@@ -1474,6 +1474,7 @@ extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
 extern vmCvar_t g_warmupDamage;
 extern vmCvar_t		g_hitsounds;
+extern vmCvar_t		g_crouchRate;
 extern vmCvar_t team_nocontrols;
 extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t		g_disableInv;
@@ -1791,6 +1792,7 @@ void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
 void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean state );
 void G_printMatchInfo( gentity_t *ent );
+void G_printMatchInfo2( gentity_t *ent );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 // OSPx - New stuff below

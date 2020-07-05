@@ -3745,6 +3745,10 @@ void PM_Sprint( void ) {
 			pm->ps->sprintTime += 10;
 		} else {
 			if ( pm->gametype != GT_SINGLE_PLAYER ) {
+				extern vmCvar_t	g_crouchRate;
+
+				if (g_crouchRate.integer > 0 && (pm->ps->pm_flags & PMF_DUCKED))
+					pm->ps->sprintTime += g_crouchRate.integer * pml.frametime;
 				pm->ps->sprintTime += 500 * pml.frametime;        // JPW NERVE adjusted for framerate independence
 				if ( pm->ps->sprintTime > 5000 ) {
 					pm->ps->sprintTime += 500 * pml.frametime;    // JPW NERVE adjusted for framerate independence

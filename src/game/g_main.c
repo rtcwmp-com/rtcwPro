@@ -193,6 +193,7 @@ vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ba
 vmCvar_t	g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
 vmCvar_t	g_dropReload;			// Enable / Disable Drop reload
 vmCvar_t	g_unlockWeapons;		// Gives ability to drop weapon to all classes..
+vmCvar_t	g_crouchRate;			// If enabled it recharges stamina faster when player is crouching..
 vmCvar_t	g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
 vmCvar_t	g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
 vmCvar_t	g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
@@ -445,6 +446,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &sab_autoIgnore, "sab_autoIgnore", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_warmupDamage, "g_warmupDamage", "0", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_crouchRate, "g_crouchRate", "3000", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse},
 	{ &g_lifeStats, "g_lifeStats", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_maxTeamPF, "g_maxTeamPF", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
