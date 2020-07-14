@@ -1,0 +1,22 @@
+CC = gcc 
+CFLAGS = -Wall -fno-strict-aliasing -pipe -DUSE_ICON -DARCH_STRING="x86_64" -m64 -DNO_GZIP -Icode/zlib-1.2.11 \
+    -DUSE_INTERNAL_JPEG -Icode/jpeg-8c -DBUILD_FREETYPE -Icode/freetype-2.9/include -DFT2_BUILD_LIBRARY \
+    -DUSE_LOCAL_HEADERS  -Wformat=2 -Wformat-security -Wno-format-nonliteral \
+    -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -MMD -DNDEBUG -O3 -ffast-math -fPIC
+
+SOURCES = $(shell ls ui_*.c ../game/bg_misc.c ../game/bg_stats.c ../game/q_math.c ../game/q_shared.c)
+MODULES = $(SOURCES:.c=.o)
+
+all: gameclean ui.mp.x86_64.so
+
+gameclean:
+	rm -rf ../game/*.o
+
+ui.mp.x86_64.so: $(MODULES)
+	$(CC) -shared -ldl -lm -o $@ $?
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f *.o *.so
