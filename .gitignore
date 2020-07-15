@@ -9,6 +9,9 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.ipch
+src/Backup/*.*
+src/.vs/*.*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -337,5 +340,3 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
-
-src/rtcwpro/rtcwpro.zip

@@ -1,4 +1,4 @@
-CC = gcc
+CC = i686-w64-mingw32-gcc
 CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mcpu=pentiumpro -march=pentium \
 -fomit-frame-pointer -ffast-math -malign-loops=2 -malign-jumps=2 \
 -malign-functions=2 -fno-strict-aliasing -fstrength-reduce \
@@ -10,7 +10,7 @@ MODULES = $(SOURCES:.c=.o)
 all: clean gameclean ui_mp_x86.dll
 
 gameclean:
-	rm -rf ../game/*.o
+	rm -rf ../game/*.o rm -rf ../ui/*.o
 
 ui_mp_x86.dll: $(MODULES)
 	$(CC) -shared -lm -o $@ $?

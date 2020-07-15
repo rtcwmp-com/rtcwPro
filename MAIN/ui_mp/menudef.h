@@ -160,6 +160,7 @@ If you have questions concerning this license or the applicable additional terms
 #define UI_SHOW_PLAYERNOREFEREE 0x04000000
 #define UI_SHOW_PLAYERREFEREE   0x08000000
 
+
 // owner draw types
 // ideally these should be done outside of this file but
 // this makes it much easier for the macro expansion to
@@ -399,6 +400,7 @@ If you have questions concerning this license or the applicable additional terms
 #define UI_FONT_BIG             2
 #define UI_FONT_SMALL           3
 #define UI_FONT_HANDWRITING     4
+
 // OSP - callvote server setting toggles
 // CS_SERVERTOGGLES
 #define CV_SVS_MUTESPECS        1
@@ -436,3 +438,4 @@ If you have questions concerning this license or the applicable additional terms
 #define RL_REFEREE              1
 #define RL_RCON                 2
 // -OSP
+// -NERVE - SMF
