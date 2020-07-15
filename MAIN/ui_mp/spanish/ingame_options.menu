@@ -1,0 +1,816 @@
+#include "ui_mp/menudef.h"
+
+{
+\\ SETUP MENU \\
+
+menuDef {
+	name "ingame_options"
+	visible 0
+	fullscreen 0
+	outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	rect 100 110 443 325
+	focusColor 1 .75 0 1
+	style 1
+	border 1
+	onopen { setCvar cg_draw2D "0"; hide grpOptions ; show view }
+	onClose { setCvar cg_draw2D "1" }
+	onEsc { setCvar cg_draw2D "1" }
+
+	itemDef {
+		name window
+		group ingamebox
+		rect 0 2 443 285
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 0 .25
+		visible 1
+		decoration
+	}
+
+	itemDef {
+		name window2
+		group grpControlbutton
+		rect 2 4 439 20
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .1 .1 .1 .2
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		decoration
+	}
+
+
+/////////////////
+// Performance
+/////////////////
+	itemDef {
+		name ctr_performance
+		text "Rendimiento"
+		tooltip "Cambiar ajustes de rendimiento"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		rect 32 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show performance }
+		mouseEnter { setitemcolor ctr_performance backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_performance backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Duración de las marcas en las paredes:"
+		tooltip "Determina el tiempo que tardan en borrarse las marcas de las paredes"
+		cvar "cg_markTime"
+		cvarFloatList { "Larga" 30000 "Normal" 20000 "Corta" 10000 "Desactivado" 0 }
+		rect 99 30 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Casquillo de proyectiles:"
+		cvar "cg_brassTime"
+		cvarFloatList { "Alto" 15000 "Medio" 2500 "Desactivado" 0 }
+		rect 99 45 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Luces Dinámicas:"
+		cvar "r_dynamiclight"
+		rect 99 60 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Cielo de Baja Calidad:"
+		cvar "r_fastsky"
+		rect 99 75 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Mostrar detalles del cielo:"
+		cvar "cg_skybox"
+		rect 99 90 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Sincronizar Frames:"
+		cvar "r_finish"
+		rect 99 105 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		type ITEM_TYPE_MULTI
+		group grpOptions
+		text "Distancia de las Coronas:"
+		cvar "cg_coronafardist"
+		cvarFloatList { "Desactivadas" 0 "Corta" 800 "Normal" 1536 "Larga" 4096 "Extra" 16000 }
+		rect 99 120 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Partículas:"
+		cvar "cg_wolfparticles"
+		rect 99 135 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Videos del Juego:"
+		cvar "r_inGameVideo"
+		rect 99 150 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Tipo de Niebla de Nvidia:"
+		cvarTest "r_ext_NV_fog_dist"
+		cvar "r_nv_fogdist_mode"
+		cvarStrList { "NV Radial", "GL_EYE_RADIAL_NV", "NV Plana", "GL_EYE_PLANE_ABSOLUTE_NV" }
+		showcvar { "1" }
+		rect 99 165 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+
+
+//////////////////////////
+//       VIEW
+//////////////////////////
+	itemDef {
+		name ctr_view
+		group grpControlbutton
+		text "Vista"
+		tooltip "Modifica las opciones de visibilidad"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 172 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show view }
+		mouseEnter { setitemcolor ctr_view backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_view backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Mostrar Arma :"
+		tooltip "Muestra el modelo del arma en la pantalla"
+		cvar "cg_drawGun"
+		rect 84 30 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Flash del cañón :"
+		tooltip "Muestra el efecto de flash de la pistola cuando disparas"
+		cvar "cg_muzzleFlash"
+		rect 84 45 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Duración de las lineas del Chat :"
+		tooltip "Ajusta lo que debe durar en pantalla los mensajes de chat"
+		cvar "cg_voicespritetime"
+		cvarFloatList { "Corta" 3000 "Normal" 6000 "Larga" 12000 "Muy Larga" 24000 }
+		rect 84 60 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view				
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Sólo chat de equipo :"
+		tooltip "Muestra SÓLO los mensajes de chat de tu equipo"
+		cvar "cg_teamChatsOnly"
+		rect 84 75 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+//	itemDef {
+//		name view
+//		group grpOptions
+//		type ITEM_TYPE_MULTI
+//		text "Barra de Estado:"
+//		cvar "cg_hudfiles"
+//		cvarStrList { "Wolf Std." "ui/wolfhud.txt" "Small(Q3A)" "ui/hud2.txt" }
+//		rect 30 150 256 20
+//		textalign ITEM_ALIGN_RIGHT
+//		textalignx 143
+//		textaligny 17
+//		textfont UI_FONT_NORMAL
+//		textscale .25	 
+//		visible 1
+//		action { exec "loadhud" }
+//	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Pistas del Puntero :"
+		tooltip "Muestra un icono característico cuando se puede realizar una acción sobre algo"
+		cvar "cg_cursorHints"
+		cvarFloatList { "Desactivado" 0 "Cambia de tamaño" 1 "Gira" 2 "Irradiación" 3 "Sólido" 4 }
+		rect 84 90 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Mostrar brújula :"
+		tooltip "Muestra la brújula (con iconos cuando estés cerca de sucesos)"
+		cvar "cg_drawCompass"
+		cvarFloatList { "Off" 0 "On" 1 }
+		rect 84 105 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Información del Equipo :"
+		tooltip "Muestra el lugar y algunos datos más sobre la posición del equipo"
+		cvar "cg_drawteamoverlay"
+		cvarFloatList { "Off" 0 "Short" 1 "Long" 2 }
+		rect 84 120 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	/////////////////////////
+	// OSP additions
+	//
+	itemDef {
+		name view
+		type ITEM_TYPE_MULTI
+		group grpOptions
+		text "Temporizador de Refuerzos :"
+		tooltip "Muestra el tiempo de refuerdos de tu equipo \"reinforcement\" "
+		cvar "cg_drawReinforcementTime"
+		cvarFloatList { "Off" 0 "On" 1 }
+		rect 84 135 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Ventana de quejas :"
+		tooltip "Muestra automáticamente una votación si te ha matado alguien de tu equipo"
+		cvar "cg_complaintPopUp"
+		cvarFloatList { "Off" 0 "On" 1 }
+		rect 84 150 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Formato JPEG para las Screenshots Automáticas :"
+		tooltip "Utiliza el formato JPG cuando se ejecura el comando \"autoscreenshot\" "
+		cvar "cg_useScreenshotJPEG"
+		rect 84 165 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Anunciador :"
+		tooltip "Hace que suenen las voces de anuncio de comienzo y fin de partida"
+		cvar "cg_announcer"
+		rect 84 180 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Flash de Sangre :"
+		tooltip "Escala el flash de sangre que aparece cuando eres herido"
+		cvar "cg_bloodFlash"
+		cvarFloatList { "Sin Flash" 0.0 "Suave" 0.25 "Medio" 0.5 "Fuerte" 0.75 "Entero" 1.0 }
+		rect 84 195 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Manchas de sangre :"
+		tooltip "Ajusta la transparencia de la sangre cuando eres herido por otros jugadores"
+		cvar "cg_bloodDamageBlend"
+		cvarFloatList { "Ninguna" 0.0 "Ligera" 0.25 "Media" 0.5 "Grande" 0.75 "Completa" 1.0 }
+		rect 84 210 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Auto-Acción :"
+		tooltip "Acciones automáticas a realizar en determinados momentos de la partida"
+		cvar "cg_autoAction"
+		cvarFloatList { "Ninguna" 0 "Demo" 1 "Screenshot" 2 "Volcar estadísticas" 4 "Demo + SS" 3 "Demo + estadísticas" 5 "SS + estadísticas" 6 "Demo + SS + Estadísticas" 7 }
+		rect 84 225 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Tipo de Letra :"
+		tooltip "Elige el tipo de letra a usar dentro del juego"
+		cvar "ch_font"
+		cvarFloatList { "Por Defecto" 0 "Estilo 1" 1 "Estilo 2" 2 }
+		rect 84 240 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Guardar mensajes importantes :"
+		tooltip "Escribe los mensajes importantes en la consola para que sean archivados"
+		cvar "cg_printObjectiveInfo"
+		rect 84 255 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+
+
+
+/////////////////
+// crosshair
+/////////////////
+	itemDef {
+		name ctr_xhair
+		group grpControlbutton
+		text "Crosshair"
+		tooltip "Modificar opciones de Puntero/mirilla"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 320 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show xhair }
+		mouseEnter { setitemcolor ctr_xhair backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_xhair backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Tamaño del Puntero :"
+		tooltip "Ajusta el tamaño del puntero"
+		cvar "cg_crosshairsize"
+		cvarFloatList { "Enano" 24 "Pequeño" 32 "Mediano" 48 "Grande" 64 "Enorme" 96 }
+		rect 84 30 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Pulso del Puntero :"
+		tooltip "Activa el movimiento y el aumento del puntero al moverse o disparar"
+		cvar "cg_crosshairPulse"
+		cvarFloatList { "Off" 0 "On" 1 }
+		rect 84 45 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Información del Nivel de Salud en el Puntero :"
+		tooltip "Cambia el color del puntero basándose en el nivel de salud (prevalece sobre los ajustes del color del puntero)"
+		cvar "cg_crosshairHealth"
+		cvarFloatList { "Off" 0 "On" 1 }
+		rect 84 60 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Mostrar Nombres en el Puntero :"
+		tooltip "Muestra el nombre/salud/munición de los compañeros de equipo cuando los señalas con el puntero"
+		cvar "cg_drawCrosshairNames"
+		cvarFloatList { "Off" 0 "Cuando está lleno" 1 "Cuando no hay munición" 2 }
+		rect 84 75 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Cambio del puntero al recoger items :"
+		tooltip "Muestra un icono del elemento recogido sobre el puntero "
+		cvar "cg_drawCrosshairPickups"
+		cvarFloatList { "None" 0 "Item" 1 "Item (highlighted)" 2 }
+		rect 84 90 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		text "SELECCIONAR"
+		rect 80 130 100 16
+		textalign ITEM_ALIGN_CENTER
+		textfont UI_FONT_NORMAL
+		textscale .30
+		textalignx 50
+		textaligny 14
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 0 .07
+		forecolor 1 1 0 1
+		visible 0
+		decoration
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		tooltip "Pincha para cambiar entre varios tipos de punteros"
+		rect 80 146 100 100
+		ownerdraw UI_CROSSHAIR
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 0
+		textaligny 100
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+   	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Color Primario :"
+		tooltip "Ajusta el color primario del puntero"
+		cvar "cg_crosshairColor"
+		cvarStrList { "Blanco", "white", "Amarillo", "yellow", "Rojo", "red", "Verde", "green", "Azul", "blue", "Magenta", "magenta", "Cyan", "cyan", "Naranja", "orange", "Azul Claro", "0xa0c0ff", "Azul semiclaro", "mdblue", "Rojo claro", "0xffc0a0", "Rojo semiclaro", "mdred", "Verde Claro", "0xa0ffc0", "Verde semiclaro", "mdgreen", "Verde Oscuro", "dkgreen", " Cyan semiclaro", "mdcyan", "Amarillo semiclaro", "mdyellow", "Naranja semiclaro", "mdorange", "Gris Oscuro", "ltgrey", "Gris semiclaro", "mdgrey", "Gris Oscuro", "dkgrey", "Negro", "black" }
+		rect 201 163 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_SLIDER
+		text "Alfa Primario :"
+		tooltip "Ajusta el nivel de transparencia para el puntero primario"
+		cvarfloat "cg_crosshairAlpha" 1 0 1
+		rect 201 178 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07            
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+ 		type ITEM_TYPE_MULTI
+		text "Color Secundario :"
+		tooltip "Set the color for the secondary crosshair"
+		cvar "cg_crosshairColorAlt"
+		cvarStrList { "Blanco", "white", "Amarillo", "yellow", "Rojo", "red", "Verde", "green", "Azul", "blue", "Magenta", "magenta", "Cyan", "cyan", "Naranja", "orange", "Azul Claro", "0xa0c0ff", "Azul semiclaro", "mdblue", "Rojo claro", "0xffc0a0", "Rojo semiclaro", "mdred", "Verde Claro", "0xa0ffc0", "Verde semiclaro", "mdgreen", "Verde Oscuro", "dkgreen", " Cyan semiclaro", "mdcyan", "Amarillo semiclaro", "mdyellow", "Naranja semiclaro", "mdorange", "Gris Oscuro", "ltgrey", "Gris semiclaro", "mdgrey", "Gris Oscuro", "dkgrey", "Negro", "black" }
+		rect 201 216 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_SLIDER
+		text "Alfa Secundario :"
+		tooltip "Ajusta el nivel de transparencia para el puntero secundario"
+		cvarfloat "cg_crosshairAlphaAlt" 1 0 1
+		rect 201 231 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07            
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+}
+
+}
