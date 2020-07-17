@@ -16,7 +16,7 @@ src/.vs/*.*
 *.dll
 *.so
 *.o
-
+*.pk3
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
