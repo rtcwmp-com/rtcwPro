@@ -7,4 +7,4 @@ echo '##########################################################################
 cd /rtcwpro/MAIN
 zip -r ../output/$PK3_NAME ./*
 cd ../output
-zip -r $PK3_NAME ./*.dll ./*.so
+zip -r $PK3_NAME ./ui*.dll ./cgame*.dll ./ui*.so ./cgame*.so
