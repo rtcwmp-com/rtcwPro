@@ -154,6 +154,9 @@ vmCvar_t g_soldierChargeTime;
 vmCvar_t sv_screenshake;
 // jpw
 
+//S4NDM4NN - fix errors when sv_fps is adjusted
+vmCvar_t sv_fps;
+
 // Gordon
 vmCvar_t g_antilag;
 
@@ -302,6 +305,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_warmup, "g_warmup", "20", CVAR_ARCHIVE, 0, qtrue  },
 //	{ &g_doWarmup, "g_doWarmup", "0", 0, CVAR_ARCHIVE, qtrue  },
 
+	//S4NDM4NN - need to get sv_fps
+	{ &sv_fps, "sv_fps", "20", 0, 0,qfalse},
 	// NERVE - SMF
 	{ &g_warmupLatch, "g_warmupLatch", "1", 0, 0, qfalse },
 
