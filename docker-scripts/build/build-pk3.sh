@@ -1,0 +1,3 @@
+#!/bin/sh
+
+#todo: create the pk3 and put it in output folder....

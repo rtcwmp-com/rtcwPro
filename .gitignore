@@ -12,6 +12,10 @@
 *.ipch
 src/Backup/*.*
 src/.vs/*.*
+# we should not put dll / so / object files in the repo
+*.dll
+*.so
+*.o
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
