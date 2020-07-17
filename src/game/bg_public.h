@@ -175,6 +175,8 @@ typedef enum {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
+#define CS_SERVERTOGGLES        42      // Shows current enable/disabled settings (for voting UI)
+
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
 #define CS_PLAYERS              ( CS_SOUNDS + MAX_SOUNDS )
@@ -1774,6 +1776,16 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
 #define CGF_AUTOACTIVATE    0x04
 #define CGF_PREDICTITEMS    0x08
 //
+// Voting
+typedef struct {
+	const char  *pszCvar;
+	int flag;
+} voteType_t;
+
+extern const voteType_t voteToggles[];
+extern int numVotesAvailable;
+
+#define VOTING_DISABLED     ( ( 1 << numVotesAvailable ) - 1 )
 extWeaponStats_t BG_WeapStatForWeapon( weapon_t iWeaponID );
 // ET Port 
 int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF );

@@ -121,12 +121,12 @@ static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd) {
 	}
 #endif
 
-	if (gametype == GT_SINGLE_PLAYER)
+	/*if (gametype == GT_SINGLE_PLAYER)
 	{
 		// Adjust the movespeed
 		scale *= (((float)movespeed) / (float)127);
 
-	} // if (gametype == GT_SINGLE_PLAYER)...
+	} // if (gametype == GT_SINGLE_PLAYER)...*/
 
 #if 0   // zinx - not letting them go at sprint speed for now.
 	if (ent->client->ps.eFlags & EF_PRONE) {

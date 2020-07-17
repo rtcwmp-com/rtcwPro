@@ -83,9 +83,19 @@ typedef struct ipGUID_s
 
 #define MAX_IPFILTERS   1024
 
-static ipFilter_t ipFilters[MAX_IPFILTERS];
-static ipGUID_t ipMaxLivesFilters[MAX_IPFILTERS];
-static int numIPFilters;
+typedef struct ipFilterList_s {
+	ipFilter_t ipFilters[MAX_IPFILTERS];
+	int numIPFilters;
+	char cvarIPList[32];
+} ipFilterList_t;
+
+static ipFilterList_t ipFilters;
+static ipFilterList_t ipMaxLivesFilters;
+/*#ifdef USEXPSTORAGE
+static ipXPStorageList_t ipXPStorage;
+#endif
+*/
+static ipGUID_t guidMaxLivesFilters[MAX_IPFILTERS];
 static int numMaxLivesFilters = 0;
 
 /*
@@ -93,7 +103,7 @@ static int numMaxLivesFilters = 0;
 StringToFilter
 =================
 */
-static qboolean StringToFilter( char *s, ipFilter_t *f ) {
+static qboolean StringToFilter( const char *s, ipFilter_t *f ) {
 	char num[128];
 	int i, j;
 	byte b[4];
@@ -147,7 +157,7 @@ static qboolean StringToFilter( char *s, ipFilter_t *f ) {
 UpdateIPBans
 =================
 */
-static void UpdateIPBans( void ) {
+static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 	byte b[4];
 	byte m[4];
 	int i,j;
@@ -155,17 +165,16 @@ static void UpdateIPBans( void ) {
 	char ip[64];
 
 	*iplist_final = 0;
-	for ( i = 0 ; i < numIPFilters ; i++ )
+	for ( i = 0 ; i < ipFilterList->numIPFilters ; i++ )
 	{
-		if ( ipFilters[i].compare == 0xffffffff ) {
+		if (ipFilterList->ipFilters[i].compare == 0xffffffff ) {
 			continue;
 		}
 
-		*(unsigned *)b = ipFilters[i].compare;
-		*(unsigned *)m = ipFilters[i].mask;
+		*(unsigned *)b = ipFilterList->ipFilters[i].compare;
+		*(unsigned *)m = ipFilterList->ipFilters[i].mask;
 		*ip = 0;
-		for ( j = 0 ; j < 4 ; j++ )
-		{
+		for ( j = 0; j < 4 ; j++ ) {
 			if ( m[j] != 255 ) {
 				Q_strcat( ip, sizeof( ip ), "*" );
 			} else {
@@ -177,12 +186,12 @@ static void UpdateIPBans( void ) {
 			Q_strcat( iplist_final, sizeof( iplist_final ), ip );
 		} else
 		{
-			Com_Printf( "g_banIPs overflowed at MAX_CVAR_VALUE_STRING\n" );
+			Com_Printf( "%s overflowed at MAX_CVAR_VALUE_STRING\n", ipFilterList->cvarIPList );
 			break;
 		}
 	}
 
-	trap_Cvar_Set( "g_banIPs", iplist_final );
+	trap_Cvar_Set( ipFilterList->cvarIPList, iplist_final );
 }
 
 void PrintMaxLivesGUID() {
@@ -190,17 +199,18 @@ void PrintMaxLivesGUID() {
 
 	for ( i = 0 ; i < numMaxLivesFilters ; i++ )
 	{
-		G_LogPrintf( "%i. %s\n", i, ipMaxLivesFilters[i].compare );
+		G_LogPrintf( "%i. %s\n", i, guidMaxLivesFilters[i].compare );
 	}
 	G_LogPrintf( "--- End of list\n" );
 }
 
 /*
 =================
-G_FilterPacket
+G_FindIpData
 =================
-*/
-qboolean G_FilterPacket( char *from ) {
+
+
+ipXPStorage_t* G_FindIpData( ipXPStorageList_t *ipXPStorageList, char *from ) {
 	int i;
 	unsigned in;
 	byte m[4];
@@ -222,14 +232,73 @@ qboolean G_FilterPacket( char *from ) {
 
 	in = *(unsigned *)m;
 
-	for ( i = 0 ; i < numIPFilters ; i++ )
-		if ( ( in & ipFilters[i].mask ) == ipFilters[i].compare ) {
+	for ( i = 0; i < MAX_IPFILTERS; i++ ) {
+		if ( !ipXPStorageList->ipFilters[ i ].timeadded || level.time - ipXPStorageList->ipFilters[ i ].timeadded > ( 5 * 60000 ) ) {
+			continue;
+		}
+
+		if ( ( in & ipXPStorageList->ipFilters[ i ].filter.mask ) == ipXPStorageList->ipFilters[ i ].filter.compare ) {
+			return &ipXPStorageList->ipFilters[ i ];
+		}
+	}
+
+	return NULL;
+}
+*/
+/*
+=================
+G_FilterPacket
+=================
+*/
+qboolean G_FilterPacket(ipFilterList_t *ipFilterList, char *from ) {
+	int i;
+	unsigned in;
+	byte m[4];
+	char *p;
+
+	i = 0;
+	p = from;
+	while ( *p && i < 4 ) {
+		m[i] = 0;
+		while ( *p >= '0' && *p <= '9' ) {
+			m[i] = m[i] * 10 + ( *p - '0' );
+			p++;
+		}
+		if ( !*p || *p == ':' ) {
+			break;
+		}
+		i++, p++;
+	}
+
+	in = *(unsigned *)m;
+
+	for (i = 0; i < ipFilterList->numIPFilters; i++)
+		if ((in & ipFilterList->ipFilters[i].mask) == ipFilterList->ipFilters[i].compare) {
 			return g_filterBan.integer != 0;
 		}
 
 	return g_filterBan.integer == 0;
 }
 
+qboolean G_FilterIPBanPacket( char *from ) {
+	return( G_FilterPacket( &ipFilters, from ) );
+}
+
+qboolean G_FilterMaxLivesIPPacket( char *from ) {
+	return( G_FilterPacket( &ipMaxLivesFilters, from ) );
+}
+
+#ifdef USEXPSTORAGE
+ipXPStorage_t* G_FindXPBackup( char *from ) {
+	ipXPStorage_t* storage = G_FindIpData( &ipXPStorage, from );
+
+	if ( storage ) {
+		storage->timeadded = 0;
+	}
+
+	return storage;
+}
+#endif // USEXPSTORAGE
 /*
  Check to see if the user is trying to sneak back in with g_enforcemaxlives enabled
 */
@@ -238,7 +307,7 @@ qboolean G_FilterMaxLivesPacket( char *from ) {
 
 	for ( i = 0 ; i < numMaxLivesFilters ; i++ )
 	{
-		if ( !Q_stricmp( ipMaxLivesFilters[i].compare, from ) ) {
+		if ( !Q_stricmp( guidMaxLivesFilters[i].compare, from ) ) {
 			return 1;
 		}
 	}
@@ -250,26 +319,33 @@ qboolean G_FilterMaxLivesPacket( char *from ) {
 AddIP
 =================
 */
-static void AddIP( char *str ) {
+void AddIP( ipFilterList_t *ipFilterList, const char *str ) {
 	int i;
 
-	for ( i = 0 ; i < numIPFilters ; i++ )
-		if ( ipFilters[i].compare == 0xffffffff ) {
+	for ( i = 0; i < ipFilterList->numIPFilters; i++ ) {
+		if (  ipFilterList->ipFilters[i].compare == 0xffffffff ) {
 			break;
 		}               // free spot
-	if ( i == numIPFilters ) {
-		if ( numIPFilters == MAX_IPFILTERS ) {
+	}
+	if ( i == ipFilterList->numIPFilters ) {
+		if ( ipFilterList->numIPFilters == MAX_IPFILTERS ) {
 			G_Printf( "IP filter list is full\n" );
 			return;
 		}
-		numIPFilters++;
+		ipFilterList->numIPFilters++;
 	}
 
-	if ( !StringToFilter( str, &ipFilters[i] ) ) {
-		ipFilters[i].compare = 0xffffffffu;
+	if ( !StringToFilter( str, &ipFilterList->ipFilters[i] ) ) {
+		ipFilterList->ipFilters[i].compare = 0xffffffffu;
 	}
 
-	UpdateIPBans();
+	UpdateIPBans( ipFilterList );
+}
+void AddIPBan(const char *str) {
+	AddIP(&ipFilters, str);
+}
+void AddMaxLivesBan( const char *str ) {
+	AddIP( &ipMaxLivesFilters, str );
 }
 /*
 =================
@@ -283,7 +359,7 @@ void AddMaxLivesGUID( char *str ) {
 		G_Printf( "MaxLives GUID filter list is full\n" );
 		return;
 	}
-	Q_strncpyz( ipMaxLivesFilters[numMaxLivesFilters].compare, str, 33 );
+	Q_strncpyz( guidMaxLivesFilters[numMaxLivesFilters].compare, str, 33 );
 	numMaxLivesFilters++;
 }
 
@@ -296,6 +372,8 @@ G_ProcessIPBans
 void G_ProcessIPBans( void ) {
 	char *s, *t;
 	char str[MAX_CVAR_VALUE_STRING];
+	ipFilters.numIPFilters = 0;
+	Q_strncpyz( ipFilters.cvarIPList, "g_banIPs", sizeof( ipFilters.cvarIPList ) );
 
 	Q_strncpyz( str, g_banIPs.string, sizeof( str ) );
 
@@ -307,7 +385,7 @@ void G_ProcessIPBans( void ) {
 		while ( *s == ' ' )
 			*s++ = 0;
 		if ( *t ) {
-			AddIP( t );
+			AddIP( &ipFilters, t );
 		}
 		t = s;
 	}
@@ -329,7 +407,7 @@ void Svcmd_AddIP_f( void ) {
 
 	trap_Argv( 1, str, sizeof( str ) );
 
-	AddIP( str );
+	AddIP( &ipFilters, str );
 
 }
 
@@ -354,13 +432,13 @@ void Svcmd_RemoveIP_f( void ) {
 		return;
 	}
 
-	for ( i = 0 ; i < numIPFilters ; i++ ) {
-		if ( ipFilters[i].mask == f.mask &&
-			 ipFilters[i].compare == f.compare ) {
-			ipFilters[i].compare = 0xffffffffu;
+	for ( i = 0 ; i < ipFilters.numIPFilters ; i++ ) {
+		if ( ipFilters.ipFilters[i].mask == f.mask   &&
+			 ipFilters.ipFilters[i].compare == f.compare ) {
+			ipFilters.ipFilters[i].compare = 0xffffffffu;
 			G_Printf( "Removed.\n" );
 
-			UpdateIPBans();
+			UpdateIPBans( &ipFilters );
 			return;
 		}
 	}
@@ -371,13 +449,15 @@ void Svcmd_RemoveIP_f( void ) {
 /*
  Xian - Clears out the entire list maxlives enforcement banlist
 */
-void ClearMaxLivesGUID() {
+void ClearMaxLivesBans() {
 	int i;
 
 	for ( i = 0 ; i < numMaxLivesFilters ; i++ ) {
-		ipMaxLivesFilters[i].compare[0] = '\0';
+		guidMaxLivesFilters[i].compare[0] = '\0';
 	}
 	numMaxLivesFilters = 0;
+	ipMaxLivesFilters.numIPFilters = 0;
+	Q_strncpyz( ipMaxLivesFilters.cvarIPList, "g_maxlivesbanIPs", sizeof( ipMaxLivesFilters.cvarIPList ) );
 }
 
 /*
@@ -468,6 +548,16 @@ gclient_t   *ClientForString( const char *s ) {
 	gclient_t   *cl;
 	int i;
 	int idnum;
+	// check for a name match
+	for ( i = 0 ; i < level.maxclients ; i++ ) {
+		cl = &level.clients[i];
+		if ( cl->pers.connected == CON_DISCONNECTED ) {
+			continue;
+		}
+		if ( !Q_stricmp( cl->pers.netname, s ) ) {
+			return cl;
+		}
+	}
 
 	// numeric values are just slot numbers
 	if ( s[0] >= '0' && s[0] <= '9' ) {
@@ -485,22 +575,102 @@ gclient_t   *ClientForString( const char *s ) {
 		return cl;
 	}
 
+	G_Printf( "User %s is not on the server\n", s );
 	// check for a name match
-	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		cl = &level.clients[i];
-		if ( cl->pers.connected == CON_DISCONNECTED ) {
-			continue;
-		}
-		if ( !Q_stricmp( cl->pers.netname, s ) ) {
-			return cl;
-		}
+	return NULL;
+}
+// fretn
+
+static qboolean G_Is_SV_Running( void ) {
+
+	char cvar[MAX_TOKEN_CHARS];
+
+	trap_Cvar_VariableStringBuffer( "sv_running", cvar, sizeof( cvar ) );
+	return (qboolean)atoi( cvar );
+}
+
+/*
+==================
+G_GetPlayerByNum
+==================
+*/
+gclient_t   *G_GetPlayerByNum( int clientNum ) {
+	gclient_t   *cl;
+
+
+	// make sure server is running
+	if ( !G_Is_SV_Running() ) {
+		return NULL;
 	}
 
-	G_Printf( "User %s is not on the server\n", s );
+	if ( trap_Argc() < 2 ) {
+		G_Printf( "No player specified.\n" );
+		return NULL;
+	}
+
+	if ( clientNum < 0 || clientNum >= level.maxclients ) {
+		Com_Printf( "Bad client slot: %i\n", clientNum );
+		return NULL;
+	}
+
+	cl = &level.clients[clientNum];
+	if ( cl->pers.connected == CON_DISCONNECTED ) {
+		G_Printf( "Client %i is not connected\n", clientNum );
+		return NULL;
+	}
+
+	if ( cl ) {
+		return cl;
+	}
+
+
+	G_Printf( "User %d is not on the server\n", clientNum );
 
 	return NULL;
 }
 
+/*
+==================
+G_GetPlayerByName
+==================
+*/
+gclient_t *G_GetPlayerByName( char *name ) {
+
+	int i;
+	gclient_t   *cl;
+	char cleanName[64];
+
+	// make sure server is running
+	if ( !G_Is_SV_Running() ) {
+		return NULL;
+	}
+
+	if ( trap_Argc() < 2 ) {
+		G_Printf( "No player specified.\n" );
+		return NULL;
+	}
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
+
+		cl = &level.clients[i];
+
+		if ( !Q_stricmp( cl->pers.netname, name ) ) {
+			return cl;
+		}
+
+		Q_strncpyz( cleanName, cl->pers.netname, sizeof( cleanName ) );
+		Q_CleanStr( cleanName );
+		if ( !Q_stricmp( cleanName, name ) ) {
+			return cl;
+		}
+	}
+
+	G_Printf( "Player %s is not on the server\n", name );
+
+	return NULL;
+}
+
+// -fretn
 /*
 ===================
 Svcmd_ForceTeam_f
@@ -701,6 +871,28 @@ void Svcmd_Antilag_f( void ) {
 		AP("chat \"^zconsole:^7 Antilag has been enabled^2!\n\"");
 	}
 }
+
+/*
+====================
+Svcmd_ShuffleTeams_f
+
+OSP - randomly places players on teams
+====================
+*/
+void Svcmd_ShuffleTeams_f(void) {
+	G_resetRoundState();
+	G_shuffleTeams();
+
+	if ((g_gamestate.integer == GS_INITIALIZE) ||
+		(g_gamestate.integer == GS_WARMUP) ||
+		(g_gamestate.integer == GS_RESET)) {
+		return;
+	}
+
+	G_resetModeState();
+	Svcmd_ResetMatch_f(qfalse, qtrue);
+}
+
 /*
 =================
 L0 - Pause/Unpause

@@ -308,6 +308,8 @@ vmCvar_t cg_noVoice;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
 vmCvar_t cg_zoomedSens;
+vmCvar_t vp_drawnames;
+vmCvar_t cg_drawNames;
 vmCvar_t cg_announcer;
 vmCvar_t cg_autoAction;
 vmCvar_t cf_wstats;             // OSP's Font scale for +wstats window
@@ -557,6 +559,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomedFOV, "cg_zoomedFOV", "90", CVAR_ARCHIVE },
 	{ &cg_statsList, "cg_statsList", "0", CVAR_ARCHIVE },
 	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
+	{ &vp_drawnames, "vp_drawnames", "0", CVAR_ARCHIVE | CVAR_CHEAT },
+	{ &cg_drawNames, "cg_drawNames", "1", CVAR_ROM },
 	{ &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
 	{ &cg_autoAction, "cg_autoAction", "0", CVAR_ARCHIVE },
 	{ &cg_useScreenshotJPEG, "cg_useScreenshotJPEG", "1", CVAR_ARCHIVE },
@@ -574,7 +578,7 @@ cvarTable_t cvarTable[] = {
 	{ &int_ui_blackout, "ui_blackout", "0", CVAR_ROM },
 	{ &cg_antilag, "g_antilag", "0", 0 }
 };
-static int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
+int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 // OSPx - Client Flags
 void CG_setClientFlags(void);
 

@@ -1681,15 +1681,22 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	// recommanding PB based IP / GUID banning, the builtin system is pretty limited
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey( userinfo, "ip" );
-	if ( G_FilterPacket( value ) ) {
+	if ( G_FilterIPBanPacket( value ) ) {
 		return "You are banned from this server.";
 	}
 
 	// Xian - check for max lives enforcement ban
 	if ( g_enforcemaxlives.integer && ( g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0 ) ) {
-		value = Info_ValueForKey( userinfo, "cl_guid" );
-		if ( G_FilterMaxLivesPacket( value ) ) {
-			return "Max Lives Enforcement Temp Ban";
+		if ( trap_Cvar_VariableIntegerValue( "sv_punkbuster" ) ) {
+			value = Info_ValueForKey( userinfo, "cl_guid" );
+			if ( G_FilterMaxLivesPacket( value ) ) {
+				return "Max Lives Enforcement Temp Ban. You will be able to reconnect when the next round starts. This ban is enforced to ensure you don't reconnect to get additional lives.";
+			}
+		} else {
+			value = Info_ValueForKey( userinfo, "ip" ); // this isn't really needed, oh well.
+			if ( G_FilterMaxLivesIPPacket( value ) ) {
+				return "Max Lives Enforcement Temp Ban. You will be able to reconnect when the next round starts. This ban is enforced to ensure you don't reconnect to get additional lives.";
+			}
 		}
 	}
 	// End Xian

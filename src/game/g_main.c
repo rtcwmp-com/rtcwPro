@@ -37,6 +37,7 @@ typedef struct {
 	int cvarFlags;
 	int modificationCount;          // for tracking changes
 	qboolean trackChange;           // track this variable, and announce if changed
+	qboolean fConfigReset;          // OSP: set this var to the default on a config reset
 	qboolean teamShader;      // track and if changed, update shader state
 } cvarTable_t;
 
@@ -186,6 +187,46 @@ vmCvar_t g_gamelocked;	// Controls if Admin locked the game so players can't joi
 vmCvar_t sv_hostname;	// So it's more accesible
 vmCvar_t svx_serverStreaming; // So it's more accessible
 vmCvar_t g_extendedLog;	// Logs various admin actions in a seperate logs
+// Match
+vmCvar_t team_maxplayers;
+vmCvar_t team_nocontrols;
+
+vmCvar_t match_warmupDamage;
+vmCvar_t match_mutespecs;
+vmCvar_t match_latejoin;
+vmCvar_t match_minplayers;
+vmCvar_t match_readypercent;
+vmCvar_t match_timeoutlength;
+vmCvar_t match_timeoutcount;
+
+vmCvar_t vote_allow_comp;
+vmCvar_t vote_allow_gametype;
+vmCvar_t vote_allow_kick;
+vmCvar_t vote_allow_map;
+vmCvar_t vote_allow_matchreset;
+vmCvar_t vote_allow_mutespecs;
+vmCvar_t vote_allow_nextmap;
+vmCvar_t vote_allow_pub;
+vmCvar_t vote_allow_referee;
+vmCvar_t vote_allow_shuffleteamsxp;
+vmCvar_t vote_allow_swapteams;
+vmCvar_t vote_allow_friendlyfire;
+vmCvar_t vote_allow_timelimit;
+vmCvar_t vote_allow_warmupdamage;
+vmCvar_t vote_allow_antilag;
+vmCvar_t vote_allow_balancedteams;
+vmCvar_t vote_allow_muting;
+vmCvar_t vote_limit;
+vmCvar_t vote_percent;
+vmCvar_t refereePassword;
+
+vmCvar_t vote_limit;
+vmCvar_t vote_percent;
+
+vmCvar_t g_spectatorInactivity;
+vmCvar_t g_showFlags;
+vmCvar_t g_allowSoftKill;
+vmCvar_t server_autoconfig;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t	g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
@@ -393,7 +434,8 @@ cvarTable_t gameCvarTable[] = {
 
 	// QCon edition cvars
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
-
+	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
+	
 // Admins
 	{ &a1_pass, "a1_pass", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &a2_pass, "a2_pass", "none", CVAR_ARCHIVE, 0, qfalse },
@@ -413,7 +455,19 @@ cvarTable_t gameCvarTable[] = {
 	{ &a5_allowAll, "a5_allowAll", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &adm_help, "adm_help", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_maxVotes, "g_maxVotes", "2", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	// match
+	{ &team_maxplayers, "team_maxplayers", "0", 0, 0, qfalse, qfalse },
+	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
+	{ &match_warmupDamage, "match_warmupDamage", "1", 0, 0, qfalse },
+	{ &match_mutespecs, "match_mutespecs", "0", 0, 0, qfalse, qtrue },
+	{ &match_latejoin, "match_latejoin", "1", 0, 0, qfalse, qfalse },
+	{ &match_minplayers, "match_minplayers", "2", 0, 0, qfalse, qfalse },
+	{ &match_readypercent, "match_readypercent", "100", 0, 0, qfalse, qtrue },
+	{ &match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue },
+	{ &match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue },
 	{ &g_showFlags, "g_showFlags", "1", 0 },
+	{ &server_autoconfig, "server_autoconfig", "1", 0, 0, qfalse, qfalse }, // set to 1 for comp settings
+	{ &g_noTeamSwitching, "g_noTeamSwitching", "0", 0, 0, qfalse, qfalse }, // set to 0 for comp settings
 	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
 	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
@@ -443,7 +497,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_motd12, "g_motd12", "", 0, 0, qfalse},
 	{ &g_motdTime, "g_motdTime", "80", 0, 0, qtrue},
 	{ &motdNum, "motdNum", "1", 0, 0, qfalse},
-	{ &match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue  },
+
 // SAB (Server Admin Bot)
 	{ &sab_system, "sab_system", "0", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
 	{ &sab_maxTeamKills, "sab_maxTeamKills", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
@@ -1212,6 +1266,26 @@ void G_RegisterCvars( void ) {
 	level.warmupModificationCount = g_warmup.modificationCount;
 
 	G_ForceCvars();
+	// OSPx
+	// Ready percents
+	if (match_readypercent.integer < 1) {
+		trap_Cvar_Set("match_readypercent", "1");
+	}
+	else if (match_readypercent.integer > 100) {
+		trap_Cvar_Set("match_readypercent", "1");
+	}
+
+	// Sanity check (clamps)
+	if (pmove_msec.integer < 8) {
+		trap_Cvar_Set("pmove_msec", "8");
+	}
+	else if (pmove_msec.integer > 33) {
+		trap_Cvar_Set("pmove_msec", "33");
+	}
+	if (match_timeoutcount.integer > 999) {
+		trap_Cvar_Set("match_timeoutcount", "999");
+	}
+	// -OSPx
 }
 
 /*
@@ -1239,6 +1313,22 @@ void G_UpdateCvars( void ) {
 				if ( cv->teamShader ) {
 					remapped = qtrue;
 				}
+				// OSPx
+				if (cv->vmCvar == &match_readypercent) {
+					if (match_readypercent.integer < 1) {
+						trap_Cvar_Set(cv->cvarName, "1");
+					}
+					else if (match_readypercent.integer > 100) {
+						trap_Cvar_Set(cv->cvarName, "100");
+					}				
+				} else if (cv->vmCvar == &pmove_msec) {
+					if (pmove_msec.integer < 8) {
+						trap_Cvar_Set(cv->cvarName, "8");
+					}
+					else if (pmove_msec.integer > 33) {
+						trap_Cvar_Set(cv->cvarName, "33");
+					}
+				} // -OSPx
 			}
 		}
 	}
@@ -1248,7 +1338,26 @@ void G_UpdateCvars( void ) {
 	}
 }
 
+/*
+=================
+OSPx - G_wipeCvars
 
+Reset particular server variables back to defaults if a config is voted in.
+=================
+*/
+void G_wipeCvars(void) {
+	int i;
+	cvarTable_t *pCvars;
+
+	for (i = 0, pCvars = gameCvarTable; i < gameCvarTableSize; i++, pCvars++) {
+		if (pCvars->vmCvar && pCvars->fConfigReset) {
+			G_Printf("set %s %s\n", pCvars->cvarName, pCvars->defaultString);
+			trap_Cvar_Set(pCvars->cvarName, pCvars->defaultString);
+		}
+	}
+
+	G_UpdateCvars();
+}
 
 /*
 ==============

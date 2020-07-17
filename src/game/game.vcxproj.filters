@@ -56,6 +56,10 @@
     <ClCompile Include="ai_cast_script_ents.c" />
     <ClCompile Include="ai_cast_sight.c" />
     <ClCompile Include="ai_cast_think.c" />
+    <ClCompile Include="g_referee.c" />
+    <ClCompile Include="g_vote.c" />
+    <ClCompile Include="g_antiwarp.c" />
+    <ClCompile Include="g_config.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="be_aas.h" />

@@ -240,7 +240,7 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	char *status[2] = { "^5UN", "^1" };
 	char *referee = (ent) ? "Referee" : "ref";
 
-	if ((PAUSE_UNPAUSING >= level.match_pause && !fPause) || (PAUSE_NONE != level.match_pause && fPause)) {
+	if ((PAUSE_UNPAUSING >= level.paused && !fPause) || (PAUSE_NONE != level.paused && fPause)) {
 		G_refPrintf(ent, "The match is already %sPAUSED!\n\"", status[fPause]);
 		return;
 	}
@@ -251,7 +251,7 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 
 	// Trigger the auto-handling of pauses
 	if (fPause) {
-		level.match_pause = 100 + ((ent) ? (1 + ent - g_entities) : 0);
+		level.paused = 100 + ((ent) ? (1 + ent - g_entities) : 0);
 		G_globalSound("sound/misc/referee.wav");
 		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 		AP(va("print \"^3%s ^1PAUSED^3 the match^3!\n", referee));
@@ -261,7 +261,7 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	}
 	else {
 		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match ... resuming in 10 seconds!\n\n\"", referee));
-		level.match_pause = PAUSE_UNPAUSING;
+		level.paused = PAUSE_UNPAUSING;
 		G_globalSound("sound/match/prepare.wav");
 		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		return;
@@ -304,10 +304,10 @@ void G_refPlayerPut_cmd(gentity_t *ent, int team_id) {
 	player->client->pers.ready = qfalse;
 
 	if (team_id == TEAM_RED) {
-		SetTeam(player, "red", qtrue, -1, -1, qfalse);
+		SetTeam(player, "red", qtrue); // , -1, -1, qfalse);
 	}
 	else {
-		SetTeam(player, "blue", qtrue, -1, -1, qfalse);
+		SetTeam(player, "blue", qtrue); //, -1, -1, qfalse);
 	}
 
 	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
@@ -346,7 +346,7 @@ void G_refRemove_cmd(gentity_t *ent) {
 	AP(va("cp \"%s\n^7removed from team %s\n\"", player->client->pers.netname, aTeams[player->client->sess.sessionTeam]));
 	CPx(pid, va("print \"^5You've been removed from the %s team\n\"", aTeams[player->client->sess.sessionTeam]));
 
-	SetTeam(player, "s", qtrue, -1, -1, qfalse);
+	SetTeam(player, "s", qtrue); // , -1, -1, qfalse);
 
 	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
 		G_readyStart(); // ET had G_readyMatchState

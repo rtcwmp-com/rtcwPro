@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 static char text[100000];
 
 #include "cg_local.h"
+#include "../../MAIN//ui_mp/menudef.h"
 
 #define SWING_RIGHT 1
 #define SWING_LEFT  2
@@ -1040,6 +1041,23 @@ void CG_NewClientInfo( int clientNum ) {
 
 	//----(SA) modify \/ to differentiate for head models/skins as well
 
+	// RtcwPro added ref code
+	trap_Cvar_Set("authLevel", va("%i", newInfo.refStatus));
+
+	if (newInfo.refStatus != ci->refStatus) {
+		if (newInfo.refStatus <= RL_NONE) {
+			const char *info = CG_ConfigString(CS_SERVERINFO);
+
+			trap_Cvar_Set("cg_ui_voteFlags", Info_ValueForKey(info, "voteFlags"));
+			CG_Printf("[cgnotify]^3*** You have been stripped of your referee status! ***\n");
+
+		}
+		else {
+			trap_Cvar_Set("cg_ui_voteFlags", "0");
+			CG_Printf("[cgnotify]^2*** You have been authorized \"%s\" status ***\n", ((newInfo.refStatus == RL_RCON) ? "rcon" : "referee"));
+			CG_Printf("Type: ^3ref^7 (by itself) for a list of referee commands.\n");
+		}
+	}
 
 	// scan for an existing clientinfo that matches this modelname
 	// so we can avoid loading checks if possible
@@ -2118,6 +2136,102 @@ static void CG_PlayerFloatSprite( centity_t *cent, qhandle_t shader, int height 
 	ent.shaderRGBA[3] = 255;
 	trap_R_AddRefEntityToScene( &ent );
 }
+/******** OSPx - draw hud names *******/
+
+qboolean CG_WorldCoordToScreenCoordFloat(vec3_t worldCoord, float *x, float *y)
+{
+	vec3_t	local, transformed;
+	vec3_t	vfwd;
+	vec3_t	vright;
+	vec3_t	vup;
+	float	xzi;
+	float	yzi;
+
+	//	xcenter = cg.refdef.width / 2;//gives screen coords adjusted for resolution
+	//	ycenter = cg.refdef.height / 2;//gives screen coords adjusted for resolution
+	//NOTE: did it this way because most draw functions expect virtual 640x480 coords
+	//	and adjust them for current resolution
+	float xcenter = 640.0f / 2.0f;	//gives screen coords in virtual 640x480, to be adjusted when drawn
+	float ycenter = 480.0f / 2.0f;	//gives screen coords in virtual 640x480, to be adjusted when drawn
+	AngleVectors(cg.refdefViewAngles, vfwd, vright, vup);
+	VectorSubtract(worldCoord, cg.refdef.vieworg, local);
+	transformed[0] = DotProduct(local, vright);
+	transformed[1] = DotProduct(local, vup);
+	transformed[2] = DotProduct(local, vfwd);
+
+	// Make sure Z is not negative.
+	if (transformed[2] < 0.01f) {
+		return qfalse;
+	}
+
+	xzi = xcenter / transformed[2] * (96.0f / cg.refdef.fov_x);
+	yzi = ycenter / transformed[2] * (102.0f / cg.refdef.fov_y);
+	*x = xcenter + xzi * transformed[0];
+	*y = ycenter - yzi * transformed[1];
+	return qtrue;
+}
+#define ISVALIDCLIENTNUM(clientNum) ( clientNum >= 0 && clientNum < MAX_CLIENTS )
+
+int CG_Text_Width(const char *text, float scale, int limit);
+int CG_Text_Height(const char *text, float scale, int limit);
+void CG_AddOnScreenText(const char *text, vec3_t origin, int clientNum)
+{
+	float x, y;
+
+	if (!ISVALIDCLIENTNUM(clientNum))
+		return;
+
+	if (CG_WorldCoordToScreenCoordFloat(origin, &x, &y)){
+		float		scale, w, h;
+		float    	dist = VectorDistance(origin, cg.refdef.vieworg);
+		float       dist2 = (dist*dist) / (3600.0f);
+
+		if (dist2 > 2.0f)
+			dist2 = 2.0f;
+
+		scale = 2.4f - dist2 - dist / 6000.0f;
+		if (scale < 0.05f)
+			scale = 0.05f;
+
+		w = CG_Text_Width_ext2(text, scale, 0);
+		h = CG_Text_Height_ext2(text, scale, 0);
+
+		x -= w / 2;
+		y -= h / 2;
+
+		// save it
+		cg.specOnScreenNames[clientNum].x = x;
+		cg.specOnScreenNames[clientNum].y = y;
+		cg.specOnScreenNames[clientNum].scale = scale;
+		cg.specOnScreenNames[clientNum].text = text;
+		VectorCopy(origin, cg.specOnScreenNames[clientNum].origin);
+		cg.specOnScreenNames[clientNum].visible = qtrue;
+	}
+	else {
+		memset(&cg.specOnScreenNames[clientNum], 0, sizeof(cg.specOnScreenNames[clientNum]));
+	}
+}
+static void CG_PlayerFloatText(centity_t *cent, const char *text, int height)
+{
+	vec3_t		origin;
+
+	VectorCopy(cent->lerpOrigin, origin);
+	origin[2] += height;
+
+	// Account for ducking
+	if (cent->currentState.clientNum == cg.snap->ps.clientNum) {
+		if (cg.snap->ps.pm_flags & PMF_DUCKED) {
+			origin[2] -= 18;
+		}
+	}
+	else {
+		if ((qboolean)cent->currentState.animMovetype) {
+			origin[2] -= 18;
+		}
+	}
+	CG_AddOnScreenText(text, origin, cent->currentState.clientNum);
+}
+/******** -OSPx - End draw hud names *******/
 
 
 
@@ -2130,6 +2244,14 @@ Float sprites over the player's head
 */
 static void CG_PlayerSprites( centity_t *cent ) {
 	int team;
+// OSPx - Draw Hud Names
+	clientInfo_t	*ci = &cgs.clientinfo[cent->currentState.clientNum];
+	int				height = 48;
+
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR) {
+		CG_PlayerFloatText(cent, ci->name, height + 16);
+	}
+// -OSPx
 
 	if ( cent->currentState.eFlags & EF_CONNECTION ) {
 		CG_PlayerFloatSprite( cent, cgs.media.connectionShader, 48 );

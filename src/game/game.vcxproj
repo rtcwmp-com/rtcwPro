@@ -200,10 +200,12 @@
     <ClCompile Include="g_admin_bot.c" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
+    <ClCompile Include="g_antiwarp.c" />
     <ClCompile Include="g_bot.c" />
     <ClCompile Include="g_client.c" />
     <ClCompile Include="g_cmds.c" />
     <ClCompile Include="g_combat.c" />
+    <ClCompile Include="g_config.c" />
     <ClCompile Include="g_geoip.c" />
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_main.c" />
@@ -214,6 +216,7 @@
     <ClCompile Include="g_mover.c" />
     <ClCompile Include="g_players.c" />
     <ClCompile Include="g_props.c" />
+    <ClCompile Include="g_referee.c" />
     <ClCompile Include="g_save.c" />
     <ClCompile Include="g_script.c" />
     <ClCompile Include="g_script_actions.c" />
@@ -229,6 +232,7 @@
     <ClCompile Include="g_trigger.c" />
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vehicles.c" />
+    <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
