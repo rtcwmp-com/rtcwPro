@@ -1,13 +1,10 @@
 #!/bin/sh
-
 #move to src dir
 #cd /rtcwpro/src
-
 dos2unix /rtcwpro/docker-scripts/build/build-game.sh && ./rtcwpro/docker-scripts/build/build-game.sh
 dos2unix /rtcwpro/docker-scripts/build/build-cgame.sh && ./rtcwpro/docker-scripts/build/build-cgame.sh
 dos2unix /rtcwpro/docker-scripts/build/build-ui.sh && ./rtcwpro/docker-scripts/build/build-ui.sh
 dos2unix /rtcwpro/docker-scripts/build/build-pk3.sh && ./rtcwpro/docker-scripts/build/build-pk3.sh
-
 #move into game dir
 # cd game
 # make -f makefile
