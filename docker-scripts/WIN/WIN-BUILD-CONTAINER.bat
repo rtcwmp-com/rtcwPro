@@ -1,1 +1,1 @@
-docker build --pull --rm -f "../Dockerfile" -t ospx:build "."
+docker build --pull --rm -f "../Dockerfile" -t rtcwpro:build "."
