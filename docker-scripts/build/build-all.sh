@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #move to src dir
-cd /ospx/src
+cd /rtcwpro/src
 
 #move into game dir
 cd game
