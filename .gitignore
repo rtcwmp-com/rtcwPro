@@ -21,6 +21,7 @@ src/.vs/*.*
 *.userprefs
 
 # Build results
+output/
 [Dd]ebug/
 [Dd]ebug_Dedicated/
 [Dd]ebugPublic/
