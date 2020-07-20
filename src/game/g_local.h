@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
-#define GAMEVERSION "EliteMod x1.0 beta"
+#define GAMEVERSION "RtcwPro 1.0 beta"
 // done.
 
 #define BODY_QUEUE_SIZE     8
