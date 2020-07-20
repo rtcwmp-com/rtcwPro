@@ -212,7 +212,7 @@
     <None Include="ui.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\main\ui\menudef.h" />
+    <ClInclude Include="..\..\main\ui_mp\menudef.h" />
     <ClInclude Include="..\cgame\tr_types.h" />
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="..\game\q_shared.h" />

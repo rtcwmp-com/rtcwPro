@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
+#include "../../MAIN/ui_mp/menudef.h"
 
 //==================================================================
 

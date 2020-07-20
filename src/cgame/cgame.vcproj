@@ -54,11 +54,7 @@
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
-<<<<<<< HEAD
-				BrowseInformation="1"
-=======
 				BrowseInformation="0"
->>>>>>> feature/vs-project-support
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -228,11 +224,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -253,11 +245,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -278,11 +266,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -303,11 +287,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -328,11 +308,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -353,11 +329,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -378,11 +350,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -403,11 +371,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -428,11 +392,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -453,11 +413,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -478,11 +434,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -503,11 +455,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -528,11 +476,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -553,11 +497,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -578,11 +518,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -603,11 +539,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -628,11 +560,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -653,11 +581,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -678,11 +602,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -703,11 +623,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -728,11 +644,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -753,11 +665,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -778,11 +686,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -803,11 +707,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -828,11 +728,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -853,11 +749,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -878,11 +770,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -903,11 +791,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -928,11 +812,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -953,11 +833,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -978,11 +854,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1003,11 +875,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-<<<<<<< HEAD
-						BrowseInformation="1"
-=======
 						BrowseInformation="0"
->>>>>>> feature/vs-project-support
 					/>
 				</FileConfiguration>
 				<FileConfiguration

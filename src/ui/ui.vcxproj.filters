@@ -13,7 +13,6 @@
     <ClCompile Include="ui_util.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\main\ui\menudef.h" />
     <ClInclude Include="..\cgame\tr_types.h" />
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="..\game\q_shared.h" />
@@ -22,6 +21,7 @@
     <ClInclude Include="ui_local.h" />
     <ClInclude Include="ui_public.h" />
     <ClInclude Include="ui_shared.h" />
+    <ClInclude Include="..\..\main\ui_mp\menudef.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ui.def" />

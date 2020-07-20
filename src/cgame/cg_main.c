@@ -308,6 +308,8 @@ vmCvar_t cg_noVoice;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
 vmCvar_t cg_zoomedSens;
+vmCvar_t vp_drawnames;
+vmCvar_t cg_drawNames;
 vmCvar_t cg_announcer;
 vmCvar_t cg_autoAction;
 vmCvar_t cf_wstats;             // OSP's Font scale for +wstats window
