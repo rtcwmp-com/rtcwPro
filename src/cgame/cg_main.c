@@ -568,8 +568,8 @@ cvarTable_t cvarTable[] = {
     { &cg_forceTapout, "cg_forceTapout", "0", CVAR_ARCHIVE },
 	{ &int_cl_timenudge, "cl_timenudge", "0", CVAR_ARCHIVE|CVAR_LATCH },
 	// et
-    { &cg_spawnTimer_set,         "cg_spawnTimer_set",         "-1",          CVAR_TEMP,                     },
-	{ &cg_spawnTimer_period,      "cg_spawnTimer_period",      "0",           CVAR_TEMP,                    0 },
+    { &cg_spawnTimer_set, "cg_spawnTimer_set", "-1", CVAR_TEMP },
+	{ &cg_spawnTimer_period, "cg_spawnTimer_period", "0", CVAR_TEMP },
 	// -OSPx
 	{ &int_ui_blackout, "ui_blackout", "0", CVAR_ROM },
 	{ &cg_antilag, "g_antilag", "0", 0 }
