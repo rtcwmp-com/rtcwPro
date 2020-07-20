@@ -52,6 +52,7 @@ typedef struct {
 } modeCvarTable_t;
 
 static const modeCvarTable_t aCompSettings[] = {
+	{ M_ALL, "g_tournament", "1" },
 	{ M_ALL, "g_altStopwatchMode", "0" },
 	{ M_ALL, "g_complaintlimit", "0" },
 	{ M_ALL, "g_doWarmup", "1" },
@@ -79,6 +80,7 @@ static const modeCvarTable_t aCompSettings[] = {
 };
 
 static const modeCvarTable_t aPubSettings[] = {
+	{ M_ALL, "g_tournament", "0" },
 	{ M_ALL, "g_altStopwatchMode", "0" },
 	{ M_ALL, "g_complaintlimit", "6" },
 	{ M_ALL, "g_doWarmup", "0" }, // RtcwPro don't do warmup for pub settings

@@ -238,6 +238,8 @@ vmCvar_t	g_crouchRate;			// If enabled it recharges stamina faster when player i
 vmCvar_t	g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
 vmCvar_t	g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
 vmCvar_t	g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
+// comp/pub settings
+vmCvar_t z_serverflags;
 // MOTD's
 vmCvar_t g_serverMessage;	// Shows a center print each time when player switches teams.
 vmCvar_t g_showMOTD;		// Enable MOTD's (message of the day)
@@ -478,6 +480,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &TXThandle, "TXThandle", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_axisSpawnProtectionTime, "g_axisSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_alliedSpawnProtectionTime, "g_alliedSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
+	{ &z_serverflags, "z_serverflags", "0", 0, 0, qfalse, qfalse },
 	{ &g_serverMessage, "g_serverMessage", "", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 
@@ -521,7 +524,30 @@ cvarTable_t gameCvarTable[] = {
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
     { &match_warmupfire, "match_warmupfire", "1", 0, 0, qfalse },
-	{&g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse}
+	{&g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse},
+	
+	// voting
+	{ &vote_limit, "vote_limit", "3", CVAR_ARCHIVE, qfalse, qfalse },
+	{ &vote_percent, "vote_percent", "50", CVAR_ARCHIVE, qfalse, qfalse },
+	{ &vote_allow_comp, "vote_allow_comp", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_gametype,     "vote_allow_gametype", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_kick,         "vote_allow_kick", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_map,          "vote_allow_map", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_matchreset,   "vote_allow_matchreset", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_mutespecs,    "vote_allow_mutespecs", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_nextmap,      "vote_allow_nextmap", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_pub,          "vote_allow_pub", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_referee,      "vote_allow_referee", "0", 0, 0, qfalse, qfalse },
+	{ &vote_allow_shuffleteamsxp,   "vote_allow_shuffleteamsxp", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_swapteams,    "vote_allow_swapteams", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_friendlyfire, "vote_allow_friendlyfire", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_timelimit,    "vote_allow_timelimit", "0", 0, 0, qfalse, qfalse },
+	{ &vote_allow_warmupdamage, "vote_allow_warmupdamage", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_antilag,      "vote_allow_antilag", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_balancedteams,"vote_allow_balancedteams", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_muting,       "vote_allow_muting", "1", 0, 0, qfalse, qfalse },
+	{ &vote_limit,      "vote_limit", "5", 0, 0, qfalse, qfalse },
+	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
 };
 
 // bk001129 - made static to avoid aliasing
@@ -2794,19 +2820,32 @@ CheckVote
 void CheckVote( void ) {
 	if ( level.voteExecuteTime && level.voteExecuteTime < level.time ) {
 		level.voteExecuteTime = 0;
-		trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteString ) );
+		trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteInfo.voteString ) );
 	}
-	if ( !level.voteTime ) {
+	if ( !level.voteInfo.voteTime ) {
 		return;
 	}
-	if ( level.time - level.voteTime >= VOTE_TIME ) {
+	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
 		trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
 	} else {
-		if ( level.voteYes > level.numVotingClients / 2 ) {
+// OSPx - Vote percent..
+		int vCnt = (!Q_stricmp(level.voteInfo.voteString, "start_match") ? 75 : vote_percent.integer);
+		int total = level.numVotingClients;
+
+		if (vCnt > 99)
+			vCnt = 99;
+		else if (vCnt < 1)
+			vCnt = 1;
+				
+		// Vote will always pass with single client..rest is perc depended..
+		if ( (total == 1) || ( 100 * level.voteInfo.voteYes / total >= vCnt) ) {
+// -OSPx
 			// execute the command, then remove the vote
 			trap_SendServerCommand( -1, "print \"Vote passed.\n\"" );
 			level.voteExecuteTime = level.time + 3000;
 			level.prevVoteExecuteTime = level.time + 4000;
+			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
 // JPW NERVE
 #ifndef PRE_RELEASE_DEMO
@@ -2838,7 +2877,7 @@ void CheckVote( void ) {
 #endif
 // jpw
 
-		} else if ( level.voteNo >= level.numVotingClients / 2 ) {
+		} else if ( level.voteInfo.voteNo >= level.numVotingClients / 2 ) {
 			// same behavior as a timeout
 			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
 		} else {
@@ -2846,7 +2885,7 @@ void CheckVote( void ) {
 			return;
 		}
 	}
-	level.voteTime = 0;
+	level.voteInfo.voteTime = 0;
 	trap_SetConfigstring( CS_VOTE_TIME, "" );
 
 }
@@ -3078,7 +3117,7 @@ void G_RunFrame( int levelTime ) {
 		if ( !( worldspawnflags & NO_GT_WOLF ) ) {
 			gt = 5;
 		} else {
-			gt = 10; // L0 - 10 not 7..!   //nihi changed from 7
+			gt = 6; // stopwatch
 		}
 
 		trap_SendServerCommand( -1, "print \"Invalid gametype was specified, Restarting\n\"" );

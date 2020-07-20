@@ -2709,7 +2709,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "players",        qtrue,  qtrue,  NULL,         ":^7 Lists all active players and their IDs/information"                                     },
 	{ "ready",          qtrue,  qtrue,  NULL,           ":^7 Sets your status to ^5ready^7 to start a match"                                         },
 	{ "readyteam",      qfalse, qtrue,  NULL,       ":^7 Sets an entire team's status to ^5ready^7 to start a match"                             },
-//	{ "ref",            qtrue,  qtrue,  G_ref_cmd,             " <password>:^7 Become a referee (admin access)"                                             },
+	{ "ref",            qtrue,  qtrue,  G_ref_cmd,             " <password>:^7 Become a referee (admin access)"                                             },
 //  { "remove",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Removes a player from the team" },
 	//{ "say_teamnl",     qtrue,  qtrue,  G_say_teamnl_cmd,      "<msg>:^7 Sends a team chat without location info"                                           },
 	{ "scores",         qtrue,  qtrue,  NULL,          ":^7 Displays current match stat info"                                                       },

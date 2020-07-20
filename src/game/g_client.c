@@ -1442,7 +1442,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	if ( s && !strcmp( s, "localhost" ) ) {
 		client->pers.localClient = qtrue;
-		//client->sess.referee = RL_REFEREE;
+		client->sess.referee = RL_REFEREE;
 	} // OSPx - Country Flags
 	else if (!(ent->r.svFlags & SVF_BOT) && !strlen(s)) {
 		// To solve the IP bug..
