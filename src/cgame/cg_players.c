@@ -60,6 +60,162 @@ char    *cg_customSoundNames[MAX_CUSTOM_SOUNDS] = {
 	"*exert3.wav",
 };
 
+/************ OSPx - DRAW HUD NAMES dump ************/
+void VP_AddName(int x, int y, float dist, int clientNum);
+/*
+=================
+VectorAngle
+=================
+*/
+float VectorAngle(const vec3_t a, const vec3_t b)
+{
+	float length_a = VectorLength(a);
+	float length_b = VectorLength(b);
+	float length_ab = length_a*length_b;
+	if (length_ab == 0.0)
+	{
+		return 0.0;
+	}
+	else
+	{
+		return (float)(acos(DotProduct(a, b) / length_ab) * (180.f / M_PI));
+	}
+}
+
+/*
+=================
+MakeVector
+=================
+*/
+void MakeVector(const vec3_t ain, vec3_t vout)
+{
+	float pitch;
+	float yaw;
+	float tmp;
+
+	pitch = (float)(ain[0] * M_PI / 180);
+	yaw = (float)(ain[1] * M_PI / 180);
+	tmp = (float)cos(pitch);
+
+	vout[0] = (float)(-tmp * -cos(yaw));
+	vout[1] = (float)(sin(yaw)*tmp);
+	vout[2] = (float)-sin(pitch);
+}
+
+/*
+=================
+VectorRotateX
+=================
+*/
+void VectorRotateX(const vec3_t in, float angle, vec3_t out)
+{
+	float a, c, s;
+
+	a = (float)(angle * M_PI / 180);
+	c = (float)cos(a);
+	s = (float)sin(a);
+	out[0] = in[0];
+	out[1] = c*in[1] - s*in[2];
+	out[2] = s*in[1] + c*in[2];
+}
+
+/*
+=================
+VectorRotateY
+=================
+*/
+void VectorRotateY(const vec3_t in, float angle, vec3_t out)
+{
+	float a, c, s;
+
+	a = (float)(angle * M_PI / 180);
+	c = (float)cos(a);
+	s = (float)sin(a);
+	out[0] = c*in[0] + s*in[2];
+	out[1] = in[1];
+	out[2] = -s*in[0] + c*in[2];
+}
+
+/*
+=================
+VectorRotateZ
+=================
+*/
+void VectorRotateZ(const vec3_t in, float angle, vec3_t out)
+{
+	float a, c, s;
+
+	a = (float)(angle * M_PI / 180);
+	c = (float)cos(a);
+	s = (float)sin(a);
+	out[0] = c*in[0] - s*in[1];
+	out[1] = s*in[0] + c*in[1];
+	out[2] = in[2];
+}
+
+#define BOUND_VALUE(var,min,max) if((var)>(max)){(var)=(max);};if((var)<(min)){(var)=(min);}
+/*
+=================
+CG_WorldToScreen
+=================
+*/
+int CG_WorldToScreen(float* in, int* out)
+{
+	vec3_t aim;
+	vec3_t newaim;
+	vec3_t view;
+	vec3_t tmp;
+	float num;
+
+	VectorCopy(cg.refdef.vieworg, tmp);
+	VectorSubtract(in, tmp, aim);
+	MakeVector(cg.refdefViewAngles, view);
+
+	//not in fov#!@#!@$#@!$
+	if (VectorAngle(view, aim) > (cg.refdef.fov_x / 1.8))
+		return -1;
+
+	VectorRotateZ(aim, -cg.refdefViewAngles[1], newaim);// yaw
+	VectorRotateY(newaim, -cg.refdefViewAngles[0], tmp);// pitch
+	VectorRotateX(tmp, -cg.refdefViewAngles[2], newaim);// roll
+
+	//they are behind us!@~!#@!$@!$
+	if (newaim[0] <= 0)
+		return -1;
+
+	num = (float)((320.0f / newaim[0])*(120.0 / cg.refdef.fov_x - 1.0 / 3.0));
+
+	out[0] = (int)(320 - num*newaim[1]);
+	out[1] = (int)(240 - num*newaim[2]);
+
+
+	BOUND_VALUE(out[0], 0, 640);
+	BOUND_VALUE(out[1], 0, 480);
+
+	return 0;
+}
+void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+	int skipNumber, int mask) {
+	trace_t	t;
+
+	trap_CM_BoxTrace(&t, start, end, mins, maxs, 0, mask);
+	t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
+
+	*result = t;
+}
+qboolean PointVisible(vec3_t point) {
+	trace_t trace;
+	//	vec3_t tmp;
+
+	CG_Trace_World(&trace, cg.refdef.vieworg, NULL, NULL, point, 0, MASK_SOLID);
+
+	if (trace.fraction != 1.0) {
+		return qfalse;
+	}
+	return qtrue;
+}
+
+/************ OSPx - END DRAW HUD NAMES ************/
 
 /*
 ================
@@ -982,6 +1138,9 @@ void CG_NewClientInfo( int clientNum ) {
 	v = Info_ValueForKey( configstring, "t" );
 	newInfo.team = atoi( v );
 
+	// ref
+	v = Info_ValueForKey(configstring, "ref");
+	newInfo.refStatus = atoi(v);
 //----(SA) modified this for head separation
 
 	// head
@@ -2337,6 +2496,10 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane ) {
 		return qfalse;
 	}
 
+	// L0 - Don't draw this above 1...
+	if (cg_shadows.integer > 1) {
+		trap_Cvar_Set("cg_shadows", "1");
+	}
 	// no shadows when invisible
 	if ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) {
 		return qfalse;
