@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug Dedicated|Win32">
+      <Configuration>Debug Dedicated</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Dedicated|x64">
+      <Configuration>Debug Dedicated</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}</ProjectGuid>
+    <RootNamespace>game</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>qagame_mp_x86</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GAMEDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ModuleDefinitionFile>.\game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapFileName>
+      </MapFileName>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+    </Link>
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <OutputFile>..\elitemod/qagame_mp_x86.dll</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\botai\ai_chat.c" />
+    <ClCompile Include="..\botai\ai_cmd.c" />
+    <ClCompile Include="..\botai\ai_dmnet.c" />
+    <ClCompile Include="..\botai\ai_dmq3.c" />
+    <ClCompile Include="..\botai\ai_main.c" />
+    <ClCompile Include="..\botai\ai_team.c" />
+    <ClCompile Include="ai_cast.c" />
+    <ClCompile Include="ai_cast_characters.c" />
+    <ClCompile Include="ai_cast_debug.c" />
+    <ClCompile Include="ai_cast_events.c" />
+    <ClCompile Include="ai_cast_fight.c" />
+    <ClCompile Include="ai_cast_funcs.c" />
+    <ClCompile Include="ai_cast_func_attack.c" />
+    <ClCompile Include="ai_cast_func_boss1.c" />
+    <ClCompile Include="ai_cast_script.c" />
+    <ClCompile Include="ai_cast_script_actions.c" />
+    <ClCompile Include="ai_cast_script_ents.c" />
+    <ClCompile Include="ai_cast_sight.c" />
+    <ClCompile Include="ai_cast_think.c" />
+    <ClCompile Include="bg_animation.c" />
+    <ClCompile Include="bg_misc.c" />
+    <ClCompile Include="bg_pmove.c" />
+    <ClCompile Include="bg_slidemove.c" />
+    <ClCompile Include="bg_stats.c" />
+    <ClCompile Include="g_active.c" />
+    <ClCompile Include="g_admin.c" />
+    <ClCompile Include="g_admin_bot.c" />
+    <ClCompile Include="g_alarm.c" />
+    <ClCompile Include="g_antilag.c" />
+    <ClCompile Include="g_antiwarp.c" />
+    <ClCompile Include="g_bot.c" />
+    <ClCompile Include="g_client.c" />
+    <ClCompile Include="g_cmds.c" />
+    <ClCompile Include="g_combat.c" />
+    <ClCompile Include="g_geoip.c" />
+    <ClCompile Include="g_items.c" />
+    <ClCompile Include="g_main.c" />
+    <ClCompile Include="g_match.c" />
+    <ClCompile Include="g_mem.c" />
+    <ClCompile Include="g_misc.c" />
+    <ClCompile Include="g_missile.c" />
+    <ClCompile Include="g_mover.c" />
+    <ClCompile Include="g_players.c" />
+    <ClCompile Include="g_props.c" />
+    <ClCompile Include="g_save.c" />
+    <ClCompile Include="g_script.c" />
+    <ClCompile Include="g_script_actions.c" />
+    <ClCompile Include="g_session.c" />
+    <ClCompile Include="g_shared.c" />
+    <ClCompile Include="g_spawn.c" />
+    <ClCompile Include="g_stats.c" />
+    <ClCompile Include="g_svcmds.c" />
+    <ClCompile Include="g_syscalls.c" />
+    <ClCompile Include="g_target.c" />
+    <ClCompile Include="g_team.c" />
+    <ClCompile Include="g_tramcar.c" />
+    <ClCompile Include="g_trigger.c" />
+    <ClCompile Include="g_utils.c" />
+    <ClCompile Include="g_vehicles.c" />
+    <ClCompile Include="g_weapon.c" />
+    <ClCompile Include="q_math.c" />
+    <ClCompile Include="q_shared.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\botai\ai_chat.h" />
+    <ClInclude Include="..\botai\ai_cmd.h" />
+    <ClInclude Include="..\botai\ai_dmnet.h" />
+    <ClInclude Include="..\botai\ai_dmq3.h" />
+    <ClInclude Include="..\botai\ai_main.h" />
+    <ClInclude Include="..\botai\ai_team.h" />
+    <ClInclude Include="..\botai\botai.h" />
+    <ClInclude Include="..\botai\chars.h" />
+    <ClInclude Include="..\botai\inv.h" />
+    <ClInclude Include="..\botai\match.h" />
+    <ClInclude Include="..\botai\syn.h" />
+    <ClInclude Include="ai_cast.h" />
+    <ClInclude Include="ai_cast_fight.h" />
+    <ClInclude Include="ai_cast_global.h" />
+    <ClInclude Include="be_aas.h" />
+    <ClInclude Include="be_ai_char.h" />
+    <ClInclude Include="be_ai_chat.h" />
+    <ClInclude Include="be_ai_gen.h" />
+    <ClInclude Include="be_ai_goal.h" />
+    <ClInclude Include="be_ai_move.h" />
+    <ClInclude Include="be_ai_weap.h" />
+    <ClInclude Include="be_ea.h" />
+    <ClInclude Include="bg_local.h" />
+    <ClInclude Include="bg_public.h" />
+    <ClInclude Include="botlib.h" />
+    <ClInclude Include="g_admin.h" />
+    <ClInclude Include="g_local.h" />
+    <ClInclude Include="g_public.h" />
+    <ClInclude Include="g_shared.h" />
+    <ClInclude Include="g_stats.h" />
+    <ClInclude Include="g_team.h" />
+    <ClInclude Include="q_shared.h" />
+    <ClInclude Include="surfaceflags.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

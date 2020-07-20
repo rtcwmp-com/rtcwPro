@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="bg_animation.c" />
+    <ClCompile Include="bg_misc.c" />
+    <ClCompile Include="bg_pmove.c" />
+    <ClCompile Include="bg_slidemove.c" />
+    <ClCompile Include="bg_stats.c" />
+    <ClCompile Include="g_active.c" />
+    <ClCompile Include="g_admin.c" />
+    <ClCompile Include="g_admin_bot.c" />
+    <ClCompile Include="g_alarm.c" />
+    <ClCompile Include="g_antilag.c" />
+    <ClCompile Include="g_bot.c" />
+    <ClCompile Include="g_client.c" />
+    <ClCompile Include="g_cmds.c" />
+    <ClCompile Include="g_combat.c" />
+    <ClCompile Include="g_geoip.c" />
+    <ClCompile Include="g_items.c" />
+    <ClCompile Include="g_main.c" />
+    <ClCompile Include="g_match.c" />
+    <ClCompile Include="g_mem.c" />
+    <ClCompile Include="g_misc.c" />
+    <ClCompile Include="g_missile.c" />
+    <ClCompile Include="g_mover.c" />
+    <ClCompile Include="g_players.c" />
+    <ClCompile Include="g_props.c" />
+    <ClCompile Include="g_save.c" />
+    <ClCompile Include="g_script.c" />
+    <ClCompile Include="g_script_actions.c" />
+    <ClCompile Include="g_session.c" />
+    <ClCompile Include="g_shared.c" />
+    <ClCompile Include="g_spawn.c" />
+    <ClCompile Include="g_stats.c" />
+    <ClCompile Include="g_svcmds.c" />
+    <ClCompile Include="g_syscalls.c" />
+    <ClCompile Include="g_target.c" />
+    <ClCompile Include="g_team.c" />
+    <ClCompile Include="g_tramcar.c" />
+    <ClCompile Include="g_trigger.c" />
+    <ClCompile Include="g_utils.c" />
+    <ClCompile Include="g_vehicles.c" />
+    <ClCompile Include="g_weapon.c" />
+    <ClCompile Include="q_math.c" />
+    <ClCompile Include="q_shared.c" />
+    <ClCompile Include="ai_cast.c" />
+    <ClCompile Include="ai_cast_characters.c" />
+    <ClCompile Include="ai_cast_debug.c" />
+    <ClCompile Include="ai_cast_events.c" />
+    <ClCompile Include="ai_cast_fight.c" />
+    <ClCompile Include="ai_cast_func_attack.c" />
+    <ClCompile Include="ai_cast_func_boss1.c" />
+    <ClCompile Include="ai_cast_funcs.c" />
+    <ClCompile Include="ai_cast_script.c" />
+    <ClCompile Include="ai_cast_script_actions.c" />
+    <ClCompile Include="ai_cast_script_ents.c" />
+    <ClCompile Include="ai_cast_sight.c" />
+    <ClCompile Include="ai_cast_think.c" />
+    <ClCompile Include="g_antiwarp.c" />
+    <ClCompile Include="..\botai\ai_team.c" />
+    <ClCompile Include="..\botai\ai_main.c">
+      <Filter>BotAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\botai\ai_chat.c">
+      <Filter>BotAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\botai\ai_cmd.c">
+      <Filter>BotAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\botai\ai_dmnet.c">
+      <Filter>BotAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\botai\ai_dmq3.c">
+      <Filter>BotAI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="be_aas.h" />
+    <ClInclude Include="be_ai_char.h" />
+    <ClInclude Include="be_ai_chat.h" />
+    <ClInclude Include="be_ai_gen.h" />
+    <ClInclude Include="be_ai_goal.h" />
+    <ClInclude Include="be_ai_move.h" />
+    <ClInclude Include="be_ai_weap.h" />
+    <ClInclude Include="be_ea.h" />
+    <ClInclude Include="bg_local.h" />
+    <ClInclude Include="bg_public.h" />
+    <ClInclude Include="botlib.h" />
+    <ClInclude Include="g_admin.h" />
+    <ClInclude Include="g_local.h" />
+    <ClInclude Include="g_public.h" />
+    <ClInclude Include="g_shared.h" />
+    <ClInclude Include="g_stats.h" />
+    <ClInclude Include="g_team.h" />
+    <ClInclude Include="q_shared.h" />
+    <ClInclude Include="surfaceflags.h" />
+    <ClInclude Include="ai_cast.h" />
+    <ClInclude Include="ai_cast_fight.h" />
+    <ClInclude Include="ai_cast_global.h" />
+    <ClInclude Include="..\botai\ai_chat.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\ai_cmd.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\ai_dmnet.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\ai_dmq3.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\ai_main.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\ai_team.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\botai.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\chars.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\inv.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\match.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\botai\syn.h">
+      <Filter>BotAI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="BotAI">
+      <UniqueIdentifier>{e5bdb8c1-7191-4d85-8853-184728643b3b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
