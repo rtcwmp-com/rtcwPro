@@ -4245,7 +4245,6 @@ const weap_ws_t aWeaponInfo[WS_MAX] = {
 	{ qtrue,    "MG42",  "MG-42 Gun"  },  // 16
 	{ qtrue,    "RIFL",  "Mauser" },	  // 17
 	{ qtrue,    "VENM",  "Venom" },		  // 18
-	{ qfalse,   "POIS",  "Poison" },	  // 19
 };
 // strip colors and control codes, copying up to dwMaxLength-1 "good" chars and nul-terminating
 // returns the length of the cleaned string

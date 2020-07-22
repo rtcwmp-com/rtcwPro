@@ -1586,7 +1586,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 //	qboolean fFull = qtrue;  // nihi added
 	char strName[MAX_STRING_CHARS];
 	int kills, headshots, deaths, team_kills, suicides, acc_shots, acc_hits, damage_giv, damage_rec;
-	int bleed, ammo_giv, med_giv, revived, poisoned, gibs, kill_peak;
+	int bleed, ammo_giv, med_giv, revived, gibs, kill_peak;
 	unsigned int iArg = 1;
 	unsigned int nClient = atoi( CG_Argv( iArg++ ) );
 	float acc;
@@ -1620,7 +1620,6 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	med_giv = atoi( CG_Argv( iArg++ ) );
 	ammo_giv = atoi( CG_Argv( iArg++ ) );
 	revived = atoi( CG_Argv( iArg++ ) );
-	poisoned = atoi( CG_Argv( iArg++ ) );
 	kill_peak = atoi( CG_Argv( iArg++ ) );
 
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
@@ -1639,8 +1638,8 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 
 	if (ammo_giv > 0 || med_giv > 0)
 		txt_dump( va("^cAmmopacks: ^7%-3d    ^cHealthpacks: ^7%d\n", ammo_giv, med_giv ));
-	if (revived > 0 || poisoned > 0)
-		txt_dump( va("^cRevives  : ^7%-3d    ^cPoisoned   : ^7%d\n", revived, poisoned ));
+	if (revived > 0)
+		txt_dump( va("^cRevives  : ^7%-3d\n", revived ));
 	if (kill_peak > 0 || gibs > 0)
 		txt_dump( va("^cKill Peak: ^7%-3d    ^cGibbed     : ^7%d\n", kill_peak, gibs ));
 	if (acc_shots > 0 || acc_hits > 0)

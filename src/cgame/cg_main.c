@@ -314,6 +314,7 @@ vmCvar_t cg_announcer;
 vmCvar_t cg_autoAction;
 vmCvar_t cf_wstats;             // OSP's Font scale for +wstats window
 vmCvar_t cf_wtopshots;          // OSP's Font scale for +wtopshots window
+vmCvar_t authLevel;
 vmCvar_t cg_noAmmoAutoSwitch;
 vmCvar_t cg_uinfo;
 vmCvar_t cg_useScreenshotJPEG;
@@ -429,7 +430,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_showmiss, "cg_showmiss", "0", 0 },
 	{ &cg_footsteps, "cg_footsteps", "1", CVAR_CHEAT },
 	//{ &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },   // nihi cmmmented to allow cg_tracerchance
-    { &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_ARCHIVE },
+	{ &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },
 	{ &cg_tracerWidth, "cg_tracerwidth", "0.8", CVAR_CHEAT },
 	{ &cg_tracerSpeed, "cg_tracerSpeed", "4500", CVAR_CHEAT },
 	{ &cg_tracerLength, "cg_tracerlength", "160", CVAR_CHEAT },
@@ -559,6 +560,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomedFOV, "cg_zoomedFOV", "90", CVAR_ARCHIVE },
 	{ &cg_statsList, "cg_statsList", "0", CVAR_ARCHIVE },
 	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
+	{ &vp_drawnames, "vp_drawnames", "0", CVAR_ARCHIVE | CVAR_CHEAT },
+	{ &cg_drawNames, "cg_drawNames", "1", CVAR_ROM },
 	{ &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
 	{ &cg_autoAction, "cg_autoAction", "0", CVAR_ARCHIVE },
 	{ &cg_useScreenshotJPEG, "cg_useScreenshotJPEG", "1", CVAR_ARCHIVE },
@@ -1196,7 +1199,7 @@ static void CG_RegisterSounds( void ) {
 	trap_S_RegisterSound( "sound/Loogie/sizzle.wav" );
 */
 	// L0 - sounds
-	cgs.media.countFightSound = trap_S_RegisterSound( "sound/scenaric/fight.wav" );
+	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// Hitsounds
 	cgs.media.headShot = trap_S_RegisterSound( "EliteMod/sound/game/hitH.wav" );
 	cgs.media.bodyShot = trap_S_RegisterSound( "EliteMod/sound/game/hit.wav" );

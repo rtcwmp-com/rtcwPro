@@ -405,8 +405,10 @@ If you have questions concerning this license or the applicable additional terms
 // CS_SERVERTOGGLES
 #define CV_SVS_MUTESPECS        1
 #define CV_SVS_FRIENDLYFIRE     2
+#define CV_SVS_WARMUPDMG		4
+#define CV_SVS_CENTERVIEW		8
 // 2 bits for warmup damage setting
-#define CV_SVS_WARMUPDMG        12
+//#define CV_SVS_WARMUPDMG        12
 #define CV_SVS_PAUSE            16
 #define CV_SVS_LOCKTEAMS        32
 #define CV_SVS_LOCKSPECS        64

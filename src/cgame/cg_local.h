@@ -1983,6 +1983,7 @@ extern vmCvar_t cg_descriptiveText;
 extern vmCvar_t cg_autoReload;
 extern vmCvar_t cg_antilag;
 
+extern vmCvar_t authLevel;
 // OSPx
 extern vmCvar_t cg_crosshairPulse;
 extern vmCvar_t	cg_showFlags;

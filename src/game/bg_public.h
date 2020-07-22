@@ -1127,7 +1127,6 @@ typedef enum extWeaponStats_s
 	WS_MG42,                // 16
 	WS_RIFLE,				// 17 - equivalent american weapon to german mauser
 	WS_VENOM,				// 18 
-	WS_POISON,				// 19							
 	WS_MAX
 } extWeaponStats_t;
 
