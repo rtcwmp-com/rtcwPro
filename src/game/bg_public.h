@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
  * desc:		definitions shared by both the server game and client game modules
  *
 */
+#include "../../MAIN/ui_mp/menudef.h" // For vote options
 
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
