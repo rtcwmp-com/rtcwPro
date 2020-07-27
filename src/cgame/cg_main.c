@@ -39,12 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 
 displayContextDef_t cgDC;
 
-int forceModelModificationCount = -1;
-int autoReloadModificationCount = -1;
-
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
-
 
 /*
 ================
@@ -337,6 +333,7 @@ typedef struct {
 	char        *cvarName;
 	char        *defaultString;
 	int cvarFlags;
+	int modificationCount;
 } cvarTable_t;
 
 cvarTable_t cvarTable[] = {
@@ -575,8 +572,12 @@ cvarTable_t cvarTable[] = {
 	{ &cg_antilag, "g_antilag", "0", 0 }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
+
 // OSPx - Client Flags
 void CG_setClientFlags(void);
+
+// RTCWPro - cvars loaded flag
+qboolean cvarsLoaded = qfalse;
 
 /*
 =================
@@ -599,8 +600,6 @@ void CG_RegisterCvars( void ) {
 	trap_Cvar_VariableStringBuffer( "sv_running", var, sizeof( var ) );
 	cgs.localServer = atoi( var );
 
-	forceModelModificationCount = cg_forceModel.modificationCount;
-
 	trap_Cvar_Register( NULL, "model", DEFAULT_MODEL, CVAR_USERINFO | CVAR_ARCHIVE );
 	trap_Cvar_Register( NULL, "head", DEFAULT_HEAD, CVAR_USERINFO | CVAR_ARCHIVE );
 
@@ -611,7 +610,11 @@ void CG_RegisterCvars( void ) {
 	// Crosshairs
 	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
+
 // -OSPx
+
+	// RTCWPro - mark cvars as loaded
+	cvarsLoaded = qtrue;
 }
 
 /*
@@ -643,35 +646,50 @@ void CG_UpdateCvars( void ) {
 	cvarTable_t *cv;
 	qboolean fSetFlags = qfalse;	// OSPx - Auto Actions
 
+	// RTCWPro - don't update the cvars if they haven't been registered
+	if (!cvarsLoaded) {
+		return;
+	}
+
 	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) {
 		trap_Cvar_Update( cv->vmCvar );
 
-		if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
-			cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-			cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems) {
-			fSetFlags = qtrue;
-		// Crosshairs
-		} else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
-			BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
+		// RTCWPro - update the modification count and perform actions on special cvars
+		if (cv->modificationCount != cv->vmCvar->modificationCount) {
+			cv->modificationCount = cv->vmCvar->modificationCount;
+
+			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
+				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
+				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems) {
+				fSetFlags = qtrue;
+			}
+			else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
+				BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
+			}
+			else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt) {
+				BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
+			} // -OSPx
+
+			// if force model changed
+			else if (cv->vmCvar == &cg_forceModel) {
+				CG_ForceModelChange();
+			}
+			
+			// auto reload
+			if (cv->vmCvar == &cg_autoReload) {
+				if (cg_autoReload.integer) {
+					cg.pmext.bAutoReload = qtrue;
+				}
+				else {
+					cg.pmext.bAutoReload = qfalse;
+				}
+			}
 		}
-		else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)     {
-			BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-		} // -OSPx
 	}
 
-	// if force model changed
-	if ( forceModelModificationCount != cg_forceModel.modificationCount ) {
-		forceModelModificationCount = cg_forceModel.modificationCount;
-		CG_ForceModelChange();
-	}
-
-	if ( autoReloadModificationCount != cg_autoReload.modificationCount ) {
-		if ( cg_autoReload.integer ) {
-			cg.pmext.bAutoReload = qtrue;
-		} else {
-			cg.pmext.bAutoReload = qfalse;
-		}
-		autoReloadModificationCount = cg_autoReload.modificationCount;
+	// RTCWPro - Send any relevent updates
+	if (fSetFlags) {
+		CG_setClientFlags();
 	}
 }
 
@@ -2599,5 +2617,8 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
+
+	// RTCWPro - mark cvars as unloaded
+	cvarsLoaded = qfalse;
 }
 
