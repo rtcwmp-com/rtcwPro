@@ -1095,7 +1095,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientItems( gentity_t *self );
-//gentity_t* G_BuildHead( gentity_t *ent );
+gentity_t* G_BuildHead( gentity_t *ent );
 
 // damage flags
 #define DAMAGE_RADIUS           0x00000001  // damage was indirect
@@ -1555,6 +1555,7 @@ extern vmCvar_t		g_alliedSpawnProtectionTime;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
+
 // Weapon/class stuff
 extern vmCvar_t g_lifeStats;
 extern vmCvar_t g_maxTeamPF;
@@ -1848,6 +1849,7 @@ void G_TimeShiftClient( gentity_t *ent, int time );
 void G_TimeShiftAllClients( int time, gentity_t *skip );
 void G_UnTimeShiftClient( gentity_t *ent );
 void G_UnTimeShiftAllClients( gentity_t *skip );
+void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
 
 // End
 
