@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="aasfile.h" />
+    <ClInclude Include="be_aas_bsp.h" />
+    <ClInclude Include="be_aas_cluster.h" />
+    <ClInclude Include="be_aas_debug.h" />
+    <ClInclude Include="be_aas_def.h" />
+    <ClInclude Include="be_aas_entity.h" />
+    <ClInclude Include="be_aas_file.h" />
+    <ClInclude Include="be_aas_funcs.h" />
+    <ClInclude Include="be_aas_main.h" />
+    <ClInclude Include="be_aas_move.h" />
+    <ClInclude Include="be_aas_optimize.h" />
+    <ClInclude Include="be_aas_reach.h" />
+    <ClInclude Include="be_aas_route.h" />
+    <ClInclude Include="be_aas_routealt.h" />
+    <ClInclude Include="be_aas_routetable.h" />
+    <ClInclude Include="be_aas_sample.h" />
+    <ClInclude Include="be_ai_weight.h" />
+    <ClInclude Include="be_interface.h" />
+    <ClInclude Include="l_crc.h" />
+    <ClInclude Include="l_libvar.h" />
+    <ClInclude Include="l_log.h" />
+    <ClInclude Include="l_memory.h" />
+    <ClInclude Include="l_precomp.h" />
+    <ClInclude Include="l_script.h" />
+    <ClInclude Include="l_struct.h" />
+    <ClInclude Include="l_utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="be_aas_bspq3.c" />
+    <ClCompile Include="be_aas_cluster.c" />
+    <ClCompile Include="be_aas_debug.c" />
+    <ClCompile Include="be_aas_entity.c" />
+    <ClCompile Include="be_aas_file.c" />
+    <ClCompile Include="be_aas_main.c" />
+    <ClCompile Include="be_aas_move.c" />
+    <ClCompile Include="be_aas_optimize.c" />
+    <ClCompile Include="be_aas_reach.c" />
+    <ClCompile Include="be_aas_route.c" />
+    <ClCompile Include="be_aas_routealt.c" />
+    <ClCompile Include="be_aas_routetable.c" />
+    <ClCompile Include="be_aas_sample.c" />
+    <ClCompile Include="be_ai_char.c" />
+    <ClCompile Include="be_ai_chat.c" />
+    <ClCompile Include="be_ai_gen.c" />
+    <ClCompile Include="be_ai_goal.c" />
+    <ClCompile Include="be_ai_move.c" />
+    <ClCompile Include="be_ai_weap.c" />
+    <ClCompile Include="be_ai_weight.c" />
+    <ClCompile Include="be_ea.c" />
+    <ClCompile Include="be_interface.c" />
+    <ClCompile Include="l_crc.c" />
+    <ClCompile Include="l_libvar.c" />
+    <ClCompile Include="l_log.c" />
+    <ClCompile Include="l_memory.c" />
+    <ClCompile Include="l_precomp.c" />
+    <ClCompile Include="l_script.c" />
+    <ClCompile Include="l_struct.c" />
+  </ItemGroup>
+</Project>

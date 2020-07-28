@@ -1,0 +1,1457 @@
+#include "ui_mp/menudef.h"
+
+{
+\\ SETUP MENU \\
+
+menuDef {
+	name "ingame_controls"
+	visible 0
+	fullscreen 0
+	outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	rect 100 125 443 340
+	focusColor 1 .75 0 1
+	style 1
+	border 1
+	onClose { setCvar cg_draw2D "1"; uiScript saveControls }
+	onopen { hide grpControls ; show look ; setCvar cg_draw2D "0"; uiScript loadControls }
+	onEsc { setCvar cg_draw2D "1" }
+
+
+	itemDef {
+		name window
+		group ingamebox
+		rect 0 2 443 300
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 0 .25
+		visible 1
+		decoration
+	}
+
+	itemDef {
+		name keyBindStatus
+		rect 0 400 320 15
+		ownerdraw UI_KEYBINDSTATUS
+		text " "
+		forecolor 1 .75 0 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		textalignx 187
+		textalign 1
+		textaligny 10
+		visible 0
+		decoration
+	}
+
+	itemDef {
+		name window
+		group ingamebox2
+		rect 2 4 439 20
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .1 .1 .1 .2
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		decoration
+	}
+
+
+
+////////////////////////
+//
+//       LOOK
+//
+////////////////////////
+	itemDef {
+		name ctr_look
+		text "Vista"
+		tooltip "Controlli della visuale"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		background "ui_mp/assets/button_back.tga"
+		rect 15 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		visible 1
+		action { hide grpControls ; show look }
+		mouseEnter { setitemcolor ctr_look backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_look backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Guarda su :"
+		cvar "+lookup"
+		rect 94 30 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Guarda giù :"
+		cvar "+lookdown"
+		rect 94 45 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Vista mouse libera :"
+		cvar "+mlook"
+		rect 94 60 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Centerview :"
+		cvar "centerview"
+		rect 94 75 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Binocolo :"
+		cvar "+zoom"
+		rect 94 90 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Zoom In :"
+		cvar "zoomin"
+		rect 94 105 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Zoom Out :"
+		cvar "zoomout"
+		rect 94 120 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Vista libera :"
+		cvar "cl_freelook"
+		rect 94 135 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_MULTI
+		text "Default Zoom :"
+		cvar "cg_zoomdefaultsniper"
+		cvarfloatlist	{ "All the way Out" 20 "Near" 16 "Far" 8 "All the Way In" 4 }
+		rect 94 150 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name look
+		group grpControls
+		type ITEM_TYPE_MULTI
+		text "Livelli di zoom :"
+		cvar "cg_zoomstepsniper"
+		cvarfloatlist { "4 Levels of Zoom" 4 "8 levels of zoom" 2 }
+		rect 94 165 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+
+
+////////////////////////
+//
+//       MOVE
+//
+////////////////////////
+	itemDef {
+		name ctr_move
+		text "Movimento"
+		tooltip "Controlli del movimento"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		background "ui_mp/assets/button_back.tga"
+		rect 85 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpControls ; show move }
+		mouseEnter { setitemcolor ctr_move backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_move backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Corri sempre :"
+		cvar "cl_run"
+		rect 94 30 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Corri / Cammina :"
+		cvar "+speed"
+		rect 94 45 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Scatto :"
+		cvar "+sprint"
+		rect 94 60 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Avanti :"
+		cvar "+forward"
+		rect 94 75 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Indietro :"
+		cvar "+back"
+		rect 94 90 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Sinistra :"
+		cvar "+moveleft"
+		rect 94 105 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Destra :"
+		cvar "+moveright"
+		rect 94 120 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Sporgi a sinistra :"
+		cvar "+leanleft"
+		rect 94 135 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Sporgi a destra :"
+		cvar "+leanright"
+		rect 94 150 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Salto :"
+		cvar "+moveup"
+		rect 94 165 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Abbassato :"
+		cvar "+movedown"
+		rect 94 180 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Gira a sinistra :"
+		cvar "+left"
+		rect 94 195 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Gira a destra :"
+		cvar "+right"
+		rect 94 210 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus } 
+	}
+
+	itemDef {
+		name move
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Spostamento laterale (strafe) :"
+		cvar "+strafe"
+		rect 94 225 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+
+
+////////////////////////
+//
+//       SHOOT
+//
+////////////////////////
+	itemDef {
+		name ctr_shoot
+		text "Sparare"
+		tooltip "Selezione delle armi e controlli di fuoco"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		rect 155 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpControls ; show shoot }
+		mouseEnter { setitemcolor ctr_shoot backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_shoot backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Spara :"
+		cvar "+attack"
+		rect 22 30 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Ricarica arma :"
+		cvar "+reload"
+		rect 22 45 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Ricarica automatico :"
+		tooltip "Ricarica automaticamente l'arma se il caricatore è vuoto"
+		cvar "cg_autoReload"
+		rect 22 60 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Autoswitch (ammo terminate) :"
+		tooltip "Cambia automaticamente ad un altra arma se quella corrente è completamente scarica"
+		cvar "cg_noAmmoAutoSwitch"
+		rect 22 75 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Prossima arma/Zoom In :"
+		cvar "weapnext"
+		rect 22 90 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Arma precedente/Zoom Out :"
+		cvar "weapprev"
+		rect 22 105 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Fuoco alt. (Mirino telescopico) :"
+		cvar "weapalt"
+		rect 22 120 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Luci icona dell'arma :"
+		tooltip "Colora il bordo dell'icona dell'arma in funzione dello stato di ricarica dell'arma"
+		cvar "cg_drawWeaponIconFlash"
+		rect 22 135 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Coltello :"
+		cvar "weaponbank 1"
+		rect 22 150 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Pistola :"
+		cvar "weaponbank 2"
+		rect 22 165 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Mitra :"
+		cvar "weaponbank 3"
+		rect 22 180 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Granata :"
+		cvar "weaponbank 4"
+		rect 22 195 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Arma Speciale 1 :"
+		cvar "weaponbank 5"
+		rect 22 210 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Arma Speciale 2 :"
+		cvar "weaponbank 6"
+		rect 22 225 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name shoot
+		group grpControls
+		type ITEM_TYPE_MULTI
+		text "Usa tasti del ciclo armi per lo zoom:"
+		cvar "cg_useWeapsForZoom"
+		cvarFloatList { "Off" 0 "On (normale)" 1 "On (invertito)" 2 }
+		rect 22 240 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+
+
+////////////////////////
+//
+//       MISC
+//
+////////////////////////
+	itemDef {
+		name ctr_miscellaneous
+		text "Misc"
+		tooltip "Altri comandi di gioco"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		rect 225 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpControls ; show misc }
+		mouseEnter { setitemcolor ctr_miscellaneous backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_miscellaneous backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Mostra punteggi :"
+		cvar "+scores"
+		rect 52 30 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Attiva :"
+		cvar "+activate"
+		rect 52 45 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_SLIDER
+		text "Sensibilità del mouse :"
+		cvarfloat "sensitivity" 5 1 30
+		rect 52 60 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Inverti Mouse :"
+		cvar "ui_mousePitch"
+		rect 52 75 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		action { uiScript update ui_mousePitch }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_YESNO
+		text "Mouse fluido :"
+		cvar "m_filter"
+		rect 52 90 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+// NERVE - SMF
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Apri il Limbo Menu :"
+		cvar "OpenLimboMenu"
+		rect 52 105 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Getta l'arma :"
+		cvar "+dropweapon"
+		rect 52 120 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Vota Si :"
+		cvar "vote yes"
+		rect 52 135 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Vota No :"
+		cvar "vote no"
+		rect 52 150 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+// -NERVE - SMF
+
+// OSP
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "AutoScreenshot :"
+		cvar "autoScreenshot"
+		rect 52 165 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "AutoRecord :"
+		cvar "autoRecord"
+		rect 52 180 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Statistiche delle armi :"
+		cvar "+wstats"
+		rect 52 195 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Classifica delle armi :"
+		cvar "+wtopshots"
+		rect 52 210 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Stampa e salva statistiche:"
+		cvar "statsdump"
+		rect 52 225 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name misc
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Mostra l'ora locale corrente :"
+		cvar "currentTime"
+		rect 52 240 340 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 170
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+// -OSP
+
+
+////////////////////////
+//
+//       CHAT
+//
+////////////////////////
+	itemDef {
+		name ctr_chat
+		text "Chat"
+		tooltip "Opzioni di chat"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		background "ui_mp/assets/button_back.tga"
+		rect 295 3.5 47 20
+		textalign 1
+		textalignx 23
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpControls ; show chat }
+		mouseEnter { setitemcolor ctr_chat backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_chat backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name chat
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Chat :"
+		cvar "messagemode"
+		rect 94 30 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name chat
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Chat di squadra :"
+		cvar "messagemode2"
+		rect 94 45 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name chat
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Chat vocale veloce :"
+		cvar "mp_QuickMessage"
+		rect 94 60 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name chat
+		group grpControls
+		type ITEM_TYPE_MULTI
+		text "Modalità della chat vocale veloce :"
+		cvar "cg_quickMessageAlt"
+		cvarFloatList { "Lettere" 0 "Numeri" 1 }
+		rect 94 75 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name chat
+		group grpControls
+		type ITEM_TYPE_MULTI
+		text "Beep della chat:"
+		tooltip "Produce un beep quando viene visualizzato un messaggio della chat"
+		cvar "cg_chatBeep"
+		cvarFloatList { "Nessuno" 0 "Tutti i messaggi delle chat" 1 "Solo i messaggi delle chat di squadra" 2 }
+		rect 94 90 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+
+
+////////////////////////
+//
+//      MULTIVIEW
+//
+////////////////////////
+	itemDef {
+		name ctr_mv
+		text "Multivisuale"
+		tooltip "Gestione della visuale di più giocatori (spettatore in prima persona)"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		group grpControlbutton
+		rect 375 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpControls ; show mv }
+		mouseEnter { setitemcolor ctr_mv backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_mv backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name mv
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Aggiungi Visuale degli Alleati :"
+		tooltip "Visualizza tutti i giocatori della squadra degli Alleati"
+		cvar "mvallies"
+		rect 20 30 404 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 202
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name mv
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Aggiungi Visuale dell'Asse :"
+		tooltip "Visualizza tutti i giocatori della squadre dell'Asse"
+		cvar "mvaxis"
+		rect 20 45 404 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 202
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name mv
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Aggiungi la visuale di tutti i giocatori :"
+		tooltip "Visualizza tutti i giocatori della partita"
+		cvar "mvall"
+		rect 20 60 404 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 202
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name mv
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Aggiungi tutte le visuali e registra :"
+		tooltip "Visualizza tutti i giocatori della partita e registra automaticamente"
+		cvar "mvd"
+		rect 20 75 404 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 202
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name mv
+		group grpControls
+		type ITEM_TYPE_BIND
+		text "Rimuovi tutte le visuali :"
+		tooltip "Rimuovi tutte le visuali correnti"
+		cvar "mvnone"
+		rect 20 90 404 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 202
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseenter { show keyBindStatus }
+		mouseexit { hide keyBindStatus }
+	}
+
+	itemDef {
+		name mv
+		group grpControls
+		type ITEM_TYPE_SLIDER
+		text "Sensibilità del puntatore :"
+		tooltip "Imposta la sensibilità del puntatore del mouse nella multivisuale"
+		cvarfloat "mv_sensitivity" 20 10 40
+		rect 20 105 404 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 202
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+}	// menuDef
+
+}	// context

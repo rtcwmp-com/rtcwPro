@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "q_shared.h"
 #include "bg_public.h"
+#include "../../MAIN//ui_mp/menudef.h"
 
 // JPW NERVE -- added because I need to check single/multiplayer instances and branch accordingly
 #ifdef CGAMEDLL
@@ -4190,6 +4191,28 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
 	trap_Cvar_Set(cvarName, "White");
 }
 
+const voteType_t voteToggles[] =
+{
+	{ "vote_allow_comp",         CV_SVF_COMP },
+	{ "vote_allow_gametype",     CV_SVF_GAMETYPE },
+	{ "vote_allow_kick",         CV_SVF_KICK },
+	{ "vote_allow_map",              CV_SVF_MAP },
+	{ "vote_allow_matchreset",       CV_SVF_MATCHRESET },
+	{ "vote_allow_mutespecs",        CV_SVF_MUTESPECS },
+	{ "vote_allow_nextmap",          CV_SVF_NEXTMAP },
+	{ "vote_allow_pub",              CV_SVF_PUB },
+	{ "vote_allow_referee",          CV_SVF_REFEREE },
+	{ "vote_allow_shuffleteamsxp",   CV_SVF_SHUFFLETEAMS },
+	{ "vote_allow_swapteams",        CV_SVF_SWAPTEAMS },
+	{ "vote_allow_friendlyfire", CV_SVF_FRIENDLYFIRE },
+	{ "vote_allow_timelimit",        CV_SVF_TIMELIMIT },
+	{ "vote_allow_warmupdamage", CV_SVF_WARMUPDAMAGE },
+	{ "vote_allow_antilag",          CV_SVF_ANTILAG },
+	{ "vote_allow_balancedteams",    CV_SVF_BALANCEDTEAMS },
+	{ "vote_allow_muting",           CV_SVF_MUTING }
+};
+
+int numVotesAvailable = sizeof(voteToggles) / sizeof(voteType_t);
 // L0 - Reinforcements offset
 const unsigned int aReinfSeeds[MAX_REINFSEEDS] = { 11, 3, 13, 7, 2, 5, 1, 17 };
 // L0 - Stats (It matches extWeaponStats_t in bg_public.h)
@@ -4222,7 +4245,6 @@ const weap_ws_t aWeaponInfo[WS_MAX] = {
 	{ qtrue,    "MG42",  "MG-42 Gun"  },  // 16
 	{ qtrue,    "RIFL",  "Mauser" },	  // 17
 	{ qtrue,    "VENM",  "Venom" },		  // 18
-	{ qfalse,   "POIS",  "Poison" },	  // 19
 };
 // strip colors and control codes, copying up to dwMaxLength-1 "good" chars and nul-terminating
 // returns the length of the cleaned string

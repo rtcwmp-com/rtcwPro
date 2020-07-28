@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
  * desc:		definitions shared by both the server game and client game modules
  *
 */
+#include "../../MAIN/ui_mp/menudef.h" // For vote options
 
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
@@ -175,6 +176,8 @@ typedef enum {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
+#define CS_SERVERTOGGLES        42      // Shows current enable/disabled settings (for voting UI)
+
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
 #define CS_PLAYERS              ( CS_SOUNDS + MAX_SOUNDS )
@@ -1125,7 +1128,6 @@ typedef enum extWeaponStats_s
 	WS_MG42,                // 16
 	WS_RIFLE,				// 17 - equivalent american weapon to german mauser
 	WS_VENOM,				// 18 
-	WS_POISON,				// 19							
 	WS_MAX
 } extWeaponStats_t;
 
@@ -1774,6 +1776,16 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
 #define CGF_AUTOACTIVATE    0x04
 #define CGF_PREDICTITEMS    0x08
 //
+// Voting
+typedef struct {
+	const char  *pszCvar;
+	int flag;
+} voteType_t;
+
+extern const voteType_t voteToggles[];
+extern int numVotesAvailable;
+
+#define VOTING_DISABLED     ( ( 1 << numVotesAvailable ) - 1 )
 extWeaponStats_t BG_WeapStatForWeapon( weapon_t iWeaponID );
 // ET Port 
 int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF );

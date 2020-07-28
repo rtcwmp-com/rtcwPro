@@ -4,7 +4,7 @@
 Return to Castle Wolfenstein multiplayer GPL Source Code
 Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ITEM_TEXTSTYLE_OUTLINED         4   // drop shadow ( need a color for this )
 #define ITEM_TEXTSTYLE_OUTLINESHADOWED  5   // drop shadow ( need a color for this )
 #define ITEM_TEXTSTYLE_SHADOWEDMORE     6   // drop shadow ( need a color for this )
+#define ITEM_TEXTSTYLE_UNDERLINED 		7	// line under the text
 
 #define WINDOW_BORDER_NONE          0       // no border
 #define WINDOW_BORDER_FULL          1       // full border based on border color ( single pixel )
@@ -68,6 +69,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WINDOW_STYLE_SHADER         3       // gradient bar based on background color
 #define WINDOW_STYLE_TEAMCOLOR      4       // team color
 #define WINDOW_STYLE_CINEMATIC      5       // cinematic
+#define WINDOW_STYLE_TAG			6		// Pop-up HTML-like help tags
 
 #define MENU_TRUE           1       // uh.. true
 #define MENU_FALSE          0       // and false
@@ -152,6 +154,11 @@ If you have questions concerning this license or the applicable additional terms
 #define UI_SHOW_NETANYTEAMGAME              0x00000800
 #define UI_SHOW_NOTFAVORITESERVERS          0x00001000
 
+
+#define UI_SHOW_PLAYERMUTED     0x01000000
+#define UI_SHOW_PLAYERNOTMUTED  0x02000000
+#define UI_SHOW_PLAYERNOREFEREE 0x04000000
+#define UI_SHOW_PLAYERREFEREE   0x08000000
 
 
 // owner draw types
@@ -393,4 +400,44 @@ If you have questions concerning this license or the applicable additional terms
 #define UI_FONT_BIG             2
 #define UI_FONT_SMALL           3
 #define UI_FONT_HANDWRITING     4
+
+// OSP - callvote server setting toggles
+// CS_SERVERTOGGLES
+#define CV_SVS_MUTESPECS        1
+#define CV_SVS_FRIENDLYFIRE     2
+#define CV_SVS_WARMUPDMG		4
+#define CV_SVS_CENTERVIEW		8
+// 2 bits for warmup damage setting
+//#define CV_SVS_WARMUPDMG        12
+#define CV_SVS_PAUSE            16
+#define CV_SVS_LOCKTEAMS        32
+#define CV_SVS_LOCKSPECS        64
+#define CV_SVS_ANTILAG          128
+#define CV_SVS_BALANCEDTEAMS    256
+#define CV_SVS_NEXTMAP          512
+
+// "cg_ui_voteFlags"
+#define CV_SVF_COMP             1
+#define CV_SVF_GAMETYPE         2
+#define CV_SVF_KICK             4
+#define CV_SVF_MAP              8
+#define CV_SVF_MATCHRESET       16
+#define CV_SVF_MUTESPECS        32
+#define CV_SVF_NEXTMAP          64
+#define CV_SVF_PUB              128
+#define CV_SVF_REFEREE          256
+#define CV_SVF_SHUFFLETEAMS     512
+#define CV_SVF_SWAPTEAMS        1024
+#define CV_SVF_FRIENDLYFIRE     2048
+#define CV_SVF_TIMELIMIT        4096
+#define CV_SVF_WARMUPDAMAGE     8192
+#define CV_SVF_ANTILAG          16384
+#define CV_SVF_BALANCEDTEAMS    32768
+#define CV_SVF_MUTING           65536
+
+// referee level
+#define RL_NONE                 0
+#define RL_REFEREE              1
+#define RL_RCON                 2
+// -OSP
 // -NERVE - SMF
