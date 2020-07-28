@@ -1584,9 +1584,8 @@ void Fire_Lead( gentity_t *ent, gentity_t *activator, float spread, int damage )
 	VectorMA( end, r, right, end );
 	VectorMA( end, u, up, end );
 
-	// L0 - Antilag (Restored it back in to cope with mg42 bug)
-
-	trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
+	// RtcwPro added historical trace (unlagged)
+	G_HistoricalTrace( ent, &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		AICast_ProcessBullet( activator, muzzle, tr.endpos );
 	}
