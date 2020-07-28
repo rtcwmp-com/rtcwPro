@@ -1553,6 +1553,8 @@ extern vmCvar_t		g_disableInv;
 extern vmCvar_t		g_axisSpawnProtectionTime;
 extern vmCvar_t		g_alliedSpawnProtectionTime;
 
+//S4NDM4NN - fix errors when sv_fps is adjusted
+extern vmCvar_t sv_fps;
 // Weapon/class stuff
 extern vmCvar_t g_lifeStats;
 extern vmCvar_t g_maxTeamPF;
