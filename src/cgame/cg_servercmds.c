@@ -1923,6 +1923,11 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "cpm")) {
+		//CG_AddPMItem(PM_MESSAGE, CG_LocalizeServerCommand(CG_Argv(1)), cgs.media.voiceChatShader); // ET had a popup message
+		CG_CenterPrint(CG_LocalizeServerCommand(CG_Argv(1)), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH);  //----(SA)	modified
+		return;
+	}
 	if ( !strcmp( cmd, "cp" ) ) {
 		// NERVE - SMF
 		int args = trap_Argc();
