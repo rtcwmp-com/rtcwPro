@@ -124,6 +124,36 @@ typedef enum {
 #define MAX_OID_TRIGGERS    16
 // dhm
 
+// RTCWPro - cvar limiting
+#define MAX_SVCVARS 128
+
+#define SVC_EQUAL           0
+#define SVC_GREATER         1
+#define SVC_GREATEREQUAL    2
+#define SVC_LOWER           3
+#define SVC_LOWEREQUAL      4
+#define SVC_INSIDE          5
+#define SVC_OUTSIDE         6
+#define SVC_INCLUDE         7
+#define SVC_EXCLUDE         8
+#define SVC_WITHBITS        9
+#define SVC_WITHOUTBITS     10
+
+typedef struct svCvar_s
+{
+	char cvarName[MAX_CVAR_VALUE_STRING];
+	int mode;
+	char Val1[MAX_CVAR_VALUE_STRING];
+	char Val2[MAX_CVAR_VALUE_STRING];
+} svCvar_t;
+
+typedef struct forceCvar_s
+{
+	char cvarName[MAX_CVAR_VALUE_STRING];
+	char cvarValue[MAX_CVAR_VALUE_STRING];
+} forceCvar_t;
+// RTCWPro
+
 //
 // config strings are a general means of communicating variable length strings
 // from the server to all connected clients.
@@ -175,6 +205,8 @@ typedef enum {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
+#define CS_SVCVAR               42		// RTCWPro - Cvar limiting
+
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
 #define CS_PLAYERS              ( CS_SOUNDS + MAX_SOUNDS )

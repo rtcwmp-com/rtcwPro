@@ -933,9 +933,14 @@ typedef struct {
 	qboolean readyAll;
 	qboolean readyPrint;
 	qboolean readyTeam[TEAM_NUM_TEAMS];
-		// Forced/Instant tapout timer to cope with flood..
+	// Forced/Instant tapout timer to cope with flood..
 	int spawnFloodTimer;
+	// RTCWPro - sv_cvars
+	svCvar_t svCvars[MAX_SVCVARS];
+	int svCvarsCount;
+	// RTCWPro
 } level_locals_t;
+
 // OSPx - Team extras
 typedef struct {
 	qboolean spec_lock;

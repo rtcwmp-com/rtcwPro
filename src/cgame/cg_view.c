@@ -1793,8 +1793,166 @@ void CG_DrawNotebook( void ) {
 
 //=========================================================================
 
-extern void CG_SetupDlightstyles( void );
+/*
+=================
+CG_ProcessCvars
+=================
+*/
+void CG_ProcessCvars()
+{
+	char currentVal[256];
+	float cvalF, val1F, val2F;
+	int i, cvalI, val1I, val2I;
+	qboolean cvalIsF, val1IsF, val2IsF;
 
+	for (i = 0; i < cg.svCvarCount; ++i)
+	{
+		trap_Cvar_VariableStringBuffer(cg.svCvars[i].cvarName, currentVal, sizeof(currentVal));
+
+		cvalF = (float)atof(currentVal);
+		val1F = (float)atof(cg.svCvars[i].Val1);
+		val2F = (float)atof(cg.svCvars[i].Val2);
+		cvalI = atoi(currentVal);
+		val1I = atoi(cg.svCvars[i].Val1);
+		val2I = atoi(cg.svCvars[i].Val2);
+		cvalIsF = (strstr(currentVal, ".")) ? qtrue : qfalse;
+		val1IsF = (strstr(cg.svCvars[i].Val1, ".")) ? qtrue : qfalse;
+		val2IsF = (strstr(cg.svCvars[i].Val2, ".")) ? qtrue : qfalse;
+
+		switch (cg.svCvars[i].mode)
+		{
+		case SVC_EQUAL:
+			if (Q_stricmp(cg.svCvars[i].Val1, currentVal))
+			{
+				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val1);
+			}
+			break;
+		case SVC_GREATER:
+			if (cvalF <= val1F)
+			{
+				if (cvalIsF || val1IsF)
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F + 0.0001f));
+				}
+				else
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I + 1));
+				}
+			}
+			break;
+		case SVC_GREATEREQUAL:
+			if (cvalF < val1F)
+			{
+				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val1);
+			}
+			break;
+		case SVC_LOWER:
+			if (cvalF >= val1F)
+			{
+				if (cvalIsF || val1IsF)
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F - 0.0001f));
+				}
+				else
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I - 1));
+				}
+			}
+			break;
+		case SVC_LOWEREQUAL:
+			if (cvalF > val1F)
+			{
+				if (cvalIsF || val1IsF)
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F));
+				}
+				else
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I));
+				}
+			}
+			break;
+		case SVC_INSIDE:
+			if (val1F != 0.f || val1I)
+			{
+				if (cvalF < val1F)
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val1);
+				}
+			}
+			if (val2F != 0.f || val2I)
+			{
+				if (cvalF > val2F)
+				{
+					trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val2);
+				}
+			}
+			break;
+		case SVC_OUTSIDE:
+			if (val1F != 0.f || val1I)
+			{
+				if (cvalF >= val1F)
+				{
+					if (val2F == 0.f || cvalF < val2F)
+					{
+						if (cvalIsF || val1IsF)
+						{
+							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F - 0.0001f));
+						}
+						else
+						{
+							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I - 1));
+						}
+					}
+				}
+			}
+			if (val2F != 0.f || val2I)
+			{
+				if (cvalF <= val2F)
+				{
+					if (cvalF > val1F)
+					{
+						if (cvalIsF || val2IsF)
+						{
+							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val2F + 0.0001f));
+						}
+						else
+						{
+							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val2I + 1));
+						}
+					}
+				}
+			}
+			break;
+		case SVC_INCLUDE:
+			if (!strstr(currentVal, cg.svCvars[i].Val1))
+			{
+				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val2);
+			}
+			break;
+		case SVC_EXCLUDE:
+			if (strstr(currentVal, cg.svCvars[i].Val1))
+			{
+				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val2);
+			}
+			break;
+		case SVC_WITHBITS:
+			if (!(cvalI & val1I))
+			{
+				trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", cvalI + val1I));
+			}
+			break;
+		case SVC_WITHOUTBITS:
+			if (cvalI & val1I)
+			{
+				trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", cvalI - val1I));
+			}
+			break;
+		}
+	}
+}
+
+extern void CG_SetupDlightstyles(void);
 
 //#define DEBUGTIME_ENABLED
 #ifdef DEBUGTIME_ENABLED
@@ -1824,6 +1982,9 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// update cvars
 	CG_UpdateCvars();
+
+	// RTCWPro - cvar limiting
+	CG_ProcessCvars();
 
 #ifdef DEBUGTIME_ENABLED
 	CG_Printf( "\n" );

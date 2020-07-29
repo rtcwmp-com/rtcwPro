@@ -1140,6 +1140,15 @@ typedef struct {
 	qboolean popinBlink;
 // -OSPx
 
+	// RTCWPro - cvar limiting
+	svCvar_t svCvars[MAX_SVCVARS];
+	int svCvarCount;
+
+	// backuping, forceCvar_t is good format, it holds name and value only
+	forceCvar_t cvarBackups[MAX_SVCVARS];
+	int cvarBackupsCount;
+	// RTCWPro
+
 	pmoveExt_t pmext;
 
 } cg_t;
@@ -2491,6 +2500,7 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
+void CG_UpdateSvCvars(void); // RTCWPro - cvar limiting
 
 //
 // cg_playerstate.c

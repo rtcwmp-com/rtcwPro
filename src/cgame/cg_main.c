@@ -687,7 +687,7 @@ void CG_UpdateCvars( void ) {
 		}
 	}
 
-	// RTCWPro - Send any relevent updates
+	// RTCWPro - send any relevent updates
 	if (fSetFlags) {
 		CG_setClientFlags();
 	}
@@ -2605,6 +2605,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// L0 - OSP stats
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
+
+	// RTCWPro - update sv cvars from the config string
+	CG_UpdateSvCvars();
 }
 
 /*
