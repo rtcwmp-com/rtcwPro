@@ -1,0 +1,906 @@
+#include "ui_mp/menudef.h"
+
+{
+\\ SETUP MENU \\
+
+menuDef
+{
+	name "options_menu"
+	visible 0
+	fullscreen 0
+	rect 100 125 443 325
+	focusColor 1 .75 0 1
+	style 1
+	border 1
+	onOpen { setitemcolor fadebox backcolor 0 0 0 1 ; fadeout fadebox }
+	onEsc { close options_menu ; close setup_menu ; open main }
+
+
+	
+	itemDef {
+		name window
+		group grpSystembutton
+		rect 0 2 443 285
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 0 .25
+		visible 1
+		decoration
+	}
+
+
+//////////////////////////
+//     PERFORMANCE
+//////////////////////////
+	itemDef {
+		name ctr_performance
+		group grpSystembutton
+		text "Performances"
+		tooltip "Modifier les  options de performances"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 100 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		style WINDOW_STYLE_FILLED
+		action { play "sound/misc/kcaction.wav"; hide grpOptions ; show performance }
+		mouseEnter { show message_graphics ; setitemcolor ctr_performance backcolor .3 .3 .3 0 }
+		mouseExit { hide message_graphics ; setitemcolor ctr_performance backcolor .1 .1 .1 0 }
+	}
+
+	itemDef {
+		name window
+		text "OPTIONS DE JEU"
+		type 1
+		style 0
+		textstyle 6
+		rect 222.5 -12 64 14
+		textalign ITEM_ALIGN_CENTER
+		textfont UI_FONT_NORMAL
+		textscale .255
+		textfont UI_FONT_NORMAL
+		textalignx 2
+		textaligny 12
+		forecolor .9 .9 .9 .9
+		visible 1
+		decoration
+	}
+
+	itemDef {
+		name window2
+		group grpControlbutton
+		rect 2 4 439 20
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .1 .1 .1 .2
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		decoration
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Duree des marques sur les murs :"
+		tooltip "Duree d'affichage des impactes de balles sur les murs"
+		cvar "cg_markTime"
+		cvarFloatList { "Longue" 30000 "Normale" 20000 "Courte" 10000 "Nulle" 0 }
+		rect 99 30 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Douilles:"
+		cvar "cg_brassTime"
+		cvarFloatList { "Elevee" 15000 "Normale" 2500 "Nulle" 0 }
+		rect 99 45 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Lumieres dynamiques:"
+		cvar "r_dynamiclight"
+		rect 99 60 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Ciel de basse qualite:"
+		cvar "r_fastsky"
+		rect 99 75 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Afficher le ciel a travers les ouvertures (fenetres, fentes):"
+		cvar "cg_skybox"
+		rect 99 90 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Synchronyser toutes les images:"
+		cvar "r_finish"
+		rect 99 105 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		type ITEM_TYPE_MULTI
+		group grpOptions
+		text "Distance Corona :"
+		cvar "cg_coronafardist"
+		cvarFloatList { "Nulle" 0 "Proche" 800 "Normale" 1536 "Eloignee" 4096 "Extreme" 16000 }
+		rect 99 120 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Particules:"
+		cvar "cg_wolfparticles"
+		rect 99 135 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Videos dans le jeu:"
+		cvar "r_inGameVideo"
+		rect 99 150 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Type de brouillard Nvidia:"
+		cvarTest "r_ext_NV_fog_dist"
+		cvar "r_nv_fogdist_mode"
+		cvarStrList { "NV Radial", "GL_EYE_RADIAL_NV", "NV Plane", "GL_EYE_PLANE_ABSOLUTE_NV" }
+		showcvar { "1" }
+		rect 99 165 256 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 128
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+		mouseenter { show floater_message }
+		mouseexit { hide floater_message }
+	}
+
+
+
+//////////////////////////
+//       VIEW
+//////////////////////////
+	itemDef {
+		name ctr_view
+		group grpSystembutton
+		text "Vue"
+		tooltip "Pour modifier les options d'affichages"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 240 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { play "sound/misc/kcaction.wav" ; hide grpOptions ; show view }
+		mouseEnter { setitemcolor ctr_view backcolor .3 .3 .3 0 }
+		mouseExit { setitemcolor ctr_view backcolor .1 .1 .1 0 }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Afficher l'arme :"
+		tooltip "Afficher le modele de l'arme sur l'ecran"
+		cvar "cg_drawGun"
+		rect 84 30 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Flash arme :"
+		tooltip "Afficher les effets d'etincelles lor du tir d'armes"
+		cvar "cg_muzzleFlash"
+		rect 84 45 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Longeur d'affichage des chat :"
+		tooltip "Determine la duree d'affichage des messages sur l'ecran"
+		cvar "cg_voicespritetime"
+		cvarFloatList { "Courte" 3000 "Normale" 6000 "Longue" 12000 "tres Longue" 24000 }
+		rect 84 60 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view				
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Messages d'equipiers seulement :"
+		tooltip "N'affiche que les messages de l'equipe"
+		cvar "cg_teamChatsOnly"
+		rect 84 75 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+//	itemDef {
+//		name view
+//		group grpOptions
+//		type ITEM_TYPE_MULTI
+//		text "Barre d'etat:"
+//		cvar "cg_hudfiles"
+//		cvarStrList { Normale "ui/hud.txt" petite "ui/hud2.txt" }
+//		rect 99 90 256 12
+//		textalign ITEM_ALIGN_RIGHT
+//		textalignx 128
+//		textaligny 10
+//		textfont UI_FONT_NORMAL
+//		textscale .25	 
+//		backcolor 1 1 1 .07
+//		visible 0
+//	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Conseils curseur :"
+		tooltip "Affichage d'une icone conseil en presence d'un objet a utiliser"
+		cvar "cg_cursorHints"
+		cvarFloatList { "Aucune" 0 "Size Pulse" 1 "Strobe Pulse" 2 "Alpha Pulse" 3 "Solid" 4 }
+		rect 84 90 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Afficher bousole :"
+		tooltip "Affiche la bousole (et les icones evenements)"
+		cvar "cg_drawCompass"
+		cvarFloatList { "Eteinte" 0 "Visible" 1 }
+		rect 84 105 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Information equipiers :"
+		tooltip "Affiche localisations et informations sur les equipiers"
+		cvar "cg_drawteamoverlay"
+		cvarFloatList { "Eteinte" 0 "Limitee" 1 "Etendue" 2 }
+		rect 84 120 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	/////////////////////////
+	// OSP additions
+	//
+	itemDef {
+		name view
+		type ITEM_TYPE_MULTI
+		group grpOptions
+		text "Timer de renforts :"
+		tooltip "Affiche le temps de \"renfort\" de l'equipe"
+		cvar "cg_drawReinforcementTime"
+		cvarFloatList { "Non" 0 "Oui" 1 }
+		rect 84 135 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Popup de plainte :"
+		tooltip "Affiche automatiquement un vote pour se plaindre contre un team-killer"
+		cvar "cg_complaintPopUp"
+		cvarFloatList { "Non" 0 "Oui" 1 }
+		rect 84 150 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Utiliser le format JPEG pour les autoscreenshot :"
+		tooltip "Utiliser le format JPG a ma demande d'un  \"autoscreenshot\" command"
+		cvar "cg_useScreenshotJPEG"
+		rect 84 165 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Commentateur :"
+		tooltip "Jouer les sons de depart et fin de match"
+		cvar "cg_announcer"
+		rect 84 180 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Flash sang :"
+		tooltip "Intensite du 'Flash' de sang rouge lors de damage inflige par d'autre joueurs "
+		cvar "cg_bloodFlash"
+		cvarFloatList { "aucun" 0.0 "Leger" 0.25 "Moyen" 0.5 "Fort" 0.75 "Complet" 1.0 }
+		rect 84 195 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Eclaboussures de sang :"
+		tooltip "transparence des eclabousures de sang lors de damage inflige par d'autre joueurs"
+		cvar "cg_bloodDamageBlend"
+		cvarFloatList { "aucun" 0.0 "Leger" 0.25 "Moyen" 0.5 "Fort" 0.75 "Complet" 1.0 }
+		rect 84 210 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Action automatique :"
+		tooltip "Actions automatiques a effectuer au cours de la partie"
+		cvar "cg_autoAction"
+		cvarFloatList { "Aucune" 0 "Demo" 1 "Screenshot" 2 "Log de stats" 4 "Demo + SS" 3 "Demo + Stats" 5 "SS + Stats" 6 "Demo + SS + Stats" 7 }
+		rect 84 225 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Police :"
+		tooltip "Selection de la police utilisé dans le jeu"
+		cvar "ch_font"
+		cvarFloatList { "Par defaut" 0 "Style 1" 1 "Style 2" 2 }
+		rect 84 240 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Log de messages importants :"
+		tooltip "Affiche les messages importants dans la console dans le but de les logger"
+		cvar "cg_printObjectiveInfo"
+		rect 84 255 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+
+
+
+/////////////////
+// crosshair
+/////////////////
+	itemDef {
+		name ctr_xhair
+		group grpControlbutton
+		text "Viseur"
+		tooltip "Pour modifier les options concernant le viseur"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 320 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show xhair }
+		mouseEnter { setitemcolor ctr_xhair backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_xhair backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Taille du viseur :"
+		tooltip "Choix de la taille du viseur"
+		cvar "cg_crosshairsize"
+		cvarFloatList { "Minuscule" 24 "Petite" 32 "Moyenne" 48 "Grande" 64 "Geante" 96 }
+		rect 84 30 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Pulsions du viseur :"
+		tooltip "Agrandissement du viseur lors de tir ou de mouvement"
+		cvar "cg_crosshairPulse"
+		cvarFloatList { "Non" 0 "Oui" 1 }
+		rect 84 45 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Informations sante sur le viseur :"
+		tooltip "Change la couleur du viseur base sur l'etat de sante du joueur (Si active, prend le dessus sur la couleur du viseur)"
+		cvar "cg_crosshairHealth"
+		cvarFloatList { "Non" 0 "Oui" 1 }
+		rect 84 60 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Afficher noms pres du viseur :"
+		tooltip "Affiche des informations concernant les joueurs lors du passage du viseur sur ceux-ci"
+		cvar "cg_drawCrosshairNames"
+		cvarFloatList { "Non" 0 "Toujours" 1 "Plus de munitions" 2 }
+		rect 84 75 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Affichage aamassage d'objets :"
+		tooltip "Affiche l'icone d'un objet au dessus du viseur lorsqu'il est ramasse"
+		cvar "cg_drawCrosshairPickups"
+		cvarFloatList { "Aucun" 0 "Objet" 1 "Objet (Mis en evidence)" 2 }
+		rect 84 90 271 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 158
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		text "SELECTION"
+		rect 80 130 100 16
+		textalign ITEM_ALIGN_CENTER
+		textfont UI_FONT_NORMAL
+		textscale .30
+		textalignx 50
+		textaligny 14
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 0 .07
+		forecolor 1 1 0 1
+		visible 0
+		decoration
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		tooltip "Cliquez pour passer d'un viseur a l'autre"
+		rect 80 146 100 100
+		ownerdraw UI_CROSSHAIR
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 0
+		textaligny 100
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+   	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Couleur primaire :"
+		tooltip "Selectionner la couleur principale du viseur"
+		cvar "cg_crosshairColor"
+		cvarStrList { "Blanc", "white", "Jaune", "yellow", "Rouge", "red", "Vert", "green", "Bleu", "blue", "Magenta", "magenta", "Cyan", "cyan", "Orange", "orange", "Bleu claire", "0xa0c0ff", "Bleu moyen", "mdblue", "Rouge claire", "0xffc0a0", "Rouge moyen", "mdred", "Vert claire", "0xa0ffc0", "Vert moyen", "mdgreen", "Vert fonce", "dkgreen", "Cyan moyen", "mdcyan", "Jaune moyen", "mdyellow", "Orange moyen", "mdorange", "Gris claire", "ltgrey", "Gris moyen", "mdgrey", "Gris fonce", "dkgrey", "Noir", "black" }
+		rect 201 163 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_SLIDER
+		text "Primaire Alpha :"
+		tooltip "Transparence du viseur Primaire"
+		cvarfloat "cg_crosshairAlpha" 1 0 1
+		rect 201 178 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07            
+		forecolor 1 1 0.9 1
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+ 		type ITEM_TYPE_MULTI
+		text "Couleur secondaire :"
+		tooltip "Selectionner la couleur secondaire du viseur"
+		cvar "cg_crosshairColorAlt"
+		cvarStrList { "Blanc", "white", "Jaune", "yellow", "Rouge", "red", "Vert", "green", "Bleu", "blue", "Magenta", "magenta", "Cyan", "cyan", "Orange", "orange", "Bleu claire", "0xa0c0ff", "Bleu moyen", "mdblue", "Rouge claire", "0xffc0a0", "Rouge moyen", "mdred", "Vert claire", "0xa0ffc0", "Vert moyen", "mdgreen", "Vert fonce", "dkgreen", "Cyan moyen", "mdcyan", "Jaune moyen", "mdyellow", "Orange moyen", "mdorange", "Gris claire", "ltgrey", "Gris moyen", "mdgrey", "Gris fonce", "dkgrey", "Noir", "black" }
+		rect 201 216 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_SLIDER
+		text "Secondaire Alpha :"
+		tooltip "Transparence du viseur secondaire"
+		cvarfloat "cg_crosshairAlphaAlt" 1 0 1
+		rect 201 231 222 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 110
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07            
+		forecolor 1 1 0.9 1
+		visible 0
+		mouseEnter { show floater_message }
+		mouseExit { hide floater_message }
+	}
+
+}
+
+}

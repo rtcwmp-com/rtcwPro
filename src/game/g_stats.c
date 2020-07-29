@@ -418,7 +418,7 @@ char *G_createClientStats( gentity_t *refEnt ) {
 
 	// Info
 	Q_strcat( strClientInfo, sizeof( strClientInfo ),
-		va( "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+		va( "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 			refEnt->client->sess.kills,
 			refEnt->client->sess.headshots,
 			refEnt->client->sess.deaths,
@@ -433,7 +433,6 @@ char *G_createClientStats( gentity_t *refEnt ) {
 			refEnt->client->sess.med_given,
 			refEnt->client->sess.ammo_given,
 			refEnt->client->sess.revives,
-			refEnt->client->sess.poisoned,
 			refEnt->client->sess.killPeak
 			));
 
@@ -612,7 +611,6 @@ void G_deleteStats( int nClient ) {
 	cl->sess.med_given = 0;
 	cl->sess.ammo_given = 0;
 	cl->sess.gibs = 0;
-	cl->sess.poisoned = 0;
 	cl->sess.revives = 0;
 	cl->sess.acc_hits = 0;
 	cl->sess.acc_shots = 0;
@@ -662,7 +660,6 @@ void G_parseStats( char *pszStatsInfo ) {
 	GETVAL( cl->sess.med_given );
 	GETVAL( cl->sess.ammo_given );
 	GETVAL( cl->sess.gibs );
-	GETVAL( cl->sess.poisoned );
 	GETVAL( cl->sess.revives );
 	GETVAL( cl->sess.acc_shots );
 	GETVAL( cl->sess.acc_hits );
@@ -690,8 +687,7 @@ const int cQualifyingShots[WS_MAX] = {
 	3,      // Smoke (Completelly useless..or maybe for "AS cannister kill" when blocking it?)
 	50,     // MG42
 	10,     // Rifle (sniper/mauser aka scopped-unscopped)
-	100,	// Venom
-	2		// Poison
+	100		// Venom
 };
 
 // ************** TOPSHOTS/BOTTOMSHOTS
@@ -823,7 +819,7 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 	// Find the weapon
 	trap_Argv( 1, z, sizeof( z ) );
 	if ( ( iWeap = atoi( z ) ) == 0 || iWeap < WS_KNIFE || iWeap >= WS_MAX ) {
-		for ( iWeap = WS_POISON; iWeap >= WS_KNIFE; iWeap-- ) { // Poison is last!
+		for (iWeap = WS_VENOM; iWeap >= WS_KNIFE; iWeap--) {
 			if ( !Q_stricmp( z, aWeaponInfo[iWeap].pszCode ) ) {
 				break;
 			}

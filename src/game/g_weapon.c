@@ -2171,6 +2171,12 @@ void Weapon_FlamethrowerFire( gentity_t *ent ) {
 	vec3_t trace_end;
 	trace_t trace;
 
+
+//S4NDM4NN - old code is sv_fps dependant and inside of fire_flamechunk stop it here instead and only spawn 1 every 100ms instead
+	if(ent->count2 > level.time)
+		return;
+	ent->count2 = level.time + 100;
+
 	VectorCopy( ent->r.currentOrigin, start );
 	start[2] += ent->client->ps.viewheight;
 	VectorCopy( start, trace_start );

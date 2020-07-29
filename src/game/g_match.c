@@ -113,6 +113,11 @@ void G_loadMatchGame(void)
 	int  aRandomValues[MAX_REINFSEEDS];
 	char strReinfSeeds[MAX_STRING_CHARS];
 
+	if (server_autoconfig.integer > 0 && (!(z_serverflags.integer & ZSF_COMP) || level.newSession)) {
+		G_configSet(g_gametype.integer, (server_autoconfig.integer == 1));
+		trap_Cvar_Set("z_serverflags", va("%d", z_serverflags.integer | ZSF_COMP));
+	}
+	
 //	G_Printf("Setting MOTD...\n");
 //	trap_SetConfigstring(CS_CUSTMOTD + 0, server_motd0.string);
 //	trap_SetConfigstring(CS_CUSTMOTD + 1, server_motd1.string);
@@ -374,4 +379,50 @@ void G_spawnPrintf(int print_type, int print_time, gentity_t *owner)
 
 	ent->nextthink = print_time;
 	ent->think     = G_delayPrint;
+}
+// Simple alias for sure-fire print :)
+void G_printFull(char *str, gentity_t *ent) {
+	if (ent != NULL) {
+		CP(va("print \"%s\n\"", str));
+		CP(va("cp \"%s\n\"", str));
+	}
+	else {
+		AP(va("print \"%s\n\"", str));
+		AP(va("cp \"%s\n\"", str));
+	}
+}
+// Debounces cmd request as necessary.
+qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommandName) {
+	if (ent->client->pers.cmd_debounce > level.time) {
+		CP(va("print \"Wait another %.1fs to issue ^3%s\n\"", 1.0 * (float)(ent->client->pers.cmd_debounce - level.time) / 1000.0,
+			pszCommandName));
+		return(qfalse);
+	}
+
+	ent->client->pers.cmd_debounce = level.time + CMD_DEBOUNCE;
+	return(qtrue);
+}
+// Plays specified sound globally.
+void G_globalSound(char *sound) {
+	gentity_t *te = G_TempEntity(level.intermission_origin, EV_GLOBAL_SOUND);
+	te->s.eventParm = G_SoundIndex(sound);
+	te->r.svFlags |= SVF_BROADCAST;
+}
+void G_resetRoundState(void) {
+	if (g_gametype.integer == GT_WOLF_STOPWATCH) {
+		trap_Cvar_Set("g_currentRound", "0");
+	}
+	/*else if (g_gametype.integer == GT_WOLF_LMS) {
+		trap_Cvar_Set("g_currentRound", "0");
+		trap_Cvar_Set("g_lms_currentMatch", "0");
+	}*/
+}
+void G_resetModeState(void) {
+	if (g_gametype.integer == GT_WOLF_STOPWATCH) {
+		trap_Cvar_Set("g_nextTimeLimit", "0");
+	}
+	/*else if (g_gametype.integer == GT_WOLF_LMS) {
+		trap_Cvar_Set("g_axiswins", "0");
+		trap_Cvar_Set("g_alliedwins", "0");
+	}*/
 }

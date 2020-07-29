@@ -1001,7 +1001,8 @@ void G_RunFlamechunk( gentity_t *ent ) {
 	if ( level.time - ent->timestamp > 50 ) {
 		VectorCopy( ent->s.pos.trDelta, vel );
 		speed = VectorNormalize( vel );
-		speed -= ( 50.f / 1000.f ) * FLAME_FRICTION_PER_SEC;
+		//S4NDM4NN take into account sv_fps
+		speed -= ((1000.0f/sv_fps.value) / 1000.0f) * FLAME_FRICTION_PER_SEC;
 
 		if ( speed < FLAME_MIN_SPEED ) {
 			speed = FLAME_MIN_SPEED;
@@ -1013,7 +1014,7 @@ void G_RunFlamechunk( gentity_t *ent ) {
 	}
 
 	// Move the chunk
-	VectorScale( ent->s.pos.trDelta, 50.f / 1000.f, add );
+	VectorScale( ent->s.pos.trDelta, (1000.0f/sv_fps.value) / 1000.0f, add );
 	VectorAdd( ent->r.currentOrigin, add, neworg );
 
 	trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, neworg, ent->r.ownerNum, MASK_SHOT | MASK_WATER ); // JPW NERVE
@@ -1081,13 +1082,15 @@ fire_flamechunk
 gentity_t *fire_flamechunk( gentity_t *self, vec3_t start, vec3_t dir ) {
 	gentity_t   *bolt;
 
-	// Only spawn every other frame
-	if ( self->count2 ) {
-		self->count2--;
-		return NULL;
-	}
 
-	self->count2 = 1;
+//S4NDM4NN - moving delay to where fire_flamechunk is called and making it time based...
+// Only spawn every other frame
+//	if ( self->count2 ) {
+//		self->count2--;
+//		return NULL;
+//	}
+//	self->count2 = 1;
+
 	VectorNormalize( dir );
 
 	bolt = G_Spawn();
