@@ -2603,8 +2603,7 @@ void ClientCommand( int clientNum ) {
 			return;
 		}
 	}
-		return;
-	}
+
 	// NERVE - SMF
 	if ( Q_stricmp( cmd, "say_limbo" ) == 0 ) {
 		Cmd_Say_f( ent, SAY_LIMBO, qfalse );
