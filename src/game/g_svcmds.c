@@ -912,6 +912,176 @@ void Svcmd_Pause_f(qboolean pause) {
 
 /*
 =================
+G_UpdateSvCvars
+=================
+*/
+void G_UpdateSvCvars(void)
+{
+	char cs[MAX_INFO_STRING];
+	int  i;
+
+	cs[0] = '\0';
+
+	for (i = 0; i < level.svCvarsCount; i++)
+	{
+		if (level.svCvars[i].Val2[0] == 0) // don't send a space char when not set
+		{
+			Info_SetValueForKey(cs, va("V%i", i),
+				va("%i %s %s", level.svCvars[i].mode, level.svCvars[i].cvarName, level.svCvars[i].Val1));
+		}
+		else
+		{
+			Info_SetValueForKey(cs, va("V%i", i),
+				va("%i %s %s %s", level.svCvars[i].mode, level.svCvars[i].cvarName, level.svCvars[i].Val1, level.svCvars[i].Val2));
+		}
+	}
+
+	Info_SetValueForKey(cs, "N", va("%i", level.svCvarsCount));
+
+	// FIXME: print a warning when this configstring has nearly reached MAX_INFO_STRING size and don't set it if greater
+	trap_SetConfigstring(CS_SVCVAR, cs);
+}
+
+/*
+=================
+CC_cvarempty
+=================
+*/
+void CC_cvarempty(void)
+{
+	memset(level.svCvars, 0, sizeof(level.svCvars));
+	level.svCvarsCount = 0;
+	G_UpdateSvCvars();
+}
+
+/*
+=================
+CC_svcvar
+
+brief Forces client cvar to a specific value
+=================
+*/
+void CC_svcvar(void)
+{
+	char cvarName[MAX_CVAR_VALUE_STRING];
+	char mode[16];
+	char cvarValue1[MAX_CVAR_VALUE_STRING];
+	char cvarValue2[MAX_CVAR_VALUE_STRING];
+	int  i;
+	int  index = level.svCvarsCount;
+	char* p;
+
+	if (trap_Argc() <= 3)
+	{
+		G_Printf("usage: sv_cvar <cvar name> <mode> <value1> <value2>\nexamples: sv_cvar cg_hitsounds EQ 1\n          sv_cvar cl_maxpackets IN 60 125\n");
+		return;
+	}
+	trap_Argv(1, cvarName, sizeof(cvarName));
+	trap_Argv(2, mode, sizeof(mode));
+	trap_Argv(3, cvarValue1, sizeof(cvarValue1));
+
+	for (p = cvarName; *p != '\0'; ++p)
+	{
+		*p = tolower(*p);
+	}
+
+	if (trap_Argc() == 5)
+	{
+		trap_Argv(4, cvarValue2, sizeof(cvarValue2));
+	}
+	else
+	{
+		cvarValue2[0] = '\0';
+	}
+
+	// is this cvar already in the array?.. (maybe they have a double entry)
+	for (i = 0; i < level.svCvarsCount; i++)
+	{
+		if (!Q_stricmp(cvarName, level.svCvars[i].cvarName))
+		{
+			index = i;
+		}
+	}
+
+	if (index >= MAX_SVCVARS)
+	{
+		G_Printf("sv_cvar: MAX_SVCVARS hit\n");
+		return;
+	}
+
+	if (!Q_stricmp(mode, "EQ") || !Q_stricmp(mode, "EQUAL"))
+	{
+		level.svCvars[index].mode = SVC_EQUAL;
+	}
+	else if (!Q_stricmp(mode, "G") || !Q_stricmp(mode, "GREATER"))
+	{
+		level.svCvars[index].mode = SVC_GREATER;
+	}
+	else if (!Q_stricmp(mode, "GE") || !Q_stricmp(mode, "GREATEREQUAL"))
+	{
+		level.svCvars[index].mode = SVC_GREATEREQUAL;
+	}
+	else if (!Q_stricmp(mode, "L") || !Q_stricmp(mode, "LOWER"))
+	{
+		level.svCvars[index].mode = SVC_LOWER;
+	}
+	else if (!Q_stricmp(mode, "LE") || !Q_stricmp(mode, "LOWEREQUAL"))
+	{
+		level.svCvars[index].mode = SVC_LOWEREQUAL;
+	}
+	else if (!Q_stricmp(mode, "IN") || !Q_stricmp(mode, "INSIDE"))
+	{
+		level.svCvars[index].mode = SVC_INSIDE;
+	}
+	else if (!Q_stricmp(mode, "OUT") || !Q_stricmp(mode, "OUTSIDE"))
+	{
+		level.svCvars[index].mode = SVC_OUTSIDE;
+	}
+	else if (!Q_stricmp(mode, "INC") || !Q_stricmp(mode, "INCLUDE"))
+	{
+		level.svCvars[index].mode = SVC_INCLUDE;
+	}
+	else if (!Q_stricmp(mode, "EXC") || !Q_stricmp(mode, "EXCLUDE"))
+	{
+		level.svCvars[index].mode = SVC_EXCLUDE;
+	}
+	else if (!Q_stricmp(mode, "WB") || !Q_stricmp(mode, "WITHBITS"))
+	{
+		level.svCvars[index].mode = SVC_WITHBITS;
+	}
+	else if (!Q_stricmp(mode, "WOB") || !Q_stricmp(mode, "WITHOUTBITS"))
+	{
+		level.svCvars[index].mode = SVC_WITHOUTBITS;
+	}
+	else
+	{
+		G_Printf("sv_cvar: invalid mode\n");
+		return;
+	}
+
+	if (trap_Argc() == 5)
+	{
+		Q_strncpyz(level.svCvars[index].Val2, cvarValue2, sizeof(level.svCvars[0].Val2));
+	}
+	else
+	{
+		Q_strncpyz(level.svCvars[index].Val2, "", sizeof(level.svCvars[0].Val2));
+	}
+
+	Q_strncpyz(level.svCvars[index].cvarName, cvarName, sizeof(level.svCvars[0].cvarName));
+	Q_strncpyz(level.svCvars[index].Val1, cvarValue1, sizeof(level.svCvars[0].Val1));
+
+	// cvar wasn't yet in the array?
+	if (index >= level.svCvarsCount)
+	{
+		level.svCvarsCount++;
+	}
+
+	G_UpdateSvCvars();
+}
+
+/*
+=================
 ConsoleCommand
 
 =================
@@ -1000,6 +1170,18 @@ qboolean    ConsoleCommand( void ) {
 		Svcmd_Pause_f(qfalse);
 		return qtrue;
 	}
+
+	// RTCWPro - cvar limiting
+	if (Q_stricmp(cmd, "sv_cvarempty") == 0) {
+		CC_cvarempty();
+		return qtrue;
+	}
+	if (Q_stricmp(cmd, "sv_cvar") == 0) {
+		CC_svcvar();
+		return qtrue;
+	}
+	// RTCWPro
+
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {
 			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 1 ) ) );
