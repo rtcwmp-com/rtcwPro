@@ -748,10 +748,20 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 										client->pers.netname ) );
 	}
 
+	// L0 - connect message
+	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
+
+	// L0 - Advertise
+	CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
+	CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
 
 	ClientBegin( clientNum );
+	// Reset stats when changing teams
+	if (team != oldTeam) {
+		G_deleteStats(clientNum);
+	}
 }
 
 // DHM - Nerve
@@ -1067,7 +1077,7 @@ void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char 
 	if ( !other->client ) {
 		return;
 	}
-	if ( mode == SAY_TEAM  && !OnSameTeam( ent, other ) ) {
+	if ((mode == SAY_TEAM || mode == SAY_TEAMNL) && !OnSameTeam(ent, other)) {
 		return;
 	}
 	// no chatting to players in tournements
@@ -1209,6 +1219,12 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 		break;
 		// -NERVE - SMF
 
+	// Team chat with no location..
+	case SAY_TEAMNL:
+		G_LogPrintf("sayteamnl: %s: %s\n", ent->client->pers.netname, chatText);
+		Com_sprintf(name, sizeof(name), "(%s^7): ", ent->client->pers.netname);
+		color = COLOR_CYAN;
+		break;
 	}
 
 	Q_strncpyz( text, chatText, sizeof( text ) );
@@ -2552,11 +2568,41 @@ void ClientCommand( int clientNum ) {
 		return;
 	}
 	if ( Q_stricmp( cmd, "say" ) == 0 ) {
-		Cmd_Say_f( ent, SAY_ALL, qfalse );
-		return;
+		// OSPx - Ignored
+		if (!ent->client->sess.ignored) {
+			Cmd_Say_f(ent, SAY_ALL, qfalse);
+			return;
+		}
+		else {
+			CP("print \"You are ^1ignored^7!\n\"");
+			return;
+		}
 	}
+
 	if ( Q_stricmp( cmd, "say_team" ) == 0 ) {
-		Cmd_Say_f( ent, SAY_TEAM, qfalse );
+		// OSPx - Ignored
+		if (!ent->client->sess.ignored) {
+			Cmd_Say_f(ent, SAY_TEAM, qfalse);
+			return;
+		}
+		else {
+			CP("print \"You are ^1ignored^7!\n\"");
+			return;
+		}
+	}
+
+	// Team chat with no location..
+	if (Q_stricmp(cmd, "say_teamnl") == 0) {
+		// Ignored
+		if (!ent->client->sess.ignored) {
+			Cmd_Say_f(ent, SAY_TEAMNL, qfalse);
+			return;
+		}
+		else {
+			CP("print \"You are ^1ignored^7!\n\"");
+			return;
+		}
+	}
 		return;
 	}
 	// NERVE - SMF
