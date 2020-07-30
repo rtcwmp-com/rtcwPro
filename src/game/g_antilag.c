@@ -258,6 +258,55 @@ void G_UnTimeShiftAllClients( gentity_t *skip ) {
 	}
 }
 
+void G_AttachBodyParts(gentity_t* ent) {
+	int i;
+	gentity_t   *list;
 
+	for (i = 0; i < level.numConnectedClients; i++) {
+		list = g_entities + level.sortedClients[i];
+		list->client->tempHead = (list != ent && IS_ACTIVE(list)) ? G_BuildHead(list) : NULL;
+	}
+}
 
+void G_DettachBodyParts(void) {
+	int i;
+	gentity_t   *list;
 
+	for (i = 0; i < level.numConnectedClients; i++) {
+		list = g_entities + level.sortedClients[i];
+		if (list->client->tempHead != NULL) {
+			G_FreeEntity(list->client->tempHead);
+		}
+	}
+}
+
+int G_SwitchBodyPartEntity(gentity_t* ent) {
+	if (ent->s.eType == ET_TEMPHEAD) {
+		return ent->parent - g_entities;
+	}
+	return ent - g_entities;
+}
+
+#define POSITION_READJUST										\
+	if (res != results->entityNum) {							\
+		VectorSubtract(end, start, dir);						\
+		VectorNormalizeFast(dir);								\
+																\
+		VectorMA(results->endpos, -1, dir, results->endpos);	\
+		results->entityNum = res;								\
+	}
+
+// Run a trace with players in historical positions.
+void G_HistoricalTrace(gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask) {
+	int res;
+	vec3_t dir;
+
+	G_AttachBodyParts(ent);
+	trap_Trace(results, start, mins, maxs, end, passEntityNum, contentmask);
+
+	res = G_SwitchBodyPartEntity(&g_entities[results->entityNum]);
+	POSITION_READJUST
+
+		G_DettachBodyParts();
+	return;
+}
