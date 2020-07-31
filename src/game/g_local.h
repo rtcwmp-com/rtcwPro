@@ -1602,7 +1602,6 @@ extern vmCvar_t z_serverflags;
 
 // QCon edition cvars
 extern vmCvar_t		g_antiWarp;
-extern vmCvar_t		g_mapConfigs;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

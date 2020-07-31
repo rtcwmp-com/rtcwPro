@@ -299,7 +299,6 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 
 // QCon edition cvars
 vmCvar_t g_antiWarp;
-vmCvar_t g_mapConfigs;
 
 
 cvarTable_t gameCvarTable[] = {
@@ -442,7 +441,6 @@ cvarTable_t gameCvarTable[] = {
 
 	// QCon edition cvars
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
-	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse },
 
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	
@@ -1435,9 +1433,6 @@ G_InitGame
 void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	int i;
 	char cs[MAX_INFO_STRING];
-	// sswolf - map configs
-	char mapName[MAX_QPATH];
-	qboolean needsMapName;
 
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "------- Game Initialization -------\n" );
@@ -1448,8 +1443,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	srand( randomSeed );
 
 	G_RegisterCvars();
-
-	needsMapName = g_mapConfigs.integer;
 
 	// Xian enforcemaxlives stuff
 	/*
@@ -1563,16 +1556,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	InitBodyQue();
 
 	ClearRegisteredItems();
-
-	if (needsMapName)
-	{
-		trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
-	}
-
-	if (g_mapConfigs.integer) 
-	{
-		trap_SendConsoleCommand(EXEC_APPEND, va("exec mapconfigs/%s.cfg\n", mapName));
-	}
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
