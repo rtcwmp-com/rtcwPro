@@ -1438,7 +1438,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// sswolf - map configs
 	char mapName[MAX_QPATH];
 	qboolean needsMapName;
-	needsMapName = g_mapConfigs.integer;
 
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "------- Game Initialization -------\n" );
@@ -1449,6 +1448,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	srand( randomSeed );
 
 	G_RegisterCvars();
+
+	needsMapName = g_mapConfigs.integer;
 
 	// Xian enforcemaxlives stuff
 	/*
