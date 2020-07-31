@@ -925,7 +925,7 @@ void Hitsounds( gentity_t *targ, gentity_t *attacker, qboolean body ) {
 			}
 
 			te = G_TempEntity( attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-			te->s.eventParm = G_SoundIndex("xmod/sound/game/hitTeam.wav");
+			te->s.eventParm = G_SoundIndex("sound/hitsounds/hitTeam.wav");
 			te->s.teamNum = attacker->s.clientNum;
 		}
 
@@ -946,9 +946,9 @@ void Hitsounds( gentity_t *targ, gentity_t *attacker, qboolean body ) {
 
 			te = G_TempEntity( attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
 			if (body)
-				te->s.eventParm = G_SoundIndex("xmod/sound/game/hit.wav");
+				te->s.eventParm = G_SoundIndex("sound/hitsounds/hit.wav");
 			else
-				te->s.eventParm = G_SoundIndex("xmod/sound/game/hitH.wav");
+				te->s.eventParm = G_SoundIndex("sound/hitsounds/hitH.wav");
 			te->s.teamNum = attacker->s.clientNum;
 		}
 	}

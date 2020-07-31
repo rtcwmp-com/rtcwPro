@@ -165,7 +165,7 @@ void PauseHandle( void ) {
 		} else {
 			level.paused = PAUSE_UNPAUSING;
 			AP( "print \"Prepare to fight!\n\"" );
-			APS("sound/scenaric/prepare.wav");
+			APS("sound/match/prepare.wav");
 		}
 	}
 

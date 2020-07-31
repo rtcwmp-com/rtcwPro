@@ -252,7 +252,7 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	// Trigger the auto-handling of pauses
 	if (fPause) {
 		level.paused = 100 + ((ent) ? (1 + ent - g_entities) : 0);
-		G_globalSound("sound/misc/referee.wav");
+		G_globalSound("sound/match/referee.wav");
 		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 		AP(va("print \"^3%s ^1PAUSED^3 the match^3!\n", referee));
 		CP(va("cp \"^3Match is ^1PAUSED^3! (^7%s^3)\n\"", referee));

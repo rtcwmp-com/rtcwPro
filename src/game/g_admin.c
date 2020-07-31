@@ -1916,7 +1916,7 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 		level.paused = !PAUSE_NONE;
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tag));
-		AAPS("sound/world/klaxon1.wav");
+		AAPS("sound/match/klaxon1.wav");
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");

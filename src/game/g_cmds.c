@@ -1674,7 +1674,7 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 		// Gordon: just call the stupid thing.... don't bother with the voting faff
 		level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
 
-		G_globalSound("sound/misc/referee.wav");
+		G_globalSound("sound/match/referee.wav");
 	}
 	else {
 		level.voteInfo.voteYes = 1;

@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
+#include "../ui/keycodes.h"	// OSPx - Demo commands
 
 
 #define POWERUP_BLINKS      5
@@ -141,6 +142,9 @@ If you have questions concerning this license or the applicable additional terms
 #define WSTATE_START        0x01    // Window is "initializing" w/effects
 #define WSTATE_SHUTDOWN     0x02    // Window is shutting down with effects
 #define WSTATE_OFF          0x04    // Window is completely shutdown
+#define WID_DEMOCONTROLS	0x01    // Demo Controls
+#define WID_DEMOPOPUP		0x02	// Demo Pop ups
+//#define WID_DEMOHELP		0x08	// Demo key control info
 
 typedef struct {
 	vec4_t colorBorder;         // Window border color
@@ -190,6 +194,22 @@ typedef enum {
 	SHOW_SHUTDOWN,
 	SHOW_ON
 } showView_t;
+
+typedef struct {	
+	int fadeTime;
+	int show;
+	int requestTime;
+} demoControlInfo_t;
+
+typedef struct {
+	int fadeTime;
+	int show;
+	int requestTime;
+} demoPopupInfo_t;
+
+#define DEMO_THIRDPERSONUPDATE  0
+#define DEMO_RANGEDELTA         6
+#define DEMO_ANGLEDELTA         4
 
 // L0 - Commented out few vars
 typedef struct {
@@ -1136,6 +1156,7 @@ typedef struct {
 	// Draw names on hud
 	qboolean	renderingFreeCam;
 	specName_t	specOnScreenNames[MAX_CLIENTS];
+	vec4_t reinforcementColor;
 	cg_string_t aStringPool[MAX_STRINGS];
 	cg_window_t *msgWstatsWindow;
 	cg_window_t *msgWtopshotsWindow;
@@ -1148,6 +1169,12 @@ typedef struct {
 	// L0 - New ones
 	cg_window_t *clientStatsWindow;
 	cg_window_t *msgClientStatsWindow;
+	cg_window_t *demoControlsWindow;
+	cg_window_t *demoPopupWindow;
+
+	// Demo
+	qboolean revertToDefaultKeys;
+	qboolean advertisementDone;
 	// Pop In prints
 	int popinPrintTime;
 	int popinPrintCharWidth;
@@ -1784,7 +1811,18 @@ typedef struct {
 	int complaintEndTime;       // DHM - Nerve
 	float smokeWindDir; // JPW NERVE for smoke puffs & wind (arty, airstrikes, bullet impacts)
 
-	// L0 - New stuff
+	// OSPx - Demo
+	demoControlInfo_t demoControlInfo;
+	demoPopupInfo_t demoPopUpInfo;
+	int thirdpersonUpdate;
+	qboolean showNormals;
+	qboolean wallhack;
+	int noChat;
+	int noVoice;
+	qboolean freezeDemo;
+	int aviDemoRate;                                    // Demo playback recording
+	int cursorUpdate;                                   // Timeout for mouse pointer view
+	
 	int axisLeft;		// For DM
 	int alliedLeft;		// For DM
 	int aReinfOffset[TEAM_NUM_TEAMS];   // Reinforcements offset
@@ -1806,6 +1844,8 @@ typedef struct {
 	fileHandle_t dumpStatsFile;
 	char* dumpStatsFileName;  // Name of file to dump stats
 	int dumpStatsTime;
+	qboolean fKeyPressed[256];                          // Key status to get around console issues
+	int timescaleUpdate;                                // Timescale display for demo playback
 } cgs_t;
 
 //==============================================================================
@@ -2019,6 +2059,8 @@ extern vmCvar_t cg_autoAction;
 extern vmCvar_t cg_forceTapout;
 extern vmCvar_t cg_statsList;
 extern vmCvar_t cg_useScreenshotJPEG;
+extern vmCvar_t cg_chatAlpha;
+extern vmCvar_t cg_chatBackgroundColor;
 extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_uinfo;
 extern vmCvar_t cf_wstats;
@@ -2036,6 +2078,11 @@ extern vmCvar_t demo_avifpsF4;
 extern vmCvar_t demo_avifpsF5;
 extern vmCvar_t demo_drawTimeScale;
 extern vmCvar_t demo_infoWindow;
+extern vmCvar_t demo_controlsWindow;
+extern vmCvar_t demo_popupWindow;
+extern vmCvar_t demo_notifyWindow;
+extern vmCvar_t demo_showTimein;
+extern vmCvar_t	demo_noAdvertisement;
 // engine mappings
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
@@ -2486,6 +2533,9 @@ void CG_LoadingString( const char *s );
 void CG_LoadingItem( int itemNum );
 void CG_LoadingClient( int clientNum );
 void CG_DrawInformation( void );
+void CG_DemoClick(int key);
+void CG_createControlsWindow(void);
+void CG_demoView(void);
 
 //
 // cg_scoreboard.c
@@ -2531,7 +2581,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
 
 //
 // L0 -  cg_window.c
-//
+void CG_createDemoPopUpWindow(char *str, int sec);
 qboolean CG_addString( cg_window_t *w, char *buf );
 void CG_createStatsWindow( void );
 void CG_createClientStatsWindow( void );
@@ -2808,6 +2858,7 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 #define CREADY_NONE		0x00	// Countdown, playing..
 #define CREADY_AWAITING	0x01	// Awaiting all to ready up..
 #define CREADY_PENDING	0x02	// Awaiting but can start once treshold (minclients) is reached..
+#define MAX_NETNAME		36
 // OSP's macro's
 #define Pri( x ) CG_Printf( "[cgnotify]%s", CG_LocalizeServerCommand( x ) )
 #define CPri( x ) CG_CenterPrint( CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH );

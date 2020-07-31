@@ -1219,9 +1219,9 @@ static void CG_RegisterSounds( void ) {
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// Hitsounds
-	cgs.media.headShot = trap_S_RegisterSound( "EliteMod/sound/game/hitH.wav" );
-	cgs.media.bodyShot = trap_S_RegisterSound( "EliteMod/sound/game/hit.wav" );
-	cgs.media.teamShot = trap_S_RegisterSound( "EliteMod/sound/game/hitTeam.wav" );
+	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
+	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
+	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
 	// End
 }
 
@@ -2501,9 +2501,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	// load a few needed things before we do any screen updates
 
-	cgs.media.charsetShader     = trap_R_RegisterShader( "gfx/2d/hudchars" ); //trap_R_RegisterShader( "gfx/2d/bigchars" );
+	cgs.media.charsetShader     = trap_R_RegisterShader( "gfx/2d/hudchars_OSP1" ); //trap_R_RegisterShader( "gfx/2d/bigchars" );
 	// JOSEPH 4-17-00
-	cgs.media.menucharsetShader = trap_R_RegisterShader( "gfx/2d/hudchars" );
+	cgs.media.menucharsetShader = trap_R_RegisterShader( "gfx/2d/hudchars_OSP1" );
 	// END JOSEPH
 	cgs.media.whiteShader       = trap_R_RegisterShader( "white" );
 	cgs.media.charsetProp       = trap_R_RegisterShaderNoMip( "menu/art/font1_prop.tga" );
@@ -2602,6 +2602,17 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// NERVE - SMF
 // JPW NERVE -- commented out 'cause this moved
 
+	// OSPx - Account for WideScreen
+	if (cg_wideScreen.integer) {
+		trap_Cvar_Set("cg_gunX", "2");
+		trap_Cvar_Set("cg_gunY", "-1");
+		trap_Cvar_Set("cg_gunZ", "1");
+	}
+	else {
+		trap_Cvar_Set("cg_gunX", "0");
+		trap_Cvar_Set("cg_gunY", "0");
+		trap_Cvar_Set("cg_gunZ", "0");
+	}
 	if ( cgs.gametype >= GT_WOLF ) {
 		trap_Cvar_Set( "cg_drawTimer", "0" ); // jpw
 	}
