@@ -84,7 +84,7 @@ typedef struct {
 
 // VC optimizes for dup strings :)
 static const vote_reference_t aVoteInfo[] = {
-	{ 0x1ff, "comp",			G_Comp_v,			"Load Competition Settings",	"^7\n  Loads standard competition settings for the current mode" },
+	{ 0x1ff, "config",			G_Config_v,			"Game config",					" <configname>^7\n  Loads up the server game config" },
 	{ 0x1ff, "gametype",		G_Gametype_v,		"Set Gametype to",				" <value>^7\n  Changes the current gametype" },
 	{ 0x1ff, "kick",			G_Kick_v,			"KICK",							" <player_id>^7\n  Attempts to kick player from server" },
 	{ 0x1ff, "mute",			G_Mute_v,			"MUTE",							" <player_id>^7\n  Removes the chat capabilities of a player" },
@@ -94,7 +94,6 @@ static const vote_reference_t aVoteInfo[] = {
 	{ 0x1ff, "matchreset",		G_MatchReset_v,		"Match Reset",					"^7\n  Resets the entire match" },
 	{ 0x1ff, "mutespecs",		G_Mutespecs_v,		"Mute Spectators",				" <0|1>^7\n  Mutes in-game spectator chat" },
 	{ 0x1ff, "nextmap",			G_Nextmap_v,		"Load Next Map",				"^7\n  Loads the next map or campaign in the map queue" },
-	{ 0x1ff, "pub",				G_Pub_v,			"Load Public Settings",			"^7\n  Loads standard public settings for the current mode" },
 	{ 0x1ff, "referee",			G_Referee_v,		"Referee",						" <player_id>^7\n  Elects a player to have admin abilities" },
 	{ 0x1ff, "shuffleteams",	G_ShuffleTeams_v,	"Shuffle Teams",				" ^7\n  Randomly place players on each team" },
 	{ 0x1ff, "startmatch",		G_StartMatch_v,		"Start Match",					" ^7\n  Sets all players to \"ready\" status to start the match" },
@@ -285,24 +284,56 @@ void G_voteSetVoteString( const char *desc ) {
 //
 ////////////////////////////////////////////////////////
 
-
-// *** Load competition settings for current mode ***
-int G_Comp_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd ) {
+// RTCWPro - custom config
+int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd)
+{
 	// Vote request (vote is being initiated)
-	if ( arg ) {
-		if ( trap_Argc() > 2 ) {
-			G_refPrintf( ent, "Usage: ^3%s %s%s\n", ( ( fRefereeCmd ) ? "\\ref" : "\\callvote" ), arg, aVoteInfo[dwVoteIndex].pszVoteHelp );
-			return( G_INVALID );
-		} else if ( vote_allow_comp.integer <= 0 && ent && !ent->client->sess.referee ) {
-			G_voteDisableMessage( ent, arg );
-			return( G_INVALID );
+	if (arg)
+	{
+		if (vote_allow_comp.integer <= 0 && ent && !ent->client->sess.referee)
+		{
+			G_voteDisableMessage(ent, arg);
+			return G_INVALID;
+		}
+		else if (trap_Argc() > 3)
+		{
+			G_refPrintf(ent, "Usage: ^3%s %s%s\n", ((fRefereeCmd) ? "\\ref" : "\\callvote"), arg, aVoteInfo[dwVoteIndex].pszVoteHelp);
+			G_PrintConfigs(ent);
+			return G_INVALID;
+		}
+		else if (G_voteDescription(ent, fRefereeCmd, dwVoteIndex))
+		{
+			G_PrintConfigs(ent);
+			return G_INVALID;
+		}
+		else if (arg2 == NULL || strlen(arg2) < 1)
+		{
+			G_PrintConfigs(ent);
+			return G_INVALID;
 		}
 
-		// Vote action (vote has passed)
-	} else {
+		if (!G_isValidConfig(ent, arg2))
+		{
+			return G_INVALID;
+		}
+
+		Com_sprintf(level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2);
+	}
+	else // Vote action (vote has passed)
+	{
 		// Load in comp settings for current gametype
-		G_CompConfigSet( g_gametype.integer, qtrue );
-		AP( "cp \"Competition Settings Loaded!\n\"" );
+		if (G_ConfigSet(level.voteInfo.vote_value))
+		{
+			AP("cpm \"Competition Settings Loaded!\n\"");
+		}
+
+		if (g_tournament.value == 1 && g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
+			level.lastRestartTime = level.time;
+			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
+		}
+		else {
+			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
+		}
 	}
 
 	return( G_OK );
@@ -623,27 +654,6 @@ int G_Nextmap_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2
 		// Load in the nextmap
 		trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
 		AP( "cp \"^3*** Loading nextmap! ***\n\"" );		
-	}
-
-	return( G_OK );
-}
-
-// *** Load public settings for current mode ***
-int G_Pub_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd ) {
-	// Vote request (vote is being initiated)
-	if ( arg ) {
-		if ( trap_Argc() > 2 ) {
-			G_refPrintf( ent, "Usage: ^3%s %s%s\n", ( ( fRefereeCmd ) ? "\\ref" : "\\callvote" ), arg, aVoteInfo[dwVoteIndex].pszVoteHelp );
-			return( G_INVALID );
-		} else if ( vote_allow_pub.integer <= 0 && ent && !ent->client->sess.referee ) {
-			G_voteDisableMessage( ent, arg );
-			return( G_INVALID );
-		}
-		// Vote action (vote has passed)
-	} else {
-		// Load in pub settings for current gametype
-		G_CompConfigSet( g_gametype.integer, qfalse );
-		AP( "cp \"Public Settings Loaded!\n\"" );
 	}
 
 	return( G_OK );

@@ -65,7 +65,7 @@
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="g_referee.c" />
     <ClCompile Include="g_vote.c" />
-    <ClCompile Include="g_comp_config.c" />
+    <ClCompile Include="g_config.c" />
     <ClCompile Include="g_sha1.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha1.c" />
