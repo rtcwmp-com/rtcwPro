@@ -64,8 +64,8 @@
     <ClCompile Include="q_math.c" />
     <ClCompile Include="q_shared.c" />
     <ClCompile Include="g_referee.c" />
-    <ClCompile Include="g_config.c" />
     <ClCompile Include="g_vote.c" />
+    <ClCompile Include="g_comp_config.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\botai\ai_chat.h" />

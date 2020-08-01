@@ -1868,7 +1868,7 @@ void G_wipeCvars(void);
 ///////////////////////
 // g_config.c
 //
-void G_configSet( int mode, qboolean doComp );
+void G_CompConfigSet( int mode, qboolean doComp );
 //
 // g_match.c
 //
@@ -1959,9 +1959,9 @@ void GeoIP_close(void);
 extern GeoIP * gidb;
 void G_ReadIP(gclient_t *client);
 //
-// g_config.c
+// g_comp_config.c
 //
-void G_configSet(int dwMode, qboolean doComp);
+void G_CompConfigSet(int dwMode, qboolean doComp);
 // g_match.c
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
 void G_loadMatchGame(void);

@@ -301,7 +301,7 @@ int G_Comp_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 		// Vote action (vote has passed)
 	} else {
 		// Load in comp settings for current gametype
-		G_configSet( g_gametype.integer, qtrue );
+		G_CompConfigSet( g_gametype.integer, qtrue );
 		AP( "cp \"Competition Settings Loaded!\n\"" );
 	}
 
@@ -642,7 +642,7 @@ int G_Pub_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 		// Vote action (vote has passed)
 	} else {
 		// Load in pub settings for current gametype
-		G_configSet( g_gametype.integer, qfalse );
+		G_CompConfigSet( g_gametype.integer, qfalse );
 		AP( "cp \"Public Settings Loaded!\n\"" );
 	}
 

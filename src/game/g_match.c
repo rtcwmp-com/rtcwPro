@@ -114,7 +114,7 @@ void G_loadMatchGame(void)
 	char strReinfSeeds[MAX_STRING_CHARS];
 
 	if (server_autoconfig.integer > 0 && (!(z_serverflags.integer & ZSF_COMP) || level.newSession)) {
-		G_configSet(g_gametype.integer, (server_autoconfig.integer == 1));
+		G_CompConfigSet(g_gametype.integer, (server_autoconfig.integer == 1));
 		trap_Cvar_Set("z_serverflags", va("%d", z_serverflags.integer | ZSF_COMP));
 	}
 	

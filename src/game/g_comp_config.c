@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-// g_config.c: Config/Mode settings
+// g_comp_config.c: Config/Mode settings
 // OSPx - ET port
 // --------------------------------
 //
@@ -107,7 +107,7 @@ static const modeCvarTable_t aPubSettings[] = {
 };
 
 // Force settings to predefined state.
-void G_configSet( int dwMode, qboolean doComp ) {
+void G_CompConfigSet( int dwMode, qboolean doComp ) {
 	unsigned int dwGameType;
 	const modeCvarTable_t *pModeCvars;
 
