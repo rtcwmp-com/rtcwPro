@@ -2824,11 +2824,10 @@ CheckVote
 ==================
 */
 void CheckVote( void ) {
-	if ( level.voteExecuteTime && level.voteExecuteTime < level.time ) {
-		level.voteExecuteTime = 0;
-		trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteInfo.voteString ) );
-	}
-	if ( !level.voteInfo.voteTime ) {
+	if (!level.voteInfo.voteTime ||
+		level.voteInfo.vote_fn == NULL ||
+		level.time - level.voteInfo.voteTime < 1000)
+	{
 		return;
 	}
 	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
@@ -2882,6 +2881,8 @@ void CheckVote( void ) {
 			}
 #endif
 // jpw
+			// Perform the passed vote
+			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
 
 		} else if ( level.voteInfo.voteNo >= level.numVotingClients / 2 ) {
 			// same behavior as a timeout
