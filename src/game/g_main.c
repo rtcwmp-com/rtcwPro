@@ -250,6 +250,11 @@ vmCvar_t g_maxTeamPF;		// Max Pf's per team
 vmCvar_t g_maxTeamSniper;	// Max snipers per team
 vmCvar_t g_maxTeamVenom;	// Max venoms per team
 vmCvar_t g_maxTeamFlamer;	// Max flamers per team
+
+// QCon edition cvars
+vmCvar_t g_antiWarp;
+
+
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -385,6 +390,10 @@ cvarTable_t gameCvarTable[] = {
 	{&g_antilag, "g_antilag", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
 
 	// L0 - New cvars
+
+	// QCon edition cvars
+	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
+
 // Admins
 	{ &a1_pass, "a1_pass", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &a2_pass, "a2_pass", "none", CVAR_ARCHIVE, 0, qfalse },
@@ -434,7 +443,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_motd12, "g_motd12", "", 0, 0, qfalse},
 	{ &g_motdTime, "g_motdTime", "80", 0, 0, qtrue},
 	{ &motdNum, "motdNum", "1", 0, 0, qfalse},
-	{ &match_timeoutlength,                 "match_timeoutlength",                 "180",                        0,                                               0, qfalse, qtrue  },
+	{ &match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue  },
 // SAB (Server Admin Bot)
 	{ &sab_system, "sab_system", "0", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
 	{ &sab_maxTeamKills, "sab_maxTeamKills", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
@@ -1144,6 +1153,18 @@ void G_RemapTeamShaders() {
 #endif
 }
 
+/*
+=================
+G_ForceCvars
+=================
+*/
+void G_ForceCvars(void)
+{
+	if (g_antiWarp.integer)
+	{
+		trap_Cvar_Set("g_syncronousClients", "0");
+	}
+}
 
 /*
 =================
@@ -1189,6 +1210,8 @@ void G_RegisterCvars( void ) {
 	// done
 
 	level.warmupModificationCount = g_warmup.modificationCount;
+
+	G_ForceCvars();
 }
 
 /*

@@ -614,7 +614,7 @@ typedef struct {
     int       time, leveltime;
 } clientTrail_t;
 
-// L0 - Anti Warp
+// L0 - AntiWarp
 #define LAG_MAX_COMMANDS 512
 #define LAG_MAX_DELTA 75
 #define LAG_MAX_DROP_THRESHOLD 800
@@ -754,7 +754,7 @@ struct gclient_s {
 	int			doublekill;		// (stats) Double+ Kills
 	int			infoTime;		// LT/spies Info
 	int respawnTime;                        ///< can respawn when time > this, force after g_forcerespwan
-	// Anti Warp
+	// AntiWarp
 	int lastCmdRealTime;
 	int cmdhead;							// antiwarp command queue head
 	int cmdcount;							// antiwarp command queue # valid commands
@@ -1492,6 +1492,10 @@ extern vmCvar_t g_pauseLimit;
 extern vmCvar_t g_duelAutoPause;
 extern vmCvar_t team_commands;
 extern vmCvar_t g_tournament;
+
+// QCon edition cvars
+extern vmCvar_t		g_antiWarp;
+
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
 int     trap_Milliseconds( void );
@@ -1844,6 +1848,13 @@ void clean_tempbans_guids(void);
 
 #define HELP_COLUMNS    4
 
+//
+// g_antiwarp.c
+//
+qboolean G_DoAntiwarp(gentity_t* ent);
+void AW_AddUserCmd(int clientNum, usercmd_t* cmd);
+static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd);
+void DoClientThinks(gentity_t* ent);
 
 /**
  * @enum enum_t_dp

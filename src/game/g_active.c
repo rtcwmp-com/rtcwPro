@@ -1318,6 +1318,18 @@ void ClientThink_real( gentity_t *ent ) {
 
 /*
 ==================
+ClientThink_cmd
+==================
+*/
+void ClientThink_cmd(gentity_t* ent, usercmd_t* cmd) {
+
+	ent->client->pers.oldcmd = ent->client->pers.cmd;
+	ent->client->pers.cmd = *cmd;
+	ClientThink_real(ent);
+}
+
+/*
+==================
 ClientThink
 
 A new command has arrived from the client
@@ -1325,25 +1337,47 @@ A new command has arrived from the client
 */
 void ClientThink( int clientNum ) {
 	gentity_t *ent;
+	usercmd_t newcmd;
 
 	ent = g_entities + clientNum;
-	ent->client->pers.oldcmd = ent->client->pers.cmd;
-	trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
+
+	// sswolf - this goes above
+	//ent->client->pers.oldcmd = ent->client->pers.cmd;
+	// new cmd
+	//trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
+	trap_GetUsercmd(clientNum, &newcmd);
 
 	// mark the time we got info, so we can display the
 	// phone jack if they don't get any for a while
 	ent->client->lastCmdTime = level.time;
 
-	if ( !g_synchronousClients.integer ) {
-		ClientThink_real( ent );
+	if (G_DoAntiwarp(ent))
+	{
+		AW_AddUserCmd(clientNum, &newcmd);
+		DoClientThinks(ent);
 	}
+	else
+	{
+		ClientThink_cmd(ent, &newcmd);
+	}
+
+	/*if ( !g_synchronousClients.integer ) {
+		ClientThink_real( ent );
+	}*/
 }
 
-
 void G_RunClient( gentity_t *ent ) {
-	if ( !g_synchronousClients.integer ) {
+
+	if (G_DoAntiwarp(ent)) 
+	{
+		DoClientThinks(ent);
+	}
+
+	if ( !g_synchronousClients.integer ) 
+	{
 		return;
 	}
+
 	ent->client->pers.cmd.serverTime = level.time;
 	ClientThink_real( ent );
 }
