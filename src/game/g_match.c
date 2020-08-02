@@ -93,6 +93,14 @@ void CountDown(qboolean restart){
 			resetPause();
 			AAPS("sound/match/fight.wav");
 			AP("cp \"^1FIGHT\n\"2");
+            // nihi added to fix the pause timer issue
+            level.startTime += level.timeDelta;  // Add the amount of time while paused to game timer
+            level.timeDelta = 0;  // Reset the "pause timer"
+            trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
+
+
+
+
 		}
 	return;
 	}
@@ -320,7 +328,9 @@ void G_delayPrint(gentity_t *dpent)
 				level.paused = PAUSE_NONE;
 				//AAPS("sound/osp/fight.wav");
 				//G_printFull("^1FIGHT!", NULL);
-				trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime + level.timeDelta));
+                level.startTime += level.timeDelta;
+                level.timeDelta = 0;
+                trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
 			}
 		}
 		break;
