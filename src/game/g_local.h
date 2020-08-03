@@ -805,6 +805,24 @@ typedef struct voteInfo_s {
 	char vote_value[VOTE_MAXSTRING];        // Desired vote item setting.
 } voteInfo_t;
 
+// RTCWPro - custom config
+typedef struct cfgCvar_s
+{
+	char name[256];
+	char value[256];
+} cfgCvar_t;
+
+typedef struct config_s
+{
+	char name[256];
+	char version[256];
+	char signature[256];
+	char mapscripthash[256];
+	cfgCvar_t setl[256];
+	int numSetl;
+	qboolean loaded;
+	qboolean publicConfig;
+} config_t;
 typedef struct {
 	struct gclient_s    *clients;       // [maxclients]
 
@@ -980,7 +998,8 @@ typedef struct {
 	// RTCWPro - sv_cvars
 	svCvar_t svCvars[MAX_SVCVARS];
 	int svCvarsCount;
-	// RTCWPro
+	// RTCWPro - custom config
+	config_t config;
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1203,6 +1222,8 @@ void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 
+// RTCWPro - custom config - g_sha1.c
+char* G_SHA1(const char* string);
 //
 // g_svcmds.c
 //
@@ -1596,12 +1617,13 @@ extern vmCvar_t vote_allow_balancedteams;
 extern vmCvar_t vote_allow_muting;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
-extern vmCvar_t z_serverflags;
 // Ref tag..
 #define REFEREE	"^3Ref^7"
 
 // QCon edition cvars
 extern vmCvar_t		g_antiWarp;
+// RTCWPro - custom configs
+extern vmCvar_t g_customConfig;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1866,9 +1888,12 @@ void G_ResetMarkers( gentity_t* ent );
 void G_UpdateCvars(void);
 void G_wipeCvars(void);
 ///////////////////////
-// g_config.c
-//
-void G_configSet( int mode, qboolean doComp );
+// RTCWPro - g_config.c
+qboolean G_ConfigSet(const char* configname);
+void G_ConfigCheckLocked(void);
+void G_PrintConfigs(gentity_t* ent);
+qboolean G_isValidConfig(gentity_t* ent, const char* configname);
+void G_ReloadConfig(void);
 //
 // g_match.c
 //
@@ -1943,6 +1968,7 @@ int G_Warmupfire_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 int G_Unreferee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_AntiLag_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
+int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd); // RTCWPro - custom config
 //
 // g_geoip.c
 //
@@ -1961,7 +1987,7 @@ void G_ReadIP(gclient_t *client);
 //
 // g_config.c
 //
-void G_configSet(int dwMode, qboolean doComp);
+void G_CompConfigSet(int dwMode, qboolean doComp);
 // g_match.c
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
 void G_loadMatchGame(void);

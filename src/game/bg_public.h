@@ -1841,3 +1841,26 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
+
+// RTCWPro - custom config
+int trap_PC_LoadSource(const char* filename);
+int trap_PC_FreeSource(int handle);
+int trap_PC_ReadToken(int handle, pc_token_t* pc_token);
+int trap_PC_SourceFileAndLine(int handle, char* filename, int* line);
+
+void PC_SourceError(int handle, const char* format, ...);
+//void PC_SourceWarning(int handle, const char *format, ...); // Unused
+
+#ifdef GAMEDLL
+const char* PC_String_Parse(int handle);
+#else
+const char* String_Alloc(const char* p);
+qboolean PC_String_Parse(int handle, const char** out);
+#endif
+qboolean PC_String_ParseNoAlloc(int handle, char* out, size_t size);
+qboolean PC_Int_Parse(int handle, int* i);
+qboolean PC_Color_Parse(int handle, vec4_t* c);
+qboolean PC_Vec_Parse(int handle, vec3_t* c);
+qboolean PC_Float_Parse(int handle, float* f);
+qboolean PC_Point_Parse(int handle, vec2_t* c);
+// RTCWPro

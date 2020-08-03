@@ -241,8 +241,6 @@ vmCvar_t	g_crouchRate;			// If enabled it recharges stamina faster when player i
 vmCvar_t	g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
 vmCvar_t	g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
 vmCvar_t	g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
-// comp/pub settings
-vmCvar_t z_serverflags;
 // MOTD's
 vmCvar_t g_serverMessage;	// Shows a center print each time when player switches teams.
 vmCvar_t g_showMOTD;		// Enable MOTD's (message of the day)
@@ -300,6 +298,8 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 // QCon edition cvars
 vmCvar_t g_antiWarp;
 
+// RTCWPro - custom configs
+vmCvar_t g_customConfig;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -441,6 +441,7 @@ cvarTable_t gameCvarTable[] = {
 
 	// QCon edition cvars
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
+
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	
 // Admins
@@ -485,7 +486,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &TXThandle, "TXThandle", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_axisSpawnProtectionTime, "g_axisSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_alliedSpawnProtectionTime, "g_alliedSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
-	{ &z_serverflags, "z_serverflags", "0", 0, 0, qfalse, qfalse },
 	{ &g_serverMessage, "g_serverMessage", "", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 
@@ -517,7 +517,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &sab_autoIgnore, "sab_autoIgnore", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_warmupDamage, "g_warmupDamage", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_crouchRate, "g_crouchRate", "3000", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_crouchRate, "g_crouchRate", "5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse},
 	{ &g_lifeStats, "g_lifeStats", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_maxTeamPF, "g_maxTeamPF", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
@@ -553,6 +553,10 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_muting,       "vote_allow_muting", "1", 0, 0, qfalse, qfalse },
 	{ &vote_limit,      "vote_limit", "5", 0, 0, qfalse, qfalse },
 	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
+
+	// RTCWPro - custom config
+	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
+
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1571,6 +1575,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	SaveRegisteredItems();
+
+	// RTCWPro - Set the game config
+	G_ConfigSet(g_customConfig.string);
 
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "-----------------------------------\n" );
@@ -2823,11 +2830,10 @@ CheckVote
 ==================
 */
 void CheckVote( void ) {
-	if ( level.voteExecuteTime && level.voteExecuteTime < level.time ) {
-		level.voteExecuteTime = 0;
-		trap_SendConsoleCommand( EXEC_APPEND, va( "%s\n", level.voteInfo.voteString ) );
-	}
-	if ( !level.voteInfo.voteTime ) {
+	if (!level.voteInfo.voteTime ||
+		level.voteInfo.vote_fn == NULL ||
+		level.time - level.voteInfo.voteTime < 1000)
+	{
 		return;
 	}
 	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
@@ -2881,6 +2887,8 @@ void CheckVote( void ) {
 			}
 #endif
 // jpw
+			// Perform the passed vote
+			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
 
 		} else if ( level.voteInfo.voteNo >= level.numVotingClients / 2 ) {
 			// same behavior as a timeout
@@ -3096,12 +3104,12 @@ void G_RunFrame( int levelTime ) {
 		level.timeCurrent = levelTime - level.timeDelta;
 	} else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		if ( ( level.time % 500 ) == 0 ) {
+		//if ( ( level.time % 500 ) == 0 ) {
 			// Respawn and time issuses
 			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
 			// Print stuff.. FIXME one day...
 			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
-		}
+		//}
 	} // End
 //	level.frameTime = trap_Milliseconds();   // nihi removed
 	level.frameStartTime = trap_Milliseconds(); // nihi added
