@@ -1,0 +1,1 @@
+docker build --pull --rm -f "../Dockerfile" -t rtcwpro:build "."

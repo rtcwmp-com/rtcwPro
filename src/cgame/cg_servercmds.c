@@ -170,6 +170,72 @@ void CG_ParseServerinfo( void ) {
 }
 
 /*
+=================
+CG_inSVCVARBackupList
+=================
+*/
+static qboolean CG_inSVCVARBackupList(const char* cvar1)
+{
+	int j;
+
+	for (j = 0; j < cg.cvarBackupsCount; ++j)
+	{
+		if (!Q_stricmp(cg.cvarBackups[j].cvarName, cvar1))
+		{
+			return qtrue;
+		}
+	}
+	return qfalse;
+}
+
+/*
+=================
+CG_UpdateSvCvars
+=================
+*/
+void CG_UpdateSvCvars(void)
+{
+	const char* info;
+	int        i;
+	char* token;
+	char* buffer;
+
+	info = CG_ConfigString(CS_SVCVAR);
+
+	cg.svCvarCount = atoi(Info_ValueForKey(info, "N"));
+
+	for (i = 0; i < cg.svCvarCount; i++)
+	{
+		// get what is it
+		buffer = Info_ValueForKey(info, va("V%i", i));
+		// get a mode pf ot
+		token = strtok(buffer, " ");
+		cg.svCvars[i].mode = atoi(token);
+
+		token = strtok(NULL, " ");
+		Q_strncpyz(cg.svCvars[i].cvarName, token, sizeof(cg.svCvars[0].cvarName));
+
+		token = strtok(NULL, " ");
+		Q_strncpyz(cg.svCvars[i].Val1, token, sizeof(cg.svCvars[0].Val1));
+
+		token = strtok(NULL, " ");
+		if (token)
+		{
+			Q_strncpyz(cg.svCvars[i].Val2, token, sizeof(cg.svCvars[0].Val2));
+		}
+
+		// FIFO! - only put into backup list if not already in
+		if (!CG_inSVCVARBackupList(cg.svCvars[i].cvarName))
+		{
+			// do a backup
+			Q_strncpyz(cg.cvarBackups[cg.cvarBackupsCount].cvarName, cg.svCvars[i].cvarName, sizeof(cg.cvarBackups[0].cvarName));
+			trap_Cvar_VariableStringBuffer(cg.svCvars[i].cvarName, cg.cvarBackups[cg.cvarBackupsCount].cvarValue, sizeof(cg.cvarBackups[0].cvarValue));
+			cg.cvarBackupsCount++;
+		}
+	}
+}
+
+/*
 ==================
 CG_ParseWolfinfo
 
@@ -476,6 +542,8 @@ static void CG_ConfigStringModified( void ) {
 		CG_ParseScreenFade();
 	} else if ( num == CS_FOGVARS ) {
 		CG_ParseFog();
+	} else if ( num == CS_SVCVAR ) {
+		CG_UpdateSvCvars();
 	} else if ( num >= CS_MODELS && num < CS_MODELS + MAX_MODELS ) {
 		cgs.gameModels[ num - CS_MODELS ] = trap_R_RegisterModel( str );
 	} else if ( num >= CS_SOUNDS && num < CS_SOUNDS + MAX_MODELS ) {
@@ -1586,7 +1654,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 //	qboolean fFull = qtrue;  // nihi added
 	char strName[MAX_STRING_CHARS];
 	int kills, headshots, deaths, team_kills, suicides, acc_shots, acc_hits, damage_giv, damage_rec;
-	int bleed, ammo_giv, med_giv, revived, poisoned, gibs, kill_peak;
+	int bleed, ammo_giv, med_giv, revived, gibs, kill_peak;
 	unsigned int iArg = 1;
 	unsigned int nClient = atoi( CG_Argv( iArg++ ) );
 	float acc;
@@ -1620,7 +1688,6 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	med_giv = atoi( CG_Argv( iArg++ ) );
 	ammo_giv = atoi( CG_Argv( iArg++ ) );
 	revived = atoi( CG_Argv( iArg++ ) );
-	poisoned = atoi( CG_Argv( iArg++ ) );
 	kill_peak = atoi( CG_Argv( iArg++ ) );
 
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
@@ -1639,8 +1706,8 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 
 	if (ammo_giv > 0 || med_giv > 0)
 		txt_dump( va("^cAmmopacks: ^7%-3d    ^cHealthpacks: ^7%d\n", ammo_giv, med_giv ));
-	if (revived > 0 || poisoned > 0)
-		txt_dump( va("^cRevives  : ^7%-3d    ^cPoisoned   : ^7%d\n", revived, poisoned ));
+	if (revived > 0)
+		txt_dump( va("^cRevives  : ^7%-3d\n", revived ));
 	if (kill_peak > 0 || gibs > 0)
 		txt_dump( va("^cKill Peak: ^7%-3d    ^cGibbed     : ^7%d\n", kill_peak, gibs ));
 	if (acc_shots > 0 || acc_hits > 0)
@@ -1924,6 +1991,11 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "cpm")) {
+		//CG_AddPMItem(PM_MESSAGE, CG_LocalizeServerCommand(CG_Argv(1)), cgs.media.voiceChatShader); // ET had a popup message
+		CG_CenterPrint(CG_LocalizeServerCommand(CG_Argv(1)), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH);  //----(SA)	modified
+		return;
+	}
 	if ( !strcmp( cmd, "cp" ) ) {
 		// NERVE - SMF
 		int args = trap_Argc();

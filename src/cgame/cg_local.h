@@ -716,6 +716,7 @@ typedef struct {
 	char headModelName[MAX_QPATH];
 	gender_t gender;                // from model
 	// -NERVE - SMF
+	int refStatus;						// RtcwPro refStatus added
 } clientInfo_t;
 
 
@@ -828,6 +829,19 @@ typedef struct {
 
 #define MAX_SPAWN_VARS          64
 #define MAX_SPAWN_VARS_CHARS    2048
+// OSPx - Draw HUDnames
+typedef struct specName_s
+{
+	float		x;
+	float		y;
+	float		scale;
+	const char *text;
+	vec3_t		origin;
+	int         lastVisibleTime;
+	int         lastInvisibleTime;
+	qboolean    visible;
+	float		alpha;
+}specName_t;
 
 typedef struct {
 	int clientFrame;                // incremented each frame
@@ -1119,6 +1133,9 @@ typedef struct {
 	// OSP's window's
 	// Auto Actions
 	qboolean	latchAutoActions;
+	// Draw names on hud
+	qboolean	renderingFreeCam;
+	specName_t	specOnScreenNames[MAX_CLIENTS];
 	cg_string_t aStringPool[MAX_STRINGS];
 	cg_window_t *msgWstatsWindow;
 	cg_window_t *msgWtopshotsWindow;
@@ -1139,6 +1156,15 @@ typedef struct {
 	int popinPrintLines;
 	qboolean popinBlink;
 // -OSPx
+
+	// RTCWPro - cvar limiting
+	svCvar_t svCvars[MAX_SVCVARS];
+	int svCvarCount;
+
+	// backuping, forceCvar_t is good format, it holds name and value only
+	forceCvar_t cvarBackups[MAX_SVCVARS];
+	int cvarBackupsCount;
+	// RTCWPro
 
 	pmoveExt_t pmext;
 
@@ -1966,6 +1992,7 @@ extern vmCvar_t cg_descriptiveText;
 extern vmCvar_t cg_autoReload;
 extern vmCvar_t cg_antilag;
 
+extern vmCvar_t authLevel;
 // OSPx
 extern vmCvar_t cg_crosshairPulse;
 extern vmCvar_t	cg_showFlags;
@@ -1985,6 +2012,8 @@ extern vmCvar_t cg_drawReinforcementTime;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
 // nihi added
+extern vmCvar_t	vp_drawnames;
+extern vmCvar_t	cg_drawNames;
 extern vmCvar_t cg_announcer;
 extern vmCvar_t cg_autoAction;
 extern vmCvar_t cg_forceTapout;
@@ -2491,6 +2520,7 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
+void CG_UpdateSvCvars(void); // RTCWPro - cvar limiting
 
 //
 // cg_playerstate.c

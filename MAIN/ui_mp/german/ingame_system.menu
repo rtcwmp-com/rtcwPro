@@ -1,0 +1,651 @@
+f#include "ui_mp/menudef.h"
+
+{
+\\ SYSTEM MENU \\
+
+menuDef {
+    	name "ingame_system"
+    	visible 0
+    	fullscreen 0
+		outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	rect 100 125 443 340
+    	focusColor 1 .75 0 1
+    	style 1
+    	border 1
+
+		onopen { setCvar cg_draw2D "0"; hide grpsystem ; show graphics }
+		onEsc { setCvar cg_draw2D "1" }
+		onClose { setCvar cg_draw2D "1" }
+
+itemDef {
+	name window
+	group ingamebox
+//	rect 0 46 300 340
+	rect 0 2 443 325
+	style WINDOW_STYLE_FILLED
+	border 1
+	bordercolor .5 .5 .5 .5
+	forecolor 1 1 1 1
+	backcolor 0 0 0 .25
+	visible 1
+	decoration
+}
+/*
+itemDef {
+	name window
+	group ingamebox2
+	rect 0 11 300 12
+	style WINDOW_STYLE_FILLED
+	border 1
+	bordercolor .5 .5 .5 .5
+	forecolor 1 1 1 1
+	backcolor 0 0 0 .25
+	visible 1
+	decoration
+}
+*/
+
+
+// FRAME	//
+
+
+	itemDef
+	{
+		name window
+		group ingamebox2
+		rect 2 4 439 20
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .1 .1 .1 .2
+		forecolor 1 1 1 1
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		decoration
+	}
+
+
+
+	itemDef {
+		name ctr_graphics
+		text "Grafik"
+		type 1
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		group grpControlbutton
+		background "ui_mp/assets/button_back.tga"
+	rect 56 10 100 12
+	textalign 1
+	textalignx 50
+	textaligny 10
+	forecolor 1 1 1 1
+ 	visible 1
+		action { hide grpSystem ; show graphics }
+		mouseEnter { setitemcolor ctr_graphics backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_graphics backcolor .37 .1 .1 1 }
+		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Qualität:"
+		cvar "ui_glCustom"
+		cvarFloatList { "Hohe Qualität" 0 "Normal" 1 "Schnell" 2 "Schnellstens" 3 "Eigen" 4 }
+ 		rect 22 30 400 12
+   		textalign ITEM_ALIGN_RIGHT
+   		textalignx 200
+   		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+   		forecolor 1 1 1 1
+   		visible 0
+		action { uiScript update "ui_glCustom" }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_EDITFIELD
+		text "GL-Treiber:"
+		cvar "r_gldriver"
+		//cvarFloatList {  }
+		rect 22 45 400 12
+   		textalign ITEM_ALIGN_RIGHT
+  		textalignx 200
+   		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+   		forecolor 1 1 1 1
+   		visible 0
+		decoration
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_YESNO
+		text "GL-Erweiterungen:"
+		cvar "r_allowExtensions"
+		rect 22 60 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Grafikmodus:"
+		cvar "r_mode"
+		cvarFloatList { "640x480" 3 "800x600" 4 "960x720" 5 "1024x768" 6 "1152x864" 7 "1280x1024" 8 "1600x1200" 9 "2048x1536" 10 "856x480 widescreen" 11 }
+		rect 22 75 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Farbtiefe:"
+		cvar "r_colorbits"
+		cvarFloatList { "Standard" 0 "16-bit" 16 "32-bit" 32 }
+		rect 22 90 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom ; uiScript update "r_colorbits" }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_YESNO
+		text "Vollbild:"
+		cvar "r_fullscreen"
+		rect 22 105 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Lichter:"
+		cvar "r_vertexlight"
+		cvarFloatList { "Light Map (hoch)" 0 "Vertex (gering)" 1  }
+		rect 22 120 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Geometriedetail:"
+		cvar "r_lodbias"
+		cvarFloatList { "Gering" 2 "Mittel" 1 "Hoch" 0 }
+		rect 22 135 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom ; uiScript update "r_lodbias" }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Allgem. Texturdetail:"
+		cvar "r_picmip"
+		cvarFloatList { "Gering" 2 "Normal" 1 "Hoch" 0 }
+		rect 22 165 400 12
+
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+ 		action { uiScript glCustom }
+   		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Charakter-Texturen:"
+		cvar "r_picmip2"
+		cvarFloatList { "Gering" 3 "Normal" 2 "Hoch" 1 "Super" 0 }
+		rect 22 150 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+   		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Texturqualität:"
+		cvar "r_texturebits"
+		cvarFloatList { "Standard" 0 "16-bit" 16 "32-bit" 32 }
+		rect 22 225 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      		forecolor 1 1 1 1
+      		visible 0
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Texturfilter:"
+		cvar "r_texturemode"
+		cvarStrList { "Bilinear", "GL_LINEAR_MIPMAP_NEAREST", "Trilinear", "GL_LINEAR_MIPMAP_LINEAR"  }
+		rect 22 180 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_YESNO
+		text "Anisotropischer Filter:"
+		cvar "r_ext_texture_filter_anisotropic"
+		rect 22 195 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_YESNO
+		text "Komprim. Texturen:"
+		cvar "r_ext_compressed_textures"
+			rect 22 210 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .23
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+		action { uiScript glCustom }
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_SLIDER
+		text "Helligkeit:"
+		cvarfloat "r_gamma" 1 .5 2
+ 		rect 22 240 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+    		}
+
+	itemDef {
+		name graphics
+		group grpSystem
+		type ITEM_TYPE_SLIDER
+		text "Bildgröße:"
+		cvarfloat "cg_viewsize" 100 30 100
+		//cvarFloatList {  }
+		rect 22 255 400 12
+      	textalign ITEM_ALIGN_RIGHT
+      	textalignx 200
+      	textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      	forecolor 1 1 1 1
+      	visible 0
+    		}
+
+//here
+
+	itemDef {
+		name ctr_driver
+		text "Treiberinfo"
+		type 1
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		group grpControlbutton
+		background "ui_mp/assets/button_back.tga"
+	rect 181 10 100 12
+	textalign 1
+	textalignx 50
+	textaligny 10
+	forecolor 1 1 1 1
+	backcolor .1 .1 .1 0
+	visible 1
+		action { hide grpSystem ; show driver }
+		mouseEnter { setitemcolor ctr_driver backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_driver backcolor .37 .1 .1 1 }
+	}
+
+
+
+	itemDef {
+		name driver
+		group grpSystem
+		rect 60 20 400 300
+		ownerdraw UI_GLINFO
+		textalign 1
+		textscale .12
+		textalignx 0
+		textaligny 17
+		forecolor 1 1 1 1
+		visible 0
+		decoration
+	}
+
+	itemDef {
+		name ctr_other
+		text "Sonstiges"
+		type 1
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		group grpControlbutton
+//		background "ui_mp/assets/button_back.tga"
+	rect 306 10 100 12
+	textalign 1
+	textalignx 50
+	textaligny 10
+	forecolor 1 1 1 1
+	backcolor .1 .1 .1 0
+	visible 1
+		action { hide grpSystem ; show other }
+		mouseEnter { setitemcolor ctr_other backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_other backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name other
+		group grpSystem
+		style 1
+		text "Sound"
+		rect 163 30 128 20
+      	textalign ITEM_ALIGN_CENTER
+      	textalignx 64
+      	textaligny 20
+		textfont	UI_FONT_NORMAL
+	textscale .25
+      	forecolor 1 .75 0 1
+      	visible 0
+		decoration
+		}
+
+	itemDef {
+		name other
+		group grpSystem
+		type ITEM_TYPE_SLIDER
+		text "Effektlautstärke:"
+		cvarfloat "s_volume" 0.7 0 1
+		rect 22 60 400 12
+      		textalign ITEM_ALIGN_RIGHT
+      		textalignx 200
+      		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      		forecolor 1 1 1 1
+      		visible 0
+		}
+
+	itemDef {
+		name other
+		group grpSystem
+		type ITEM_TYPE_SLIDER
+		text "Musiklautstärke:"
+		cvarfloat "s_musicvolume" 0.25 0 1
+		rect 22 90 400 12
+      		textalign ITEM_ALIGN_RIGHT
+      		textalignx 200
+      		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      		forecolor 1 1 1 1
+      		visible 0
+		}
+
+	itemDef {
+		name other
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Soundqualität:"
+		cvar "s_khz"
+		cvarFloatList { "22 khz (hoch)" 22 "11 khz (gering)" 11 }
+			rect 22 120 400 12
+      		textalign ITEM_ALIGN_RIGHT
+      		textalignx 200
+      		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      		forecolor 1 1 1 1
+      		visible 0
+		}
+/*
+	itemDef {
+		name other
+		group grpSystem
+		type ITEM_TYPE_YESNO
+		text "Dopplereffekt:"
+		cvar "s_doppler"
+		rect 22 150 400 12
+      		textalign ITEM_ALIGN_RIGHT
+      		textalignx 200
+      		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+      		forecolor 1 1 1 1
+      		visible 0
+		}
+*/
+	itemDef {
+		name other
+		group grpSystem
+		text "ÜBERNEHMEN"
+		type 1
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		background "ui/assets/button_back.tga"
+		rect 180 150 100 20
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 50
+		textaligny 14
+		forecolor 1 1 1 1
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		action { play "sound/misc/kcaction.wav" ; exec snd_restart ; hide other }
+//		mouseEnter { setcolor backcolor .1 .37 .1 1 }
+//		mouseExit { setcolor backcolor .37 .1 .1 1 }
+		}
+
+itemDef {
+	name graphics
+	text "EMPFEHLUNG"
+	type 1
+	group grpSystem
+	textfont UI_FONT_NORMAL
+	textscale .27
+	style WINDOW_STYLE_FILLED
+	backcolor .3 0.5 0.2 .25
+	rect 170 275 150 20
+	textalign ITEM_ALIGN_LEFT
+	textalignx 17
+	textaligny 14
+	forecolor 1 1 1 1
+	visible 1
+	action { play "sound/misc/kcaction.wav" ;
+	exec setrecommended }
+	//mouseEnter { show message_set_recommended }
+	//mouseExit { hide message_set_recommended }
+	}
+
+	itemDef {
+		name other
+		group grpSystem
+		style 1
+		text "Netzwerk"
+	rect 163 200 128 20
+     	textalign 1
+     	textalignx 64
+     	textaligny 20
+	textfont	UI_FONT_NORMAL
+	textscale .25
+     	forecolor 1 .75 0 1
+     	visible 0
+	decoration
+		}
+
+	itemDef {
+		name other
+		group grpSystem
+		type ITEM_TYPE_MULTI
+		text "Verbindungstyp:"
+		cvar "rate"
+		cvarFloatList { "<=28.8k" 2500 "33.6k" 3000 "56k" 4000 "ISDN" 5000 "LAN/KABEL/xDSL" 25000  }
+		rect 22 230 400 12
+     		textalign ITEM_ALIGN_RIGHT
+     		textalignx 200
+     		textaligny 10
+		textfont	UI_FONT_NORMAL
+	textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+     		forecolor 1 1 1 1
+     		visible 0
+		}
+
+	itemDef {
+		name graphics
+		text "ÜBERNEHMEN"
+		type 1
+		textfont	UI_FONT_NORMAL
+	textscale .24
+	style WINDOW_STYLE_FILLED
+		group grpsystem
+		border 1
+		bordercolor .1 .1 .1 .3
+	rect 181 300 100 20
+	textalign 1
+	textalignx 50
+	textaligny 14
+	forecolor 1 1 1 1
+	backcolor .3 0.5 0.2 .25
+	visible 1
+		action { setCvar cg_draw2D "1"; exec "vid_restart" }
+		mouseEnter { setcolor backcolor .1 .37 .1 1 }
+		mouseExit { setcolor backcolor .37 .1 .1 1 }
+		}
+
+
+}
+
+
+}

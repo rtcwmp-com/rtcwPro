@@ -1,0 +1,703 @@
+#include "ui_mp/menudef.h"
+
+//
+// ENGLISH - ingame_callvote.menu
+//
+
+{
+\\ CALL VOTE MENU \\ 
+
+menuDef {
+	name "ingame_callvote"
+	visible 0
+	fullscreen 0
+	rect 150 125 343 276
+	outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	focusColor 1 .75 0 1
+	style 1
+	border 1
+	onOpen { hide grpcallVote ; show map ; setCvar cg_draw2D "0"; uiScript loadArenas }
+	onClose { setCvar cg_draw2D "1" }
+	onEsc { setCvar cg_draw2D "1" }
+
+	itemDef {
+		name window
+		group ingamebox
+		rect 30 2 275 266
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 0 .25
+		visible 1
+		decoration
+	}
+
+	itemDef {
+		name window2
+		group grpControlbutton
+		rect 32 4 271 20
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .1 .1 .1 .2
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		decoration
+	}
+
+
+	////////////////////
+	//
+	// 	BUTTONS
+	//
+	itemDef {
+		name ctr_changemap
+		group grpControlbutton
+		text "Mappa"
+		tooltip "Cambia la mappa corrente"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 30 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpCallVote ; show map }
+		mouseEnter { setitemcolor ctr_changemap backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_changemap backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name ctr_misc
+		group grpControlbutton
+		text "Misc"
+		tooltip "Altre opzioni di voto"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		background "ui_mp/assets/button_back.tga"
+		rect 85 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		visible 1
+		action { hide grpCallVote ; show misc }
+		mouseEnter { setitemcolor ctr_misc backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_misc backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name ctr_refplayer
+		group grpControlbutton
+		text "Arbitro"
+		tooltip "Proponi e vota un arbitro"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 145 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpCallVote ; show ref }
+		mouseEnter { setitemcolor ctr_refplayer backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_refplayer backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name ctr_kickplayer
+		group grpControlbutton
+		text "Espelli"
+		tooltip "Proponi e vota l'espulsione di un giocatore"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 210 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpCallVote ; show kick }
+		mouseEnter { setitemcolor ctr_kickplayer backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_kickplayer backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name ctr_gametype
+		group grpControlbutton
+		text "Modo"
+		tooltip "Cambia la modalità di gioco"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		background "ui_mp/assets/button_back.tga"
+		rect 265 3.5 45 20
+		textalign 1
+		textalignx 22
+		textaligny 14
+		border 1
+		bordercolor .1 .1 .1 0
+		visible 1
+		action { hide grpCallVote ; show type }
+		mouseEnter { setitemcolor ctr_gametype backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_gametype backcolor .37 .1 .1 1 }
+	}
+
+////////////////////////////////////////////////////////////////////////////
+
+	///////////////////
+	// 	  NEW MAP
+	///////////////////
+	itemDef {
+		name map
+		group grpCallVote
+		text "Altra mappa:"
+		ownerdraw UI_ALLMAPS_SELECTION 
+		textscale .25
+		rect 140 25 110 20
+		textfont UI_FONT_NORMAL
+		textalign 0
+		textalignx 0
+		textaligny 16
+		decoration
+		visible 0
+		action { }
+	}
+
+	itemDef {
+		name map
+		group grpCallVote
+		rect 30 45 275 201
+		type ITEM_TYPE_LISTBOX
+		style WINDOW_STYLE_FILLED
+		elementwidth 120
+		elementheight 15
+		textscale .25
+		elementtype LISTBOX_TEXT
+		textfont UI_FONT_NORMAL
+		feeder FEEDER_ALLMAPS
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 .5 .25
+		outlinecolor .1 .1 .7 .5
+		visible 0
+		textstyle 0
+		textaligny -3
+		columns 1 2 190 25
+		mouseEnter { fadein message_arena }
+		mouseExit { fadeout message_arena }
+	}
+
+	itemDef {
+		name map
+		text "OK"
+		type 1
+		textscale .25
+		group grpCallVote
+		style WINDOW_STYLE_FILLED
+		background "ui/assets/button_back.tga"
+		rect 116 249 100 15
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 50		// center
+		textaligny 11
+		backcolor .3 .5 .2 .3
+		visible 0
+		border 1
+		bordercolor .1 .1 .1 .25
+		action { uiScript voteMap ; uiScript closeingame }
+	}
+
+
+	//////////////////
+	//     MISC
+	//////////////////
+	itemDef {
+		name misc
+		group grpCallVote
+		text "INIZIA PARTITA"
+		tooltip "Imposta tutti i giocatori su \"ready\" per iniziare la partita"
+		textscale .25
+		rect 45 30 250 20
+		border 1
+		bordercolor .1 .1 .1 .3
+		style WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 124
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote start_match" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "CARICA SETTAGGI DA TORNEO"
+		tooltip "Carica le impostazioni \"competition\" "
+		textscale .25
+		rect 45 53 250 20
+		border 1
+		bordercolor .1 .1 .1 .3
+		style WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 124
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote comp" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "CARICA SETTAGGI PUBBLICI"
+		tooltip "Carica le impostazioni \"public\" "
+		textscale .25
+		rect 45 76 250 20
+		border 1
+		bordercolor .1 .1 .1 .3
+		style WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 124
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote pub" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "RESET MATCH"
+		tooltip "Ricomincia la partita in corso"
+		textscale .25
+		style	WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		rect 45 99 250 20
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 124
+		border 1
+		bordercolor .1 .1 .1 .3
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote map_restart" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "MUTE SPETTATORI"
+		tooltip "Elimina la chat degli spettatori per chi è in gioco"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 122 250 20
+		settingDisabled CV_SVS_MUTESPECS
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote mutespecs 1" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "UNMUTE SPETTATORI"
+		tooltip "Abilita la chat degli spettatori per chi è in gioco"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 122 250 20
+		settingEnabled CV_SVS_MUTESPECS
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote mutespecs 0" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "ABILITA DANNO DI SQUADRA"
+		tooltip "Abilità la possibilità di ferire e uccidere i compagni di squadra"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 145 250 20
+		settingDisabled CV_SVS_TEAMDMG
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote teamdamage 1" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "DISAB. DANNO DI SQUADRA "
+		tooltip "Rende i giocatori invulnerabili ai colpi dei compagni di squadra"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 145 250 20
+		settingEnabled CV_SVS_TEAMDMG
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote teamdamage 0" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "DISAB. DANNO NEL WARM-UP"
+		tooltip "Abilita il danno durante il riscaldamento prima di una partita"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 168 250 20
+		settingDisabled CV_SVS_WARMUPDMG
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote warmupfire 1" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "DISAB. DANNO NEL WARM-UP"
+		tooltip "Toglie il danno durante il riscaldamento"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 168 250 20
+		settingEnabled CV_SVS_WARMUPDMG
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote warmupfire 0" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "MISCHIA SQUADRE"
+		tooltip "Ricomincia la partita cambiando le squadre casualmente"
+		textscale .25
+		rect 45 191 250 20
+		border 1
+		bordercolor .1 .1 .1 .3
+		style WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 124
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote shuffleteams" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "INVERTI SQUADRE"
+		tooltip "Scambia i giocatori delle due squadre"
+		textscale .25
+		rect 45 214 133 20
+		border 1
+		bordercolor .1 .1 .1 .3
+		style WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 68
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote swapteams" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "MAPPA SUCC."
+		tooltip "Passa alla prossima mappa nel mapcycle (del server)"
+		textscale .25
+		rect 182 214 113 20
+		border 1
+		bordercolor .1 .1 .1 .3
+		style WINDOW_STYLE_FILLED
+		backcolor .3 0.5 0.2 .25
+		type 1
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 56
+		textaligny 14
+		visible 0
+		action { exec "cmd callvote nextmap" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "ABILITA CENTERVIEW"
+		tooltip "Permette ai giocatori di usare il comando centerview"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 237 250 20
+		settingDisabled CV_SVS_CENTERVIEW
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 124
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote centerview 1" ; uiScript closeingame }
+	}
+
+	itemDef {
+		name misc
+		group grpCallVote
+		text "DISABILITA CENTERVIEW"
+		tooltip "Toglie la possibilità per i giocatori di usare il comando centerview"
+		border 1
+		bordercolor .1 .1 .1 .3
+		backcolor .3 0.5 0.2 .25
+		rect 45 237 250 20
+		settingEnabled CV_SVS_CENTERVIEW
+		style WINDOW_STYLE_FILLED
+		textalign 1
+		textalignx 104
+		textaligny 14
+		textfont UI_FONT_NORMAL
+		textscale .25
+		type 1
+		visible 0
+		action { exec "cmd callvote centerview 0" ; uiScript closeingame }
+	}
+
+
+	/////////////////////
+	//     REFEREE
+	/////////////////////
+	itemDef {
+		name ref
+		group grpCallVote
+		text "Scegli come arbitro:"
+		textscale .25
+		rect 130 25 110 20
+		textfont UI_FONT_NORMAL
+		textalign 0
+		textalignx 0
+		textaligny 16
+		visible 0
+		decoration
+		action { }
+	}
+
+	itemDef {
+		name ref
+		group grpCallVote
+		rect 30 45 275 201
+		style WINDOW_STYLE_FILLED
+		type ITEM_TYPE_LISTBOX
+		elementwidth 120
+		elementheight 15
+		textfont UI_FONT_NORMAL
+		textscale .25
+		elementtype LISTBOX_TEXT
+		feeder FEEDER_PLAYER_LIST
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 .5 .25
+		outlinecolor .1 .1 .7 .5
+		visible 0
+		textstyle 0
+		textaligny -5
+		columns 1 2 190 25
+		mouseEnter { fadein message_arena }
+		mouseExit { fadeout message_arena }
+	}
+
+	itemDef {
+		name ref
+		text "OK"
+		type 1
+		textscale .25
+		group grpCallVote
+		style WINDOW_STYLE_FILLED
+		background "ui/assets/button_back.tga"
+		rect 116 249 100 15
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 50		// center
+		textaligny 11
+		backcolor .3 .5 .2 .3
+		visible 0
+		border 1
+		bordercolor .1 .1 .1 .25
+		action { uiScript voteReferee ; uiScript closeingame }
+	}
+
+
+	///////////////////
+	// 	   KICK
+	///////////////////
+	itemDef {
+		name kick
+		group grpCallVote
+		text "Espelli il giocatore:"
+		textscale .25
+		rect 130 25 110 20
+		textfont UI_FONT_NORMAL
+		textalign 0
+		textalignx 0
+		textaligny 16
+		visible 0
+		decoration
+		action { }
+	}
+
+	itemDef {
+		name kick
+		group grpCallVote
+		rect 30 45 275 201
+		style WINDOW_STYLE_FILLED
+		type ITEM_TYPE_LISTBOX
+		elementwidth 120
+		elementheight 15
+		textfont UI_FONT_NORMAL
+		textscale .25
+		elementtype LISTBOX_TEXT
+		feeder FEEDER_PLAYER_LIST
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 .5 .25
+		outlinecolor .1 .1 .7 .5
+		visible 0
+		textstyle 0
+		textaligny -5
+		columns 1 2 190 25
+		mouseEnter { fadein message_arena }
+		mouseExit { fadeout message_arena }
+	}
+
+	itemDef {
+		name kick
+		text "OK"
+		type 1
+		textscale .25
+		group grpCallVote
+		style WINDOW_STYLE_FILLED
+		background "ui/assets/button_back.tga"
+		rect 116 249 100 15
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 50		// center
+		textaligny 11
+		backcolor .3 .5 .2 .3
+		visible 0
+		border 1
+		bordercolor .1 .1 .1 .25
+		action { uiScript voteKick ; uiScript closeingame }
+	}
+
+
+	//////////////////////
+	//     GAMETYPE
+	//////////////////////
+	itemDef {
+		name type
+		group grpCallVote
+		text "Tipo di gioco:"
+		style WINDOW_STYLE_FILLED
+		textfont UI_FONT_NORMAL
+		textscale .25
+		ownerdraw UI_NETGAMETYPE
+		backcolor 1 1 1 .1
+		rect 100 60 140 15
+		textalign 0
+		textalignx 10
+		textaligny 12
+		forecolor 1 1 1 1
+		visible 0
+	}
+
+	itemDef {
+		name type
+		group grpCallVote
+		text "OK"
+		type 1
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		background "ui/assets/button_back.tga"
+		rect 118 100 100 15
+		textfont UI_FONT_NORMAL
+		textalign 1
+		textalignx 50		// center
+		textaligny 11
+		backcolor .3 .5 .2 .3
+		visible 0
+		border 1
+		bordercolor .1 .1 .1 .25
+		action { uiScript voteGame ; uiScript closeingame }
+	}
+
+}
+
+}

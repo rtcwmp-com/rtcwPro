@@ -39,12 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 
 displayContextDef_t cgDC;
 
-int forceModelModificationCount = -1;
-int autoReloadModificationCount = -1;
-
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
-
 
 /*
 ================
@@ -308,10 +304,13 @@ vmCvar_t cg_noVoice;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
 vmCvar_t cg_zoomedSens;
+vmCvar_t vp_drawnames;
+vmCvar_t cg_drawNames;
 vmCvar_t cg_announcer;
 vmCvar_t cg_autoAction;
 vmCvar_t cf_wstats;             // OSP's Font scale for +wstats window
 vmCvar_t cf_wtopshots;          // OSP's Font scale for +wtopshots window
+vmCvar_t authLevel;
 vmCvar_t cg_noAmmoAutoSwitch;
 vmCvar_t cg_uinfo;
 vmCvar_t cg_useScreenshotJPEG;
@@ -337,6 +336,7 @@ typedef struct {
 	char        *cvarName;
 	char        *defaultString;
 	int cvarFlags;
+	int modificationCount;
 } cvarTable_t;
 
 cvarTable_t cvarTable[] = {
@@ -427,7 +427,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_showmiss, "cg_showmiss", "0", 0 },
 	{ &cg_footsteps, "cg_footsteps", "1", CVAR_CHEAT },
 	//{ &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },   // nihi cmmmented to allow cg_tracerchance
-    { &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_ARCHIVE },
+	{ &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },
 	{ &cg_tracerWidth, "cg_tracerwidth", "0.8", CVAR_CHEAT },
 	{ &cg_tracerSpeed, "cg_tracerSpeed", "4500", CVAR_CHEAT },
 	{ &cg_tracerLength, "cg_tracerlength", "160", CVAR_CHEAT },
@@ -557,6 +557,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomedFOV, "cg_zoomedFOV", "90", CVAR_ARCHIVE },
 	{ &cg_statsList, "cg_statsList", "0", CVAR_ARCHIVE },
 	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
+	{ &vp_drawnames, "vp_drawnames", "0", CVAR_ARCHIVE | CVAR_CHEAT },
+	{ &cg_drawNames, "cg_drawNames", "1", CVAR_ROM },
 	{ &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
 	{ &cg_autoAction, "cg_autoAction", "0", CVAR_ARCHIVE },
 	{ &cg_useScreenshotJPEG, "cg_useScreenshotJPEG", "1", CVAR_ARCHIVE },
@@ -568,15 +570,19 @@ cvarTable_t cvarTable[] = {
     { &cg_forceTapout, "cg_forceTapout", "0", CVAR_ARCHIVE },
 	{ &int_cl_timenudge, "cl_timenudge", "0", CVAR_ARCHIVE|CVAR_LATCH },
 	// et
-    { &cg_spawnTimer_set,         "cg_spawnTimer_set",         "-1",          CVAR_TEMP,                     },
-	{ &cg_spawnTimer_period,      "cg_spawnTimer_period",      "0",           CVAR_TEMP,                    0 },
+    { &cg_spawnTimer_set, "cg_spawnTimer_set", "-1", CVAR_TEMP },
+	{ &cg_spawnTimer_period, "cg_spawnTimer_period", "0", CVAR_TEMP },
 	// -OSPx
 	{ &int_ui_blackout, "ui_blackout", "0", CVAR_ROM },
 	{ &cg_antilag, "g_antilag", "0", 0 }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
+
 // OSPx - Client Flags
 void CG_setClientFlags(void);
+
+// RTCWPro - cvars loaded flag
+qboolean cvarsLoaded = qfalse;
 
 /*
 =================
@@ -599,8 +605,6 @@ void CG_RegisterCvars( void ) {
 	trap_Cvar_VariableStringBuffer( "sv_running", var, sizeof( var ) );
 	cgs.localServer = atoi( var );
 
-	forceModelModificationCount = cg_forceModel.modificationCount;
-
 	trap_Cvar_Register( NULL, "model", DEFAULT_MODEL, CVAR_USERINFO | CVAR_ARCHIVE );
 	trap_Cvar_Register( NULL, "head", DEFAULT_HEAD, CVAR_USERINFO | CVAR_ARCHIVE );
 
@@ -611,7 +615,11 @@ void CG_RegisterCvars( void ) {
 	// Crosshairs
 	BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
+
 // -OSPx
+
+	// RTCWPro - mark cvars as loaded
+	cvarsLoaded = qtrue;
 }
 
 /*
@@ -643,35 +651,50 @@ void CG_UpdateCvars( void ) {
 	cvarTable_t *cv;
 	qboolean fSetFlags = qfalse;	// OSPx - Auto Actions
 
+	// RTCWPro - don't update the cvars if they haven't been registered
+	if (!cvarsLoaded) {
+		return;
+	}
+
 	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) {
 		trap_Cvar_Update( cv->vmCvar );
 
-		if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
-			cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-			cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems) {
-			fSetFlags = qtrue;
-		// Crosshairs
-		} else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
-			BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
+		// RTCWPro - update the modification count and perform actions on special cvars
+		if (cv->modificationCount != cv->vmCvar->modificationCount) {
+			cv->modificationCount = cv->vmCvar->modificationCount;
+
+			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
+				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
+				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems) {
+				fSetFlags = qtrue;
+			}
+			else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
+				BG_setCrosshair(cg_crosshairColor.string, cg.xhairColor, cg_crosshairAlpha.value, "cg_crosshairColor");
+			}
+			else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt) {
+				BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
+			} // -OSPx
+
+			// if force model changed
+			else if (cv->vmCvar == &cg_forceModel) {
+				CG_ForceModelChange();
+			}
+			
+			// auto reload
+			if (cv->vmCvar == &cg_autoReload) {
+				if (cg_autoReload.integer) {
+					cg.pmext.bAutoReload = qtrue;
+				}
+				else {
+					cg.pmext.bAutoReload = qfalse;
+				}
+			}
 		}
-		else if (cv->vmCvar == &cg_crosshairColorAlt || cv->vmCvar == &cg_crosshairAlphaAlt)     {
-			BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
-		} // -OSPx
 	}
 
-	// if force model changed
-	if ( forceModelModificationCount != cg_forceModel.modificationCount ) {
-		forceModelModificationCount = cg_forceModel.modificationCount;
-		CG_ForceModelChange();
-	}
-
-	if ( autoReloadModificationCount != cg_autoReload.modificationCount ) {
-		if ( cg_autoReload.integer ) {
-			cg.pmext.bAutoReload = qtrue;
-		} else {
-			cg.pmext.bAutoReload = qfalse;
-		}
-		autoReloadModificationCount = cg_autoReload.modificationCount;
+	// RTCWPro - send any relevent updates
+	if (fSetFlags) {
+		CG_setClientFlags();
 	}
 }
 
@@ -1194,7 +1217,7 @@ static void CG_RegisterSounds( void ) {
 	trap_S_RegisterSound( "sound/Loogie/sizzle.wav" );
 */
 	// L0 - sounds
-	cgs.media.countFightSound = trap_S_RegisterSound( "sound/scenaric/fight.wav" );
+	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// Hitsounds
 	cgs.media.headShot = trap_S_RegisterSound( "EliteMod/sound/game/hitH.wav" );
 	cgs.media.bodyShot = trap_S_RegisterSound( "EliteMod/sound/game/hit.wav" );
@@ -2587,6 +2610,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// L0 - OSP stats
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
+
+	// RTCWPro - update sv cvars from the config string
+	CG_UpdateSvCvars();
 }
 
 /*
@@ -2599,5 +2625,8 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
+
+	// RTCWPro - mark cvars as unloaded
+	cvarsLoaded = qfalse;
 }
 

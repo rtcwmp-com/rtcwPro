@@ -880,6 +880,8 @@ void CG_InitConsoleCommands( void ) {
 	// -NERVE - SMF
 	// L0 - Make it more available..
 	trap_AddCommand( "getstatus" );		// Prints user info (IP, GUID, STATUS..)
+	trap_AddCommand( "ref" );
+	trap_AddCommand( "?" );
 	trap_AddCommand( "login" );			// Logs user as admin
 	trap_AddCommand( "@login" );		// Silently logs user as admin
 	trap_AddCommand( "logout" );		// Logs out user and revokes admin/ref status

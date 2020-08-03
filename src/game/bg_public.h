@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
  * desc:		definitions shared by both the server game and client game modules
  *
 */
+#include "../../MAIN/ui_mp/menudef.h" // For vote options
 
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
@@ -124,6 +125,36 @@ typedef enum {
 #define MAX_OID_TRIGGERS    16
 // dhm
 
+// RTCWPro - cvar limiting
+#define MAX_SVCVARS 128
+
+#define SVC_EQUAL           0
+#define SVC_GREATER         1
+#define SVC_GREATEREQUAL    2
+#define SVC_LOWER           3
+#define SVC_LOWEREQUAL      4
+#define SVC_INSIDE          5
+#define SVC_OUTSIDE         6
+#define SVC_INCLUDE         7
+#define SVC_EXCLUDE         8
+#define SVC_WITHBITS        9
+#define SVC_WITHOUTBITS     10
+
+typedef struct svCvar_s
+{
+	char cvarName[MAX_CVAR_VALUE_STRING];
+	int mode;
+	char Val1[MAX_CVAR_VALUE_STRING];
+	char Val2[MAX_CVAR_VALUE_STRING];
+} svCvar_t;
+
+typedef struct forceCvar_s
+{
+	char cvarName[MAX_CVAR_VALUE_STRING];
+	char cvarValue[MAX_CVAR_VALUE_STRING];
+} forceCvar_t;
+// RTCWPro
+
 //
 // config strings are a general means of communicating variable length strings
 // from the server to all connected clients.
@@ -175,6 +206,9 @@ typedef enum {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
+#define CS_SVCVAR               42		// RTCWPro - Cvar limiting
+#define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
+
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
 #define CS_PLAYERS              ( CS_SOUNDS + MAX_SOUNDS )
@@ -1125,7 +1159,6 @@ typedef enum extWeaponStats_s
 	WS_MG42,                // 16
 	WS_RIFLE,				// 17 - equivalent american weapon to german mauser
 	WS_VENOM,				// 18 
-	WS_POISON,				// 19							
 	WS_MAX
 } extWeaponStats_t;
 
@@ -1774,6 +1807,16 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
 #define CGF_AUTOACTIVATE    0x04
 #define CGF_PREDICTITEMS    0x08
 //
+// Voting
+typedef struct {
+	const char  *pszCvar;
+	int flag;
+} voteType_t;
+
+extern const voteType_t voteToggles[];
+extern int numVotesAvailable;
+
+#define VOTING_DISABLED     ( ( 1 << numVotesAvailable ) - 1 )
 extWeaponStats_t BG_WeapStatForWeapon( weapon_t iWeaponID );
 // ET Port 
 int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF );
@@ -1787,3 +1830,26 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
+
+// RTCWPro - custom config
+int trap_PC_LoadSource(const char* filename);
+int trap_PC_FreeSource(int handle);
+int trap_PC_ReadToken(int handle, pc_token_t* pc_token);
+int trap_PC_SourceFileAndLine(int handle, char* filename, int* line);
+
+void PC_SourceError(int handle, const char* format, ...);
+//void PC_SourceWarning(int handle, const char *format, ...); // Unused
+
+#ifdef GAMEDLL
+const char* PC_String_Parse(int handle);
+#else
+const char* String_Alloc(const char* p);
+qboolean PC_String_Parse(int handle, const char** out);
+#endif
+qboolean PC_String_ParseNoAlloc(int handle, char* out, size_t size);
+qboolean PC_Int_Parse(int handle, int* i);
+qboolean PC_Color_Parse(int handle, vec4_t* c);
+qboolean PC_Vec_Parse(int handle, vec3_t* c);
+qboolean PC_Float_Parse(int handle, float* f);
+qboolean PC_Point_Parse(int handle, vec2_t* c);
+// RTCWPro

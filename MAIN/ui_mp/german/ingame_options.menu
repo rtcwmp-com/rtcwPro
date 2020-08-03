@@ -1,0 +1,799 @@
+#include "ui_mp/menudef.h"
+
+{
+\\ SETUP MENU \\
+
+menuDef {
+	name "ingame_options"
+	visible 0
+	fullscreen 0
+	outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	rect 100 110 443 325
+	focusColor 1 .75 0 1
+	style 1
+	border 1
+	onopen { setCvar cg_draw2D "0"; hide grpOptions ; show view }
+	onClose { setCvar cg_draw2D "1" }
+	onEsc { setCvar cg_draw2D "1" }
+
+	itemDef {
+		name window
+		group ingamebox
+		rect 0 2 443 285
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .5 .5 .5 .5
+		backcolor 0 0 0 .25
+		visible 1
+		decoration
+	}
+
+	itemDef {
+		name window2
+		group grpControlbutton
+		rect 2 4 439 20
+		style WINDOW_STYLE_FILLED
+		border 1
+		bordercolor .1 .1 .1 .2
+		backcolor .3 0.5 0.2 .25
+		visible 1
+		decoration
+	}
+
+
+/////////////////
+// Performance
+/////////////////
+	itemDef {
+		name ctr_performance
+		group grpControlbutton
+		text "Leistung"
+		tooltip "Leistungs Einstellungen"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 32 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show performance }
+		mouseEnter { setitemcolor ctr_performance backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_performance backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Anzeigedauer Wandtreffer:"
+		tooltip "Wie lange Einschüsse in der Wand sichtbar sind"
+		cvar "cg_markTime"
+		cvarFloatList { "Lang" 30000 "Normal" 20000 "Kurz" 10000 "Aus" 0 }
+		rect 22 30 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Verzierungen:"
+		cvar "cg_brassTime"
+		cvarFloatList { "Hoch" 15000 "Med" 2500 "Aus" 0 }
+		rect 22 45 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Dynamische Lichter:"
+		cvar "r_dynamiclight"
+		rect 22 60 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Einfacher Himmel:"
+		cvar "r_fastsky"
+		rect 22 75 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Komplexer Himmel:"
+		cvar "cg_skybox"
+		rect 22 90 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Bild-Synchronisation:"
+		cvar "r_finish"
+		rect 22 105 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		type ITEM_TYPE_MULTI
+		group grpOptions
+		text "Strahlenlänge:"
+		cvar "cg_coronafardist"
+		cvarFloatList { "Aus" 0 "Nah" 800 "Normal" 1536 "Entfernt" 4096 "Extrem" 16000 }
+		rect 22 120 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Partikel:"
+		cvar "cg_wolfparticles"
+		rect 22 135 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Filmsequenzen:"
+		cvar "r_inGameVideo"
+		rect 22 150 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+	itemDef {
+		name performance
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Nvidia-Nebeltyp:"
+		cvarTest "r_ext_NV_fog_dist"
+		cvar "r_nv_fogdist_mode"
+		cvarStrList { "NV Radial", "GL_EYE_RADIAL_NV", "NV Plane", "GL_EYE_PLANE_ABSOLUTE_NV" }
+		showcvar { "1" }
+		rect 22 165 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 1
+	}
+
+
+
+//////////////////////////
+//       VIEW
+//////////////////////////
+	itemDef {
+		name ctr_view
+		group grpControlbutton
+		text "Anzeige"
+		tooltip "Bildschirm Einstellungen"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 172 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show view }
+		mouseEnter { setitemcolor ctr_view backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_view backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Waffe anzeigen:"
+		tooltip "Waffen-Grafik anzeigen"
+		cvar "cg_drawGun"
+		rect 22 30 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Mündungsfeuer :"
+		tooltip "Das Mündungsfeuer beim Schiessen anzeigen"
+		cvar "cg_muzzleFlash"
+		rect 22 45 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Anzeigedauer des Chats:"
+		tooltip "Wie lange die Chatnachrichten angezeigt werden sollen"
+		cvar "cg_voicespritetime"
+		cvarFloatList { "Kurz" 3000 "Normal" 6000 "Lang" 12000 "Sehr Lang" 24000 }
+		rect 22 60 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Nur Teamchats:"
+		tooltip "Nur Teamchats anzeigen"
+		cvar "cg_teamChatsOnly"
+		rect 22 75 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Zeiger-Tipps:"
+		tooltip "Anzeige wenn in Nähe eines Aktionsobjektes"
+		cvar "cg_cursorHints"
+		cvarFloatList { "Aus" 0 "Intervall" 1 "Stroboskop Intervall" 2 "Alpha Intervall" 3 "Fest" 4 }
+		rect 22 90 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Kompass anzeigen:"
+		tooltip "Kompass-Anzeige"
+		cvar "cg_drawCompass"
+		cvarFloatList { "Aus" 0 "An" 1 }
+		rect 22 105 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Team-Infos:"
+		tooltip "Team Aufenthaltsinformationen"
+		cvar "cg_drawteamoverlay"
+		cvarFloatList { "Aus" 0 "Kurz" 1 "Lang" 2 }
+		rect 22 120 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	/////////////////////////
+	// OSP additions
+	//
+	itemDef {
+		name view
+		type ITEM_TYPE_MULTI
+		group grpOptions
+		text "Nachschub Zeit:"
+		tooltip "Zeigt die verbleibende Zeit bis zum Eintreffen der Verstärkung an"
+		cvar "cg_drawReinforcementTime"
+		cvarFloatList { "Aus" 0 "An" 1 }
+		rect 22 135 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Beschwerde-Abfrage:"
+		tooltip "Automatische Anzeige der Beschwerde-Abfrage wenn man von eimem Mitspieler getötet wird"
+		cvar "cg_complaintPopUp"
+		cvarFloatList { "Aus" 0 "An" 1 }
+		rect 22 150 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "JPEG für Screenshot:"
+		tooltip "JPEG Format wenn \"Autoscreenshot\" an"
+		cvar "cg_useScreenshotJPEG"
+		rect 22 165 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Ansager:"
+		tooltip "Ansager am Anfang und Ende des Spiels"
+		cvar "cg_announcer"
+		rect 22 180 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Menge Blutspritzer:"
+		tooltip "Blutspritzer wenn man getroffen wird"
+		cvar "cg_bloodFlash"
+		cvarFloatList { "Keine" 0.0 "Leicht" 0.25 "Medium" 0.5 "Viel" 0.75 "Voll" 1.0 }
+		rect 22 195 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Anzeige Blutspritzer:"
+		tooltip "Sichtbarkeit des spritzendes Blutes wenn man getroffen wird"
+		cvar "cg_bloodDamageBlend"
+		cvarFloatList { "Keine" 0.0 "Leicht" 0.25 "Medium" 0.5 "Viele" 0.75 "Voll" 1.0 }
+		rect 22 210 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Automatische Aktionen:"
+		tooltip "Automatische Aktionen an bestimmten Punkten im Spiel"
+		cvar "cg_autoAction"
+		cvarFloatList { "Keine" 0 "Demo" 1 "Screenshot" 2 "Statistik" 4 "Demo + Screenshot" 3 "Demo + Statistik" 5 "Screenshot + Statistik" 6 "Demo + Screenshot + Statistik" 7 }
+		rect 22 225 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Zeichensatz Stil:"
+		tooltip "Auswahl des Zeichensatzes für das Spiel"
+		cvar "ch_font"
+		cvarFloatList { "Standart" 0 "Stil 1" 1 "Stil 2" 2 }
+		rect 22 240 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name view
+		group grpOptions
+		type ITEM_TYPE_YESNO
+		text "Wichtiges in Konsole anzeigen:"
+		tooltip "Zeigt wichtige Meldungen zusätzlich in der Konsole an"
+		cvar "cg_printObjectiveInfo"
+		rect 22 255 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+
+
+
+/////////////////
+// crosshair
+/////////////////
+	itemDef {
+		name ctr_xhair
+		group grpControlbutton
+		text "Fadenkreuz"
+		tooltip "Fadenkreuz Einstellungen verändern"
+		type 1
+		textfont UI_FONT_NORMAL
+		textscale .25
+		rect 320 10 100 12
+		textalign 1
+		textalignx 50
+		textaligny 10
+		backcolor .1 .1 .1 0
+		visible 1
+		action { hide grpOptions ; show xhair }
+		mouseEnter { setitemcolor ctr_xhair backcolor .1 .37 .1 1 }
+		mouseExit { setitemcolor ctr_xhair backcolor .37 .1 .1 1 }
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Fadenkreuz Grösse:"
+		tooltip "Grösse des Fadenkreuzes einstellen"
+		cvar "cg_crosshairsize"
+		cvarFloatList { "Winzig" 24 "Klein" 32 "Medium" 48 "Gross" 64 "Riesig" 96 }
+		rect 22 30 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Pulsierendes Fadenkreuz:"
+		tooltip "Pulsierendes Fadenkreuz im Spiel"
+		cvar "cg_crosshairPulse"
+		cvarFloatList { "Aus" 0 "An" 1 }
+		rect 22 45 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Fadenkreuz Gesundheits Info:"
+		tooltip "Färbt das Fadenkreuz nach Schaden (Fadenkreuz-Farben dann nicht möglich)"
+		cvar "cg_crosshairHealth"
+		cvarFloatList { "Aus" 0 "An" 1 }
+		rect 22 60 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Fadenkreuz Namensanzeige:"
+		tooltip "Zeigt den Namen/Gesundheit/Munition des Mitspielers wenn man ihn anvisiert"
+		cvar "cg_drawCrosshairNames"
+		cvarFloatList { "Aus" 0 "Alles anzeigen" 1 "Nur Name/Health" 2 }
+		rect 22 75 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Fadenkreuz \"Objekt aufnehmen\":"
+		tooltip "Zeigt das 'Objekt aufnehmen' Symbol über dem Fadenkreuz an"
+		cvar "cg_drawCrosshairPickups"
+		cvarFloatList { "Keins" 0 "Objekt" 1 "Objekt (hervorgehoben)" 2 }
+		rect 22 90 400 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 200
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		text "Auswählen"
+		rect 80 130 100 16
+		textalign ITEM_ALIGN_CENTER
+		textfont UI_FONT_NORMAL
+		textscale .30
+		textalignx 50
+		textaligny 14
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 0 .07
+		forecolor 1 1 0 1
+		visible 0
+		decoration
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		tooltip "Klicken um die verschiedenen Fadenkreuze zu sehen"
+		rect 80 146 100 100
+		ownerdraw UI_CROSSHAIR
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 0
+		textaligny 100
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		visible 0
+   	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_MULTI
+		text "Primäre Farbe:"
+		tooltip "Farbe des primären Fadenkreuzes"
+		cvar "cg_crosshairColor"
+		cvarStrList { "Weiss", "white", "Gelb", "yellow", "Rot", "red", "Grün", "green", "Blau", "blue", "Magenta", "magenta", "Zyan", "cyan", "Orange", "orange", "Leicht Blau", "0xa0c0ff", "Medium Blau", "mdblue", "Leicht Rot", "0xffc0a0", "Medium Rot", "mdred", "Leicht Grün", "0xa0ffc0", "Medium Grün", "mdgreen", "Dunkel Grün", "dkgreen", "Medium Zyan", "mdcyan", "Medium Gelb", "mdyellow", "Medium Orange", "mdorange", "Leicht Grau", "ltgrey", "Medium Grau", "mdgrey", "Dunkel Grau", "dkgrey", "Schwarz", "black" }
+		rect 191 163 242 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 120
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_SLIDER
+		text "Primäres Alpha:"
+		tooltip "Transparenz des primären Fadenkreuzes"
+		cvarfloat "cg_crosshairAlpha" 1 0 1
+		rect 191 178 242 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 120
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+ 		type ITEM_TYPE_MULTI
+		text "Sekundäre Farbe:"
+		tooltip "Farbe des Sekundären Fadenkreuzes"
+		cvar "cg_crosshairColorAlt"
+		cvarStrList { "Weiss", "white", "Gelb", "yellow", "Rot", "red", "Grün", "green", "Blau", "blue", "Magenta", "magenta", "Zyan", "cyan", "Orange", "orange", "Leicht Blau", "0xa0c0ff", "Medium Blau", "mdblue", "Leicht Rot", "0xffc0a0", "Medium Rot", "mdred", "Leicht Grün", "0xa0ffc0", "Medium Grün", "mdgreen", "Dunkel Grün", "dkgreen", "Medium Zyan", "mdcyan", "Medium Gelb", "mdyellow", "Medium Orange", "mdorange", "Leicht Grau", "ltgrey", "Medium Grau", "mdgrey", "Dunkel Grau", "dkgrey", "Schwarz", "black" }
+		rect 191 216 242 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 120
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+	itemDef {
+		name xhair
+		group grpOptions
+		type ITEM_TYPE_SLIDER
+		text "Sekundäres Alpha:"
+		tooltip "Transparenz des Sekundären Fadenkreuzes"
+		cvarfloat "cg_crosshairAlphaAlt" 1 0 1
+		rect 191 231 242 12
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 120
+		textaligny 10
+		textfont UI_FONT_NORMAL
+		textscale .25
+		style WINDOW_STYLE_FILLED
+		backcolor 1 1 1 .07
+		forecolor 1 1 0.9 1
+		visible 0
+	}
+
+}
+
+}
