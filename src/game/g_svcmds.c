@@ -912,6 +912,27 @@ void Svcmd_Pause_f(qboolean pause) {
 
 /*
 =================
+CC_loadconfig
+=================
+*/
+void CC_loadconfig(void)
+{
+	char scriptName[MAX_QPATH];
+
+	if (trap_Argc() != 2)
+	{
+		G_Printf("usage: loadConfig <config name>\n");
+		return;
+	}
+
+	trap_Argv(1, scriptName, sizeof(scriptName));
+
+	memset(&level.config, 0, sizeof(config_t));
+	G_ConfigSet(scriptName);
+}
+
+/*
+=================
 G_UpdateSvCvars
 =================
 */
@@ -1182,6 +1203,16 @@ qboolean    ConsoleCommand( void ) {
 	}
 	// RTCWPro
 
+	// RTCWPro - custom config
+	if (Q_stricmp(cmd, "reloadConfig") == 0) {
+		G_ReloadConfig();
+		return qtrue;
+	}
+	if (Q_stricmp(cmd, "loadConfig") == 0) {
+		CC_loadconfig();
+		return qtrue;
+	}
+	// RTCWPro
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {
 			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 1 ) ) );
