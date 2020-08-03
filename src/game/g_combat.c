@@ -337,11 +337,15 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		obit = modNames[ meansOfDeath ];
 	}
 
-	G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
+	// L0 - Don't bother in warmup etc..
+	if (g_gamestate.integer == GS_PLAYING)
+	{
+		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
+	}
 	// L0 - Stats
-	if (attacker && attacker->client){
+	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
 		if (!OnSameTeam(attacker, self)){
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
@@ -360,12 +364,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		}
 	} // End
 
-	// broadcast the death event to everyone
-	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
-	ent->s.eventParm = meansOfDeath;
-	ent->s.otherEntityNum = self->s.number;
-	ent->s.otherEntityNum2 = killer;
-	ent->r.svFlags = SVF_BROADCAST; // send to everyone
+	if (g_gamestate.integer == GS_PLAYING) {
+		// broadcast the death event to everyone
+		ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
+		ent->s.eventParm = meansOfDeath;
+		ent->s.otherEntityNum = self->s.number;
+		ent->s.otherEntityNum2 = killer;
+		ent->r.svFlags = SVF_BROADCAST; // send to everyone
+	}
 
 	self->enemy = attacker;
 
@@ -1050,6 +1056,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			case MOD_ROCKET:
 			case MOD_ROCKET_SPLASH:
 			case MOD_AIRSTRIKE:
+			case MOD_ARTY:
 			case MOD_GRENADE_PINEAPPLE:
 			case MOD_MORTAR:
 			case MOD_MORTAR_SPLASH:
@@ -1088,7 +1095,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( knockback > 200 ) {
 		knockback = 200;
 	}
-	else { knockback = .5*knockback;}   //nihi added to reduce knockback
+	//else { knockback = .5*knockback;}  // TODO did OSP do this?? //nihi added to reduce knockback
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}

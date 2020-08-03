@@ -330,8 +330,9 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_UNKNOWN,              WS_MAX },
 	{ MOD_MACHINEGUN,           WS_MG42 },
 	{ MOD_GRENADE,              WS_GRENADE },
+	{ MOD_GRENADE_SPLASH,		WS_GRENADE }, // RtcwPro added grenade splash
 	{ MOD_ROCKET,               WS_PANZERFAUST },
-
+	{ MOD_ROCKET_SPLASH,		WS_PANZERFAUST}, // RtcwPro added rocket splash
 	{ MOD_KNIFE2,               WS_KNIFE },
 	{ MOD_KNIFE,                WS_KNIFE },
 	{ MOD_KNIFE_STEALTH,        WS_KNIFE },
@@ -342,6 +343,7 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_THOMPSON,             WS_THOMPSON },
 	{ MOD_STEN,                 WS_STEN },
 //	{ MOD_GARAND,               WS_RIFLE },
+	{ MOD_MAUSER,				WS_RIFLE}, // RtcwPro added mauser
 	{ MOD_SNIPERRIFLE,          WS_RIFLE },
 	{ MOD_FG42,                 WS_FG42 },
 	{ MOD_FG42SCOPE,            WS_FG42 },
@@ -349,6 +351,7 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_GRENADE_LAUNCHER,     WS_GRENADE },
 	{ MOD_FLAMETHROWER,         WS_FLAMETHROWER },
 	{ MOD_VENOM,				WS_VENOM },
+	{ MOD_VENOM_FULL,			WS_VENOM }, // RtcwPro added venom full
 	{ MOD_GRENADE_PINEAPPLE,    WS_GRENADE },
 
 	{ MOD_DYNAMITE,             WS_DYNAMITE },
@@ -509,7 +512,7 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 	if ( !targ || !targ->client ||
 		 g_gamestate.integer != GS_PLAYING ||
 	//	 mod == MOD_ADMKILL ||
-//		 mod == MOD_SWITCHTEAM ||
+		 mod == MOD_SWITCHTEAM ||
 		 ( g_gametype.integer >= GT_WOLF && ( targ->client->ps.pm_flags & PMF_LIMBO ) ) ||
 		 ( g_gametype.integer < GT_WOLF && ( targ->s.eFlags == EF_DEAD || targ->client->ps.pm_type == PM_DEAD ) ) ) {
 		return;
@@ -901,9 +904,10 @@ void G_printMatchInfo( gentity_t *ent ) {
 		tot_shots = 0;
 		tot_acc = 0;
 		tot_rev = 0;
-		CP( va("sc \"\n"
-				 "\n^7TEAM   Player          Kll Dth Sui TK Eff ^3Gib^7    ^2DG    ^1DR   ^6TD  ^3Score\n"
-				 "^7--------------------------------------------------------------------------\n\""  ));
+		CP(va("sc \"%s ^7Team\n"
+			     "^7--------------------------------------------------------------------------"
+				 "\nPlayer          ^eKll ^7Dth Sui TK ^cEff ^3Gib ^7Accrcy   ^eHS    DG    DR   TD  Rev ^7Score\n"
+				 "^7--------------------------------------------------------------------------\n\"", (i == TEAM_RED) ? "^1Axis" : "^4Allied"  ));
 
 		for ( j = 0; j < level.numPlayingClients; j++ ) {
 			cl = level.clients + level.sortedClients[j];
@@ -946,26 +950,34 @@ void G_printMatchInfo( gentity_t *ent ) {
 			}
 
 			cnt++;
-            CP( va( "sc \"%s%-15s^3%4d^7%4d%4d%3d%3d^3%4d^2%4d^1%5d^6%6d^3%6d\n\"",
-//			CP( va( "sc \"%s%-15s^n%4d^7%4d%4d%3d%s^z%4d ^7%6.2f^n%5d%6d%6d%5d^7%7d\n\"",
-                    (i == TEAM_RED) ? "^1Axis" : "^4Allies" ,
-				//	ref,
+			CP(va("sc \"%s%-15s^e%4d^7%4d%4d%3d%s^c%4d%3d ^7%6.2f^e%5d%6d%6d%5d%3d^7%7d\n\"",
+				ref,
 					n2,
 					cl->sess.kills,
 					cl->sess.deaths,
 					cl->sess.suicides,
 					cl->sess.team_kills,
-              //      cl->sess.revives,
-				//	ref,
+					ref,
 					eff,
 					cl->sess.gibs,
-				//	( (cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots ) * 100.00f ),
-				//	cl->sess.headshots,
+					((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f),
+					cl->sess.headshots,
 					cl->sess.damage_given,
 					cl->sess.damage_received,
 					cl->sess.team_damage,
-			//		cl->sess.revives,
+					cl->sess.revives,
 					cl->ps.persistant[PERS_SCORE] ) );
+			eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+			if (eff < 0) {
+				eff = 0;
+			}
+
+			if (ent->client == cl ||
+				(ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
+					ent->client->sess.spectatorState == SPECTATOR_FOLLOW &&
+					ent->client->sess.spectatorClient == level.sortedClients[j])) {
+				ref = "^7";
+			}
 		}
 
 		eff = ( tot_kills + tot_deaths == 0 ) ? 0 : 100 * tot_kills / ( tot_kills + tot_deaths );
@@ -975,21 +987,20 @@ void G_printMatchInfo( gentity_t *ent ) {
 		tot_acc = ( (tot_shots == 0) ? 0.00 : ((float)tot_hits / (float)tot_shots ) * 100.00f );
 
 		CP( va( "sc \"^7--------------------------------------------------------------------------\n"
-				"%s%-19s^5%4d^7%4d%4d%3d %3d^3%4d ^2%4d^1%5d^6%6d^3%6d\n\"",
-				(i == TEAM_RED) ? "^1Axis" : "^4Allies" ,
-				" ^5Totals^7",
+				"%-19s^e%4d^7%4d%4d%3d^c%4d%3d ^7%6.2f^e%5d%6d%6d%5d%3d^7%7d\n\n\n\"",
+				"^eTotals^7",
 				tot_kills,
 				tot_deaths,
 				tot_sui,
 				tot_tk,
 				eff,
 				tot_gib,
-				//tot_acc,
-				//tot_hs,
+				tot_acc,
+				tot_hs,
 				tot_dg,
 				tot_dr,
 				tot_td,
-				//tot_rev,
+				tot_rev,
 				tot_gp ) );
 	}
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );

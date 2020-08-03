@@ -64,8 +64,8 @@ char *sortTag(gentity_t *ent) {
 
 	// No colors in tag for console prints..
 	DecolorString(tag, n1);
-	SanitizeString(n1, tag);
-	Q_CleanStr(tag);
+	//SanitizeString(n1, tag);
+	//Q_CleanStr(tag);
 	tag[20] = 0;	 // 20 should be enough..
 
 return tag;

@@ -1364,7 +1364,7 @@ qboolean G_ParseAnimationFiles( char *modelname, gclient_t *cl ) {
 OSPx - Store Client's IP
 ============
 */
-void SaveIP_f(gclient_t * client, char * sip)
+void SaveIP_f(gclient_t * client, char * sip) {
 	// Don't blindly save if entry already exists..
 	if (client->sess.ip[0] && 
 		client->sess.ip[1] && 

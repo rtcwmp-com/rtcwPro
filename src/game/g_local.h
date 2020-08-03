@@ -1573,6 +1573,7 @@ extern vmCvar_t g_allowPMs;
 extern vmCvar_t g_warmupDamage;
 extern vmCvar_t		g_hitsounds;
 extern vmCvar_t		g_crouchRate;
+extern vmCvar_t g_drawHitboxes;
 extern vmCvar_t team_nocontrols;
 extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t		g_disableInv;

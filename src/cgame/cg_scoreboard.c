@@ -341,7 +341,10 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 		if ( msec < 0 ) {
 			s = va( "%s %s", CG_TranslateString( "Mission time:" ),  CG_TranslateString( "Sudden Death" ) );
 		} else {
-			s = va( "%s   %2.0f:%i%i", CG_TranslateString( "Mission time:" ), (float)mins, tens, seconds ); // float cast to line up with reinforce time
+			if (cgs.gamestate == GS_PLAYING)
+				s = va( "%s   %2.0f:%i%i", CG_TranslateString( "Mission time:" ), (float)mins, tens, seconds ); // float cast to line up with reinforce time
+			else if (cgs.gamestate == GS_WARMUP)
+				s = va("%s %s", CG_TranslateString("MISSION TIME:"), CG_TranslateString("WARMUP"));
 
 		}
 		CG_DrawSmallString( x,y,s,fade );
