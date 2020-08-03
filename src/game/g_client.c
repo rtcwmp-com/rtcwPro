@@ -510,7 +510,7 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 			ent->client->deployQueueNumber = level.blueNumWaiting;
 			level.blueNumWaiting++;
 		}
-
+		// TODO Check this against OSPx
 		for ( i = 0 ; i < level.maxclients ; i++ ) {
 			if ( level.clients[i].ps.pm_flags & PMF_LIMBO
 				 && level.clients[i].sess.spectatorClient == ent->s.number ) {
@@ -1365,7 +1365,14 @@ OSPx - Store Client's IP
 ============
 */
 void SaveIP_f(gclient_t * client, char * sip)
-{
+	// Don't blindly save if entry already exists..
+	if (client->sess.ip[0] && 
+		client->sess.ip[1] && 
+		client->sess.ip[2] && 
+		client->sess.ip[3])
+	{
+		return;
+	}
 	if (strcmp(sip, "localhost") == 0 || sip == NULL) {
 		// Localhost, just enter 0 for all values:
 		client->sess.ip[0] = 0;
@@ -1395,6 +1402,81 @@ char *clientIP(gentity_t *ent, qboolean full)
 	else {
 		return va("%d.*.*.*", ent->client->sess.ip[0]);
 	}
+}
+
+/*
+===========
+L0 - Sort IP for spoof check (strips port)
+
+ETpub Port
+============
+*/
+char *GetParsedIP(const char *ipadd)
+{
+	// code by Dan Pop, http://bytes.com/forum/thread212174.html
+	unsigned b1, b2, b3, b4, port = 0;
+	unsigned char c;
+	int rc;
+	static char ipge[20];
+
+	if(!Q_strncmp(ipadd,"localhost",strlen("localhost")))
+		return "localhost";
+
+	rc = sscanf(ipadd, "%3u.%3u.%3u.%3u:%u%c", &b1, &b2, &b3, &b4, &port, &c);
+	if (rc < 4 || rc > 5)
+		return NULL;
+	if ( (b1 | b2 | b3 | b4) > 255 || port > 65535)
+		return NULL;
+	if (strspn(ipadd, "0123456789.:") < strlen(ipadd))
+		return NULL;
+	sprintf(ipge, "%u.%u.%u.%u", b1, b2, b3, b4);
+	return ipge;
+}
+
+/*
+===========
+L0 - Check spoofing..
+
+Used ETpub for reference
+============
+*/
+char *spoofcheck( gclient_t *client, char *guid, char *ip ){
+	char *cIP;
+
+	if(Q_stricmp(client->sess.guid, guid)) {
+		if( !client->sess.guid ||
+			!Q_stricmp( client->sess.guid, "" ) ||
+			!Q_stricmp( client->sess.guid, "NOGUID" ) ) {
+			
+			if( Q_stricmp( guid, "unknown" ) && Q_stricmp( guid, "NO_GUID" ) ) {
+				Q_strncpyz( client->sess.guid, guid, sizeof( client->sess.guid ) );
+			}
+		} else {
+			G_LogPrintf( "GUID SPOOF: client %i Original guid %s"
+				"Secondary guid %s\n",
+				client->ps.clientNum,
+				client->sess.guid,
+				guid);
+			
+			// We use more permanent (no options to disable it) version
+			return "You are kicked for GUID spoofing";
+		}
+	}
+
+	cIP = va("%i.%i.%i.%i", client->sess.ip[0], client->sess.ip[1], client->sess.ip[2], client->sess.ip[3] );
+	if(Q_stricmp(cIP, ip) != 0) {
+		G_LogPrintf( 
+			"IP SPOOF: client %i Original ip %s \n"
+			"Secondary ip %s\n",
+			client->ps.clientNum,
+			cIP,
+			ip
+		);
+	
+		return "You are kicked for IP spoofing";
+	}
+
+	return 0;
 }
 
 /*
@@ -1437,12 +1519,18 @@ void ClientUserinfoChanged( int clientNum ) {
 	// check for local client
 	s = Info_ValueForKey( userinfo, "ip" );
 	// OSPx - save IP
-	if (s[0] != 0) {
-		SaveIP_f(client, s);
-	}
+	//if (s[0] != 0) {
+	//	SaveIP_f(client, s);
+	//}
 	if ( s && !strcmp( s, "localhost" ) ) {
 		client->pers.localClient = qtrue;
 		client->sess.referee = RL_REFEREE;
+	}
+// L0
+	// Save IP for getstatus..
+	s = Info_ValueForKey( userinfo, "ip" );
+	if( s[0] != 0 ){
+		SaveIP_f( client, s );
 	} // OSPx - Country Flags
 	else if (!(ent->r.svFlags & SVF_BOT) && !strlen(s)) {
 		// To solve the IP bug..
@@ -1455,6 +1543,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		sscanf(s, "%[^z]s:%*s", s);
 	}
 	int cGender = 0;
+	// Check for "" GUID..
+	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
+		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
+		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+	}
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	sscanf(s, "%i %i %i %i",
 			&client->pers.clientFlags,

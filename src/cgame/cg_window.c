@@ -43,6 +43,79 @@ If you have questions concerning this license or the applicable additional terms
 extern pmove_t cg_pmove;        // cg_predict.c
 extern displayContextDef_t cgDC;// L0 - Makes more sense here..	
 
+/*
+	Closes any existing window
+*/
+void CG_closeDemoPopWindow(void) {	
+	if (cgs.demoPopUpInfo.show == SHOW_ON) {
+		if (cg.time < cgs.demoPopUpInfo.fadeTime) {
+			cgs.demoPopUpInfo.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoPopUpInfo.fadeTime;
+		}
+		else {
+			cgs.demoPopUpInfo.fadeTime = cg.time + STATS_FADE_TIME;
+		}
+		CG_windowFree(cg.demoPopupWindow);
+		cg.demoPopupWindow = NULL;
+	}
+}
+
+/*
+	Pops up for few seconds
+*/
+void CG_createDemoPopUpWindow( char *str, int sec) {
+
+	if (!demo_popupWindow.integer) {
+		return;
+	}
+	else {
+		vec4_t colorGeneralFill = { 0.1f, 0.1f, 0.1f, 0.8f };
+		cg_window_t *sw = CG_windowAlloc(WFX_TEXTSIZING | WFX_FADEIN | WFX_SCROLLUP, 120);
+
+		// Close any existing..
+		CG_closeDemoPopWindow();
+
+		cg.demoPopupWindow = sw;
+		if (sw == NULL) {
+			return;
+		}
+
+		// Window specific
+		sw->id = WID_DEMOPOPUP;
+		sw->fontScaleX = 1 * 0.7f;
+		sw->fontScaleY = 1 * 0.8f;
+		sw->x = 0;
+		sw->y = 470;
+		sw->flashPeriod = 1500;
+		sw->flashMidpoint = sw->flashPeriod * 0.7f;
+		memcpy(&sw->colorBackground2, colorGeneralFill, sizeof(vec4_t));
+
+		// Mark it so it can fade away..
+		cgs.demoPopUpInfo.requestTime = cg.time + (sec * 1000);
+
+		cg.windowCurrent = sw;
+		CG_printWindow((char*)str);
+	}
+}
+
+/*
+	Destroys pop up window 
+*/
+void CG_destroyDemoPopUpWindow(void) {
+	if (!cg.demoPlayback) {
+		return;
+	}
+
+	if (cgs.demoPopUpInfo.show == SHOW_ON && cg.time > cgs.demoPopUpInfo.requestTime) {
+		if (cg.time < cgs.demoPopUpInfo.fadeTime) {
+			cgs.demoPopUpInfo.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoPopUpInfo.fadeTime;
+		}
+		else {
+			cgs.demoPopUpInfo.fadeTime = cg.time + STATS_FADE_TIME;
+		}
+		CG_windowFree(cg.demoPopupWindow);
+		cg.demoPopupWindow = NULL;
+	}
+}
 void CG_createStatsWindow( void ) {
 	cg_window_t *sw = CG_windowAlloc( WFX_TEXTSIZING | WFX_FADEIN | WFX_SCROLLUP| WFX_TRUETYPE, 110 );
 
@@ -122,6 +195,8 @@ void CG_windowInit( void ) {
 	cg.statsWindow = NULL;
 	cg.topshotsWindow = NULL;
 	cg.clientStatsWindow = NULL;
+	cg.demoControlsWindow = NULL;
+	cg.demoPopupWindow = NULL;
 }
 
 
@@ -240,6 +315,25 @@ void CG_windowDraw( void ) {
 		return;
 	}
 */
+
+	// OSPx Demo code - TODO what is above?
+	CG_demoView();
+
+	if ( cg.winHandler.numActiveWindows == 0 ) {
+		// OSPx - Pre-set some stuff
+		if (demo_controlsWindow.integer && cg.demoPlayback) {
+			cgs.demoControlInfo.show = SHOW_ON;
+			CG_createControlsWindow();
+		}
+
+		if (demo_popupWindow.integer && cg.demoPlayback && !cg.advertisementDone && !demo_noAdvertisement.integer) {
+			cgs.demoPopUpInfo.show = SHOW_ON;
+			CG_createDemoPopUpWindow("Upload this demo: ^n/demoupload current <optional: comment>", 10);
+			cg.advertisementDone = qtrue;
+		}
+		// ~OSPx
+		return;
+	}
 
 	milli = trap_Milliseconds();
 	memcpy( textColor, colorWhite, sizeof( vec4_t ) );
@@ -376,6 +470,7 @@ void CG_windowDraw( void ) {
 	// Extra rate info
 //	CG_demoAviFPSDraw();
 //	CG_demoTimescaleDraw();
+	CG_destroyDemoPopUpWindow();
 
 	if ( fCleanup ) {
 		CG_windowCleanup();

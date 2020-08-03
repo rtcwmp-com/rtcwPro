@@ -264,8 +264,14 @@ char    *modNames[] = {
 	"MOD_LT_AIRSTRIKE",
 	"MOD_ENGINEER",  // not sure if we'll use
 	"MOD_MEDIC",     // these like this or not
+	"MOD_BAT",
 // jpw
-	"MOD_BAT"
+// OSPx
+	"MOD_ADMKILL",
+	"MOD_SELFKILL",
+	"MOD_SWITCHTEAM",
+	"MOD_NUM_MODS"
+// -OSPx
 };
 
 /*
@@ -294,6 +300,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	if ( level.intermissiontime ) {
 		return;
 	}
+
+	// OSP - goat luvin TODO Fix me
+	/*if(meansOfDeath == MOD_KNIFE) {
+	if( attacker == cg.snap->ps.clientNum || target == cg.snap->ps.clientNum ) {
+		trap_S_StartSound( cg.snap->ps.origin, cg.snap->ps.clientNum, CHAN_AUTO, cgs.media.goatAxis );
+	}*/
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );

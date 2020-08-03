@@ -522,8 +522,7 @@ void CG_createControlsWindow(void) {
 	}
 	else {		
 		vec4_t colorGeneralFill = { 0.1f, 0.1f, 0.1f, 0.8f };
-		int i, \
-			aHelp = ARRAY_LEN(helpInfo);
+		int i, aHelp = ARRAY_LEN(helpInfo);
 		const helpCmd_reference_t *hCM;		
 
 		if (aHelp != 0) {

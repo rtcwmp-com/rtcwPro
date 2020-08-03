@@ -486,7 +486,7 @@ void CG_PyroSmokeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 		if ( !ent->currentState.otherEntityNum2 ) { // axis team, generate red smoke
 			le = CG_SmokePuff( origin, dir,
 							   25 + rnd * 110, // width
-							   rnd * 0.5 + 0.5, rnd * 0.5 + 0.5, 1, 0.5,
+							   rnd * 0.5 + 0.2, rnd * 0.5 + 0.2, 1, 0.5, // RtcwPro make it more red
 							   4800 + ( rand() % 2800 ), // duration was 2800+
 							   t,
 							   0,
@@ -495,7 +495,7 @@ void CG_PyroSmokeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 		} else {
 			le = CG_SmokePuff( origin, dir,
 							   25 + rnd * 110, // width
-							   1.0, rnd * 0.5 + 0.5, rnd * 0.5 + 0.5, 0.5,
+							   1.0, rnd * 0.5 + 0.2, rnd * 0.5 + 0.2, 0.5, // RtcwPro make it more blue
 							   4800 + ( rand() % 2800 ), // duration was 2800+
 							   t,
 							   0,

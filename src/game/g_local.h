@@ -2001,19 +2001,27 @@ qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
 qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
+
 // Macros
+//
+#define AP( x ) trap_SendServerCommand( -1, x )                 // Print to all
+#define CP( x ) trap_SendServerCommand( ent - g_entities, x )	// Print to an ent
+#define CPx( x, y ) trap_SendServerCommand( x, y )				// Print to id = x
+#define TP( x, y ) G_TeamCommand( x, y)							// Sends team command
+#define APS(x)		APSound(x)									// Global sound 
+#define AAPS(x)		AAPSound(x)									// Global sound but hooked under cg_announcer..
+#define APRS(x, y)	APRSound(x, y)								// Global sound with limited (radius) range
+#define CPS(x, y)	CPSound(x, y)								// Client sound only
+#define ARRAY_LEN(x) (sizeof(x) / sizeof(*(x)))					// Saves some time..
+
 
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
-//#define AP( x ) trap_SendServerCommand( -1, x )					// Print to all
 void CountDown(qboolean restart);
 int isWeaponLimited (gclient_t *client, int weap);
 void setDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
-//#define CP( x ) trap_SendServerCommand( ent - g_entities, x )	// Print to an ent
-//#define CPx( x, y ) trap_SendServerCommand( x, y )				// Print to id = x
-#define AAPS(x)		AAPSound(x)
 //
 // g_files.c
 //

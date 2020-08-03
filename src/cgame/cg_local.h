@@ -1696,6 +1696,7 @@ typedef struct {
 	sfxHandle_t	headShot;
 	sfxHandle_t	bodyShot;
 	sfxHandle_t	teamShot;
+	sfxHandle_t goatAxis;
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -2042,6 +2043,7 @@ extern vmCvar_t cg_crosshairAlpha;
 extern vmCvar_t cg_crosshairAlphaAlt;
 extern vmCvar_t cg_crosshairColor;
 extern vmCvar_t cg_crosshairColorAlt;
+extern vmCvar_t cg_coloredCrosshairNames;
 extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
 extern vmCvar_t cg_printObjectiveInfo;
@@ -2049,19 +2051,22 @@ extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
+extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
 // nihi added
 extern vmCvar_t	vp_drawnames;
 extern vmCvar_t	cg_drawNames;
 extern vmCvar_t cg_announcer;
+extern vmCvar_t cg_drawPickupItems;
 extern vmCvar_t cg_autoAction;
-extern vmCvar_t cg_forceTapout;
 extern vmCvar_t cg_statsList;
 extern vmCvar_t cg_useScreenshotJPEG;
 extern vmCvar_t cg_chatAlpha;
 extern vmCvar_t cg_chatBackgroundColor;
 extern vmCvar_t cg_printObjectiveInfo;
+extern vmCvar_t cg_instantTapout;
+extern vmCvar_t cg_forceTapout;
 extern vmCvar_t cg_uinfo;
 extern vmCvar_t cf_wstats;
 extern vmCvar_t cf_wtopshots;
@@ -2111,7 +2116,7 @@ int CG_LastAttacker( void );
 void CG_LoadMenus( const char *menuFile );
 void CG_KeyEvent( int key, qboolean down );
 void CG_MouseEvent( int x, int y );
-void CG_EventHandling( int type );
+void CG_EventHandling(int type, qboolean forced);
 
 qboolean CG_GetTag( int clientNum, char *tagname, orientation_t * or );
 qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t * or );
