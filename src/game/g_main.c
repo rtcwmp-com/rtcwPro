@@ -517,7 +517,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &sab_autoIgnore, "sab_autoIgnore", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_warmupDamage, "g_warmupDamage", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_crouchRate, "g_crouchRate", "3000", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_crouchRate, "g_crouchRate", "5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse},
 	{ &g_lifeStats, "g_lifeStats", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_maxTeamPF, "g_maxTeamPF", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
@@ -3104,12 +3104,12 @@ void G_RunFrame( int levelTime ) {
 		level.timeCurrent = levelTime - level.timeDelta;
 	} else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		if ( ( level.time % 500 ) == 0 ) {
+		//if ( ( level.time % 500 ) == 0 ) {
 			// Respawn and time issuses
 			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
 			// Print stuff.. FIXME one day...
 			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
-		}
+		//}
 	} // End
 //	level.frameTime = trap_Milliseconds();   // nihi removed
 	level.frameStartTime = trap_Milliseconds(); // nihi added
