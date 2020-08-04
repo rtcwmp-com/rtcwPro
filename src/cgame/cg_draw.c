@@ -2945,6 +2945,9 @@ static void CG_DrawWarmup( void ) {
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
 		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
+		if (sec==3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
+		if (sec==2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
+		if (sec==1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
 		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
 	}
