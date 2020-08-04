@@ -2945,9 +2945,11 @@ static void CG_DrawWarmup( void ) {
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
 		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
-		if (sec==3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
-		if (sec==2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
-		if (sec==1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
+		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
+		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
+		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
+		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
+		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
 		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
 	}
@@ -4088,6 +4090,8 @@ static void CG_Draw2D( void ) {
 		// -NERVE - SMF
 	}
 
+	// OSPx - Announcer
+	CG_DrawAnnouncer();
 	// OSPx - window updates
 	CG_windowDraw();
 	// Ridah, draw flash blends now
@@ -4544,7 +4548,7 @@ L0 - CG_DrawAnnouncer
 
 Ported from ET
 =====================
-
+*/
 
 void CG_DrawAnnouncer( void )
 {
@@ -4608,4 +4612,3 @@ void CG_AddAnnouncer(char *text, sfxHandle_t sound, float scale, int duration, f
 		cg.centerPrintAnnouncerMode = mode;
 	}
 }
-*/

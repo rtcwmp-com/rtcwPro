@@ -1645,7 +1645,7 @@ void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 			}
 
 			txt_dump( va( "\n^zDamage Given: ^7%-6d  ^zTeam Damage : ^7%d\n", dmg_given, team_dmg ) );
-			txt_dump( va(  "^zDamage Recvd: ^7%-6d  ^zBodies Gibed: ^7%d \n", dmg_rcvd, gibs ) );
+			txt_dump( va(  "^zDamage Recvd: ^7%-6d  ^zBodies Gibbed: ^7%d \n", dmg_rcvd, gibs ) );
 		}
 	}
 	txt_dump( "\n" );

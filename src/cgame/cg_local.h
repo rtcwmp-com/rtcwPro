@@ -1151,6 +1151,15 @@ typedef struct {
 	vec4_t xhairColor;
 	vec4_t xhairColorAlt;
 	// OSP's window's
+
+	// Announcer
+	int		centerPrintAnnouncerTime;
+	char	*centerPrintAnnouncer;
+	float	centerPrintAnnouncerScale;
+	int		centerPrintAnnouncerDuration;
+	vec3_t	centerPrintAnnouncerColor;
+	int		centerPrintAnnouncerMode;
+	
 	// Auto Actions
 	qboolean	latchAutoActions;
 	// Draw names on hud
@@ -1623,6 +1632,8 @@ typedef struct {
 	sfxHandle_t teamsTiedSound;
 
 	// tournament sounds
+	sfxHandle_t count5Sound;
+	sfxHandle_t count4Sound;
 	sfxHandle_t count3Sound;
 	sfxHandle_t count2Sound;
 	sfxHandle_t count1Sound;

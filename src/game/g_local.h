@@ -620,6 +620,7 @@ typedef struct {
 	int life_acc_hits;
 	int life_headshots;
 	int life_kills;
+	int life_gibs;
 	unsigned int int_stats;
 	unsigned int int_statsType;
 //	unsigned int int_dragBodies;

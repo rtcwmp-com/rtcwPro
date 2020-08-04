@@ -1008,6 +1008,88 @@ void G_printMatchInfo( gentity_t *ent ) {
 
 
 
+
+// Dumps end-of-match info
+// L0 - FIXME!!!!!!!!!
+void G_matchInfoDump( unsigned int dwDumpType ) {
+	int i, ref;
+	gentity_t *ent;
+	gclient_t *cl;
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
+		ref = level.sortedClients[i];
+		ent = &g_entities[ref];
+		cl = ent->client;
+
+		if ( cl->pers.connected != CON_CONNECTED ) {
+			continue;
+		}
+
+		if ( dwDumpType == EOM_WEAPONSTATS ) {
+		// L0 - THIS NEEDS FINE TUNNING - TODO!
+			// If client wants to write stats to a file, don't auto send this stuff
+			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
+				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/) {
+					G_statsall_cmd(ent, 0, qfalse);
+				}
+				else if (cl->sess.sessionTeam != TEAM_SPECTATOR) {
+					if (cl->pers.autoaction & AA_STATSTEAM) {
+						G_statsall_cmd(ent, cl->sess.sessionTeam, qfalse);
+					}
+					else { CP(va("ws %s\n", G_createStats(ent))); }
+
+				}
+				else if (cl->sess.spectatorState != SPECTATOR_FREE) {
+					int pid = cl->sess.spectatorClient;
+
+					if ((cl->pers.autoaction & AA_STATSTEAM)) {
+						G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam, qfalse);
+					}
+					else { CP(va("ws %s\n", G_createStats(g_entities + pid))); }
+				}
+			}
+
+			// Log it
+			if ( cl->sess.sessionTeam != TEAM_SPECTATOR ) {
+				G_LogPrintf( "WeaponStats: %s\n", G_createStats( ent ) );
+			}
+
+		} else if ( dwDumpType == EOM_MATCHINFO ) {
+			// Don't dump score table for users with stats dump enabled
+			if ( !cl->pers.int_stats ) {
+				G_printMatchInfo( ent );
+			}
+
+			if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
+				if ( g_currentRound.integer == 1 ) {   // We've already missed the switch
+					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
+							g_nextTimeLimit.integer,
+							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
+				} else {
+					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
+					if ( val < g_timelimit.value ) {
+						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+								(int)val,
+								(int)( 60.0 * ( val - (int)val ) ),
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+					} else {
+						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+					}
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************************/
+/* ==================== END Stats code dump from OSP (ET port) ====================*/
+/***********************************************************************************/
+
+
+
 // Backup of old stats output
 /*
 // Prints current player match info.
@@ -1137,82 +1219,3 @@ void G_printMatchInfo( gentity_t *ent ) {
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
 }
 */
-// Dumps end-of-match info
-// L0 - FIXME!!!!!!!!!
-void G_matchInfoDump( unsigned int dwDumpType ) {
-	int i, ref;
-	gentity_t *ent;
-	gclient_t *cl;
-
-	for ( i = 0; i < level.numConnectedClients; i++ ) {
-		ref = level.sortedClients[i];
-		ent = &g_entities[ref];
-		cl = ent->client;
-
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-
-		if ( dwDumpType == EOM_WEAPONSTATS ) {
-		// L0 - THIS NEEDS FINE TUNNING - TODO!
-			// If client wants to write stats to a file, don't auto send this stuff
-			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
-				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/) {
-					G_statsall_cmd(ent, 0, qfalse);
-				}
-				else if (cl->sess.sessionTeam != TEAM_SPECTATOR) {
-					if (cl->pers.autoaction & AA_STATSTEAM) {
-						G_statsall_cmd(ent, cl->sess.sessionTeam, qfalse);
-					}
-					else { CP(va("ws %s\n", G_createStats(ent))); }
-
-				}
-				else if (cl->sess.spectatorState != SPECTATOR_FREE) {
-					int pid = cl->sess.spectatorClient;
-
-					if ((cl->pers.autoaction & AA_STATSTEAM)) {
-						G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam, qfalse);
-					}
-					else { CP(va("ws %s\n", G_createStats(g_entities + pid))); }
-				}
-			}
-
-			// Log it
-			if ( cl->sess.sessionTeam != TEAM_SPECTATOR ) {
-				G_LogPrintf( "WeaponStats: %s\n", G_createStats( ent ) );
-			}
-
-		} else if ( dwDumpType == EOM_MATCHINFO ) {
-			// Don't dump score table for users with stats dump enabled
-			if ( !cl->pers.int_stats ) {
-				G_printMatchInfo( ent );
-			}
-
-			if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
-				if ( g_currentRound.integer == 1 ) {   // We've already missed the switch
-					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
-							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
-				} else {
-					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-					if ( val < g_timelimit.value ) {
-						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
-								(int)val,
-								(int)( 60.0 * ( val - (int)val ) ),
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-					} else {
-						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-					}
-				}
-			}
-		}
-	}
-}
-
-/***********************************************************************************/
-/* ==================== END Stats code dump from OSP (ET port) ====================*/
-/***********************************************************************************/
-
