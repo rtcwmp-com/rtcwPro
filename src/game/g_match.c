@@ -231,23 +231,23 @@ void CountDown(qboolean restart) {
             AAPS("sound/match/prepare.wav");
 		if (!restart) AP(va("cp \"Prepare to fight^1!\n\"2"));
 	}
-	if (level.CNstart == 1) { 
+	if (level.CNstart == 1) {
 		index = "cn_5.wav";
 		if (!restart) AP(va("cp \"Match resumes in: ^15\n\"2"));
 	}
-	if (level.CNstart == 2) { 
+	if (level.CNstart == 2) {
 		index = "cn_4.wav";
 		if (!restart) AP(va("cp \"Match resumes in: ^14\n\"2"));
 	}
-	if (level.CNstart == 3) { 
+	if (level.CNstart == 3) {
 		index = "cn_3.wav";
 		if (!restart) AP(va("cp \"Match resumes in: ^13\n\"2"));
 	}
-	if (level.CNstart == 4) { 
+	if (level.CNstart == 4) {
 		index = "cn_2.wav";
 		if (!restart) AP(va("cp \"Match resumes in: ^12\n\"2"));
 	}
-	if (level.CNstart == 5) { 
+	if (level.CNstart == 5) {
 		index = "cn_1.wav";
 		if (!restart) AP(va("cp \"Match resumes in: ^11\n\"2"));
 	}
@@ -295,9 +295,9 @@ void CountDown(qboolean restart) {
 
 //	if (level.clients->pers.connected == CON_CONNECTED)
 //		doSound(other, EV_ANNOUNCER_SOUND, "sound/scenaric/", va("%s", index));
-	
+
 	if (level.clients->pers.connected == CON_CONNECTED)
-		AAPS("sound/match/%s", index);
+		AAPS(va("sound/match/%s", index));
 
 	level.CNstart++;  // push forward each frame.. :)
 }
