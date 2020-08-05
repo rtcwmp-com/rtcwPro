@@ -547,7 +547,7 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 		 targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam ) {
 		attacker->client->sess.team_damage += dmg;
 		// Don't count self kill as team kill..because it ain't!
-		if ( targ->health <= 0 && !(mod == MOD_SUICIDE || mod == MOD_SUICIDE)) {
+		if ( targ->health <= 0 && !(mod == MOD_SELFKILL || mod == MOD_SUICIDE)) {
 			attacker->client->sess.team_kills++;
 			targ->client->sess.deaths++;	// Record death when TK occurs
 		}
