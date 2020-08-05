@@ -542,7 +542,55 @@ int Text_Height( const char *text, float scale, int limit ) {
 	}
 	return max * useScale;
 }
+int Multiline_Text_Height( const char *text, float scale, int limit ) {
+	int len, count;
+	float max;
+	float totalheight = 0;
+	glyphInfo_t *glyph;
+	const char *s = text;
+	//fontInfo_t *font = &uiInfo.uiDC.Assets.fonts[uiInfo.activeFont];
+	fontInfo_t *font = &uiInfo.uiDC.Assets.textFont;
 
+	max = 0;
+	if ( text ) {
+		len = strlen( text );
+		if ( limit > 0 && len > limit ) {
+			len = limit;
+		}
+		count = 0;
+		while ( s && *s && count < len ) {
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+				continue;
+			} else {
+				if ( *s == '\n' ) {
+					if ( !totalheight ) {
+						totalheight += 5;   // 5 is the vertical spacing that autowrap painting uses
+					}
+					totalheight += max;
+					max = 0;
+				} else {
+					glyph = &font->glyphs[(unsigned char)*s];           // NERVE - SMF - this needs to be an unsigned cast for localization
+					if ( max < glyph->height ) {
+						max = glyph->height;
+					}
+				}
+				s++;
+				count++;
+			}
+		}
+	}
+
+	if ( totalheight > 0 ) {
+		if ( !totalheight ) {
+			totalheight += 5;   // 5 is the vertical spacing that autowrap painting uses
+		}
+		totalheight += max;
+		return totalheight * scale * font->glyphScale;
+	} else {
+		return max * scale * font->glyphScale;
+	}
+}
 void Text_PaintChar( float x, float y, float width, float height, float scale, float s, float t, float s2, float t2, qhandle_t hShader ) {
 	float w, h;
 	w = width * scale;
@@ -6866,6 +6914,7 @@ void _UI_Init( qboolean inGameLoad ) {
 	uiInfo.uiDC.translateString = &trap_TranslateString;            // NERVE - SMF
 	uiInfo.uiDC.checkAutoUpdate = &trap_CheckAutoUpdate;            // DHM - Nerve
 	uiInfo.uiDC.getAutoUpdate = &trap_GetAutoUpdate;                // DHM - Nerve
+    uiInfo.uiDC.multiLineTextHeight = &Multiline_Text_Height;
 
 	Init_Display( &uiInfo.uiDC );
 
@@ -7525,6 +7574,7 @@ vmCvar_t ui_crosshairSize;
 
 // Speclock
 vmCvar_t ui_blackout;
+vmCvar_t ui_showtooltips;
 // -OSPx
 
 cvarTable_t cvarTable[] = {
@@ -7663,7 +7713,7 @@ cvarTable_t cvarTable[] = {
 	// Speclock
 	{ &ui_blackout, "ui_blackout", "0", CVAR_ROM },
 // -OSPx
-
+	{ &ui_showtooltips,     "ui_showtooltips",           "1", CVAR_ARCHIVE },
 	{ &ui_hudAlpha, "cg_hudAlpha", "1.0", CVAR_ARCHIVE }
 };
 
