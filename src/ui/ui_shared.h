@@ -282,10 +282,15 @@ typedef struct itemDef_s {
 	float special;                  // used for feeder id's etc.. diff per type
 	int cursorPos;                  // cursor position in characters
 	void *typeData;                 // type specific data ptr's
-    struct itemDef_s *toolTipData;  // OSP - Tag an item to this item for auto-help popups
+
     	// OSP - on-the-fly enable/disable of items
 	int settingTest;
 	int settingFlags;
+	int voteFlag;
+	const char *onEsc;
+	const char *onEnter;
+
+	struct itemDef_s *toolTipData;  // OSP - Tag an item to this item for auto-help popups
 } itemDef_t;
 
 typedef struct {
@@ -417,6 +422,7 @@ typedef struct {
 	void ( *runCinematicFrame )( int handle );
 	int ( *multiLineTextHeight )( const char *text, float scale, int limit );
     int ( *multiLineTextWidth )( const char *text, float scale, int limit );
+	int ( *getConfigString )( int index, char* buff, int buffsize );
 	float yscale;
 	float xscale;
 	float bias;

@@ -4832,10 +4832,49 @@ static void UI_RunMenuScript( char **args ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote kick \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
-		} else if ( Q_stricmp( name, "voteGame" ) == 0 ) {
-			if ( ui_netGameType.integer >= 0 && ui_netGameType.integer < uiInfo.numGameTypes ) {
-				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote g_gametype %i\n",uiInfo.gameTypes[ui_netGameType.integer].gtEnum ) );
+		} else if ( Q_stricmp( name, "voteMute" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote mute \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+		} else if ( Q_stricmp( name, "voteUnMute" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote unmute \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "voteReferee" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote referee \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "voteUnReferee" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote unreferee \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "voteGame" ) == 0 ) {
+			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
+			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", ui_voteGameType ) );
+			}
+		} else if ( Q_stricmp( name, "refGame" ) == 0 ) {
+			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
+			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", ui_voteGameType ) );
+			}
+		} else if ( Q_stricmp( name, "voteTimelimit" ) == 0 ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote timelimit %f\n", trap_Cvar_VariableValue( "ui_voteTimelimit" ) ) );
+		} else if ( Q_stricmp( name, "voteWarmupDamage" ) == 0 ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote warmupdamage %d\n", (int)trap_Cvar_VariableValue( "ui_voteWarmupDamage" ) ) );
+
+		} else if ( Q_stricmp( name, "refTimelimit" ) == 0 ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref timelimit %f\n", trap_Cvar_VariableValue( "ui_voteTimelimit" ) ) );
+		} else if ( Q_stricmp( name, "refWarmupDamage" ) == 0 ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref warmupdamage %d\n", (int)trap_Cvar_VariableValue( "ui_voteWarmupDamage" ) ) );
+		} else if ( Q_stricmp( name, "voteInitToggles" ) == 0 ) {
+			char info[MAX_INFO_STRING];
+
+			trap_GetConfigString( CS_SERVERTOGGLES, info, sizeof( info ) );
+			trap_Cvar_Set( "ui_voteWarmupDamage", va( "%d", ( ( atoi( info ) & CV_SVS_WARMUPDMG ) >> 2 ) ) );
+
+			trap_GetConfigString( CS_SERVERINFO, info, sizeof( info ) );
+			trap_Cvar_Set( "ui_voteTimelimit", va( "%i", atoi( Info_ValueForKey( info, "timelimit" ) ) ) );
 		} else if ( Q_stricmp( name, "voteLeader" ) == 0 ) {
 			if ( uiInfo.teamIndex >= 0 && uiInfo.teamIndex < uiInfo.myTeamCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callteamvote leader %s\n",uiInfo.teamNames[uiInfo.teamIndex] ) );
@@ -4979,6 +5018,94 @@ static void UI_RunMenuScript( char **args ) {
 		} else if ( Q_stricmp( name, "showSpecScores" ) == 0 ) {
 			if ( atoi( UI_Cvar_VariableString( "ui_isSpectator" ) ) ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, "+scores\n" );
+			}
+		} else if ( Q_stricmp( name, "rconGame" ) == 0 ) {
+			if ( ui_netGameType.integer >= 0 && ui_netGameType.integer < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon g_gametype %i\n", ui_netGameType.integer ) );
+			}
+		} else if ( Q_stricmp( name, "rconMap" ) == 0 ) {
+			if ( ui_currentNetMap.integer >= 0 && ui_currentNetMap.integer < uiInfo.mapCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon map %s\n",uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) );
+			}
+		} else if ( Q_stricmp( name, "refMap" ) == 0 ) {
+			if ( ui_currentNetMap.integer >= 0 && ui_currentNetMap.integer < uiInfo.mapCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref map %s\n", uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) );
+			}
+		} else if ( Q_stricmp( name, "rconKick" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon kick \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refKick" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref kick \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "rconBan" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon ban \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refMute" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref mute \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refUnMute" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref unmute \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refMakeAxis" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref putaxis \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refMakeAllied" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref putallies \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refMakeSpec" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref remove \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refUnReferee" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref unreferee \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refMakeReferee" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref referee \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "rconMakeReferee" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon makeReferee \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "rconRemoveReferee" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon removeReferee \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "rconMute" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon mute \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "rconUnMute" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "rcon unmute \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "refWarning" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				char buffer[128];
+				trap_Cvar_VariableStringBuffer( "ui_warnreason", buffer, 128 );
+
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref warn \"%s\" \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex], buffer ) );
+			}
+		} else if ( Q_stricmp( name, "refWarmup" ) == 0 ) {
+			char buffer[128];
+			trap_Cvar_VariableStringBuffer( "ui_warmup", buffer, 128 );
+
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref warmup \"%s\"\n", buffer ) );
+		} else if ( Q_stricmp( name, "ignorePlayer" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ignore \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
+			}
+		} else if ( Q_stricmp( name, "unIgnorePlayer" ) == 0 ) {
+			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "unignore \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
 		} else if ( Q_stricmp( name, "wm_sayPlayerClass" ) == 0 ) {
 			int playerType;
@@ -6915,6 +7042,7 @@ void _UI_Init( qboolean inGameLoad ) {
 	uiInfo.uiDC.checkAutoUpdate = &trap_CheckAutoUpdate;            // DHM - Nerve
 	uiInfo.uiDC.getAutoUpdate = &trap_GetAutoUpdate;                // DHM - Nerve
     uiInfo.uiDC.multiLineTextHeight = &Multiline_Text_Height;
+	uiInfo.uiDC.getConfigString = &trap_GetConfigString;
 
 	Init_Display( &uiInfo.uiDC );
 

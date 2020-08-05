@@ -732,24 +732,32 @@ NERVE - SMF - this has three behaviors
 - if in stopwatch mode, reset back to first round
 ============
 */
-void Svcmd_ResetMatch_f() {
-	if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
-		trap_Cvar_Set( "g_currentRound", "0" );
-		trap_Cvar_Set( "g_nextTimeLimit", "0" );
-	}
+void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
+	int i;
 
-	if ( !g_noTeamSwitching.integer || ( g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer ) ) {
-		trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
-		return;
-	} else { // L0 - Tournament..
-	//	if (g_tournament.integer) {
-		if (g_tournament.integer) {
+	for (i = 0; i < level.numConnectedClients; i++) {
+		g_entities[level.sortedClients[i]].client->pers.ready = 0;
+	}
+	
+
+	if (fDoReset) {
+		G_resetRoundState();
+		G_resetModeState();
+	}
+	else
+	{
+		if (fDoRestart && !g_noTeamSwitching.integer || ( g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer ) ) {
 			trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
-			trap_SetConfigstring( CS_READY, va( "%i", READY_PENDING ) );
-		} else {
-			trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WAITING_FOR_PLAYERS ) );
+			return;
+		} else { // L0 - Tournament..
+			if (g_tournament.integer) {
+				trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
+				trap_SetConfigstring( CS_READY, va( "%i", READY_PENDING ) );
+			} else {
+				trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WAITING_FOR_PLAYERS ) );
+			}
+			return;
 		}
-		return;
 	}
 }
 
@@ -852,7 +860,7 @@ void Svcmd_Shuffle_f( void )
 	}
 
 	// Reset match if there's a shuffle!
-	Svcmd_ResetMatch_f();
+	Svcmd_ResetMatch_f( qfalse, qtrue );
 
 	AP("chat \"^zconsole:^7 Teams were shuffled^1!\n\"");
 }
@@ -1160,7 +1168,7 @@ qboolean    ConsoleCommand( void ) {
 	}
 
 	if ( Q_stricmp( cmd, "reset_match" ) == 0 ) {
-		Svcmd_ResetMatch_f();
+		Svcmd_ResetMatch_f(qtrue, qtrue);
 		return qtrue;
 	}
 

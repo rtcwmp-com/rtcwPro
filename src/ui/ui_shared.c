@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 // string allocation/managment
 
 #include "ui_shared.h"
+#include "ui_local.h"    // For CS settings/retrieval
 
 #define SCROLL_TIME_START                   500
 #define SCROLL_TIME_ADJUST              150
@@ -1648,6 +1649,29 @@ qboolean Item_EnableShowViaCvar( itemDef_t *item, int flag ) {
 }
 
 
+// OSP - display if we poll on a server toggle setting
+// We want *current* settings, so this is a bit of a perf hit,
+// but this is only during UI display
+
+qboolean Item_SettingShow( itemDef_t *item, qboolean fVoteTest ) {
+	char info[MAX_INFO_STRING];
+
+	if ( fVoteTest ) {
+		trap_Cvar_VariableStringBuffer( "cg_ui_voteFlags", info, sizeof( info ) );
+		return( ( atoi( info ) & item->voteFlag ) != item->voteFlag );
+	}
+
+	DC->getConfigString( CS_SERVERTOGGLES, info, sizeof( info ) );
+
+	if ( item->settingFlags & SVS_ENABLED_SHOW ) {
+		return( atoi( info ) & item->settingTest );
+	}
+	if ( item->settingFlags & SVS_DISABLED_SHOW ) {
+		return( !( atoi( info ) & item->settingTest ) );
+	}
+
+	return( qtrue );
+}
 // will optionaly set focus to this item
 qboolean Item_SetFocus( itemDef_t *item, float x, float y ) {
 	int i;
@@ -1672,6 +1696,13 @@ qboolean Item_SetFocus( itemDef_t *item, float x, float y ) {
 		return qfalse;
 	}
 
+	// OSP
+	if ( ( item->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( item, qfalse ) ) {
+		return( qfalse );
+	}
+	if ( item->voteFlag != 0 && !Item_SettingShow( item, qtrue ) ) {
+		return( qfalse );
+	}
 	oldFocus = Menu_ClearFocus( item->parent );
 
 	if ( item->type == ITEM_TYPE_TEXT ) {
@@ -1955,6 +1986,13 @@ void Item_MouseEnter( itemDef_t *item, float x, float y ) {
 			return;
 		}
 
+		// OSP - server settings too .. (mostly for callvote)
+		if ( ( item->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( item, qfalse ) ) {
+			return;
+		}
+		if ( item->voteFlag != 0 && !Item_SettingShow( item, qtrue ) ) {
+			return;
+		}
 		if ( Rect_ContainsPoint( &r, x, y ) ) {
 			if ( !( item->window.flags & WINDOW_MOUSEOVERTEXT ) ) {
 				Item_RunScript( item, item->mouseEnterText );
@@ -4456,7 +4494,7 @@ void Item_Paint( itemDef_t *item ) {
 
 	if ( item->window.ownerDrawFlags && DC->ownerDrawVisible ) {
 		if ( !DC->ownerDrawVisible( item->window.ownerDrawFlags ) ) {
-			item->window.flags &= ~WINDOW_VISIBLE;
+			item->window.flags &= ~( WINDOW_VISIBLE | WINDOW_MOUSEOVER );
 		} else {
 			item->window.flags |= WINDOW_VISIBLE;
 		}
@@ -4466,6 +4504,13 @@ void Item_Paint( itemDef_t *item ) {
 		if ( !Item_EnableShowViaCvar( item, CVAR_SHOW ) ) {
 			return;
 		}
+	}
+	// OSP
+	if ( ( item->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( item, qfalse ) ) {
+		return;
+	}
+	if ( item->voteFlag != 0 && !Item_SettingShow( item, qtrue ) ) {
+		return;
 	}
 
 	if ( item->window.flags & WINDOW_TIMEDVISIBLE ) {
@@ -4697,6 +4742,13 @@ void Menu_HandleMouseMove( menuDef_t *menu, float x, float y ) {
 				continue;
 			}
 
+			// OSP - server settings too
+			if ( ( menu->items[i]->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( menu->items[i], qfalse ) ) {
+				continue;
+			}
+			if ( menu->items[i]->voteFlag != 0 && !Item_SettingShow( menu->items[i], qtrue ) ) {
+				continue;
+			}
 
 
 			if ( Rect_ContainsPoint( &menu->items[i]->window.rect, x, y ) ) {
@@ -4730,6 +4782,7 @@ void Menu_HandleMouseMove( menuDef_t *menu, float x, float y ) {
 
 void Menu_Paint( menuDef_t *menu, qboolean forcePaint ) {
 	int i;
+	itemDef_t *item = NULL;
 
 	if ( menu == NULL ) {
 		return;
@@ -4762,6 +4815,18 @@ void Menu_Paint( menuDef_t *menu, qboolean forcePaint ) {
 
 	for ( i = 0; i < menu->itemCount; i++ ) {
 		Item_Paint( menu->items[i] );
+		if ( menu->items[i]->window.flags & WINDOW_MOUSEOVER ) {
+			item = menu->items[i];
+		}
+	}
+
+	// OSP draw tooltip data if we have it
+	if ( DC->getCVarValue( "ui_showtooltips" ) &&
+		 item != NULL &&
+		 item->toolTipData != NULL &&
+		 item->toolTipData->text != NULL &&
+		 *item->toolTipData->text ) {
+		Item_Paint( item->toolTipData );
 	}
 
 	if ( debugMode ) {
@@ -5736,8 +5801,9 @@ qboolean ItemParse_tooltipaligny( itemDef_t *item, int handle ) {
 	return( Item_ValidateTooltipData( item ) && PC_Float_Parse( handle, &item->toolTipData->textaligny ) );
 }
 
-
-// end from ET
+qboolean ItemParse_voteFlag( itemDef_t *item, int handle ) {
+	return( PC_Int_Parse( handle, &item->voteFlag ) );
+}
 
 keywordHash_t itemParseKeywords[] = {
 	{"name", ItemParse_name, NULL},
@@ -5814,6 +5880,7 @@ keywordHash_t itemParseKeywords[] = {
 	{ "tooltipaligny",       ItemParse_tooltipaligny,    NULL },
 	{ "settingDisabled", ItemParse_settingDisabled,  NULL }, // OSP
 	{ "settingEnabled",      ItemParse_settingEnabled,   NULL }, // OSP
+	{ "voteFlag",            ItemParse_voteFlag,         NULL }, // OSP - vote check
 	{NULL, NULL, NULL}
 };
 
