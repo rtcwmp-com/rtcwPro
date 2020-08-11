@@ -240,6 +240,7 @@ vmCvar_t	g_dropReload;			// Enable / Disable Drop reload
 vmCvar_t	g_unlockWeapons;		// Gives ability to drop weapon to all classes..
 vmCvar_t	g_crouchRate;			// If enabled it recharges stamina faster when player is crouching..
 vmCvar_t	g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
+vmCvar_t	g_fastStabSound;		// 0 = off, 1 = (OSP's) goat sound, 2 = humiliation sound, 3 = random between 1 or 2
 vmCvar_t	g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
 vmCvar_t	g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
 // MOTD's
@@ -490,6 +491,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_alliedSpawnProtectionTime, "g_alliedSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_serverMessage, "g_serverMessage", "", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
 
 // MOTDs
 	{ &g_showMOTD, "g_showMOTD", "0", 0, 0, qfalse },

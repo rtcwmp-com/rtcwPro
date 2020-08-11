@@ -486,7 +486,7 @@ void CG_PyroSmokeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 		if ( !ent->currentState.otherEntityNum2 ) { // axis team, generate red smoke
 			le = CG_SmokePuff( origin, dir,
 							   25 + rnd * 110, // width
-							   rnd * 0.5 + 0.2, rnd * 0.5 + 0.2, 1, 0.5, // RtcwPro make it more red
+							   rnd * 0.5 + 0.5, rnd * 0.5 + 0.5, 1, 0.5,
 							   4800 + ( rand() % 2800 ), // duration was 2800+
 							   t,
 							   0,
@@ -495,7 +495,7 @@ void CG_PyroSmokeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 		} else {
 			le = CG_SmokePuff( origin, dir,
 							   25 + rnd * 110, // width
-							   1.0, rnd * 0.5 + 0.2, rnd * 0.5 + 0.2, 0.5, // RtcwPro make it more blue
+							   1.0, rnd * 0.5 + 0.5, rnd * 0.5 + 0.5, 0.5,
 							   4800 + ( rand() % 2800 ), // duration was 2800+
 							   t,
 							   0,
@@ -4261,8 +4261,8 @@ void CG_OutOfAmmoChange( qboolean allowforceswitch ) {
 		// jpw
 
 		// never switch weapon if auto-reload is disabled
-		if (!cg.pmext.bAutoReload && IS_AUTORELOAD_WEAPON(cg.weaponSelect) ){
-	//		&& !cg_noAmmoAutoSwitch.integer) {   // OSPx - Account for cg_noAmmoAutoSwitch variable.. //nihi added
+	if (!cg.pmext.bAutoReload && IS_AUTORELOAD_WEAPON(cg.weaponSelect)
+		&& !cg_noAmmoAutoSwitch.integer) { // OSPx - Account for cg_noAmmoAutoSwitch variable..
 			return;
 		}
 

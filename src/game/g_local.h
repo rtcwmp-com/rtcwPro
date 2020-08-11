@@ -541,6 +541,7 @@ typedef struct {
 	int acc_shots;  // Overall acc
 	int acc_hits;	// -||-
 	int killPeak;
+	int knifeKills;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
@@ -1592,6 +1593,7 @@ extern vmCvar_t g_maxTeamVenom;
 extern vmCvar_t g_maxTeamFlamer;
 // Misc (unsorted)
 extern vmCvar_t g_pauseLimit;
+extern vmCvar_t	g_fastStabSound;
 extern vmCvar_t g_duelAutoPause;
 extern vmCvar_t team_commands;
 extern vmCvar_t g_tournament;

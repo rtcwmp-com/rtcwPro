@@ -240,6 +240,12 @@ char    *modNames[] = {
 	"MOD_MORTAR_SPLASH",
 	"MOD_KICKED",
 	"MOD_GRABBER",
+	"MOD_DYNAMITE",
+	"MOD_DYNAMITE_SPLASH",
+	"MOD_AIRSTRIKE",
+	"MOD_SYRINGE",
+	"MOD_AMMO",
+	"MOD_ARTILLERY",
 	"MOD_WATER",
 	"MOD_SLIME",
 	"MOD_LAVA",
@@ -301,11 +307,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		return;
 	}
 
-	// OSP - goat luvin TODO Fix me
-	/*if(meansOfDeath == MOD_KNIFE) {
-	if( attacker == cg.snap->ps.clientNum || target == cg.snap->ps.clientNum ) {
-		trap_S_StartSound( cg.snap->ps.origin, cg.snap->ps.clientNum, CHAN_AUTO, cgs.media.goatAxis );
-	}*/
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );
@@ -344,24 +345,27 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}*/
 	// If person gets stabbed use custom sound from soundpack
 	// it's broadcasted to victim and heard only if standing near victim...
-	/*if ( meansOfDeath == MOD_KNIFE_STEALTH && !OnSameTeam(self, attacker) && g_fastStabSound.integer) {
+	if ( meansOfDeath == MOD_KNIFE_STEALTH && !OnSameTeam(self, attacker) && g_fastStabSound.integer) {
 		int r = rand() %2; 
 		char *snd;
 
 		if (r == 0)
-			snd = "stab.wav";
+			snd = "goat.wav";
 		else
-			snd = "stab_alt.wav";
+			snd = "humiliation.wav";
 
-		APRS(self, va("xmod/sound/game/events/%s", ((g_fastStabSound.integer == 1) ? "stab.wav" : 
-			((g_fastStabSound.integer == 2) ? "stab_alt.wav" : snd)	)));
+		APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" : 
+			((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
 
-		attacker->client->pers.stats.knifeStealth++;
-		write_RoundStats(attacker->client->pers.netname, attacker->client->pers.stats.knifeStealth, ROUND_FASTSTABS);
-	}*/
-	if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {		
-		meansOfDeath = MOD_AIRSTRIKE; // Just Remaps it back..
+		attacker->client->sess.knifeKills++;
+		//write_RoundStats(attacker->client->pers.netname, attacker->client->pers.stats.knifeStealth, ROUND_FASTSTABS);
 	}
+
+	// RtcwPro commented this out - we want artillery distinguished from airstrike
+	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {		
+	//	meansOfDeath = MOD_AIRSTRIKE; // Just Remaps it back..
+	//}
+
 	if ( meansOfDeath < 0 || meansOfDeath >= sizeof( modNames ) / sizeof( modNames[0] ) ) {
 		obit = "<bad obituary>";
 	} else {
@@ -378,10 +382,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
-		if (!OnSameTeam(attacker, self)){
+		if (!OnSameTeam(attacker, self)) {
+			
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
 			attacker->client->pers.life_kills++;		// life kills
-
 
 		// Count teamkill
 		} else {
@@ -1097,7 +1101,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			case MOD_ROCKET:
 			case MOD_ROCKET_SPLASH:
 			case MOD_AIRSTRIKE:
-			case MOD_ARTY:
+			case MOD_ARTILLERY:
 			case MOD_GRENADE_PINEAPPLE:
 			case MOD_MORTAR:
 			case MOD_MORTAR_SPLASH:
@@ -1328,25 +1332,25 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
 		if ( targ->health <= 0 ) {
-			if ( client ) {
+			if (client) {
 				targ->flags |= FL_NO_KNOCKBACK;
-				// RtcwPro - Stats			
-				if (targ->client->ps.pm_type == PM_DEAD) {
-					G_addStats(targ, attacker, take, mod);
-				}
-
-				if (targ->health <= GIB_HEALTH && !OnSameTeam(attacker, targ) && attacker->client)
+				if (g_gametype.integer >= GT_WOLF)
 				{
-					attacker->client->sess.gibs++;
-					attacker->client->pers.life_gibs++;
-				}
-// JPW NERVE -- repeated shooting sends to limbo
-				if ( g_gametype.integer >= GT_WOLF ) {
-					if ( ( targ->health < FORCE_LIMBO_HEALTH ) && ( targ->health > GIB_HEALTH ) && ( !( targ->client->ps.pm_flags & PMF_LIMBO ) ) ) {
-						limbo( targ, qtrue );
+					if (targ->health <= GIB_HEALTH && !OnSameTeam(attacker, targ) && attacker->client)
+					{
+						attacker->client->sess.gibs++;
+						attacker->client->pers.life_gibs++;
 					}
+
+					if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO)))
+					{
+						// JPW NERVE -- repeated shooting sends to limbo
+						if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
+							limbo(targ, qtrue);
+						}
+					}
+					// jpw
 				}
-// jpw
 			}
 
 			if ( targ->health < -999 ) {

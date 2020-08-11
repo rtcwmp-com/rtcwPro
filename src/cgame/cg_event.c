@@ -143,7 +143,7 @@ static void CG_Obituary( entityState_t *ent ) {
 
 	switch ( mod ) {
 	case MOD_SUICIDE:
-		message = "committed suicide";
+		message = "killed himself";
 		break;
 	case MOD_FALLING:
 		message = "fell to his death";
@@ -195,13 +195,13 @@ static void CG_Obituary( entityState_t *ent ) {
 			message = "died in his own explosion";
 			break;
 // OSPx - MODs
-		case MOD_ARTY:			
+		case MOD_ARTILLERY:			
 			message = "obliterated himself";
 			break;
 		case MOD_SWITCHTEAM:
 			return;
 		case MOD_SUICIDE:
-			message = "committed suicide";
+			message = "killed himself";
 			break;
 		case MOD_SELFKILL:
 			message = "slit his own throat";
@@ -372,7 +372,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			message2 = "'s support fire"; // JPW NERVE changed since it gets called for both air strikes and artillery
 			break;
 // OSPx
-		case MOD_ARTY:
+		case MOD_ARTILLERY:
 			message = "stood under";
 			message2 = "'s air strike";			
 			break;
