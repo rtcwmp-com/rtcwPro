@@ -294,8 +294,8 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 
 			if ( !cg.latchVictorySound ) {
 				cg.latchVictorySound = qtrue;
-				//trap_S_StartLocalSound( trap_S_RegisterSound( "sound/multiplayer/music/l_complete_2.wav" ), CHAN_LOCAL_SOUND );  // nihi changed
-				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/osp/winallies.wav" ), CHAN_LOCAL_SOUND );
+				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/multiplayer/music/l_complete_2.wav" ), CHAN_LOCAL_SOUND );
+				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/match/winallies.wav" ), CHAN_LOCAL_SOUND );
 			}
 		} else {
 			str = "AXIS";
@@ -305,8 +305,8 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 
 			if ( !cg.latchVictorySound ) {
 				cg.latchVictorySound = qtrue;
-				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/osp/winaxis.wav" ), CHAN_LOCAL_SOUND );
-				//trap_S_StartLocalSound( trap_S_RegisterSound( "sound/multiplayer/music/s_stinglow.wav" ), CHAN_LOCAL_SOUND );
+				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/multiplayer/music/s_stinglow.wav" ), CHAN_LOCAL_SOUND );
+				trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_LOCAL_SOUND);
 			}
 		}
 
@@ -341,7 +341,10 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 		if ( msec < 0 ) {
 			s = va( "%s %s", CG_TranslateString( "Mission time:" ),  CG_TranslateString( "Sudden Death" ) );
 		} else {
-			s = va( "%s   %2.0f:%i%i", CG_TranslateString( "Mission time:" ), (float)mins, tens, seconds ); // float cast to line up with reinforce time
+			if (cgs.gamestate == GS_PLAYING)
+				s = va( "%s   %2.0f:%i%i", CG_TranslateString( "Mission time:" ), (float)mins, tens, seconds ); // float cast to line up with reinforce time
+			else if (cgs.gamestate == GS_WARMUP)
+				s = va("%s %s", CG_TranslateString("MISSION TIME:"), CG_TranslateString("WARMUP"));
 
 		}
 		CG_DrawSmallString( x,y,s,fade );
@@ -604,6 +607,23 @@ static int WM_DrawInfoLine( int x, int y, float fade ) {
 	return y + INFO_LINE_HEIGHT + 10;
 }
 
+/*
+	L0 - Calculate Average Ping for desired team
+*/
+int calculateAvgPing(team_t team) {
+	int i, j = 0, k = 0;	
+
+	for (i = 0; i < cg.numScores; i++) {
+		if (team != cgs.clientinfo[cg.scores[i].client].team) {
+			continue;
+		}
+		
+		k += cg.scores[i].ping;
+		j++;		
+	}
+	return ( (j && k) ? round(k / j) : 0 );
+}
+// ~L0
 static int WM_TeamScoreboard( int x, int y, team_t team, float fade, int maxrows ) {
 	vec4_t hcolor;
 	float tempx, tempy;
@@ -630,9 +650,46 @@ static int WM_TeamScoreboard( int x, int y, team_t team, float fade, int maxrows
 
 	// draw header
 	if ( team == TEAM_RED ) {
-		CG_DrawSmallString( x, y, va( "%s [%d] (%d %s)", CG_TranslateString( "Axis" ), cg.teamScores[0], cg.teamPlayers[team], CG_TranslateString( "players" ) ), fade );
+		char *str;
+		CG_DrawSmallString( x + 26, y, va( "%s [%d] (%d %s)", CG_TranslateString( "Axis" ), cg.teamScores[0], cg.teamPlayers[team], CG_TranslateString( "players" ) ), fade );
+		// L0 - Average Ping
+		str = va("^nAVG PING");
+		CG_DrawStringExt(x + width - 5 - (CG_DrawStrlen(str) * (TINYCHAR_WIDTH - 2)),
+			y,
+			str,
+			colorWhite, qfalse, qfalse,
+			TINYCHAR_WIDTH - 2,
+			TINYCHAR_HEIGHT - 1, 0);
+
+		str = va("^n%3d", calculateAvgPing(TEAM_RED));
+		CG_DrawStringExt(x + width - 5 - (3 * (TINYCHAR_WIDTH - 2)),
+			y + 6,
+			str,
+			colorWhite, qfalse, qfalse,
+			TINYCHAR_WIDTH - 2,
+			TINYCHAR_HEIGHT - 1, 0);
+		// ~L0
 	} else if ( team == TEAM_BLUE ) {
-		CG_DrawSmallString( x, y, va( "%s [%d] (%d %s)", CG_TranslateString( "Allies" ), cg.teamScores[1], cg.teamPlayers[team], CG_TranslateString( "players" ) ), fade );
+		char *str;
+		//CG_DrawPic(x + 2, y + 4, 2 * TOURINFO_TEXTSIZE, TOURINFO_TEXTSIZE, trap_R_RegisterShaderNoMip("ui_mp/assets/usa_flag.tga"));
+		CG_DrawSmallString( x + 26, y, va( "%s [%d] (%d %s)", CG_TranslateString( "Allies" ), cg.teamScores[1], cg.teamPlayers[team], CG_TranslateString( "players" ) ), fade );
+		// L0 - Average Ping
+		str = va("^nAVG PING");
+		CG_DrawStringExt(x + width - 5 - (CG_DrawStrlen(str) * (TINYCHAR_WIDTH - 2)),
+			y,
+			str,
+			colorWhite, qfalse, qfalse,
+			TINYCHAR_WIDTH - 2,
+			TINYCHAR_HEIGHT - 1, 0);
+
+		str = va("^n%3d", calculateAvgPing(TEAM_BLUE));
+		CG_DrawStringExt(x + width - 5 - (3 * (TINYCHAR_WIDTH - 2)),
+			y + 6,
+			str,
+			colorWhite, qfalse, qfalse,
+			TINYCHAR_WIDTH - 2,
+			TINYCHAR_HEIGHT - 1, 0);
+		// ~L0
 	}
 	y += SMALLCHAR_HEIGHT + 4;
 

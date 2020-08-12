@@ -430,7 +430,8 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
 		( client->sess.spectatorState == SPECTATOR_FOLLOW ) &&
 		( client->buttons & BUTTON_ACTIVATE ) &&
-		!( client->oldbuttons & BUTTON_ACTIVATE ) ) {
+		!( client->oldbuttons & BUTTON_ACTIVATE ) &&
+		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) ) { // OSPx - Speclock
 		// code moved to StopFollowing
 		StopFollowing( ent );
 	}
@@ -769,6 +770,87 @@ void WolfFindMedic( gentity_t *self ) {
 	}
 }
 
+/*
+==============
+OSPx - LTinfoMsg
+
+Shows ammo stocks of clients..
+==============
+*/
+char *weaponStr(int weapon)
+{
+	switch (weapon) {
+	case WP_MP40:				return "MP40";
+	case WP_THOMPSON:			return "Thompson";
+	case WP_STEN:				return "Sten";
+	case WP_MAUSER:				return "Mauser";
+	case WP_SNIPERRIFLE:		return "Sniper Rifle";
+	case WP_FLAMETHROWER:		return "Flamethrower";
+	case WP_PANZERFAUST:		return "Panzerfaust";
+	case WP_VENOM:				return "Venom";
+	case WP_GRENADE_LAUNCHER:	return "Grenade";
+	case WP_GRENADE_PINEAPPLE:	return "Grenade";
+	case WP_KNIFE:				return "Knife";
+	case WP_KNIFE2:				return "Knife";
+	case WP_LUGER:				return "Luger";
+	case WP_COLT:				return "Colt";
+	case WP_MEDIC_SYRINGE:		return "Syringe";
+	default:
+		return "";
+	}
+}
+// Draw str
+void LTinfoMSG(gentity_t *ent) {
+	unsigned int current = 0;
+	unsigned int stock = 0;
+	unsigned int nades = 0;
+	weapon_t weapon;
+
+	gentity_t *target;
+	trace_t tr;
+	vec3_t start, end, forward;
+
+	if (ent->client->ps.stats[STAT_HEALTH] <= 0)
+		return;
+
+	if (g_gamestate.integer != GS_PLAYING)
+		return;
+
+	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
+
+	VectorCopy(ent->s.pos.trBase, start);	//set 'start' to the player's position (plus the viewheight)
+	start[2] += ent->client->ps.viewheight;
+	VectorMA(start, 512, forward, end);	//put 'end' 512 units forward of 'start'
+
+	//see if we hit anything between 'start' and 'end'
+	trap_Trace(&tr, start, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
+
+	if (tr.surfaceFlags & SURF_NOIMPACT)	return;
+	if (tr.entityNum == ENTITYNUM_WORLD)	return;
+	if (tr.entityNum >= MAX_CLIENTS)		return;
+
+	target = &g_entities[tr.entityNum];
+	if ((!target->inuse) || (!target->client))		return;
+	if (target->client->ps.stats[STAT_HEALTH] <= 0)	return;
+	if (!OnSameTeam(target, ent))					return;
+
+	ent->client->infoTime = level.time;
+	weapon = target->client->ps.weapon;
+	current += target->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
+	stock += target->client->ps.ammo[BG_FindAmmoForWeapon(weapon)];
+	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
+	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
+
+	if (Q_stricmp(weaponStr(weapon), ""))
+	{
+		if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER)
+			CP(va("cp \"%s: %i\n\"1", weaponStr(weapon), current));
+		else if (weapon == WP_KNIFE || weapon == WP_KNIFE2)
+			CP(va("cp \"%s - Grenades: %i\n\"1", weaponStr(weapon), current, nades));
+		else
+			CP(va("cp \"%s: %i/%i - Grenades: %i\n\"1", weaponStr(weapon), current, stock, nades));
+	}
+}
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
@@ -816,10 +898,91 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
+	// L0 - Draw hitboxes
+	if (g_drawHitboxes.integer) {
+		if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
+			gentity_t *bboxEnt;
+			gentity_t *tent;
+			gentity_t   *head;
+			vec3_t b1, b2;
+			orientation_t or;       // DHM - Nerve
+			VectorCopy( ent->r.currentOrigin, b1 );
+			VectorCopy( ent->r.currentOrigin, b2 );
+			VectorAdd( b1, ent->r.mins, b1 );
+			VectorAdd( b2, ent->r.maxs, b2 );
+			bboxEnt = G_TempEntity( b1, EV_RAILTRAIL );
+			VectorCopy( b2, bboxEnt->s.origin2 );
+			bboxEnt->s.dmgFlags = 1; // ("type")
+
+			head = G_Spawn();
+
+			if ( trap_GetTag( ent->s.number, "tag_head", &or ) ) {
+				G_SetOrigin( head, or.origin );
+			} else {
+				float height, dest;
+				vec3_t v, angles, forward, up, right;
+
+				G_SetOrigin( head, ent->r.currentOrigin );
+
+				if ( ent->client->ps.pm_flags & PMF_DUCKED ) {
+					height = ent->client->ps.crouchViewHeight - 12;
+				} else {
+					height = ent->client->ps.viewheight;
+				}
+				
+				VectorCopy( ent->client->ps.viewangles, angles );
+				if ( angles[PITCH] > 180 ) {
+					dest = ( -360 + angles[PITCH] ) * 0.75;
+				} else {
+					dest = angles[PITCH] * 0.75;
+				}
+				angles[PITCH] = dest;
+
+				AngleVectors( angles, forward, right, up );
+				VectorScale( forward, 5, v );
+				VectorMA( v, 18, up, v );
+
+				VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
+				head->r.currentOrigin[2] += height / 2;				
+			}
+			
+			VectorCopy( head->r.currentOrigin, head->s.origin );
+			VectorCopy( ent->r.currentAngles, head->s.angles );
+			VectorCopy( head->s.angles, head->s.apos.trBase );
+			VectorCopy( head->s.angles, head->s.apos.trDelta );
+			
+			VectorSet (head->r.mins , -6, -6, -4);
+			VectorSet (head->r.maxs , 6, 6, 10);
+			//VectorSet (head->r.mins , -6, -6, -6);
+			//VectorSet (head->r.maxs , 6, 6, 6);
+			//VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+			//VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
+			head->clipmask = CONTENTS_SOLID;
+			head->r.contents = CONTENTS_SOLID;
+
+			trap_LinkEntity( head );
+
+			VectorCopy( head->r.currentOrigin, b1 );
+			VectorCopy( head->r.currentOrigin, b2 );
+			VectorAdd( b1, head->r.mins, b1 );
+			VectorAdd( b2, head->r.maxs, b2 );
+			tent = G_TempEntity( b1, EV_RAILTRAIL );
+			VectorCopy( b2, tent->s.origin2 );
+			tent->s.dmgFlags = 1;
+
+			G_FreeEntity( head );
+		}
+	} // L0 - Draw hitboxes end
 	if ( client->cameraPortal ) {
 		G_SetOrigin( client->cameraPortal, client->ps.origin );
 		trap_LinkEntity( client->cameraPortal );
 		VectorCopy( client->cameraOrigin, client->cameraPortal->s.origin2 );
+	}
+
+	// OSPx - LT info bar..
+	if ((client->ps.stats[STAT_PLAYER_CLASS] == PC_LT) &&
+		(level.time >= client->infoTime + 1000)) {
+		LTinfoMSG(ent);
 	}
 
 	// mark the time, so the connection sprite can be removed
@@ -1012,7 +1175,7 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	if ( reloading || client->cameraPortal ) {
+	if ( reloading || client->cameraPortal ) { // TODO check this against OSPx
 		ucmd->buttons = 0;
 		ucmd->forwardmove = 0;
 		ucmd->rightmove = 0;
@@ -1262,6 +1425,7 @@ void ClientThink_real( gentity_t *ent ) {
 		// dhm - end
 
 		// wait for the attack button to be pressed
+		// TODO check this against OSPx which is wayyyyy different
 		if ( level.time > client->respawnTime ) {
 			// forcerespawn is to prevent users from waiting out powerups
 			if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) &&
@@ -1385,7 +1549,7 @@ void G_RunClient( gentity_t *ent ) {
 /*
 ==================
 SpectatorClientEndFrame
-
+TODO check this against OSPx its wayyy different
 ==================
 */
 void SpectatorClientEndFrame( gentity_t *ent ) {
@@ -1666,7 +1830,7 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	if ( !ent->aiCharacter ) {
 		// turn off any expired powerups
-		for ( i = 0 ; i < MAX_POWERUPS ; i++ ) {
+		for ( i = 0; i < PW_NUM_POWERUPS; i++ ) {
 
 			if ( i == PW_FIRE ||             // these aren't dependant on level.time
 				 i == PW_ELECTRIC ||

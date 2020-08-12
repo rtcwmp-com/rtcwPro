@@ -98,7 +98,7 @@ static const vote_reference_t aVoteInfo[] = {
 	{ 0x1ff, "shuffleteams",	G_ShuffleTeams_v,	"Shuffle Teams",				" ^7\n  Randomly place players on each team" },
 	{ 0x1ff, "startmatch",		G_StartMatch_v,		"Start Match",					" ^7\n  Sets all players to \"ready\" status to start the match" },
 	{ 0x1ff, "swapteams",		G_SwapTeams_v,		"Swap Teams",					" ^7\n  Switch the players on each team" },
-	{ 0x1ff, "friendlyfire",	G_FriendlyFire_v,	"Friendly Fire",				" <0|1>^7\n  Toggles ability to hurt teammates" },
+	{ 0x1ff, "teamdamage",		G_FriendlyFire_v,	"Friendly Fire",				" <0|1>^7\n  Toggles ability to hurt teammates" },
 	{ 0x1ff, "timelimit",		G_Timelimit_v,		"Timelimit",					" <value>^7\n  Changes the current timelimit" },
 	{ 0x1ff, "unreferee",		G_Unreferee_v,		"UNReferee",					" <player_id>^7\n  Elects a player to have admin abilities removed" },
 	{ 0x1ff, "warmupdamage",	G_Warmupfire_v,		"Warmup Damage",				" <0|1|2>^7\n  Specifies if players can inflict damage during warmup" },

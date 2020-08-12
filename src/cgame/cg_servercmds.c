@@ -1292,6 +1292,10 @@ void CG_PlayVoiceChat( bufferedVoiceChat_t *vchat ) {
 		return;
 	}
 */
+	// OSPx - Not in demo if disabled
+	if (cg.demoPlayback && cgs.noVoice) {
+		return;
+	}
  // nihi moved outside of novoicechats
 	// DHM - Nerve :: Show icon above head
 		if ( vchat->clientNum == cg.snap->ps.clientNum ) {
@@ -1331,7 +1335,7 @@ void CG_PlayVoiceChat( bufferedVoiceChat_t *vchat ) {
 		}
 #endif
 	}
-	if ( !vchat->voiceOnly && !cg_noVoiceText.integer ) {
+	if ( !vchat->voiceOnly && !cg_noVoiceText.integer || (cg.demoPlayback && !cgs.noVoice) ) {
 		CG_AddToTeamChat( vchat->message );
 		CG_Printf( va( "[skipnotify]: %s\n", vchat->message ) ); // JPW NERVE
 	}
@@ -1641,7 +1645,7 @@ void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 			}
 
 			txt_dump( va( "\n^zDamage Given: ^7%-6d  ^zTeam Damage : ^7%d\n", dmg_given, team_dmg ) );
-			txt_dump( va(  "^zDamage Recvd: ^7%-6d  ^zBodies Gibed: ^7%d \n", dmg_rcvd, gibs ) );
+			txt_dump( va(  "^zDamage Recvd: ^7%-6d  ^zBodies Gibbed: ^7%d \n", dmg_rcvd, gibs ) );
 		}
 	}
 	txt_dump( "\n" );
@@ -2090,6 +2094,14 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 // L0 -End OSP Stats dump
+	// Force instant tapout 
+	// NOTE: cg_forceTapout prevails if enabled..
+	if (!Q_stricmp(cmd, "reqforcespawn")) {
+		if (cg_instantTapout.integer && !cg_forceTapout.integer) {
+			CG_ForceTapOut_f();
+		} 		
+		return;
+	}
 	// Force tapout on respawn (reuse instant tapout..)
 	if (!Q_stricmp(cmd, "reqforcetapout")) {
 		 if (cg_forceTapout.integer) {
@@ -2130,6 +2142,10 @@ static void CG_ServerCommand( void ) {
 			return;
 		}
 
+		// OSPx - Not in demo if it's off..
+		if (cg.demoPlayback && cgs.noChat) {
+			return;
+		}
 		if ( atoi( CG_Argv( 2 ) ) ) {
 			s = CG_LocalizeServerCommand( CG_Argv( 1 ) );
 		} else {
@@ -2163,7 +2179,14 @@ static void CG_ServerCommand( void ) {
 			s = CG_Argv( 1 );
 		}
 
-		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
+		// OSPx - Not in demo if it's off..
+		if (cg.demoPlayback && cgs.noChat) {
+			return;
+		}
+
+		// OSPx - No voice prints
+		if  (cg_noVoice.integer < 2)
+			trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
 		Q_strncpyz( text, s, MAX_SAY_TEXT );
 		CG_RemoveChatEscapeChar( text );
 
@@ -2195,6 +2218,10 @@ static void CG_ServerCommand( void ) {
 		if (cg_noVoice.integer == 2 || cg_noVoice.integer == 3)
 			return;
 
+		// OSPx - Not in demo if it's off..
+		if (cg.demoPlayback && cgs.noVoice) {
+			return;
+		}
 		CG_VoiceChat( SAY_TEAM );           // NERVE - SMF - enabled support
 		return;
 	}
@@ -2203,6 +2230,10 @@ static void CG_ServerCommand( void ) {
 		// OSPx - No voice prints
 		if (cg_noVoice.integer)
 			return;
+		// OSPx - Not in demo if it's off..
+		if (cg.demoPlayback && cgs.noVoice) {
+			return;
+		}
 
 		CG_VoiceChat( SAY_TELL );           // NERVE - SMF - enabled support
 		return;

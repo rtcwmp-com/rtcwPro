@@ -822,6 +822,8 @@ static float CG_DrawTeamOverlay( float y ) {
 	for ( i = 0; i < numSortedTeamPlayers; i++ ) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
 		if ( ci->infoValid && ci->team == cg.snap->ps.persistant[PERS_TEAM] ) {
+			// RtcwPro - Add * in front or revivable players..
+			char *isRevivable = " ";
 
 			// NERVE - SMF
 			// determine class type
@@ -841,20 +843,10 @@ static float CG_DrawTeamOverlay( float y ) {
 
 			Com_sprintf( st, sizeof( st ), "%s", CG_TranslateString( classType ) );
 
-			xx = x + TINYCHAR_WIDTH;
 
-			hcolor[0] = hcolor[1] = 1.0;
-			hcolor[2] = 0.0;
-			hcolor[3] = cg_hudAlpha.value;
 
-			CG_DrawStringExt( xx, y,
-							  st, hcolor, qtrue, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 1 );
 
-			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
-			hcolor[3] = cg_hudAlpha.value;
 
-			xx = x + 3 * TINYCHAR_WIDTH;
 
 			// JPW NERVE
 			if ( ci->health > 80 ) {
@@ -863,11 +855,23 @@ static float CG_DrawTeamOverlay( float y ) {
 				pcolor = damagecolor;
 			} else {
 				pcolor = deathcolor;
+				// RtcwPro
+				if (!(cg.snap->ps.pm_flags & PMF_LIMBO))
+					isRevivable = "*";
 			}
 			// jpw
 
-			CG_DrawStringExt( xx, y,
-							  ci->name, pcolor, qtrue, qfalse,
+			xx = x + 1; // * TINYCHAR_WIDTH;
+
+			hcolor[0] = hcolor[1] = 1.0;
+			hcolor[2] = 0.0;
+			hcolor[3] = cg_hudAlpha.value;
+			// RtcwPro put IsRevivable in front of class type
+			CG_DrawStringExt( xx, y, va("%s%s", isRevivable, st), pcolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5 );
+			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
+			hcolor[3] = cg_hudAlpha.value;
+			xx = x + 3 * TINYCHAR_WIDTH;
+			CG_DrawStringExt( xx + 1, y, ci->name, pcolor, qtrue, qfalse, // RtcwPro moved IsRevivable above
 							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, TEAM_OVERLAY_MAXNAME_WIDTH );
 
 			if ( lwidth ) {
@@ -1081,6 +1085,7 @@ static void CG_DrawTeamInfo( void ) {
 	vec4_t hcolor;
 	int chatHeight;
 	float alphapercent;
+	float chatAlpha = (float)cg_chatAlpha.value;
 
 #define CHATLOC_Y 385 // bottom end
 #define CHATLOC_X 0
@@ -1135,11 +1140,21 @@ static void CG_DrawTeamInfo( void ) {
 				hcolor[0] = 0;
 				hcolor[1] = 1;
 				hcolor[2] = 0;
+			}
 //			hcolor[3] = 0.33;
+// L0 - Wanted to do this for years..
+			if (chatAlpha > 1.0f) {
+				chatAlpha = 1.0f;
+			}
+			else if (chatAlpha < 0.f) {
+				chatAlpha = 0.f;
 			}
 
-			hcolor[3] = 0.33f * alphapercent;
-
+			if (!Q_stricmp(cg_chatBackgroundColor.string, ""))
+				hcolor[3] = chatAlpha * alphapercent;
+			else // Abuse this..
+				BG_setCrosshair(cg_chatBackgroundColor.string, hcolor, chatAlpha * alphapercent, "cg_chatBackgroundColor");
+// End
 			trap_R_SetColor( hcolor );
 			CG_DrawPic( CHATLOC_X, CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
 
@@ -1396,6 +1411,10 @@ static void CG_DrawLagometer( void ) {
 	float ax, ay, aw, ah, mid, range;
 	int color;
 	float vscale;
+	// OSPx - Bail out in demo..
+	if (cg.demoPlayback) {
+		return;
+	}
 
 	if ( !cg_lagometer.integer || cgs.localServer ) {
 //	if(0) {
@@ -2373,7 +2392,13 @@ static void CG_DrawCrosshairNames( void ) {
 	w = CG_DrawStrlen( s ) * SMALLCHAR_WIDTH;
 
 	// draw the name and class
-	CG_DrawSmallStringColor( 320 - w / 2, 170, s, color );
+	// OSPx - Colored names
+	if (cg_coloredCrosshairNames.integer) {
+		CG_DrawStringExt(320 - w / 2, 170, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
+	}
+	else {
+		CG_DrawSmallStringColor(320 - w / 2, 170, s, color);
+	}
 
 	// draw the health bar
 	playerHealth = cg.identifyClientHealth;
@@ -2641,6 +2666,10 @@ static void CG_DrawSpectatorMessage( void ) {
 		return;
 	}
 
+	// OSPx - Never during demo..
+	if (cg.demoPlayback) {
+		return;
+	}
 	trap_Cvar_VariableStringBuffer( "ui_limboMode", buf, sizeof( buf ) );
 	if ( atoi( buf ) ) {
 		return;
@@ -2847,12 +2876,11 @@ static void CG_DrawWarmup( void ) {
 		// Account for g_minGameClients if it's present
 		if (cgs.readyState == CREADY_PENDING) {
 
-			s = CG_TranslateString( "^nGame Stopped ^7- Waiting for players to ready up" );
+			/*s = CG_TranslateString( "^nGame Stopped ^7- Waiting for players to ready up" );
 			w = CG_DrawStrlen( s );
-			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
+			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 ); KK commented this out*/
 
 
-			//s1 = va( CG_TranslateString( "Waiting for at least ^n%i ^7%s to ready" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );
 			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );   // nihi changed
 			s2 = CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
 
@@ -2867,7 +2895,6 @@ static void CG_DrawWarmup( void ) {
 		} else {
 
 			// No need to bother with count..scoreboard gives info..
-		//	s = CG_TranslateString( "^nGame Stopped ^7- Waiting for players to ready up" );
 			s = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );   // nihi changed
 			w = CG_DrawStrlen( s );
 			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
@@ -2888,7 +2915,7 @@ static void CG_DrawWarmup( void ) {
 		if ( cgs.gamestate == GS_WAITING_FOR_PLAYERS ) {
 			cw = 10;
 
-			s = CG_TranslateString( "^3Game Stopped ^7- Waiting for more players" );
+			s = CG_TranslateString( "^3WARMUP:^7 Waiting for more players" );
 
 			w = CG_DrawStrlen( s );
 			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
@@ -2918,6 +2945,11 @@ static void CG_DrawWarmup( void ) {
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
 		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
+		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
+		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
+		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
+		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
+		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
 		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
 	}
@@ -4009,7 +4041,9 @@ static void CG_Draw2D( void ) {
 			// DHM - Nerve :: Don't draw icon in upper-right when switching weapons
 			//CG_DrawWeaponSelect();
 
-			CG_DrawPickupItem();
+			// OSPx - In warmup we print ready intel there..
+			if (!cgs.gamestate == GS_WARMUP || cg_drawPickupItems.integer )
+				CG_DrawPickupItem();
 		}
 		if ( cgs.gametype >= GT_TEAM ) {
 			CG_DrawTeamInfo();
@@ -4056,6 +4090,8 @@ static void CG_Draw2D( void ) {
 		// -NERVE - SMF
 	}
 
+	// OSPx - Announcer
+	CG_DrawAnnouncer();
 	// OSPx - window updates
 	CG_windowDraw();
 	// Ridah, draw flash blends now
@@ -4512,7 +4548,7 @@ L0 - CG_DrawAnnouncer
 
 Ported from ET
 =====================
-
+*/
 
 void CG_DrawAnnouncer( void )
 {
@@ -4576,4 +4612,3 @@ void CG_AddAnnouncer(char *text, sfxHandle_t sound, float scale, int duration, f
 		cg.centerPrintAnnouncerMode = mode;
 	}
 }
-*/

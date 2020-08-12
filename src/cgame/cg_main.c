@@ -82,7 +82,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		CG_MouseEvent( arg0, arg1 );
 		return 0;
 	case CG_EVENT_HANDLING:
-		CG_EventHandling( arg0 );
+		CG_EventHandling(arg0, qtrue);
 		return 0;
 	case CG_GET_TAG:
 		return CG_GetTag( arg0, (char *)arg1, (orientation_t *)arg2 );
@@ -285,37 +285,57 @@ vmCvar_t cg_antilag;
 
 // OSPx
 vmCvar_t cg_crosshairPulse;
-vmCvar_t cg_showFlags;			//mcwf GeoIP
 vmCvar_t cg_bloodDamageBlend;
 vmCvar_t cg_bloodFlash;
 vmCvar_t cg_crosshairAlpha;
 vmCvar_t cg_crosshairAlphaAlt;
 vmCvar_t cg_crosshairColor;
 vmCvar_t cg_crosshairColorAlt;
-vmCvar_t ch_font;
-vmCvar_t cg_hitsounds;
+vmCvar_t cg_coloredCrosshairNames;
 vmCvar_t cg_drawWeaponIconFlash;
 vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_muzzleFlash;
 vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
+vmCvar_t cg_reinforcementTimeColor;
 vmCvar_t cg_noChat;
 vmCvar_t cg_noVoice;
+vmCvar_t cg_noAmmoAutoSwitch;
+vmCvar_t cg_wideScreen;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
 vmCvar_t cg_zoomedSens;
 vmCvar_t vp_drawnames;
 vmCvar_t cg_drawNames;
+vmCvar_t cg_showFlags;
 vmCvar_t cg_announcer;
+vmCvar_t cg_drawPickupItems;
 vmCvar_t cg_autoAction;
-vmCvar_t cf_wstats;             // OSP's Font scale for +wstats window
-vmCvar_t cf_wtopshots;          // OSP's Font scale for +wtopshots window
+vmCvar_t cg_useScreenshotJPEG;
+vmCvar_t cg_chatAlpha;
+vmCvar_t cg_chatBackgroundColor;
+vmCvar_t cg_instantTapout;
+vmCvar_t cg_forceTapout;
+vmCvar_t cg_hitsounds;
+vmCvar_t cg_uinfo;
+
+// Stats - Font scale
+vmCvar_t cf_wstats; 
+vmCvar_t cf_wtopshots;
+
+// OSP
 vmCvar_t authLevel;
+
+
+//vmCvar_t	cg_announcer;
 vmCvar_t cg_noAmmoAutoSwitch;
+vmCvar_t cg_printObjectiveInfo;
+vmCvar_t cg_specHelp;
 vmCvar_t cg_uinfo;
 vmCvar_t cg_useScreenshotJPEG;
-vmCvar_t cg_forceTapout;
-// -OSPx
+
+vmCvar_t ch_font;
+
 vmCvar_t demo_avifpsF1;
 vmCvar_t demo_avifpsF2;
 vmCvar_t demo_avifpsF3;
@@ -323,8 +343,19 @@ vmCvar_t demo_avifpsF4;
 vmCvar_t demo_avifpsF5;
 vmCvar_t demo_drawTimeScale;
 vmCvar_t demo_infoWindow;
+
+vmCvar_t mv_sensitivity;
+
+vmCvar_t demo_controlsWindow;
+vmCvar_t demo_popupWindow;
+vmCvar_t demo_showTimein;
+vmCvar_t demo_noAdvertisement;
+
 vmCvar_t int_cl_maxpackets;
 vmCvar_t int_cl_timenudge;
+vmCvar_t int_m_pitch;
+vmCvar_t int_sensitivity;
+vmCvar_t int_timescale;
 vmCvar_t int_ui_blackout;
 
 // added from et - nihi
@@ -1013,6 +1044,11 @@ static void CG_RegisterSounds( void ) {
 //	cgs.media.teleOutSound = trap_S_RegisterSound( "sound/world/teleout.wav" );
 //	cgs.media.respawnSound = trap_S_RegisterSound( "sound/items/respawn1.wav" );
     cgs.media.prepFight = trap_S_RegisterSound( "sound/match/prepare.wav" ); //---- nihi added
+    cgs.media.count1Sound = trap_S_RegisterSound( "sound/match/cn_1.wav" ); //---- nihi added
+    cgs.media.count2Sound = trap_S_RegisterSound( "sound/match/cn_2.wav" ); //---- nihi added
+	cgs.media.count3Sound = trap_S_RegisterSound("sound/match/cn_3.wav"); //---- nihi added
+	cgs.media.count4Sound = trap_S_RegisterSound("sound/match/cn_4.wav"); //---- nihi added
+	cgs.media.count5Sound = trap_S_RegisterSound("sound/match/cn_5.wav"); //---- nihi added
     cgs.media.announceFight = trap_S_RegisterSound( "sound/match/fight.wav" ); //---- nihi added
 	cgs.media.grenadebounce1 = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb1a.wav" );
 	cgs.media.grenadebounce2 = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb2a.wav" );
@@ -1218,10 +1254,11 @@ static void CG_RegisterSounds( void ) {
 */
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
+	cgs.media.goatAxis = trap_S_RegisterSound( "sound/match/goat.wav" );
 	// Hitsounds
-	cgs.media.headShot = trap_S_RegisterSound( "EliteMod/sound/game/hitH.wav" );
-	cgs.media.bodyShot = trap_S_RegisterSound( "EliteMod/sound/game/hit.wav" );
-	cgs.media.teamShot = trap_S_RegisterSound( "EliteMod/sound/game/hitTeam.wav" );
+	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
+	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
+	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
 	// End
 }
 
@@ -2501,9 +2538,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	// load a few needed things before we do any screen updates
 
-	cgs.media.charsetShader     = trap_R_RegisterShader( "gfx/2d/hudchars" ); //trap_R_RegisterShader( "gfx/2d/bigchars" );
+	cgs.media.charsetShader     = trap_R_RegisterShader( "gfx/2d/hudchars_OSP1" ); //trap_R_RegisterShader( "gfx/2d/bigchars" );
 	// JOSEPH 4-17-00
-	cgs.media.menucharsetShader = trap_R_RegisterShader( "gfx/2d/hudchars" );
+	cgs.media.menucharsetShader = trap_R_RegisterShader( "gfx/2d/hudchars_OSP1" );
 	// END JOSEPH
 	cgs.media.whiteShader       = trap_R_RegisterShader( "white" );
 	cgs.media.charsetProp       = trap_R_RegisterShaderNoMip( "menu/art/font1_prop.tga" );
@@ -2602,6 +2639,17 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// NERVE - SMF
 // JPW NERVE -- commented out 'cause this moved
 
+	// OSPx - Account for WideScreen
+	if (cg_wideScreen.integer) {
+		trap_Cvar_Set("cg_gunX", "2");
+		trap_Cvar_Set("cg_gunY", "-1");
+		trap_Cvar_Set("cg_gunZ", "1");
+	}
+	else {
+		trap_Cvar_Set("cg_gunX", "0");
+		trap_Cvar_Set("cg_gunY", "0");
+		trap_Cvar_Set("cg_gunZ", "0");
+	}
 	if ( cgs.gametype >= GT_WOLF ) {
 		trap_Cvar_Set( "cg_drawTimer", "0" ); // jpw
 	}

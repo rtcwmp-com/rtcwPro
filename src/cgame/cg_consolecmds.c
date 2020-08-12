@@ -910,6 +910,7 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand("ready");
 	// Misc
 	trap_AddCommand("players");
+	trap_AddCommand("say_teamnl");
 	// Stats
 	trap_AddCommand( "scores" );		// Prints score table
 	trap_AddCommand( "weaponstats" );	// +wstats equivalent for console

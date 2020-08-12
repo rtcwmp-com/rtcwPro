@@ -108,6 +108,9 @@ typedef enum {
 	CLDMG_MAX
 } clientDamage_t;
 
+typedef enum popupMessageType_e {
+	PM_MESSAGE
+} popupMessageType_t;
 // RF
 #define MAX_TAGCONNECTS     32
 
@@ -356,6 +359,7 @@ typedef struct {
 	// for fixed msec Pmove
 	int pmove_fixed;
 	int pmove_msec;
+	int fixedphysicsfps; // OSPx
 
 	// callbacks to test the world
 	// these will be different functions during game and cgame
@@ -1268,7 +1272,14 @@ typedef enum {
 	MOD_MEDIC,      // these like this or not
 //
 	MOD_BAT,
-	MOD_NUM_MODS	// OSP port
+
+// OSPx
+	MOD_ADMKILL,
+	MOD_SELFKILL,
+	MOD_ARTILLERY,	
+	MOD_SWITCHTEAM,
+	MOD_NUM_MODS
+// -OSPx
 
 } meansOfDeath_t;
 

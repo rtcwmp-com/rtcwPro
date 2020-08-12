@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WINDOW_TIMEDVISIBLE     0x00800000  // visibility timing ( NOT implemented )
 #define WINDOW_IGNORE_HUDALPHA  0x01000000  // window will apply cg_hudAlpha value to colors unless this flag is set
 #define WINDOW_MODAL                        0x02000000 // window is modal, the window to go back to is stored in a stack
-
+#define WINDOW_DRAWALWAYSONTOP  0x02000000  // added from ET for tooltips
 // CGAME cursor type bits
 #define CURSOR_NONE             0x00000001
 #define CURSOR_ARROW            0x00000002
@@ -243,6 +243,9 @@ typedef struct modelDef_s {
 #define CVAR_SHOW       0x00000004
 #define CVAR_HIDE       0x00000008
 #define CVAR_NOTOGGLE   0x00000010
+// OSP - "setting" flags for items
+#define SVS_DISABLED_SHOW   0x01
+#define SVS_ENABLED_SHOW    0x02
 
 #define UI_MAX_TEXT_LINES 64
 
@@ -279,6 +282,15 @@ typedef struct itemDef_s {
 	float special;                  // used for feeder id's etc.. diff per type
 	int cursorPos;                  // cursor position in characters
 	void *typeData;                 // type specific data ptr's
+
+    	// OSP - on-the-fly enable/disable of items
+	int settingTest;
+	int settingFlags;
+	int voteFlag;
+	const char *onEsc;
+	const char *onEnter;
+
+	struct itemDef_s *toolTipData;  // OSP - Tag an item to this item for auto-help popups
 } itemDef_t;
 
 typedef struct {
@@ -306,6 +318,7 @@ typedef struct {
 	const char *fontStr;
 	const char *cursorStr;
 	const char *gradientStr;
+    fontInfo_t fonts[6];
 	fontInfo_t textFont;
 	fontInfo_t smallFont;
 	fontInfo_t bigFont;
@@ -407,7 +420,9 @@ typedef struct {
 	void ( *stopCinematic )( int handle );
 	void ( *drawCinematic )( int handle, float x, float y, float w, float h );
 	void ( *runCinematicFrame )( int handle );
-
+	int ( *multiLineTextHeight )( const char *text, float scale, int limit );
+    int ( *multiLineTextWidth )( const char *text, float scale, int limit );
+	int ( *getConfigString )( int index, char* buff, int buffsize );
 	float yscale;
 	float xscale;
 	float bias;

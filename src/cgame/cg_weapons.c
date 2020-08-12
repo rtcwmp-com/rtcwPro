@@ -4261,8 +4261,8 @@ void CG_OutOfAmmoChange( qboolean allowforceswitch ) {
 		// jpw
 
 		// never switch weapon if auto-reload is disabled
-		if (!cg.pmext.bAutoReload && IS_AUTORELOAD_WEAPON(cg.weaponSelect) ){
-	//		&& !cg_noAmmoAutoSwitch.integer) {   // OSPx - Account for cg_noAmmoAutoSwitch variable.. //nihi added
+	if (!cg.pmext.bAutoReload && IS_AUTORELOAD_WEAPON(cg.weaponSelect)
+		&& !cg_noAmmoAutoSwitch.integer) { // OSPx - Account for cg_noAmmoAutoSwitch variable..
 			return;
 		}
 
