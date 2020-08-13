@@ -526,11 +526,11 @@ typedef struct {
 	int suicides;
 	int team_damage;
 	int team_kills;
-	
+
 	// referee
 	int referee, status;
 	int spec_invite, specInvited, specLocked;
-		
+
 	// New ones
 	int headshots;
 	int med_given;
@@ -969,7 +969,7 @@ typedef struct {
 	// voting and referee
 	voteInfo_t voteInfo;
 	int server_settings;
-	
+
 	// Weapons restrictions
 	int axisSniper, alliedSniper;
 	int axisPF, alliedPF;
@@ -1241,7 +1241,7 @@ void AddIPBan( const char *str );
 
 void Svcmd_ShuffleTeams_f( void );
 void Svcmd_StartMatch_f( void );
-void Svcmd_ResetMatch_f(); // qboolean fDoReset, qboolean fDoRestart 
+void Svcmd_ResetMatch_f(); // qboolean fDoReset, qboolean fDoRestart
 void Svcmd_SwapTeams_f( void );
 
 //
@@ -1912,6 +1912,7 @@ qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_globalSound(char *sound);
 void G_resetRoundState(void);
 void G_resetModeState(void);
+int G_checkServerToggle(vmCvar_t *cv);
 ///////////////////////
 // g_referee.c
 //
@@ -2038,7 +2039,7 @@ qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 #define CP( x ) trap_SendServerCommand( ent - g_entities, x )	// Print to an ent
 #define CPx( x, y ) trap_SendServerCommand( x, y )				// Print to id = x
 #define TP( x, y ) G_TeamCommand( x, y)							// Sends team command
-#define APS(x)		APSound(x)									// Global sound 
+#define APS(x)		APSound(x)									// Global sound
 #define AAPS(x)		AAPSound(x)									// Global sound but hooked under cg_announcer..
 #define APRS(x, y)	APRSound(x, y)								// Global sound with limited (radius) range
 #define CPS(x, y)	CPSound(x, y)								// Client sound only

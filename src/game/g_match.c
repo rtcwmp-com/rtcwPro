@@ -402,6 +402,61 @@ void G_spawnPrintf(int print_type, int print_time, gentity_t *owner)
 	ent->nextthink = print_time;
 	ent->think     = G_delayPrint;
 }
+/**
+ * @brief Update configstring for vote info
+ * @param[in] cv
+ * @return
+ */
+int G_checkServerToggle(vmCvar_t *cv)
+{
+	int nFlag;
+
+	if (cv == &match_mutespecs)
+	{
+		nFlag = CV_SVS_MUTESPECS;
+	}
+	else if (cv == &g_friendlyFire)
+	{
+		nFlag = CV_SVS_TEAMDMG;
+	}
+	else if (cv == &g_antilag)
+	{
+		nFlag = CV_SVS_ANTILAG;
+	}
+	// special case for 2 bits
+	else if (cv == &match_warmupDamage)
+	{
+		if (cv->integer > 0)
+		{
+			level.server_settings &= ~CV_SVS_WARMUPDMG;
+			nFlag                  = (cv->integer > 2) ? 2 : cv->integer;
+			nFlag                  = nFlag << 2;
+		}
+		else
+		{
+			nFlag = CV_SVS_WARMUPDMG;
+		}
+	}
+	else
+	{
+		return qfalse;
+	}
+
+	if (cv->integer > 0)
+	{
+		level.server_settings |= nFlag;
+	}
+	else
+	{
+		level.server_settings &= ~nFlag;
+	}
+
+	return qtrue;
+}
+
+
+
+
 // Simple alias for sure-fire print :)
 void G_printFull(char *str, gentity_t *ent) {
 	if (ent != NULL) {

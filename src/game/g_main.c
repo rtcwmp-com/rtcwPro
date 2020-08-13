@@ -445,7 +445,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
-	
+
 // Admins
 	{ &a1_pass, "a1_pass", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &a2_pass, "a2_pass", "none", CVAR_ARCHIVE, 0, qfalse },
@@ -534,7 +534,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
     { &match_warmupfire, "match_warmupfire", "1", 0, 0, qfalse },
 	{&g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse},
-	
+
 	// voting
 	{ &vote_limit, "vote_limit", "3", CVAR_ARCHIVE, qfalse, qfalse },
 	{ &vote_percent, "vote_percent", "50", CVAR_ARCHIVE, qfalse, qfalse },
@@ -1304,6 +1304,8 @@ void G_RegisterCvars( void ) {
 
 	level.warmupModificationCount = g_warmup.modificationCount;
 
+	trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
+
 	G_ForceCvars();
 	// OSPx
 	// Ready percents
@@ -1336,6 +1338,8 @@ void G_UpdateCvars( void ) {
 	int i;
 	cvarTable_t *cv;
 	qboolean remapped = qfalse;
+	qboolean    fToggles           = qfalse;
+	qboolean    fVoteFlags         = qfalse;
 
 	for ( i = 0, cv = gameCvarTable ; i < gameCvarTableSize ; i++, cv++ ) {
 		if ( cv->vmCvar ) {
@@ -1359,7 +1363,7 @@ void G_UpdateCvars( void ) {
 					}
 					else if (match_readypercent.integer > 100) {
 						trap_Cvar_Set(cv->cvarName, "100");
-					}				
+					}
 				} else if (cv->vmCvar == &pmove_msec) {
 					if (pmove_msec.integer < 8) {
 						trap_Cvar_Set(cv->cvarName, "8");
@@ -1368,10 +1372,38 @@ void G_UpdateCvars( void ) {
 						trap_Cvar_Set(cv->cvarName, "33");
 					}
 				} // -OSPx
+
+				// cvar toggle
+// Update vote info for clients, if necessary
+				if (cv->vmCvar == &vote_allow_kick            || cv->vmCvar == &vote_allow_map            ||
+				    cv->vmCvar == &vote_allow_matchreset      || cv->vmCvar == &vote_allow_gametype       ||
+				    cv->vmCvar == &vote_allow_mutespecs       || cv->vmCvar == &vote_allow_nextmap        ||
+				    cv->vmCvar == &vote_allow_referee        ||
+				    cv->vmCvar == &vote_allow_swapteams       || cv->vmCvar == &vote_allow_friendlyfire   ||
+				    cv->vmCvar == &vote_allow_timelimit       || cv->vmCvar == &vote_allow_warmupdamage   ||
+				    cv->vmCvar == &vote_allow_antilag         || cv->vmCvar == &vote_allow_balancedteams  ||
+				    cv->vmCvar == &vote_allow_muting             )
+				{
+					fVoteFlags = qtrue;
+				}
+				else
+				{
+					fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles);
+				}
 			}
 		}
 	}
 
+	if (fVoteFlags)
+	{
+		G_voteFlags();
+	}
+
+	if (fToggles)
+	{
+		trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
+	}
+// end cvar toggle
 	if ( remapped ) {
 		G_RemapTeamShaders();
 	}
@@ -2852,7 +2884,7 @@ void CheckVote( void ) {
 			vCnt = 99;
 		else if (vCnt < 1)
 			vCnt = 1;
-				
+
 		// Vote will always pass with single client..rest is perc depended..
 		if ( (total == 1) || ( 100 * level.voteInfo.voteYes / total >= vCnt) ) {
 // -OSPx
