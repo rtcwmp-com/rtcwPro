@@ -1274,6 +1274,8 @@ void G_RegisterCvars( void ) {
 							cv->defaultString, cv->cvarFlags );
 		if ( cv->vmCvar ) {
 			cv->modificationCount = cv->vmCvar->modificationCount;
+            // update vote info for clients, if necessary
+			G_checkServerToggle(cv->vmCvar);
 		}
 
 		if ( cv->teamShader ) {
