@@ -1682,13 +1682,13 @@ void G_swapTeams( void ) {
 	}
 
 	AP( "cp \"^1Teams have been swapped!\n\"" );
-}    
+}
 // Return blockout status for a player
 int G_blockoutTeam( gentity_t *ent, int nTeam ) {
 	return( !G_allowFollow( ent, nTeam ) );
 }
 // Figure out if we are allowed/want to follow a given player
-qboolean G_allowFollow( gentity_t *ent, int nTeam ) {	
+qboolean G_allowFollow( gentity_t *ent, int nTeam ) {
 
 	if ( level.time - level.startTime > 2500 ) {
 		if ( TeamCount( -1, TEAM_RED ) == 0 ) {
@@ -1712,7 +1712,7 @@ qboolean G_desiredFollow( gentity_t *ent, int nTeam ) {
 	return( qfalse );
 }
 // Swap team speclocks
-void G_swapTeamLocks( void ) {	
+void G_swapTeamLocks( void ) {
 	qboolean fLock = teamInfo[TEAM_RED].spec_lock;
 	teamInfo[TEAM_RED].spec_lock = teamInfo[TEAM_BLUE].spec_lock;
 	teamInfo[TEAM_BLUE].spec_lock = fLock;
@@ -1772,7 +1772,7 @@ void G_removeSpecInvite( int team ) {
 
 	if (update)
 		G_updateSpecLock( team, qtrue );
-		
+
 }
 /*
 =============
@@ -1799,8 +1799,10 @@ int G_playersReady( void ) {
 	count = (!level.numPlayingClients) ? -1 : level.numPlayingClients - ready;
 	state = ( (ready == level.numPlayingClients) && level.numPlayingClients ) ? -2 : count;
 
-	if (g_noTeamSwitching.integer) {
-		state = ((ready >= g_minGameClients.integer) ? -2 : g_minGameClients.integer - ready);
+    if (g_noTeamSwitching.integer && level.numPlayingClients >= g_minGameClients.integer ) {
+	//if (g_noTeamSwitching.integer) {
+		//state = ((ready >= g_minGameClients.integer) ? -2 : g_minGameClients.integer - ready);
+		state = ((ready >= level.numPlayingClients) ? -2 : level.numPlayingClients - ready);  // force threshold to be everybody playing
 	}
 
 return state;
