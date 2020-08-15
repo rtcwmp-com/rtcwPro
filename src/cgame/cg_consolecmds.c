@@ -586,41 +586,26 @@ void CG_wStatsDown_f( void ) {
 			return;
 		}
 
-		// wstats overlap so close them first if they're open
-		if ( cgs.clientGameStats.show == SHOW_ON ) {
-			CG_StatsUp_f();
-		}
+        if(cgs.gamestats.requestTime < cg.time) {
+            cgs.gamestats.requestTime = cg.time + 500;
+            trap_SendClientCommand(va("wstats %d", i));
+        }
 
-		if ( cgs.gamestats.show == SHOW_SHUTDOWN && cg.time < cgs.gamestats.fadeTime ) {
-			cgs.gamestats.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.gamestats.fadeTime;
-		} else if ( cgs.gamestats.show != SHOW_ON ) {
-			cgs.gamestats.fadeTime = cg.time + STATS_FADE_TIME;
-		}
+        cg.showStats = qtrue;
+    }
 
-		cgs.gamestats.show = SHOW_ON;
 
-		if ( cgs.gamestats.requestTime < cg.time ) {
-			cgs.gamestats.requestTime = cg.time + 2000;
-			//trap_SendClientCommand( va( "sgstats %d", i ) );
-			trap_SendClientCommand( va( "wstats %d", i ) ); // L0 - Decide which window will this draw..
-		}
-	}
 }
 
 // -wstats
 void CG_wStatsUp_f( void ) {
-	if ( cgs.gamestats.show == SHOW_ON ) {
-		cgs.gamestats.show = SHOW_SHUTDOWN;
-		if ( cg.time < cgs.gamestats.fadeTime ) {
-			cgs.gamestats.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.gamestats.fadeTime;
-		} else {
-			cgs.gamestats.fadeTime = cg.time + STATS_FADE_TIME;
-		}
-		CG_windowFree( cg.statsWindow );
-		cg.statsWindow = NULL;
-	}
-}
 
+		cg.showStats = qfalse;
+		cgs.gamestats.show = SHOW_SHUTDOWN;
+        CG_windowFree( cg.statsWindow );
+		cg.statsWindow = NULL;
+
+}
 // +stats
 void CG_StatsDown_f( void ) {
 	if ( !cg.demoPlayback ) {

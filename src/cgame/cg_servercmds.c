@@ -1698,12 +1698,12 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
 
 	if ( fFull ) {
-		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^3%-5d  %-5d  %-5d\n\n", 
+		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^3%-5d  %-5d  %-5d\n\n",
 					kills, headshots, deaths,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	} else {
-		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^n%-5d %-5d %-4d\n\n\n", 
+		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^n%-5d %-5d %-4d\n\n\n",
 					kills, headshots, deaths,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
@@ -1750,7 +1750,7 @@ void CG_parseBestShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 		// (port shit load of stuff that we'll never use besides for this) and style it there..
 		txt_dump( va( ( doTop ) ? "^dBEST Match Accuracies:                            \n\n" :
 								  "^nWORST Match Accuracies:                           \n\n"));
-		txt_dump(    "^zWP   Acrcy Hits/Atts Kll Dth\n" );	
+		txt_dump(    "^zWP   Acrcy Hits/Atts Kll Dth\n" );
 		txt_dump(    "\n" );
 	}
 
@@ -1821,24 +1821,27 @@ void CG_parseTopShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 // +wstats window
 void CG_wstatsParse_cmd( void ) {
+    if( cg.showStats ) {
+        if ( cg.statsWindow == NULL
+            || cg.statsWindow->id != WID_STATS
+            || cg.statsWindow->inuse == qfalse
+            )  {
+            CG_createStatsWindow();
+        } else if ( cg.statsWindow->state == WSTATE_SHUTDOWN ) {
+            cg.statsWindow->state = WSTATE_START;
+            cg.statsWindow->time = trap_Milliseconds();
+        }
 
-	if ( cg.statsWindow == NULL
-		 || cg.statsWindow->id != WID_STATS
-		 || cg.statsWindow->inuse == qfalse
-		 ) {
-		CG_createStatsWindow();
-	} else if ( cg.statsWindow->state == WSTATE_SHUTDOWN ) {
-		cg.statsWindow->state = WSTATE_START;
-		cg.statsWindow->time = trap_Milliseconds();
-	}
-
-	if ( cg.statsWindow != NULL ) {
-		cg.statsWindow->effects |= WFX_TEXTSIZING;
-		cg.statsWindow->lineCount = 0;
-		cg.windowCurrent = cg.statsWindow;
-		CG_parseWeaponStats_cmd( CG_printWindow );
-	}
-
+        if ( cg.statsWindow == NULL ) {
+                cg.showStats = qfalse;
+        }
+        else {
+            cg.statsWindow->effects |= WFX_TEXTSIZING;
+            cg.statsWindow->lineCount = 0;
+            cg.windowCurrent = cg.statsWindow;
+            CG_parseWeaponStats_cmd( CG_printWindow );
+        }
+    }
 }
 // +stats window
 void CG_clientParse_cmd( void ) {
@@ -2095,12 +2098,12 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 // L0 -End OSP Stats dump
-	// Force instant tapout 
+	// Force instant tapout
 	// NOTE: cg_forceTapout prevails if enabled..
 	if (!Q_stricmp(cmd, "reqforcespawn")) {
 		if (cg_instantTapout.integer && !cg_forceTapout.integer) {
 			CG_ForceTapOut_f();
-		} 		
+		}
 		return;
 	}
 	// Force tapout on respawn (reuse instant tapout..)
