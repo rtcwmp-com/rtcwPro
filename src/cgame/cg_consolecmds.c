@@ -608,6 +608,7 @@ void CG_wStatsUp_f( void ) {
 }
 // +stats
 void CG_StatsDown_f( void ) {
+    /*
 	if ( !cg.demoPlayback ) {
 		int i = cg.snap->ps.clientNum;
 
@@ -634,10 +635,28 @@ void CG_StatsDown_f( void ) {
 			trap_SendClientCommand( va( "cstats %d", i ) );
 		}
 	}
+	*/
+    if ( !cg.demoPlayback ) {
+		int i = cg.snap->ps.clientNum;
+
+		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
+			CPri( "You must be a player or following a player to use +stats\n" );
+			return;
+		}
+
+        if(cgs.clientGameStats.requestTime < cg.time) {
+            cgs.clientGameStats.requestTime = cg.time + 500;
+            trap_SendClientCommand( va( "cstats %d", i ) );
+        }
+
+        cg.showCLgameStats = qtrue;
+    }
+
 }
 
 // -stats
 void CG_StatsUp_f( void ) {
+    /*
 	if ( cgs.clientGameStats.show == SHOW_ON ) {
 		cgs.clientGameStats.show = SHOW_SHUTDOWN;
 		if ( cg.time < cgs.clientGameStats.fadeTime ) {
@@ -648,6 +667,12 @@ void CG_StatsUp_f( void ) {
 		CG_windowFree( cg.clientStatsWindow );
 		cg.clientStatsWindow = NULL;
 	}
+	*/
+    cg.showCLgameStats = qfalse;
+    cgs.clientGameStats.show = SHOW_SHUTDOWN;
+    CG_windowFree( cg.clientStatsWindow );
+    cg.clientStatsWindow = NULL;
+
 }
 
 // +topshots

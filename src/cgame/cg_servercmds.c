@@ -1845,23 +1845,28 @@ void CG_wstatsParse_cmd( void ) {
 }
 // +stats window
 void CG_clientParse_cmd( void ) {
+    if( cg.showCLgameStats ) {
+        if ( cg.clientStatsWindow == NULL
+             || cg.clientStatsWindow->id != WID_CLIENTSTATS
+             || cg.clientStatsWindow->inuse == qfalse
+             ) {
+            CG_createClientStatsWindow();
+        } else if ( cg.clientStatsWindow->state == WSTATE_SHUTDOWN ) {
+            cg.clientStatsWindow->state = WSTATE_START;
+            cg.clientStatsWindow->time = trap_Milliseconds();
+        }
 
-	if ( cg.clientStatsWindow == NULL
-		 || cg.clientStatsWindow->id != WID_CLIENTSTATS
-		 || cg.clientStatsWindow->inuse == qfalse
-		 ) {
-		CG_createClientStatsWindow();
-	} else if ( cg.clientStatsWindow->state == WSTATE_SHUTDOWN ) {
-		cg.clientStatsWindow->state = WSTATE_START;
-		cg.clientStatsWindow->time = trap_Milliseconds();
-	}
+        if ( cg.clientStatsWindow == NULL ) {
+            cg.showCLgameStats = qfalse;
+        }
+        else{
+            cg.clientStatsWindow->effects |= WFX_TEXTSIZING;
+            cg.clientStatsWindow->lineCount = 0;
+            cg.windowCurrent = cg.clientStatsWindow;
+            CG_parseClientStats_cmd( CG_printWindow );
+        }
 
-	if ( cg.clientStatsWindow != NULL ) {
-		cg.clientStatsWindow->effects |= WFX_TEXTSIZING;
-		cg.clientStatsWindow->lineCount = 0;
-		cg.windowCurrent = cg.clientStatsWindow;
-		CG_parseClientStats_cmd( CG_printWindow );
-	}
+    }
 
 }
 // +topshots window

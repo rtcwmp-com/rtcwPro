@@ -963,6 +963,7 @@ typedef struct {
 	score_t scores[MAX_CLIENTS];
 	qboolean showScores;
 	qboolean showStats;
+	qboolean showCLgameStats;
 	qboolean scoreBoardShowing;
 	int scoreFadeTime;
 	char killerName[MAX_NAME_LENGTH];
