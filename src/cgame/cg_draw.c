@@ -88,7 +88,7 @@ void VP_DrawNames(void) {
 	float fontsize;
 	float dist;
 
-	for (i = 0; i < numnames; i++) 
+	for (i = 0; i < numnames; i++)
 	{
 		//need to come up with better scaler
 		fontsize = cgs.media.charsetShader;
@@ -828,7 +828,7 @@ static float CG_DrawTeamOverlay( float y ) {
 			// NERVE - SMF
 			// determine class type
 			val = cg_entities[ ci->clientNum ].currentState.teamNum;
-		
+
 			if ( val == 0 ) {
 				classType[0] = 'S';
 			} else if ( val == 1 ) {
@@ -2800,21 +2800,22 @@ static qboolean CG_DrawFollow( void ) {
 					sprintf(deploytime, CG_TranslateString("Deploying in ^3%d ^7second"), reinfTime);
 				}
         }
-
-		CG_DrawStringExt( INFOTEXT_STARTX, 68, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 );
-
+        CG_DrawStringExt( INFOTEXT_STARTX, 83, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 );// below respawn timer
+		//CG_DrawStringExt( INFOTEXT_STARTX, 68, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 ); // original location
 		// DHM - Nerve :: Don't display if you're following yourself
 		if ( cg.snap->ps.clientNum != cg.clientNum ) {
 			sprintf( deploytime,"(%s %s)", CG_TranslateString( "Following" ), cgs.clientinfo[ cg.snap->ps.clientNum ].name );
-			CG_DrawStringExt( INFOTEXT_STARTX, 86, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 );
+			//CG_DrawStringExt( INFOTEXT_STARTX, 86, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 ); // original location
+			CG_DrawStringExt( INFOTEXT_STARTX, 101, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 ); //  below respawn timer
 		}
 	} else {
 		// jpw
-		CG_DrawSmallString( INFOTEXT_STARTX, 68, CG_TranslateString( "following" ), 1.0F );
+		//CG_DrawSmallString( INFOTEXT_STARTX, 68, CG_TranslateString( "following" ), 1.0F ); // original location
+		CG_DrawSmallString( INFOTEXT_STARTX, 83, CG_TranslateString( "following" ), 1.0F ); // below respawn timer
 
 		name = cgs.clientinfo[ cg.snap->ps.clientNum ].name;
-
-		CG_DrawStringExt( 120, 68, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 );
+        //CG_DrawStringExt( 120, 68, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // original location
+		CG_DrawStringExt( 120, 83, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // below respawn timer
 	} // JPW NERVE
 	return qtrue;
 }
