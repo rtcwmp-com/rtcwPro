@@ -929,7 +929,7 @@ void ClientThink_real( gentity_t *ent ) {
 				} else {
 					height = ent->client->ps.viewheight;
 				}
-				
+
 				VectorCopy( ent->client->ps.viewangles, angles );
 				if ( angles[PITCH] > 180 ) {
 					dest = ( -360 + angles[PITCH] ) * 0.75;
@@ -943,14 +943,14 @@ void ClientThink_real( gentity_t *ent ) {
 				VectorMA( v, 18, up, v );
 
 				VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
-				head->r.currentOrigin[2] += height / 2;				
+				head->r.currentOrigin[2] += height / 2;
 			}
-			
+
 			VectorCopy( head->r.currentOrigin, head->s.origin );
 			VectorCopy( ent->r.currentAngles, head->s.angles );
 			VectorCopy( head->s.angles, head->s.apos.trBase );
 			VectorCopy( head->s.angles, head->s.apos.trDelta );
-			
+
 			VectorSet (head->r.mins , -6, -6, -4);
 			VectorSet (head->r.maxs , 6, 6, 10);
 			//VectorSet (head->r.mins , -6, -6, -6);
@@ -1111,7 +1111,9 @@ void ClientThink_real( gentity_t *ent ) {
 			if ( !client->dropWeaponTime  ) {
 				client->dropWeaponTime = 1; // just latch it for now
 
-				if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
+				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
+				// (dropweapon) ADD NEW CVAR (if desired) and include in the following condition to allow medics to drop their weapons
+				if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) ) {
 					for ( i = 0; i < MAX_WEAPS_IN_BANK_MP; i++ ) {
 						weapon = weapBanksMultiPlayer[3][i];
 						if ( COM_BitCheck( client->ps.weapons,weapon ) ) {
@@ -1532,12 +1534,12 @@ void ClientThink( int clientNum ) {
 
 void G_RunClient( gentity_t *ent ) {
 
-	if (G_DoAntiwarp(ent)) 
+	if (G_DoAntiwarp(ent))
 	{
 		DoClientThinks(ent);
 	}
 
-	if ( !g_synchronousClients.integer ) 
+	if ( !g_synchronousClients.integer )
 	{
 		return;
 	}

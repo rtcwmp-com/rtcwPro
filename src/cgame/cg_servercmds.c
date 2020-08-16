@@ -256,8 +256,8 @@ void CG_ParseWolfinfo( void ) {
 	{
 		trap_S_StartLocalSound(cgs.media.announceFight, CHAN_ANNOUNCER);
 
-	//	Pri("^1FIGHT!\n");
-		//CPri(CG_TranslateString("^1FIGHT!\n"));
+		//Pri("^1FIGHT!\n");
+		CPri(CG_TranslateString("^1FIGHT!\n"));
 	}
 
 
@@ -914,6 +914,7 @@ static void CG_MapRestart( void ) {
 		}
 	}
 #endif
+
 	trap_Cvar_Set( "cg_thirdPerson", "0" );
 }
 
@@ -1669,10 +1670,10 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	txt_dump( va( "^7Current game stats for: ^c%s\n\n", strName ));
 
 	if ( fFull ) {
-		txt_dump(     "^cKills ^7HS   Deaths TKs Suicides ^eDmgGiv DmgRcv TeamDmg\n" );
+		txt_dump(     "Kills HS   Deaths TKs Suicides ^3DmgGiv DmgRcv TeamDmg\n" );
 		txt_dump(     "----------------------------------------------------\n" );
 	} else {
-		txt_dump(     "^cKls  ^7HS  Dth TK Sui ^eDmGiv DmRcv TDmg\n" );
+		txt_dump(     "^zKls  ^7HS  Dth TK Sui ^nDmGiv DmRcv TDmg\n" );
 		//txt_dump(     "-------------------------------------\n");
 		txt_dump(     "\n" );
 	}
@@ -1697,25 +1698,25 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
 
 	if ( fFull ) {
-		txt_dump( va( "^c%-4d  ^7%-3d  %-3d    %-2d  %-2d       ^e%-5d  %-5d  %-5d\n\n",
+		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^3%-5d  %-5d  %-5d\n\n",
 					kills, headshots, deaths,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	} else {
-		txt_dump( va( "^c%-4d ^7%-3d %-3d %-2d %-2d  ^e%-5d %-5d %-4d\n\n\n",
+		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^n%-5d %-5d %-4d\n\n\n",
 					kills, headshots, deaths,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	}
 
 	if (ammo_giv > 0 || med_giv > 0)
-		txt_dump( va("^cAmmopacks: ^7%-3d    ^cHealthpacks: ^7%d\n", ammo_giv, med_giv ));
+		txt_dump(va("^3Ammopacks: ^7%-3d    ^3Healthpacks: ^7%d\n", ammo_giv, med_giv));
 	if (revived > 0)
-		txt_dump( va("^cRevives  : ^7%-3d\n", revived ));
+		txt_dump(va("^3Revives  : ^7%-3d    \n", revived));
 	if (kill_peak > 0 || gibs > 0)
-		txt_dump( va("^cKill Peak: ^7%-3d    ^cGibbed     : ^7%d\n", kill_peak, gibs ));
+		txt_dump(va("^3Kill Peak: ^7%-3d    ^3Gibbed     : ^7%d\n", kill_peak, gibs));
 	if (acc_shots > 0 || acc_hits > 0)
-		txt_dump( va("^cAccouracy: ^7%-3.2f  ^cShots-Hits : ^7%d/^e%d\n", acc, acc_shots, acc_hits  ));
+		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Shots-Hits : ^7%d/^n%d\n", acc, acc_shots, acc_hits));
 
 	if ( !fFull ) {
 		txt_dump( "\n" );
@@ -1736,20 +1737,20 @@ void CG_parseBestShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 	int iWeap = atoi( CG_Argv( iArg++ ) );
 	if ( !iWeap ) {
-		txt_dump( va( "^cNo qualifying %sshot info available.      \n\n", ( ( doTop ) ? "top" : "bottom" ) ) );
+		txt_dump(va("^3No qualifying %sshot info available.      \n\n", ((doTop) ? "top" : "bottom")));
 		return;
 	}
 
 	if ( fFull ) {
-		txt_dump( va( "^2%s Match Accuracies:\n", ( doTop ) ? "BEST" : "WORST" ) );
-		txt_dump(  "\n^cWP   Acrcy Hits/Atts Kills Deaths\n" );
+		txt_dump( va( "^5%s Match Accuracies:\n", ( doTop ) ? "BEST" : "WORST" ) );
+		txt_dump(  "\n^3WP   Acrcy Hits/Atts Kills Deaths\n" );
 		txt_dump(    "-------------------------------------------------------------\n" );
 	} else {
 		// L0 - Sucks I know...alternative is to patch cg_info.c
 		// (port shit load of stuff that we'll never use besides for this) and style it there..
 		txt_dump( va( ( doTop ) ? "^dBEST Match Accuracies:                            \n\n" :
-								  "^eWORST Match Accuracies:                           \n\n"));
-		txt_dump(    "^cWP   Acrcy Hits/Atts Kll Dth\n" );
+								  "^nWORST Match Accuracies:                           \n\n"));
+		txt_dump(    "^zWP   Acrcy Hits/Atts Kll Dth\n" );
 		txt_dump(    "\n" );
 	}
 
@@ -1764,11 +1765,11 @@ void CG_parseBestShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 		if ( fFull ) {
 			BG_cleanName( cgs.clientinfo[cnum].name, name, 30, qfalse );
-			txt_dump( va( "^c%s ^7%5.1f ^5%4d/%-4d ^2%5d ^1%6d ^7%s\n",
+			txt_dump( va( "^3%s ^7%5.1f ^5%4d/%-4d ^2%5d ^1%6d ^7%s\n",
 						  aWeaponInfo[iWeap - 1].pszCode, acc, hits, atts, kills, deaths, name ) );
 		} else {
 			BG_cleanName( cgs.clientinfo[cnum].name, name, 12, qfalse );
-			txt_dump( va( "^c%s ^7%5.1f ^5%4d/%-4d ^2%3d ^1%3d ^7%s\n",
+			txt_dump( va( "^z%s ^7%5.1f ^5%4d/%-4d ^2%3d ^1%3d ^7%s\n",
 						  aWeaponInfo[iWeap - 1].pszCode, acc, hits, atts, kills, deaths, name ) );
 		}
 
@@ -1820,44 +1821,52 @@ void CG_parseTopShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 // +wstats window
 void CG_wstatsParse_cmd( void ) {
+    if( cg.showStats ) {
+        if ( cg.statsWindow == NULL
+            || cg.statsWindow->id != WID_STATS
+            || cg.statsWindow->inuse == qfalse
+            )  {
+            CG_createStatsWindow();
+        } else if ( cg.statsWindow->state == WSTATE_SHUTDOWN ) {
+            cg.statsWindow->state = WSTATE_START;
+            cg.statsWindow->time = trap_Milliseconds();
+        }
 
-	if ( cg.statsWindow == NULL
-		 || cg.statsWindow->id != WID_STATS
-		 || cg.statsWindow->inuse == qfalse
-		 ) {
-		CG_createStatsWindow();
-	} else if ( cg.statsWindow->state == WSTATE_SHUTDOWN ) {
-		cg.statsWindow->state = WSTATE_START;
-		cg.statsWindow->time = trap_Milliseconds();
-	}
-
-	if ( cg.statsWindow != NULL ) {
-		cg.statsWindow->effects |= WFX_TEXTSIZING;
-		cg.statsWindow->lineCount = 0;
-		cg.windowCurrent = cg.statsWindow;
-		CG_parseWeaponStats_cmd( CG_printWindow );
-	}
-
+        if ( cg.statsWindow == NULL ) {
+                cg.showStats = qfalse;
+        }
+        else {
+            cg.statsWindow->effects |= WFX_TEXTSIZING;
+            cg.statsWindow->lineCount = 0;
+            cg.windowCurrent = cg.statsWindow;
+            CG_parseWeaponStats_cmd( CG_printWindow );
+        }
+    }
 }
 // +stats window
 void CG_clientParse_cmd( void ) {
+    if( cg.showCLgameStats ) {
+        if ( cg.clientStatsWindow == NULL
+             || cg.clientStatsWindow->id != WID_CLIENTSTATS
+             || cg.clientStatsWindow->inuse == qfalse
+             ) {
+            CG_createClientStatsWindow();
+        } else if ( cg.clientStatsWindow->state == WSTATE_SHUTDOWN ) {
+            cg.clientStatsWindow->state = WSTATE_START;
+            cg.clientStatsWindow->time = trap_Milliseconds();
+        }
 
-	if ( cg.clientStatsWindow == NULL
-		 || cg.clientStatsWindow->id != WID_CLIENTSTATS
-		 || cg.clientStatsWindow->inuse == qfalse
-		 ) {
-		CG_createClientStatsWindow();
-	} else if ( cg.clientStatsWindow->state == WSTATE_SHUTDOWN ) {
-		cg.clientStatsWindow->state = WSTATE_START;
-		cg.clientStatsWindow->time = trap_Milliseconds();
-	}
+        if ( cg.clientStatsWindow == NULL ) {
+            cg.showCLgameStats = qfalse;
+        }
+        else{
+            cg.clientStatsWindow->effects |= WFX_TEXTSIZING;
+            cg.clientStatsWindow->lineCount = 0;
+            cg.windowCurrent = cg.clientStatsWindow;
+            CG_parseClientStats_cmd( CG_printWindow );
+        }
 
-	if ( cg.clientStatsWindow != NULL ) {
-		cg.clientStatsWindow->effects |= WFX_TEXTSIZING;
-		cg.clientStatsWindow->lineCount = 0;
-		cg.windowCurrent = cg.clientStatsWindow;
-		CG_parseClientStats_cmd( CG_printWindow );
-	}
+    }
 
 }
 // +topshots window
@@ -2094,12 +2103,12 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 // L0 -End OSP Stats dump
-	// Force instant tapout 
+	// Force instant tapout
 	// NOTE: cg_forceTapout prevails if enabled..
 	if (!Q_stricmp(cmd, "reqforcespawn")) {
 		if (cg_instantTapout.integer && !cg_forceTapout.integer) {
 			CG_ForceTapOut_f();
-		} 		
+		}
 		return;
 	}
 	// Force tapout on respawn (reuse instant tapout..)

@@ -2648,7 +2648,7 @@ void SP_misc_firetrails( gentity_t *ent ) {
 PC_SourceError
 ==============
 */
-void PC_SourceError(int handle, const char* format, ...)
+void PC_SourceError(int handle, char* format, ...)
 {
 	int         line;
 	char        filename[MAX_QPATH];

@@ -320,7 +320,7 @@ vmCvar_t cg_hitsounds;
 vmCvar_t cg_uinfo;
 
 // Stats - Font scale
-vmCvar_t cf_wstats; 
+vmCvar_t cf_wstats;
 vmCvar_t cf_wtopshots;
 
 // OSP
@@ -605,6 +605,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_spawnTimer_period, "cg_spawnTimer_period", "0", CVAR_TEMP },
 	// -OSPx
 	{ &int_ui_blackout, "ui_blackout", "0", CVAR_ROM },
+	{ &cg_drawPickupItems, "cg_drawPickupItems", "0", CVAR_ARCHIVE },
 	{ &cg_antilag, "g_antilag", "0", 0 }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
@@ -710,7 +711,7 @@ void CG_UpdateCvars( void ) {
 			else if (cv->vmCvar == &cg_forceModel) {
 				CG_ForceModelChange();
 			}
-			
+
 			// auto reload
 			if (cv->vmCvar == &cg_autoReload) {
 				if (cg_autoReload.integer) {

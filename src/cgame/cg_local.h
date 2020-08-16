@@ -195,7 +195,7 @@ typedef enum {
 	SHOW_ON
 } showView_t;
 
-typedef struct {	
+typedef struct {
 	int fadeTime;
 	int show;
 	int requestTime;
@@ -962,6 +962,8 @@ typedef struct {
 	int teamPlayers[TEAM_NUM_TEAMS];         // JPW NERVE for scoreboard
 	score_t scores[MAX_CLIENTS];
 	qboolean showScores;
+	qboolean showStats;
+	qboolean showCLgameStats;
 	qboolean scoreBoardShowing;
 	int scoreFadeTime;
 	char killerName[MAX_NAME_LENGTH];
@@ -1159,7 +1161,7 @@ typedef struct {
 	int		centerPrintAnnouncerDuration;
 	vec3_t	centerPrintAnnouncerColor;
 	int		centerPrintAnnouncerMode;
-	
+
 	// Auto Actions
 	qboolean	latchAutoActions;
 	// Draw names on hud
@@ -1834,7 +1836,7 @@ typedef struct {
 	qboolean freezeDemo;
 	int aviDemoRate;                                    // Demo playback recording
 	int cursorUpdate;                                   // Timeout for mouse pointer view
-	
+
 	int axisLeft;		// For DM
 	int alliedLeft;		// For DM
 	int aReinfOffset[TEAM_NUM_TEAMS];   // Reinforcements offset
