@@ -419,7 +419,7 @@ menuDef {
 		name osp_gfx
 		style WINDOW_STYLE_SHADER
 		rect 160 94 300 300
-		background "gfx/2d/blender_180.tga"
+		background "gfx/2d/rtcwpro-eagle.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration
@@ -427,12 +427,12 @@ menuDef {
 
 	itemDef {
 		name window
-		text "www.castlewolfenstein.com"
-		tooltip "Aller au site RtCW"
+		text "RtcwPro Beta 0.1"
+		tooltip "RtcwPro Beta"
 		tooltipaligny -40
 		type 0
 		style 0	
-		rect 475 465 170 14
+		rect 500 465 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED
@@ -450,12 +450,12 @@ menuDef {
 
 	itemDef {
 		name osp_url
-		text "www.OrangeSmoothie.org"
-		tooltip "Aller au site OSP"
+		text "www.github.com/rtcw-nihi/ospx"
+		tooltip "RtcwPro Repository"
 		tooltipaligny -40
 		type 1
 		style 0
-		rect 483 450 170 14
+		rect 450 450 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED
