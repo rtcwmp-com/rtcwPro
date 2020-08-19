@@ -665,7 +665,7 @@ menuDef {
 
 
 
-//////////////////// OSP //////////////////
+//////////////////// RtcwPro //////////////////
 
 
 
@@ -692,7 +692,7 @@ menuDef {
 		group grpnervecredit
 		style WINDOW_STYLE_SHADER
 		rect 270 342 100 100
-		background "gfx/2d/blender_180.tga"
+		background "gfx/2d/rtcwpro-eagle.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration
@@ -709,7 +709,7 @@ menuDef {
 		textstyle 2
 		textscale .22
 		textalign ITEM_ALIGN_CENTER
-		text "ORANGE SMOOTHIE PRODUCTIONS"
+		text "RtCW Pro Dev Team"
 		forecolor 1 0.62 0.1 1
 		decoration
 		visible 0
@@ -725,7 +725,7 @@ menuDef {
 		textaligny 9
 		textstyle 2
 		textscale .2
-		text "Design / Development"
+		text ""
 		textalign ITEM_ALIGN_LEFT
 		backcolor 1 1 1 .1
 		visible 0
@@ -743,7 +743,7 @@ menuDef {
 		textfont UI_FONT_SMALL
 		textscale .2
 		textstyle 2
-		text "Jason Keimig"
+		text "Nihilist / KrAzYkAzE / Dutchmeat / Tarator / S4ndm4nn"
 		textalign ITEM_ALIGN_LEFT
 		visible 0
 		decoration

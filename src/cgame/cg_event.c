@@ -196,7 +196,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			break;
 // OSPx - MODs
 		case MOD_ARTILLERY:			
-			message = "obliterated himself";
+			message = "fired-for-effect on himself";
 			break;
 		case MOD_SWITCHTEAM:
 			return;
@@ -374,7 +374,7 @@ static void CG_Obituary( entityState_t *ent ) {
 // OSPx
 		case MOD_ARTILLERY:
 			message = "stood under";
-			message2 = "'s air strike";			
+			message2 = "'s artillery support";			
 			break;
 // -OSPx
 // jpw
