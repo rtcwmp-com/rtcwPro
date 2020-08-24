@@ -89,7 +89,7 @@ menuDef {
 		name OSP
 		style WINDOW_STYLE_SHADER
 		rect 515 1 120 80
-		background "gfx/2d/rtcwpro-eagle.tga"
+		background "gfx/2d/rtcw-red-layered.tga"
 		visible 1
 		decoration
 	}

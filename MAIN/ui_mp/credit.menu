@@ -692,7 +692,7 @@ menuDef {
 		group grpnervecredit
 		style WINDOW_STYLE_SHADER
 		rect 270 342 100 100
-		background "gfx/2d/rtcwpro-eagle.tga"
+		background "gfx/2d/rtcw-red-layered.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration
