@@ -373,12 +373,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 
 	// L0 - Don't bother in warmup etc..
-	if (g_gamestate.integer == GS_PLAYING)
-	{
+	//if (g_gamestate.integer == GS_PLAYING) // euros want this during warmup
+	//{
 		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
-	}
+	//}
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress

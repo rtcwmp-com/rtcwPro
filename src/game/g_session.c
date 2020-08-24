@@ -163,8 +163,8 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
 			(int *)&client->sess.admin,
-			&client->sess.incognito,
-			&client->sess.ignored,
+			(int *)&client->sess.incognito,
+			(int *)&client->sess.ignored,
 			&client->sess.uci,
 			(int *)&client->sess.ip[0],
 			(int *)&client->sess.ip[1],

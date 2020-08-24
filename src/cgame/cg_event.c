@@ -272,7 +272,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			//message = "'s face was the unwilling recipient of";
 			//message2 = "'s .45ACP 1911 rounds";
 			message = "was killed by";
-			message2 = " 's .45ACP 1911";
+			message2 = "'s .45ACP 1911";
 			break;
 		case MOD_MP40:
 			//message = "was force fed a magazine of";
@@ -373,7 +373,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			break;
 // OSPx
 		case MOD_ARTILLERY:
-			message = "stood under";
+			message = "shelled by";
 			message2 = "'s artillery support";			
 			break;
 // -OSPx
