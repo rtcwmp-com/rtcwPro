@@ -1716,7 +1716,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	if (kill_peak > 0 || gibs > 0)
 		txt_dump(va("^3Kill Peak: ^7%-3d    ^3Gibbed     : ^7%d\n", kill_peak, gibs));
 	if (acc_shots > 0 || acc_hits > 0)
-		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Shots-Hits : ^7%d/^n%d\n", acc, acc_shots, acc_hits));
+		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Hits/Shots : ^7%d/^n%d\n", acc, acc_hits, acc_shots));
 
 	if ( !fFull ) {
 		txt_dump( "\n" );

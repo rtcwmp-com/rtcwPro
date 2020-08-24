@@ -723,7 +723,7 @@ static float CG_DrawTeamOverlay( float y ) {
 	damagecolor[3] = cg_hudAlpha.value;
 	maxCharsBeforeOverlay = 80;
 
-	if ( !cg_drawTeamOverlay.integer ) {
+	if ( !cg_drawTeamOverlay.integer || cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR) { // Issue 31 hide team overlay for specs
 		return y;
 	}
 

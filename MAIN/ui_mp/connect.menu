@@ -15,7 +15,7 @@ menuDef {
 		name window
 		group connect
 		rect 515 390 120 80
-		background "gfx/2d/rtcwpro-eagle.tga"
+		background "gfx/2d/rtcw-red-layered.tga"
 		visible MENU_TRUE
 		style WINDOW_STYLE_SHADER
 		decoration
