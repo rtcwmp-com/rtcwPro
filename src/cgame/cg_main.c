@@ -606,6 +606,8 @@ cvarTable_t cvarTable[] = {
 	// -OSPx
 	{ &int_ui_blackout, "ui_blackout", "0", CVAR_ROM },
 	{ &cg_drawPickupItems, "cg_drawPickupItems", "0", CVAR_ARCHIVE },
+	{ &cg_chatAlpha, "cg_chatAlpha", "0.33", CVAR_ARCHIVE },
+	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_antilag, "g_antilag", "0", 0 }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

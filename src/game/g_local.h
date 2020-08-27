@@ -1547,7 +1547,6 @@ extern vmCvar_t match_readypercent;
 extern vmCvar_t match_timeoutcount;
 extern vmCvar_t match_timeoutlength;
 extern vmCvar_t match_warmupDamage;
-extern vmCvar_t server_autoconfig;
 
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;

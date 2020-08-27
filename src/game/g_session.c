@@ -54,7 +54,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	if ( level.fResetStats ) {
 		G_deleteStats( client - level.clients );
 	} /// End
-	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
 			client->sess.spectatorState,
@@ -82,7 +82,8 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		//	client->sess.guid,			// Guid
 			client->sess.selectedWeapon,// Selected weapon
 			client->sess.specInvited,	// Can watch..
-			client->sess.specLocked		// Spec lock
+			client->sess.specLocked,	// Spec lock
+			client->sess.rounds
 			);
 
 	var = va( "session%i", client - level.clients );
@@ -145,7 +146,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // nihi changed
+	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -173,7 +174,8 @@ void G_ReadSessionData( gclient_t *client ) {
 	//		(char *)&client->sess.guid,
 			&client->sess.selectedWeapon,
 			&client->sess.specInvited,
-			&client->sess.specLocked
+			&client->sess.specLocked,
+			&client->sess.rounds
 			);
 
 	// L0 - OSP stats -- pull and parse weapon stats

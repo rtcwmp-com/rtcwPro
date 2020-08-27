@@ -229,7 +229,6 @@ vmCvar_t vote_percent;
 vmCvar_t g_spectatorInactivity;
 vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
-vmCvar_t server_autoconfig;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
 vmCvar_t	g_hitsounds;			// Hitsounds - Requires soundpack
@@ -476,7 +475,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue },
 	{ &match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue },
 	{ &g_showFlags, "g_showFlags", "1", 0 },
-	{ &server_autoconfig, "server_autoconfig", "1", 0, 0, qfalse, qfalse }, // set to 1 for comp settings
 	{ &g_noTeamSwitching, "g_noTeamSwitching", "0", 0, 0, qfalse, qfalse }, // set to 0 for comp settings
 	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
 	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
@@ -524,16 +522,16 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_crouchRate, "g_crouchRate", "5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse},
 	{ &g_lifeStats, "g_lifeStats", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_maxTeamPF, "g_maxTeamPF", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
+	{ &g_maxTeamPF, "g_maxTeamPF", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamSniper, "g_maxTeamSniper", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
-	{ &g_maxTeamVenom, "g_maxTeamVenom", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
-	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
+	{ &g_maxTeamVenom, "g_maxTeamVenom", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
+	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &team_commands, "team_commands", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
     { &match_warmupfire, "match_warmupfire", "1", 0, 0, qfalse },
-	{&g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse},
+	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 
 	// voting
 	{ &vote_limit, "vote_limit", "3", CVAR_ARCHIVE, qfalse, qfalse },

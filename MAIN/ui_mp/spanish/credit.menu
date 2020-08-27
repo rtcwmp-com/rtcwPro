@@ -718,24 +718,7 @@ menuDef {
 	itemDef {
 		name osp1
 		group grpnervecredit
-		rect 120 350 440 10
-		style 1
-		textalign 1
-		textalignx 260
-		textaligny 9
-		textstyle 2
-		textscale .2
-		text ""
-		textalign ITEM_ALIGN_LEFT
-		backcolor 1 1 1 .1
-		visible 0
-		decoration
-	}
-
-	itemDef {
-		name osp1
-		group grpnervecredit
-		rect 120 350 440 10
+		rect 300 350 440 10
 		style 1
 		textalign 1
 		textalignx 20
@@ -744,12 +727,26 @@ menuDef {
 		textscale .2
 		textstyle 2
 		text "Nihilist / KrAzYkAzE / Dutchmeat / Tarator / S4ndm4nn"
-		textalign ITEM_ALIGN_LEFT
+		textalign ITEM_ALIGN_CENTER
 		visible 0
 		decoration
 	}
 
-
+	itemDef {
+		name osp1
+		group grpnervecredit
+		rect 300 400 440 10
+		style 1
+		textalign 1
+		textalignx 20
+		textaligny 9
+		textstyle 2
+		textscale .2
+		text "Special Thanks to Nate L0 - Author of OSPx/xMod"
+		textalign ITEM_ALIGN_CENTER
+		visible 0
+		decoration
+	}
 
 
 
