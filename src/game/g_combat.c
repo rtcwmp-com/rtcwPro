@@ -373,12 +373,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 
 	// L0 - Don't bother in warmup etc..
-	//if (g_gamestate.integer == GS_PLAYING) // euros want this during warmup
-	//{
+	if (g_gamestate.integer == GS_PLAYING) // this is only on server side not needed during warmup
+	{
 		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
-	//}
+	}
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
@@ -399,14 +399,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		}
 	} // End
 
-	if (g_gamestate.integer == GS_PLAYING) {
-		// broadcast the death event to everyone
-		ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
-		ent->s.eventParm = meansOfDeath;
-		ent->s.otherEntityNum = self->s.number;
-		ent->s.otherEntityNum2 = killer;
-		ent->r.svFlags = SVF_BROADCAST; // send to everyone
-	}
+	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
+
+	// broadcast the death event to everyone
+	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
+	ent->s.eventParm = meansOfDeath;
+	ent->s.otherEntityNum = self->s.number;
+	ent->s.otherEntityNum2 = killer;
+	ent->r.svFlags = SVF_BROADCAST; // send to everyone
+
+	//}
 
 	self->enemy = attacker;
 

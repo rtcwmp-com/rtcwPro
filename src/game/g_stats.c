@@ -914,7 +914,7 @@ void G_printMatchInfo( gentity_t *ent ) {
 		tot_rev = 0;
 		CP(va("sc \"%s ^7Team\n"
 			     "^7--------------------------------------------------------------------------"
-				 "\nPlayer          ^eKll ^7Dth Sui TK ^cEff ^3Gib ^7Accrcy   ^eHS    DG    DR   TD  Rev ^7Score\n"
+				 "\nPlayer          ^eKll ^7Dth Sui TK ^cEff ^7Gib Accrcy HS   ^2DG   ^1DR   ^4TD  ^5Rev ^3Score\n"
 				 "^7--------------------------------------------------------------------------\n\"", (i == TEAM_RED) ? "^1Axis" : "^4Allied"  ));
 
 		for ( j = 0; j < level.numPlayingClients; j++ ) {
@@ -958,7 +958,7 @@ void G_printMatchInfo( gentity_t *ent ) {
 			}
 
 			cnt++;
-			CP(va("sc \"%s%-15s^e%4d^7%4d%4d%3d%s^c%4d%3d ^7%6.2f^e%5d%6d%6d%5d%3d^7%7d\n\"",
+			CP(va("sc \"%s%-15s^e%4d^7%4d%4d%3d%s^c%4d^7%3d %6.2f%4d^2%5d^1%5d^4%5d^5%5d^7%5d\n\"",
 				ref,
 					n2,
 					cl->sess.kills,
@@ -995,7 +995,7 @@ void G_printMatchInfo( gentity_t *ent ) {
 		tot_acc = ( (tot_shots == 0) ? 0.00 : ((float)tot_hits / (float)tot_shots ) * 100.00f );
 
 		CP( va( "sc \"^7--------------------------------------------------------------------------\n"
-				"%-19s^e%4d^7%4d%4d%3d^c%4d%3d ^7%6.2f^e%5d%6d%6d%5d%3d^7%7d\n\n\n\"",
+				"%-19s^e%4d^7%4d%4d%3d%4d%3d ^7%6.2f%4d^2%5d^1%5d^4%5d^5%5d^7%5d\n\n\n\"",
 				"^eTotals^7",
 				tot_kills,
 				tot_deaths,

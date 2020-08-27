@@ -2722,9 +2722,22 @@ void ClientCommand( int clientNum ) {
 		Cmd_EntityCount_f( ent );
 	} else if ( Q_stricmp( cmd, "setspawnpt" ) == 0 )  {
 		Cmd_SetSpawnPoint_f( ent );
-	} else {
+	} else if (!Q_stricmp(cmd, "forcetapout")) {
+		 if (!ent || !ent->client) {
+			 return;
+		 }
+
+		 if (ent->client->ps.stats[STAT_HEALTH] <= 0 && (ent->client->sess.sessionTeam == TEAM_RED || ent->client->sess.sessionTeam == TEAM_BLUE)) {
+			 limbo(ent, qtrue);
+		 }
+
+		 return;
+	}
+	
+	else {
 		trap_SendServerCommand( clientNum, va( "print \"unknown cmd[lof] %s\n\"", cmd ) );
 	}
+
 }
 
 typedef struct
