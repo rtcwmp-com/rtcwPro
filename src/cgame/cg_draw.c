@@ -2878,7 +2878,7 @@ static void CG_DrawWarmup( void ) {
 		const char* playReady = CG_ConfigString(CS_PLAYERSREADY);
 
 		int playersReady = atoi(playReady);
-		int numberOfPlayers = cg.teamPlayers[0] + cg.teamPlayers[1];
+		int numberOfPlayers = cg.teamPlayers[TEAM_BLUE] + cg.teamPlayers[TEAM_RED];
 		
 		if (cgs.minclients > numberOfPlayers)
 			numberOfPlayers = cgs.minclients;
