@@ -15,6 +15,7 @@ all: gameclean qagame.mp.i386.so
 
 gameclean:
 	rm -rf *.o ../botai/*.o
+	rm -rf ../qcommon/crypto/sha-1/*.o
 
 qagame.mp.i386.so: $(MODULES)
 	$(CC)  -shared -m32 -ldl -lm -o $@ $? $(LDFLAGS)
