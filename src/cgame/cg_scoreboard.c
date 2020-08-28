@@ -347,7 +347,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 				CG_DrawSmallString(x, y, s, fade);
 			} 
 			else if (cgs.gamestate == GS_WARMUP) {
-				s = va("%s %s", CG_TranslateString("MISSION TIME:"), CG_TranslateString("WARMUP"));
+				s = va("%s %s", CG_TranslateString("Mission time:"), CG_TranslateString("WARMUP"));
 				CG_DrawSmallString(x, y, s, fade);
 			}
 		}
