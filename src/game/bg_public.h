@@ -211,6 +211,7 @@ typedef struct forceCvar_s
 #define CS_READY				41
 #define CS_SVCVAR               42		// RTCWPro - Cvar limiting
 #define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
+#define CS_PLAYERSREADY			44		// RtcwPro - number of players ready so far
 
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )

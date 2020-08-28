@@ -398,8 +398,17 @@ L0 - Ready
 Parse Ready state
 ================
 */
-void CG_ParseReady( const char *pState ) {
-	cgs.readyState = atoi( pState );
+void CG_ParseReady(const char* pState) {
+	cgs.readyState = atoi(pState);
+}
+
+/*
+================
+Parse Players ready
+================
+*/
+void CG_ParsePlayersReady(const char* pState) {
+	cgs.playersReady = atoi( pState );
 }
 
 /*
@@ -433,7 +442,9 @@ void CG_SetConfigValues( void ) {
 	// L0 - Pause
 	CG_ParsePause( CG_ConfigString( CS_PAUSED ) );
 	// L0 - Ready
-	CG_ParseReady( CG_ConfigString( CS_READY ) );
+	CG_ParseReady(CG_ConfigString(CS_READY) );
+	// RtcwPro Players Ready
+	CG_ParsePlayersReady(CG_ConfigString(CS_PLAYERSREADY) );
 }
 
 /*
@@ -580,6 +591,9 @@ static void CG_ConfigStringModified( void ) {
 	} // Ready
 	else if ( num == CS_READY ) {
 		CG_ParseReady( str );
+	}
+	else if (num == CS_PLAYERSREADY) {
+		CG_ParsePlayersReady( str );
 	}
 }
 

@@ -1845,6 +1845,7 @@ typedef struct {
 	int pauseState;		// Pause
 	int pauseTime;   // pause time nihi added
 	int readyState;		// Ready
+	int playersReady;   // number of players ready so far
 // nihi added below
 	// Pause
 	cPauseSts_t match_paused;
@@ -2866,7 +2867,8 @@ int CG_Text_Height_ext2(const char *text, float scale, int limit);
 // Pause
 void CG_ParsePause( const char *pState );
 // Ready
-void CG_ParseReady( const char *pState );
+void CG_ParseReady(const char* pState);
+void CG_ParsePlayersReady(const char* pState);
 void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int border, const float *color );
 // OSP's Autoaction values
 #define AA_DEMORECORD   0x01

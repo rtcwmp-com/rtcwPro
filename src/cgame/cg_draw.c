@@ -2870,9 +2870,20 @@ static void CG_DrawWarmup( void ) {
 		return;     // (SA) don't bother with this stuff in sp
 	}
 
+
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
 		cw = 10;
+		
+		const char* playReady = CG_ConfigString(CS_PLAYERSREADY);
+
+		int playersReady = atoi(playReady);
+		int numberOfPlayers = cg.teamPlayers[0] + cg.teamPlayers[1];
+		
+		if (cgs.minclients > numberOfPlayers)
+			numberOfPlayers = cgs.minclients;
+
+		int playersToReadyUp = numberOfPlayers - playersReady;
 
 		// Account for g_minGameClients if it's present
 		if (cgs.readyState == CREADY_PENDING) {
@@ -2882,7 +2893,8 @@ static void CG_DrawWarmup( void ) {
 			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 ); KK commented this out*/
 
 
-			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );   // nihi changed
+			//s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );   // nihi changed
+			s1 = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), playersToReadyUp, playersToReadyUp == 1 ? "player" : "players");
 			s2 = CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
 
 			w = CG_DrawStrlen( s1 );
@@ -2896,7 +2908,8 @@ static void CG_DrawWarmup( void ) {
 		} else {
 
 			// No need to bother with count..scoreboard gives info..
-			s = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );   // nihi changed
+			//s = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );   // nihi changed
+			s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), playersToReadyUp, playersToReadyUp == 1 ? "player" : "players");
 			w = CG_DrawStrlen( s );
 			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
 
