@@ -54,7 +54,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	if ( level.fResetStats ) {
 		G_deleteStats( client - level.clients );
 	} /// End
-	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
 			client->sess.spectatorState,
@@ -83,7 +83,18 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.selectedWeapon,// Selected weapon
 			client->sess.specInvited,	// Can watch..
 			client->sess.specLocked,	// Spec lock
-			client->sess.rounds
+			client->sess.deaths,
+			client->sess.kills,
+			client->sess.team_kills,
+			client->sess.gibs,
+			client->sess.acc_shots,
+			client->sess.acc_hits,
+			client->sess.headshots,
+			client->sess.suicides,
+			client->sess.med_given,
+			client->sess.ammo_given,
+			client->sess.revives,
+			client->sess.knifeKills
 			);
 
 	var = va( "session%i", client - level.clients );
@@ -146,7 +157,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
+	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -175,7 +186,18 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.selectedWeapon,
 			&client->sess.specInvited,
 			&client->sess.specLocked,
-			&client->sess.rounds
+			&client->sess.deaths,
+			&client->sess.kills,
+			&client->sess.team_kills,
+			&client->sess.gibs,
+			&client->sess.acc_shots,
+			&client->sess.acc_hits,
+			&client->sess.headshots,
+			&client->sess.suicides,
+			&client->sess.med_given,
+			&client->sess.ammo_given,
+			&client->sess.revives,
+			&client->sess.knifeKills
 			);
 
 	// L0 - OSP stats -- pull and parse weapon stats

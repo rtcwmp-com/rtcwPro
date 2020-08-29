@@ -1799,6 +1799,8 @@ int G_playersReady( void ) {
 	}
 
 	trap_SetConfigstring(CS_PLAYERSREADY, va("%i", ready)); // RtcwPro set the number of players left to ready up
+	trap_SetConfigstring(CS_PLAYERCOUNT, va("%i", level.numPlayingClients)); // RtcwPro set the number of players
+
 	count = (!level.numPlayingClients) ? -1 : level.numPlayingClients - ready;
 	state = ( (ready == level.numPlayingClients) && level.numPlayingClients ) ? -2 : count;
 

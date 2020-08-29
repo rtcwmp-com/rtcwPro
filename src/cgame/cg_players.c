@@ -3390,3 +3390,15 @@ qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t *or ) {
 
 	return qtrue;
 }
+
+int CG_GetTeamPlayers(void) {
+	const char* numPlayers = CG_ConfigString(CS_PLAYERCOUNT);
+	int numTeamplayers = atoi(numPlayers);
+	return numTeamplayers;
+}
+
+int CG_GetPlayersReady(void) {
+	const char* playReady = CG_ConfigString(CS_PLAYERSREADY);
+	int playersReady = atoi(playReady);
+	return playersReady;
+}

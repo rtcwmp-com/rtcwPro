@@ -1846,6 +1846,7 @@ typedef struct {
 	int pauseTime;   // pause time nihi added
 	int readyState;		// Ready
 	int playersReady;   // number of players ready so far
+	int playerCount;	// number of players
 // nihi added below
 	// Pause
 	cPauseSts_t match_paused;
@@ -2288,6 +2289,8 @@ void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, entityState_t *es, const vec3_t fireRiseDir );
 void CG_NewClientInfo( int clientNum );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
+int CG_GetPlayersReady(void);
+int CG_GetTeamPlayers(void);
 
 // Rafael particles
 extern qboolean initparticles;

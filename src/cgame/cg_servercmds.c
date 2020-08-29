@@ -413,6 +413,16 @@ void CG_ParsePlayersReady(const char* pState) {
 
 /*
 ================
+Parse Player count
+================
+*/
+void CG_ParsePlayerCount(const char* pState) {
+	cgs.playerCount = atoi(pState);
+}
+
+
+/*
+================
 CG_SetConfigValues
 
 Called on load to set the initial values from configure strings
@@ -445,6 +455,8 @@ void CG_SetConfigValues( void ) {
 	CG_ParseReady(CG_ConfigString(CS_READY) );
 	// RtcwPro Players Ready
 	CG_ParsePlayersReady(CG_ConfigString(CS_PLAYERSREADY) );
+	// RtcwPro Player Count
+	CG_ParsePlayerCount(CG_ConfigString(CS_PLAYERCOUNT));
 }
 
 /*

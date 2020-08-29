@@ -2875,10 +2875,8 @@ static void CG_DrawWarmup( void ) {
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
 		cw = 10;
 		
-		const char* playReady = CG_ConfigString(CS_PLAYERSREADY);
-
-		int playersReady = atoi(playReady);
-		int numberOfPlayers = cg.teamPlayers[TEAM_BLUE] + cg.teamPlayers[TEAM_RED];
+		int playersReady = CG_GetPlayersReady();
+		int numberOfPlayers = CG_GetTeamPlayers();
 		
 		if (cgs.minclients > numberOfPlayers)
 			numberOfPlayers = cgs.minclients;
