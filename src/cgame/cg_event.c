@@ -373,7 +373,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			break;
 // OSPx
 		case MOD_ARTILLERY:
-			message = "shelled by";
+			message = "was shelled by";
 			message2 = "'s artillery support";			
 			break;
 // -OSPx
