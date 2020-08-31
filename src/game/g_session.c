@@ -54,7 +54,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	if ( level.fResetStats ) {
 		G_deleteStats( client - level.clients );
 	} /// End
-	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
 			client->sess.spectatorState,
@@ -72,6 +72,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.latchPlayerSkin,    // DHM - Nerve
 			// L0 - New stuff
 			client->sess.admin,			// User is admin
+			client->sess.referee,			// User is ref
 			client->sess.incognito,		// Admin is hidden
 			client->sess.ignored,		// User is ignored
 			client->sess.uci,			// mcwf's GeoIP
@@ -80,11 +81,15 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.ip[2],			// L0 - IP
 			client->sess.ip[3],			// L0 - IP
 		//	client->sess.guid,			// Guid
+			client->sess.rounds,		// rounds played in stopwatch
 			client->sess.selectedWeapon,// Selected weapon
 			client->sess.specInvited,	// Can watch..
 			client->sess.specLocked,	// Spec lock
 			client->sess.deaths,
 			client->sess.kills,
+			client->sess.damage_given,
+			client->sess.damage_received,
+			client->sess.team_damage,
 			client->sess.team_kills,
 			client->sess.gibs,
 			client->sess.acc_shots,
@@ -157,7 +162,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
+	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -174,7 +179,8 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerItem,  // DHM - Nerve
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
-			(int *)&client->sess.admin,
+			(int*)&client->sess.admin,
+			(int*)&client->sess.referee,
 			(int *)&client->sess.incognito,
 			(int *)&client->sess.ignored,
 			&client->sess.uci,
@@ -183,11 +189,15 @@ void G_ReadSessionData( gclient_t *client ) {
 			(int *)&client->sess.ip[2],
 			(int *)&client->sess.ip[3],
 	//		(char *)&client->sess.guid,
+			&client->sess.rounds,
 			&client->sess.selectedWeapon,
 			&client->sess.specInvited,
 			&client->sess.specLocked,
 			&client->sess.deaths,
 			&client->sess.kills,
+			&client->sess.damage_given,
+			&client->sess.damage_received,
+			&client->sess.team_damage,
 			&client->sess.team_kills,
 			&client->sess.gibs,
 			&client->sess.acc_shots,

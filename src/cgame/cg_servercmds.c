@@ -1693,13 +1693,13 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	ci = &cgs.clientinfo[nClient];
 
 	Q_strncpyz( strName, ci->name, sizeof( strName ) );
-	txt_dump( va( "^7Current game stats for: ^c%s\n\n", strName ));
+	txt_dump( va( "^7Current game stats for: ^7%s\n\n", strName ));
 
 	if ( fFull ) {
-		txt_dump(     "Kills HS   Deaths TKs Suicides ^3DmgGiv DmgRcv TeamDmg\n" );
+		txt_dump(     "Kills Deaths HS TKs Suicides ^2DmgGiv ^1DmgRcv ^4TeamDmg\n" );
 		txt_dump(     "----------------------------------------------------\n" );
 	} else {
-		txt_dump(     "^zKls  ^7HS  Dth TK Sui ^nDmGiv DmRcv TDmg\n" );
+		txt_dump(     "^zKls Dth ^7HS TK Sui ^2DmGiv ^1DmRcv ^4TDmg\n" );
 		//txt_dump(     "-------------------------------------\n");
 		txt_dump(     "\n" );
 	}
@@ -1724,13 +1724,13 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
 
 	if ( fFull ) {
-		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^3%-5d  %-5d  %-5d\n\n",
-					kills, headshots, deaths,
+		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^2%-5d  ^1%-5d  ^4%-5d\n\n",
+					kills, deaths, headshots,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	} else {
-		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^n%-5d %-5d %-4d\n\n\n",
-					kills, headshots, deaths,
+		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^2%-5d ^1%-5d ^4%-4d\n\n\n",
+					kills, deaths, headshots,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	}
