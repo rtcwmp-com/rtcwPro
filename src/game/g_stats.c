@@ -92,10 +92,11 @@ Double+ kills
 ===========
 */
 void doubleKill (gentity_t *ent, int meansOfDeath ) {
+	/*
 	char *message, *random;
 	int n = rand() % 3;
 
-/*	if (!g_doubleKills.integer) {
+	if (!g_doubleKills.integer) {
 		return;
 	}
 
@@ -152,9 +153,10 @@ Killing sprees
 ===========
 */
 void KillingSprees ( gentity_t *ent, int score ) {
+	/*
 	int killRatio = ent->client->sess.kills;
 	int snd_idx;
-	/*
+	
 	if (!g_killingSprees.integer)
 		return;
 
