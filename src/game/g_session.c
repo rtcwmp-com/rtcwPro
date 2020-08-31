@@ -39,6 +39,15 @@ and tournament restarts.
 =======================================================================
 */
 
+void G_WriteWeaponStatsData( gclient_t* client ) {
+	const char* var;
+	const char* s = G_writeStats(client);
+	if (s != NULL) {
+		var = va("wstats%i", client - level.clients);
+		trap_Cvar_Set(var, s);
+	}
+}
+
 /*
 ================
 G_WriteClientSessionData
@@ -53,7 +62,10 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	// L0 - OSP -- stats reset check
 	if ( level.fResetStats ) {
 		G_deleteStats( client - level.clients );
-	} /// End
+	} else {
+		// write wstats
+		G_WriteWeaponStatsData(client);
+	}/// End
 	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
@@ -103,9 +115,9 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			);
 
 	var = va( "session%i", client - level.clients );
-
 	trap_Cvar_Set( var, s );
 }
+
 // nihi added below
 /*
 ================

@@ -2011,6 +2011,7 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod );
 void G_addStatsHeadShot( gentity_t *attacker, int mod );
 void G_deleteStats( int nClient );
 void G_parseStats( char *pszStatsInfo );
+char *G_writeStats( gclient_t* client );
 char *G_createClientStats( gentity_t *refEnt );
 void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
