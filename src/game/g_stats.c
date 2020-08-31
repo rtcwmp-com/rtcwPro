@@ -658,32 +658,12 @@ void G_parseStats( char *pszStatsInfo ) {
 		}
 	}
 
-	// Additional info
-	GETVAL( cl->sess.damage_given );
-	GETVAL( cl->sess.damage_received );
-	GETVAL( cl->sess.team_damage );
-
-	// L0 - New ones
-	// We store this so players can check it up in warmup (TODO)..
-	GETVAL( cl->sess.deaths );
-	GETVAL( cl->sess.kills );
-	GETVAL( cl->sess.suicides );
-	GETVAL( cl->sess.team_kills );
-	GETVAL( cl->sess.headshots );
-	GETVAL( cl->sess.med_given );
-	GETVAL( cl->sess.ammo_given );
-	GETVAL( cl->sess.gibs );
-	GETVAL( cl->sess.revives );
-	GETVAL( cl->sess.acc_shots );
-	GETVAL( cl->sess.acc_hits );
-	GETVAL( cl->sess.killPeak );
 }
 
 // Writes the weaponstats to a string and returns it (used for wstats%i)
 char* G_writeStats( gclient_t* client ) {
 	unsigned int i, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
-	char strClientInfo[MAX_STRING_CHARS] = { 0 };
 
 	if (!client) {
 		return(NULL);
@@ -702,36 +682,11 @@ char* G_writeStats( gclient_t* client ) {
 		}
 	}
 
-	// Additional info
-	Q_strcat(strWeapInfo, sizeof(strWeapInfo),
-		va(" %d %d %d",
-			client->sess.damage_given,
-			client->sess.damage_received,
-			client->sess.team_damage));
-
-	// Info
-	Q_strcat(strClientInfo, sizeof(strClientInfo),
-		va("%d %d %d %d %d %d %d %d %d %d %d %d",
-			client->sess.deaths,
-			client->sess.kills,
-			client->sess.suicides,
-			client->sess.team_kills,
-			client->sess.headshots,
-			client->sess.med_given,
-			client->sess.ammo_given,
-			client->sess.gibs,
-			client->sess.revives,
-			client->sess.acc_shots,
-			client->sess.acc_hits,
-			client->sess.killPeak
-		));
-
-	return(va("%d %d %d%s %s",
+	return(va("%d %d %d%s",
 		(int)(client - level.clients),
 		client->sess.rounds,
 		dwWeaponMask,
-		strWeapInfo,
-		strClientInfo));
+		strWeapInfo));
 }
 
 // These map to WS_* weapon indexes
