@@ -2243,7 +2243,7 @@ void ExitLevel( void ) {
 	// nihi added as temporary fix for stopwatch not autoswapping teams
 
 	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
-	 G_swapTeams();
+		G_swapTeams();
 	 }
 	 //  end
 	G_LogPrintf( "ExitLevel: executed\n" );

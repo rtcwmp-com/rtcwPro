@@ -92,10 +92,11 @@ Double+ kills
 ===========
 */
 void doubleKill (gentity_t *ent, int meansOfDeath ) {
+	/*
 	char *message, *random;
 	int n = rand() % 3;
 
-/*	if (!g_doubleKills.integer) {
+	if (!g_doubleKills.integer) {
 		return;
 	}
 
@@ -152,9 +153,10 @@ Killing sprees
 ===========
 */
 void KillingSprees ( gentity_t *ent, int score ) {
+	/*
 	int killRatio = ent->client->sess.kills;
 	int snd_idx;
-	/*
+	
 	if (!g_killingSprees.integer)
 		return;
 
@@ -658,23 +660,35 @@ void G_parseStats( char *pszStatsInfo ) {
 		}
 	}
 
-	GETVAL( cl->sess.damage_given );
-	GETVAL( cl->sess.damage_received );
-	GETVAL( cl->sess.team_damage );
-	// L0 - New ones
-	// We store this so players can check it up in warmup (TODO)..
-	GETVAL( cl->sess.deaths );
-	GETVAL( cl->sess.kills );
-	GETVAL( cl->sess.suicides );
-	GETVAL( cl->sess.team_kills );
-	GETVAL( cl->sess.headshots );
-	GETVAL( cl->sess.med_given );
-	GETVAL( cl->sess.ammo_given );
-	GETVAL( cl->sess.gibs );
-	GETVAL( cl->sess.revives );
-	GETVAL( cl->sess.acc_shots );
-	GETVAL( cl->sess.acc_hits );
-	GETVAL( cl->sess.killPeak );
+}
+
+// Writes the weaponstats to a string and returns it (used for wstats%i)
+char* G_writeStats( gclient_t* client ) {
+	unsigned int i, dwWeaponMask = 0;
+	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
+
+	if (!client) {
+		return(NULL);
+	}
+
+	// Add weapon stats as necessary
+	for (i = WS_KNIFE; i < WS_MAX; i++) {
+		if (client->sess.aWeaponStats[i].atts || client->sess.aWeaponStats[i].hits ||
+			client->sess.aWeaponStats[i].deaths) {
+			dwWeaponMask |= (1 << i);
+			Q_strcat(strWeapInfo, sizeof(strWeapInfo),
+				va(" %d %d %d %d %d",
+					client->sess.aWeaponStats[i].hits, client->sess.aWeaponStats[i].atts,
+					client->sess.aWeaponStats[i].kills, client->sess.aWeaponStats[i].deaths,
+					client->sess.aWeaponStats[i].headshots));
+		}
+	}
+
+	return(va("%d %d %d%s",
+		(int)(client - level.clients),
+		client->sess.rounds,
+		dwWeaponMask,
+		strWeapInfo));
 }
 
 // These map to WS_* weapon indexes
