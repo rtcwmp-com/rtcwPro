@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 //vec3_t playerMins = {-18, -18, -24};
 //vec3_t playerMaxs = {18, 18, 48};
 vec3_t	playerMins = {-18, -18, -24}; //-24
-vec3_t	playerMaxs = {18, 18, 51};  //elver fix bounding box, fuck yea!
+vec3_t	playerMaxs = {18, 18, 48}; //51};  //elver fix bounding box, fuck yea!
 // done.
 
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32) initial
