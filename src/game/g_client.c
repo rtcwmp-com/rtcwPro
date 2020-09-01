@@ -34,9 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 //static vec3_t	playerMins = {-15, -15, -24};
 //static vec3_t	playerMaxs = {15, 15, 32};
 //vec3_t playerMins = {-18, -18, -24};
-//vec3_t playerMaxs = {18, 18, 48};
+vec3_t playerMaxs = {18, 18, 48};
 vec3_t	playerMins = {-18, -18, -24}; //-24
-vec3_t	playerMaxs = {18, 18, 51};  //elver fix bounding box, fuck yea!
+//vec3_t	playerMaxs = {18, 18, 51};  //elver fix bounding box, fuck yea!
 // done.
 
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32) initial
@@ -1366,9 +1366,9 @@ OSPx - Store Client's IP
 */
 void SaveIP_f(gclient_t * client, char * sip) {
 	// Don't blindly save if entry already exists..
-	if (client->sess.ip[0] && 
-		client->sess.ip[1] && 
-		client->sess.ip[2] && 
+	if (client->sess.ip[0] &&
+		client->sess.ip[1] &&
+		client->sess.ip[2] &&
 		client->sess.ip[3])
 	{
 		return;
@@ -1447,7 +1447,7 @@ char *spoofcheck( gclient_t *client, char *guid, char *ip ){
 		if( !client->sess.guid ||
 			!Q_stricmp( client->sess.guid, "" ) ||
 			!Q_stricmp( client->sess.guid, "NOGUID" ) ) {
-			
+
 			if( Q_stricmp( guid, "unknown" ) && Q_stricmp( guid, "NO_GUID" ) ) {
 				Q_strncpyz( client->sess.guid, guid, sizeof( client->sess.guid ) );
 			}
@@ -1457,7 +1457,7 @@ char *spoofcheck( gclient_t *client, char *guid, char *ip ){
 				client->ps.clientNum,
 				client->sess.guid,
 				guid);
-			
+
 			// We use more permanent (no options to disable it) version
 			return "You are kicked for GUID spoofing";
 		}
@@ -1465,14 +1465,14 @@ char *spoofcheck( gclient_t *client, char *guid, char *ip ){
 
 	cIP = va("%i.%i.%i.%i", client->sess.ip[0], client->sess.ip[1], client->sess.ip[2], client->sess.ip[3] );
 	if(Q_stricmp(cIP, ip) != 0) {
-		G_LogPrintf( 
+		G_LogPrintf(
 			"IP SPOOF: client %i Original ip %s \n"
 			"Secondary ip %s\n",
 			client->ps.clientNum,
 			cIP,
 			ip
 		);
-	
+
 		return "You are kicked for IP spoofing";
 	}
 
