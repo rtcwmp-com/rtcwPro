@@ -1598,14 +1598,15 @@ Resets a team's settings
 ===========
 */
 void G_teamReset(int team_num, qboolean fClearSpecLock) {
-//	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
-//	teamInfo[team_num].team_name[0] = 0;
-//	teamInfo[team_num].timeouts = match_timeoutcount.integer;
+	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+	teamInfo[team_num].team_name[0] = 0;
+	teamInfo[team_num].timeouts = match_timeoutcount.integer;
 
-//	if (fClearSpecLock) {
-//		teamInfo[team_num].spec_lock = qfalse;
-//	}
+	if (fClearSpecLock) {
+		teamInfo[team_num].spec_lock = qfalse;
+	}
 }
+
 // Shuffle active players onto teams
 void G_shuffleTeams( void ) {
 	int i, cTeam; //, cMedian = level.numNonSpectatorClients / 2;
@@ -1615,8 +1616,8 @@ void G_shuffleTeams( void ) {
 
 	gclient_t *cl;
 
-	G_teamReset( TEAM_RED, qtrue );
-	G_teamReset( TEAM_BLUE, qtrue );
+	G_teamReset( TEAM_RED, qfalse );
+	G_teamReset( TEAM_BLUE, qfalse);
 
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		aTeamCount[i] = 0;
@@ -1664,7 +1665,7 @@ void G_swapTeams( void ) {
 	gclient_t *cl;
 
 	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		G_teamReset( i, qtrue );
+		G_teamReset( i, qfalse );
 	}
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
@@ -1830,7 +1831,7 @@ void G_readyStart( void ) {
 	trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 
 	// Prevents joining once countdown starts..
-	if (g_tournament.integer == 2)
+	if (g_tournament.integer) // == 2 xmod has a value of 2 but we do not
 		G_readyTeamLock();
 }
 
