@@ -2789,8 +2789,8 @@ void CheckGameState( void ) {
 				trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
 				trap_Cvar_Set( "gamestate", va( "%i", GS_WARMUP_COUNTDOWN ) );
 				// Prevents joining once countdown starts..
-				if (g_tournament.integer == 2)
-					G_readyTeamLock();
+				//if (g_tournament.integer == 2) // xmod has a value of 2 but we do not
+				G_readyTeamLock();
 
 				if (!level.readyPrint) {
 					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "Ready threshold reached!" : "All players are now ^nready^7!") ));
@@ -3058,17 +3058,17 @@ OSPx - check for team stuff..
 void handleEmptyTeams(void) {
 	if (g_gamestate.integer == GS_PLAYING) {
 		if (!level.axisPlayers) {
-		//	G_teamReset(TEAM_RED, qtrue);
+			G_teamReset(TEAM_RED, qtrue);
 
 			// Reset match if paused with an empty team
-			if (level.paused != PAUSE_NONE )
+			if (level.paused == PAUSE_NONE )
 				trap_SendConsoleCommand(EXEC_APPEND, va("reset_match"));
 		}
 		else if (!level.alliedPlayers) {
-		//	G_teamReset(TEAM_BLUE, qtrue);
+			G_teamReset(TEAM_BLUE, qtrue);
 
 			// Reset match if paused with an empty team
-			if (level.paused != PAUSE_NONE )
+			if (level.paused == PAUSE_NONE )
 				trap_SendConsoleCommand(EXEC_APPEND, va("reset_match"));
 		}
 	}

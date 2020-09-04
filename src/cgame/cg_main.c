@@ -314,6 +314,7 @@ vmCvar_t cg_autoAction;
 vmCvar_t cg_useScreenshotJPEG;
 vmCvar_t cg_chatAlpha;
 vmCvar_t cg_chatBackgroundColor;
+vmCvar_t cg_chatBeep;
 vmCvar_t cg_instantTapout;
 vmCvar_t cg_forceTapout;
 vmCvar_t cg_hitsounds;
@@ -608,6 +609,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_drawPickupItems, "cg_drawPickupItems", "0", CVAR_ARCHIVE },
 	{ &cg_chatAlpha, "cg_chatAlpha", "0.33", CVAR_ARCHIVE },
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
+	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
 	{ &cg_antilag, "g_antilag", "0", 0 }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
@@ -1257,11 +1259,16 @@ static void CG_RegisterSounds( void ) {
 */
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
-	cgs.media.goatAxis = trap_S_RegisterSound( "sound/match/goat.wav" );
 	// Hitsounds
 	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
 	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
 	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
+	// chats
+	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
+	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");
+	// end of round
+	cgs.media.alliesWin = trap_S_RegisterSound("sound/match/winallies.wav");
+	cgs.media.axisWin = trap_S_RegisterSound("sound/match/winaxis.wav");
 	// End
 }
 

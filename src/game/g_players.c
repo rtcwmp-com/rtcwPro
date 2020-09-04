@@ -109,10 +109,10 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			}
 		}
 
-		if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
+		/*if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
 		}
-		/*
+		
 		if (cl->sess.coach_team) {
 			tteam = cl->sess.coach_team;
 			coach = (ent) ? "^3C" : "C";

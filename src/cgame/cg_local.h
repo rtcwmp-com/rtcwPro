@@ -1709,7 +1709,12 @@ typedef struct {
 	sfxHandle_t	headShot;
 	sfxHandle_t	bodyShot;
 	sfxHandle_t	teamShot;
-	sfxHandle_t goatAxis;
+	// chats
+	sfxHandle_t normalChat;
+	sfxHandle_t teamChat;
+	// end of round
+	sfxHandle_t alliesWin;
+	sfxHandle_t axisWin;
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -2079,6 +2084,7 @@ extern vmCvar_t cg_statsList;
 extern vmCvar_t cg_useScreenshotJPEG;
 extern vmCvar_t cg_chatAlpha;
 extern vmCvar_t cg_chatBackgroundColor;
+extern vmCvar_t cg_chatBeep;
 extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_instantTapout;
 extern vmCvar_t cg_forceTapout;
