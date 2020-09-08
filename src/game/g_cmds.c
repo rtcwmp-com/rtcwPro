@@ -523,7 +523,7 @@ void Cmd_Gib_f( gentity_t *ent ) {
 	ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
 	ent->client->ps.persistant[PERS_HWEAPON_USE] = 0;		// TTimo - if using /kill while at MG42
 	player_die (ent, ent, ent, ent->health, MOD_SUICIDE);	// L0 - Straight to limbo!
-	ent->client->sess.suicides++;							// L0 - Record it here..as it's easier..
+	if (g_gamestate.integer == GS_PLAYING) ent->client->sess.suicides++;	// L0 - Record it here..as it's easier..
 }
 
 
@@ -554,7 +554,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
 //	player_die( ent, ent, ent, 100000, MOD_SUICIDE );
 
     player_die( ent, ent, ent, dmg, MOD_SUICIDE );
-	ent->client->sess.suicides++;							// L0 - Record it here..as it's easier.. // nihi added
+	if (g_gamestate.integer == GS_PLAYING) ent->client->sess.suicides++;	// L0 - Record it here..as it's easier.. // nihi added
 }
 
 

@@ -511,6 +511,10 @@ void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow ) {
 void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 	int dmg, ref;
 
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
 	// Keep track of only active player-to-player interactions in a real game
 	if ( !targ || !targ->client ||
 		 g_gamestate.integer != GS_PLAYING ||

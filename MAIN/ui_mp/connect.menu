@@ -14,9 +14,9 @@ menuDef {
 	itemDef {
 		name window
 		group connect
-		rect 515 390 120 80
+		rect 475 390 142 80
 		//rect 175 250 300 175
-		background "gfx/2d/rtcw-red-layered.tga"
+		background "gfx/2d/wpro.tga"
 		visible MENU_TRUE
 		style WINDOW_STYLE_SHADER
 		decoration

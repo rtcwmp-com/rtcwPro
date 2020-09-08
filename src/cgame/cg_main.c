@@ -865,11 +865,13 @@ OSP's name generation for SS's and Demo's
 char *CG_generateFilename( void ) {
 	qtime_t ct;
 	const char *pszServerInfo = CG_ConfigString( CS_SERVERINFO );
+	char* playerName = cgs.clientinfo[cg.clientNum].name;
 
 	trap_RealTime( &ct );
-	return( va( "%s.%02d.%d/%02d-%02d.%02d-%s",
+	return( va( "%s.%02d.%d/%02d%02d%02d-%s-%s",
 				aMonths[ct.tm_mon],ct.tm_mday, 1900 + ct.tm_year,
 				ct.tm_hour, ct.tm_min, ct.tm_sec,
+				playerName,
 				Info_ValueForKey( pszServerInfo, "mapname" ) ));
 }
 // Console prints for stats

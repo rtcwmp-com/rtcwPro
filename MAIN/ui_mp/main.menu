@@ -418,8 +418,8 @@ menuDef {
 	itemDef {
 		name osp_gfx
 		style WINDOW_STYLE_SHADER
-		rect 175 175 300 175
-		background "gfx/2d/rtcw-red-layered.tga"
+		rect 150 175 339 191
+		background "gfx/2d/wpro.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration

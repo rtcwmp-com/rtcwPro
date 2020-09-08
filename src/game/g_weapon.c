@@ -1600,25 +1600,27 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 Bullet_Fire
 ==============
 */
-void Bullet_Fire( gentity_t *ent, float spread, int damage ) {
+void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	vec3_t end;
-     // nihi added below
-	// L0 - Antilag
-	if ( g_antilag.integer && ent->client &&
-        !(ent->r.svFlags & SVF_BOT) ) {
-        G_TimeShiftAllClients( ent->client->pers.cmd.serverTime, ent );
-    } // End
+	// nihi added below
+   // L0 - Antilag
+	if (g_antilag.integer && ent->client &&
+		!(ent->r.svFlags & SVF_BOT)) {
+		G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
+	} // End
 
 	// L0 - disable invincible time when player spawns and starts shooting
 	if (g_disableInv.integer)
 		ent->client->ps.powerups[PW_INVULNERABLE] = 0;
 	// end
 
-	Bullet_Endpos( ent, spread, &end );
-	Bullet_Fire_Extended( ent, ent, muzzleTrace, end, spread, damage );
+	Bullet_Endpos(ent, spread, &end);
+	Bullet_Fire_Extended(ent, ent, muzzleTrace, end, spread, damage);
 	// L0 - Stats
-	ent->client->pers.life_acc_shots++;
-	ent->client->sess.acc_shots++;
+	if (g_gamestate.integer == GS_PLAYING) {
+		ent->client->pers.life_acc_shots++;
+		ent->client->sess.acc_shots++;
+	}
 	// End
 }
 
@@ -1691,8 +1693,10 @@ void Bullet_Fire_Extended( gentity_t *source, gentity_t *attacker, vec3_t start,
 		if ( LogAccuracyHit( traceEnt, attacker ) ) {
 			attacker->client->ps.persistant[PERS_ACCURACY_HITS]++;
 			// L0 - Stats
-			attacker->client->pers.life_acc_hits++;
-			attacker->client->sess.acc_hits++;
+			if (g_gamestate.integer == GS_PLAYING) {
+				attacker->client->pers.life_acc_hits++;
+				attacker->client->sess.acc_hits++;
+			}
 			// End
 		}
 

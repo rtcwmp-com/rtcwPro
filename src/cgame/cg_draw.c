@@ -867,7 +867,7 @@ static float CG_DrawTeamOverlay( float y ) {
 			hcolor[2] = 0.0;
 			hcolor[3] = cg_hudAlpha.value;
 			// RtcwPro put IsRevivable in front of class type
-			CG_DrawStringExt( xx, y, va("%s%s", isRevivable, st), pcolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5 );
+			CG_DrawStringExt( xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5 ); // always draw class name and * yellow
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = cg_hudAlpha.value;
 			xx = x + 3 * TINYCHAR_WIDTH;
