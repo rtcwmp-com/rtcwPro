@@ -691,8 +691,8 @@ menuDef {
 		name osp_gfx
 		group grpnervecredit
 		style WINDOW_STYLE_SHADER
-		rect 270 342 100 100
-		background "gfx/2d/rtcw-red-layered.tga"
+		rect 250 342 142 80
+		background "gfx/2d/wpro.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration
