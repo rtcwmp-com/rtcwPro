@@ -1508,6 +1508,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			if (g_tournament.integer) {// L0 - Ready
 				trap_Cvar_Set( "gamestate", va( "%i", GS_WARMUP ) );
 				trap_SetConfigstring( CS_READY, va( "%i", READY_PENDING ) );
+				level.ref_allready = qfalse;
 			} else {
 				trap_Cvar_Set( "gamestate", va( "%i", GS_WAITING_FOR_PLAYERS ) );
 			}
@@ -1903,7 +1904,7 @@ void CalculateRanks( void ) {
 	level.numConnectedClients = 0;
 	level.numNonSpectatorClients = 0;
 	level.numPlayingClients = 0;
-	level.numVotingClients = 0;     // don't count bots
+	level.voteInfo.numVotingClients = 0;     // don't count bots
 
 	level.numFinalDead[0] = 0;      // NERVE - SMF
 	level.numFinalDead[1] = 0;      // NERVE - SMF
@@ -1911,6 +1912,7 @@ void CalculateRanks( void ) {
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		level.numteamVotingClients[i] = 0;
 	}
+
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].pers.connected != CON_DISCONNECTED ) {
 			level.sortedClients[level.numConnectedClients] = i;
@@ -1923,7 +1925,7 @@ void CalculateRanks( void ) {
 				if ( level.clients[i].pers.connected == CON_CONNECTED ) {
 					level.numPlayingClients++;
 					if ( !( g_entities[i].r.svFlags & SVF_BOT ) ) {
-						level.numVotingClients++;
+						level.voteInfo.numVotingClients++;
 
 						if ( level.clients[i].sess.sessionTeam == TEAM_RED ) {
 							// NERVE - SMF
@@ -2783,7 +2785,7 @@ void CheckGameState( void ) {
 		// L0 - Tourny..
 		if (g_tournament.integer) {
 
-			if ( (G_playersReady() == -2) || level.readyAll) {
+			if (G_playersReady() || level.readyAll) {
 				level.warmupTime = level.time + 11000;
 				trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 				trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
@@ -2818,7 +2820,7 @@ void CheckGameState( void ) {
 	// L0 - Reset countdown if ready goes off (eg. player enters, leaves..)
 	if ( current_gs == GS_WARMUP_COUNTDOWN ) {
 		if (g_tournament.integer) {
-			if ( (G_playersReady() != -2) && !level.readyAll )
+			if (!G_playersReady()) // && !level.readyAll )
 				G_readyReset(qfalse);
 		}
 	}
