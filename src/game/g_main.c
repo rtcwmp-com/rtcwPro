@@ -2880,7 +2880,7 @@ void CheckVote( void ) {
 	} else {
 // OSPx - Vote percent..
 		int vCnt = (!Q_stricmp(level.voteInfo.voteString, "start_match") ? 75 : vote_percent.integer);
-		int total = level.numVotingClients;
+		int total = level.voteInfo.numVotingClients;
 
 		if (vCnt > 99)
 			vCnt = 99;
@@ -2928,7 +2928,7 @@ void CheckVote( void ) {
 			// Perform the passed vote
 			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
 
-		} else if ( level.voteInfo.voteNo >= level.numVotingClients / 2 ) {
+		} else if ( level.voteInfo.voteNo >= level.voteInfo.numVotingClients / 2 ) {
 			// same behavior as a timeout
 			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
 		} else {
