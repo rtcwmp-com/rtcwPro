@@ -1330,6 +1330,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 // JPW NERVE overcome previous chunk of code for making grenades work again
 		if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) && ( take > 190 ) ) { // 190 is greater than 2x mauser headshot, so headshots don't gib
 			targ->health = GIB_HEALTH - 1;
+			
+			// gibbed by a nade or other explosion
+			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+			{
+				attacker->client->sess.gibs++;	//gibbed an enemy
+				attacker->client->pers.life_gibs++;
+			}
 		}
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
@@ -1338,7 +1345,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				targ->flags |= FL_NO_KNOCKBACK;
 				if (g_gametype.integer >= GT_WOLF)
 				{
-					if (targ->health <= GIB_HEALTH && !OnSameTeam(attacker, targ) && attacker->client)
+					// gibbed by something another player (eg. smg)
+					if (targ->health <= FORCE_LIMBO_HEALTH && !OnSameTeam(attacker, targ) && attacker->client)
 					{
 						attacker->client->sess.gibs++;
 						attacker->client->pers.life_gibs++;
