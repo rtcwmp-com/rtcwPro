@@ -1613,9 +1613,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	SaveRegisteredItems();
 
-	// RTCWPro - Set the game config
-	G_ConfigSet(g_customConfig.string);
-
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "-----------------------------------\n" );
 	}
@@ -1640,6 +1637,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// Start with off! As if map_restart occur while paused screen fade is stuck..
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
+
+	// RTCWPro - Set the game config
+	G_ConfigSet(g_customConfig.string);
 }
 
 
@@ -3379,11 +3379,15 @@ void G_RunFrame( int levelTime ) {
 
 	// Ridah, check if we are reloading, and times have expired
 	CheckReloadStatus();
-	// L0 - Count active players..
-	sortedActivePlayers();
-	// L0 - Check Team Lock status..
-	TeamLockStatus();
-	// L0 - Pause
-	pauseCheck();
-	handleEmptyTeams();
+
+	qboolean isServerRestarting = trap_Cvar_VariableIntegerValue("sv_serverRestarting");
+	if (!isServerRestarting) {
+		// L0 - Count active players..
+		sortedActivePlayers();
+		// L0 - Check Team Lock status..
+		TeamLockStatus();
+		// L0 - Pause
+		pauseCheck();
+		handleEmptyTeams();
+	}
 }
