@@ -606,7 +606,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_spawnTimer_period, "cg_spawnTimer_period", "0", CVAR_TEMP },
 	// -OSPx
 	{ &int_ui_blackout, "ui_blackout", "0", CVAR_ROM },
-	{ &cg_drawPickupItems, "cg_drawPickupItems", "0", CVAR_ARCHIVE },
+	{ &cg_drawPickupItems, "cg_drawPickupItems", "1", CVAR_ARCHIVE },
 	{ &cg_chatAlpha, "cg_chatAlpha", "0.33", CVAR_ARCHIVE },
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
