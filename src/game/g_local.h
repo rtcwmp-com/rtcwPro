@@ -403,6 +403,9 @@ struct gentity_s {
 	int voiceChatSquelch;                   // DHM - Nerve
 	int voiceChatPreviousTime;              // DHM - Nerve
 	int lastBurnedFrameNumber;              // JPW - Nerve   : to fix FT instant-kill exploit
+	// OSPx
+	qboolean	dmginloop;
+	gentity_t	*dmgparent;
 	int thrownKnifeTime;
 };
 
