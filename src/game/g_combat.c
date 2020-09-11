@@ -1327,7 +1327,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 		}
 
-		qboolean gibCounted = qfalse;
 
 // JPW NERVE overcome previous chunk of code for making grenades work again
 		if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) && ( take > 190 ) ) { // 190 is greater than 2x mauser headshot, so headshots don't gib
@@ -1336,7 +1335,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			// gibbed by a nade or other explosion
 			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
 			{
-				gibCounted = qtrue;
 				attacker->client->sess.gibs++;	//gibbed an enemy
 				attacker->client->pers.life_gibs++;
 			}
@@ -1346,22 +1344,18 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		if ( targ->health <= 0 ) {
 			if (client) {
 				targ->flags |= FL_NO_KNOCKBACK;
-				if (g_gametype.integer >= GT_WOLF)
-				{
-					// gibbed by something another player (eg. smg)
-					if (targ->health <= FORCE_LIMBO_HEALTH && !OnSameTeam(attacker, targ) && attacker->client && !gibCounted)
-					{
-						attacker->client->sess.gibs++;
-						attacker->client->pers.life_gibs++;
-					}
-
-					if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO)))
-					{
+				if (g_gametype.integer >= GT_WOLF) {
 						// JPW NERVE -- repeated shooting sends to limbo
 						if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
 							limbo(targ, qtrue);
+
+							// gibbed by something another player (eg. smg)
+							if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+							{
+								attacker->client->sess.gibs++;
+								attacker->client->pers.life_gibs++;
+							}
 						}
-					}
 					// jpw
 				}
 			}
