@@ -1508,6 +1508,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			if (g_tournament.integer) {// L0 - Ready
 				trap_Cvar_Set( "gamestate", va( "%i", GS_WARMUP ) );
 				trap_SetConfigstring( CS_READY, va( "%i", READY_PENDING ) );
+				level.ref_allready = qfalse;
 			} else {
 				trap_Cvar_Set( "gamestate", va( "%i", GS_WAITING_FOR_PLAYERS ) );
 			}
@@ -1612,9 +1613,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	SaveRegisteredItems();
 
-	// RTCWPro - Set the game config
-	G_ConfigSet(g_customConfig.string);
-
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "-----------------------------------\n" );
 	}
@@ -1639,6 +1637,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// Start with off! As if map_restart occur while paused screen fade is stuck..
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
+
+	// RTCWPro - Set the game config
+	G_ConfigSet(g_customConfig.string);
 }
 
 
@@ -1903,7 +1904,7 @@ void CalculateRanks( void ) {
 	level.numConnectedClients = 0;
 	level.numNonSpectatorClients = 0;
 	level.numPlayingClients = 0;
-	level.numVotingClients = 0;     // don't count bots
+	level.voteInfo.numVotingClients = 0;     // don't count bots
 
 	level.numFinalDead[0] = 0;      // NERVE - SMF
 	level.numFinalDead[1] = 0;      // NERVE - SMF
@@ -1911,6 +1912,7 @@ void CalculateRanks( void ) {
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		level.numteamVotingClients[i] = 0;
 	}
+
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].pers.connected != CON_DISCONNECTED ) {
 			level.sortedClients[level.numConnectedClients] = i;
@@ -1923,7 +1925,7 @@ void CalculateRanks( void ) {
 				if ( level.clients[i].pers.connected == CON_CONNECTED ) {
 					level.numPlayingClients++;
 					if ( !( g_entities[i].r.svFlags & SVF_BOT ) ) {
-						level.numVotingClients++;
+						level.voteInfo.numVotingClients++;
 
 						if ( level.clients[i].sess.sessionTeam == TEAM_RED ) {
 							// NERVE - SMF
@@ -2783,7 +2785,7 @@ void CheckGameState( void ) {
 		// L0 - Tourny..
 		if (g_tournament.integer) {
 
-			if ( (G_playersReady() == -2) || level.readyAll) {
+			if (G_playersReady() || level.readyAll) {
 				level.warmupTime = level.time + 11000;
 				trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 				trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
@@ -2818,7 +2820,7 @@ void CheckGameState( void ) {
 	// L0 - Reset countdown if ready goes off (eg. player enters, leaves..)
 	if ( current_gs == GS_WARMUP_COUNTDOWN ) {
 		if (g_tournament.integer) {
-			if ( (G_playersReady() != -2) && !level.readyAll )
+			if (!G_playersReady()) // && !level.readyAll )
 				G_readyReset(qfalse);
 		}
 	}
@@ -2878,7 +2880,7 @@ void CheckVote( void ) {
 	} else {
 // OSPx - Vote percent..
 		int vCnt = (!Q_stricmp(level.voteInfo.voteString, "start_match") ? 75 : vote_percent.integer);
-		int total = level.numVotingClients;
+		int total = level.voteInfo.numVotingClients;
 
 		if (vCnt > 99)
 			vCnt = 99;
@@ -2926,7 +2928,7 @@ void CheckVote( void ) {
 			// Perform the passed vote
 			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
 
-		} else if ( level.voteInfo.voteNo >= level.numVotingClients / 2 ) {
+		} else if ( level.voteInfo.voteNo >= level.voteInfo.numVotingClients / 2 ) {
 			// same behavior as a timeout
 			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
 		} else {
@@ -3377,11 +3379,15 @@ void G_RunFrame( int levelTime ) {
 
 	// Ridah, check if we are reloading, and times have expired
 	CheckReloadStatus();
-	// L0 - Count active players..
-	sortedActivePlayers();
-	// L0 - Check Team Lock status..
-	TeamLockStatus();
-	// L0 - Pause
-	pauseCheck();
-	handleEmptyTeams();
+
+	qboolean isServerRestarting = trap_Cvar_VariableIntegerValue("sv_serverRestarting");
+	if (!isServerRestarting) {
+		// L0 - Count active players..
+		sortedActivePlayers();
+		// L0 - Check Team Lock status..
+		TeamLockStatus();
+		// L0 - Pause
+		pauseCheck();
+		handleEmptyTeams();
+	}
 }

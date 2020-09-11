@@ -1782,43 +1782,48 @@ Tardo -- Ready/Not Ready
 L0 - Rewrote and simplifed this
 =============
 */
-// count players
-int G_playersReady( void ) {
+// Determine if the "ready" player threshold has been reached.
+qboolean G_playersReady( void ) {
+	int i, ready = 0, notReady = match_minplayers.integer;
 	gclient_t *cl;
-	int ready = 0,		\
-		i,				\
-		state = 0,		\
-		count = 0;
 
-	for ( i = 0;  i < level.numPlayingClients; i++ ) {
-		cl = level.clients + level.sortedClients[i];
 
-		if (cl->pers.ready)
-		{
-			ready++;
+	if ( 0 == g_tournament.integer ) {
+		return( qtrue );
+	}
+
+	// Ensure we have enough real players
+	if ( level.numNonSpectatorClients >= match_minplayers.integer && level.voteInfo.numVotingClients > 0 ) {
+		// Step through all active clients
+		notReady = 0;
+		for ( i = 0; i < level.numConnectedClients; i++ ) {
+			cl = level.clients + level.sortedClients[i];
+
+			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam == TEAM_SPECTATOR ) {
+				continue;
+			} else if ( cl->pers.ready || level.ref_allready || ( g_entities[level.sortedClients[i]].r.svFlags & SVF_BOT ) ) {
+				ready++;
+			} else { notReady++;}
 		}
 	}
 
-	trap_SetConfigstring(CS_PLAYERSREADY, va("%i", ready)); // RtcwPro set the number of players left to ready up
-	trap_SetConfigstring(CS_PLAYERCOUNT, va("%i", level.numPlayingClients)); // RtcwPro set the number of players
-
-	count = (!level.numPlayingClients) ? -1 : level.numPlayingClients - ready;
-	state = ( (ready == level.numPlayingClients) && level.numPlayingClients ) ? -2 : count;
-
-    if (g_noTeamSwitching.integer && level.numPlayingClients >= g_minGameClients.integer ) {
-	//if (g_noTeamSwitching.integer) {
-		//state = ((ready >= g_minGameClients.integer) ? -2 : g_minGameClients.integer - ready);
-		state = ((ready >= level.numPlayingClients) ? -2 : level.numPlayingClients - ready);  // force threshold to be everybody playing
+	notReady = ( notReady > 0 || ready > 0 ) ? notReady : match_minplayers.integer;
+	if ( g_minGameClients.integer != notReady ) {
+		trap_Cvar_Set( "g_minGameClients", va( "%d", notReady ) );
 	}
 
-	return state;
+	// Do we have enough "ready" players?
+	return(level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer));
+
+	//state = ((ready >= level.numPlayingClients) ? -2 : level.numPlayingClients - ready);  // force threshold to be everybody playing
+	//return state;
 }
 
 void G_readyReset( qboolean aForced ) {
 	if ( g_gamestate.integer == GS_WARMUP_COUNTDOWN && !aForced ) {
 		AP( "print \"*** ^zINFO: ^nCountdown aborted! Going back to warmup..\n\"2" );
 	}
-	level.readyAll = qfalse;
+	level.ref_allready = qfalse;
 	level.lastRestartTime = level.time;
 	level.readyPrint = qfalse;
 	trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
@@ -1826,7 +1831,7 @@ void G_readyReset( qboolean aForced ) {
 }
 
 void G_readyStart( void ) {
-	level.readyAll = qtrue;
+	level.ref_allready = qtrue;
 	level.CNstart = 0; // Resets countdown
 	trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 

@@ -1309,7 +1309,7 @@ qboolean G_desiredFollow( gentity_t *ent, int nTeam );
 void G_swapTeamLocks( void );
 void G_updateSpecLock( int nTeam, qboolean fLock );
 void G_removeSpecInvite( int team );
-int G_playersReady( void );
+qboolean G_playersReady( void );
 void G_readyReset( qboolean aForced );
 void G_readyStart( void );
 void G_readyTeamLock( void );
