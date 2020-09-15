@@ -2144,6 +2144,7 @@ qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t * or );
 
 qboolean CG_CheckCenterView();
 // nihi added lines below
+char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
 

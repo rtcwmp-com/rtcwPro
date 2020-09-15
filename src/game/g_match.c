@@ -454,8 +454,38 @@ int G_checkServerToggle(vmCvar_t *cv)
 	return qtrue;
 }
 
+/*
+=================
+Match Info
 
+Basically just some info prints..
+=================
+*/
+// Gracefully taken from s4ndmod :p
+char* GetLevelTime(void) {
+	int Objseconds, Objmins, Objtens;
 
+	Objseconds = (((g_timelimit.value * 60 * 1000) - ((level.time - level.startTime))) / 1000); // martin - this line was a bitch :-)
+																								// nate	  - I know, that's why I took it. :p
+	Objmins = Objseconds / 60;
+	Objseconds -= Objmins * 60;
+	Objtens = Objseconds / 10;
+	Objseconds -= Objtens * 10;
+
+	if (Objseconds < 0) { Objseconds = 0; }
+	if (Objtens < 0) { Objtens = 0; }
+	if (Objmins < 0) { Objmins = 0; }
+
+	return va("%i:%i%i", Objmins, Objtens, Objseconds);
+}
+
+// Prints stuff
+void G_matchPrintInfo(char *msg, qboolean printTime) {
+	if (printTime)
+		AP(va("print \"[%s] ^3%s \n\"", GetLevelTime(), msg));
+	else
+		AP(va("print \"*** ^3INFO: ^3%s \n\"", msg));
+}
 
 // Simple alias for sure-fire print :)
 void G_printFull(char *str, gentity_t *ent) {
