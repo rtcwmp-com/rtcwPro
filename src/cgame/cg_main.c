@@ -854,6 +854,48 @@ const char *CG_Argv( int arg ) {
 
 	return buffer;
 }
+
+//========================================================================
+// CG_nameCleanFilename
+// Cleans a string for filesystem compatibility
+//========================================================================
+void CG_nameCleanFilename(const char* pszIn, char* pszOut, unsigned int dwOutSize) {
+	unsigned int dwCurrLength = 0;
+
+	while (*pszIn && dwCurrLength < dwOutSize) {
+		if (*pszIn == 27 || *pszIn == '^') {
+			pszIn++;
+			dwCurrLength++;
+
+			if (*pszIn) {
+				pszIn++;        // skip color code
+				dwCurrLength++;
+				continue;
+			}
+		}
+
+		// Illegal Windows characters
+		if (*pszIn == '\\' || *pszIn == '/' || *pszIn == ':' || *pszIn == '"' ||
+			*pszIn == '*' || *pszIn == '?' || *pszIn == '<' || *pszIn == '>' ||
+			*pszIn == '|' || *pszIn == '.') {
+			pszIn++;
+			dwCurrLength++;
+			continue;
+		}
+
+		if (*pszIn <= 32) {
+			pszIn++;
+			dwCurrLength++;
+			continue;
+		}
+
+		*pszOut++ = *pszIn++;
+		dwCurrLength++;
+	}
+
+	*pszOut = 0;
+}
+
 /*
 ================
 L0
@@ -864,20 +906,26 @@ OSP's name generation for SS's and Demo's
 // Standard naming for screenshots/demos
 char *CG_generateFilename( void ) {
 	qtime_t ct;
+	int clientNum = (cg.snap == NULL || (cg.snap->ps.pm_flags & PMF_LIMBO)) ? cg.clientNum : cg.snap->ps.clientNum;
 	const char *pszServerInfo = CG_ConfigString( CS_SERVERINFO );
-	char* playerName = cgs.clientinfo[cg.clientNum].name;
+	const char *pszPlayerInfo = CG_ConfigString(CS_PLAYERS + clientNum);
+	char strCleanName[64];
+	//const char *playerName = cgs.clientinfo[cg.clientNum].name;
 
 	trap_RealTime( &ct );
-	return( va( "%s.%02d.%d/%02d%02d%02d-%s-%s",
-				aMonths[ct.tm_mon],ct.tm_mday, 1900 + ct.tm_year,
+
+	CG_nameCleanFilename(Info_ValueForKey(pszPlayerInfo, "n"), strCleanName, sizeof(strCleanName));
+
+	return( va( "%d-%02d-%02d/%02d%02d%02d-%s-%s",
+				1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
 				ct.tm_hour, ct.tm_min, ct.tm_sec,
-				playerName,
+				strCleanName, //playerName
 				Info_ValueForKey( pszServerInfo, "mapname" ) ));
 }
+
 // Console prints for stats
 void CG_printConsoleString( char *str ) {
-	//CG_Printf( "[skipnotify]%s", str );
-    CG_Printf( "%s", str );  // nihi changed
+	CG_Printf( "[skipnotify]%s", str ); // keep skipnotify for current stat parser compatability
 }
 // End
 

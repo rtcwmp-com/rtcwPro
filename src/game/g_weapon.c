@@ -577,8 +577,10 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 ( ( hit->spawnflags & ALLIED_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_RED ) ) ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
+								G_matchPrintInfo(va("Dynamite planted near %s!", hit->track), qfalse);
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
+								G_matchPrintInfo(va("Dynamite planted near objective #%d!", hit->count), qfalse);
 							}
 						}
 						i = num;
@@ -646,6 +648,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 									hit->spawnflags &= ~OBJECTIVE_DESTROYED; // "re-activate" objective since it wasn't destroyed.  kludgy, I know; see G_ExplodeMissile for the other half
 								}
 								trap_SendServerCommand( -1, "cp \"Axis engineer disarmed the Dynamite!\n\"" );
+								G_matchPrintInfo(va("Axis defused dynamite near %s!", hit->track), qfalse);
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_RED;
 							} else { // TEAM_BLUE
@@ -655,6 +658,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 									hit->spawnflags &= ~OBJECTIVE_DESTROYED; // "re-activate" objective since it wasn't destroyed
 								}
 								trap_SendServerCommand( -1, "cp \"Allied engineer disarmed the Dynamite!\n\"" );
+								G_matchPrintInfo(va("Allies defused dynamite near %s!", hit->track), qfalse);
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_BLUE;
 							}
@@ -797,6 +801,10 @@ void weapon_callAirStrike( gentity_t *ent ) {
 
 		// move pos for next bomb
 		VectorAdd( pos,bombaxis,pos );
+
+		// OSPx - Stats
+		if (g_gamestate.integer == GS_PLAYING)
+			ent->parent->client->sess.aWeaponStats[WS_AIRSTRIKE].atts++;
 	}
 }
 
