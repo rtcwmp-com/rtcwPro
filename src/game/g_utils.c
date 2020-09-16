@@ -795,3 +795,27 @@ int DebugLine( vec3_t start, vec3_t end, int color ) {
 
 	return trap_DebugPolygonCreate( color, 4, points );
 }
+
+/*
+================
+sswolf - allowteams - ET port
+G_AllowTeamsAllowed
+================
+*/
+qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator)
+{
+	if (ent->allowteams && activator && activator->client)
+	{
+		if (activator->client->sess.sessionTeam != TEAM_SPECTATOR)
+		{
+			int checkTeam = activator->client->sess.sessionTeam;
+
+			if (!(ent->allowteams & checkTeam))
+			{
+				return qfalse;
+			}
+		}
+	}
+
+	return qtrue;
+}
