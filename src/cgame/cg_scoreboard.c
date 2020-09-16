@@ -292,10 +292,12 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			flagshader = "ui_mp/assets/portraits/allies_win_flag.tga";
 			nameshader = "ui_mp/assets/portraits/text_allies.tga";
 
-			if ( !cg.latchVictorySound ) {
+			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
-				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/multiplayer/music/l_complete_2.wav" ), CHAN_LOCAL_SOUND );
-				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/match/winallies.wav" ), CHAN_LOCAL_SOUND );
+				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/l_complete_2.wav"), CHAN_LOCAL_SOUND);
+				if (cg_announcer.integer) {
+					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winallies.wav"), CHAN_ANNOUNCER);
+				}
 			}
 		} else {
 			str = "AXIS";
@@ -303,10 +305,12 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			flagshader = "ui_mp/assets/portraits/axis_win_flag.tga";
 			nameshader = "ui_mp/assets/portraits/text_axis.tga";
 
-			if ( !cg.latchVictorySound ) {
+			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
-				trap_S_StartLocalSound( trap_S_RegisterSound( "sound/multiplayer/music/s_stinglow.wav" ), CHAN_LOCAL_SOUND );
-				trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_LOCAL_SOUND);
+				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/s_stinglow.wav"), CHAN_LOCAL_SOUND);
+				if (cg_announcer.integer) {
+					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_ANNOUNCER);
+				}
 			}
 		}
 
