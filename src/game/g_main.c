@@ -1910,7 +1910,9 @@ void CalculateRanks( void ) {
 	level.numFinalDead[1] = 0;      // NERVE - SMF
 
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
-		level.numteamVotingClients[i] = 0;
+		if ( i < 2 ) {
+			level.numteamVotingClients[i] = 0;
+		}
 	}
 
 	for ( i = 0 ; i < level.maxclients ; i++ ) {

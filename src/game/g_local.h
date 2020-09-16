@@ -1904,10 +1904,9 @@ void G_ReloadConfig(void);
 // g_match.c
 //
 void G_loadMatchGame(void);
-void G_matchInfoDump(unsigned int dwDumpType);
 void CountDown(qboolean restart);
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
-void G_verifyMatchState(int nTeam);
+//void G_verifyMatchState(int nTeam);
 void G_matchPrintInfo(char *msg, qboolean printTime);
 void G_printFull(char *str, gentity_t *ent); // from ET
 qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
@@ -2020,7 +2019,6 @@ void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
 void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean state );
 void G_printMatchInfo( gentity_t *ent );
-void G_printMatchInfo2( gentity_t *ent );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 // OSPx - New stuff below

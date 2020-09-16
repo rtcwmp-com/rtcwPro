@@ -1082,8 +1082,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 		} else if ( dwDumpType == EOM_MATCHINFO ) {
 			// Don't dump score table for users with stats dump enabled
-			if ( !cl->pers.int_stats ) {
-				G_printMatchInfo( ent );
+			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
+				G_printMatchInfo(ent);
 			}
 
 			if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
