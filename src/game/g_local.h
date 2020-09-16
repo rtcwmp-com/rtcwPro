@@ -407,6 +407,9 @@ struct gentity_s {
 	qboolean	dmginloop;
 	gentity_t	*dmgparent;
 	int thrownKnifeTime;
+
+	// sswolf - allowteams - ET port
+	int allowteams;
 };
 
 // Ridah
@@ -485,6 +488,10 @@ typedef struct {
 	unsigned int kills;
 } weapon_stat_t;
 // End
+
+// sswolf - allowteams - ET port
+#define ALLOW_AXIS_TEAM         1
+#define ALLOW_ALLIED_TEAM       2
 
 // client data that stays across multiple levels or tournament restarts
 // this is achieved by writing all the data to cvar strings at game shutdown
@@ -1115,6 +1122,9 @@ void G_SetAngle( gentity_t *ent, vec3_t angle );
 qboolean infront( gentity_t *self, gentity_t *other );
 
 void G_ProcessTagConnect( gentity_t *ent );
+
+// sswolf - allowteams ET - port
+qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator);
 
 //
 // g_combat.c
