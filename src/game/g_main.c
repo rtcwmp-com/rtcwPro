@@ -2605,7 +2605,7 @@ void CheckExitRules( void ) {
 			Info_SetValueForKey( cs, "winner", "1" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
 			// sswolf - moved from WM_DrawObjectives in cg
-			APS("sound/announcer/winallies.wav");
+			APS("sound/match/winallies.wav");
 			LogExit( "Axis team eliminated." );
 		} 
 		else if ( level.numFinalDead[1] >= level.numteamVotingClients[1] && level.numteamVotingClients[1] > 0 )   
@@ -2613,7 +2613,7 @@ void CheckExitRules( void ) {
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "0" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
-			APS("sound/announcer/winaxis.wav");
+			APS("sound/match/winaxis.wav");
 			LogExit( "Allied team eliminated." );
 		}
 	}
@@ -2623,7 +2623,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer ) 
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the fraglimit.\n\"" );
-			APS("sound/announcer/winaxis.wav");
+			APS("sound/match/winaxis.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
@@ -2631,7 +2631,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_BLUE] >= g_fraglimit.integer ) 
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the fraglimit.\n\"" );
-			APS("sound/announcer/winallies.wav");
+			APS("sound/match/winallies.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
@@ -2664,7 +2664,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) 
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
-			APS("sound/announcer/winaxis.wav");
+			APS("sound/match/winaxis.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
@@ -2672,7 +2672,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_BLUE] >= g_capturelimit.integer ) 
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the capturelimit.\n\"" );
-			APS("sound/announcer/winallies.wav");
+			APS("sound/match/winallies.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}

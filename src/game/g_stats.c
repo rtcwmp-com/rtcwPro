@@ -1120,11 +1120,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 					if (winner == 0)
 					{
-						APS("sound/announcer/winaxis.wav");
+						APS("sound/match/winaxis.wav");
 					}
 					else if (winner == 1)
 					{
-						APS("sound/announcer/winallies.wav");
+						APS("sound/match/winallies.wav");
 					}
 				} 
 				else 
@@ -1140,11 +1140,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 						if (winner == 0)
 						{
-							APS("sound/announcer/winaxis.wav");
+							APS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/announcer/winallies.wav");
+							APS("sound/match/winallies.wav");
 						}
 					} 
 					else 
@@ -1155,11 +1155,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 						if (winner == 0)
 						{
-							APS("sound/announcer/winaxis.wav");
+							APS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/announcer/winallies.wav");
+							APS("sound/match/winallies.wav");
 						}
 					}
 				}
@@ -1173,22 +1173,22 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						if (winner == 0)
 						{
-							APS("sound/announcer/winaxis.wav");
+							APS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/announcer/winallies.wav");
+							APS("sound/match/winallies.wav");
 						}
 					}
 					else
 					{
 						if (winner == 0)
 						{
-							APS("sound/announcer/winaxis.wav");
+							APS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/announcer/winallies.wav");
+							APS("sound/match/winallies.wav");
 						}
 					}
 				}
