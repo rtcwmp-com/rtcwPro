@@ -409,11 +409,6 @@ void G_WriteSessionData( void ) {
 			( teamInfo[TEAM_RED].spec_lock * TEAM_RED | teamInfo[TEAM_BLUE].spec_lock * TEAM_BLUE )
 		));
 
-	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		if ( level.clients[i].pers.connected == CON_CONNECTED ) {
-			G_WriteClientSessionData( &level.clients[i] );
-		}
-	}
 	// L0 - OSP Stats
 	// Keep stats for all players in sync
 	for ( i = 0; !level.fResetStats && i < level.numConnectedClients; i++ ) {
@@ -423,4 +418,19 @@ void G_WriteSessionData( void ) {
 			level.fResetStats = qtrue;
 		}
 	} // End
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
+		if ( level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED ) {
+			G_WriteClientSessionData( &level.clients[level.sortedClients[i]]);
+			// For slow connecters and a short warmup
+		} else if ( level.fResetStats ) {
+			G_deleteStats( level.sortedClients[i] );
+		}
+	}
+	
+	/*for (i = 0; i < level.maxclients; i++) {
+		if (level.clients[i].pers.connected == CON_CONNECTED) {
+			G_WriteClientSessionData(&level.clients[i]);
+		}
+	}*/
 }

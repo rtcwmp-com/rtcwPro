@@ -3596,14 +3596,14 @@ UI_LoadDemos
 ===============
 */
 static void UI_LoadDemos() {
-	char demolist[4096];
+	char demolist[30000];
 	char demoExt[32];
 	char    *demoname;
 	int i, len;
 
 	Com_sprintf( demoExt, sizeof( demoExt ), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
-	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, 4096 );
+	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, sizeof( demolist ) );
 
 	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
@@ -3617,7 +3617,7 @@ static void UI_LoadDemos() {
 			if ( !Q_stricmp( demoname +  len - strlen( demoExt ), demoExt ) ) {
 				demoname[len - strlen( demoExt )] = '\0';
 			}
-			Q_strupr( demoname );
+//			Q_strupr(demoname);
 			uiInfo.demoList[i] = String_Alloc( demoname );
 			demoname += len + 1;
 		}
