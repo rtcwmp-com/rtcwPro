@@ -1694,17 +1694,20 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 
-		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\country\\255",  // nihi added
+		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\country\\255\\mu\\%i",  // nihi added
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
-				Info_ValueForKey( userinfo, "skill" ) );
+				Info_ValueForKey( userinfo, "skill" ),
+				client->sess.uci, (client->sess.ignored ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i",  // nihi added
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",  // nihi added
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
-				client->sess.uci, (client->sess.ignored ? 1 : 0));
+				client->sess.uci, (client->sess.ignored ? 1 : 0),
+				client->sess.referee
+				);
 	}
 
 //----(SA) end
