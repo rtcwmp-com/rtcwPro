@@ -2902,7 +2902,7 @@ void CheckVote( void ) {
 		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
 	} else {
 // OSPx - Vote percent..
-		int vCnt = (!Q_stricmp(level.voteInfo.voteString, "start_match") ? 75 : vote_percent.integer);
+		int vCnt = (!Q_stricmp(level.voteInfo.voteString, "Start Match") ? 75 : vote_percent.integer);
 		int total = level.voteInfo.numVotingClients;
 
 		if (vCnt > 99)

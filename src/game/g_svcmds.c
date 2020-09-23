@@ -702,11 +702,15 @@ NERVE - SMF - starts match if in tournament mode
 ============
 */
 void Svcmd_StartMatch_f() {
-	if ( !g_noTeamSwitching.integer ) {
+/*	if ( !g_noTeamSwitching.integer ) {
 		trap_SendServerCommand( -1, va( "print \"g_noTeamSwitching not activated.\n\"" ) );
 		return;
 	}
+*/
 
+	G_refAllReady_cmd( NULL );
+
+/*
 	if ( level.numPlayingClients <= 1 ) {
 		trap_SendServerCommand( -1, va( "print \"Not enough playing clients to start match.\n\"" ) );
 		return;
@@ -720,6 +724,7 @@ void Svcmd_StartMatch_f() {
 	if ( g_gamestate.integer == GS_WAITING_FOR_PLAYERS ) {
 		trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
 	}
+	*/
 }
 
 /*

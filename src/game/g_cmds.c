@@ -1787,6 +1787,18 @@ void Cmd_Vote_f( gentity_t *ent ) {
 		return;
 	}
 
+	if ( level.voteInfo.vote_fn == G_Kick_v ) {
+		int pid = atoi( level.voteInfo.vote_value );
+		if ( !g_entities[ pid ].client ) {
+			return;
+		}
+
+		if ( g_entities[ pid ].client->sess.sessionTeam != TEAM_SPECTATOR && ent->client->sess.sessionTeam != g_entities[ pid ].client->sess.sessionTeam ) {
+			trap_SendServerCommand( ent - g_entities, "print \"Cannot vote to kick player on opposing team.\n\"" );
+			return;
+		}
+	}
+
 	trap_SendServerCommand( ent - g_entities, "print \"Vote cast.\n\"" );
 
 	ent->client->ps.eFlags |= EF_VOTED;
