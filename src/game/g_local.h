@@ -1903,6 +1903,7 @@ void G_ResetMarkers( gentity_t* ent );
 //
 void G_UpdateCvars(void);
 void G_wipeCvars(void);
+void G_teamReset(int, qboolean);
 ///////////////////////
 // RTCWPro - g_config.c
 qboolean G_ConfigSet(const char* configname);
