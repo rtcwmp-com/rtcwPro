@@ -626,7 +626,10 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		return;
 	}
 
-
+	if (team == TEAM_FREE || team == TEAM_SPECTATOR) {
+		CP("print \"^jError: ^7Pause cannot be issued by a spectator!\n\"");
+		return;
+	}
 
 	if ( g_gamestate.integer != GS_PLAYING ) {
 		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
