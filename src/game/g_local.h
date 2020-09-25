@@ -403,7 +403,13 @@ struct gentity_s {
 	int voiceChatSquelch;                   // DHM - Nerve
 	int voiceChatPreviousTime;              // DHM - Nerve
 	int lastBurnedFrameNumber;              // JPW - Nerve   : to fix FT instant-kill exploit
+	// OSPx
+	qboolean	dmginloop;
+	gentity_t	*dmgparent;
 	int thrownKnifeTime;
+
+	// sswolf - allowteams - ET port
+	int allowteams;
 };
 
 // Ridah
@@ -483,6 +489,10 @@ typedef struct {
 } weapon_stat_t;
 // End
 
+// sswolf - allowteams - ET port
+#define ALLOW_AXIS_TEAM         1
+#define ALLOW_ALLIED_TEAM       2
+
 // client data that stays across multiple levels or tournament restarts
 // this is achieved by writing all the data to cvar strings at game shutdown
 // time and reading them back at connection time.  Anything added here
@@ -526,11 +536,11 @@ typedef struct {
 	int suicides;
 	int team_damage;
 	int team_kills;
-	
+
 	// referee
 	int referee, status;
 	int spec_invite, specInvited, specLocked;
-		
+
 	// New ones
 	int headshots;
 	int med_given;
@@ -541,6 +551,7 @@ typedef struct {
 	int acc_shots;  // Overall acc
 	int acc_hits;	// -||-
 	int killPeak;
+	int knifeKills;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
@@ -620,6 +631,7 @@ typedef struct {
 	int life_acc_hits;
 	int life_headshots;
 	int life_kills;
+	int life_gibs;
 	unsigned int int_stats;
 	unsigned int int_statsType;
 //	unsigned int int_dragBodies;
@@ -823,8 +835,6 @@ typedef struct config_s
 	qboolean loaded;
 	qboolean publicConfig;
 } config_t;
-
-
 typedef struct {
 	struct gclient_s    *clients;       // [maxclients]
 
@@ -969,7 +979,7 @@ typedef struct {
 	// voting and referee
 	voteInfo_t voteInfo;
 	int server_settings;
-	
+
 	// Weapons restrictions
 	int axisSniper, alliedSniper;
 	int axisPF, alliedPF;
@@ -1113,6 +1123,9 @@ qboolean infront( gentity_t *self, gentity_t *other );
 
 void G_ProcessTagConnect( gentity_t *ent );
 
+// sswolf - allowteams ET - port
+qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator);
+
 //
 // g_combat.c
 //
@@ -1226,7 +1239,6 @@ qboolean SpotWouldTelefrag( gentity_t *spot );
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);
-
 //
 // g_svcmds.c
 //
@@ -1242,7 +1254,7 @@ void AddIPBan( const char *str );
 
 void Svcmd_ShuffleTeams_f( void );
 void Svcmd_StartMatch_f( void );
-void Svcmd_ResetMatch_f(); // qboolean fDoReset, qboolean fDoRestart 
+void Svcmd_ResetMatch_f(); // qboolean fDoReset, qboolean fDoRestart
 void Svcmd_SwapTeams_f( void );
 
 //
@@ -1310,7 +1322,7 @@ qboolean G_desiredFollow( gentity_t *ent, int nTeam );
 void G_swapTeamLocks( void );
 void G_updateSpecLock( int nTeam, qboolean fLock );
 void G_removeSpecInvite( int team );
-int G_playersReady( void );
+qboolean G_playersReady( void );
 void G_readyReset( qboolean aForced );
 void G_readyStart( void );
 void G_readyTeamLock( void );
@@ -1548,7 +1560,6 @@ extern vmCvar_t match_readypercent;
 extern vmCvar_t match_timeoutcount;
 extern vmCvar_t match_timeoutlength;
 extern vmCvar_t match_warmupDamage;
-extern vmCvar_t server_autoconfig;
 
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
@@ -1576,6 +1587,7 @@ extern vmCvar_t g_allowPMs;
 extern vmCvar_t g_warmupDamage;
 extern vmCvar_t		g_hitsounds;
 extern vmCvar_t		g_crouchRate;
+extern vmCvar_t g_drawHitboxes;
 extern vmCvar_t team_nocontrols;
 extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t		g_disableInv;
@@ -1593,6 +1605,7 @@ extern vmCvar_t g_maxTeamVenom;
 extern vmCvar_t g_maxTeamFlamer;
 // Misc (unsorted)
 extern vmCvar_t g_pauseLimit;
+extern vmCvar_t	g_fastStabSound;
 extern vmCvar_t g_duelAutoPause;
 extern vmCvar_t team_commands;
 extern vmCvar_t g_tournament;
@@ -1625,10 +1638,8 @@ extern vmCvar_t vote_percent;
 
 // QCon edition cvars
 extern vmCvar_t		g_antiWarp;
-
 // RTCWPro - custom configs
 extern vmCvar_t g_customConfig;
-
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1892,29 +1903,28 @@ void G_ResetMarkers( gentity_t* ent );
 //
 void G_UpdateCvars(void);
 void G_wipeCvars(void);
+void G_teamReset(int, qboolean);
 ///////////////////////
-
 // RTCWPro - g_config.c
 qboolean G_ConfigSet(const char* configname);
 void G_ConfigCheckLocked(void);
 void G_PrintConfigs(gentity_t* ent);
 qboolean G_isValidConfig(gentity_t* ent, const char* configname);
 void G_ReloadConfig(void);
-
 //
 // g_match.c
 //
 void G_loadMatchGame(void);
-void G_matchInfoDump(unsigned int dwDumpType);
 void CountDown(qboolean restart);
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
-void G_verifyMatchState(int nTeam);
-void G_matchPrintInfo(char *msg);
+//void G_verifyMatchState(int nTeam);
+void G_matchPrintInfo(char *msg, qboolean printTime);
 void G_printFull(char *str, gentity_t *ent); // from ET
 qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_globalSound(char *sound);
 void G_resetRoundState(void);
 void G_resetModeState(void);
+int G_checkServerToggle(vmCvar_t *cv);
 ///////////////////////
 // g_referee.c
 //
@@ -1992,7 +2002,7 @@ void GeoIP_close(void);
 extern GeoIP * gidb;
 void G_ReadIP(gclient_t *client);
 //
-// g_comp_config.c
+// g_config.c
 //
 void G_CompConfigSet(int dwMode, qboolean doComp);
 // g_match.c
@@ -2014,12 +2024,12 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod );
 void G_addStatsHeadShot( gentity_t *attacker, int mod );
 void G_deleteStats( int nClient );
 void G_parseStats( char *pszStatsInfo );
+char *G_writeStats( gclient_t* client );
 char *G_createClientStats( gentity_t *refEnt );
 void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
 void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean state );
 void G_printMatchInfo( gentity_t *ent );
-void G_printMatchInfo2( gentity_t *ent );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 // OSPx - New stuff below
@@ -2034,19 +2044,27 @@ qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
 qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
+
 // Macros
+//
+#define AP( x ) trap_SendServerCommand( -1, x )                 // Print to all
+#define CP( x ) trap_SendServerCommand( ent - g_entities, x )	// Print to an ent
+#define CPx( x, y ) trap_SendServerCommand( x, y )				// Print to id = x
+#define TP( x, y ) G_TeamCommand( x, y)							// Sends team command
+#define APS(x)		APSound(x)									// Global sound
+#define AAPS(x)		AAPSound(x)									// Global sound but hooked under cg_announcer..
+#define APRS(x, y)	APRSound(x, y)								// Global sound with limited (radius) range
+#define CPS(x, y)	CPSound(x, y)								// Client sound only
+#define ARRAY_LEN(x) (sizeof(x) / sizeof(*(x)))					// Saves some time..
+
 
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
-//#define AP( x ) trap_SendServerCommand( -1, x )					// Print to all
 void CountDown(qboolean restart);
 int isWeaponLimited (gclient_t *client, int weap);
 void setDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
-//#define CP( x ) trap_SendServerCommand( ent - g_entities, x )	// Print to an ent
-//#define CPx( x, y ) trap_SendServerCommand( x, y )				// Print to id = x
-#define AAPS(x)		AAPSound(x)
 //
 // g_files.c
 //

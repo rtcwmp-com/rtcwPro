@@ -5,7 +5,7 @@
 
 menuDef {
 	name "Connect"
-	background "menu/art/unknownmap"
+	background "gfx/2d/black.tga"
 	rect 0 0 640 480
 	fullScreen MENU_FALSE
 	visible MENU_FALSE
@@ -14,8 +14,9 @@ menuDef {
 	itemDef {
 		name window
 		group connect
-		rect 580 420 60 60
-		background "gfx/2d/blender_180.tga"
+		rect 475 390 142 80
+		//rect 175 250 300 175
+		background "gfx/2d/wpro.tga"
 		visible MENU_TRUE
 		style WINDOW_STYLE_SHADER
 		decoration

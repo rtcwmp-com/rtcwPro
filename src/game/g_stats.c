@@ -92,10 +92,11 @@ Double+ kills
 ===========
 */
 void doubleKill (gentity_t *ent, int meansOfDeath ) {
+	/*
 	char *message, *random;
 	int n = rand() % 3;
 
-/*	if (!g_doubleKills.integer) {
+	if (!g_doubleKills.integer) {
 		return;
 	}
 
@@ -152,9 +153,10 @@ Killing sprees
 ===========
 */
 void KillingSprees ( gentity_t *ent, int score ) {
+	/*
 	int killRatio = ent->client->sess.kills;
 	int snd_idx;
-	/*
+	
 	if (!g_killingSprees.integer)
 		return;
 
@@ -330,8 +332,9 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_UNKNOWN,              WS_MAX },
 	{ MOD_MACHINEGUN,           WS_MG42 },
 	{ MOD_GRENADE,              WS_GRENADE },
+	{ MOD_GRENADE_SPLASH,		WS_GRENADE }, // RtcwPro added grenade splash
 	{ MOD_ROCKET,               WS_PANZERFAUST },
-
+	{ MOD_ROCKET_SPLASH,		WS_PANZERFAUST}, // RtcwPro added rocket splash
 	{ MOD_KNIFE2,               WS_KNIFE },
 	{ MOD_KNIFE,                WS_KNIFE },
 	{ MOD_KNIFE_STEALTH,        WS_KNIFE },
@@ -342,6 +345,7 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_THOMPSON,             WS_THOMPSON },
 	{ MOD_STEN,                 WS_STEN },
 //	{ MOD_GARAND,               WS_RIFLE },
+	{ MOD_MAUSER,				WS_RIFLE}, // RtcwPro added mauser
 	{ MOD_SNIPERRIFLE,          WS_RIFLE },
 	{ MOD_FG42,                 WS_FG42 },
 	{ MOD_FG42SCOPE,            WS_FG42 },
@@ -349,13 +353,15 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_GRENADE_LAUNCHER,     WS_GRENADE },
 	{ MOD_FLAMETHROWER,         WS_FLAMETHROWER },
 	{ MOD_VENOM,				WS_VENOM },
+	{ MOD_VENOM_FULL,			WS_VENOM }, // RtcwPro added venom full
 	{ MOD_GRENADE_PINEAPPLE,    WS_GRENADE },
 
 	{ MOD_DYNAMITE,             WS_DYNAMITE },
 	{ MOD_AIRSTRIKE,            WS_AIRSTRIKE },
 	{ MOD_SYRINGE,              WS_SYRINGE },
 //	{ MOD_POISONEDMED,           WS_POISON },
-	{ MOD_ARTY,                 WS_ARTILLERY }
+	{ MOD_ARTY,                 WS_ARTILLERY },
+	{ MOD_ARTILLERY,                 WS_ARTILLERY }
 };
 
 // Get right stats index based on weapon mod
@@ -505,11 +511,15 @@ void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow ) {
 void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 	int dmg, ref;
 
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
 	// Keep track of only active player-to-player interactions in a real game
 	if ( !targ || !targ->client ||
 		 g_gamestate.integer != GS_PLAYING ||
 	//	 mod == MOD_ADMKILL ||
-//		 mod == MOD_SWITCHTEAM ||
+		 mod == MOD_SWITCHTEAM ||
 		 ( g_gametype.integer >= GT_WOLF && ( targ->client->ps.pm_flags & PMF_LIMBO ) ) ||
 		 ( g_gametype.integer < GT_WOLF && ( targ->s.eFlags == EF_DEAD || targ->client->ps.pm_type == PM_DEAD ) ) ) {
 		return;
@@ -544,7 +554,7 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 		 targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam ) {
 		attacker->client->sess.team_damage += dmg;
 		// Don't count self kill as team kill..because it ain't!
-		if ( targ->health <= 0 && !(mod == MOD_SUICIDE || mod == MOD_SUICIDE)) {
+		if ( targ->health <= 0 && !(mod == MOD_SELFKILL || mod == MOD_SUICIDE)) {
 			attacker->client->sess.team_kills++;
 			targ->client->sess.deaths++;	// Record death when TK occurs
 		}
@@ -562,6 +572,13 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 			// L0 - Life(s) Kill peak
 			if (attacker->client->pers.life_kills >= attacker->client->sess.killPeak)
 				attacker->client->sess.killPeak++;
+
+			// RtcwPro - gib stats
+			/*if (targ->health <= GIB_HEALTH)
+			{
+				attacker->client->sess.gibs++;
+				attacker->client->pers.life_gibs++;
+			}*/
 		}
 	}
 
@@ -647,23 +664,35 @@ void G_parseStats( char *pszStatsInfo ) {
 		}
 	}
 
-	GETVAL( cl->sess.damage_given );
-	GETVAL( cl->sess.damage_received );
-	GETVAL( cl->sess.team_damage );
-	// L0 - New ones
-	// We store this so players can check it up in warmup (TODO)..
-	GETVAL( cl->sess.deaths );
-	GETVAL( cl->sess.kills );
-	GETVAL( cl->sess.suicides );
-	GETVAL( cl->sess.team_kills );
-	GETVAL( cl->sess.headshots );
-	GETVAL( cl->sess.med_given );
-	GETVAL( cl->sess.ammo_given );
-	GETVAL( cl->sess.gibs );
-	GETVAL( cl->sess.revives );
-	GETVAL( cl->sess.acc_shots );
-	GETVAL( cl->sess.acc_hits );
-	GETVAL( cl->sess.killPeak );
+}
+
+// Writes the weaponstats to a string and returns it (used for wstats%i)
+char* G_writeStats( gclient_t* client ) {
+	unsigned int i, dwWeaponMask = 0;
+	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
+
+	if (!client) {
+		return(NULL);
+	}
+
+	// Add weapon stats as necessary
+	for (i = WS_KNIFE; i < WS_MAX; i++) {
+		if (client->sess.aWeaponStats[i].atts || client->sess.aWeaponStats[i].hits ||
+			client->sess.aWeaponStats[i].deaths) {
+			dwWeaponMask |= (1 << i);
+			Q_strcat(strWeapInfo, sizeof(strWeapInfo),
+				va(" %d %d %d %d %d",
+					client->sess.aWeaponStats[i].hits, client->sess.aWeaponStats[i].atts,
+					client->sess.aWeaponStats[i].kills, client->sess.aWeaponStats[i].deaths,
+					client->sess.aWeaponStats[i].headshots));
+		}
+	}
+
+	return(va("%d %d %d%s",
+		(int)(client - level.clients),
+		client->sess.rounds,
+		dwWeaponMask,
+		strWeapInfo));
 }
 
 // These map to WS_* weapon indexes
@@ -901,9 +930,10 @@ void G_printMatchInfo( gentity_t *ent ) {
 		tot_shots = 0;
 		tot_acc = 0;
 		tot_rev = 0;
-		CP( va("sc \"\n"
-				 "\n^7TEAM   Player          Kll Dth Sui TK Eff ^3Gib^7    ^2DG    ^1DR   ^6TD  ^3Score\n"
-				 "^7--------------------------------------------------------------------------\n\""  ));
+		CP(va("sc \"%s ^7Team\n"
+			     "^7--------------------------------------------------------------------------"
+				 "\nPlayer          ^eKll ^7Dth Sui TK ^cEff ^7Gib Accrcy HS   ^2DG   ^1DR   ^4TD  ^5Rev ^3Score\n"
+				 "^7--------------------------------------------------------------------------\n\"", (i == TEAM_RED) ? "^1Axis" : "^4Allied"  ));
 
 		for ( j = 0; j < level.numPlayingClients; j++ ) {
 			cl = level.clients + level.sortedClients[j];
@@ -946,26 +976,34 @@ void G_printMatchInfo( gentity_t *ent ) {
 			}
 
 			cnt++;
-            CP( va( "sc \"%s%-15s^3%4d^7%4d%4d%3d%3d^3%4d^2%4d^1%5d^6%6d^3%6d\n\"",
-//			CP( va( "sc \"%s%-15s^n%4d^7%4d%4d%3d%s^z%4d ^7%6.2f^n%5d%6d%6d%5d^7%7d\n\"",
-                    (i == TEAM_RED) ? "^1Axis" : "^4Allies" ,
-				//	ref,
+			CP(va("sc \"%s%-15s^e%4d^7%4d%4d%3d%s^c%4d^7%3d %6.2f%4d^2%5d^1%5d^4%5d^5%5d^7%5d\n\"",
+				ref,
 					n2,
 					cl->sess.kills,
 					cl->sess.deaths,
 					cl->sess.suicides,
 					cl->sess.team_kills,
-              //      cl->sess.revives,
-				//	ref,
+					ref,
 					eff,
 					cl->sess.gibs,
-				//	( (cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots ) * 100.00f ),
-				//	cl->sess.headshots,
+					((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f),
+					cl->sess.headshots,
 					cl->sess.damage_given,
 					cl->sess.damage_received,
 					cl->sess.team_damage,
-			//		cl->sess.revives,
+					cl->sess.revives,
 					cl->ps.persistant[PERS_SCORE] ) );
+			eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+			if (eff < 0) {
+				eff = 0;
+			}
+
+			if (ent->client == cl ||
+				(ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
+					ent->client->sess.spectatorState == SPECTATOR_FOLLOW &&
+					ent->client->sess.spectatorClient == level.sortedClients[j])) {
+				ref = "^7";
+			}
 		}
 
 		eff = ( tot_kills + tot_deaths == 0 ) ? 0 : 100 * tot_kills / ( tot_kills + tot_deaths );
@@ -975,25 +1013,193 @@ void G_printMatchInfo( gentity_t *ent ) {
 		tot_acc = ( (tot_shots == 0) ? 0.00 : ((float)tot_hits / (float)tot_shots ) * 100.00f );
 
 		CP( va( "sc \"^7--------------------------------------------------------------------------\n"
-				"%s%-19s^5%4d^7%4d%4d%3d %3d^3%4d ^2%4d^1%5d^6%6d^3%6d\n\"",
-				(i == TEAM_RED) ? "^1Axis" : "^4Allies" ,
-				" ^5Totals^7",
+				"%-19s^e%4d^7%4d%4d%3d%4d%3d ^7%6.2f%4d^2%5d^1%5d^4%5d^5%5d^7%5d\n\n\n\"",
+				"^eTotals^7",
 				tot_kills,
 				tot_deaths,
 				tot_sui,
 				tot_tk,
 				eff,
 				tot_gib,
-				//tot_acc,
-				//tot_hs,
+				tot_acc,
+				tot_hs,
 				tot_dg,
 				tot_dr,
 				tot_td,
-				//tot_rev,
+				tot_rev,
 				tot_gp ) );
 	}
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
 }
+
+// Dumps end-of-match info
+// L0 - FIXME!!!!!!!!!
+void G_matchInfoDump( unsigned int dwDumpType ) {
+	int i, ref;
+	gentity_t *ent;
+	gclient_t *cl;
+
+	// sswolf - move the announcer sound from WM_DrawObjectives in cg, here,
+	// to at least temporarily fix whatevr is causing the cut off
+	char cs[MAX_STRING_CHARS];
+	char* buf;
+	int winner;
+	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
+	buf = Info_ValueForKey(cs, "winner");
+	winner = atoi(buf);
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) 
+	{
+		ref = level.sortedClients[i];
+		ent = &g_entities[ref];
+		cl = ent->client;
+
+		if ( cl->pers.connected != CON_CONNECTED ) 
+		{
+			continue;
+		}
+
+		if ( dwDumpType == EOM_WEAPONSTATS ) 
+		{
+		// L0 - THIS NEEDS FINE TUNNING - TODO!
+			// If client wants to write stats to a file, don't auto send this stuff
+			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
+				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/) 
+				{
+					G_statsall_cmd(ent, 0, qfalse);
+				}
+				else if (cl->sess.sessionTeam != TEAM_SPECTATOR) 
+				{
+					if (cl->pers.autoaction & AA_STATSTEAM) 
+					{
+						G_statsall_cmd(ent, cl->sess.sessionTeam, qfalse);
+					}
+					else 
+					{ 
+						CP(va("ws %s\n", G_createStats(ent))); 
+					}
+
+				}
+				else if (cl->sess.spectatorState != SPECTATOR_FREE) 
+				{
+					int pid = cl->sess.spectatorClient;
+
+					if ((cl->pers.autoaction & AA_STATSTEAM)) {
+						G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam, qfalse);
+					}
+					else 
+					{ 
+						CP(va("ws %s\n", G_createStats(g_entities + pid))); 
+					}
+				}
+			}
+
+			// Log it
+			if ( cl->sess.sessionTeam != TEAM_SPECTATOR ) 
+			{
+				G_LogPrintf( "WeaponStats: %s\n", G_createStats( ent ) );
+			}
+
+		} 
+		else if ( dwDumpType == EOM_MATCHINFO ) 
+		{
+			// Don't dump score table for users with stats dump enabled
+			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) 
+			{
+				G_printMatchInfo(ent);
+			}
+
+			if ( g_gametype.integer == GT_WOLF_STOPWATCH ) 
+			{
+				// We've already missed the switch
+				if ( g_currentRound.integer == 1 ) 
+				{ 
+					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
+							g_nextTimeLimit.integer,
+							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
+
+					if (winner == 0)
+					{
+						APS("sound/match/winaxis.wav");
+					}
+					else if (winner == 1)
+					{
+						APS("sound/match/winallies.wav");
+					}
+				} 
+				else 
+				{
+					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
+					if ( val < g_timelimit.value ) 
+					{
+						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+								(int)val,
+								(int)( 60.0 * ( val - (int)val ) ),
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+
+						if (winner == 0)
+						{
+							APS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							APS("sound/match/winallies.wav");
+						}
+					} 
+					else 
+					{
+						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+
+						if (winner == 0)
+						{
+							APS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							APS("sound/match/winallies.wav");
+						}
+					}
+				}
+			}
+			// sswolf - non SW exits
+			else if (g_gametype.integer == GS_PLAYING)
+			{
+				if (g_timelimit.value && !level.warmupTime)
+				{
+					if (level.time - level.startTime >= g_timelimit.value * 60000)
+					{
+						if (winner == 0)
+						{
+							APS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							APS("sound/match/winallies.wav");
+						}
+					}
+					else
+					{
+						if (winner == 0)
+						{
+							APS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							APS("sound/match/winallies.wav");
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************************/
+/* ==================== END Stats code dump from OSP (ET port) ====================*/
+/***********************************************************************************/
 
 
 
@@ -1126,82 +1332,3 @@ void G_printMatchInfo( gentity_t *ent ) {
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
 }
 */
-// Dumps end-of-match info
-// L0 - FIXME!!!!!!!!!
-void G_matchInfoDump( unsigned int dwDumpType ) {
-	int i, ref;
-	gentity_t *ent;
-	gclient_t *cl;
-
-	for ( i = 0; i < level.numConnectedClients; i++ ) {
-		ref = level.sortedClients[i];
-		ent = &g_entities[ref];
-		cl = ent->client;
-
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-
-		if ( dwDumpType == EOM_WEAPONSTATS ) {
-		// L0 - THIS NEEDS FINE TUNNING - TODO!
-			// If client wants to write stats to a file, don't auto send this stuff
-			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
-				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/) {
-					G_statsall_cmd(ent, 0, qfalse);
-				}
-				else if (cl->sess.sessionTeam != TEAM_SPECTATOR) {
-					if (cl->pers.autoaction & AA_STATSTEAM) {
-						G_statsall_cmd(ent, cl->sess.sessionTeam, qfalse);
-					}
-					else { CP(va("ws %s\n", G_createStats(ent))); }
-
-				}
-				else if (cl->sess.spectatorState != SPECTATOR_FREE) {
-					int pid = cl->sess.spectatorClient;
-
-					if ((cl->pers.autoaction & AA_STATSTEAM)) {
-						G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam, qfalse);
-					}
-					else { CP(va("ws %s\n", G_createStats(g_entities + pid))); }
-				}
-			}
-
-			// Log it
-			if ( cl->sess.sessionTeam != TEAM_SPECTATOR ) {
-				G_LogPrintf( "WeaponStats: %s\n", G_createStats( ent ) );
-			}
-
-		} else if ( dwDumpType == EOM_MATCHINFO ) {
-			// Don't dump score table for users with stats dump enabled
-			if ( !cl->pers.int_stats ) {
-				G_printMatchInfo( ent );
-			}
-
-			if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
-				if ( g_currentRound.integer == 1 ) {   // We've already missed the switch
-					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
-							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
-				} else {
-					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-					if ( val < g_timelimit.value ) {
-						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
-								(int)val,
-								(int)( 60.0 * ( val - (int)val ) ),
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-					} else {
-						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-					}
-				}
-			}
-		}
-	}
-}
-
-/***********************************************************************************/
-/* ==================== END Stats code dump from OSP (ET port) ====================*/
-/***********************************************************************************/
-

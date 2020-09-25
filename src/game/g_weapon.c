@@ -577,8 +577,10 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 ( ( hit->spawnflags & ALLIED_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_RED ) ) ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
+								G_matchPrintInfo(va("Dynamite planted near %s!", hit->track), qfalse);
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
+								G_matchPrintInfo(va("Dynamite planted near objective #%d!", hit->count), qfalse);
 							}
 						}
 						i = num;
@@ -646,6 +648,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 									hit->spawnflags &= ~OBJECTIVE_DESTROYED; // "re-activate" objective since it wasn't destroyed.  kludgy, I know; see G_ExplodeMissile for the other half
 								}
 								trap_SendServerCommand( -1, "cp \"Axis engineer disarmed the Dynamite!\n\"" );
+								G_matchPrintInfo(va("Axis defused dynamite near %s!", hit->track), qfalse);
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_RED;
 							} else { // TEAM_BLUE
@@ -655,6 +658,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 									hit->spawnflags &= ~OBJECTIVE_DESTROYED; // "re-activate" objective since it wasn't destroyed
 								}
 								trap_SendServerCommand( -1, "cp \"Allied engineer disarmed the Dynamite!\n\"" );
+								G_matchPrintInfo(va("Allies defused dynamite near %s!", hit->track), qfalse);
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_BLUE;
 							}
@@ -797,6 +801,10 @@ void weapon_callAirStrike( gentity_t *ent ) {
 
 		// move pos for next bomb
 		VectorAdd( pos,bombaxis,pos );
+
+		// OSPx - Stats
+		if (g_gamestate.integer == GS_PLAYING)
+			ent->parent->client->sess.aWeaponStats[WS_AIRSTRIKE].atts++;
 	}
 }
 
@@ -969,8 +977,8 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->splashDamage  = 400;
 				bomb->splashRadius  = 400;
 			}
-			bomb->methodOfDeath         = MOD_AIRSTRIKE;
-			bomb->splashMethodOfDeath   = MOD_AIRSTRIKE;
+			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
+			bomb->splashMethodOfDeath   = MOD_ARTILLERY;; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->clipmask = MASK_MISSILESHOT;
 			bomb->s.pos.trType = TR_STATIONARY; // was TR_GRAVITY,  might wanna go back to this and drop from height
 			bomb->s.pos.trTime = level.time;        // move a bit on the very first frame
@@ -1600,25 +1608,27 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 Bullet_Fire
 ==============
 */
-void Bullet_Fire( gentity_t *ent, float spread, int damage ) {
+void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	vec3_t end;
-     // nihi added below
-	// L0 - Antilag
-	if ( g_antilag.integer && ent->client &&
-        !(ent->r.svFlags & SVF_BOT) ) {
-        G_TimeShiftAllClients( ent->client->pers.cmd.serverTime, ent );
-    } // End
+	// nihi added below
+   // L0 - Antilag
+	if (g_antilag.integer && ent->client &&
+		!(ent->r.svFlags & SVF_BOT)) {
+		G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
+	} // End
 
 	// L0 - disable invincible time when player spawns and starts shooting
 	if (g_disableInv.integer)
 		ent->client->ps.powerups[PW_INVULNERABLE] = 0;
 	// end
 
-	Bullet_Endpos( ent, spread, &end );
-	Bullet_Fire_Extended( ent, ent, muzzleTrace, end, spread, damage );
+	Bullet_Endpos(ent, spread, &end);
+	Bullet_Fire_Extended(ent, ent, muzzleTrace, end, spread, damage);
 	// L0 - Stats
-	ent->client->pers.life_acc_shots++;
-	ent->client->sess.acc_shots++;
+	if (g_gamestate.integer == GS_PLAYING) {
+		ent->client->pers.life_acc_shots++;
+		ent->client->sess.acc_shots++;
+	}
 	// End
 }
 
@@ -1691,8 +1701,10 @@ void Bullet_Fire_Extended( gentity_t *source, gentity_t *attacker, vec3_t start,
 		if ( LogAccuracyHit( traceEnt, attacker ) ) {
 			attacker->client->ps.persistant[PERS_ACCURACY_HITS]++;
 			// L0 - Stats
-			attacker->client->pers.life_acc_hits++;
-			attacker->client->sess.acc_hits++;
+			if (g_gamestate.integer == GS_PLAYING) {
+				attacker->client->pers.life_acc_hits++;
+				attacker->client->sess.acc_hits++;
+			}
 			// End
 		}
 

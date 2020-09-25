@@ -108,6 +108,9 @@ typedef enum {
 	CLDMG_MAX
 } clientDamage_t;
 
+typedef enum popupMessageType_e {
+	PM_MESSAGE
+} popupMessageType_t;
 // RF
 #define MAX_TAGCONNECTS     32
 
@@ -356,6 +359,7 @@ typedef struct {
 	// for fixed msec Pmove
 	int pmove_fixed;
 	int pmove_msec;
+	int fixedphysicsfps; // OSPx
 
 	// callbacks to test the world
 	// these will be different functions during game and cgame
@@ -420,7 +424,7 @@ typedef enum {
 	PERS_WOLFKICK,
 	// L0 - Hitsounds
 	PERS_HITHEAD,
-	PERS_HIT	
+	PERS_HIT
 } persEnum_t;
 
 
@@ -1137,7 +1141,7 @@ typedef enum {
 
 // Time between location updates
 #define TEAM_LOCATION_UPDATE_TIME       1000
-// L0 - OSP stats dump / weapon stat info: mapping between MOD_ and WP_ types 
+// L0 - OSP stats dump / weapon stat info: mapping between MOD_ and WP_ types
 typedef enum extWeaponStats_s
 {
 	WS_KNIFE,               // 0
@@ -1158,7 +1162,7 @@ typedef enum extWeaponStats_s
 	WS_SMOKE,               // 15
 	WS_MG42,                // 16
 	WS_RIFLE,				// 17 - equivalent american weapon to german mauser
-	WS_VENOM,				// 18 
+	WS_VENOM,				// 18
 	WS_MAX
 } extWeaponStats_t;
 
@@ -1268,7 +1272,14 @@ typedef enum {
 	MOD_MEDIC,      // these like this or not
 //
 	MOD_BAT,
-	MOD_NUM_MODS	// OSP port
+
+// OSPx
+	MOD_ADMKILL,
+	MOD_SELFKILL,
+	MOD_ARTILLERY,
+	MOD_SWITCHTEAM,
+	MOD_NUM_MODS
+// -OSPx
 
 } meansOfDeath_t;
 
@@ -1818,7 +1829,7 @@ extern int numVotesAvailable;
 
 #define VOTING_DISABLED     ( ( 1 << numVotesAvailable ) - 1 )
 extWeaponStats_t BG_WeapStatForWeapon( weapon_t iWeaponID );
-// ET Port 
+// ET Port
 int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF );
 // L0 - bg_stats.c
 //
@@ -1837,7 +1848,7 @@ int trap_PC_FreeSource(int handle);
 int trap_PC_ReadToken(int handle, pc_token_t* pc_token);
 int trap_PC_SourceFileAndLine(int handle, char* filename, int* line);
 
-void PC_SourceError(int handle, const char* format, ...);
+void PC_SourceError(int handle, char* format, ...);
 //void PC_SourceWarning(int handle, const char *format, ...); // Unused
 
 #ifdef GAMEDLL

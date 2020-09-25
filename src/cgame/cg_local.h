@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
+#include "../ui/keycodes.h"	// OSPx - Demo commands
 
 
 #define POWERUP_BLINKS      5
@@ -141,6 +142,9 @@ If you have questions concerning this license or the applicable additional terms
 #define WSTATE_START        0x01    // Window is "initializing" w/effects
 #define WSTATE_SHUTDOWN     0x02    // Window is shutting down with effects
 #define WSTATE_OFF          0x04    // Window is completely shutdown
+#define WID_DEMOCONTROLS	0x01    // Demo Controls
+#define WID_DEMOPOPUP		0x02	// Demo Pop ups
+//#define WID_DEMOHELP		0x08	// Demo key control info
 
 typedef struct {
 	vec4_t colorBorder;         // Window border color
@@ -190,6 +194,22 @@ typedef enum {
 	SHOW_SHUTDOWN,
 	SHOW_ON
 } showView_t;
+
+typedef struct {
+	int fadeTime;
+	int show;
+	int requestTime;
+} demoControlInfo_t;
+
+typedef struct {
+	int fadeTime;
+	int show;
+	int requestTime;
+} demoPopupInfo_t;
+
+#define DEMO_THIRDPERSONUPDATE  0
+#define DEMO_RANGEDELTA         6
+#define DEMO_ANGLEDELTA         4
 
 // L0 - Commented out few vars
 typedef struct {
@@ -942,6 +962,8 @@ typedef struct {
 	int teamPlayers[TEAM_NUM_TEAMS];         // JPW NERVE for scoreboard
 	score_t scores[MAX_CLIENTS];
 	qboolean showScores;
+	qboolean showStats;
+	qboolean showCLgameStats;
 	qboolean scoreBoardShowing;
 	int scoreFadeTime;
 	char killerName[MAX_NAME_LENGTH];
@@ -1131,11 +1153,21 @@ typedef struct {
 	vec4_t xhairColor;
 	vec4_t xhairColorAlt;
 	// OSP's window's
+
+	// Announcer
+	int		centerPrintAnnouncerTime;
+	char	*centerPrintAnnouncer;
+	float	centerPrintAnnouncerScale;
+	int		centerPrintAnnouncerDuration;
+	vec3_t	centerPrintAnnouncerColor;
+	int		centerPrintAnnouncerMode;
+
 	// Auto Actions
 	qboolean	latchAutoActions;
 	// Draw names on hud
 	qboolean	renderingFreeCam;
 	specName_t	specOnScreenNames[MAX_CLIENTS];
+	vec4_t reinforcementColor;
 	cg_string_t aStringPool[MAX_STRINGS];
 	cg_window_t *msgWstatsWindow;
 	cg_window_t *msgWtopshotsWindow;
@@ -1148,6 +1180,12 @@ typedef struct {
 	// L0 - New ones
 	cg_window_t *clientStatsWindow;
 	cg_window_t *msgClientStatsWindow;
+	cg_window_t *demoControlsWindow;
+	cg_window_t *demoPopupWindow;
+
+	// Demo
+	qboolean revertToDefaultKeys;
+	qboolean advertisementDone;
 	// Pop In prints
 	int popinPrintTime;
 	int popinPrintCharWidth;
@@ -1596,6 +1634,8 @@ typedef struct {
 	sfxHandle_t teamsTiedSound;
 
 	// tournament sounds
+	sfxHandle_t count5Sound;
+	sfxHandle_t count4Sound;
 	sfxHandle_t count3Sound;
 	sfxHandle_t count2Sound;
 	sfxHandle_t count1Sound;
@@ -1669,6 +1709,12 @@ typedef struct {
 	sfxHandle_t	headShot;
 	sfxHandle_t	bodyShot;
 	sfxHandle_t	teamShot;
+	// chats
+	sfxHandle_t normalChat;
+	sfxHandle_t teamChat;
+	// end of round
+	sfxHandle_t alliesWin;
+	sfxHandle_t axisWin;
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -1784,7 +1830,18 @@ typedef struct {
 	int complaintEndTime;       // DHM - Nerve
 	float smokeWindDir; // JPW NERVE for smoke puffs & wind (arty, airstrikes, bullet impacts)
 
-	// L0 - New stuff
+	// OSPx - Demo
+	demoControlInfo_t demoControlInfo;
+	demoPopupInfo_t demoPopUpInfo;
+	int thirdpersonUpdate;
+	qboolean showNormals;
+	qboolean wallhack;
+	int noChat;
+	int noVoice;
+	qboolean freezeDemo;
+	int aviDemoRate;                                    // Demo playback recording
+	int cursorUpdate;                                   // Timeout for mouse pointer view
+
 	int axisLeft;		// For DM
 	int alliedLeft;		// For DM
 	int aReinfOffset[TEAM_NUM_TEAMS];   // Reinforcements offset
@@ -1793,6 +1850,8 @@ typedef struct {
 	int pauseState;		// Pause
 	int pauseTime;   // pause time nihi added
 	int readyState;		// Ready
+	int playersReady;   // number of players ready so far
+	int playerCount;	// number of players
 // nihi added below
 	// Pause
 	cPauseSts_t match_paused;
@@ -1806,6 +1865,8 @@ typedef struct {
 	fileHandle_t dumpStatsFile;
 	char* dumpStatsFileName;  // Name of file to dump stats
 	int dumpStatsTime;
+	qboolean fKeyPressed[256];                          // Key status to get around console issues
+	int timescaleUpdate;                                // Timescale display for demo playback
 } cgs_t;
 
 //==============================================================================
@@ -2002,6 +2063,7 @@ extern vmCvar_t cg_crosshairAlpha;
 extern vmCvar_t cg_crosshairAlphaAlt;
 extern vmCvar_t cg_crosshairColor;
 extern vmCvar_t cg_crosshairColorAlt;
+extern vmCvar_t cg_coloredCrosshairNames;
 extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
 extern vmCvar_t cg_printObjectiveInfo;
@@ -2009,17 +2071,23 @@ extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
+extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
 // nihi added
 extern vmCvar_t	vp_drawnames;
 extern vmCvar_t	cg_drawNames;
 extern vmCvar_t cg_announcer;
+extern vmCvar_t cg_drawPickupItems;
 extern vmCvar_t cg_autoAction;
-extern vmCvar_t cg_forceTapout;
 extern vmCvar_t cg_statsList;
 extern vmCvar_t cg_useScreenshotJPEG;
+extern vmCvar_t cg_chatAlpha;
+extern vmCvar_t cg_chatBackgroundColor;
+extern vmCvar_t cg_chatBeep;
 extern vmCvar_t cg_printObjectiveInfo;
+extern vmCvar_t cg_instantTapout;
+extern vmCvar_t cg_forceTapout;
 extern vmCvar_t cg_uinfo;
 extern vmCvar_t cf_wstats;
 extern vmCvar_t cf_wtopshots;
@@ -2036,6 +2104,11 @@ extern vmCvar_t demo_avifpsF4;
 extern vmCvar_t demo_avifpsF5;
 extern vmCvar_t demo_drawTimeScale;
 extern vmCvar_t demo_infoWindow;
+extern vmCvar_t demo_controlsWindow;
+extern vmCvar_t demo_popupWindow;
+extern vmCvar_t demo_notifyWindow;
+extern vmCvar_t demo_showTimein;
+extern vmCvar_t	demo_noAdvertisement;
 // engine mappings
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
@@ -2064,13 +2137,14 @@ int CG_LastAttacker( void );
 void CG_LoadMenus( const char *menuFile );
 void CG_KeyEvent( int key, qboolean down );
 void CG_MouseEvent( int x, int y );
-void CG_EventHandling( int type );
+void CG_EventHandling(int type, qboolean forced);
 
 qboolean CG_GetTag( int clientNum, char *tagname, orientation_t * or );
 qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t * or );
 
 qboolean CG_CheckCenterView();
 // nihi added lines below
+char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
 
@@ -2222,6 +2296,8 @@ void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, entityState_t *es, const vec3_t fireRiseDir );
 void CG_NewClientInfo( int clientNum );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
+int CG_GetPlayersReady(void);
+int CG_GetTeamPlayers(void);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -2486,6 +2562,9 @@ void CG_LoadingString( const char *s );
 void CG_LoadingItem( int itemNum );
 void CG_LoadingClient( int clientNum );
 void CG_DrawInformation( void );
+void CG_DemoClick(int key);
+void CG_createControlsWindow(void);
+void CG_demoView(void);
 
 //
 // cg_scoreboard.c
@@ -2531,7 +2610,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
 
 //
 // L0 -  cg_window.c
-//
+void CG_createDemoPopUpWindow(char *str, int sec);
 qboolean CG_addString( cg_window_t *w, char *buf );
 void CG_createStatsWindow( void );
 void CG_createClientStatsWindow( void );
@@ -2798,7 +2877,8 @@ int CG_Text_Height_ext2(const char *text, float scale, int limit);
 // Pause
 void CG_ParsePause( const char *pState );
 // Ready
-void CG_ParseReady( const char *pState );
+void CG_ParseReady(const char* pState);
+void CG_ParsePlayersReady(const char* pState);
 void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int border, const float *color );
 // OSP's Autoaction values
 #define AA_DEMORECORD   0x01
@@ -2808,6 +2888,7 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 #define CREADY_NONE		0x00	// Countdown, playing..
 #define CREADY_AWAITING	0x01	// Awaiting all to ready up..
 #define CREADY_PENDING	0x02	// Awaiting but can start once treshold (minclients) is reached..
+#define MAX_NETNAME		36
 // OSP's macro's
 #define Pri( x ) CG_Printf( "[cgnotify]%s", CG_LocalizeServerCommand( x ) )
 #define CPri( x ) CG_CenterPrint( CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH );

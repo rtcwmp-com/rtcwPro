@@ -402,7 +402,7 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 
 void Team_ReturnFlag( int team ) {
 	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
-	PrintMsg( NULL, "The %s flag has returned!\n", TeamName( team ) );
+	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
 }
 
 void Team_FreeEntity( gentity_t *ent ) {
@@ -433,12 +433,14 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 	if ( ent->item->giTag == PW_REDFLAG ) {
 		Team_ReturnFlagSound( Team_ResetFlag( TEAM_RED ), TEAM_RED );
 		if ( gm ) {
+			//G_matchPrintInfo( "Axis have returned the objective!", qfalse);
 			trap_SendServerCommand( -1, "cp \"Axis have returned the objective!\" 2" );
 			G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 		}
 	} else if ( ent->item->giTag == PW_BLUEFLAG )     {
 		Team_ReturnFlagSound( Team_ResetFlag( TEAM_BLUE ), TEAM_BLUE );
 		if ( gm ) {
+			//G_matchPrintInfo("Allies have returned the objective!", qfalse);
 			trap_SendServerCommand( -1, "cp \"Allies have returned the objective!\" 2" );
 			G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 		}
@@ -475,12 +477,14 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 			if ( cl->sess.sessionTeam == TEAM_RED ) {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_secure.wav" );
+				//G_matchPrintInfo(va("Axis have returned %s!", ent->message), qfalse);
 				trap_SendServerCommand( -1, va( "cp \"Axis have returned %s!\n\" 2", ent->message ) );
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 				}
 			} else {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
+				//G_matchPrintInfo(va("Allies have returned %s!", ent->message), qfalse);
 				trap_SendServerCommand( -1, va( "cp \"Allies have returned %s!\n\" 2", ent->message ) );
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
@@ -608,12 +612,14 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 		if ( cl->sess.sessionTeam == TEAM_RED ) {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_taken.wav" );
+			//G_matchPrintInfo(va("Axis have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Axis have stolen %s!\n\" 2", ent->message ) );
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "allied_object_stolen" );
 			}
 		} else {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_taken.wav" );
+			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Allies have stolen %s!\n\" 2", ent->message ) );
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "axis_object_stolen" );
@@ -1598,14 +1604,15 @@ Resets a team's settings
 ===========
 */
 void G_teamReset(int team_num, qboolean fClearSpecLock) {
-//	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
-//	teamInfo[team_num].team_name[0] = 0;
-//	teamInfo[team_num].timeouts = match_timeoutcount.integer;
+	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+	teamInfo[team_num].team_name[0] = 0;
+	teamInfo[team_num].timeouts = match_timeoutcount.integer;
 
-//	if (fClearSpecLock) {
-//		teamInfo[team_num].spec_lock = qfalse;
-//	}
+	if (fClearSpecLock) {
+		teamInfo[team_num].spec_lock = qfalse;
+	}
 }
+
 // Shuffle active players onto teams
 void G_shuffleTeams( void ) {
 	int i, cTeam; //, cMedian = level.numNonSpectatorClients / 2;
@@ -1615,8 +1622,8 @@ void G_shuffleTeams( void ) {
 
 	gclient_t *cl;
 
-	G_teamReset( TEAM_RED, qtrue );
-	G_teamReset( TEAM_BLUE, qtrue );
+	G_teamReset( TEAM_RED, qfalse );
+	G_teamReset( TEAM_BLUE, qfalse);
 
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		aTeamCount[i] = 0;
@@ -1664,7 +1671,7 @@ void G_swapTeams( void ) {
 	gclient_t *cl;
 
 	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		G_teamReset( i, qtrue );
+		G_teamReset( i, qfalse );
 	}
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
@@ -1682,13 +1689,13 @@ void G_swapTeams( void ) {
 	}
 
 	AP( "cp \"^1Teams have been swapped!\n\"" );
-}    
+}
 // Return blockout status for a player
 int G_blockoutTeam( gentity_t *ent, int nTeam ) {
 	return( !G_allowFollow( ent, nTeam ) );
 }
 // Figure out if we are allowed/want to follow a given player
-qboolean G_allowFollow( gentity_t *ent, int nTeam ) {	
+qboolean G_allowFollow( gentity_t *ent, int nTeam ) {
 
 	if ( level.time - level.startTime > 2500 ) {
 		if ( TeamCount( -1, TEAM_RED ) == 0 ) {
@@ -1712,7 +1719,7 @@ qboolean G_desiredFollow( gentity_t *ent, int nTeam ) {
 	return( qfalse );
 }
 // Swap team speclocks
-void G_swapTeamLocks( void ) {	
+void G_swapTeamLocks( void ) {
 	qboolean fLock = teamInfo[TEAM_RED].spec_lock;
 	teamInfo[TEAM_RED].spec_lock = teamInfo[TEAM_BLUE].spec_lock;
 	teamInfo[TEAM_BLUE].spec_lock = fLock;
@@ -1727,7 +1734,7 @@ void G_updateSpecLock( int nTeam, qboolean fLock ) {
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		ent = g_entities + level.sortedClients[i];
 
-		if ( ent->client->sess.admin ) {
+		if ( ent->client->sess.admin || ent->client->sess.referee ) {
 			continue;
 		}
 
@@ -1760,7 +1767,7 @@ void G_removeSpecInvite( int team ) {
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = g_entities + level.sortedClients[i];
-		if ( !cl->inuse || cl->client->sess.admin ) {
+		if ( !cl->inuse || cl->client->sess.admin || cl->client->sess.referee ) {
 			continue;
 		}
 
@@ -1772,7 +1779,7 @@ void G_removeSpecInvite( int team ) {
 
 	if (update)
 		G_updateSpecLock( team, qtrue );
-		
+
 }
 /*
 =============
@@ -1781,36 +1788,48 @@ Tardo -- Ready/Not Ready
 L0 - Rewrote and simplifed this
 =============
 */
-// count players
-int G_playersReady( void ) {
+// Determine if the "ready" player threshold has been reached.
+qboolean G_playersReady( void ) {
+	int i, ready = 0, notReady = match_minplayers.integer;
 	gclient_t *cl;
-	int ready = 0,		\
-		i,				\
-		state = 0,		\
-		count = 0;
 
-	for ( i = 0;  i < level.numPlayingClients; i++ ) {
-		cl = level.clients + level.sortedClients[i];
 
-		if (cl->pers.ready)
-			ready++;
+	if ( 0 == g_tournament.integer ) {
+		return( qtrue );
 	}
 
-	count = (!level.numPlayingClients) ? -1 : level.numPlayingClients - ready;
-	state = ( (ready == level.numPlayingClients) && level.numPlayingClients ) ? -2 : count;
+	// Ensure we have enough real players
+	if ( level.numNonSpectatorClients >= match_minplayers.integer && level.voteInfo.numVotingClients > 0 ) {
+		// Step through all active clients
+		notReady = 0;
+		for ( i = 0; i < level.numConnectedClients; i++ ) {
+			cl = level.clients + level.sortedClients[i];
 
-	if (g_noTeamSwitching.integer) {
-		state = ((ready >= g_minGameClients.integer) ? -2 : g_minGameClients.integer - ready);
+			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam == TEAM_SPECTATOR ) {
+				continue;
+			} else if ( cl->pers.ready || level.ref_allready || ( g_entities[level.sortedClients[i]].r.svFlags & SVF_BOT ) ) {
+				ready++;
+			} else { notReady++;}
+		}
 	}
 
-return state;
+	notReady = ( notReady > 0 || ready > 0 ) ? notReady : match_minplayers.integer;
+	if ( g_minGameClients.integer != notReady ) {
+		trap_Cvar_Set( "g_minGameClients", va( "%d", notReady ) );
+	}
+
+	// Do we have enough "ready" players?
+	return(level.ref_allready || ((ready + notReady > 0) && 100 * ready / (ready + notReady) >= match_readypercent.integer));
+
+	//state = ((ready >= level.numPlayingClients) ? -2 : level.numPlayingClients - ready);  // force threshold to be everybody playing
+	//return state;
 }
 
 void G_readyReset( qboolean aForced ) {
 	if ( g_gamestate.integer == GS_WARMUP_COUNTDOWN && !aForced ) {
 		AP( "print \"*** ^zINFO: ^nCountdown aborted! Going back to warmup..\n\"2" );
 	}
-	level.readyAll = qfalse;
+	level.ref_allready = qfalse;
 	level.lastRestartTime = level.time;
 	level.readyPrint = qfalse;
 	trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
@@ -1818,12 +1837,12 @@ void G_readyReset( qboolean aForced ) {
 }
 
 void G_readyStart( void ) {
-	level.readyAll = qtrue;
+	level.ref_allready = qtrue;
 	level.CNstart = 0; // Resets countdown
 	trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 
 	// Prevents joining once countdown starts..
-	if (g_tournament.integer == 2)
+	if (g_tournament.integer) // == 2 xmod has a value of 2 but we do not
 		G_readyTeamLock();
 }
 

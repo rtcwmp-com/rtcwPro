@@ -109,10 +109,10 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			}
 		}
 
-		if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
+		/*if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
 		}
-		/*
+		
 		if (cl->sess.coach_team) {
 			tteam = cl->sess.coach_team;
 			coach = (ent) ? "^3C" : "C";
@@ -626,7 +626,10 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		return;
 	}
 
-
+	if (team == TEAM_FREE || team == TEAM_SPECTATOR) {
+		CP("print \"^jError: ^7Pause cannot be issued by a spectator!\n\"");
+		return;
+	}
 
 	if ( g_gamestate.integer != GS_PLAYING ) {
 		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
@@ -646,7 +649,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
-		AAPS("sound/world/klaxon1.wav");
+		AAPS("sound/match/klaxon1.wav");
 	}
    // else if (level.paused != PAUSE_UNPAUSING){
     else if (team + 128 != level.paused) {// nihi added
@@ -667,7 +670,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		level.paused = !PAUSE_NONE;
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
-		AAPS("sound/world/klaxon1.wav");
+		AAPS("sound/match/klaxon1.wav");
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");

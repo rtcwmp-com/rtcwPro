@@ -418,8 +418,8 @@ menuDef {
 	itemDef {
 		name osp_gfx
 		style WINDOW_STYLE_SHADER
-		rect 160 94 300 300
-		background "gfx/2d/blender_180.tga"
+		rect 150 175 339 191
+		background "gfx/2d/wpro.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration
@@ -427,12 +427,12 @@ menuDef {
 
 	itemDef {
 		name window
-		text "www.castlewolfenstein.com"
-		tooltip "Go to RtCW's official website"
+		text "RtcwPro Beta 0.1"
+		tooltip "RtcwPro Beta"
 		tooltipaligny -40
 		type 0
 		style 0	
-		rect 475 465 170 14
+		rect 530 450 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED
@@ -444,18 +444,18 @@ menuDef {
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
-			uiScript openWolf
+			uiScript openModURL
 		}
     }
 
 	itemDef {
 		name osp_url
-		text "www.OrangeSmoothie.org"
-		tooltip "Go to OSP's website"
+		text "RtcwPro Repository"
+		tooltip "RtcwPro Repository"
 		tooltipaligny -40
 		type 1
 		style 0
-		rect 483 450 170 14
+		rect 515 465 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED
@@ -467,7 +467,7 @@ menuDef {
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
-			uiScript openOSP
+			uiScript openModURL
 		}
     }
 }

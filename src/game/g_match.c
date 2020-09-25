@@ -38,80 +38,7 @@ Updated: 18.04/13
 // OSP
 char *aTeams[TEAM_NUM_TEAMS] = { "FFA", "^1Axis^7", "^4Allies^7", "Spectators" };
 team_info teamInfo[TEAM_NUM_TEAMS];
-/*
-=================
-Countdown
 
-Causes some troubles on client side so done it here.
-=================
-*/
-void CountDown(qboolean restart){
-	gentity_t *other;
-	char *index="";
-
-	if (level.CNyes == qfalse) {
-		return;
-	}
-		// Countdown...
-	if (level.CNstart == 0) { //index = "prepare.wav";
-		if (level.clients->pers.connected == CON_CONNECTED)
-            AAPS("sound/match/prepare.wav");
-		if (!restart) AP( "cp \"Prepare to fight^1!\n\"2" );}
-	if (level.CNstart == 1) { //index = "cn_5.wav";
-		if (!restart) AP( "cp \"Match resumes in: ^15\n\"2" ); 	 }
-	if (level.CNstart == 2) { //index = "cn_4.wav";
-		if (!restart) AP( "cp \"Match resumes in: ^14\n\"2" );     }
-	if (level.CNstart == 3) {// index = "cn_3.wav";
-		if (!restart) AP( "cp \"Match resumes in: ^13\n\"2" );    }
-	if (level.CNstart == 4) { //index = "cn_2.wav";
-		if (!restart) AP( "cp \"Match resumes in: ^12\n\"2" );     }
-	if (level.CNstart == 5) { //index = "cn_1.wav";
-		if (!restart) AP( "cp \"Match resumes in: ^11\n\"2" );	 }
-	// Pushes forward. Could be done in 5 but then there's a sound bug ..
-	if (level.CNstart == 6 ) { level.HAprintnum++;	 }
-
-	// Prepare to fight takes 2 seconds..
-	if(level.CNstart == 0){
-		level.CNpush = level.time+2000;
-	// Just enough to fix the bug and skip to action..
-	} else if (level.CNstart == 6) {
-		level.CNpush = level.time+200;
-	// Otherwise, 1 second.
-	} else {
-		level.CNpush = level.time+1000;
-	}
-
-	// We're done.. restart the game
-	if (level.CNstart == 7) {
-		if (restart) {
-			level.warmupTime += 10000;
-			trap_Cvar_Set( "g_restarted", "1" );
-			trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-			level.restarted = qtrue;
-		} else {
-			// Resume the match..
-			resetPause();
-			AAPS("sound/match/fight.wav");
-			AP("cp \"^1FIGHT\n\"2");
-            // nihi added to fix the pause timer issue
-            level.startTime += level.timeDelta;  // Add the amount of time while paused to game timer
-            level.timeDelta = 0;  // Reset the "pause timer"
-            trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
-
-
-
-
-		}
-	return;
-	}
-
-	other = g_entities;
-//	if (level.clients->pers.connected == CON_CONNECTED)
-//		doSound(other, EV_ANNOUNCER_SOUND, "sound/scenaric/", va("%s", index));
-//	if (level.clients->pers.connected == CON_CONNECTED)
-	//	AAPS(va("sound/match/%s", index));
-level.CNstart++;  // push forward each frame.. :)
-}
 /**
  * @brief Setting initialization
  */
@@ -168,7 +95,7 @@ void PauseHandle( void ) {
 		} else {
 			level.paused = PAUSE_UNPAUSING;
 			AP( "print \"Prepare to fight!\n\"" );
-			APS("sound/scenaric/prepare.wav");
+			APS("sound/match/prepare.wav");
 		}
 	}
 
@@ -284,6 +211,96 @@ void setDefaultWeapon(gclient_t *client, qboolean isSold) {
  * @brief G_delayPrint
  * @param[in,out] dpent
  */
+/*
+=================
+Countdown
+
+Causes some troubles on client side so done it here.
+=================
+*/
+void CountDown(qboolean restart) {
+	gentity_t *other;
+	char *index="";
+
+	if (level.CNyes == qfalse) {
+		return;
+	}
+		// Countdown...
+	if (level.CNstart == 0) { //index = "prepare.wav";
+		if (level.clients->pers.connected == CON_CONNECTED)
+            AAPS("sound/match/prepare.wav");
+		if (!restart) AP(va("cp \"Prepare to fight^1!\n\"2"));
+	}
+	if (level.CNstart == 1) {
+		index = "cn_5.wav";
+		if (!restart) AP(va("cp \"Match resumes in: ^15\n\"2"));
+	}
+	if (level.CNstart == 2) {
+		index = "cn_4.wav";
+		if (!restart) AP(va("cp \"Match resumes in: ^14\n\"2"));
+	}
+	if (level.CNstart == 3) {
+		index = "cn_3.wav";
+		if (!restart) AP(va("cp \"Match resumes in: ^13\n\"2"));
+	}
+	if (level.CNstart == 4) {
+		index = "cn_2.wav";
+		if (!restart) AP(va("cp \"Match resumes in: ^12\n\"2"));
+	}
+	if (level.CNstart == 5) {
+		index = "cn_1.wav";
+		if (!restart) AP(va("cp \"Match resumes in: ^11\n\"2"));
+	}
+
+	// Pushes forward. Could be done in 5 but then there's a sound bug ..
+	if (level.CNstart == 6 ) { level.HAprintnum++;	 }
+
+	// Prepare to fight takes 2 seconds..
+	if(level.CNstart == 0){
+		level.CNpush = level.time+2000;
+	// Just enough to fix the bug and skip to action..
+	} else if (level.CNstart == 6) {
+		level.CNpush = level.time+200;
+	// Otherwise, 1 second.
+	} else {
+		level.CNpush = level.time+1000;
+	}
+
+	// We're done.. restart the game
+	if (level.CNstart == 7) {
+		if (restart) {
+			level.warmupTime += 10000;
+			trap_Cvar_Set( "g_restarted", "1" );
+			trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
+			level.restarted = qtrue;
+		} else {
+			// Resume the match..
+			resetPause();
+			AAPS("sound/match/fight.wav");
+			AP(va("cp \"^1FIGHT\n\"2"));
+            // nihi added to fix the pause timer issue
+            level.startTime += level.timeDelta;  // Add the amount of time while paused to game timer
+            level.timeDelta = 0;  // Reset the "pause timer"
+            trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
+
+
+
+
+		}
+
+		return;
+	}
+
+	other = g_entities;
+
+//	if (level.clients->pers.connected == CON_CONNECTED)
+//		doSound(other, EV_ANNOUNCER_SOUND, "sound/scenaric/", va("%s", index));
+
+	if (level.clients->pers.connected == CON_CONNECTED)
+		AAPS(va("sound/match/%s", index));
+
+	level.CNstart++;  // push forward each frame.. :)
+}
 void G_delayPrint(gentity_t *dpent)
 {
 	int      think_next = 0;
@@ -385,6 +402,91 @@ void G_spawnPrintf(int print_type, int print_time, gentity_t *owner)
 	ent->nextthink = print_time;
 	ent->think     = G_delayPrint;
 }
+/**
+ * @brief Update configstring for vote info
+ * @param[in] cv
+ * @return
+ */
+int G_checkServerToggle(vmCvar_t *cv)
+{
+	int nFlag;
+
+	if (cv == &match_mutespecs)
+	{
+		nFlag = CV_SVS_MUTESPECS;
+	}
+	else if (cv == &g_friendlyFire)
+	{
+		nFlag = CV_SVS_TEAMDMG;
+	}
+	else if (cv == &g_antilag)
+	{
+		nFlag = CV_SVS_ANTILAG;
+	}
+	// special case for 2 bits
+	else if (cv == &match_warmupDamage)
+	{
+		if (cv->integer > 0)
+		{
+			level.server_settings &= ~CV_SVS_WARMUPDMG;
+			nFlag                  = (cv->integer > 2) ? 2 : cv->integer;
+			nFlag                  = nFlag << 2;
+		}
+		else
+		{
+			nFlag = CV_SVS_WARMUPDMG;
+		}
+	}
+	else
+	{
+		return qfalse;
+	}
+
+	if (cv->integer > 0)
+	{
+		level.server_settings |= nFlag;
+	}
+	else
+	{
+		level.server_settings &= ~nFlag;
+	}
+
+	return qtrue;
+}
+
+/*
+=================
+Match Info
+
+Basically just some info prints..
+=================
+*/
+// Gracefully taken from s4ndmod :p
+char* GetLevelTime(void) {
+	int Objseconds, Objmins, Objtens;
+
+	Objseconds = (((g_timelimit.value * 60 * 1000) - ((level.time - level.startTime))) / 1000); // martin - this line was a bitch :-)
+																								// nate	  - I know, that's why I took it. :p
+	Objmins = Objseconds / 60;
+	Objseconds -= Objmins * 60;
+	Objtens = Objseconds / 10;
+	Objseconds -= Objtens * 10;
+
+	if (Objseconds < 0) { Objseconds = 0; }
+	if (Objtens < 0) { Objtens = 0; }
+	if (Objmins < 0) { Objmins = 0; }
+
+	return va("%i:%i%i", Objmins, Objtens, Objseconds);
+}
+
+// Prints stuff
+void G_matchPrintInfo(char *msg, qboolean printTime) {
+	if (printTime)
+		AP(va("print \"[%s] ^3%s \n\"", GetLevelTime(), msg));
+	else
+		AP(va("print \"*** ^3INFO: ^3%s \n\"", msg));
+}
+
 // Simple alias for sure-fire print :)
 void G_printFull(char *str, gentity_t *ent) {
 	if (ent != NULL) {

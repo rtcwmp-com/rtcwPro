@@ -240,6 +240,12 @@ char    *modNames[] = {
 	"MOD_MORTAR_SPLASH",
 	"MOD_KICKED",
 	"MOD_GRABBER",
+	"MOD_DYNAMITE",
+	"MOD_DYNAMITE_SPLASH",
+	"MOD_AIRSTRIKE",
+	"MOD_SYRINGE",
+	"MOD_AMMO",
+	"MOD_ARTILLERY",
 	"MOD_WATER",
 	"MOD_SLIME",
 	"MOD_LAVA",
@@ -264,8 +270,14 @@ char    *modNames[] = {
 	"MOD_LT_AIRSTRIKE",
 	"MOD_ENGINEER",  // not sure if we'll use
 	"MOD_MEDIC",     // these like this or not
+	"MOD_BAT",
 // jpw
-	"MOD_BAT"
+// OSPx
+	"MOD_ADMKILL",
+	"MOD_SELFKILL",
+	"MOD_SWITCHTEAM",
+	"MOD_NUM_MODS"
+// -OSPx
 };
 
 /*
@@ -295,6 +307,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		return;
 	}
 
+
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );
 	// OSP
@@ -319,22 +332,60 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		killerName = "<world>";
 	}
 
+	if ( meansOfDeath == MOD_SELFKILL && g_gamestate.integer == GS_PLAYING) {
+		int r = rand() %2; // randomize messages
+			
+		if (r == 0)			
+			AP(va("print \"%s ^7slit his throat.\n\"", self->client->pers.netname));
+		else if (r == 1)
+			AP(va("print \"%s ^7commited suicide.\n\"", self->client->pers.netname));
+	}
+	/* new stats if (meansOfDeath == MOD_KNIFE2 && g_gamestate.integer == GS_PLAYING) {
+		attacker->client->pers.stats.knife++;
+	}*/
+	// If person gets stabbed use custom sound from soundpack
+	// it's broadcasted to victim and heard only if standing near victim...
+	if ( meansOfDeath == MOD_KNIFE_STEALTH && !OnSameTeam(self, attacker) && g_fastStabSound.integer) {
+		int r = rand() %2; 
+		char *snd;
+
+		if (r == 0)
+			snd = "goat.wav";
+		else
+			snd = "humiliation.wav";
+
+		APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" : 
+			((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
+
+		attacker->client->sess.knifeKills++;
+		//write_RoundStats(attacker->client->pers.netname, attacker->client->pers.stats.knifeStealth, ROUND_FASTSTABS);
+	}
+
+	// RtcwPro commented this out - we want artillery distinguished from airstrike
+	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {		
+	//	meansOfDeath = MOD_AIRSTRIKE; // Just Remaps it back..
+	//}
+
 	if ( meansOfDeath < 0 || meansOfDeath >= sizeof( modNames ) / sizeof( modNames[0] ) ) {
 		obit = "<bad obituary>";
 	} else {
 		obit = modNames[ meansOfDeath ];
 	}
 
-	G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
+	// L0 - Don't bother in warmup etc..
+	if (g_gamestate.integer == GS_PLAYING) // this is only on server side not needed during warmup
+	{
+		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
+	}
 	// L0 - Stats
-	if (attacker && attacker->client){
+	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
-		if (!OnSameTeam(attacker, self)){
+		if (!OnSameTeam(attacker, self)) {
+			
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
 			attacker->client->pers.life_kills++;		// life kills
-
 
 		// Count teamkill
 		} else {
@@ -348,6 +399,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		}
 	} // End
 
+	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
+
 	// broadcast the death event to everyone
 	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
 	ent->s.eventParm = meansOfDeath;
@@ -355,9 +408,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	ent->s.otherEntityNum2 = killer;
 	ent->r.svFlags = SVF_BROADCAST; // send to everyone
 
+	//}
+
 	self->enemy = attacker;
 
-	self->client->ps.persistant[PERS_KILLED]++;
+	self->client->ps.persistant[PERS_KILLED]++; // TODO find out what PERS_KILLED is used for????
 
 // JPW NERVE -- if player is holding ticking grenade, drop it
 	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {
@@ -423,9 +478,19 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				acc = (self->client->pers.life_acc_shots == 0) ?
 					0.00 : ((float)self->client->pers.life_acc_hits / (float)self->client->pers.life_acc_shots ) * 100.00f ;
 
-					CPx(self-g_entities, va("chat \"^zLast life: ^7Kills:^z%d ^7Headshots:^z%d ^7Acc:^z%2.2f ^7Killer: %s^z(%ihp)\n\"",
-						self->client->pers.life_kills, self->client->pers.life_headshots,
-						acc, attacker->client->pers.netname, attacker->health ));
+				// Class based..
+				/*if (self->client->ps.stats[PC_MEDIC])
+					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7Rev:^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
+						self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_revives, acc, attacker->client->pers.netname, attacker->health));
+				else if (self->client->ps.stats[PC_LT])
+					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7AmmoGiv:^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
+					self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_ammo, acc, attacker->client->pers.netname, attacker->health));
+				else if (self->client->ps.stats[PC_ENGINEER])
+					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7Gibs: ^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
+						self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_gibs, acc, attacker->client->pers.netname, attacker->health));
+				else*/
+					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7Gibs: ^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
+					self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_gibs, acc, attacker->client->pers.netname, attacker->health));
 			} // End
 		}
 	} else {
@@ -451,7 +516,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-
+			G_matchPrintInfo(va("Allies have lost %s!", self->message), qfalse);
 			self->client->ps.powerups[PW_REDFLAG] = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
@@ -459,7 +524,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-
+			G_matchPrintInfo(va("Axis have lost %s!", self->message), qfalse);
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}
 
@@ -925,7 +990,7 @@ void Hitsounds( gentity_t *targ, gentity_t *attacker, qboolean body ) {
 			}
 
 			te = G_TempEntity( attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-			te->s.eventParm = G_SoundIndex("xmod/sound/game/hitTeam.wav");
+			te->s.eventParm = G_SoundIndex("sound/hitsounds/hitTeam.wav");
 			te->s.teamNum = attacker->s.clientNum;
 		}
 
@@ -946,9 +1011,9 @@ void Hitsounds( gentity_t *targ, gentity_t *attacker, qboolean body ) {
 
 			te = G_TempEntity( attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
 			if (body)
-				te->s.eventParm = G_SoundIndex("xmod/sound/game/hit.wav");
+				te->s.eventParm = G_SoundIndex("sound/hitsounds/hit.wav");
 			else
-				te->s.eventParm = G_SoundIndex("xmod/sound/game/hitH.wav");
+				te->s.eventParm = G_SoundIndex("sound/hitsounds/hitH.wav");
 			te->s.teamNum = attacker->s.clientNum;
 		}
 	}
@@ -1038,6 +1103,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			case MOD_ROCKET:
 			case MOD_ROCKET_SPLASH:
 			case MOD_AIRSTRIKE:
+			case MOD_ARTILLERY:
 			case MOD_GRENADE_PINEAPPLE:
 			case MOD_MORTAR:
 			case MOD_MORTAR_SPLASH:
@@ -1076,7 +1142,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( knockback > 200 ) {
 		knockback = 200;
 	}
-	else { knockback = .5*knockback;}   //nihi added to reduce knockback
+	//else { knockback = .5*knockback;}  // TODO did OSP do this?? //nihi added to reduce knockback
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
@@ -1207,8 +1273,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	if ( g_debugDamage.integer ) {
-		G_Printf( "client:%i health:%i damage:%i armor:%i\n", targ->s.number,
-				  targ->health, take, asave );
+		G_Printf( "client:%i health:%i damage:%i\n", targ->s.number, targ->health, take); //, asave );
 	}
 
 	// add to the damage inflicted on a player this frame
@@ -1220,7 +1285,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		} else {
 			client->ps.persistant[PERS_ATTACKER] = ENTITYNUM_WORLD;
 		}
-		client->damage_armor += asave;
+		//client->damage_armor += asave;
 		client->damage_blood += take;
 		client->damage_knockback += knockback;
 
@@ -1262,22 +1327,37 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 		}
 
+
 // JPW NERVE overcome previous chunk of code for making grenades work again
 		if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) && ( take > 190 ) ) { // 190 is greater than 2x mauser headshot, so headshots don't gib
 			targ->health = GIB_HEALTH - 1;
+			
+			// gibbed by a nade or other explosion
+			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+			{
+				attacker->client->sess.gibs++;	//gibbed an enemy
+				attacker->client->pers.life_gibs++;
+			}
 		}
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
 		if ( targ->health <= 0 ) {
-			if ( client ) {
+			if (client) {
 				targ->flags |= FL_NO_KNOCKBACK;
-// JPW NERVE -- repeated shooting sends to limbo
-				if ( g_gametype.integer >= GT_WOLF ) {
-					if ( ( targ->health < FORCE_LIMBO_HEALTH ) && ( targ->health > GIB_HEALTH ) && ( !( targ->client->ps.pm_flags & PMF_LIMBO ) ) ) {
-						limbo( targ, qtrue );
-					}
+				if (g_gametype.integer >= GT_WOLF) {
+						// JPW NERVE -- repeated shooting sends to limbo
+						if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
+							limbo(targ, qtrue);
+
+							// gibbed by something another player (eg. smg)
+							if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+							{
+								attacker->client->sess.gibs++;
+								attacker->client->pers.life_gibs++;
+							}
+						}
+					// jpw
 				}
-// jpw
 			}
 
 			if ( targ->health < -999 ) {

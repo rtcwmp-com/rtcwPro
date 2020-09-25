@@ -65,10 +65,10 @@ void APSound(char *sound);
 void APRSound(gentity_t *ent, char *sound);
 
 // Macros
-#define APS(x) APSound(x)									// Global sound 
+/*#define APS(x) APSound(x)									// Global sound 
 #define APRS(x, y) APRSound(x, y)							// Global sound with limited range
 #define CPS(x, y) CPSound(x, y)								// Client sound only
 #define AP(x) trap_SendServerCommand(-1, x)					// Print to all
 #define CP(x) trap_SendServerCommand(ent-g_entities, x)		// Print to an ent
 #define CPx(x, y) trap_SendServerCommand(x, y)				// Print to id = x
-#define TP(x,y,z) G_SayToTeam(x, y, z)						// Prints to selected team
+#define TP(x,y,z) G_SayToTeam(x, y, z)						// Prints to selected team*/

@@ -665,7 +665,7 @@ menuDef {
 
 
 
-//////////////////// OSP //////////////////
+//////////////////// RtcwPro //////////////////
 
 
 
@@ -691,8 +691,8 @@ menuDef {
 		name osp_gfx
 		group grpnervecredit
 		style WINDOW_STYLE_SHADER
-		rect 270 342 100 100
-		background "gfx/2d/blender_180.tga"
+		rect 250 342 142 80
+		background "gfx/2d/wpro.tga"
 		forecolor 1 1 1 0.2
 		visible 1
 		decoration
@@ -709,7 +709,7 @@ menuDef {
 		textstyle 2
 		textscale .22
 		textalign ITEM_ALIGN_CENTER
-		text "ORANGE SMOOTHIE PRODUCTIONS"
+		text "RtCW Pro Dev Team"
 		forecolor 1 0.62 0.1 1
 		decoration
 		visible 0
@@ -718,24 +718,7 @@ menuDef {
 	itemDef {
 		name osp1
 		group grpnervecredit
-		rect 120 350 440 10
-		style 1
-		textalign 1
-		textalignx 260
-		textaligny 9
-		textstyle 2
-		textscale .2
-		text "Design / Development"
-		textalign ITEM_ALIGN_LEFT
-		backcolor 1 1 1 .1
-		visible 0
-		decoration
-	}
-
-	itemDef {
-		name osp1
-		group grpnervecredit
-		rect 120 350 440 10
+		rect 300 350 440 10
 		style 1
 		textalign 1
 		textalignx 20
@@ -743,13 +726,27 @@ menuDef {
 		textfont UI_FONT_SMALL
 		textscale .2
 		textstyle 2
-		text "Jason Keimig"
-		textalign ITEM_ALIGN_LEFT
+		text "Nihilist / KrAzYkAzE / Dutchmeat / Tarator / S4ndm4nn"
+		textalign ITEM_ALIGN_CENTER
 		visible 0
 		decoration
 	}
 
-
+	itemDef {
+		name osp1
+		group grpnervecredit
+		rect 300 400 440 10
+		style 1
+		textalign 1
+		textalignx 20
+		textaligny 9
+		textstyle 2
+		textscale .2
+		text "Special Thanks to Nate L0 - Author of OSPx/xMod"
+		textalign ITEM_ALIGN_CENTER
+		visible 0
+		decoration
+	}
 
 
 

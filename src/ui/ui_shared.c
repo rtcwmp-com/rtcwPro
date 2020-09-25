@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 // string allocation/managment
 
 #include "ui_shared.h"
+#include "ui_local.h"    // For CS settings/retrieval
 
 #define SCROLL_TIME_START                   500
 #define SCROLL_TIME_ADJUST              150
@@ -47,6 +48,9 @@ typedef struct scrollInfo_s {
 	qboolean scrollDir;
 } scrollInfo_t;
 
+
+
+
 static scrollInfo_t scrollInfo;
 
 static void ( *captureFunc )( void *p ) = NULL;
@@ -54,6 +58,46 @@ static void *captureData = NULL;
 static itemDef_t *itemCapture = NULL;   // item that has the mouse captured ( if any )
 
 displayContextDef_t *DC = NULL;
+
+void Tooltip_Initialize( itemDef_t *item ) {
+	item->text = NULL;
+	item->font = UI_FONT_SMALL;
+	item->textalignx = 3;
+	item->textaligny = 10;
+	item->textscale = .2f;
+	item->window.border = WINDOW_BORDER_FULL;
+	item->window.borderSize = 1.f;
+	item->window.flags &= ~WINDOW_VISIBLE;
+	item->window.flags |= ( WINDOW_DRAWALWAYSONTOP | WINDOW_AUTOWRAPPED );
+	Vector4Set( item->window.backColor, .9f, .9f, .75f, 1.f );
+	Vector4Set( item->window.borderColor, 0.f, 0.f, 0.f, 1.f );
+	Vector4Set( item->window.foreColor, 0.f, 0.f, 0.f, 1.f );
+}
+
+void Tooltip_ComputePosition( itemDef_t *item ) {
+	Rectangle *itemRect = &item->window.rectClient;
+	Rectangle *tipRect = &item->toolTipData->window.rectClient;
+
+	DC->textFont( item->toolTipData->font );
+
+	// Set positioning based on item location
+	tipRect->x = itemRect->x + ( itemRect->w / 3 );
+	tipRect->y = itemRect->y + itemRect->h + 8;
+	//tipRect->h = 14.0f;
+	//tipRect->w = DC->textWidth( item->toolTipData->text, item->toolTipData->textscale, 0 ) + 6.0f;
+	tipRect->h = DC->multiLineTextHeight( item->toolTipData->text, item->toolTipData->textscale, 0 ) + 9.f;
+	tipRect->w = DC->multiLineTextWidth( item->toolTipData->text, item->toolTipData->textscale, 0 ) + 6.f;
+	if ( ( tipRect->w + tipRect->x ) > 635.0f ) {
+		tipRect->x -= ( tipRect->w + tipRect->x ) - 635.0f;
+	}
+
+	item->toolTipData->parent = item->parent;
+	item->toolTipData->type = ITEM_TYPE_TEXT;
+	item->toolTipData->window.style = WINDOW_STYLE_FILLED;
+	item->toolTipData->window.flags |= WINDOW_VISIBLE;
+}
+
+
 
 qboolean g_waitingForKey = qfalse;
 qboolean g_editingField = qfalse;
@@ -1605,6 +1649,29 @@ qboolean Item_EnableShowViaCvar( itemDef_t *item, int flag ) {
 }
 
 
+// OSP - display if we poll on a server toggle setting
+// We want *current* settings, so this is a bit of a perf hit,
+// but this is only during UI display
+
+qboolean Item_SettingShow( itemDef_t *item, qboolean fVoteTest ) {
+	char info[MAX_INFO_STRING];
+
+	if ( fVoteTest ) {
+		trap_Cvar_VariableStringBuffer( "cg_ui_voteFlags", info, sizeof( info ) );
+		return( ( atoi( info ) & item->voteFlag ) != item->voteFlag );
+	}
+
+	DC->getConfigString( CS_SERVERTOGGLES, info, sizeof( info ) );
+
+	if ( item->settingFlags & SVS_ENABLED_SHOW ) {
+		return( atoi( info ) & item->settingTest );
+	}
+	if ( item->settingFlags & SVS_DISABLED_SHOW ) {
+		return( !( atoi( info ) & item->settingTest ) );
+	}
+
+	return( qtrue );
+}
 // will optionaly set focus to this item
 qboolean Item_SetFocus( itemDef_t *item, float x, float y ) {
 	int i;
@@ -1629,6 +1696,13 @@ qboolean Item_SetFocus( itemDef_t *item, float x, float y ) {
 		return qfalse;
 	}
 
+	// OSP
+	if ( ( item->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( item, qfalse ) ) {
+		return( qfalse );
+	}
+	if ( item->voteFlag != 0 && !Item_SettingShow( item, qtrue ) ) {
+		return( qfalse );
+	}
 	oldFocus = Menu_ClearFocus( item->parent );
 
 	if ( item->type == ITEM_TYPE_TEXT ) {
@@ -1912,6 +1986,13 @@ void Item_MouseEnter( itemDef_t *item, float x, float y ) {
 			return;
 		}
 
+		// OSP - server settings too .. (mostly for callvote)
+		if ( ( item->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( item, qfalse ) ) {
+			return;
+		}
+		if ( item->voteFlag != 0 && !Item_SettingShow( item, qtrue ) ) {
+			return;
+		}
 		if ( Rect_ContainsPoint( &r, x, y ) ) {
 			if ( !( item->window.flags & WINDOW_MOUSEOVERTEXT ) ) {
 				Item_RunScript( item, item->mouseEnterText );
@@ -4413,7 +4494,7 @@ void Item_Paint( itemDef_t *item ) {
 
 	if ( item->window.ownerDrawFlags && DC->ownerDrawVisible ) {
 		if ( !DC->ownerDrawVisible( item->window.ownerDrawFlags ) ) {
-			item->window.flags &= ~WINDOW_VISIBLE;
+			item->window.flags &= ~( WINDOW_VISIBLE | WINDOW_MOUSEOVER );
 		} else {
 			item->window.flags |= WINDOW_VISIBLE;
 		}
@@ -4423,6 +4504,13 @@ void Item_Paint( itemDef_t *item ) {
 		if ( !Item_EnableShowViaCvar( item, CVAR_SHOW ) ) {
 			return;
 		}
+	}
+	// OSP
+	if ( ( item->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( item, qfalse ) ) {
+		return;
+	}
+	if ( item->voteFlag != 0 && !Item_SettingShow( item, qtrue ) ) {
+		return;
 	}
 
 	if ( item->window.flags & WINDOW_TIMEDVISIBLE ) {
@@ -4654,6 +4742,13 @@ void Menu_HandleMouseMove( menuDef_t *menu, float x, float y ) {
 				continue;
 			}
 
+			// OSP - server settings too
+			if ( ( menu->items[i]->settingFlags & ( SVS_ENABLED_SHOW | SVS_DISABLED_SHOW ) ) && !Item_SettingShow( menu->items[i], qfalse ) ) {
+				continue;
+			}
+			if ( menu->items[i]->voteFlag != 0 && !Item_SettingShow( menu->items[i], qtrue ) ) {
+				continue;
+			}
 
 
 			if ( Rect_ContainsPoint( &menu->items[i]->window.rect, x, y ) ) {
@@ -4687,6 +4782,7 @@ void Menu_HandleMouseMove( menuDef_t *menu, float x, float y ) {
 
 void Menu_Paint( menuDef_t *menu, qboolean forcePaint ) {
 	int i;
+	itemDef_t *item = NULL;
 
 	if ( menu == NULL ) {
 		return;
@@ -4719,6 +4815,18 @@ void Menu_Paint( menuDef_t *menu, qboolean forcePaint ) {
 
 	for ( i = 0; i < menu->itemCount; i++ ) {
 		Item_Paint( menu->items[i] );
+		if ( menu->items[i]->window.flags & WINDOW_MOUSEOVER ) {
+			item = menu->items[i];
+		}
+	}
+
+	// OSP draw tooltip data if we have it
+	if ( DC->getCVarValue( "ui_showtooltips" ) &&
+		 item != NULL &&
+		 item->toolTipData != NULL &&
+		 item->toolTipData->text != NULL &&
+		 *item->toolTipData->text ) {
+		Item_Paint( item->toolTipData );
 	}
 
 	if ( debugMode ) {
@@ -4757,6 +4865,28 @@ void Item_ValidateTypeData( itemDef_t *item ) {
 	} else if ( item->type == ITEM_TYPE_MENUMODEL ) {
 		item->typeData = UI_Alloc( sizeof( modelDef_t ) );
 	}
+}
+
+// added from ET for tool tips
+/*
+========================
+Item_ValidateTooltipData
+========================
+*/
+qboolean Item_ValidateTooltipData( itemDef_t *item ) {
+	if ( item->toolTipData != NULL ) {
+		return( qtrue );
+	}
+
+	item->toolTipData = UI_Alloc( sizeof( itemDef_t ) );
+	if ( item->toolTipData == NULL ) {
+		return( qfalse );
+	}
+
+	Item_Init( item->toolTipData );
+	Tooltip_Initialize( item->toolTipData );
+
+	return( qtrue );
 }
 
 /*
@@ -5641,7 +5771,39 @@ qboolean ItemParse_hideCvar( itemDef_t *item, int handle ) {
 	}
 	return qfalse;
 }
+// added from ET for tooltips , settingsenabled, disabled
+// OSP - server setting tags
+qboolean ItemParse_settingDisabled( itemDef_t *item, int handle ) {
+	qboolean fResult = PC_Int_Parse( handle, &item->settingTest );
+	if ( fResult ) {
+		item->settingFlags = SVS_DISABLED_SHOW;
+	}
+	return( fResult );
+}
 
+qboolean ItemParse_settingEnabled( itemDef_t *item, int handle ) {
+	qboolean fResult = PC_Int_Parse( handle, &item->settingTest );
+	if ( fResult ) {
+		item->settingFlags = SVS_ENABLED_SHOW;
+	}
+	return( fResult );
+}
+
+qboolean ItemParse_tooltip( itemDef_t *item, int handle ) {
+	return( Item_ValidateTooltipData( item ) && PC_String_Parse( handle, &item->toolTipData->text ) );
+}
+
+qboolean ItemParse_tooltipalignx( itemDef_t *item, int handle ) {
+	return( Item_ValidateTooltipData( item ) && PC_Float_Parse( handle, &item->toolTipData->textalignx ) );
+}
+
+qboolean ItemParse_tooltipaligny( itemDef_t *item, int handle ) {
+	return( Item_ValidateTooltipData( item ) && PC_Float_Parse( handle, &item->toolTipData->textaligny ) );
+}
+
+qboolean ItemParse_voteFlag( itemDef_t *item, int handle ) {
+	return( PC_Int_Parse( handle, &item->voteFlag ) );
+}
 
 keywordHash_t itemParseKeywords[] = {
 	{"name", ItemParse_name, NULL},
@@ -5713,6 +5875,12 @@ keywordHash_t itemParseKeywords[] = {
 	{"cinematic", ItemParse_cinematic, NULL},
 	{"doubleclick", ItemParse_doubleClick, NULL},
 	{"noToggle", ItemParse_noToggle, NULL}, // TTimo: use with ITEM_TYPE_YESNO and an action script (see sv_punkbuster)
+	{ "tooltip",         ItemParse_tooltip,          NULL },
+	{ "tooltipalignx",       ItemParse_tooltipalignx,    NULL },
+	{ "tooltipaligny",       ItemParse_tooltipaligny,    NULL },
+	{ "settingDisabled", ItemParse_settingDisabled,  NULL }, // OSP
+	{ "settingEnabled",      ItemParse_settingEnabled,   NULL }, // OSP
+	{ "voteFlag",            ItemParse_voteFlag,         NULL }, // OSP - vote check
 	{NULL, NULL, NULL}
 };
 
@@ -5789,6 +5957,8 @@ void Item_InitControls( itemDef_t *item ) {
 		}
 	}
 }
+
+
 
 /*
 ===============

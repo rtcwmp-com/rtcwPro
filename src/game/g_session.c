@@ -39,6 +39,15 @@ and tournament restarts.
 =======================================================================
 */
 
+void G_WriteWeaponStatsData( gclient_t* client ) {
+	const char* var;
+	const char* s = G_writeStats(client);
+	if (s != NULL) {
+		var = va("wstats%i", client - level.clients);
+		trap_Cvar_Set(var, s);
+	}
+}
+
 /*
 ================
 G_WriteClientSessionData
@@ -53,8 +62,11 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	// L0 - OSP -- stats reset check
 	if ( level.fResetStats ) {
 		G_deleteStats( client - level.clients );
-	} /// End
-	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+	} else {
+		// write wstats
+		G_WriteWeaponStatsData(client);
+	}/// End
+	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
 			client->sess.spectatorState,
@@ -72,6 +84,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.latchPlayerSkin,    // DHM - Nerve
 			// L0 - New stuff
 			client->sess.admin,			// User is admin
+			client->sess.referee,			// User is ref
 			client->sess.incognito,		// Admin is hidden
 			client->sess.ignored,		// User is ignored
 			client->sess.uci,			// mcwf's GeoIP
@@ -80,15 +93,31 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.ip[2],			// L0 - IP
 			client->sess.ip[3],			// L0 - IP
 		//	client->sess.guid,			// Guid
+			client->sess.rounds,		// rounds played in stopwatch
 			client->sess.selectedWeapon,// Selected weapon
 			client->sess.specInvited,	// Can watch..
-			client->sess.specLocked		// Spec lock
+			client->sess.specLocked,	// Spec lock
+			client->sess.deaths,
+			client->sess.kills,
+			client->sess.damage_given,
+			client->sess.damage_received,
+			client->sess.team_damage,
+			client->sess.team_kills,
+			client->sess.gibs,
+			client->sess.acc_shots,
+			client->sess.acc_hits,
+			client->sess.headshots,
+			client->sess.suicides,
+			client->sess.med_given,
+			client->sess.ammo_given,
+			client->sess.revives,
+			client->sess.knifeKills
 			);
 
 	var = va( "session%i", client - level.clients );
-
 	trap_Cvar_Set( var, s );
 }
+
 // nihi added below
 /*
 ================
@@ -145,7 +174,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // nihi changed
+	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -162,18 +191,35 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerItem,  // DHM - Nerve
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
-			(int *)&client->sess.admin,
-			&client->sess.incognito,
-			&client->sess.ignored,
+			(int*)&client->sess.admin,
+			(int*)&client->sess.referee,
+			(int *)&client->sess.incognito,
+			(int *)&client->sess.ignored,
 			&client->sess.uci,
 			(int *)&client->sess.ip[0],
 			(int *)&client->sess.ip[1],
 			(int *)&client->sess.ip[2],
 			(int *)&client->sess.ip[3],
 	//		(char *)&client->sess.guid,
+			&client->sess.rounds,
 			&client->sess.selectedWeapon,
 			&client->sess.specInvited,
-			&client->sess.specLocked
+			&client->sess.specLocked,
+			&client->sess.deaths,
+			&client->sess.kills,
+			&client->sess.damage_given,
+			&client->sess.damage_received,
+			&client->sess.team_damage,
+			&client->sess.team_kills,
+			&client->sess.gibs,
+			&client->sess.acc_shots,
+			&client->sess.acc_hits,
+			&client->sess.headshots,
+			&client->sess.suicides,
+			&client->sess.med_given,
+			&client->sess.ammo_given,
+			&client->sess.revives,
+			&client->sess.knifeKills
 			);
 
 	// L0 - OSP stats -- pull and parse weapon stats
@@ -363,11 +409,6 @@ void G_WriteSessionData( void ) {
 			( teamInfo[TEAM_RED].spec_lock * TEAM_RED | teamInfo[TEAM_BLUE].spec_lock * TEAM_BLUE )
 		));
 
-	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		if ( level.clients[i].pers.connected == CON_CONNECTED ) {
-			G_WriteClientSessionData( &level.clients[i] );
-		}
-	}
 	// L0 - OSP Stats
 	// Keep stats for all players in sync
 	for ( i = 0; !level.fResetStats && i < level.numConnectedClients; i++ ) {
@@ -377,4 +418,19 @@ void G_WriteSessionData( void ) {
 			level.fResetStats = qtrue;
 		}
 	} // End
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
+		if ( level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED ) {
+			G_WriteClientSessionData( &level.clients[level.sortedClients[i]]);
+			// For slow connecters and a short warmup
+		} else if ( level.fResetStats ) {
+			G_deleteStats( level.sortedClients[i] );
+		}
+	}
+	
+	/*for (i = 0; i < level.maxclients; i++) {
+		if (level.clients[i].pers.connected == CON_CONNECTED) {
+			G_WriteClientSessionData(&level.clients[i]);
+		}
+	}*/
 }
