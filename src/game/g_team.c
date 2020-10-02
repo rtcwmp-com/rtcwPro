@@ -976,7 +976,7 @@ Format:
 ==================
 */
 void TeamplayInfoMessage( gentity_t *ent ) {
-	int identClientNum, identHealth;                // NERVE - SMF
+	int identClientNum, identHealth, playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;                // NERVE - SMF
 	char entry[1024];
 	char string[1400];
 	int stringlength;
@@ -1021,15 +1021,20 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	// NERVE - SMF
 	identClientNum = ent->client->ps.identifyClient;
 
+
 	if ( g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client ) {
 		identHealth =  g_entities[identClientNum].health;
+		playerAmmo = g_entities[identClientNum].playerAmmo;
+		playerAmmoClip = g_entities[identClientNum].playerAmmoClip;
+		playerWeapon = g_entities[identClientNum].playerWeapon;
 	} else {
 		identClientNum = -1;
 		identHealth = 0;
 	}
 	// -NERVE - SMF
 
-	trap_SendServerCommand( ent - g_entities, va( "tinfo %i %i %i%s", identClientNum, identHealth, cnt, string ) );
+	// Rtcwpro - added player ammo
+	trap_SendServerCommand( ent - g_entities, va( "tinfo %i %i %i%s %i %i %i %i", identClientNum, identHealth, cnt, string, playerAmmo, playerAmmoClip, playerNades, playerWeapon ) );
 }
 
 void CheckTeamStatus( void ) {

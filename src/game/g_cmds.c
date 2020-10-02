@@ -1726,6 +1726,10 @@ void Cmd_Vote_f( gentity_t *ent ) {
 	// DHM - Nerve :: Complaints supercede voting (and share command)
 	if ( ent->client->pers.complaintEndTime > level.time ) {
 
+		// exit out for comp settings
+		if (g_tournament.integer == 1 && g_complaintlimit.integer == 0)
+			return;
+
 		gclient_t *cl = g_entities[ ent->client->pers.complaintClient ].client;
 		if ( !cl ) {
 			return;
@@ -1763,7 +1767,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 			// L0 - Inform about dismissed complain :)
 			if ( msg[0] == 'n' || msg[1] == 'N' || msg[1] == '1' ) 
 			{
-				CPx( cl->ps.clientNum, va("print \"Complain dismissed^3!\n\"" ) );
+				CPx( cl->ps.clientNum, va("print \"Complaint dismissed^3!\n\"" ) );
 			}
 
 		return;

@@ -119,6 +119,11 @@ static void CG_ParseTeamInfo( void ) {
 
 		cg_entities[ client ].currentState.teamNum = atoi( CG_Argv( i * 5 + 8 ) );
 	}
+
+	cg.playerAmmo = atoi(CG_Argv(4));
+	cg.playerAmmo = atoi(CG_Argv(5));
+	cg.playerNades = atoi(CG_Argv(6));
+	cg.playerWeapon = atoi(CG_Argv(7));
 }
 
 

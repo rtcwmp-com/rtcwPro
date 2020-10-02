@@ -66,7 +66,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		// write wstats
 		G_WriteWeaponStatsData(client);
 	}/// End
-	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
 			client->sess.spectatorState,
@@ -92,7 +92,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.ip[1],			// L0 - IP
 			client->sess.ip[2],			// L0 - IP
 			client->sess.ip[3],			// L0 - IP
-		//	client->sess.guid,			// Guid
+			client->sess.guid,			// Guid
 			client->sess.rounds,		// rounds played in stopwatch
 			client->sess.selectedWeapon,// Selected weapon
 			client->sess.specInvited,	// Can watch..
@@ -174,7 +174,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
+	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -200,7 +200,7 @@ void G_ReadSessionData( gclient_t *client ) {
 			(int *)&client->sess.ip[1],
 			(int *)&client->sess.ip[2],
 			(int *)&client->sess.ip[3],
-	//		(char *)&client->sess.guid,
+			(char *)&client->sess.guid,
 			&client->sess.rounds,
 			&client->sess.selectedWeapon,
 			&client->sess.specInvited,

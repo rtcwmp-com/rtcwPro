@@ -1202,11 +1202,19 @@ typedef struct {
 	// backuping, forceCvar_t is good format, it holds name and value only
 	forceCvar_t cvarBackups[MAX_SVCVARS];
 	int cvarBackupsCount;
+
+	// player ammo
+	int playerAmmo;
+	int playerAmmoClip;
+	int playerWeapon;
+	int playerNades;
+
 	// RTCWPro
 
 	pmoveExt_t pmext;
 
 } cg_t;
+
 
 #define NUM_FUNNEL_SPRITES  21
 
@@ -2225,6 +2233,10 @@ void CG_ReloadTranslation();
 
 // OSPx - Country Flags
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);
+
+// RtcwPro
+void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip);
+
 //
 // cg_draw.c, cg_newDraw.c
 //

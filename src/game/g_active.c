@@ -980,10 +980,10 @@ void ClientThink_real( gentity_t *ent ) {
 	}
 
 	// OSPx - LT info bar..
-	if ((client->ps.stats[STAT_PLAYER_CLASS] == PC_LT) &&
+	/*if ((client->ps.stats[STAT_PLAYER_CLASS] == PC_LT) &&
 		(level.time >= client->infoTime + 1000)) {
 		LTinfoMSG(ent);
-	}
+	}*/
 
 	// mark the time, so the connection sprite can be removed
 	ucmd = &ent->client->pers.cmd;
