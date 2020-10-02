@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -304,7 +304,7 @@ static void CG_DrawPlayerWeaponIcon( rectDef_t *rect, qboolean drawHighlighted, 
 		return;
 	}
 
-	// OSPx - Weapon highlight 
+	// OSPx - Weapon highlight
 	if (cg_drawWeaponIconFlash.integer) {
 		if (cg.snap->ps.weaponstate == WEAPON_RELOADING) {
 			VectorCopy(colorYellow, hcolor);
@@ -322,7 +322,7 @@ static void CG_DrawPlayerWeaponIcon( rectDef_t *rect, qboolean drawHighlighted, 
 			VectorCopy(colorWhite, hcolor);
 			icon = cg_weapons[realweap].weaponIcon[1];
 		}
-		hcolor[3] = 4.0f;		
+		hcolor[3] = 4.0f;
 	} // Just wrap default ..
 	else {
 		if (drawHighlighted) {
@@ -1116,12 +1116,16 @@ static void CG_DrawPlayerHealth( rectDef_t *rect, float scale, vec4_t color, qha
 	vec4_t color2;
 
 	ps = &cg.snap->ps;
-
+/*
 	if ( cgs.gametype >= GT_WOLF && ( ps->pm_flags & PMF_FOLLOW ) ) {
-		value = cgs.clientinfo[ ps->clientNum ].health;
+        value = cgs.clientinfo[ ps->clientNum ].health;
 	} else {
 		value = ps->stats[STAT_HEALTH];
 	}
+*/
+    // nihi: The above results in spectators seeing 0 health for players they are following.
+    //       If that is desired then we may want to create a cvar to turn this feature 'on/off'
+	value = ps->stats[STAT_HEALTH];
 
 	// DHM - Nerve :: Don't show negative health
 	if ( value < 0 ) {
@@ -2671,18 +2675,18 @@ void CG_EventHandling( int type, qboolean forced ) {
 	}
 
 	switch (type) {
-	/*case CGAME_EVENT_DEMO:		
+	/*case CGAME_EVENT_DEMO:
 		CG_ScoresUp_f();
 		break;*/
 	case CGAME_EVENT_NONE:
-		CG_HideTeamMenu();		
+		CG_HideTeamMenu();
 		break;
 	case CGAME_EVENT_TEAMMENU:
 	case CGAME_EVENT_SCOREBOARD:
 		break;
 	}
 
-	cgs.eventHandling = type;	
+	cgs.eventHandling = type;
 
 	if (type == CGAME_EVENT_NONE) {
 		trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
@@ -2701,7 +2705,7 @@ void CG_KeyEvent( int key, qboolean down ) {
 		CG_DemoClick(key);
 		return;
 	}
-	
+
 	if ( cg.predictedPlayerState.pm_type == PM_NORMAL || ( cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse ) ) {
 		CG_EventHandling( CGAME_EVENT_NONE, qfalse );
 		trap_Key_SetCatcher( 0 );
