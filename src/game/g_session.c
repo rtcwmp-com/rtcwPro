@@ -134,19 +134,21 @@ void G_ClientSwap( gclient_t *client ) {
 	} else if ( client->sess.sessionTeam == TEAM_BLUE )   {
 		client->sess.sessionTeam = TEAM_RED;
 	}
-
 	// Swap spec invites as well
 	if ( client->sess.specInvited & TEAM_RED ) {
 		flags |= TEAM_BLUE;
+
 	}
 	if ( client->sess.specInvited & TEAM_BLUE ) {
 		flags |= TEAM_RED;
+
 	}
 
 	client->sess.specInvited = flags;
 
-	// Swap spec follows as well
 	flags = 0;
+
+	// Swap spec follows as well
 	if ( client->sess.specLocked & TEAM_RED ) {
 		flags |= TEAM_BLUE;
 	}
@@ -169,6 +171,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	char s[MAX_STRING_CHARS];
 	const char  *var;
 	qboolean test;
+    gamestate_t current_gs;
 
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
@@ -240,7 +243,15 @@ void G_ReadSessionData( gclient_t *client ) {
 
 
 
-	if ( g_gametype.integer == GT_WOLF_STOPWATCH && level.warmupTime > 0 && test ) {
+    //if ( g_gametype.integer == GT_WOLF_STOPWATCH && level.warmupTime > 0 && test ) {
+    /* nihi: I did not backtrace this very far but it seems level.warmupTime was always zero by the time this
+             function is called and hence G_ClientSwap was never called below. A "quick fix" is given below
+             but this does require g_altStopwatchMode = 0 (which is a good thing)
+    */
+    current_gs = trap_Cvar_VariableIntegerValue( "gamestate" );
+	if ( g_gametype.integer == GT_WOLF_STOPWATCH && current_gs == GS_WARMUP  && test ) {
+
+
 	/*	if ( client->sess.sessionTeam == TEAM_RED ) {
 			client->sess.sessionTeam = TEAM_BLUE;
 		} else if ( client->sess.sessionTeam == TEAM_BLUE )   {
@@ -427,7 +438,7 @@ void G_WriteSessionData( void ) {
 			G_deleteStats( level.sortedClients[i] );
 		}
 	}
-	
+
 	/*for (i = 0; i < level.maxclients; i++) {
 		if (level.clients[i].pers.connected == CON_CONNECTED) {
 			G_WriteClientSessionData(&level.clients[i]);
