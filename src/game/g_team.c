@@ -1024,9 +1024,11 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 	if ( g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client ) {
 		identHealth =  g_entities[identClientNum].health;
-		playerAmmo = g_entities[identClientNum].playerAmmo;
-		playerAmmoClip = g_entities[identClientNum].playerAmmoClip;
-		playerWeapon = g_entities[identClientNum].playerWeapon;
+		playerWeapon = ent->client->ps.weapon; //g_entities[identClientNum].playerWeapon;
+		playerAmmo = ent->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)]; //g_entities[identClientNum].playerAmmo;
+		playerAmmoClip = ent->client->ps.ammoclip[BG_FindAmmoForWeapon(playerWeapon)]; //g_entities[identClientNum] .playerAmmoClip;
+		if (ent->client->ps.teamNum == TEAM_BLUE) playerNades = ent->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
+		if (ent->client->ps.teamNum == TEAM_RED) playerNades = ent->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 	} else {
 		identClientNum = -1;
 		identHealth = 0;
