@@ -298,6 +298,7 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 
 // QCon edition cvars
 vmCvar_t g_antiWarp;
+vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
 // RTCWPro - custom configs
 vmCvar_t g_customConfig;
@@ -558,6 +559,7 @@ cvarTable_t gameCvarTable[] = {
 
 	// RTCWPro - custom config
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 
 };
 
