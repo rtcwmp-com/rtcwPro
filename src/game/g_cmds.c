@@ -722,7 +722,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			ent->flags &= ~FL_GODMODE;
 			ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
 			player_die( ent, ent, ent, 100000, MOD_SWITCHTEAM ); // OSPx - Fix this for stats..
-			// L0 - Remove any spectators if speclock is on	
+			// L0 - Remove any spectators if speclock is on
 			for (i = 0; i < level.maxclients; i++) {
 				if (level.clients[i].sess.sessionTeam == TEAM_SPECTATOR
 					&& level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW
@@ -1389,8 +1389,8 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, qbool
 		!Q_stricmp(id, "DynamitePlanted")))
 	{
 		return;
-	} 
-	
+	}
+
 	// No vsay's for specs..
 	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
 		CP("cp \"You cannot voice chat as spectator^3!\n\"2");
@@ -1761,7 +1761,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 		} else
 			trap_SendServerCommand( ent - g_entities, "complaint -2" );
 			// L0 - Inform about dismissed complain :)
-			if ( msg[0] == 'n' || msg[1] == 'N' || msg[1] == '1' ) 
+			if ( msg[0] == 'n' || msg[1] == 'N' || msg[1] == '1' )
 			{
 				CPx( cl->ps.clientNum, va("print \"Complain dismissed^3!\n\"" ) );
 			}
@@ -2744,7 +2744,7 @@ void ClientCommand( int clientNum ) {
 
 		 return;
 	}
-	
+
 	else {
 		trap_SendServerCommand( clientNum, va( "print \"unknown cmd[lof] %s\n\"", cmd ) );
 	}
@@ -2788,7 +2788,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "players",        qtrue,  qtrue,  NULL,         ":^7 Lists all active players and their IDs/information"                                     },
 	{ "ready",          qtrue,  qtrue,  NULL,           ":^7 Sets your status to ^5ready^7 to start a match"                                         },
 	{ "readyteam",      qfalse, qtrue,  NULL,       ":^7 Sets an entire team's status to ^5ready^7 to start a match"                             },
-	{ "ref",            qtrue,  qtrue,  G_ref_cmd,             " <password>:^7 Become a referee (admin access)"                                             },
+	{ "ref",            qtrue,  qtrue,  NULL,             " <password>:^7 Become a referee (admin access)"                                             },
 //  { "remove",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Removes a player from the team" },
 	//{ "say_teamnl",     qtrue,  qtrue,  G_say_teamnl_cmd,      "<msg>:^7 Sends a team chat without location info"                                           },
 	{ "scores",         qtrue,  qtrue,  NULL,          ":^7 Displays current match stat info"                                                       },
