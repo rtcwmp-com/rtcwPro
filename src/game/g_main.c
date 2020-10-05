@@ -2820,7 +2820,7 @@ void CheckGameState( void ) {
 				G_readyTeamLock();
 
 				if (!level.readyPrint) {
-					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "Ready threshold reached!" : "All players are now ^nready^7!") ));
+					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "Ready threshold reached!") ));
 					level.readyPrint = qtrue;
 				}
 			} else {

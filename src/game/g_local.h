@@ -410,6 +410,12 @@ struct gentity_s {
 
 	// sswolf - allowteams - ET port
 	int allowteams;
+
+	// player ammo
+	int playerAmmo;
+	int playerAmmoClip;
+	int playerWeapon;
+	int playerNades;
 };
 
 // Ridah
