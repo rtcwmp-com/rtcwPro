@@ -1727,7 +1727,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 	if ( ent->client->pers.complaintEndTime > level.time ) {
 
 		// exit out for comp settings
-		if (g_tournament.integer == 1 && g_complaintlimit.integer == 0)
+		if (g_tournament.integer == 1 || g_complaintlimit.integer == 0)
 			return;
 
 		gclient_t *cl = g_entities[ ent->client->pers.complaintClient ].client;
