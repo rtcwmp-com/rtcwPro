@@ -886,12 +886,14 @@ void ClientThink_real( gentity_t *ent ) {
 	int weapon;
 	trace_t tr;
 // jpw
+	int pclass;
 
 	// Rafael wolfkick
 	//int			validkick;
 	//static int	wolfkicktimer = 0;
 
 	client = ent->client;
+	pclass = client->ps.stats[STAT_PLAYER_CLASS];
 
 	// don't think if the client is not yet connected (and thus not yet spawned in)
 	if ( client->pers.connected != CON_CONNECTED ) {
@@ -1113,7 +1115,10 @@ void ClientThink_real( gentity_t *ent ) {
 
 				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
 				// (dropweapon) ADD NEW CVAR (if desired) and include in the following condition to allow medics to drop their weapons
-				if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) ) {
+				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) )
+				// sswolf - decide what classes can drop weapon
+				if (AllowDropForClass(ent, pclass))
+				{
 					for ( i = 0; i < MAX_WEAPS_IN_BANK_MP; i++ ) {
 						weapon = weapBanksMultiPlayer[3][i];
 						if ( COM_BitCheck( client->ps.weapons,weapon ) ) {
