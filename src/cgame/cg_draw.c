@@ -2496,7 +2496,7 @@ static void CG_DrawCrosshairNames( void ) {
 	
 
 	// RtcwPro add player ammo
-	CG_DrawPlayerAmmo(color, cg.playerWeapon, cg.playerAmmo, cg.playerAmmoClip, cg.playerNades);
+	//CG_DrawPlayerAmmo(color, cg.playerWeapon, cg.playerAmmo, cg.playerAmmoClip, cg.playerNades);
 
 	trap_R_SetColor( NULL );
 }

@@ -2235,7 +2235,7 @@ void CG_ReloadTranslation();
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);
 
 // RtcwPro
-void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip);
+void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
 
 //
 // cg_draw.c, cg_newDraw.c
