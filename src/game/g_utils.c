@@ -819,3 +819,37 @@ qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator)
 
 	return qtrue;
 }
+
+/*
+==============
+sswolf - determine if
+class can drop weapon
+Originally from PubJ
+==============
+*/
+qboolean AllowDropForClass(gentity_t* ent, int pclass)
+{
+	qboolean varval;
+	gclient_t* client = ent->client;
+	pclass = client->ps.stats[STAT_PLAYER_CLASS];
+
+	switch (pclass)
+	{
+	case PC_SOLDIER:
+		varval = g_dropWeapons.integer & WEP_DROP_SOLDIER;
+		break;
+	case PC_ENGINEER:
+		varval = g_dropWeapons.integer & WEP_DROP_ENG;
+		break;
+	case PC_MEDIC:
+		varval = g_dropWeapons.integer & WEP_DROP_MEDIC;
+		break;
+	case PC_LT:
+		varval = g_dropWeapons.integer & WEP_DROP_LT;
+		break;
+	default:
+		varval = qfalse;
+		break;
+	}
+	return (varval);
+}
