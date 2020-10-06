@@ -141,6 +141,8 @@ extern vmCvar_t ui_crosshairSize;
 extern vmCvar_t ui_blackout;
 extern vmCvar_t ui_showtooltips;
 // -OSPx
+extern vmCvar_t ui_demoDir;
+extern vmCvar_t ui_gameversion;
 
 //
 // ui_qmenu.c
