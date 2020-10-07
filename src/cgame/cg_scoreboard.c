@@ -295,6 +295,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
 				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/l_complete_2.wav"), CHAN_LOCAL_SOUND);
+                trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
 				// sswolf - temporarily move those to qa
 				/*if (cg_announcer.integer) {
 					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winallies.wav"), CHAN_ANNOUNCER);
@@ -309,6 +310,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
 				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/s_stinglow.wav"), CHAN_LOCAL_SOUND);
+				trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
 				/*if (cg_announcer.integer) {
 					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_ANNOUNCER);
 				}*/
@@ -350,7 +352,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (cgs.gamestate == GS_PLAYING) {
 				s = va("%s   %2.0f:%i%i", CG_TranslateString("Mission time:"), (float)mins, tens, seconds); // float cast to line up with reinforce time
 				CG_DrawSmallString(x, y, s, fade);
-			} 
+			}
 			else if (cgs.gamestate == GS_WARMUP) {
 				s = va("%s %s", CG_TranslateString("Mission time:"), CG_TranslateString("WARMUP"));
 				CG_DrawSmallString(x, y, s, fade);
@@ -620,15 +622,15 @@ static int WM_DrawInfoLine( int x, int y, float fade ) {
 	L0 - Calculate Average Ping for desired team
 */
 int calculateAvgPing(team_t team) {
-	int i, j = 0, k = 0;	
+	int i, j = 0, k = 0;
 
 	for (i = 0; i < cg.numScores; i++) {
 		if (team != cgs.clientinfo[cg.scores[i].client].team) {
 			continue;
 		}
-		
+
 		k += cg.scores[i].ping;
-		j++;		
+		j++;
 	}
 	return ( (j && k) ? round(k / j) : 0 );
 }
