@@ -2595,18 +2595,18 @@ void CheckExitRules( void ) {
 		return;
 	}
 
-	if ( g_gametype.integer >= GT_WOLF && ( g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0 ) ) 
+	if ( g_gametype.integer >= GT_WOLF && ( g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0 ) )
 	{
-		if ( level.numFinalDead[0] >= level.numteamVotingClients[0] && level.numteamVotingClients[0] > 0 ) 
+		if ( level.numFinalDead[0] >= level.numteamVotingClients[0] && level.numteamVotingClients[0] > 0 )
 		{
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "1" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
 			// sswolf - moved from WM_DrawObjectives in cg
-			APS("sound/match/winallies.wav");
+			AAPS("sound/match/winallies.wav");
 			LogExit( "Axis team eliminated." );
-		} 
-		else if ( level.numFinalDead[1] >= level.numteamVotingClients[1] && level.numteamVotingClients[1] > 0 )   
+		}
+		else if ( level.numFinalDead[1] >= level.numteamVotingClients[1] && level.numteamVotingClients[1] > 0 )
 		{
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "0" );
@@ -2616,37 +2616,37 @@ void CheckExitRules( void ) {
 		}
 	}
 
-	if ( ( g_gametype.integer != GT_CTF && g_gametype.integer < GT_WOLF ) && g_fraglimit.integer ) 
+	if ( ( g_gametype.integer != GT_CTF && g_gametype.integer < GT_WOLF ) && g_fraglimit.integer )
 	{
-		if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer ) 
+		if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the fraglimit.\n\"" );
-			APS("sound/match/winaxis.wav");
+			AAPS("sound/match/winaxis.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
 
-		if ( level.teamScores[TEAM_BLUE] >= g_fraglimit.integer ) 
+		if ( level.teamScores[TEAM_BLUE] >= g_fraglimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the fraglimit.\n\"" );
-			APS("sound/match/winallies.wav");
+			AAPS("sound/match/winallies.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
 
-		for ( i = 0 ; i < g_maxclients.integer ; i++ ) 
+		for ( i = 0 ; i < g_maxclients.integer ; i++ )
 		{
 			cl = level.clients + i;
-			if ( cl->pers.connected != CON_CONNECTED ) 
+			if ( cl->pers.connected != CON_CONNECTED )
 			{
 				continue;
 			}
-			if ( cl->sess.sessionTeam != TEAM_FREE ) 
+			if ( cl->sess.sessionTeam != TEAM_FREE )
 			{
 				continue;
 			}
 
-			if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer ) 
+			if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer )
 			{
 				LogExit( "Fraglimit hit." );
 				trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " hit the fraglimit.\n\"",
@@ -2656,21 +2656,21 @@ void CheckExitRules( void ) {
 		}
 	}
 
-	if ( g_gametype.integer == GT_CTF && g_capturelimit.integer ) 
+	if ( g_gametype.integer == GT_CTF && g_capturelimit.integer )
 	{
 
-		if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) 
+		if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
-			APS("sound/match/winaxis.wav");
+			AAPS("sound/match/winaxis.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
 
-		if ( level.teamScores[TEAM_BLUE] >= g_capturelimit.integer ) 
+		if ( level.teamScores[TEAM_BLUE] >= g_capturelimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the capturelimit.\n\"" );
-			APS("sound/match/winallies.wav");
+			AAPS("sound/match/winallies.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
