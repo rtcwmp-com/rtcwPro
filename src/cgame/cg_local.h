@@ -736,7 +736,14 @@ typedef struct {
 	char headModelName[MAX_QPATH];
 	gender_t gender;                // from model
 	// -NERVE - SMF
-	int refStatus;						// RtcwPro refStatus added
+
+	// RTCWPro
+	int refStatus;
+	int playerAmmo;
+	int playerAmmoClip;
+	int playerWeapon;
+	int playerNades;
+
 } clientInfo_t;
 
 
@@ -1202,14 +1209,6 @@ typedef struct {
 	// backuping, forceCvar_t is good format, it holds name and value only
 	forceCvar_t cvarBackups[MAX_SVCVARS];
 	int cvarBackupsCount;
-
-	// player ammo
-	int playerAmmo;
-	int playerAmmoClip;
-	int playerWeapon;
-	int playerNades;
-
-	// RTCWPro
 
 	pmoveExt_t pmext;
 

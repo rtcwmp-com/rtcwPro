@@ -2322,59 +2322,19 @@ void CG_CheckForCursorHints( void ) {
 }
 
 
-/*
-==============
-RtcwPro - LT Ammo drawing
-
-Shows ammo stocks of clients..
-==============
-*/
-char* weaponStr(int weapon)
-{
-	switch (weapon) {
-	case WP_MP40:				return "MP40";
-	case WP_THOMPSON:			return "Thompson";
-	case WP_STEN:				return "Sten";
-	case WP_MAUSER:				return "Mauser";
-	case WP_SNIPERRIFLE:		return "Sniper Rifle";
-	case WP_FLAMETHROWER:		return "Flamethrower";
-	case WP_PANZERFAUST:		return "Panzerfaust";
-	case WP_VENOM:				return "Venom";
-	case WP_GRENADE_LAUNCHER:	return "Grenade";
-	case WP_GRENADE_PINEAPPLE:	return "Grenade";
-	case WP_KNIFE:				return "Knife";
-	case WP_KNIFE2:				return "Knife";
-	case WP_LUGER:				return "Luger";
-	case WP_COLT:				return "Colt";
-	case WP_MEDIC_SYRINGE:		return "Syringe";
-	default:
-		return "";
-	}
-}
-// Draw str
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades) {
 	const char* s;
 	float w;
 
-	if (Q_stricmp(weaponStr(weapon), "")) {
-		if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER) {
-			s = va("%s: %i", CG_TranslateString(weapon), playerAmmo);
-			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-			CG_DrawStringExt(320 - w / 2, 210, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
-			//CP(va("cp \"%s: %i\n\"1", weaponStr(weapon), playerAmmo));
-		}
-		else if (weapon == WP_KNIFE || weapon == WP_KNIFE2) {
-			s = va("%s: %i - Grenades: %i\n\"1", CG_TranslateString(weapon), playerAmmo, playerNades);
-			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-			CG_DrawStringExt(320 - w / 2, 210, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
-			//CP(va("cp \"%s - Grenades: %i\n\"1", weaponStr(weapon), playerAmmo, playerNades));
-		}
-		else {
-			s = va("%s: %i/%i - Grenades: %i\n\"1", CG_TranslateString(weapon), playerAmmo, playerAmmoClip, playerNades);
-			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-			CG_DrawStringExt(320 - w / 2, 210, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
-			//CP(va("cp \"%s: %i/%i - Grenades: %i\n\"1", weaponStr(weapon), playerAmmo, playerAmmo, playerNades));
-		}
+	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
+		s = va("Grenades: %i", playerNades);
+		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 200, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
+	}
+	else {
+		s = va("Ammo: %i/%i - Grenades: %i", playerAmmoClip, playerAmmo, playerNades);
+		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 200, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
 	}
 }
 
@@ -2487,10 +2447,9 @@ static void CG_DrawCrosshairNames( void ) {
 		CG_FilledBar( 320 - w / 2, 190, 110, 10, c, NULL, NULL, barFrac, 16 );
 	}
 	// -NERVE - SMF
-	
 
 	// RtcwPro add player ammo
-	CG_DrawPlayerAmmo(color, cg.playerWeapon, cg.playerAmmo, cg.playerAmmoClip, cg.playerNades);
+	CG_DrawPlayerAmmo(colorWhite, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
 }
