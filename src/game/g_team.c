@@ -976,7 +976,7 @@ Format:
 ==================
 */
 void TeamplayInfoMessage( gentity_t *ent ) {
-	int identClientNum, identHealth, playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;                // NERVE - SMF
+	int identClientNum, identHealth;                // NERVE - SMF
 	char entry[1024];
 	char string[1400];
 	int stringlength;
@@ -990,9 +990,12 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	stringlength = 0;
 
 	for ( i = 0, cnt = 0; i < level.numConnectedClients && cnt < TEAM_MAXOVERLAY; i++ ) {
+
 		player = g_entities + level.sortedClients[i];
-		if ( player->inuse && player->client->sess.sessionTeam ==
-			 ent->client->sess.sessionTeam ) {
+
+		int playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;
+
+		if ( player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam ) {
 
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
 			if ( player->client->ps.pm_flags & PMF_LIMBO ) {
@@ -1005,9 +1008,17 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 				h = 0;
 			}
 
+			playerWeapon = player->client->ps.weapon;
+			playerAmmoClip = player->client->ps.ammoclip[BG_FindAmmoForWeapon(playerWeapon)];
+			playerAmmo = player->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)];
+			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
+			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
+
 			Com_sprintf( entry, sizeof( entry ),
-						 " %i %i %i %i %i",
-						 level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS] );
+						 " %i %i %i %i %i %i %i %i %i",
+						 level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
+						 playerAmmo, playerAmmoClip, playerNades, playerWeapon);
+
 			j = strlen( entry );
 			if ( stringlength + j > sizeof( string ) ) {
 				break;
@@ -1024,21 +1035,13 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 	if ( g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client ) {
 		identHealth =  g_entities[identClientNum].health;
-		playerWeapon = ent->client->ps.weapon; //g_entities[identClientNum].playerWeapon;
-		playerAmmo = ent->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)]; //g_entities[identClientNum].playerAmmo;
-		playerAmmoClip = ent->client->ps.ammoclip[BG_FindAmmoForWeapon(playerWeapon)]; //g_entities[identClientNum] .playerAmmoClip;
-		if (ent->client->ps.teamNum == TEAM_BLUE) playerNades = ent->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
-		if (ent->client->ps.teamNum == TEAM_RED) playerNades = ent->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 	} else {
 		identClientNum = -1;
 		identHealth = 0;
 	}
 	// -NERVE - SMF
 
-	//trap_SendServerCommand(ent - g_entities, va("tinfo %i %i %i%s", identClientNum, identHealth, cnt, string));
-
-	// Rtcwpro - added player ammo
-	trap_SendServerCommand( ent - g_entities, va( "tinfo %i %i %i%s %i %i %i %i", identClientNum, identHealth, cnt, string, playerAmmo, playerAmmoClip, playerNades, playerWeapon ) );
+	trap_SendServerCommand(ent - g_entities, va("tinfo %i %i %i%s", identClientNum, identHealth, cnt, string));
 }
 
 void CheckTeamStatus( void ) {

@@ -109,21 +109,21 @@ static void CG_ParseTeamInfo( void ) {
 	numSortedTeamPlayers = atoi( CG_Argv( 3 ) );
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
-		client = atoi( CG_Argv( i * 5 + 4 ) );
+		client = atoi( CG_Argv( i * 9 + 4 ) );
 
 		sortedTeamPlayers[i] = client;
 
-		cgs.clientinfo[ client ].location = atoi( CG_Argv( i * 5 + 5 ) );
-		cgs.clientinfo[ client ].health = atoi( CG_Argv( i * 5 + 6 ) );
-		cgs.clientinfo[ client ].powerups = atoi( CG_Argv( i * 5 + 7 ) );
+		cgs.clientinfo[ client ].location = atoi( CG_Argv( i * 9 + 5 ) );
+		cgs.clientinfo[ client ].health = atoi( CG_Argv( i * 9 + 6 ) );
+		cgs.clientinfo[ client ].powerups = atoi( CG_Argv( i * 9 + 7 ) );
 
-		cg_entities[ client ].currentState.teamNum = atoi( CG_Argv( i * 5 + 8 ) );
+		cg_entities[ client ].currentState.teamNum = atoi( CG_Argv( i * 9 + 8 ) );
+
+		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 9 + 9));
+		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 9 + 10));
+		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 9 + 11));
+		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 9 + 12));
 	}
-
-	cg.playerAmmo = atoi(CG_Argv(4));
-	cg.playerAmmoClip = atoi(CG_Argv(5));
-	cg.playerNades = atoi(CG_Argv(6));
-	cg.playerWeapon = atoi(CG_Argv(7));
 }
 
 
