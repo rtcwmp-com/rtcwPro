@@ -156,7 +156,7 @@ void KillingSprees ( gentity_t *ent, int score ) {
 	/*
 	int killRatio = ent->client->sess.kills;
 	int snd_idx;
-	
+
 	if (!g_killingSprees.integer)
 		return;
 
@@ -1048,89 +1048,89 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
 
-	for ( i = 0; i < level.numConnectedClients; i++ ) 
+	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
 		ref = level.sortedClients[i];
 		ent = &g_entities[ref];
 		cl = ent->client;
 
-		if ( cl->pers.connected != CON_CONNECTED ) 
+		if ( cl->pers.connected != CON_CONNECTED )
 		{
 			continue;
 		}
 
-		if ( dwDumpType == EOM_WEAPONSTATS ) 
+		if ( dwDumpType == EOM_WEAPONSTATS )
 		{
 		// L0 - THIS NEEDS FINE TUNNING - TODO!
 			// If client wants to write stats to a file, don't auto send this stuff
 			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
-				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/) 
+				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/)
 				{
 					G_statsall_cmd(ent, 0, qfalse);
 				}
-				else if (cl->sess.sessionTeam != TEAM_SPECTATOR) 
+				else if (cl->sess.sessionTeam != TEAM_SPECTATOR)
 				{
-					if (cl->pers.autoaction & AA_STATSTEAM) 
+					if (cl->pers.autoaction & AA_STATSTEAM)
 					{
 						G_statsall_cmd(ent, cl->sess.sessionTeam, qfalse);
 					}
-					else 
-					{ 
-						CP(va("ws %s\n", G_createStats(ent))); 
+					else
+					{
+						CP(va("ws %s\n", G_createStats(ent)));
 					}
 
 				}
-				else if (cl->sess.spectatorState != SPECTATOR_FREE) 
+				else if (cl->sess.spectatorState != SPECTATOR_FREE)
 				{
 					int pid = cl->sess.spectatorClient;
 
 					if ((cl->pers.autoaction & AA_STATSTEAM)) {
 						G_statsall_cmd(ent, level.clients[pid].sess.sessionTeam, qfalse);
 					}
-					else 
-					{ 
-						CP(va("ws %s\n", G_createStats(g_entities + pid))); 
+					else
+					{
+						CP(va("ws %s\n", G_createStats(g_entities + pid)));
 					}
 				}
 			}
 
 			// Log it
-			if ( cl->sess.sessionTeam != TEAM_SPECTATOR ) 
+			if ( cl->sess.sessionTeam != TEAM_SPECTATOR )
 			{
 				G_LogPrintf( "WeaponStats: %s\n", G_createStats( ent ) );
 			}
 
-		} 
-		else if ( dwDumpType == EOM_MATCHINFO ) 
+		}
+		else if ( dwDumpType == EOM_MATCHINFO )
 		{
 			// Don't dump score table for users with stats dump enabled
-			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) 
+			if (!(cl->pers.clientFlags & CGF_STATSDUMP))
 			{
 				G_printMatchInfo(ent);
 			}
 
-			if ( g_gametype.integer == GT_WOLF_STOPWATCH ) 
+			if ( g_gametype.integer == GT_WOLF_STOPWATCH )
 			{
 				// We've already missed the switch
-				if ( g_currentRound.integer == 1 ) 
-				{ 
+				if ( g_currentRound.integer == 1 )
+				{
 					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
 							g_nextTimeLimit.integer,
 							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
 
 					if (winner == 0)
 					{
-						APS("sound/match/winaxis.wav");
+						AAPS("sound/match/winaxis.wav");
 					}
 					else if (winner == 1)
 					{
-						APS("sound/match/winallies.wav");
+						AAPS("sound/match/winallies.wav");
 					}
-				} 
-				else 
+				}
+				else
 				{
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-					if ( val < g_timelimit.value ) 
+					if ( val < g_timelimit.value )
 					{
 						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
 								(int)val,
@@ -1140,14 +1140,14 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 						if (winner == 0)
 						{
-							APS("sound/match/winaxis.wav");
+							AAPS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/match/winallies.wav");
+							AAPS("sound/match/winallies.wav");
 						}
-					} 
-					else 
+					}
+					else
 					{
 						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
 								g_timelimit.integer,
@@ -1155,11 +1155,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 						if (winner == 0)
 						{
-							APS("sound/match/winaxis.wav");
+							AAPS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/match/winallies.wav");
+							AAPS("sound/match/winallies.wav");
 						}
 					}
 				}
@@ -1173,22 +1173,22 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						if (winner == 0)
 						{
-							APS("sound/match/winaxis.wav");
+							AAPS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/match/winallies.wav");
+							AAPS("sound/match/winallies.wav");
 						}
 					}
 					else
 					{
 						if (winner == 0)
 						{
-							APS("sound/match/winaxis.wav");
+							AAPS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
 						{
-							APS("sound/match/winallies.wav");
+							AAPS("sound/match/winallies.wav");
 						}
 					}
 				}
