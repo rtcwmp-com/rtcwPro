@@ -81,7 +81,6 @@ vmCvar_t g_weaponRespawn;
 vmCvar_t g_motd;
 vmCvar_t g_synchronousClients;
 vmCvar_t g_warmup;
-vmCvar_t match_warmupfire;
 // NERVE - SMF
 vmCvar_t g_warmupLatch;
 vmCvar_t g_nextTimeLimit;
@@ -231,17 +230,17 @@ vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
-vmCvar_t	g_hitsounds;			// Hitsounds - Requires soundpack
+vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
 vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ban) can be disabled..
-vmCvar_t	g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
-vmCvar_t	g_dropReload;			// Enable / Disable Drop reload
-vmCvar_t	g_unlockWeapons;		// Gives ability to drop weapon to all classes..
-vmCvar_t	g_crouchRate;			// If enabled it recharges stamina faster when player is crouching..
-vmCvar_t	g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
-vmCvar_t	g_fastStabSound;		// 0 = off, 1 = (OSP's) goat sound, 2 = humiliation sound, 3 = random between 1 or 2
-vmCvar_t	g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
-vmCvar_t	g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
+vmCvar_t g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
+vmCvar_t g_dropReload;			// Enable / Disable Drop reload
+vmCvar_t g_unlockWeapons;		// Gives ability to drop weapon to all classes..
+vmCvar_t g_crouchRate;			// If enabled it recharges stamina faster when player is crouching..
+vmCvar_t g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
+vmCvar_t g_fastStabSound;		// 0 = off, 1 = (OSP's) goat sound, 2 = humiliation sound, 3 = random between 1 or 2
+vmCvar_t g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
+vmCvar_t g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
 // MOTD's
 vmCvar_t g_serverMessage;	// Shows a center print each time when player switches teams.
 vmCvar_t g_showMOTD;		// Enable MOTD's (message of the day)
@@ -284,7 +283,6 @@ vmCvar_t g_allowPMs;		// Allow private messages
 vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
-vmCvar_t g_warmupDamage;	// Allows damage in warmup
 vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
 vmCvar_t team_nocontrols;
@@ -519,7 +517,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &sab_censorPenalty, "sab_censorPenalty", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sab_autoIgnore, "sab_autoIgnore", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_warmupDamage, "g_warmupDamage", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_crouchRate, "g_crouchRate", "5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse},
 	{ &g_lifeStats, "g_lifeStats", "0", CVAR_ARCHIVE, 0, qfalse },
@@ -531,7 +528,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &team_commands, "team_commands", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
-    { &match_warmupfire, "match_warmupfire", "1", 0, 0, qfalse },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 
 	// voting

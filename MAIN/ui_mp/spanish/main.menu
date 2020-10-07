@@ -427,12 +427,13 @@ menuDef {
 
 	itemDef {
 		name window
-		text "RtcwPro Beta 0.1"
+		text "RtcwPro"
+		cvar ui_gameversion
 		tooltip "RtcwPro Beta"
 		tooltipaligny -40
-		type 0
+		type 4
 		style 0	
-		rect 500 465 170 14
+		rect 530 450 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED
@@ -444,18 +445,18 @@ menuDef {
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
-			uiScript openWolf
+			uiScript openModURL
 		}
     }
 
 	itemDef {
 		name osp_url
-		text "www.github.com/rtcw-nihi/ospx"
+		text "RtcwPro Repository"
 		tooltip "RtcwPro Repository"
 		tooltipaligny -40
 		type 1
 		style 0
-		rect 450 450 170 14
+		rect 515 465 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED
@@ -467,7 +468,7 @@ menuDef {
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
-			uiScript openOSP
+			uiScript openModURL
 		}
     }
 }
