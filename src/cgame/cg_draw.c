@@ -1044,6 +1044,30 @@ static float CG_DrawRespawnTimer(float y) {
 }
 
 /*
+========================
+sswolf - complete OSP demo features
+OSPx
+Counts time in
+
+NOTE: Don't try to read this mess..it will break you.
+========================
+*/
+void CG_startCounter(void) {
+	char* seconds = ((cg.timein % 60 < 10) ? va("0%d", cg.timein % 60) : va("%d", cg.timein % 60));
+	int minutes = cg.timein / 60;
+	char* hours = ((minutes / 60 < 10) ? (minutes / 60 ? va("0%d:", minutes / 60) : "") : va("%d:", minutes / 60));
+	char* str = va("^nT: ^7%s%s:%s", (hours ? va("%s", hours) : ""), (minutes ? (minutes < 10 ? va("0%d", minutes) : va("%d", minutes)) : "00"), seconds);
+
+	// Don't draw timer if client is checking scoreboard
+	if (CG_DrawScoreboard() || !cg.demoPlayback || (cg.demoPlayback && !demo_showTimein.integer))
+		return;
+
+	// It is aligned under Respawn timer..
+	CG_DrawStringExt(16, 243, str, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH - 3, SMALLCHAR_HEIGHT - 4, 0);
+	return;
+}
+
+/*
 =====================
 CG_DrawUpperRight
 
@@ -1076,6 +1100,10 @@ static void CG_DrawUpperRight( void ) {
 	if (cg_drawReinforcementTime.integer) {
 		y = CG_DrawRespawnTimer(y);
 	}
+
+	// sswolf - complete OSP demo features
+	// OSPx - Time Counter
+	CG_startCounter();
 }
 
 /*
