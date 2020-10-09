@@ -1200,6 +1200,11 @@ typedef struct {
 	char popinPrint[1024];
 	int popinPrintLines;
 	qboolean popinBlink;
+
+	// sswolf - complete OSP demo features
+	// Time Counter
+	int timein;
+	int timeCounter;
 // -OSPx
 
 	// RTCWPro - cvar limiting
