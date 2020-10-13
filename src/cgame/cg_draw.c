@@ -2377,7 +2377,7 @@ static void CG_DrawCrosshairNames( void ) {
 	float w;
 	// NERVE - SMF
 	const char  *s, *playerClass;
-	int playerHealth, val;
+	int playerHealth, cgClass, val;
 	vec4_t c;
 	float barFrac;
 	// -NERVE - SMF
@@ -2426,6 +2426,9 @@ static void CG_DrawCrosshairNames( void ) {
 	}
 
 	// determine player class
+	cgClass = cg_entities[cg.snap->ps.clientNum].currentState.teamNum;
+
+	// determine other player class
 	val = cg_entities[ cg.crosshairClientNum ].currentState.teamNum;
 	if ( val == 0 ) {
 		playerClass = "S";
@@ -2476,8 +2479,9 @@ static void CG_DrawCrosshairNames( void ) {
 	}
 	// -NERVE - SMF
 
-	// RtcwPro add player ammo
-	CG_DrawPlayerAmmo(colorWhite, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
+	// RtcwPro add player ammo if player class is LT
+	if (cgClass == 3)
+		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
 }
@@ -3005,14 +3009,14 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
-		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
 		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
 		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
 		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
 		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
 		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
-		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
 	}
 
 	w = CG_DrawStrlen( s );

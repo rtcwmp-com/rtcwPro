@@ -2129,6 +2129,7 @@ extern vmCvar_t int_cl_timenudge;
 //added from et - nihi
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
+
 //
 // cg_main.c
 //

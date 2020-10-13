@@ -1609,6 +1609,15 @@ extern vmCvar_t sv_fps;
 extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
+extern vmCvar_t	g_ltNades;
+extern vmCvar_t	g_medicNades;
+extern vmCvar_t	g_soldNades;
+extern vmCvar_t	g_engNades;
+extern vmCvar_t	g_medicClips;
+extern vmCvar_t	g_engineerClips;
+extern vmCvar_t	g_soldierClips;
+extern vmCvar_t	g_leutClips;
+extern vmCvar_t	g_pistolClips;
 extern vmCvar_t g_lifeStats;
 extern vmCvar_t g_maxTeamPF;
 extern vmCvar_t g_maxTeamSniper;

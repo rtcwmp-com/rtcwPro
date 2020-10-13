@@ -175,6 +175,7 @@ int isWeaponLimited( gclient_t *client, int weap ) {
 
 return 0;
 }
+
 /*
 ================
 Default weapon
@@ -198,14 +199,53 @@ void setDefWeap(gclient_t *client, int clips) {
 		client->ps.weapon = WP_THOMPSON;
 	}
 }
+
 ///////////
 // Deals with weapons
 //
 // NOTE: Selected weapons only works for eng and med..sold and lt can pick their weapons already..
 //       so setting it can potentialy overlap with client spawn scripts..
 void setDefaultWeapon(gclient_t *client, qboolean isSold) {
+	int ammo;
 
+	// This deals with weapon restrictions.
+	if (isSold) {
+		setDefWeap(client, g_soldierClips.integer);
+		return;
+	}
 
+	// Sorts ammo
+	ammo = (client->sess.selectedWeapon == WP_THOMPSON) ? 30 : 32;
+
+	// Medic
+	if (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC) {
+		if (client->sess.selectedWeapon != 0) {
+			COM_BitSet(client->ps.weapons, client->sess.selectedWeapon);
+			client->ps.ammoclip[BG_FindClipForWeapon(client->sess.selectedWeapon)] += ammo;
+			client->ps.ammo[BG_FindAmmoForWeapon(client->sess.selectedWeapon)] += (ammo * g_medicClips.integer);
+			client->ps.weapon = client->sess.selectedWeapon;
+			return;
+		}
+		else {
+			setDefWeap(client, g_medicClips.integer);
+			return;
+		}
+	}
+
+	// Engineer
+	if (client->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
+		if (client->sess.selectedWeapon != 0) {
+			COM_BitSet(client->ps.weapons, client->sess.selectedWeapon);
+			client->ps.ammoclip[BG_FindClipForWeapon(client->sess.selectedWeapon)] += ammo;
+			client->ps.ammo[BG_FindAmmoForWeapon(client->sess.selectedWeapon)] += (ammo * g_engineerClips.integer);
+			client->ps.weapon = client->sess.selectedWeapon;
+			return;
+		}
+		else {
+			setDefWeap(client, g_engineerClips.integer);
+			return;
+		}
+	}
 }
 /**
  * @brief G_delayPrint

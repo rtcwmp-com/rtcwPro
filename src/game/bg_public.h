@@ -684,8 +684,12 @@ typedef struct ammotable_s {
 	int mod;                // means of death
 } ammotable_t;
 
+extern ammotable_t* GetAmmoTableData(int ammoIndex);
 extern ammotable_t ammoTable[];     // defined in bg_misc.c
 extern int weapAlts[];  // defined in bg_misc.c
+int BG_MaxAmmoForWeapon(weapon_t weaponNum);
+
+#define GetAmmoTableData( ammoIndex ) ( (ammotable_t*)( &ammoTable[ammoIndex] ) )
 
 
 //----(SA)

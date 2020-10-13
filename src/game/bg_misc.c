@@ -48,12 +48,13 @@ extern vmCvar_t g_gametype;
 // jpw
 
 // NOTE: weapons that share ammo (ex. colt/thompson) need to share max ammo, but not necessarily uses or max clip
-#define MAX_AMMO_45     300
-#define MAX_AMMO_9MM    300
-#define MAX_AMMO_SMG	608		// L0 - Increases the ammo for SMGs but cvars will be clamped to 18..
+#define MAX_AMMO_45     32		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_9MM    32		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_SMG	96		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_PANZ   3		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_VENOM  1000
-#define MAX_AMMO_MAUSER 50
-#define MAX_AMMO_GARAND 1000
+#define MAX_AMMO_MAUSER 30		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_GARAND 30		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_FG42   500
 #define MAX_AMMO_BAR    500
 
@@ -77,6 +78,10 @@ int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP] = {
 	{WP_DYNAMITE,           WP_MEDKIT,              WP_AMMO,    0,          0,          0,              0,          0           }
 };
 // jpw
+
+int reloadableWeapons[] = {
+	WP_MP40, WP_THOMPSON, WP_STEN, WP_MAUSER, WP_GARAND, WP_PANZERFAUST, WP_FLAMETHROWER, WP_COLT, WP_LUGER, -1 // BG_AddMagicAmmo leave -1 at the end so we can stop the loop
+};
 
 // [0] = maxammo		-	max player ammo carrying capacity.
 // [1] = uses			-	how many 'rounds' it takes/costs to fire one cycle.
@@ -111,7 +116,7 @@ ammotable_t ammoTable[] = {
 	{   MAX_AMMO_MAUSER,1,      10,     2500,   DELAY_HIGH,     1200,   0,      0,      MOD_MAUSER              },  //	WP_MAUSER				// 4	// NOTE: authentic clips are 5/10/25 rounds
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42                },  //	WP_FG42					// 5
 	{   15,             1,      15,     1000,   DELAY_THROW,    1600,   0,      0,      MOD_GRENADE_LAUNCHER    },  //	WP_GRENADE_LAUNCHER		// 6
-	{   5,              1,      1,      1000,   750,           2000,   0,      0,      MOD_PANZERFAUST         },   //	WP_PANZERFAUST			// 7	// DHM - Nerve :: updated delay so prediction is correct
+	{   MAX_AMMO_PANZ,  1,      1,      1000,   750,           2000,   0,      0,      MOD_PANZERFAUST         },   //	WP_PANZERFAUST			// 7	// DHM - Nerve :: updated delay so prediction is correct
 //	{	MAX_AMMO_VENOM,	1,		500,	3000,	750,			30,		5000,	200,	MOD_VENOM				},	//	WP_VENOM				// -
 	{   MAX_AMMO_VENOM, 1,      500,    3000,   750,            45,     5000,   200,    MOD_VENOM               },  //	WP_VENOM				// 8	// JPW NOTE: changed next_shot 50->45 to genlock firing to every server frame (fire rate shouldn't be framerate dependent now)
 	{   200,            1,      200,    1000,   DELAY_LOW,      50,     0,      0,      MOD_FLAMETHROWER        },  //	WP_FLAMETHROWER			// 9 // JPW NOTE: changed maxclip for MP 500->150
@@ -3351,6 +3356,172 @@ qboolean    BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int at
 }
 
 
+int BG_MaxAmmoForWeapon(weapon_t weaponNum) {
+	return(GetAmmoTableData(weaponNum)->maxammo);
+}
+
+/*
+=================================
+BG_AddMagicAmmo:
+	if numOfClips is 0, no ammo is added, it just return whether any ammo CAN be added;
+	otherwise return whether any ammo was ACTUALLY added.
+
+WARNING: when numOfClips is 0, DO NOT CHANGE ANYTHING under ps.
+=================================
+*/
+int BG_GrenadesForClass(int cls) {
+
+	char currentVal[256];
+
+	switch (cls) {
+		case PC_MEDIC:
+			return 1; // g_medicNades;
+		case PC_SOLDIER:
+			return 4; // g_soldNades;
+		case PC_ENGINEER:
+			return 8; // g_engNades;
+		case PC_LT:
+			return 2; // g_ltNades;
+	}
+	return 0;
+}
+
+weapon_t BG_GrenadeTypeForTeam(team_t team) {
+	switch (team) {
+	case TEAM_RED:
+		return WP_GRENADE_LAUNCHER;
+	case TEAM_BLUE:
+		return WP_GRENADE_PINEAPPLE;
+	default:
+		return WP_NONE;
+	}
+}
+
+qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
+	int i, weapon;
+	int ammoAdded = qfalse;
+	int maxammo;
+	int clip;
+	int weapNumOfClips;
+
+	// Gordon: handle grenades first
+	i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS]);
+
+	//Com_Printf("Grenades for class -> %5d\n", i);
+
+	weapon = BG_GrenadeTypeForTeam(teamNum);
+
+	clip = BG_FindClipForWeapon(weapon);
+
+	if (ps->ammoclip[clip] < i) {
+
+		// Gordon: early out
+		if (!numOfClips) {
+			return qtrue;
+		}
+
+		//Com_Printf("Grenade added -> %5d\n", 1);
+
+		ps->ammoclip[clip] += numOfClips;
+
+		ammoAdded = qtrue;
+
+		COM_BitSet(ps->weapons, weapon);
+
+		if (ps->ammoclip[clip] > i) {
+			ps->ammoclip[clip] = i;
+		}
+	}
+
+	if (COM_BitCheck(ps->weapons, WP_MEDIC_SYRINGE)) {
+		i = 10;
+
+		clip = BG_FindClipForWeapon(WP_MEDIC_SYRINGE);
+
+		if (ps->ammoclip[clip] < i) {
+
+			if (!numOfClips) {
+				return qtrue;
+			}
+
+			//Com_Printf("Syringe added -> %5d\n", ps->ammoclip[clip]);
+
+			ps->ammoclip[clip] += numOfClips;
+
+			ammoAdded = qtrue;
+
+			if (ps->ammoclip[clip] > i) {
+				ps->ammoclip[clip] = i;
+			}
+		}
+	}
+
+	// Gordon: now other weapons
+	for (i = 0; reloadableWeapons[i] >= 0; i++) {
+		weapon = reloadableWeapons[i];
+		if (COM_BitCheck(ps->weapons, weapon)) {
+			maxammo = BG_MaxAmmoForWeapon(weapon);
+
+			// Handle weapons that just use clip, and not ammo
+			if (weapon == WP_FLAMETHROWER) {
+				clip = BG_FindAmmoForWeapon(weapon);
+				if (ps->ammoclip[clip] < maxammo) {
+
+					// early out
+					if (!numOfClips) {
+						return qtrue;
+					}
+
+					//Com_Printf("Flame added -> %5d\n", ps->ammoclip[clip]);
+
+					ammoAdded = qtrue;
+					ps->ammoclip[clip] = maxammo;
+				}
+			}
+			else if (weapon == WP_PANZERFAUST) {
+				clip = BG_FindAmmoForWeapon(weapon);
+				if (ps->ammoclip[clip] < maxammo) {
+
+					// early out
+					if (!numOfClips) {
+						return qtrue;
+					}
+
+					//Com_Printf("Panzer added -> %5d\n", ps->ammoclip[clip]);
+
+					ammoAdded = qtrue;
+					ps->ammoclip[clip] += numOfClips;
+					if (ps->ammoclip[clip] >= maxammo) {
+						ps->ammoclip[clip] = maxammo;
+					}
+				}
+			}
+			else {
+				clip = BG_FindAmmoForWeapon(weapon);
+				if (ps->ammo[clip] < maxammo) {
+
+					// early out
+					if (!numOfClips) {
+						return qtrue;
+					}
+
+					//Com_Printf("SMG/Pistol added -> %5d\n", ps->ammoclip[clip]);
+
+					ammoAdded = qtrue;
+
+					weapNumOfClips = numOfClips;
+
+					// add and limit check
+					ps->ammo[clip] += weapNumOfClips * GetAmmoTableData(weapon)->maxclip;
+					if (ps->ammo[clip] > maxammo) {
+						ps->ammo[clip] = maxammo;
+					}
+				}
+			}
+		}
+	}
+	return ammoAdded;
+}
 
 #define AMMOFORWEAP BG_FindAmmoForWeapon( item->giTag )
 /*
@@ -3383,151 +3554,157 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	item = &bg_itemlist[ent->modelindex];
 
 	switch ( item->giType ) {
-	case IT_WEAPON:
-	// L0 - disable SMG Pickup if client already has a SMG
-		if (disableSMGPickup)
-		{
-			// We only check for SMG's
-			if ((item->giTag == WP_MP40) ||
-				(item->giTag == WP_THOMPSON) ||
-				(item->giTag == WP_STEN))
+
+		case IT_WEAPON:
+		// L0 - disable SMG Pickup if client already has a SMG
+			if (disableSMGPickup)
 			{
-				// If client has it, do not pick it up..
-				if (COM_BitCheck(ps->weapons, item->giTag))
-					return qfalse;
-			}
-		}
-// End
-
-// JPW NERVE -- medics & engineers can only pick up same weapon type
-		if (item->giTag == WP_AMMO) // magic ammo for any two-handed weapon
-			return qtrue;
-		if ((ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC) || (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER)) {
-			if (!COM_BitCheck( ps->weapons, item->giTag)) {
-// L0 - unlockWeapons
-				// if this cvar is disabled, then behave like normal
-				if (unlockWeapons == 0)
-					return qfalse;
-				// If it's 1, meds and engs can pickup smg's
-				else if ((unlockWeapons == 1) && ((item->giTag != WP_MP40) && (item->giTag != WP_THOMPSON) && (item->giTag != WP_STEN)))
-					return qfalse;
-// L0 - end
-			}
-			else {
-				return qtrue;
-			}
-		}
-
-		if ( ps->stats[STAT_PLAYER_CLASS] == PC_LT ) {
-			if ( (item->giTag != WP_MP40) && (item->giTag != WP_THOMPSON) && (item->giTag != WP_STEN) ) {
-				// L0 - allow picking any weapons for all classes if it's set to 2.. includes -> snipers, panzer, flamer..
-				if (unlockWeapons < 2)
-					return qfalse;
-				// End
-			}
-		}
-
-// JPW NERVE wolf multiplayer: other classes can only pick up weapon if weapon's bank is empty
-#ifdef GAMEDLL
-		if ( g_gametype.integer >= GT_WOLF )
-#endif
-#ifdef CGAMEDLL
-		if ( cg_gameType.integer >= GT_WOLF )
-#endif
-		{
-			weapbank = 0;
-			for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
-				if ( item->giTag == weapBanksMultiPlayer[3][ammoweap] ) {
-					weapbank = 1;
+				// We only check for SMG's
+				if ((item->giTag == WP_MP40) ||
+					(item->giTag == WP_THOMPSON) ||
+					(item->giTag == WP_STEN))
+				{
+					// If client has it, do not pick it up..
+					if (COM_BitCheck(ps->weapons, item->giTag))
+						return qfalse;
 				}
-			if ( !weapbank ) {
+			}
+	// End
+
+	// JPW NERVE -- medics & engineers can only pick up same weapon type
+		
+			if (item->giTag == WP_AMMO) // magic ammo for any two-handed weapon
+			{
+				return BG_AddMagicAmmo((playerState_t*)ps, ps->persistant[PERS_TEAM], 1); // RtcwPro - check to see if player needs the ammo (ET Port)
+			}
+
+
+			if ((ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC) || (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER)) {
+				if (!COM_BitCheck( ps->weapons, item->giTag)) {
+					// L0 - unlockWeapons
+					// if this cvar is disabled, then behave like normal
+					if (unlockWeapons == 0)
+						return qfalse;
+					// If it's 1, meds and engs can pickup smg's
+					else if ((unlockWeapons == 1) && ((item->giTag != WP_MP40) && (item->giTag != WP_THOMPSON) && (item->giTag != WP_STEN)))
+						return qfalse;
+					// L0 - end
+				}
+				else {
+					return qtrue;
+				}
+			}
+
+			if ( ps->stats[STAT_PLAYER_CLASS] == PC_LT ) {
+				if ( (item->giTag != WP_MP40) && (item->giTag != WP_THOMPSON) && (item->giTag != WP_STEN) ) {
+					// L0 - allow picking any weapons for all classes if it's set to 2.. includes -> snipers, panzer, flamer..
+					if (unlockWeapons < 2)
+						return qfalse;
+					// End
+				}
+			}
+
+	// JPW NERVE wolf multiplayer: other classes can only pick up weapon if weapon's bank is empty
+	#ifdef GAMEDLL
+			if ( g_gametype.integer >= GT_WOLF )
+	#endif
+	#ifdef CGAMEDLL
+			if ( cg_gameType.integer >= GT_WOLF )
+	#endif
+			{
+				weapbank = 0;
+				for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
+					if ( item->giTag == weapBanksMultiPlayer[3][ammoweap] ) {
+						weapbank = 1;
+					}
+				if ( !weapbank ) {
+					return qfalse;
+				}
+				for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
+					if ( COM_BitCheck( ps->weapons,weapBanksMultiPlayer[3][ammoweap] ) ) {
+						return qfalse;
+					}
+			}
+			return qtrue;
+	// jpw
+		case IT_AMMO:
+			ammoweap = BG_FindAmmoForWeapon( item->giTag );
+
+			if ( ps->ammo[ammoweap] >= ammoTable[ammoweap].maxammo ) {
 				return qfalse;
 			}
-			for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
-				if ( COM_BitCheck( ps->weapons,weapBanksMultiPlayer[3][ammoweap] ) ) {
-					return qfalse;
-				}
-		}
-		return qtrue;
-// jpw
-	case IT_AMMO:
-		ammoweap = BG_FindAmmoForWeapon( item->giTag );
 
-		if ( ps->ammo[ammoweap] >= ammoTable[ammoweap].maxammo ) {
-			return qfalse;
-		}
+			return qtrue;
 
-		return qtrue;
-
-	case IT_ARMOR:
-		// we also clamp armor to the maxhealth for handicapping
-		if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
-			return qfalse;
-		}
-		return qtrue;
-
-	case IT_HEALTH:
-		if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
-			return qfalse;
-		}
-
-		// small and mega healths will go over the max, otherwise
-		// don't pick up if already at max
-		if ( item->quantity == 5 || item->quantity == 100 ) {   // (SA) this is /totally/ a Q3 check.  TODO: adapt for Wolf
-			if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
+		case IT_ARMOR:
+			// we also clamp armor to the maxhealth for handicapping
+			if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
 				return qfalse;
 			}
 			return qtrue;
-		}
 
-		if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] ) {
-			return qfalse;
-		}
-		return qtrue;
+		case IT_HEALTH:
+			if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
+				return qfalse;
+			}
 
-	case IT_POWERUP:
-		if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
-			return qfalse;
-		}
-		return qtrue;
-
-	case IT_TEAM: // team items, such as flags
-
-		// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
-		// ent->modelindex2 is non-zero on items if they are dropped
-		// we need to know this because we can pick up our dropped flag (and return it)
-		// but we can't pick up our flag at base
-		if ( ps->persistant[PERS_TEAM] == TEAM_RED ) {
-			if ( item->giTag == PW_BLUEFLAG ||
-				 ( item->giTag == PW_REDFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
-				 ( item->giTag == PW_REDFLAG && ps->powerups[PW_BLUEFLAG] ) ) {
+			// small and mega healths will go over the max, otherwise
+			// don't pick up if already at max
+			if ( item->quantity == 5 || item->quantity == 100 ) {   // (SA) this is /totally/ a Q3 check.  TODO: adapt for Wolf
+				if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
+					return qfalse;
+				}
 				return qtrue;
 			}
-		} else if ( ps->persistant[PERS_TEAM] == TEAM_BLUE ) {
-			if ( item->giTag == PW_REDFLAG ||
-				 ( item->giTag == PW_BLUEFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
-				 ( item->giTag == PW_BLUEFLAG && ps->powerups[PW_REDFLAG] ) ) {
-				return qtrue;
+
+			if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] ) {
+				return qfalse;
 			}
-		}
-		return qfalse;
+			return qtrue;
+
+		case IT_POWERUP:
+			if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
+				return qfalse;
+			}
+			return qtrue;
+
+		case IT_TEAM: // team items, such as flags
+
+			// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
+			// ent->modelindex2 is non-zero on items if they are dropped
+			// we need to know this because we can pick up our dropped flag (and return it)
+			// but we can't pick up our flag at base
+			if ( ps->persistant[PERS_TEAM] == TEAM_RED ) {
+				if ( item->giTag == PW_BLUEFLAG ||
+					 ( item->giTag == PW_REDFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
+					 ( item->giTag == PW_REDFLAG && ps->powerups[PW_BLUEFLAG] ) ) {
+					return qtrue;
+				}
+			} else if ( ps->persistant[PERS_TEAM] == TEAM_BLUE ) {
+				if ( item->giTag == PW_REDFLAG ||
+					 ( item->giTag == PW_BLUEFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
+					 ( item->giTag == PW_BLUEFLAG && ps->powerups[PW_REDFLAG] ) ) {
+					return qtrue;
+				}
+			}
+			return qfalse;
 
 
-	case IT_HOLDABLE:
-		return qtrue;
+		case IT_HOLDABLE:
+			return qtrue;
 
-	case IT_TREASURE:   // treasure always picked up
-		return qtrue;
+		case IT_TREASURE:   // treasure always picked up
+			return qtrue;
 
-	case IT_CLIPBOARD:  // clipboards always picked up
-		return qtrue;
+		case IT_CLIPBOARD:  // clipboards always picked up
+			return qtrue;
 
-		//---- (SA) Wolf keys
-	case IT_KEY:
-		return qtrue;   // keys are always picked up
+			//---- (SA) Wolf keys
+		case IT_KEY:
+			return qtrue;   // keys are always picked up
 
-	case IT_BAD:
-		Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: IT_BAD" );
+		case IT_BAD:
+			Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: IT_BAD" );
 
 	}
 	return qfalse;
