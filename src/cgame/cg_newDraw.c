@@ -203,7 +203,6 @@ static void CG_DrawPlayerArmorValue( rectDef_t *rect, float scale, vec4_t color,
 	int value;
 	centity_t   *cent;
 	playerState_t   *ps;
-
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
 
@@ -1137,6 +1136,7 @@ static void CG_DrawPlayerHealth( rectDef_t *rect, float scale, vec4_t color, qha
 		CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
 		trap_R_SetColor( NULL );
 	} else {
+
 		trap_R_SetColor( color );
 		CG_DrawField( rect->x, rect->y, 3, value, 20 * scale, 32 * scale, qtrue, qtrue );           // NERVE - SMF
 
@@ -1539,12 +1539,14 @@ float CG_GetValue( int ownerDraw, int type ) {
 		return cg.snap->ps.persistant[PERS_SCORE];
 		break;
 	case CG_PLAYER_HEALTH:
+	    /*
 		if ( cgs.gametype >= GT_WOLF && ( ps->pm_flags & PMF_FOLLOW ) ) {
 			ci = &cgs.clientinfo[ ps->clientNum ];
 			return ci->health;
 		} else {
 			return ps->stats[STAT_HEALTH];
-		}
+		}*/
+		return ps->stats[STAT_HEALTH];
 		break;
 	case CG_RED_SCORE:
 		return cgs.scores1;

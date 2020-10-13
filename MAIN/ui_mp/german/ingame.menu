@@ -242,7 +242,7 @@ assetGlobalDef {
 		text "Version:"
 		cvar version
 		maxPaintChars 32
-		textalignx 30
+		textalignx 8
 		textaligny 12
 		textalign 0
 		textscale .18
@@ -256,7 +256,7 @@ assetGlobalDef {
 		type 4
 		style 0
 		text "RtcwPro Version:"
-		cvar gameversion
+		cvar ui_gameversion
 		maxPaintChars 64
 		textalignx 8
 		textaligny 12

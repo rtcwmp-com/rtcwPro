@@ -736,7 +736,14 @@ typedef struct {
 	char headModelName[MAX_QPATH];
 	gender_t gender;                // from model
 	// -NERVE - SMF
-	int refStatus;						// RtcwPro refStatus added
+
+	// RTCWPro
+	int refStatus;
+	int playerAmmo;
+	int playerAmmoClip;
+	int playerWeapon;
+	int playerNades;
+
 } clientInfo_t;
 
 
@@ -1193,6 +1200,11 @@ typedef struct {
 	char popinPrint[1024];
 	int popinPrintLines;
 	qboolean popinBlink;
+
+	// sswolf - complete OSP demo features
+	// Time Counter
+	int timein;
+	int timeCounter;
 // -OSPx
 
 	// RTCWPro - cvar limiting
@@ -1202,11 +1214,11 @@ typedef struct {
 	// backuping, forceCvar_t is good format, it holds name and value only
 	forceCvar_t cvarBackups[MAX_SVCVARS];
 	int cvarBackupsCount;
-	// RTCWPro
 
 	pmoveExt_t pmext;
 
 } cg_t;
+
 
 #define NUM_FUNNEL_SPRITES  21
 
@@ -2117,6 +2129,7 @@ extern vmCvar_t int_cl_timenudge;
 //added from et - nihi
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
+
 //
 // cg_main.c
 //
@@ -2225,6 +2238,10 @@ void CG_ReloadTranslation();
 
 // OSPx - Country Flags
 void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader);
+
+// RtcwPro
+void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
+
 //
 // cg_draw.c, cg_newDraw.c
 //

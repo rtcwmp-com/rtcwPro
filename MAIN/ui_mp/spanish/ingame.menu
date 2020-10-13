@@ -245,7 +245,7 @@ menuDef {
 		text "Versión:"
 		cvar version
 		maxPaintChars 32
-		textalignx 30
+		textalignx 8
 		textaligny 12
 		textalign 0
 		textscale .18
@@ -259,7 +259,7 @@ menuDef {
 		type 4
 		style 0
 		text "Versión de RtcwPro:"
-		cvar gameversion
+		cvar ui_gameversion
 		maxPaintChars 64
 		textalignx 8
 		textaligny 12

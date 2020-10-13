@@ -1044,6 +1044,30 @@ static float CG_DrawRespawnTimer(float y) {
 }
 
 /*
+========================
+sswolf - complete OSP demo features
+OSPx
+Counts time in
+
+NOTE: Don't try to read this mess..it will break you.
+========================
+*/
+void CG_startCounter(void) {
+	char* seconds = ((cg.timein % 60 < 10) ? va("0%d", cg.timein % 60) : va("%d", cg.timein % 60));
+	int minutes = cg.timein / 60;
+	char* hours = ((minutes / 60 < 10) ? (minutes / 60 ? va("0%d:", minutes / 60) : "") : va("%d:", minutes / 60));
+	char* str = va("^nT: ^7%s%s:%s", (hours ? va("%s", hours) : ""), (minutes ? (minutes < 10 ? va("0%d", minutes) : va("%d", minutes)) : "00"), seconds);
+
+	// Don't draw timer if client is checking scoreboard
+	if (CG_DrawScoreboard() || !cg.demoPlayback || (cg.demoPlayback && !demo_showTimein.integer))
+		return;
+
+	// It is aligned under Respawn timer..
+	CG_DrawStringExt(16, 243, str, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH - 3, SMALLCHAR_HEIGHT - 4, 0);
+	return;
+}
+
+/*
 =====================
 CG_DrawUpperRight
 
@@ -1076,6 +1100,10 @@ static void CG_DrawUpperRight( void ) {
 	if (cg_drawReinforcementTime.integer) {
 		y = CG_DrawRespawnTimer(y);
 	}
+
+	// sswolf - complete OSP demo features
+	// OSPx - Time Counter
+	CG_startCounter();
 }
 
 /*
@@ -2322,6 +2350,22 @@ void CG_CheckForCursorHints( void ) {
 }
 
 
+void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades) {
+	const char* s;
+	float w;
+
+	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
+		s = va("Grenades: %i", playerNades);
+		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 200, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
+	}
+	else {
+		s = va("Ammo: %i/%i - Grenades: %i", playerAmmoClip, playerAmmo, playerNades);
+		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 200, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
+	}
+}
+
 /*
 =====================
 CG_DrawCrosshairNames
@@ -2333,7 +2377,7 @@ static void CG_DrawCrosshairNames( void ) {
 	float w;
 	// NERVE - SMF
 	const char  *s, *playerClass;
-	int playerHealth, val;
+	int playerHealth, cgClass, val;
 	vec4_t c;
 	float barFrac;
 	// -NERVE - SMF
@@ -2382,6 +2426,9 @@ static void CG_DrawCrosshairNames( void ) {
 	}
 
 	// determine player class
+	cgClass = cg_entities[cg.snap->ps.clientNum].currentState.teamNum;
+
+	// determine other player class
 	val = cg_entities[ cg.crosshairClientNum ].currentState.teamNum;
 	if ( val == 0 ) {
 		playerClass = "S";
@@ -2431,6 +2478,10 @@ static void CG_DrawCrosshairNames( void ) {
 		CG_FilledBar( 320 - w / 2, 190, 110, 10, c, NULL, NULL, barFrac, 16 );
 	}
 	// -NERVE - SMF
+
+	// RtcwPro add player ammo if player class is LT
+	if (cgClass == 3)
+		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
 }
@@ -2958,14 +3009,14 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
-		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
 		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
 		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
 		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
 		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
 		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
-		s = va( "%s %i", CG_TranslateString( "(^3WARMUP^7) Match begins in:" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
 	}
 
 	w = CG_DrawStrlen( s );

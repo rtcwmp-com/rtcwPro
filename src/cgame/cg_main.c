@@ -610,7 +610,14 @@ cvarTable_t cvarTable[] = {
 	{ &cg_chatAlpha, "cg_chatAlpha", "0.33", CVAR_ARCHIVE },
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
-	{ &cg_antilag, "g_antilag", "0", 0 }
+	{ &cg_antilag, "g_antilag", "0", 0 },
+
+	// sswolf - complete OSP demo features
+	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
+	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
+	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },
+	{ &demo_showTimein, "demo_showTimein", "1", CVAR_ARCHIVE },
+	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 

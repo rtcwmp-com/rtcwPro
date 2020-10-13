@@ -427,10 +427,11 @@ menuDef {
 
 	itemDef {
 		name window
-		text "RtcwPro Beta 0.1"
+		text "RtcwPro"
+		cvar ui_gameversion
 		tooltip "RtcwPro Beta"
 		tooltipaligny -40
-		type 0
+		type 4
 		style 0	
 		rect 530 450 170 14
 		textalign 0

@@ -2179,5 +2179,16 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	}
 
 	DEBUGTIME
+
+	// sswolf - complete OSP demo features
+	// OSPx - Count time..
+	if (!cg.timeCounter) {
+		cg.timeCounter = cg.time + 1000;
+		cg.timein++;
+	}
+	else if (cg.timeCounter < cg.time) {
+		cg.timeCounter = cg.time + 1000;
+		cg.timein++;
+	}
 }
 

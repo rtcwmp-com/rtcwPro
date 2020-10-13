@@ -7704,6 +7704,8 @@ vmCvar_t ui_crosshairSize;
 vmCvar_t ui_blackout;
 vmCvar_t ui_showtooltips;
 // -OSPx
+vmCvar_t ui_demoDir;
+vmCvar_t ui_gameversion;
 
 cvarTable_t cvarTable[] = {
 
@@ -7842,7 +7844,10 @@ cvarTable_t cvarTable[] = {
 	{ &ui_blackout, "ui_blackout", "0", CVAR_ROM },
 // -OSPx
 	{ &ui_showtooltips,     "ui_showtooltips",           "1", CVAR_ARCHIVE },
-	{ &ui_hudAlpha, "cg_hudAlpha", "1.0", CVAR_ARCHIVE }
+	{ &ui_hudAlpha, "cg_hudAlpha", "1.0", CVAR_ARCHIVE },
+
+	{ &ui_demoDir, "ui_demoDir", "demos", CVAR_ARCHIVE },
+	{ &ui_gameversion, "ui_gameversion", PRO_VERSION, CVAR_ARCHIVE }
 };
 
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

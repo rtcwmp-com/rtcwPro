@@ -410,6 +410,12 @@ struct gentity_s {
 
 	// sswolf - allowteams - ET port
 	int allowteams;
+
+	// player ammo
+	int playerAmmo;
+	int playerAmmoClip;
+	int playerWeapon;
+	int playerNades;
 };
 
 // Ridah
@@ -492,6 +498,12 @@ typedef struct {
 // sswolf - allowteams - ET port
 #define ALLOW_AXIS_TEAM         1
 #define ALLOW_ALLIED_TEAM       2
+
+// sswolf - drop weapon stuff
+#define WEP_DROP_SOLDIER 1
+#define WEP_DROP_ENG 2
+#define WEP_DROP_MEDIC 4
+#define WEP_DROP_LT 8
 
 // client data that stays across multiple levels or tournament restarts
 // this is achieved by writing all the data to cvar strings at game shutdown
@@ -1123,8 +1135,8 @@ qboolean infront( gentity_t *self, gentity_t *other );
 
 void G_ProcessTagConnect( gentity_t *ent );
 
-// sswolf - allowteams ET - port
-qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator);
+qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // sswolf - allowteams ET - port
+qboolean AllowDropForClass(gentity_t* ent, int pclass); // sswolf - drop weapon stuff
 
 //
 // g_combat.c
@@ -1573,7 +1585,6 @@ extern vmCvar_t TXThandle;
 extern vmCvar_t g_serverMessage;
 extern vmCvar_t g_maxVotes;
 extern vmCvar_t g_showFlags;
-extern vmCvar_t match_warmupfire;
 // SAB
 extern vmCvar_t sab_system;
 extern vmCvar_t sab_maxTeamKills;
@@ -1584,20 +1595,29 @@ extern vmCvar_t sab_maxPingHits;
 extern vmCvar_t sab_censorPenalty;
 extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
-extern vmCvar_t g_warmupDamage;
-extern vmCvar_t		g_hitsounds;
-extern vmCvar_t		g_crouchRate;
+extern vmCvar_t	g_hitsounds;
+extern vmCvar_t	g_crouchRate;
 extern vmCvar_t g_drawHitboxes;
 extern vmCvar_t team_nocontrols;
 extern vmCvar_t	g_mapConfigs;
-extern vmCvar_t		g_disableInv;
-extern vmCvar_t		g_axisSpawnProtectionTime;
-extern vmCvar_t		g_alliedSpawnProtectionTime;
+extern vmCvar_t	g_disableInv;
+extern vmCvar_t	g_axisSpawnProtectionTime;
+extern vmCvar_t	g_alliedSpawnProtectionTime;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
+extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
+extern vmCvar_t	g_ltNades;
+extern vmCvar_t	g_medicNades;
+extern vmCvar_t	g_soldNades;
+extern vmCvar_t	g_engNades;
+extern vmCvar_t	g_medicClips;
+extern vmCvar_t	g_engineerClips;
+extern vmCvar_t	g_soldierClips;
+extern vmCvar_t	g_leutClips;
+extern vmCvar_t	g_pistolClips;
 extern vmCvar_t g_lifeStats;
 extern vmCvar_t g_maxTeamPF;
 extern vmCvar_t g_maxTeamSniper;
