@@ -261,7 +261,7 @@ void CG_ParseWolfinfo( void ) {
 	{
 		trap_S_StartLocalSound(cgs.media.announceFight, CHAN_ANNOUNCER);
 
-		//Pri("^1FIGHT!\n");
+		CG_Printf("[skipnotify]^1FIGHT!\n");
 		CPri(CG_TranslateString("^1FIGHT!\n"));
 	}
 
