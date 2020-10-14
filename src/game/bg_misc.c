@@ -3397,9 +3397,11 @@ weapon_t BG_GrenadeTypeForTeam(team_t team) {
 	}
 }
 
-qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
+
+// Return true/false if the player "needs" the ammo
+qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 	int i, weapon;
-	int ammoAdded = qfalse;
+	int needsAmmo = qfalse;
 	int maxammo;
 	int clip;
 	int weapNumOfClips;
@@ -3415,22 +3417,17 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
 
 	if (ps->ammoclip[clip] < i) {
 
-		// Gordon: early out
-		if (!numOfClips) {
-			return qtrue;
-		}
-
 		//Com_Printf("Grenade added -> %5d\n", 1);
 
-		ps->ammoclip[clip] += numOfClips;
+		//ps->ammoclip[clip] += numOfClips;
 
-		ammoAdded = qtrue;
+		needsAmmo = qtrue;
 
 		COM_BitSet(ps->weapons, weapon);
 
-		if (ps->ammoclip[clip] > i) {
-			ps->ammoclip[clip] = i;
-		}
+		//if (ps->ammoclip[clip] > i) {
+		//	ps->ammoclip[clip] = i;
+		//}
 	}
 
 	if (COM_BitCheck(ps->weapons, WP_MEDIC_SYRINGE)) {
@@ -3440,19 +3437,19 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
 
 		if (ps->ammoclip[clip] < i) {
 
-			if (!numOfClips) {
-				return qtrue;
-			}
+			//if (!numOfClips) {
+			//	return qtrue;
+			//}
 
 			//Com_Printf("Syringe added -> %5d\n", ps->ammoclip[clip]);
 
-			ps->ammoclip[clip] += numOfClips;
+			//ps->ammoclip[clip] += numOfClips;
 
-			ammoAdded = qtrue;
+			needsAmmo = qtrue;
 
-			if (ps->ammoclip[clip] > i) {
-				ps->ammoclip[clip] = i;
-			}
+			//if (ps->ammoclip[clip] > i) {
+			//	ps->ammoclip[clip] = i;
+			//}
 		}
 	}
 
@@ -3468,14 +3465,14 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
 				if (ps->ammoclip[clip] < maxammo) {
 
 					// early out
-					if (!numOfClips) {
-						return qtrue;
-					}
+					//if (!numOfClips) {
+					//	return qtrue;
+					//}
 
 					//Com_Printf("Flame added -> %5d\n", ps->ammoclip[clip]);
 
-					ammoAdded = qtrue;
-					ps->ammoclip[clip] = maxammo;
+					needsAmmo = qtrue;
+					//ps->ammoclip[clip] = maxammo;
 				}
 			}
 			else if (weapon == WP_PANZERFAUST) {
@@ -3483,17 +3480,17 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
 				if (ps->ammoclip[clip] < maxammo) {
 
 					// early out
-					if (!numOfClips) {
-						return qtrue;
-					}
+					//if (!numOfClips) {
+					//	return qtrue;
+					//}
 
 					//Com_Printf("Panzer added -> %5d\n", ps->ammoclip[clip]);
 
-					ammoAdded = qtrue;
-					ps->ammoclip[clip] += numOfClips;
-					if (ps->ammoclip[clip] >= maxammo) {
-						ps->ammoclip[clip] = maxammo;
-					}
+					needsAmmo = qtrue;
+					//ps->ammoclip[clip] += numOfClips;
+					//if (ps->ammoclip[clip] >= maxammo) {
+					//	ps->ammoclip[clip] = maxammo;
+					//}
 				}
 			}
 			else {
@@ -3501,26 +3498,26 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum, int numOfClips) {
 				if (ps->ammo[clip] < maxammo) {
 
 					// early out
-					if (!numOfClips) {
-						return qtrue;
-					}
+					//if (!numOfClips) {
+					//	return qtrue;
+					//}
 
 					//Com_Printf("SMG/Pistol added -> %5d\n", ps->ammoclip[clip]);
 
-					ammoAdded = qtrue;
+					needsAmmo = qtrue;
 
-					weapNumOfClips = numOfClips;
+					//weapNumOfClips = numOfClips;
 
 					// add and limit check
-					ps->ammo[clip] += weapNumOfClips * GetAmmoTableData(weapon)->maxclip;
-					if (ps->ammo[clip] > maxammo) {
-						ps->ammo[clip] = maxammo;
-					}
+					//ps->ammo[clip] += weapNumOfClips * GetAmmoTableData(weapon)->maxclip;
+					//if (ps->ammo[clip] > maxammo) {
+					//	ps->ammo[clip] = maxammo;
+					//}
 				}
 			}
 		}
 	}
-	return ammoAdded;
+	return needsAmmo;
 }
 
 #define AMMOFORWEAP BG_FindAmmoForWeapon( item->giTag )
@@ -3575,7 +3572,7 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 		
 			if (item->giTag == WP_AMMO) // magic ammo for any two-handed weapon
 			{
-				return BG_AddMagicAmmo((playerState_t*)ps, ps->persistant[PERS_TEAM], 1); // RtcwPro - check to see if player needs the ammo (ET Port)
+				return BG_AddMagicAmmo((playerState_t*)ps, ps->persistant[PERS_TEAM]); // RtcwPro - check to see if player needs the ammo (ET Port)
 			}
 
 
