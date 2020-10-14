@@ -2392,10 +2392,10 @@ static void CG_DrawCrosshairNames( void ) {
 		return;
 	}
 
-	// NERVE - SMF - we don't want to do this in warmup
-	if ( cgs.gamestate != GS_PLAYING && cgs.gametype == GT_WOLF_STOPWATCH ) {
-		return;
-	}
+	// NERVE - SMF - we don't want to do this in warmup // RtcwPro we can do this during warmup
+	//if ( cgs.gamestate != GS_PLAYING && cgs.gametype == GT_WOLF_STOPWATCH ) {
+	//	return;
+	//}
 
 	// Ridah
 	if ( cg_gameType.integer == GT_SINGLE_PLAYER ) {
@@ -2950,11 +2950,11 @@ static void CG_DrawWarmup( void ) {
 			s2 = CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
 
 			w = CG_DrawStrlen( s1 );
-			CG_DrawStringExt( 320 - w * cw / 2, 160, s1, colorWhite,
+			CG_DrawStringExt( 320 - w * cw / 2, 120, s1, colorWhite,
 							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 
 			w = CG_DrawStrlen( s2 );
-			CG_DrawStringExt( 320 - w * cw / 2, 180, s2, colorWhite,
+			CG_DrawStringExt( 320 - w * cw / 2, 140, s2, colorWhite,
 							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 
 		} else {
