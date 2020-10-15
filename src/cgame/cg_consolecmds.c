@@ -37,7 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
-
+// sswolf - minimizer
+#if defined _WIN32
+#include <Windows.h>
+#endif
 
 void CG_TargetCommand_f( void ) {
 	int targetNum;
@@ -575,7 +578,6 @@ void CG_vstrUp_f(void) {
 	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
 }
 
-
 // +wstats
 void CG_wStatsDown_f( void ) {
 	if ( !cg.demoPlayback ) {
@@ -719,6 +721,28 @@ void CG_ForceTapOut_f(void) {
 	trap_SendClientCommand("forcetapout");
 }
 /************ L0 - OSP dump ends here ************/
+
+/*
+================
+sswolf - minimizer (windows only)
+Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
+================
+*/
+static void CG_Minimize_f(void) 
+{
+#if defined _WIN32
+	HWND wnd;
+
+	wnd = GetForegroundWindow();
+	if (wnd) 
+	{
+		ShowWindow(wnd, SW_MINIMIZE);
+	}
+#else
+	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
+#endif
+}
+
 typedef struct {
 	char    *cmd;
 	void ( *function )( void );
@@ -788,6 +812,9 @@ static consoleCommand_t commands[] = {
 	{ "-wtopshots", CG_topshotsUp_f },
 	{ "forcetapout", CG_ForceTapOut_f },
 	// -OSPx
+
+	// sswolf - minimizer
+	{ "minimize", CG_Minimize_f },
 
 	// Arnout
 	{ "dumploc", CG_DumpLocation_f },
