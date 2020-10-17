@@ -240,7 +240,7 @@ menuDef {
 		textalignx 104
 		textaligny 14
 		visible 0
-		action { exec "cmd callvote start_match" ; uiScript closeingame }
+		action { exec "cmd callvote startmatch" ; uiScript closeingame }
 	}
 
 	itemDef {

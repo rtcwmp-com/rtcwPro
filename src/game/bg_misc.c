@@ -3371,7 +3371,7 @@ WARNING: when numOfClips is 0, DO NOT CHANGE ANYTHING under ps.
 */
 int BG_GrenadesForClass(int cls) {
 
-	char currentVal[256];
+	//char currentVal[256];
 
 	switch (cls) {
 		case PC_MEDIC:

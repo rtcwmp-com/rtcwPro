@@ -911,8 +911,8 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "follownext" );
 	trap_AddCommand( "followprev" );
 
-	trap_AddCommand( "start_match" );
-	trap_AddCommand( "reset_match" );
+	trap_AddCommand( "startmatch" );
+	trap_AddCommand( "resetmatch" );
 	trap_AddCommand( "swap_teams" );
 	// -NERVE - SMF
 	// L0 - Make it more available..

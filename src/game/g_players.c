@@ -271,7 +271,7 @@ void cmd_pmsg(gentity_t *ent)
 }
 
 // Actual command
-void cmd_throwKnives( gentity_t *ent ) {
+/*void cmd_throwKnives( gentity_t *ent ) {
 	vec3_t velocity, angles, offset, org, mins, maxs;
 	trace_t tr;
 	gentity_t *ent2;
@@ -290,7 +290,6 @@ void cmd_throwKnives( gentity_t *ent ) {
 	//	 ( g_throwKnives.integer != -1 ) ) {
 	//return;
 	//}
-/*
 	AngleVectors( ent->client->ps.viewangles, velocity, NULL, NULL );
 	VectorScale( velocity, 64, offset );
 	offset[2] += ent->client->ps.viewheight / 2;
@@ -320,9 +319,8 @@ void cmd_throwKnives( gentity_t *ent ) {
 	}
 
 ent->thrownKnifeTime = level.time;
-*/
-
 }
+*/
 
 /*
 ===================

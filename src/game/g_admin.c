@@ -1709,7 +1709,7 @@ void cmd_resetmatch(gentity_t *ent) {
 
 	tag = sortTag(ent);
 	AP(va("chat \"^zconsole:^7 %s has ^zresetted ^7match^z.\n\"", tag));
-	trap_SendConsoleCommand( EXEC_APPEND, va("reset_match"));
+	trap_SendConsoleCommand( EXEC_APPEND, va("resetmatch"));
 
 	// Log it
 	log =va("Player %s (IP:%i.%i.%i.%i) has resetted match.",
@@ -1793,7 +1793,7 @@ void cmd_shuffle(gentity_t *ent) {
 	}
 
 	AP(va("print \"^zconsole:^7 %s has ^zshuffled ^7teams^z.\n\"", tag));
-	trap_SendConsoleCommand(EXEC_APPEND, va("reset_match %i\n", GS_WARMUP));
+	trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch %i\n", GS_WARMUP));
 
 	// Log it
 	log =va("Player %s (IP:%i.%i.%i.%i) has shuffled teams.",
