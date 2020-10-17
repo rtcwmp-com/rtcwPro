@@ -129,12 +129,12 @@ typedef struct {
 	float h;    // height;
 } rectDef_t;
 
-typedef rectDef_t Rectangle;
+typedef rectDef_t _Rectangle;
 
 // FIXME: do something to separate text vs window stuff
 typedef struct {
-	Rectangle rect;                 // client coord rectangle
-	Rectangle rectClient;           // screen coord rectangle
+	_Rectangle rect;                    // client coord rectangle
+	_Rectangle rectClient;          // screen coord rectangle
 	const char *name;               //
 	const char *model;              //
 	const char *group;              // if it belongs to a group
@@ -146,8 +146,8 @@ typedef struct {
 	int ownerDrawFlags;             // show flags for ownerdraw items
 	float borderSize;               //
 	int flags;                      // visible, focus, mouseover, cursor
-	Rectangle rectEffects;          // for various effects
-	Rectangle rectEffects2;         // for various effects
+	_Rectangle rectEffects;         // for various effects
+	_Rectangle rectEffects2;            // for various effects
 	int offsetTime;                 // time based value for various effects
 	int nextTime;                   // time next effect should cycle
 	vec4_t foreColor;               // text color
@@ -251,7 +251,7 @@ typedef struct modelDef_s {
 
 typedef struct itemDef_s {
 	Window window;                  // common positional, border, style, layout info
-	Rectangle textRect;             // rectangle the text ( if any ) consumes
+	_Rectangle textRect;                // rectangle the text ( if any ) consumes
 	int type;                       // text, button, radiobutton, checkbox, textfield, listbox, combo
 	int alignment;                  // left center right
 	int textalignment;              // ( optional ) alignment for text within rect based on text width

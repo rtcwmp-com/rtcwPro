@@ -1266,7 +1266,7 @@ void AddIPBan( const char *str );
 
 void Svcmd_ShuffleTeams_f( void );
 void Svcmd_StartMatch_f( void );
-void Svcmd_ResetMatch_f(); // qboolean fDoReset, qboolean fDoRestart
+void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart);
 void Svcmd_SwapTeams_f( void );
 
 //
