@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/ui_shared.h"
 
 // sswolf - minimizer
-#if defined _WIN32
+#ifdef _WIN32
 #include <Windows.h>
 #endif
 
@@ -730,7 +730,7 @@ Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minim
 */
 static void CG_Minimize_f(void) 
 {
-#if defined _WIN32
+#ifdef _WIN32
 	HWND wnd;
 
 	wnd = GetForegroundWindow();
