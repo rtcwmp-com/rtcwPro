@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // sswolf - minimizer
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 void CG_TargetCommand_f( void ) {
