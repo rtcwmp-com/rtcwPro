@@ -93,9 +93,9 @@ static const char *teamArenaGameTypes[] = {
 	"SP",
 	"TEAM DM",
 	"CTF",
-	"WOLF MP",               // NERVE - SMF
-	"WOLF SW",               // NERVE - SMF
-	"WOLF CP",               // NERVE - SMF
+	"MP",               // NERVE - SMF
+	"SW",               // NERVE - SMF
+	"CP",               // NERVE - SMF
 	"TEAMTOURNAMENT"
 };
 
@@ -4367,10 +4367,10 @@ static void UI_Update( const char *name ) {
 			trap_Cvar_Set( "cl_maxpackets", "30" );
 			trap_Cvar_Set( "cl_packetdup", "1" );
 		} else if ( rate >= 4000 ) {
-			trap_Cvar_Set( "cl_maxpackets", "15" );
+			trap_Cvar_Set( "cl_maxpackets", "30" );
 			trap_Cvar_Set( "cl_packetdup", "2" );       // favor less prediction errors when there's packet loss
 		} else {
-			trap_Cvar_Set( "cl_maxpackets", "15" );
+			trap_Cvar_Set( "cl_maxpackets", "30" );
 			trap_Cvar_Set( "cl_packetdup", "1" );       // favor lower bandwidth
 		}
 	} else if ( Q_stricmp( name, "ui_GetName" ) == 0 ) {
@@ -4705,9 +4705,9 @@ static void UI_RunMenuScript( char **args ) {
 			uiInfo.nextServerStatusRefresh = 0;
 			uiInfo.nextFindPlayerRefresh = 0;
 		} else if ( Q_stricmp( name, "UpdateFilter" ) == 0 ) {
-			if ( ui_netSource.integer == AS_LOCAL ) {
+			//if (ui_netSource.integer == AS_LOCAL) {
 				UI_StartServerRefresh( qtrue );
-			}
+			//}
 			UI_BuildServerDisplayList( qtrue );
 			UI_FeederSelection( FEEDER_SERVERS, 0 );
 		} else if ( Q_stricmp( name, "check_ServerStatus" ) == 0 ) {
@@ -6136,6 +6136,9 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 	static char hostname[1024];
 	static char clientBuff[32];
 	static char pingstr[10];
+	static char fs_game[32];
+	static char gamename[32];
+	static char mapname_clean[32];
 	static int lastColumn = -1;
 	static int lastTime = 0;
 	*handle = -1;
@@ -6178,14 +6181,31 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 						return Info_ValueForKey( info, "hostname" );
 					}
 				}
-			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
+			case SORT_MAP:
+				if (Info_ValueForKey( info, "mapname" ) != "" )
+				{
+					Q_strncpyz( mapname_clean, Q_CleanStr( Q_strlwr( Info_ValueForKey( info, "mapname" ) ) ), sizeof( mapname_clean ) );
+					return va( "%.15s", mapname_clean );
+				}
+				else
+				{
+					return " ";
+				}
 			case SORT_CLIENTS:
 				Com_sprintf( clientBuff, sizeof( clientBuff ), "%s (%s)", Info_ValueForKey( info, "clients" ), Info_ValueForKey( info, "sv_maxclients" ) );
 				return clientBuff;
 			case SORT_GAME:
 				game = atoi( Info_ValueForKey( info, "gametype" ) );
 				if ( game >= 0 && game < numTeamArenaGameTypes ) {
-					return teamArenaGameTypes[game];
+					Q_strncpyz( fs_game, Q_strlwr( Info_ValueForKey( info, "game" ) ), sizeof( fs_game ) );   // Get it so we can filter
+					if ( !Q_stricmp( fs_game, "" ) ) {
+						Q_strncpyz( fs_game, "main", sizeof( fs_game ) );       // none set, replace with main
+
+					}
+					// martin - 6/1 - clean the string here because it might be a null fs_game which will crash
+					Com_sprintf( gamename, sizeof( gamename ), "%.2s/^N%.7s", teamArenaGameTypes[game], Q_CleanStr( fs_game ) );
+					return gamename;
+					//return teamArenaGameTypes[game];
 				} else {
 					return "Unknown";
 				}
@@ -7706,6 +7726,7 @@ vmCvar_t ui_showtooltips;
 // -OSPx
 vmCvar_t ui_demoDir;
 vmCvar_t ui_gameversion;
+vmCvar_t fs_game;
 
 cvarTable_t cvarTable[] = {
 
@@ -7847,6 +7868,7 @@ cvarTable_t cvarTable[] = {
 	{ &ui_hudAlpha, "cg_hudAlpha", "1.0", CVAR_ARCHIVE },
 
 	{ &ui_demoDir, "ui_demoDir", "demos", CVAR_ARCHIVE },
+	{ &fs_game, "fs_game", "", 0 },
 	{ &ui_gameversion, "ui_gameversion", PRO_VERSION, CVAR_ARCHIVE }
 };
 

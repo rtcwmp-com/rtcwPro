@@ -547,16 +547,42 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 	// Telefrags only add 100 points.. not 100k!!
 	else if ( mod == MOD_TELEFRAG ) {
 		dmg = 100;
-	} else { dmg = dmg_ref;}
+	}
+	else {
+
+		// RtcwPro do not give more damage the user's full health - in OSP panzer awarded 400 damage on a kill/gib - let's try to even out the damange efficiency
+		if (dmg_ref >= abs(FORCE_LIMBO_HEALTH) && dmg_ref < abs(GIB_HEALTH)) {
+			dmg = abs(FORCE_LIMBO_HEALTH);
+		}
+		else if (dmg_ref >= abs(GIB_HEALTH)) {
+			dmg = abs(GIB_HEALTH);
+		}
+		else
+			dmg = dmg_ref;
+	}
 
 	// Player team stats
-	if ( g_gametype.integer >= GT_WOLF &&
-		 targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam ) {
-		attacker->client->sess.team_damage += dmg;
+	if ( g_gametype.integer >= GT_WOLF && targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam ) {
+
+		if (attacker != targ) { // don't give team damage for suicide (same as OSP)
+			attacker->client->sess.team_damage += dmg;
+		}
+
 		// Don't count self kill as team kill..because it ain't!
 		if ( targ->health <= 0 && !(mod == MOD_SELFKILL || mod == MOD_SUICIDE)) {
-			attacker->client->sess.team_kills++;
-			targ->client->sess.deaths++;	// Record death when TK occurs
+
+			// RtcwPro temporary fixes below - when you panzer yourself and a teammate the MOD for the attacker is not a MOD_SUICIDE it's a MOD_ROCKET/MOD_ROCKET_SPLASH
+
+			if (attacker != targ) {
+				attacker->client->sess.team_kills++;  // if it's NOT a self kill count it as a TK (same as OSP)
+			}
+
+			if (attacker == targ) {
+				attacker->client->sess.suicides++;  // if it IS a self kill count it as a suicide (same as OSP)
+			}
+			else {
+				targ->client->sess.deaths++;	// Record death when TK occurs
+			}
 		}
 		return;
 	}

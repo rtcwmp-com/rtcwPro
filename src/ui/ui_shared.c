@@ -75,8 +75,8 @@ void Tooltip_Initialize( itemDef_t *item ) {
 }
 
 void Tooltip_ComputePosition( itemDef_t *item ) {
-	Rectangle *itemRect = &item->window.rectClient;
-	Rectangle *tipRect = &item->toolTipData->window.rectClient;
+	_Rectangle *itemRect = &item->window.rectClient;
+	_Rectangle *tipRect = &item->toolTipData->window.rectClient;
 
 	DC->textFont( item->toolTipData->font );
 

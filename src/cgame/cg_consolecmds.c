@@ -38,8 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../ui/ui_shared.h"
 
 // sswolf - minimizer
-#if defined _WIN32
-#include <Windows.h>
+#ifdef _WIN32
+#include <windows.h>
 #endif
 
 void CG_TargetCommand_f( void ) {
@@ -730,7 +730,7 @@ Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minim
 */
 static void CG_Minimize_f(void) 
 {
-#if defined _WIN32
+#ifdef _WIN32
 	HWND wnd;
 
 	wnd = GetForegroundWindow();
@@ -911,8 +911,8 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "follownext" );
 	trap_AddCommand( "followprev" );
 
-	trap_AddCommand( "start_match" );
-	trap_AddCommand( "reset_match" );
+	trap_AddCommand( "startmatch" );
+	trap_AddCommand( "resetmatch" );
 	trap_AddCommand( "swap_teams" );
 	// -NERVE - SMF
 	// L0 - Make it more available..
