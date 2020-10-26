@@ -40,6 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
 #define GAMEVERSION "RtcwPro 1.0 beta"
+#define JSONGAMESTATVERSION "0.1"
 // done.
 
 #define BODY_QUEUE_SIZE     8
@@ -858,6 +859,8 @@ typedef struct {
 
 	fileHandle_t logFile;
 
+    fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+
 	// store latched cvars here that we want to get at often
 	int maxclients;
 
@@ -1426,6 +1429,7 @@ extern vmCvar_t g_gametype;
 // Rafael gameskill
 extern vmCvar_t g_gameskill;
 // done
+extern vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
@@ -1945,6 +1949,7 @@ void G_globalSound(char *sound);
 void G_resetRoundState(void);
 void G_resetModeState(void);
 int G_checkServerToggle(vmCvar_t *cv);
+char* GetLevelTime(void);
 ///////////////////////
 // g_referee.c
 //
@@ -2052,6 +2057,16 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 void G_printMatchInfo( gentity_t *ent );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
+
+// g_json.c
+void G_stats2JSON(int winner );
+void G_writeGameHeader (void);
+//void G_writeKillEvent (char* killer, char* victim, char* weapon);
+void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealth);
+void G_writeTeamKillEvent (char* killer, char* victim);
+void G_writeSuicideEvent (char* player);
+void G_writeReviveEvent (char* revived, char* medic);
+void G_writeObjectiveEvent (char* team, char* objective, char* result);
 // OSPx - New stuff below
 //
 // g_cmds.c

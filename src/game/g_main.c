@@ -97,6 +97,7 @@ vmCvar_t g_swapteams;
 
 vmCvar_t g_restarted;
 vmCvar_t g_log;
+vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -289,11 +290,11 @@ vmCvar_t team_nocontrols;
 // Match specific
 vmCvar_t team_commands; // Team commands (captain..)
 vmCvar_t g_tournament;	// Ready-unready system
-vmCvar_t g_ltNades;			// Number of nades a lt starts with 
-vmCvar_t g_medicNades;		// Number of nades a med starts with 
+vmCvar_t g_ltNades;			// Number of nades a lt starts with
+vmCvar_t g_medicNades;		// Number of nades a med starts with
 vmCvar_t g_soldNades;		// Number of nades sold starts with
 vmCvar_t g_engNades;		// Number of nades eng starts with
-vmCvar_t g_medicClips;		// Number of clips in weapon med starts with 
+vmCvar_t g_medicClips;		// Number of clips in weapon med starts with
 vmCvar_t g_engineerClips;	// Number of clips in weapon eng starts with
 vmCvar_t g_soldierClips;	// Number of clips in weapon sold starts with
 vmCvar_t g_leutClips;		// Number of clips in weapon leut starts with
@@ -380,7 +381,7 @@ cvarTable_t gameCvarTable[] = {
 
 	{ &g_log, "g_log", "", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
-
+	{ &g_gameStatslog, "g_gameStatslog", "0", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
 	// show_bug.cgi?id=500
@@ -1559,11 +1560,28 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			G_LogPrintf( "------------------------------------------------------------\n" );
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
 		}
+
+        if (g_gameStatslog.integer && g_gamestate.integer != GS_WARMUP) { // definitely needs improving but here for testing purposes
+                char newGamestatFile[MAX_QPATH];
+                qtime_t ct;
+                trap_RealTime(&ct);
+                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year);
+                trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year ), &level.gameStatslogFile, FS_WRITE );
+                if ( !level.gameStatslogFile ) {
+                    G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
+                } else {
+                    G_writeGameHeader();
+
+                }
+
+            }
+
 	} else {
 		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 			G_Printf( "Not logging to disk.\n" );
 		}
 	}
+
 
 	G_InitWorldSession();
 
@@ -1670,6 +1688,11 @@ void G_ShutdownGame( int restart ) {
 		G_LogPrintf( "ShutdownGame:\n" );
 		G_LogPrintf( "------------------------------------------------------------\n" );
 		trap_FS_FCloseFile( level.logFile );
+	}
+	if (level.gameStatslogFile) {
+        // we may want to put some closing information into the gamestat file...
+        trap_FS_FCloseFile( level.gameStatslogFile );
+
 	}
 
 	// Ridah, shutdown the Botlib, so weapons and things get reset upon doing a "map xxx" command

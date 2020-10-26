@@ -334,8 +334,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	if ( meansOfDeath == MOD_SELFKILL && g_gamestate.integer == GS_PLAYING) {
 		int r = rand() %2; // randomize messages
-			
-		if (r == 0)			
+
+		if (r == 0)
 			AP(va("print \"%s ^7slit his throat.\n\"", self->client->pers.netname));
 		else if (r == 1)
 			AP(va("print \"%s ^7commited suicide.\n\"", self->client->pers.netname));
@@ -346,7 +346,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// If person gets stabbed use custom sound from soundpack
 	// it's broadcasted to victim and heard only if standing near victim...
 	if ( meansOfDeath == MOD_KNIFE_STEALTH && !OnSameTeam(self, attacker) && g_fastStabSound.integer) {
-		int r = rand() %2; 
+		int r = rand() %2;
 		char *snd;
 
 		if (r == 0)
@@ -354,7 +354,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		else
 			snd = "humiliation.wav";
 
-		APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" : 
+		APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" :
 			((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
 
 		attacker->client->sess.knifeKills++;
@@ -362,7 +362,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 
 	// RtcwPro commented this out - we want artillery distinguished from airstrike
-	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {		
+	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {
 	//	meansOfDeath = MOD_AIRSTRIKE; // Just Remaps it back..
 	//}
 
@@ -378,12 +378,25 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
+        // GameStats logging .... probably want to control this via cvar (as well as do a better job in general)
+        if (qtrue) {
+            if (killer == self->s.number) {
+                G_writeSuicideEvent(self->client->pers.netname);
+            }
+            else if (OnSameTeam(attacker, self)) {
+                G_writeTeamKillEvent(killerName,self->client->pers.netname);
+            }
+            else {
+                G_writeKillEvent(killerName,self->client->pers.netname, obit,attacker->health);
+            }
+
+        }
 	}
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
 		if (!OnSameTeam(attacker, self)) {
-			
+
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
 			attacker->client->pers.life_kills++;		// life kills
 
@@ -525,6 +538,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				item = BG_FindItem( "Objective" );
 			}
 			G_matchPrintInfo(va("Axis have lost %s!", self->message), qfalse);
+
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}
 
@@ -1329,7 +1343,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 // JPW NERVE overcome previous chunk of code for making grenades work again
 		if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) && ( take > 190 ) ) { // 190 is greater than 2x mauser headshot, so headshots don't gib
 			targ->health = GIB_HEALTH - 1;
-			
+
 			// gibbed by a nade or other explosion
 			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
 			{

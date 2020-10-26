@@ -904,7 +904,6 @@ void G_printMatchInfo( gentity_t *ent ) {
 	char *ref;
 	char n1[MAX_NETNAME];
 	char n2[MAX_NETNAME];
-
 	qtime_t ct;
 	trap_RealTime(&ct);
 	CP(va("sc \"\nMod: %s \n^7Server: %s  \n^7Time: ^7%02d:%02d:%02d ^d(^7%02d %s %d^d)\n\n\"",
@@ -1030,6 +1029,7 @@ void G_printMatchInfo( gentity_t *ent ) {
 				tot_gp ) );
 	}
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
+
 }
 
 // Dumps end-of-match info
@@ -1195,6 +1195,10 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 		}
 	}
+    if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
+    //if (g_gameStatslog.integer) {
+        G_stats2JSON(winner);
+    }
 }
 
 /***********************************************************************************/

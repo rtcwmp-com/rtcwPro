@@ -403,6 +403,9 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 void Team_ReturnFlag( int team ) {
 	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
+	if (g_gameStatslog.integer) { // still needs some fixing....
+        G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), ".."  );
+	}
 }
 
 void Team_FreeEntity( gentity_t *ent ) {
