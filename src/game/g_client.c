@@ -1890,6 +1890,10 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 	}
 
+	// sswolf - move here from SetTeam
+	CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
+	CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
+
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
