@@ -4241,8 +4241,8 @@ void CG_OutOfAmmoChange( qboolean allowforceswitch ) {
 // jpw
 
 	// OSPx - wrapped for noAmmoAutoSwitch
-//	if (allowforceswitch)   // nihi commented out
-//	{
+	if (allowforceswitch)
+	{
 		// JPW NERVE -- early out if we just fired Panzerfaust, go to pistola, then grenades
 		if (cg.weaponSelect == WP_PANZERFAUST) {
 			for (i = 0; i < MAX_WEAPS_IN_BANK_MP; i++)
@@ -4285,7 +4285,7 @@ void CG_OutOfAmmoChange( qboolean allowforceswitch ) {
 			CG_FinishWeaponChange(cg.predictedPlayerState.weapon, cg.weaponSelect); //----(SA)
 			return;
 		}
-//	} // -OSPx - Wrapper ends here..
+	} // -OSPx - Wrapper ends here..
 
 	//
 	// more complicated selection

@@ -624,6 +624,8 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 				return;
 			}
 		} // end
+
+
 		// NERVE - SMF
 		// L0 - Ready (temporary) lock
 		if (teamInfo[team].team_lock && !forced) {
@@ -745,6 +747,14 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->sess.spectatorState = specState;
 	client->sess.spectatorClient = specClient;
 	client->pers.ready = qfalse;
+
+	// set ServerInfo team
+	/*if (team == TEAM_BLUE)
+		trap_Cvar_VariableStringBuffer("Players_Allies", clientNum);
+
+	if (team == TEAM_RED)
+		trap_Cvar_Set("Players_Axis", clientNum);*/
+
 	// During team switching you can sometime spawn immediately
 	client->pers.lastReinforceTime = 0;
 	if ( team == TEAM_RED ) {

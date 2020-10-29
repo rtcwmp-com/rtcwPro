@@ -545,10 +545,8 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 		if ( !level.intermissiontime ) {
 			if ( state ) {
 				ent->client->pers.ready = qtrue;
-				ent->client->ps.powerups[PW_READY] = INT_MAX;
 			} else {
 				ent->client->pers.ready = qfalse;
-				ent->client->ps.powerups[PW_READY] = 0;
 			}
 
 			// Doesn't rly matter..score tab will show slow ones..
@@ -597,7 +595,6 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 
 		if ((cl->client->pers.ready != ready) && !level.intermissiontime) {
 			cl->client->pers.ready = ready;
-			cl->client->ps.powerups[PW_READY] = (ready ? INT_MAX : 0);
 			++p;
 		}
 	}

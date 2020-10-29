@@ -100,7 +100,7 @@ CG_ParseTeamInfo
 static void CG_ParseTeamInfo( void ) {
 	int i;
 	int client;
-
+	
 	// NERVE - SMF
 	cg.identifyClientNum = atoi( CG_Argv( 1 ) );
 	cg.identifyClientHealth = atoi( CG_Argv( 2 ) );
@@ -109,20 +109,22 @@ static void CG_ParseTeamInfo( void ) {
 	numSortedTeamPlayers = atoi( CG_Argv( 3 ) );
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
-		client = atoi( CG_Argv( i * 9 + 4 ) );
+		client = atoi( CG_Argv( i * 10 + 4 ) );
 
 		sortedTeamPlayers[i] = client;
 
-		cgs.clientinfo[ client ].location = atoi( CG_Argv( i * 9 + 5 ) );
-		cgs.clientinfo[ client ].health = atoi( CG_Argv( i * 9 + 6 ) );
-		cgs.clientinfo[ client ].powerups = atoi( CG_Argv( i * 9 + 7 ) );
+		cgs.clientinfo[client].location = atoi( CG_Argv( i * 10 + 5 ) );
+		cgs.clientinfo[client].health = atoi( CG_Argv( i * 10 + 6 ) );
+		cgs.clientinfo[client].powerups = atoi( CG_Argv( i * 10 + 7 ) );
 
-		cg_entities[ client ].currentState.teamNum = atoi( CG_Argv( i * 9 + 8 ) );
+		cg_entities[client].currentState.teamNum = atoi( CG_Argv( i * 10 + 8 ) );
 
-		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 9 + 9));
-		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 9 + 10));
-		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 9 + 11));
-		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 9 + 12));
+		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 10 + 9));
+		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 10 + 10));
+		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 10 + 11));
+		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 10 + 12));
+		//cgs.clientinfo[client].isReady = atoi(CG_Argv(i * 10 + 13));
+		player_ready_status[client].isReady = atoi(CG_Argv(i * 10 + 13));
 	}
 }
 
@@ -262,7 +264,7 @@ void CG_ParseWolfinfo( void ) {
 		trap_S_StartLocalSound(cgs.media.announceFight, CHAN_ANNOUNCER);
 
 		CG_Printf("[skipnotify]^1FIGHT!\n");
-		CPri(CG_TranslateString("^1FIGHT!\n"));
+		CPriP(CG_TranslateString("^1FIGHT!\n"));
 	}
 
 	if ( !cgs.localServer ) {
@@ -405,25 +407,6 @@ Parse Ready state
 void CG_ParseReady(const char* pState) {
 	cgs.readyState = atoi(pState);
 }
-
-/*
-================
-Parse Players ready
-================
-*/
-void CG_ParsePlayersReady(const char* pState) {
-	cgs.playersReady = atoi( pState );
-}
-
-/*
-================
-Parse Player count
-================
-*/
-void CG_ParsePlayerCount(const char* pState) {
-	cgs.playerCount = atoi(pState);
-}
-
 
 /*
 ================
@@ -1970,8 +1953,8 @@ void CG_dumpStats( void ) {
 	// /me holds breath (using circular va() buffer)
 	if ( cgs.dumpStatsFile == 0 ) {
 		fDoScores = qtrue;
-		cgs.dumpStatsFileName = va( "stats/%s.%02d.%d/%02d%02d%02d.%s.txt",
-									aMonths[ct.tm_mon],ct.tm_mday, 1900 + ct.tm_year,
+		cgs.dumpStatsFileName = va( "stats/%d.%02d.%02d/%02d%02d%02d.%s.txt",
+									1900 + ct.tm_year, ct.tm_mon + 1, ct.tm_mday,
 									ct.tm_hour, ct.tm_min, ct.tm_sec, Info_ValueForKey( info, "mapname" ) ); // Map has to be last so they sort right..
 	}
 

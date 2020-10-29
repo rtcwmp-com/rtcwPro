@@ -159,13 +159,13 @@ int isWeaponLimited( gclient_t *client, int weap ) {
 	int count=0;
 
 	// Limit
-	if (( weap == 6 ) && ( client->pers.restrictedWeapon != WP_MAUSER ) )
+	if (( weap == 6 ) && (client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_MAUSER ) )
 		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisSniper : level.alliedSniper;
-	else if (( weap == 8 ) && ( client->pers.restrictedWeapon != WP_PANZERFAUST ))
+	else if (( weap == 8 ) && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_PANZERFAUST ))
 		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisPF : level.alliedPF;
-	else if (( weap == 9 )  && ( client->pers.restrictedWeapon != WP_VENOM ))
+	else if (( weap == 9 )  && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_VENOM ))
 		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisVenom : level.alliedVenom;
-	else if (( weap == 10 ) && ( client->pers.restrictedWeapon != WP_FLAMETHROWER ))
+	else if (( weap == 10 ) && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_FLAMETHROWER ))
 		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer : level.alliedFlamer;
 
 	if (count >= sortWeaponLimit(weap))

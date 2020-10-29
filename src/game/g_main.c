@@ -307,8 +307,11 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-// RTCWPro - custom configs
+// RTCWPro
 vmCvar_t g_customConfig;
+//vmCvar_t Players_Allies;
+//vmCvar_t Players_Axis;
+vmCvar_t P; // ET Port Players server info
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -543,7 +546,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_limit,      "vote_limit", "5", 0, 0, qfalse, qfalse },
 	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
 
-	// RTCWPro - custom config
+	// RTCWPro
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
@@ -570,7 +573,9 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
-
+	//{ &Players_Allies, "Players_Allies", "(None)", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue }, 
+	//{ &Players_Axis, "Players_Axis", "(None)", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
+	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
 // bk001129 - made static to avoid aliasing
@@ -2024,6 +2029,9 @@ void CalculateRanks( void ) {
 		}
 	}
 
+	//RtcwPro player info
+	ServerPlayerInfo();
+
 	// see if it is time to end the level
 	CheckExitRules();
 
@@ -2243,7 +2251,14 @@ void ExitLevel( void ) {
 			continue;
 		}
 		cl->ps.persistant[PERS_SCORE] = 0;
+		cl->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on exit
 	}
+
+	// reset all the weapon restrictions so next time the players spawn they get set correctly
+	level.alliedFlamer = level.axisFlamer = 0;
+	level.alliedSniper = level.axisSniper = 0;
+	level.alliedPF = level.axisPF = 0;
+	level.alliedVenom = level.axisVenom = 0;
 
 	// we need to do this here before chaning to CON_CONNECTING
 	G_WriteSessionData();
@@ -3154,6 +3169,49 @@ void pauseCheck(void) {
 }
 
 
+/*
+Player Info (port from ET)
+sane replacement for OSP's Players_Axis/Players_Allies
+*/
+void ServerPlayerInfo(void) {
+	//128 bits
+	char playerinfo[MAX_CLIENTS + 1];
+	gentity_t* e;
+	team_t playerteam;
+	int i;
+	int lastclient;
+
+	memset(playerinfo, 0, sizeof(playerinfo));
+
+	lastclient = -1;
+	e = &g_entities[0];
+	for (i = 0; i < MAX_CLIENTS; i++, e++) {
+		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED) {
+			playerinfo[i] = '-';
+			continue;
+		}
+
+		//keep track of highest connected/connecting client
+		lastclient = i;
+
+		if (e->inuse == qfalse) {
+			playerteam = 0;
+		}
+		else {
+			playerteam = e->client->sess.sessionTeam;
+		}
+		playerinfo[i] = (char)'0' + playerteam;
+	}
+	//terminate the string, if we have any non-0 clients
+	if (lastclient != -1) {
+		playerinfo[lastclient + 1] = (char)0;
+	}
+	else {
+		playerinfo[0] = (char)0;
+	}
+
+	trap_Cvar_Set("P", playerinfo);
+}
 
 
 /*
