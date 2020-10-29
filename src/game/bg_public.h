@@ -422,9 +422,8 @@ typedef enum {
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
 	PERS_WOLFKICK,
-	// L0 - Hitsounds
-	PERS_HITHEAD,
-	PERS_HIT
+	// Weapon Restrictions
+	PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
 } persEnum_t;
 
 
@@ -491,7 +490,7 @@ typedef enum {
 	PW_REDFLAG,
 	PW_BLUEFLAG,
 	PW_BALL,
-	PW_READY,			// Ready
+	PW_READY,			// Ready (KK - not used anymore but leaving in place for now)
 	PW_BLACKOUT = 14,	// Specklock
 
 	PW_NUM_POWERUPS
@@ -1183,6 +1182,13 @@ typedef struct weap_ws_convert_s {
 	extWeaponStats_t iWS;
 } weap_ws_convert_t;
 // OSP
+
+// RtcwPro - struct for holding client ready info that both server and client can access
+typedef struct {
+	int isReady;
+} player_ready_status_t;
+
+player_ready_status_t player_ready_status[MAX_CLIENTS];
 
 // How many players on the overlay
 #define TEAM_MAXOVERLAY     8

@@ -29,7 +29,6 @@ If you have questions concerning this license or the applicable additional terms
 // cg_scoreboard -- draw the scoreboard on top of the game screen
 #include "cg_local.h"
 
-
 #define SCOREBOARD_WIDTH    ( 31 * BIGCHAR_WIDTH )
 
 /*
@@ -71,7 +70,8 @@ int is_ready( int clientNum ) {
 
 	for ( i = 0 ; i < cgs.maxclients ; i++ ) {
 		if (cgs.clientinfo[i].team != TEAM_SPECTATOR && cgs.clientinfo[i].clientNum == clientNum) {
-			rdy = (cgs.clientinfo[clientNum].powerups & (1 << PW_READY) ) ? 1 : 0;
+			//rdy = (cgs.clientinfo[clientNum].powerups & (1 << PW_READY) ) ? 1 : 0;
+			rdy = player_ready_status[clientNum].isReady;
 			return rdy;
 		}
 	}
@@ -509,7 +509,7 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 	// OSPx - Country Flags
 	if ((score->ping != -1) && (score->ping != 999) && (cg_showFlags.integer))
 	{
-		if (cf_draw(tempx - 7, y - 7, fade, ci->clientNum))
+		if (cf_draw(tempx - 6, y - 7, fade, ci->clientNum))
 		{
 			offset += 14;
 			tempx += 18;

@@ -741,8 +741,15 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 	int i;
 
 	for (i = 0; i < level.numConnectedClients; i++) {
-		g_entities[level.sortedClients[i]].client->pers.ready = 0;
+		g_entities[level.sortedClients[i]].client->pers.ready = qfalse;
+		g_entities[level.sortedClients[i]].client->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on restart
 	}
+
+	// reset all the weapon restrictions so next time the players spawn they get set correctly
+	level.alliedFlamer = level.axisFlamer = 0;
+	level.alliedSniper = level.axisSniper = 0;
+	level.alliedPF = level.axisPF = 0;
+	level.alliedVenom = level.axisVenom = 0;
 	
 
 	if (fDoReset) {

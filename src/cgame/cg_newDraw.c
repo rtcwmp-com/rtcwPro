@@ -2733,10 +2733,14 @@ void CG_KeyEvent( int key, qboolean down ) {
 
 // prevent centerview exploits
 qboolean CG_CheckCenterView() {
-	if ( cg.pmext.blockCenterViewTime && cg.time < cg.pmext.blockCenterViewTime ) {
+	
+	// RtcwPro always return false we do not want centerview
+	return qfalse;
+
+	/*if ( cg.pmext.blockCenterViewTime && cg.time < cg.pmext.blockCenterViewTime ) {
 		return qfalse;
 	}
-	return qtrue;
+	return qtrue;*/
 }
 
 int CG_ClientNumFromName( const char *p ) {
