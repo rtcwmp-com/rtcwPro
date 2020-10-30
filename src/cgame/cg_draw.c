@@ -2947,7 +2947,8 @@ static void CG_DrawWarmup( void ) {
 
 
 			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );
-			s2 = CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
+
+			s2 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
 
 			w = CG_DrawStrlen( s1 );
 			CG_DrawStringExt( 320 - w * cw / 2, 120, s1, colorWhite,
@@ -2966,7 +2967,7 @@ static void CG_DrawWarmup( void ) {
 
 			if ( !cg.demoPlayback && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR &&
 			   ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
-				s1 = CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
+				s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
 				w = CG_DrawStrlen( s1 );
 				CG_DrawStringExt( 320 - w * cw / 2, 160, s1, colorWhite,
 								  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
