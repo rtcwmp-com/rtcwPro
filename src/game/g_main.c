@@ -1560,8 +1560,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			G_LogPrintf( "------------------------------------------------------------\n" );
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
 		}
-
-        if (g_gameStatslog.integer && g_gamestate.integer != GS_WARMUP) { // definitely needs improving but here for testing purposes
+        if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) { // definitely needs improving but here for testing purposes
                 char newGamestatFile[MAX_QPATH];
                 qtime_t ct;
                 trap_RealTime(&ct);

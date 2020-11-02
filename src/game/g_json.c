@@ -94,9 +94,9 @@ void G_stats2JSON(int winner ) {
                 }
             }
 
-            json_object_set_new(jdata, "wstats", weapArray);
+            json_object_set(jdata, "wstats", weapArray);
             json_array_append(playersArray, jdata);
-
+            json_decref(weapArray);
             json_decref(jdata);
 
         }
@@ -303,6 +303,9 @@ void G_writeObjectiveEvent (char* team, char* objective, char* result){
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);  // come back and make globally available
+    if (!g_gameStatslog.integer) {
+        return;
+    }
     if (eventtype == 0) {
         json_t *eventStats =  json_array();
         json_object_set_new(jdata, "timestamp",    json_string(" "));
