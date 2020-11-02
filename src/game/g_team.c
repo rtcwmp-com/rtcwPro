@@ -996,7 +996,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 		int playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;
 
-		if (player->inuse) { // && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
+		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
 
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
 			if (player->client->ps.pm_flags & PMF_LIMBO) {
@@ -1021,7 +1021,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 				level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
 				playerAmmo, playerAmmoClip, playerNades, playerWeapon, player->client->pers.ready); // set ready status on each client
 
-			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // do we need to set this on the server also?
+			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 
 			j = strlen(entry);
 			if (stringlength + j > sizeof(string)) {
