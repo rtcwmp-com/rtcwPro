@@ -648,6 +648,7 @@ typedef struct {
 	unsigned int int_selectedWeapon;
 	// tardo
 	qboolean ready;
+	int restrictedWeapon;
 } clientPersistant_t;
 
 // L0 - antilag port     nihi added
@@ -1247,8 +1248,8 @@ void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 void RemoveWeaponRestrictions(gentity_t *ent);
-void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
-void CheckTeamForWeapon(team_t team, weapon_t enumWeapon, int weapon);
+//void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+//void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);

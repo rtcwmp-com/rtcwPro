@@ -2251,7 +2251,7 @@ void ExitLevel( void ) {
 			continue;
 		}
 		cl->ps.persistant[PERS_SCORE] = 0;
-		cl->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on exit
+		//cl->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on exit
 	}
 
 	// reset all the weapon restrictions so next time the players spawn they get set correctly
