@@ -25,7 +25,6 @@ void G_stats2JSON(int winner ) {
     json_t *root = json_object();
     json_t *playersArray =  json_array();
     json_t* weapArray;
-    weapArray = json_array();
 
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
 
@@ -77,6 +76,7 @@ void G_stats2JSON(int winner ) {
             json_object_set_new(jdata, "killpeak", json_integer(cl->sess.killPeak));
             json_object_set_new(jdata, "efficiency", json_real(eff));
 
+            weapArray = json_array();
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
                 if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
