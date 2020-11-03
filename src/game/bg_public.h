@@ -421,9 +421,9 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
+	PERS_WOLFKICK
 	// Weapon Restrictions
-	PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
+	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
 } persEnum_t;
 
 
