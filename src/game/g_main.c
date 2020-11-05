@@ -492,7 +492,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &TXThandle, "TXThandle", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_axisSpawnProtectionTime, "g_axisSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_alliedSpawnProtectionTime, "g_alliedSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_serverMessage, "g_serverMessage", "", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_serverMessage, "g_serverMessage", "^1Server running RtcwPro", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
 
@@ -2208,7 +2208,7 @@ void BeginIntermission( void ) {
 	// send the current scoring to all clients
 	SendScoreboardMessageToAllClients();
 
-		G_matchInfoDump( EOM_MATCHINFO );
+	G_matchInfoDump(EOM_MATCHINFO);
 }
 
 
@@ -2704,7 +2704,6 @@ void CheckExitRules( void ) {
 			return;
 		}
 	}
-
 }
 
 
@@ -3137,22 +3136,29 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
-	// Check now
-	if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
-		trap_Cvar_Set( "g_gamelocked", "0" );
+	if (g_gamestate.integer == GS_PLAYING) // RtcwPro added this to avoid erroneous text at the end of the round
+	{
+		// Check now
+		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
+			trap_Cvar_Set("g_gamelocked", "0");
 			AP("chat \"^zconsole: ^7Teams have no players! Server is releasing the team lock^z!\n\"");
-	} else if (!level.axisPlayers && g_gamelocked.integer == 3) {
-		trap_Cvar_Set( "g_gamelocked", "2" );
+		}
+		else if (!level.axisPlayers && g_gamelocked.integer == 3) {
+			trap_Cvar_Set("g_gamelocked", "2");
 			AP("chat \"^zconsole: ^1Axis ^7team has no players! Server unlocked Axis team^z!\n\"");
-	} else if (!level.axisPlayers && g_gamelocked.integer == 1) {
-		trap_Cvar_Set( "g_gamelocked", "0" );
+		}
+		else if (!level.axisPlayers && g_gamelocked.integer == 1) {
+			trap_Cvar_Set("g_gamelocked", "0");
 			AP("chat \"^zconsole: ^1Axis ^7team has no players! Server unlocked Axis team^z!\n\"");
-	} else if (!level.alliedPlayers && g_gamelocked.integer == 2) {
-		trap_Cvar_Set( "g_gamelocked", "0" );
+		}
+		else if (!level.alliedPlayers && g_gamelocked.integer == 2) {
+			trap_Cvar_Set("g_gamelocked", "0");
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
-	} else if (!level.alliedPlayers && g_gamelocked.integer == 3) {
-		trap_Cvar_Set( "g_gamelocked", "1" );
+		}
+		else if (!level.alliedPlayers && g_gamelocked.integer == 3) {
+			trap_Cvar_Set("g_gamelocked", "1");
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
+		}
 	}
 }
 

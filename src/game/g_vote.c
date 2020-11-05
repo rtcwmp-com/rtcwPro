@@ -324,7 +324,7 @@ int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, 
 		// Load in comp settings for current gametype
 		if (G_ConfigSet(level.voteInfo.vote_value))
 		{
-			AP("cpm \"Competition Settings Loaded!\n\"");
+			AP(va("cpm \"%s Settings Loaded!\n\"", level.voteInfo.vote_value));
 		}
 
 		if (g_tournament.value == 1 && g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
