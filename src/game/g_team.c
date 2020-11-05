@@ -989,22 +989,24 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	string[0] = 0;
 	stringlength = 0;
 
-	for ( i = 0, cnt = 0; i < level.numConnectedClients && cnt < TEAM_MAXOVERLAY; i++ ) {
+	// Do each team for team information
+	for (i = 0, cnt = 0; i < level.numConnectedClients && cnt < TEAM_MAXOVERLAY; i++) {
 
 		player = g_entities + level.sortedClients[i];
 
 		int playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;
 
-		if ( player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam ) {
+		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
 
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
-			if ( player->client->ps.pm_flags & PMF_LIMBO ) {
+			if (player->client->ps.pm_flags & PMF_LIMBO) {
 				h = 0;
-			} else {
+			}
+			else {
 				h = player->client->ps.stats[STAT_HEALTH];
 			}
 
-			if ( h < 0 ) {
+			if (h < 0) {
 				h = 0;
 			}
 
@@ -1014,16 +1016,18 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 
-			Com_sprintf( entry, sizeof( entry ),
-						 " %i %i %i %i %i %i %i %i %i",
-						 level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-						 playerAmmo, playerAmmoClip, playerNades, playerWeapon);
+			Com_sprintf(entry, sizeof(entry),
+				" %i %i %i %i %i %i %i %i %i %i",
+				level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, player->client->pers.ready); // set ready status on each client
 
-			j = strlen( entry );
-			if ( stringlength + j > sizeof( string ) ) {
+			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
+
+			j = strlen(entry);
+			if (stringlength + j > sizeof(string)) {
 				break;
 			}
-			strcpy( string + stringlength, entry );
+			strcpy(string + stringlength, entry);
 			stringlength += j;
 			cnt++;
 		}
@@ -1032,10 +1036,10 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	// NERVE - SMF
 	identClientNum = ent->client->ps.identifyClient;
 
-
-	if ( g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client ) {
-		identHealth =  g_entities[identClientNum].health;
-	} else {
+	if (g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client) {
+		identHealth = g_entities[identClientNum].health;
+	}
+	else {
 		identClientNum = -1;
 		identHealth = 0;
 	}
@@ -1861,5 +1865,6 @@ void G_readyStart( void ) {
 void G_readyTeamLock( void ) {
 	teamInfo[TEAM_RED].team_lock = qtrue;
 	teamInfo[TEAM_BLUE].team_lock = qtrue;
+	trap_Cvar_Set("g_gamelocked", "3");
 }
 

@@ -1256,8 +1256,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 		if ( !( targ->client->ps.eFlags & EF_HEADSHOT ) ) {  // only toss hat on first headshot
 			G_AddEvent( targ, EV_LOSE_HAT, DirToByte( dir ) );
-		// L0 - Hitsounds (head)
-		Hitsounds( targ, attacker, qfalse);
 		}
 
 		targ->client->ps.eFlags |= EF_HEADSHOT;
@@ -1266,8 +1264,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-	// L0 - Hitsounds -> Headshot
-		attacker->client->ps.persistant[PERS_HITHEAD]++;
+		
 	}
 
 	if ( g_debugDamage.integer ) {
@@ -1296,15 +1293,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 	}
 
-	// L0 - Hitsounds
-	if ( attacker->client && targ->client && targ != attacker && g_hitsounds.integer ) {
-		qboolean onSameTeam = OnSameTeam( targ, attacker);
 
-		if(onSameTeam)
-			attacker->client->ps.persistant[PERS_HIT] -= damage;
-		else
-			attacker->client->ps.persistant[PERS_HIT] += damage;
-	} // End
 	// See if it's the player hurting the emeny flag carrier
 	Team_CheckHurtCarrier( targ, attacker );
 

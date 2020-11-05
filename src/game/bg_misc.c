@@ -3381,7 +3381,7 @@ int BG_GrenadesForClass(int cls) {
 		case PC_ENGINEER:
 			return 8; // g_engNades;
 		case PC_LT:
-			return 2; // g_ltNades;
+			return 1; // g_ltNades;
 	}
 	return 0;
 }

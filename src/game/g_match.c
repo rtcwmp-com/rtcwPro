@@ -155,26 +155,26 @@ return g_maxclients.integer;
 }
 ////////////
 // See if weapon can be used..
-int isWeaponLimited( gclient_t *client, int weap ) {
-	int count=0;
-
-	// Limit
-	if (( weap == 6 ) && ( client->pers.restrictedWeapon != WP_MAUSER ) )
-		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisSniper : level.alliedSniper;
-	else if (( weap == 8 ) && ( client->pers.restrictedWeapon != WP_PANZERFAUST ))
-		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisPF : level.alliedPF;
-	else if (( weap == 9 )  && ( client->pers.restrictedWeapon != WP_VENOM ))
-		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisVenom : level.alliedVenom;
-	else if (( weap == 10 ) && ( client->pers.restrictedWeapon != WP_FLAMETHROWER ))
-		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer : level.alliedFlamer;
-
-	if (count >= sortWeaponLimit(weap))
-		return 1;
-	else
-		return 0;
-
-return 0;
-}
+//int isWeaponLimited( gclient_t *client, int weap ) {
+//	int count=0;
+//
+//	// Limit
+//	if (( weap == 6 ) && (client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_MAUSER ) )
+//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisSniper : level.alliedSniper;
+//	else if (( weap == 8 ) && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_PANZERFAUST ))
+//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisPF : level.alliedPF;
+//	else if (( weap == 9 )  && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_VENOM ))
+//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisVenom : level.alliedVenom;
+//	else if (( weap == 10 ) && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_FLAMETHROWER ))
+//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer : level.alliedFlamer;
+//
+//	if (count >= sortWeaponLimit(weap))
+//		return 1;
+//	else
+//		return 0;
+//
+//return 0;
+//}
 
 /*
 ================
@@ -524,7 +524,7 @@ void G_matchPrintInfo(char *msg, qboolean printTime) {
 	if (printTime)
 		AP(va("print \"[%s] ^3%s \n\"", GetLevelTime(), msg));
 	else
-		AP(va("print \"*** ^3INFO: ^3%s \n\"", msg));
+		AP(va("print \"*** ^3INFO: ^1%s \n\"", msg));
 }
 
 // Simple alias for sure-fire print :)

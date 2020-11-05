@@ -624,6 +624,8 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 				return;
 			}
 		} // end
+
+
 		// NERVE - SMF
 		// L0 - Ready (temporary) lock
 		if (teamInfo[team].team_lock && !forced) {
@@ -745,6 +747,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->sess.spectatorState = specState;
 	client->sess.spectatorClient = specClient;
 	client->pers.ready = qfalse;
+
 	// During team switching you can sometime spawn immediately
 	client->pers.lastReinforceTime = 0;
 	if ( team == TEAM_RED ) {
@@ -760,9 +763,10 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	// L0 - connect message
 	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
 
+	// sswolf - moved to ClientConnect
 	// L0 - Advertise
-	CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
-	CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
+	//CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
+	//CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
 
