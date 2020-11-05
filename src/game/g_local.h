@@ -1608,9 +1608,9 @@ extern vmCvar_t	g_alliedSpawnProtectionTime;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
+extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
-extern vmCvar_t	g_dropWeapons;
 extern vmCvar_t	g_ltNades;
 extern vmCvar_t	g_medicNades;
 extern vmCvar_t	g_soldNades;
@@ -1931,7 +1931,6 @@ void G_UpdateCvars(void);
 void G_wipeCvars(void);
 void G_teamReset(int, qboolean);
 void ServerPlayerInfo(void);
-
 ///////////////////////
 // RTCWPro - g_config.c
 qboolean G_ConfigSet(const char* configname);
@@ -2057,9 +2056,10 @@ char *G_createClientStats( gentity_t *refEnt );
 void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
 void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean state );
-void G_printMatchInfo( gentity_t *ent );
+void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
+void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 // OSPx - New stuff below
 //
 // g_cmds.c
