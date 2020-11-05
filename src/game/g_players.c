@@ -112,7 +112,7 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 		/*if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
 		}
-		
+
 		if (cl->sess.coach_team) {
 			tteam = cl->sess.coach_team;
 			coach = (ent) ? "^3C" : "C";
@@ -546,8 +546,7 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 			if ( state ) {
 				ent->client->pers.ready = qtrue;
 				ent->client->ps.powerups[PW_READY] = INT_MAX;
-			}
-			else {
+			} else {
 				ent->client->pers.ready = qfalse;
 				ent->client->ps.powerups[PW_READY] = 0;
 			}
@@ -598,6 +597,7 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 
 		if ((cl->client->pers.ready != ready) && !level.intermissiontime) {
 			cl->client->pers.ready = ready;
+			cl->client->ps.powerups[PW_READY] = (ready ? INT_MAX : 0);
 			++p;
 		}
 	}
@@ -783,7 +783,14 @@ OSP's stats
 ===================
 */
 void G_scores_cmd( gentity_t *ent ) {
-	G_printMatchInfo( ent );
+	G_printMatchInfo( ent , qfalse);
+}
+// temp fix for cg_autoaction issue
+void G_matchClock_cmd( gentity_t *ent ) {
+	G_matchClockDump(ent);
+}
+void G_scoresDump_cmd( gentity_t *ent ) {
+	G_printMatchInfo( ent , qtrue);
 }
 // Shows a player's stats to the requesting client.
 void G_weaponStats_cmd( gentity_t *ent ) {
@@ -811,6 +818,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "sgstats"))				{ G_statsPrint( ent, 2 );	return qtrue;}
 	else if(!Q_stricmp(cmd, "stshots"))				{ G_weaponStatsLeaders_cmd( ent, qtrue, qtrue );	return qtrue;}
 	else if(!Q_stricmp(cmd, "scores"))				{ G_scores_cmd(ent);	return qtrue;}
+	else if(!Q_stricmp(cmd, "scoresdump"))				{ G_scoresDump_cmd(ent);	return qtrue;}// temp fix for cg_autoaction issue
+   // else if(!Q_stricmp(cmd, "matchClock"))			{ G_matchClock_cmd(ent);	return qtrue;} // temp fix for cg_autoaction issue
 	else if(!Q_stricmp(cmd, "statsall"))			{ G_statsall_cmd( ent, 0, qfalse );	return qtrue;}
 	else if(!Q_stricmp(cmd, "bottomshots"))			{ G_weaponRankings_cmd( ent, qtrue, qfalse );	return qtrue;}
 	else if(!Q_stricmp(cmd, "topshots"))			{ G_weaponRankings_cmd( ent, qtrue, qtrue );	return qtrue;}

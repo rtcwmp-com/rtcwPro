@@ -621,6 +621,8 @@ typedef struct {
 	char cmd2[128]; // !command attribute
 	char cmd3[128];	// !command attribute extra
 	qboolean nameLocked; // Takes ability to rename from client..it's cleared next round, map load..
+	// Weapon restrictions
+	int restrictedWeapon;
 
 	// Server Bot
 	int sb_teamBleed;
@@ -648,7 +650,6 @@ typedef struct {
 	unsigned int int_selectedWeapon;
 	// tardo
 	qboolean ready;
-	int restrictedWeapon;
 } clientPersistant_t;
 
 // L0 - antilag port     nihi added
@@ -1247,9 +1248,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
-void RemoveWeaponRestrictions(gentity_t *ent);
-//void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
-//void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);
@@ -1608,9 +1606,9 @@ extern vmCvar_t	g_alliedSpawnProtectionTime;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
+extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
-extern vmCvar_t	g_dropWeapons;
 extern vmCvar_t	g_ltNades;
 extern vmCvar_t	g_medicNades;
 extern vmCvar_t	g_soldNades;
@@ -1660,12 +1658,8 @@ extern vmCvar_t vote_percent;
 
 // QCon edition cvars
 extern vmCvar_t		g_antiWarp;
-
-// RTCWPro
+// RTCWPro - custom configs
 extern vmCvar_t g_customConfig;
-//extern vmCvar_t Players_Allies;
-//extern vmCvar_t Players_Axis;
-extern vmCvar_t P;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1930,8 +1924,6 @@ void G_ResetMarkers( gentity_t* ent );
 void G_UpdateCvars(void);
 void G_wipeCvars(void);
 void G_teamReset(int, qboolean);
-void ServerPlayerInfo(void);
-
 ///////////////////////
 // RTCWPro - g_config.c
 qboolean G_ConfigSet(const char* configname);
@@ -2057,9 +2049,10 @@ char *G_createClientStats( gentity_t *refEnt );
 void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
 void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean state );
-void G_printMatchInfo( gentity_t *ent );
+void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
+void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 // OSPx - New stuff below
 //
 // g_cmds.c
