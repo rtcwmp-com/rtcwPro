@@ -546,7 +546,8 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 			if ( state ) {
 				ent->client->pers.ready = qtrue;
 				ent->client->ps.powerups[PW_READY] = INT_MAX;
-			} else {
+			}
+			else {
 				ent->client->pers.ready = qfalse;
 				ent->client->ps.powerups[PW_READY] = 0;
 			}
