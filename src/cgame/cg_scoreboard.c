@@ -295,9 +295,9 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
 				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/l_complete_2.wav"), CHAN_LOCAL_SOUND);
-                trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
+                /*trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
 				// sswolf - temporarily move those to qa
-				/*if (cg_announcer.integer) {
+				if (cg_announcer.integer) {
 					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winallies.wav"), CHAN_ANNOUNCER);
 				}*/
 			}
@@ -310,8 +310,8 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
 				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/s_stinglow.wav"), CHAN_LOCAL_SOUND);
-				trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
-				/*if (cg_announcer.integer) {
+				/*trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
+				if (cg_announcer.integer) {
 					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_ANNOUNCER);
 				}*/
 			}

@@ -524,7 +524,7 @@ void G_matchPrintInfo(char *msg, qboolean printTime) {
 	if (printTime)
 		AP(va("print \"[%s] ^3%s \n\"", GetLevelTime(), msg));
 	else
-		AP(va("print \"*** ^3INFO: ^3%s \n\"", msg));
+		AP(va("print \"*** ^3INFO: ^1%s \n\"", msg));
 }
 
 // Simple alias for sure-fire print :)
