@@ -1915,7 +1915,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				 es->weapon == WP_DYNAMITE ||
 				 es->weapon == WP_PANZERFAUST ||
 				 es->weapon == WP_AMMO ||
-				 es->weapon == WP_MEDKIT ) ) {
+				 es->weapon == WP_MEDKIT ||
+				 es->weapon == WP_SMOKE_GRENADE) ) {
 			CG_OutOfAmmoChange(qtrue); // event == EV_NOAMMO ? qfalse : qtrue);
 		}
 		break;
