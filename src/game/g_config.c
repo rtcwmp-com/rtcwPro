@@ -242,11 +242,16 @@ qboolean G_ParseSettings(int handle, qboolean setvars, config_t *config)
 		}
 		else if (!Q_stricmp(token.string, "command"))
 		{
-			if (!trap_PC_ReadToken(handle, &token))
-			{
-				return G_ConfigError(handle, "expected a command value");
-			}
-			trap_SendConsoleCommand(EXEC_APPEND, va("%s\n", token.string));
+			//if (trap_Cvar_VariableIntegerValue("sv_punkbuster")) // only run the "commands" if Punkbuster is turned off
+			//	continue;
+			//else
+			//{
+				if (!trap_PC_ReadToken(handle, &token))
+				{
+					return G_ConfigError(handle, "expected a command value");
+				}
+				trap_SendConsoleCommand(EXEC_APPEND, va("%s\n", token.string));
+			//}
 		}
 		else if (!Q_stricmp(token.string, "mapscripthash"))
 		{

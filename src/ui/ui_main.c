@@ -4494,7 +4494,7 @@ static void UI_UpdateVoteFlags( qboolean open ) {
 		trap_Cvar_SetValue( "ui_voteSwap", flags & VOTEFLAGS_SWAP );
 		trap_Cvar_SetValue( "ui_voteType", flags & VOTEFLAGS_TYPE );
 		trap_Cvar_SetValue( "ui_voteKick", flags & VOTEFLAGS_KICK );
-		trap_Cvar_SetValue( "ui_voteMap", flags & VOTEFLAGS_MAP );
+		trap_Cvar_SetValue("ui_voteMap", flags & VOTEFLAGS_MAP);
 	} else {
 		flags = 0;
 		flags |= trap_Cvar_VariableValue( "ui_voteRestart" ) ? VOTEFLAGS_RESTART : 0;
@@ -4504,7 +4504,7 @@ static void UI_UpdateVoteFlags( qboolean open ) {
 		flags |= trap_Cvar_VariableValue( "ui_voteSwap" ) ? VOTEFLAGS_SWAP : 0;
 		flags |= trap_Cvar_VariableValue( "ui_voteType" ) ? VOTEFLAGS_TYPE : 0;
 		flags |= trap_Cvar_VariableValue( "ui_voteKick" ) ? VOTEFLAGS_KICK : 0;
-		flags |= trap_Cvar_VariableValue( "ui_voteMap" ) ? VOTEFLAGS_MAP : 0;
+		flags |= trap_Cvar_VariableValue("ui_voteMap") ? VOTEFLAGS_MAP : 0;
 		trap_Cvar_SetValue( "g_voteFlags", flags );
 		// maintain consistency, if we turned one option back on, set the global on
 		if ( flags != 0 ) {
@@ -4815,70 +4815,92 @@ static void UI_RunMenuScript( char **args ) {
 				// make sure we sort again
 				UI_ServersSort( sortColumn, qtrue );
 			}
+
 		} else if ( Q_stricmp( name, "nextSkirmish" ) == 0 ) {
 			UI_StartSkirmish( qtrue );
+
 		} else if ( Q_stricmp( name, "SkirmishStart" ) == 0 ) {
 			UI_StartSkirmish( qfalse );
+
 		} else if ( Q_stricmp( name, "closeingame" ) == 0 ) {
 			trap_Key_SetCatcher( trap_Key_GetCatcher() & ~KEYCATCH_UI );
 			trap_Key_ClearStates();
 			trap_Cvar_Set( "cl_paused", "0" );
 			Menus_CloseAll();
+
 		} else if ( Q_stricmp( name, "voteMap" ) == 0 ) {
 			if ( ui_currentNetMap.integer >= 0 && ui_currentNetMap.integer < uiInfo.mapCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote map %s\n",uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteKick" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote kick \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteMute" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote mute \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteUnMute" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote unmute \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteReferee" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote referee \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteUnReferee" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote unreferee \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteGame" ) == 0 ) {
 			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
 			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", ui_voteGameType ) );
 			}
+
 		} else if ( Q_stricmp( name, "refGame" ) == 0 ) {
 			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
 			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", ui_voteGameType ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteTimelimit" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote timelimit %f\n", trap_Cvar_VariableValue( "ui_voteTimelimit" ) ) );
+
 		} else if ( Q_stricmp( name, "voteWarmupDamage" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote warmupdamage %d\n", (int)trap_Cvar_VariableValue( "ui_voteWarmupDamage" ) ) );
 
+		} else if (Q_stricmp(name, "voteAntilag") == 0) {
+			trap_Cmd_ExecuteText(EXEC_APPEND, va("callvote antilag %f\n", trap_Cvar_VariableValue("ui_voteAntilag")));
+
 		} else if ( Q_stricmp( name, "refTimelimit" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref timelimit %f\n", trap_Cvar_VariableValue( "ui_voteTimelimit" ) ) );
+
 		} else if ( Q_stricmp( name, "refWarmupDamage" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref warmupdamage %d\n", (int)trap_Cvar_VariableValue( "ui_voteWarmupDamage" ) ) );
+
 		} else if ( Q_stricmp( name, "voteInitToggles" ) == 0 ) {
 			char info[MAX_INFO_STRING];
 
 			trap_GetConfigString( CS_SERVERTOGGLES, info, sizeof( info ) );
 			trap_Cvar_Set( "ui_voteWarmupDamage", va( "%d", ( ( atoi( info ) & CV_SVS_WARMUPDMG ) >> 2 ) ) );
 
+			trap_Cvar_Set("ui_voteAntilag", va("%d", atoi(Info_ValueForKey(info, "g_antilag"))));
+
 			trap_GetConfigString( CS_SERVERINFO, info, sizeof( info ) );
 			trap_Cvar_Set( "ui_voteTimelimit", va( "%i", atoi( Info_ValueForKey( info, "timelimit" ) ) ) );
+
 		} else if ( Q_stricmp( name, "voteLeader" ) == 0 ) {
 			if ( uiInfo.teamIndex >= 0 && uiInfo.teamIndex < uiInfo.myTeamCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callteamvote leader %s\n",uiInfo.teamNames[uiInfo.teamIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "addBot" ) == 0 ) {
 			if ( trap_Cvar_VariableValue( "g_gametype" ) >= GT_TEAM ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "addbot %s %i %s\n", uiInfo.characterList[uiInfo.botIndex].name, uiInfo.skillIndex + 1, ( uiInfo.redBlue == 0 ) ? "Red" : "Blue" ) );
@@ -4886,6 +4908,7 @@ static void UI_RunMenuScript( char **args ) {
 				// NERVE - SMF - no bots in wolf multiplayer
 //				trap_Cmd_ExecuteText( EXEC_APPEND, va("addbot %s %i %s\n", UI_GetBotNameByNumber(uiInfo.botIndex), uiInfo.skillIndex+1, (uiInfo.redBlue == 0) ? "Red" : "Blue") );
 			}
+
 		} else if ( Q_stricmp( name, "addFavorite" ) == 0 ) {
 			if ( ui_netSource.integer != AS_FAVORITES ) {
 				char name[MAX_NAME_LENGTH];
@@ -4910,6 +4933,7 @@ static void UI_RunMenuScript( char **args ) {
 					}
 				}
 			}
+
 		} else if ( Q_stricmp( name, "deleteFavorite" ) == 0 ) {
 			if ( ui_netSource.integer == AS_FAVORITES ) {
 				char addr[MAX_NAME_LENGTH];
@@ -4920,6 +4944,7 @@ static void UI_RunMenuScript( char **args ) {
 					trap_LAN_RemoveServer( AS_FAVORITES, addr );
 				}
 			}
+
 		} else if ( Q_stricmp( name, "createFavorite" ) == 0 ) {
 			if ( ui_netSource.integer == AS_FAVORITES ) {
 				char name[MAX_NAME_LENGTH];
@@ -4943,6 +4968,7 @@ static void UI_RunMenuScript( char **args ) {
 					}
 				}
 			}
+
 		} else if ( Q_stricmp( name, "orders" ) == 0 ) {
 			const char *orders;
 			if ( String_Parse( args, &orders ) ) {
@@ -4967,6 +4993,7 @@ static void UI_RunMenuScript( char **args ) {
 				trap_Cvar_Set( "cl_paused", "0" );
 				Menus_CloseAll();
 			}
+
 		} else if ( Q_stricmp( name, "voiceOrdersTeam" ) == 0 ) {
 			const char *orders;
 			if ( String_Parse( args, &orders ) ) {
