@@ -703,7 +703,6 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
     DecolorString(aTeams[team], tName);
 
 	// Deals with unlocking
-	// Deals with unlocking
 	if (unlock) {
 		if (!g_gamelocked.integer) {
 			CP(va("print \"Both teams are already unlocked^z!\n\""));

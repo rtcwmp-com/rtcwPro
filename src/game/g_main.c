@@ -2208,6 +2208,9 @@ void BeginIntermission( void ) {
 	// send the current scoring to all clients
 	SendScoreboardMessageToAllClients();
 
+	// reset client spawnpoints
+	//SendSpawnpointResetToClients();
+
 	G_matchInfoDump(EOM_MATCHINFO);
 }
 
@@ -3112,17 +3115,21 @@ void handleEmptyTeams(void) {
 			G_teamReset(TEAM_RED, qtrue);
 
 			// Reset match if paused with an empty team
-			if (level.paused == PAUSE_NONE )
+			if (level.paused == PAUSE_NONE) {
 				//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
 				Svcmd_ResetMatch_f(qtrue, qtrue);
+				trap_Cvar_Set("g_gamelocked", "0");
+			}
 		}
 		else if (!level.alliedPlayers) {
 			G_teamReset(TEAM_BLUE, qtrue);
 
 			// Reset match if paused with an empty team
-			if (level.paused == PAUSE_NONE )
+			if (level.paused == PAUSE_NONE) {
 				//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
 				Svcmd_ResetMatch_f(qtrue, qtrue);
+				trap_Cvar_Set("g_gamelocked", "0");
+			}
 		}
 	}
 }

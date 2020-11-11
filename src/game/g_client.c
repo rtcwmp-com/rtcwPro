@@ -1964,6 +1964,10 @@ void ClientUserinfoChanged( int clientNum ) {
 	//dhm - end
 
 
+	// L0 - Set guid
+	if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
+		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);
+
 	// colors
 	c1 = Info_ValueForKey( userinfo, "color" );
 
@@ -2003,10 +2007,10 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%d.%d.%d.%d\\country\\%i\\ignored\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i",
+		s = va("name\\%s\\team\\%s\\IP\\%d.%d.%d.%d\\country\\%i\\ignored\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\guid\\%s",
 			client->pers.netname, team, client->sess.ip[0], client->sess.ip[1], client->sess.ip[2],
 			client->sess.ip[3], client->sess.uci, (client->sess.ignored ? "yes" : "no"), client->sess.admin,
-			client->pers.clientTimeNudge, client->pers.clientMaxPackets);
+			client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
 	// Account for bots..
 	else {
