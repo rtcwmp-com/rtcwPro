@@ -3110,26 +3110,23 @@ OSPx - check for team stuff..
 ================
 */
 void handleEmptyTeams(void) {
-	if (g_gamestate.integer == GS_PLAYING) {
-		if (!level.axisPlayers) {
-			G_teamReset(TEAM_RED, qtrue);
+	
+	if (!level.axisPlayers && g_gamestate.integer != GS_INTERMISSION) {
+		G_teamReset(TEAM_RED, qtrue);
 
-			// Reset match if paused with an empty team
-			if (level.paused == PAUSE_NONE) {
-				//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-				trap_Cvar_Set("g_gamelocked", "0");
-			}
+		// Reset match if NOT paused with an empty team
+		if (level.paused == PAUSE_NONE) {
+			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
+			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
 		}
-		else if (!level.alliedPlayers) {
-			G_teamReset(TEAM_BLUE, qtrue);
+	}
+	else if (!level.alliedPlayers && g_gamestate.integer != GS_INTERMISSION) {
+		G_teamReset(TEAM_BLUE, qtrue);
 
-			// Reset match if paused with an empty team
-			if (level.paused == PAUSE_NONE) {
-				//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-				trap_Cvar_Set("g_gamelocked", "0");
-			}
+		// Reset match if NOT paused with an empty team
+		if (level.paused == PAUSE_NONE) {
+			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
+			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
 		}
 	}
 }
@@ -3497,7 +3494,6 @@ void G_RunFrame( int levelTime ) {
 		// L0 - Pause
 		pauseCheck();
 
-		if (g_gamestate.integer == GS_PLAYING)
-			handleEmptyTeams();
+		handleEmptyTeams();
 	}
 }

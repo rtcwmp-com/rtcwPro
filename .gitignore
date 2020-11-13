@@ -18,6 +18,7 @@ src/.vs/*.*
 *.o
 *.pk3
 src/rtcwpro/wolfconfig_mp.cfg
+server/
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
