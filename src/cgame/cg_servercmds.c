@@ -100,7 +100,7 @@ CG_ParseTeamInfo
 static void CG_ParseTeamInfo( void ) {
 	int i;
 	int client;
-	
+
 	// NERVE - SMF
 	cg.identifyClientNum = atoi( CG_Argv( 1 ) );
 	cg.identifyClientHealth = atoi( CG_Argv( 2 ) );
@@ -1976,7 +1976,7 @@ void CG_dumpStats( void ) {
 	//		3. we'll just continue to parse the remaining ws entries and dump them to the log
 	//		   before the scores result would ever hit us.. thus, we still keep proper ordering :)
 	if ( fDoScores ) {
-		trap_SendClientCommand( "scores" );
+		trap_SendClientCommand( "scoresdump" );
 	}
 }
 /**************** L0 - OSP Stats dump ends here *****************/
