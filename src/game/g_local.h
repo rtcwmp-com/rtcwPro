@@ -416,6 +416,10 @@ struct gentity_s {
 	int playerAmmoClip;
 	int playerWeapon;
 	int playerNades;
+
+    // pause stuff from rtcwPub
+	int			trType_pre_pause;
+	vec3_t		trBase_pre_pause;
 };
 
 // Ridah
