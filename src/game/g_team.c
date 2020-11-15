@@ -1627,6 +1627,8 @@ void G_teamReset(int team_num, qboolean fClearSpecLock) {
 	if (fClearSpecLock) {
 		teamInfo[team_num].spec_lock = qfalse;
 	}
+
+	trap_Cvar_Set("g_gamelocked", "0"); // unlock both teams
 }
 
 // Shuffle active players onto teams

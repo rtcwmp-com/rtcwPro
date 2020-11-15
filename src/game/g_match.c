@@ -205,7 +205,7 @@ void setDefWeap(gclient_t *client, int clips) {
 //
 // NOTE: Selected weapons only works for eng and med..sold and lt can pick their weapons already..
 //       so setting it can potentialy overlap with client spawn scripts..
-void setDefaultWeapon(gclient_t *client, qboolean isSold) {
+void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 	int ammo;
 
 	// This deals with weapon restrictions.
