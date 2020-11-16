@@ -205,7 +205,7 @@ void setDefWeap(gclient_t *client, int clips) {
 //
 // NOTE: Selected weapons only works for eng and med..sold and lt can pick their weapons already..
 //       so setting it can potentialy overlap with client spawn scripts..
-void setDefaultWeapon(gclient_t *client, qboolean isSold) {
+void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 	int ammo;
 
 	// This deals with weapon restrictions.
@@ -261,6 +261,8 @@ Causes some troubles on client side so done it here.
 void CountDown(qboolean restart) {
 	gentity_t *other;
 	char *index="";
+	int i;
+    gentity_t *target_ent;
 
 	if (level.CNyes == qfalse) {
 		return;
@@ -318,13 +320,37 @@ void CountDown(qboolean restart) {
 			resetPause();
 			AAPS("sound/match/fight.wav");
 			AP(va("cp \"^1FIGHT\n\"2"));
+
+            // nihi: added from rtcwpub for restoring grenades/dyno/airstrikes/etc but
+            //   note that slight modifications were made since pause is handled differently for rtcwpro
+            for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
+            {
+                target_ent = g_entities + i;
+
+                if (target_ent->inuse)
+                {
+                    // NOTE(nobo): same goes for other time-sensitive functionality; nextthink on entities and trTime on trajectory interoplation.
+                    if (target_ent->think &&
+                        target_ent->nextthink > 0)
+                    {
+                        target_ent->nextthink -= level.timeDelta;
+                    }
+
+                    if (target_ent->s.eType > TR_INTERPOLATE &&
+                        target_ent->s.pos.trTime > 0)
+                    {
+                        VectorCopy(target_ent->trBase_pre_pause, target_ent->s.pos.trBase);
+                        target_ent->s.pos.trTime -= level.timeDelta;
+                        target_ent->s.pos.trType = target_ent->trType_pre_pause;
+                        target_ent->trType_pre_pause = 0;
+                    }
+                }
+            }
+             // end import from rtcwpub
             // nihi added to fix the pause timer issue
             level.startTime += level.timeDelta;  // Add the amount of time while paused to game timer
             level.timeDelta = 0;  // Reset the "pause timer"
             trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
-
-
-
 
 		}
 
@@ -524,7 +550,7 @@ void G_matchPrintInfo(char *msg, qboolean printTime) {
 	if (printTime)
 		AP(va("print \"[%s] ^3%s \n\"", GetLevelTime(), msg));
 	else
-		AP(va("print \"*** ^3INFO: ^1%s \n\"", msg));
+		AP(va("print \"*** ^3INFO: ^7%s \n\"", msg));
 }
 
 // Simple alias for sure-fire print :)
