@@ -1252,6 +1252,7 @@ void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 void RemoveWeaponRestrictions(gentity_t *ent);
+void limbo( gentity_t *ent, qboolean makeCorpse );
 //void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
 //void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
 
