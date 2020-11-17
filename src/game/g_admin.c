@@ -1881,7 +1881,8 @@ Pause
 void cmd_pause(gentity_t *ent, qboolean resume) {
 
 	char *tag, *log, *action;
-
+	gentity_t *target_ent;
+	int i;
 	if ( g_gamestate.integer != GS_PLAYING ) {
 		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
 		return;
@@ -1917,6 +1918,29 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tag));
 		AAPS("sound/match/klaxon1.wav");
+				// nihi: added from rtcwpub for freezing grenades/dyno/airstrikes/etc
+			// NOTE(nobo): pm_type of PM_FREEZE is enough to keep clients in-place. missiles, however, need some help.
+        for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
+        {
+            target_ent = g_entities + i;
+
+            if (target_ent->inuse)
+            {
+                // NOTE(nobo): force moving entities in the world to stop in-place.
+                if (target_ent->s.eType > TR_INTERPOLATE &&
+                    target_ent->s.pos.trTime > 0)
+                {
+                    // NOTE(nobo): Store trBase so it can be restored upon unpause of game.
+                    // trBase is what's used to determine a missile's position in the world, not r.currentOrigin or s.origin
+                    VectorCopy(target_ent->s.pos.trBase, target_ent->trBase_pre_pause);
+                    VectorCopy(target_ent->r.currentOrigin, target_ent->s.pos.trBase);
+                    target_ent->trType_pre_pause = target_ent->s.pos.trType;
+                    target_ent->s.pos.trType = TR_STATIONARY;
+                }
+            }
+        }
+        // end import from rtcwpub
+
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");

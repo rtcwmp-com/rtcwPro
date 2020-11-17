@@ -416,6 +416,10 @@ struct gentity_s {
 	int playerAmmoClip;
 	int playerWeapon;
 	int playerNades;
+
+    // pause stuff from rtcwPub
+	int			trType_pre_pause;
+	vec3_t		trBase_pre_pause;
 };
 
 // Ridah
@@ -1248,6 +1252,7 @@ void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 void RemoveWeaponRestrictions(gentity_t *ent);
+void limbo( gentity_t *ent, qboolean makeCorpse );
 //void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
 //void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
 
@@ -1977,6 +1982,10 @@ void G_MuteClient(void);
 void G_UnMuteClient(void);
 void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
+
+// g_shared.c
+char *Q_StrReplace(char *haystack, char *needle, char *newp);
+void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
 void Cmd_hitsounds(gentity_t *ent);
@@ -2090,7 +2099,7 @@ extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
 void CountDown(qboolean restart);
 //int isWeaponLimited (gclient_t *client, int weap);
-void setDefaultWeapon(gclient_t *client, qboolean isSold);
+void SetDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
 //
