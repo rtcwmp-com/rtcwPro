@@ -2131,6 +2131,9 @@ extern vmCvar_t int_cl_timenudge;
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
 
+void CG_TimerSet_f(void);
+void CG_TimerReset_f(void);
+
 //
 // cg_main.c
 //
