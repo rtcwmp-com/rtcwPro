@@ -1981,6 +1981,7 @@ void G_MuteClient(void);
 void G_UnMuteClient(void);
 void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
+void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
 void Cmd_hitsounds(gentity_t *ent);
