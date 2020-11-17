@@ -1982,6 +1982,9 @@ void G_MuteClient(void);
 void G_UnMuteClient(void);
 void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
+
+// g_shared.c
+char *Q_StrReplace(char *haystack, char *needle, char *newp);
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
