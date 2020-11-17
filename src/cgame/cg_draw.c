@@ -2809,11 +2809,11 @@ static void CG_DrawLimboMessage( void ) {
 
 		if (reinfTime > 1)
 		{
-			str = va(CG_TranslateString("Deploying in ^3%d ^7seconds"), reinfTime);
+			str = va(CG_TranslateString("Reinforcements deploy in ^3%d ^7seconds"), reinfTime);
 		}
 		else
 		{
-			str = va(CG_TranslateString("Deploying in ^3%d ^7second"), reinfTime);
+			str = va(CG_TranslateString("Reinforcements deploy in ^3%d ^7second"), reinfTime);
 		}
 	}
 
@@ -2856,11 +2856,11 @@ static qboolean CG_DrawFollow( void ) {
 
 				if (reinfTime > 1)
 				{
-					sprintf(deploytime, CG_TranslateString("Deploying in ^3%d ^7seconds"), reinfTime);
+					sprintf(deploytime, CG_TranslateString("Reinforcements deploy in ^3%d ^7seconds"), reinfTime);
 				}
 				else
 				{
-					sprintf(deploytime, CG_TranslateString("Deploying in ^3%d ^7second"), reinfTime);
+					sprintf(deploytime, CG_TranslateString("Reinforcements deploy in ^3%d ^7second"), reinfTime);
 				}
         }
         CG_DrawStringExt( INFOTEXT_STARTX, 83, deploytime, color, qtrue, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 80 );// below respawn timer
