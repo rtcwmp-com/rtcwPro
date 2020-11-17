@@ -250,7 +250,7 @@ qboolean G_ParseSettings(int handle, qboolean setvars, config_t *config)
 				{
 					return G_ConfigError(handle, "expected a command value");
 				}
-				trap_SendConsoleCommand(EXEC_APPEND, va("%s\n", token.string));
+				trap_SendConsoleCommand(EXEC_NOW, va("%s\n", token.string));
 			//}
 		}
 		else if (!Q_stricmp(token.string, "mapscripthash"))
