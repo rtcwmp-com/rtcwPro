@@ -811,6 +811,9 @@ static consoleCommand_t commands[] = {
 	{ "+wtopshots", CG_topshotsDown_f },
 	{ "-wtopshots", CG_topshotsUp_f },
 	{ "forcetapout", CG_ForceTapOut_f },
+	{ "timerSet", CG_TimerSet_f },
+	{ "timerReset", CG_TimerReset_f },
+	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
 	// -OSPx
 
 	// sswolf - minimizer
@@ -956,6 +959,9 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "stats" );			// Dumps to console (same as +stats just no fancy window)
 	trap_AddCommand( "statsall" );		// Dumps stats of all players
 	trap_AddCommand( "statsdump" );		// Dumps current stats
+	// Enemy spawn timer
+	trap_AddCommand("timerSet");
+	trap_AddCommand("timerReset");
 	// End
 }
 /**
