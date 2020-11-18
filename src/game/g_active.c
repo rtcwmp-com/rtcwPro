@@ -770,87 +770,6 @@ void WolfFindMedic( gentity_t *self ) {
 	}
 }
 
-/*
-==============
-OSPx - LTinfoMsg
-
-Shows ammo stocks of clients..
-==============
-*/
-char *weaponStr(int weapon)
-{
-	switch (weapon) {
-	case WP_MP40:				return "MP40";
-	case WP_THOMPSON:			return "Thompson";
-	case WP_STEN:				return "Sten";
-	case WP_MAUSER:				return "Mauser";
-	case WP_SNIPERRIFLE:		return "Sniper Rifle";
-	case WP_FLAMETHROWER:		return "Flamethrower";
-	case WP_PANZERFAUST:		return "Panzerfaust";
-	case WP_VENOM:				return "Venom";
-	case WP_GRENADE_LAUNCHER:	return "Grenade";
-	case WP_GRENADE_PINEAPPLE:	return "Grenade";
-	case WP_KNIFE:				return "Knife";
-	case WP_KNIFE2:				return "Knife";
-	case WP_LUGER:				return "Luger";
-	case WP_COLT:				return "Colt";
-	case WP_MEDIC_SYRINGE:		return "Syringe";
-	default:
-		return "";
-	}
-}
-// Draw str
-void LTinfoMSG(gentity_t *ent) {
-	unsigned int current = 0;
-	unsigned int stock = 0;
-	unsigned int nades = 0;
-	weapon_t weapon;
-
-	gentity_t *target;
-	trace_t tr;
-	vec3_t start, end, forward;
-
-	if (ent->client->ps.stats[STAT_HEALTH] <= 0)
-		return;
-
-	if (g_gamestate.integer != GS_PLAYING)
-		return;
-
-	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
-
-	VectorCopy(ent->s.pos.trBase, start);	//set 'start' to the player's position (plus the viewheight)
-	start[2] += ent->client->ps.viewheight;
-	VectorMA(start, 512, forward, end);	//put 'end' 512 units forward of 'start'
-
-	//see if we hit anything between 'start' and 'end'
-	trap_Trace(&tr, start, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
-
-	if (tr.surfaceFlags & SURF_NOIMPACT)	return;
-	if (tr.entityNum == ENTITYNUM_WORLD)	return;
-	if (tr.entityNum >= MAX_CLIENTS)		return;
-
-	target = &g_entities[tr.entityNum];
-	if ((!target->inuse) || (!target->client))		return;
-	if (target->client->ps.stats[STAT_HEALTH] <= 0)	return;
-	if (!OnSameTeam(target, ent))					return;
-
-	ent->client->infoTime = level.time;
-	weapon = target->client->ps.weapon;
-	current += target->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
-	stock += target->client->ps.ammo[BG_FindAmmoForWeapon(weapon)];
-	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
-	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
-
-	if (Q_stricmp(weaponStr(weapon), ""))
-	{
-		if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER)
-			CP(va("cp \"%s: %i\n\"1", weaponStr(weapon), current));
-		else if (weapon == WP_KNIFE || weapon == WP_KNIFE2)
-			CP(va("cp \"%s - Grenades: %i\n\"1", weaponStr(weapon), current, nades));
-		else
-			CP(va("cp \"%s: %i/%i - Grenades: %i\n\"1", weaponStr(weapon), current, stock, nades));
-	}
-}
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
@@ -981,11 +900,6 @@ void ClientThink_real( gentity_t *ent ) {
 		VectorCopy( client->cameraOrigin, client->cameraPortal->s.origin2 );
 	}
 
-	// OSPx - LT info bar..
-	//if ((client->ps.stats[STAT_PLAYER_CLASS] == PC_LT) &&
-	//	(level.time >= client->infoTime + 1000)) {
-	//	LTinfoMSG(ent);
-	//}
 
 	// mark the time, so the connection sprite can be removed
 	ucmd = &ent->client->pers.cmd;
