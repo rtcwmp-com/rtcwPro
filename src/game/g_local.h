@@ -653,6 +653,7 @@ typedef struct {
 	// tardo
 	qboolean ready;
 	int restrictedWeapon;
+	qboolean drawHitBoxes;
 } clientPersistant_t;
 
 // L0 - antilag port     nihi added

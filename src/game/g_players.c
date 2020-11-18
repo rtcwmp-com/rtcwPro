@@ -825,6 +825,14 @@ void G_weaponStats_cmd( gentity_t *ent ) {
 	G_statsPrint( ent, 0 );
 }
 
+void G_draw_hitboxes( gentity_t* ent ) {
+	if (!g_drawHitboxes.integer) {
+		CP("cp \"g_drawHitboxes is disabled.\n\"");
+		return;
+	}
+
+	ent->client->pers.drawHitBoxes = !ent->client->pers.drawHitBoxes;
+}
 
 /******************* Client commands *******************/
 qboolean playerCmds (gentity_t *ent, char *cmd ) {
@@ -860,6 +868,7 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "ready"))				{ G_ready_cmd( ent, qtrue ); return qtrue;}
 	else if(!Q_stricmp(cmd, "unready") ||
 			!Q_stricmp(cmd, "notready"))			{ G_ready_cmd( ent, qfalse ); return qtrue;}
+	else if(!Q_stricmp(cmd, "draw_hitboxes"))		{ G_draw_hitboxes(ent, qfalse); return qtrue; }
 	else
 		return qfalse;
 }

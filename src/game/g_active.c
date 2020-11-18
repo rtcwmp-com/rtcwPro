@@ -2137,7 +2137,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	}
 	// dhm
 
-	if (g_drawHitboxes.integer && ent->health > 0) {
+	if (ent->client->pers.drawHitBoxes && g_drawHitboxes.integer && ent->health > 0) {
 		G_DrawHitBoxes(ent);
 	}
 }
