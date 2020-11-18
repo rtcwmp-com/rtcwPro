@@ -87,17 +87,23 @@ void PauseHandle( void ) {
 	if (level.paused == !PAUSE_NONE) {
 		// TODO: Add auto timeout..
 		if (level.paused != PAUSE_UNPAUSING) {
-			if (!g_duelAutoPause.integer)
-				AP( va("cp \"Call a vote to resume the match.\n Timeouts remaining: ^1A^7(%i)/^4A^7(%i)\n\"",
-					g_pauseLimit.integer - level.axisTimeouts, g_pauseLimit.integer - level.alliedTimeouts));
-			else
-				AP("cp \"Match will resume once teams are even!\n\"");
+            if ( ( level.time % 500 ) == 0 ) { // nihi added due to cmd overflow on connecting clients
+                    if (!g_duelAutoPause.integer){
+                        AP( va("cp \"Call a vote to resume the match.\n Timeouts remaining: ^1A^7(%i)/^4A^7(%i)\n\"",
+                            g_pauseLimit.integer - level.axisTimeouts, g_pauseLimit.integer - level.alliedTimeouts));
+                }
+                    else
+                        AP("cp \"Match will resume once teams are even!\n\"");
+
+                    }
+                }
+
 		} else {
 			level.paused = PAUSE_UNPAUSING;
 			AP( "print \"Prepare to fight!\n\"" );
 			APS("sound/match/prepare.wav");
 		}
-	}
+
 
 	if (level.paused == PAUSE_UNPAUSING) {
 		CountDown(qfalse);
