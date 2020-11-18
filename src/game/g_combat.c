@@ -741,8 +741,15 @@ qboolean IsHeadShot( gentity_t *targ, qboolean isAICharacter, vec3_t dir, vec3_t
 	if ( head_shot_weapon ) {
 		head = G_Spawn();
 
-		if ( trap_GetTag( targ->s.number, "tag_head", &or ) ) {
-			G_SetOrigin( head, or.origin );
+		if (g_preciseHeadHitBox.integer && trap_GetTag(targ, &targ->client->animationInfo, "tag_head", &or )) {
+			G_SetOrigin(head, or .origin);
+			VectorCopy(targ->r.currentAngles, head->s.angles);
+			VectorCopy(head->s.angles, head->s.apos.trBase);
+			VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+			VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
+			head->clipmask = CONTENTS_SOLID;
+			head->r.contents = CONTENTS_SOLID;
+			trap_LinkEntity(head);
 		} else {
 			float height, dest;
 			vec3_t v, angles, forward, up, right;
@@ -834,8 +841,15 @@ gentity_t* G_BuildHead( gentity_t *ent ) {
 
 	head = G_Spawn();
 
-	if ( trap_GetTag( ent->s.number, "tag_head", &or ) ) {
-		G_SetOrigin( head, or.origin );
+	if (g_preciseHeadHitBox.integer && trap_GetTag(ent, &ent->client->animationInfo, "tag_head", &or )) {
+		G_SetOrigin(head, or .origin);
+		VectorCopy(ent->r.currentAngles, head->s.angles);
+		VectorCopy(head->s.angles, head->s.apos.trBase);
+		VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+		VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
+		head->clipmask = CONTENTS_SOLID;
+		head->r.contents = CONTENTS_SOLID;
+		trap_LinkEntity(head);
 	} else {
 		float height, dest;
 		vec3_t v, angles, forward, up, right;

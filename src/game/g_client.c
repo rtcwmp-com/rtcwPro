@@ -2417,6 +2417,9 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		ent->clipmask = MASK_PLAYERSOLID;
 	}
 
+	ent->client->animationInfo.bodyModelHandle = ent->client->sess.sessionTeam == TEAM_RED ?
+		AXIS_MODEL_HANDLE : ALLIED_MODEL_HANDLE;
+
 	// DHM - Nerve :: Init to -1 on first spawn;
 	if ( !revived ) {
 		ent->props_frame_state = -1;

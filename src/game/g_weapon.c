@@ -1649,7 +1649,7 @@ void Bullet_Fire_Extended( gentity_t *source, gentity_t *attacker, vec3_t start,
 
 	damage *= s_quadFactor;
 
-	trap_Trace (&tr, start, NULL, NULL, end, source->s.number, MASK_SHOT);
+	G_HistoricalTrace(source, &tr, start, NULL, NULL, end, source->s.number, MASK_SHOT);
 
 	// nihi added below
 	 // L0 - antilag
