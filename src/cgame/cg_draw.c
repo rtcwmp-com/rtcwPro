@@ -2355,14 +2355,14 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 	float w;
 
 	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
-		s = va("Grenades: %i", playerNades);
+		s = va("[G:%i]", playerNades);
 		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		CG_DrawStringExt(320 - w / 2, 200, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
+		CG_DrawStringExt(325 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
 	}
 	else {
-		s = va("Ammo: %i/%i - Grenades: %i", playerAmmoClip, playerAmmo, playerNades);
+		s = va("[A:%i/%i-G:%i]", playerAmmoClip, playerAmmo, playerNades);
 		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		CG_DrawStringExt(320 - w / 2, 200, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 40);
+		CG_DrawStringExt(325 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
 	}
 }
 
