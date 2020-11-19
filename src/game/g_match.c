@@ -87,17 +87,23 @@ void PauseHandle( void ) {
 	if (level.paused == !PAUSE_NONE) {
 		// TODO: Add auto timeout..
 		if (level.paused != PAUSE_UNPAUSING) {
-			if (!g_duelAutoPause.integer)
-				AP( va("cp \"Call a vote to resume the match.\n Timeouts remaining: ^1A^7(%i)/^4A^7(%i)\n\"",
-					g_pauseLimit.integer - level.axisTimeouts, g_pauseLimit.integer - level.alliedTimeouts));
-			else
-				AP("cp \"Match will resume once teams are even!\n\"");
+            if ( ( level.time % 500 ) == 0 ) { // nihi added due to cmd overflow on connecting clients
+                    if (!g_duelAutoPause.integer){
+                        AP( va("cp \"Call a vote to resume the match.\n Timeouts remaining: ^1A^7(%i)/^4A^7(%i)\n\"",
+                            g_pauseLimit.integer - level.axisTimeouts, g_pauseLimit.integer - level.alliedTimeouts));
+                }
+                    else
+                        AP("cp \"Match will resume once teams are even!\n\"");
+
+                    }
+                }
+
 		} else {
 			level.paused = PAUSE_UNPAUSING;
 			AP( "print \"Prepare to fight!\n\"" );
 			APS("sound/match/prepare.wav");
 		}
-	}
+
 
 	if (level.paused == PAUSE_UNPAUSING) {
 		CountDown(qfalse);
@@ -155,26 +161,26 @@ return g_maxclients.integer;
 }
 ////////////
 // See if weapon can be used..
-//int isWeaponLimited( gclient_t *client, int weap ) {
-//	int count=0;
-//
-//	// Limit
-//	if (( weap == 6 ) && (client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_MAUSER ) )
-//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisSniper : level.alliedSniper;
-//	else if (( weap == 8 ) && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_PANZERFAUST ))
-//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisPF : level.alliedPF;
-//	else if (( weap == 9 )  && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_VENOM ))
-//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisVenom : level.alliedVenom;
-//	else if (( weap == 10 ) && ( client->ps.persistant[PERS_RESTRICTEDWEAPON] != WP_FLAMETHROWER ))
-//		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer : level.alliedFlamer;
-//
-//	if (count >= sortWeaponLimit(weap))
-//		return 1;
-//	else
-//		return 0;
-//
-//return 0;
-//}
+int isWeaponLimited( gclient_t *client, int weap ) {
+	int count=0;
+
+	// Limit
+	if (( weap == 6 ) && (client->pers.restrictedWeapon != WP_MAUSER ) )
+		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisSniper : level.alliedSniper;
+	else if (( weap == 8 ) && ( client->pers.restrictedWeapon != WP_PANZERFAUST ))
+		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisPF : level.alliedPF;
+	else if (( weap == 9 )  && ( client->pers.restrictedWeapon != WP_VENOM ))
+		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisVenom : level.alliedVenom;
+	else if (( weap == 10 ) && ( client->pers.restrictedWeapon != WP_FLAMETHROWER ))
+		count = (client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer : level.alliedFlamer;
+
+	if (count >= sortWeaponLimit(weap))
+		return 1;
+	else
+		return 0;
+
+return 0;
+}
 
 /*
 ================
