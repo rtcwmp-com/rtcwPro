@@ -2098,7 +2098,7 @@ qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
 void CountDown(qboolean restart);
-//int isWeaponLimited (gclient_t *client, int weap);
+int isWeaponLimited (gclient_t *client, int weap);
 void SetDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
