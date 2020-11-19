@@ -3140,7 +3140,7 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
-	if (g_gamestate.integer == GS_PLAYING) // RtcwPro added this to avoid erroneous text at the end of the round
+	if (g_gamestate.integer != GS_INTERMISSION) // RtcwPro added this to avoid erroneous text at the end of the round
 	{
 		// Check now
 		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
