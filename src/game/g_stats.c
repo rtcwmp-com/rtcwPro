@@ -598,13 +598,6 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 			// L0 - Life(s) Kill peak
 			if (attacker->client->pers.life_kills >= attacker->client->sess.killPeak)
 				attacker->client->sess.killPeak++;
-
-			// RtcwPro - gib stats
-			/*if (targ->health <= GIB_HEALTH)
-			{
-				attacker->client->sess.gibs++;
-				attacker->client->pers.life_gibs++;
-			}*/
 		}
 	}
 
