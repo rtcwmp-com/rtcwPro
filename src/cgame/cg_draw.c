@@ -1002,13 +1002,13 @@ static float CG_DrawRespawnTimer(float y) {
 	playerState_t* ps;
 
 	if (cgs.gametype < GT_WOLF) {
-		return;
+		return y;
 	}
 
 	ps = &cg.snap->ps;
 
 	if (ps->stats[STAT_HEALTH] <= 0) { // don't show RT when limbo message is drawn
-		return;
+		return y;
 	}
 
 	if (!cg_drawReinforcementTime.integer)
