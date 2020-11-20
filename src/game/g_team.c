@@ -1724,7 +1724,7 @@ qboolean G_allowFollow( gentity_t *ent, int nTeam ) {
 		}
 	}
 
-	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || ( ent->client->sess.specInvited & nTeam ) == nTeam ) );
+	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || ent->client->sess.referee == RL_REFEREE || ( ent->client->sess.specInvited & nTeam ) == nTeam ) );
 }
 
 // Figure out if we are allowed/want to follow a given player
