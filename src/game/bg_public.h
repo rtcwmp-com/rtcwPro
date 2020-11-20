@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
+#define PRO_VERSION			"1.0 Nov19-20"
 
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
