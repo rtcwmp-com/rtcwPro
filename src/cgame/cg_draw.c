@@ -678,6 +678,8 @@ static float CG_DrawTimer( float y ) {
 
 	CG_DrawBigString( UPPERRIGHT_X - w, y + 2, s, 1.0F );
 
+
+
 	return y + BIGCHAR_HEIGHT + 4;
 }
 
@@ -1023,9 +1025,9 @@ static float CG_DrawRespawnTimer(float y) {
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
 		str = "";
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED)
-		str = va("RT: %d", CG_CalculateReinfTime(qfalse));
+		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_BLUE)
-		str = va("RT: %d", CG_CalculateReinfTime(qfalse));
+		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
 
 	w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
@@ -1043,6 +1045,79 @@ static float CG_DrawRespawnTimer(float y) {
 	return y += TINYCHAR_HEIGHT;
 }
 
+/*
+========================
+Enemy Timer
+========================
+*/
+static float CG_DrawEnemyTimer(float y) {
+	char		*str = { 0 };
+
+	int    w;
+	int    tens;
+	int    x;
+	int    secondsThen;
+	int    msec    = (cgs.timelimit * 60.f * 1000.f ) - (cg.time - cgs.levelStartTime);
+	int    seconds = msec / 1000;
+	int    mins    = seconds / 60;
+
+	seconds -= mins * 60;
+	tens     = seconds / 10;
+	seconds -= tens * 10;
+
+
+	playerState_t* ps;
+
+	if (cgs.gametype < GT_WOLF) {
+		return y;
+	}
+
+	ps = &cg.snap->ps;
+
+	if (ps->stats[STAT_HEALTH] <= 0) { // don't show when limbo message is drawn
+		return y;
+	}
+
+	// Don't draw timer if client is checking scoreboard
+	if (CG_DrawScoreboard())
+		return y;
+
+    if (cg_spawnTimer_set.integer == -1)
+        return y;
+
+
+    if (cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
+        return y;
+    }
+
+	if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate == GS_PLAYING)
+	{
+		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW))
+		{
+
+            seconds     = msec / 1000;
+            secondsThen = ((cgs.timelimit * 60.f * 1000.f )  - cg_spawnTimer_set.integer) / 1000;
+            float temp = cg_spawnTimer_period.integer + (seconds - secondsThen) % cg_spawnTimer_period.integer;
+            str           = va("ERT: %-2d", (int)temp);
+            w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
+
+            //	x = 46 + 6;
+            x = 46 + 40;
+            //	y = 480 - 245;
+            y = 480 - 400;
+            CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		}
+	}
+	else if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate != GS_PLAYING)
+	{
+		trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	}
+	else {
+        return;
+	}
+
+	return y += TINYCHAR_HEIGHT;
+}
 /*
 ========================
 sswolf - complete OSP demo features
@@ -1099,6 +1174,12 @@ static void CG_DrawUpperRight( void ) {
 	// OSPx - Respawn Timer
 	if (cg_drawReinforcementTime.integer) {
 		y = CG_DrawRespawnTimer(y);
+	}
+
+	// enemy respawn timer
+	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
+        y = CG_DrawEnemyTimer(y);
+
 	}
 
 	// sswolf - complete OSP demo features
@@ -2937,7 +3018,7 @@ static void CG_DrawWarmup( void ) {
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
 		cw = 10;
-		
+
 		// Account for g_minGameClients if it's present
 		if (cgs.readyState == CREADY_PENDING) {
 
