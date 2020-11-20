@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 // A user mod should never modify this file
 
 #define Q3_VERSION      "Wolf 1.41b-MP"
-#define PRO_VERSION		"Beta 1.0"
+
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
 // 1.3-MP : final for release

@@ -309,8 +309,6 @@ vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 
 
 // RTCWPro
 vmCvar_t g_customConfig;
-//vmCvar_t Players_Allies;
-//vmCvar_t Players_Axis;
 vmCvar_t P; // ET Port Players server info
 
 cvarTable_t gameCvarTable[] = {
@@ -320,6 +318,7 @@ cvarTable_t gameCvarTable[] = {
 	// noset vars
 	{ NULL, "gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
 	{ NULL, "gamedate", __DATE__, CVAR_ROM, 0, qfalse  },
+	{ NULL, "proversion", PRO_VERSION, CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
 	{ &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
 	{ NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
 
@@ -573,8 +572,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
-	//{ &Players_Allies, "Players_Allies", "(None)", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
-	//{ &Players_Axis, "Players_Axis", "(None)", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
