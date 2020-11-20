@@ -4157,7 +4157,7 @@ void CG_Weapon_f( void ) {
 // JPW NERVE
 // weapon bind should execute weaponbank instead -- for splitting out class weapons, per Id request
 	if ( cg_gameType.integer >= GT_WOLF ) {
-		if ( num < maxWeapBanks ) {
+		if ( num < maxWeapBanks && num < 7) {
 			CG_WeaponBank_f();
 		}
 		return;
