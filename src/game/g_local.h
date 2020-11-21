@@ -1251,10 +1251,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
-void RemoveWeaponRestrictions(gentity_t *ent);
-void limbo( gentity_t *ent, qboolean makeCorpse );
-//void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
-//void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+void limbo(gentity_t* ent, qboolean makeCorpse);
+
+//void RemoveWeaponRestrictions(gentity_t *ent);
+//void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);
