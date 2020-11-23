@@ -115,6 +115,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
+#ifndef ID_INLINE
+#if defined(NDEBUG) || defined(_WIN32)
+#define ID_INLINE __inline
+#else
+#define ID_INLINE
+#endif
+#endif
 
 // this is the define for determining if we have an asm version of a C function
 #if ( defined _M_IX86 || defined __i386__ ) && !defined __sun__  && !defined __LCC__
@@ -1076,6 +1083,10 @@ typedef enum {
 //#define	MAX_CONFIGSTRINGS	1024
 #define MAX_CONFIGSTRINGS   2048
 
+#define NUM_MODELS 2
+#define AXIS_MODEL_HANDLE	0
+#define ALLIED_MODEL_HANDLE 1
+
 #define MAX_DLIGHT_CONFIGSTRINGS    128
 #define MAX_CLIPBOARD_CONFIGSTRINGS 64
 #define MAX_SPLINE_CONFIGSTRINGS    64
@@ -1501,6 +1512,15 @@ typedef struct entityState_s {
 
 
 } entityState_t;
+
+typedef struct {
+	vec3_t legsAxis[3];
+	vec3_t torsoAxis[3];
+	vec3_t headAxis[3];
+	int legsFrame;
+	int torsoFrame;
+	qhandle_t bodyModelHandle;
+} clientAnimationInfo_t;
 
 typedef enum {
 	CA_UNINITIALIZED,

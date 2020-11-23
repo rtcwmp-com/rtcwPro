@@ -237,8 +237,8 @@ void trap_SnapVector( float *v ) {
 	return;
 }
 
-qboolean trap_GetTag( int clientNum, char *tagName, orientation_t *or ) {
-	return syscall( G_GETTAG, clientNum, tagName, or );
+qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* or ) {
+	return syscall(G_GETTAG, ent, animInfo, tagName, or );
 }
 
 int trap_PC_LoadSource(const char* filename) {

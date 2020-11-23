@@ -770,6 +770,323 @@ void WolfFindMedic( gentity_t *self ) {
 	}
 }
 
+
+/*
+==============
+OSPx - LTinfoMsg
+
+Shows ammo stocks of clients..
+==============
+*/
+char *weaponStr(int weapon)
+{
+	switch (weapon) {
+	case WP_MP40:				return "MP40";
+	case WP_THOMPSON:			return "Thompson";
+	case WP_STEN:				return "Sten";
+	case WP_MAUSER:				return "Mauser";
+	case WP_SNIPERRIFLE:		return "Sniper Rifle";
+	case WP_FLAMETHROWER:		return "Flamethrower";
+	case WP_PANZERFAUST:		return "Panzerfaust";
+	case WP_VENOM:				return "Venom";
+	case WP_GRENADE_LAUNCHER:	return "Grenade";
+	case WP_GRENADE_PINEAPPLE:	return "Grenade";
+	case WP_KNIFE:				return "Knife";
+	case WP_KNIFE2:				return "Knife";
+	case WP_LUGER:				return "Luger";
+	case WP_COLT:				return "Colt";
+	case WP_MEDIC_SYRINGE:		return "Syringe";
+	default:
+		return "";
+	}
+}
+// Draw str
+void LTinfoMSG(gentity_t *ent) {
+	unsigned int current = 0;
+	unsigned int stock = 0;
+	unsigned int nades = 0;
+	weapon_t weapon;
+
+	gentity_t *target;
+	trace_t tr;
+	vec3_t start, end, forward;
+
+	if (ent->client->ps.stats[STAT_HEALTH] <= 0)
+		return;
+
+	if (g_gamestate.integer != GS_PLAYING)
+		return;
+
+	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
+
+	VectorCopy(ent->s.pos.trBase, start);	//set 'start' to the player's position (plus the viewheight)
+	start[2] += ent->client->ps.viewheight;
+	VectorMA(start, 512, forward, end);	//put 'end' 512 units forward of 'start'
+
+	//see if we hit anything between 'start' and 'end'
+	trap_Trace(&tr, start, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
+
+	if (tr.surfaceFlags & SURF_NOIMPACT)	return;
+	if (tr.entityNum == ENTITYNUM_WORLD)	return;
+	if (tr.entityNum >= MAX_CLIENTS)		return;
+
+	target = &g_entities[tr.entityNum];
+	if ((!target->inuse) || (!target->client))		return;
+	if (target->client->ps.stats[STAT_HEALTH] <= 0)	return;
+	if (!OnSameTeam(target, ent))					return;
+
+	ent->client->infoTime = level.time;
+	weapon = target->client->ps.weapon;
+	current += target->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
+	stock += target->client->ps.ammo[BG_FindAmmoForWeapon(weapon)];
+	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
+	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
+
+	if (Q_stricmp(weaponStr(weapon), ""))
+	{
+		if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER)
+			CP(va("cp \"%s: %i\n\"1", weaponStr(weapon), current));
+		else if (weapon == WP_KNIFE || weapon == WP_KNIFE2)
+			CP(va("cp \"%s - Grenades: %i\n\"1", weaponStr(weapon), current, nades));
+		else
+			CP(va("cp \"%s: %i/%i - Grenades: %i\n\"1", weaponStr(weapon), current, stock, nades));
+	}
+}
+
+/*
+==================
+CG_SwingAngles
+==================
+*/
+void G_SwingAngles(float destination, float swingTolerance, float clampTolerance, float speed, float* angle, qboolean* swinging, int msec) {
+	float	swing;
+	float	move;
+	float	scale;
+
+#define	SWING_RIGHT	1
+#define SWING_LEFT	2
+
+	if (!*swinging) {
+		// see if a swing should be started
+		swing = AngleSubtract(*angle, destination);
+		if (swing > swingTolerance || swing < -swingTolerance) {
+			*swinging = qtrue;
+		}
+	}
+
+	if (!*swinging) {
+		return;
+	}
+
+	// modify the speed depending on the delta
+	// so it doesn't seem so linear
+	swing = AngleSubtract(destination, *angle);
+	scale = fabs(swing);
+	scale *= 0.05;
+	if (scale < 0.5)
+		scale = 0.5;
+
+	// swing towards the destination angle
+	if (swing >= 0) {
+		move = msec * scale * speed;
+		if (move >= swing) {
+			move = swing;
+			*swinging = qfalse;
+		}
+		else {
+			*swinging = SWING_LEFT;		// left
+		}
+		*angle = AngleMod(*angle + move);
+	}
+	else if (swing < 0) {
+		move = msec * scale * -speed;
+		if (move <= swing) {
+			move = swing;
+			*swinging = qfalse;
+		}
+		else {
+			*swinging = SWING_RIGHT;	// right
+		}
+		*angle = AngleMod(*angle + move);
+	}
+
+	// clamp to no more than tolerance
+	swing = AngleSubtract(destination, *angle);
+	if (swing > clampTolerance) {
+		*angle = AngleMod(destination - (clampTolerance - 1));
+	}
+	else if (swing < -clampTolerance) {
+		*angle = AngleMod(destination + (clampTolerance - 1));
+	}
+}
+
+/*
+===============
+G_PlayerAngles
+
+Handles seperate torso motion
+
+legs pivot based on direction of movement
+
+head always looks exactly at cent->lerpAngles
+
+if motion < 20 degrees, show in head only
+if < 45 degrees, also show in torso
+===============
+*/
+void G_PlayerAngles(gentity_t* ent, int msec) {
+	vec3_t		legsAngles, torsoAngles, headAngles;
+	float		dest;
+	vec3_t		velocity;
+	float		speed;
+	float		clampTolerance;
+	int			legsSet, torsoSet;
+
+#define SWING_SPEED 0.1f
+
+	legsSet = ent->s.legsAnim & ~ANIM_TOGGLEBIT;
+	torsoSet = ent->s.torsoAnim & ~ANIM_TOGGLEBIT;
+
+	VectorCopy(ent->s.apos.trBase, headAngles);
+	headAngles[YAW] = AngleMod(headAngles[YAW]);
+	VectorClear(legsAngles);
+	VectorClear(torsoAngles);
+
+	// --------- yaw -------------
+
+	// Is the concept of "yawing" and "pitching" needed?
+	// allow yaw to drift a bit, unless these conditions don't allow them
+	if (!(BG_GetConditionValue(ent->s.number, ANIM_COND_MOVETYPE, qfalse) & ((1 << ANIM_MT_IDLE) | (1 << ANIM_MT_IDLECR)))) {
+		ent->client->torsoYawing = qtrue;	// always center
+		ent->client->torsoPitching = qtrue;	// always center
+		ent->client->legsYawing = qtrue;	// always center
+	}
+	else if (BG_GetConditionValue(ent->s.number, ANIM_COND_FIRING, qtrue)) {
+		ent->client->torsoYawing = qtrue;	// always center
+		ent->client->torsoPitching = qtrue;	// always center
+	}
+
+	// adjust legs for movement dir
+	if (ent->s.eFlags & EF_DEAD) {
+		// don't let dead bodies twitch
+		legsAngles[YAW] = headAngles[YAW];
+		torsoAngles[YAW] = headAngles[YAW];
+	}
+	else {
+		legsAngles[YAW] = headAngles[YAW] + ent->s.angles2[YAW];
+
+		if (ent->s.eFlags & EF_NOSWINGANGLES) {
+			legsAngles[YAW] = torsoAngles[YAW] = headAngles[YAW];	// always face firing direction
+			clampTolerance = 60;
+		}
+		else if (!(ent->s.eFlags & EF_FIRING)) {
+			torsoAngles[YAW] = headAngles[YAW] + 0.35 * ent->s.angles2[YAW];
+			clampTolerance = 90;
+		}
+		else {	// must be firing
+			torsoAngles[YAW] = headAngles[YAW];	// always face firing direction
+												//if (fabs(cent->currentState.angles2[YAW]) > 30)
+												//	legsAngles[YAW] = headAngles[YAW];
+			clampTolerance = 60;
+		}
+
+		// torso
+		G_SwingAngles(torsoAngles[YAW], 25, clampTolerance, SWING_SPEED, &ent->client->torsoYawAngle, &ent->client->torsoYawing, msec);
+
+		// if the legs are yawing (facing heading direction), allow them to rotate a bit, so we don't keep calling
+		// the legs_turn animation while an AI is firing, and therefore his angles will be randomizing according to their accuracy
+
+		clampTolerance = 150;
+
+		if (BG_GetConditionValue(ent->s.number, ANIM_COND_MOVETYPE, qfalse) & (1 << ANIM_MT_IDLE))
+		{
+			ent->client->legsYawing = qfalse; // set it if they really need to swing
+			G_SwingAngles(legsAngles[YAW], 20, clampTolerance, 0.5 * SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
+		}
+		else
+			//if	( BG_GetConditionValue( ci->clientNum, ANIM_COND_MOVETYPE, qfalse ) & ((1<<ANIM_MT_STRAFERIGHT)|(1<<ANIM_MT_STRAFELEFT)) )
+			if (strstr(BG_GetAnimString(ent->s.number, legsSet), "strafe"))
+			{
+				ent->client->legsYawing = qfalse; // set it if they really need to swing
+				legsAngles[YAW] = headAngles[YAW];
+				G_SwingAngles(legsAngles[YAW], 0, clampTolerance, SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
+			}
+			else
+				if (ent->client->legsYawing)
+				{
+					G_SwingAngles(legsAngles[YAW], 0, clampTolerance, SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
+				}
+				else
+				{
+					G_SwingAngles(legsAngles[YAW], 40, clampTolerance, SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
+				}
+
+		torsoAngles[YAW] = ent->client->torsoYawAngle;
+		legsAngles[YAW] = ent->client->legsYawAngle;
+	}
+
+	// --------- pitch -------------
+
+	// only show a fraction of the pitch angle in the torso
+	if (headAngles[PITCH] > 180) {
+		dest = (-360 + headAngles[PITCH]) * 0.75;
+	}
+	else {
+		dest = headAngles[PITCH] * 0.75;
+	}
+	G_SwingAngles(dest, 15, 30, 0.1, &ent->client->torsoPitchAngle, &ent->client->torsoPitching, msec);
+	torsoAngles[PITCH] = ent->client->torsoPitchAngle;
+
+	// --------- roll -------------
+
+	// lean towards the direction of travel
+	VectorCopy(ent->s.pos.trDelta, velocity);
+	speed = VectorNormalize(velocity);
+	if (speed) {
+		vec3_t	axis[3];
+		float	side;
+
+		speed *= 0.05;
+
+		AnglesToAxis(legsAngles, axis);
+		side = speed * DotProduct(velocity, axis[1]);
+		legsAngles[ROLL] -= side;
+
+		side = speed * DotProduct(velocity, axis[0]);
+		legsAngles[PITCH] += side;
+	}
+
+	// We don't care about the minute changs pain twitch inflict.
+	/*
+	// pain twitch
+	CG_AddPainTwitch(cent, torsoAngles);
+	*/
+
+	// pull the angles back out of the hierarchial chain
+	AnglesSubtract(headAngles, torsoAngles, headAngles);
+	AnglesSubtract(torsoAngles, legsAngles, torsoAngles);
+	AnglesToAxis(legsAngles, ent->client->animationInfo.legsAxis);
+	AnglesToAxis(torsoAngles, ent->client->animationInfo.torsoAxis);
+	AnglesToAxis(headAngles, ent->client->animationInfo.headAxis);
+}
+
+void G_PlayerAnimation(gentity_t* ent) {
+	int legsSet, torsoSet;
+	animModelInfo_t* modelInfo = NULL;
+
+	modelInfo = BG_ModelInfoForClient(ent->s.number);
+	if (!modelInfo) {
+		return;
+	}
+
+	legsSet = ent->s.legsAnim & ~ANIM_TOGGLEBIT;
+	torsoSet = ent->s.torsoAnim & ~ANIM_TOGGLEBIT;
+
+	ent->client->animationInfo.legsFrame = modelInfo->animations[legsSet].firstFrame + modelInfo->animations[legsSet].numFrames - 1;
+	ent->client->animationInfo.torsoFrame = modelInfo->animations[torsoSet].firstFrame + modelInfo->animations[torsoSet].numFrames - 1;
+}
+
+
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
@@ -819,81 +1136,6 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	// L0 - Draw hitboxes
-	if (g_drawHitboxes.integer) {
-		if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
-			gentity_t *bboxEnt;
-			gentity_t *tent;
-			gentity_t   *head;
-			vec3_t b1, b2;
-			orientation_t or;       // DHM - Nerve
-			VectorCopy( ent->r.currentOrigin, b1 );
-			VectorCopy( ent->r.currentOrigin, b2 );
-			VectorAdd( b1, ent->r.mins, b1 );
-			VectorAdd( b2, ent->r.maxs, b2 );
-			bboxEnt = G_TempEntity( b1, EV_RAILTRAIL );
-			VectorCopy( b2, bboxEnt->s.origin2 );
-			bboxEnt->s.dmgFlags = 1; // ("type")
-
-			head = G_Spawn();
-
-			if ( trap_GetTag( ent->s.number, "tag_head", &or ) ) {
-				G_SetOrigin( head, or.origin );
-			} else {
-				float height, dest;
-				vec3_t v, angles, forward, up, right;
-
-				G_SetOrigin( head, ent->r.currentOrigin );
-
-				if ( ent->client->ps.pm_flags & PMF_DUCKED ) {
-					height = ent->client->ps.crouchViewHeight - 12;
-				} else {
-					height = ent->client->ps.viewheight;
-				}
-
-				VectorCopy( ent->client->ps.viewangles, angles );
-				if ( angles[PITCH] > 180 ) {
-					dest = ( -360 + angles[PITCH] ) * 0.75;
-				} else {
-					dest = angles[PITCH] * 0.75;
-				}
-				angles[PITCH] = dest;
-
-				AngleVectors( angles, forward, right, up );
-				VectorScale( forward, 5, v );
-				VectorMA( v, 18, up, v );
-
-				VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
-				head->r.currentOrigin[2] += height / 2;
-			}
-
-			VectorCopy( head->r.currentOrigin, head->s.origin );
-			VectorCopy( ent->r.currentAngles, head->s.angles );
-			VectorCopy( head->s.angles, head->s.apos.trBase );
-			VectorCopy( head->s.angles, head->s.apos.trDelta );
-
-			VectorSet (head->r.mins , -6, -6, -4);
-			VectorSet (head->r.maxs , 6, 6, 10);
-			//VectorSet (head->r.mins , -6, -6, -6);
-			//VectorSet (head->r.maxs , 6, 6, 6);
-			//VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
-			//VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
-			head->clipmask = CONTENTS_SOLID;
-			head->r.contents = CONTENTS_SOLID;
-
-			trap_LinkEntity( head );
-
-			VectorCopy( head->r.currentOrigin, b1 );
-			VectorCopy( head->r.currentOrigin, b2 );
-			VectorAdd( b1, head->r.mins, b1 );
-			VectorAdd( b2, head->r.maxs, b2 );
-			tent = G_TempEntity( b1, EV_RAILTRAIL );
-			VectorCopy( b2, tent->s.origin2 );
-			tent->s.dmgFlags = 1;
-
-			G_FreeEntity( head );
-		}
-	} // L0 - Draw hitboxes end
 	if ( client->cameraPortal ) {
 		G_SetOrigin( client->cameraPortal, client->ps.origin );
 		trap_LinkEntity( client->cameraPortal );
@@ -1283,6 +1525,9 @@ void ClientThink_real( gentity_t *ent ) {
 
 	ent->waterlevel = pm.waterlevel;
 	ent->watertype = pm.watertype;
+
+	G_PlayerAngles(ent, msec);
+	G_PlayerAnimation(ent);
 
 	// execute client events
 	// L0 - Pause dump
@@ -1729,6 +1974,33 @@ void WolfReviveBbox( gentity_t *self ) {
 
 // dhm
 
+void G_DrawHitBoxes(gentity_t* ent) {
+	gentity_t* bboxEnt, * headEnt;
+	vec3_t b1, b2;
+
+	// Draw body hitbox
+	VectorCopy(ent->r.currentOrigin, b1);
+	VectorCopy(ent->r.currentOrigin, b2);
+	VectorAdd(b1, ent->r.mins, b1);
+	VectorAdd(b2, ent->r.maxs, b2);
+	bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
+	VectorCopy(b2, bboxEnt->s.origin2);
+	bboxEnt->s.dmgFlags = 1;
+	bboxEnt->s.otherEntityNum2 = ent->s.number;
+
+	// Draw head hitbox
+	headEnt = G_BuildHead(ent);
+	VectorCopy(headEnt->r.currentOrigin, b1);
+	VectorCopy(headEnt->r.currentOrigin, b2);
+	VectorAdd(b1, headEnt->r.mins, b1);
+	VectorAdd(b2, headEnt->r.maxs, b2);
+	bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
+	VectorCopy(b2, bboxEnt->s.origin2);
+	bboxEnt->s.dmgFlags = 1;
+	bboxEnt->s.otherEntityNum2 = ent->s.number;
+	G_FreeEntity(headEnt);
+}
+
 /*
 ==============
 ClientEndFrame
@@ -1861,4 +2133,8 @@ void ClientEndFrame( gentity_t *ent ) {
 		ent->count2 = 0;
 	}
 	// dhm
+
+	if (ent->client->pers.drawHitBoxes && g_drawHitboxes.integer && ent->health > 0) {
+		G_DrawHitBoxes(ent);
+	}
 }
