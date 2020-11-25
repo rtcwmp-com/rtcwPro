@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1092,6 +1092,28 @@ void SV_Frame( int msec ) {
 
 	// send a heartbeat to the master if needed
 	SV_MasterHeartbeat( HEARTBEAT_GAME );
+}
+/*
+==================
+SV_FrameMsec
+Return time in millseconds until processing of the next server frame.
+==================
+*/
+int SV_FrameMsec()
+{
+	if(sv_fps)
+	{
+		int frameMsec;
+
+		frameMsec = 1000.0f / sv_fps->value;
+
+		if(frameMsec < sv.timeResidual)
+			return 0;
+		else
+			return frameMsec - sv.timeResidual;
+	}
+	else
+		return 1;
 }
 
 //============================================================================
