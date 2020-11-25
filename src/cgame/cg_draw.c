@@ -858,7 +858,7 @@ static float CG_DrawTeamOverlay( float y ) {
 			} else {
 				pcolor = deathcolor;
 				// RtcwPro
-				if (!(cg.snap->ps.pm_flags & PMF_LIMBO))
+				if (!(cg.snap->ps.pm_flags & PMF_LIMBO && cg.snap->ps.stats[STAT_HEALTH] > GIB_HEALTH))
 					isRevivable = "*";
 			}
 			// jpw
