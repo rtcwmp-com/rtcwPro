@@ -258,7 +258,7 @@ menuDef {
 		rect 10 448 256 20
 		type 4
 		style 0
-		text "RtcwPro Version:"
+		text "" // show the cvar below
 		cvar ui_gameversion
 		maxPaintChars 64
 		textalignx 8
