@@ -427,13 +427,13 @@ menuDef {
 
 	itemDef {
 		name window
-		text "RtcwPro Version"
+		text "" // show the cvar below
 		cvar ui_gameversion
-		tooltip "RtcwPro Version"
+		//tooltip "RtcwPro Version"
 		tooltipaligny -40
 		type 4
 		style 0	
-		rect 450 450 200 14
+		rect 400 450 300 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED

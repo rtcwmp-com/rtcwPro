@@ -763,10 +763,6 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	// L0 - connect message
 	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
 
-	// sswolf - moved to ClientConnect
-	// L0 - Advertise
-	//CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
-	//CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
 
