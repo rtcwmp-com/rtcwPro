@@ -254,6 +254,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 	if ( cg.snap->ps.pm_type != PM_INTERMISSION ) {
 		CG_DrawSmallString( x, y, CG_TranslateString( "Goals" ), fade );
 	}
+	CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // sswolf - time
 	y += SMALLCHAR_HEIGHT + 3;
 
 	// draw color bands
