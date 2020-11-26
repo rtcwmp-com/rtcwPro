@@ -932,8 +932,23 @@ void CG_ColorForHealth( vec4_t hcolor ) {
 	}
 }
 
+/*
+==================
+sswolf
+CG_GetClock
+Returns realtime in the format "hh:mm:ss"
+==================
+*/
+char* CG_GetClock(void) {
+	static char displayTime[19] = { 0 };
+	qtime_t     tm;
 
+	trap_RealTime(&tm);
+	displayTime[0] = '\0';
+	Q_strcat(displayTime, sizeof(displayTime), va("%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec));
 
+	return displayTime;
+}
 
 /*
 =================
