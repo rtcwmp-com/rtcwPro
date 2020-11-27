@@ -951,6 +951,7 @@ void CG_InitConsoleCommands( void ) {
 	// Misc
 	trap_AddCommand("players");
 	trap_AddCommand("say_teamnl");
+	trap_AddCommand("forcefps");		// adding this so we don't get an invalid command error
 	// Stats
 	trap_AddCommand( "scores" );		// Prints score table
 	trap_AddCommand( "weaponstats" );	// +wstats equivalent for console
