@@ -2441,7 +2441,7 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
 	}
 	else {
-		s = va("[A:%i/%i-G:%i]", playerAmmoClip, playerAmmo, playerNades);
+		s = va("[A:%i-G:%i]", playerAmmoClip + playerAmmo, playerNades);
 		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
 	}
