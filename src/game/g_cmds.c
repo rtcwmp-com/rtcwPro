@@ -2784,6 +2784,7 @@ static const cmd_reference_t aCommandInfo[] =
 //	{ "callvote",       qtrue,  qfalse, (void (*)(gentity_t *, unsigned int, qboolean))Cmd_CallVote_f, " <params>:^7 Calls a vote"                          },
 	{ "currenttime",    qtrue,  qtrue,  NULL,                  ":^7 Displays current local time"                                                            },
 //	{ "follow",         qfalse, qtrue,  NULL,          " <player_ID|allies|axis>:^7 Spectates a particular player or team"                          },
+	{ "forcefps",		qtrue, qtrue, NULL,		"Deprecated" },
 //  { "invite",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Invites a player to join a team" },
 	{ "lock",           qtrue,  qfalse,  NULL,            ":^7 Locks a player's team to prevent others from joining"                                   },
 	{ "notready",       qtrue,  qfalse, NULL,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
