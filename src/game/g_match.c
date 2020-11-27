@@ -370,7 +370,7 @@ void CountDown(qboolean restart) {
 //	if (level.clients->pers.connected == CON_CONNECTED)
 //		doSound(other, EV_ANNOUNCER_SOUND, "sound/scenaric/", va("%s", index));
 
-	if (level.clients->pers.connected == CON_CONNECTED)
+	if ((level.clients->pers.connected == CON_CONNECTED)  && (Q_stricmpn(index,"cn",2) ==0))
 		AAPS(va("sound/match/%s", index));
 
 	level.CNstart++;  // push forward each frame.. :)
