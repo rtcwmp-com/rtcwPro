@@ -338,7 +338,10 @@ void CountDown(qboolean restart) {
                     if (target_ent->think &&
                         target_ent->nextthink > 0)
                     {
-                        target_ent->nextthink -= level.timeDelta;
+                        if (target_ent->s.eType != ET_ITEM) {   // do not adjust for med/ammo packs
+                            target_ent->nextthink -= level.timeDelta;
+                        }
+
                     }
 
                     if (target_ent->s.eType > TR_INTERPOLATE &&
