@@ -431,117 +431,6 @@ ATVI Wolfenstein Misc #284
 char *Cmd_Cmd() {
 	return cmd_cmd;
 }
-
-/*
-============
-Cmd_TokenizeString
-
-Parses the given string into command line tokens.
-The text is copied to a seperate buffer and 0 characters
-are inserted in the apropriate place, The argv array
-will point into this temporary buffer.
-============
-*/
-void Cmd_TokenizeString( const char *text_in ) {
-
-    Cmd_TokenizeString2( text_in, qfalse );
-    /*
-	const char  *text;
-	char    *textOut;
-
-	// clear previous args
-	cmd_argc = 0;
-
-	if ( !text_in ) {
-		return;
-	}
-
-	Q_strncpyz( cmd_cmd, text_in, sizeof( cmd_cmd ) );
-
-	text = text_in;
-	textOut = cmd_tokenized;
-
-	while ( 1 ) {
-		if ( cmd_argc == MAX_STRING_TOKENS ) {
-			return;         // this is usually something malicious
-		}
-
-		while ( 1 ) {
-			// skip whitespace
-			while ( *text && *text <= ' ' ) {
-				text++;
-			}
-			if ( !*text ) {
-				return;         // all tokens parsed
-			}
-
-			// skip // comments
-			if ( text[0] == '/' && text[1] == '/' ) {
-				return;         // all tokens parsed
-			}
-
-			// skip  comments
-			if ( text[0] == '/' && text[1] == '*' ) {
-				while ( *text && ( text[0] != '*' || text[1] != '/' ) ) {
-					text++;
-				}
-				if ( !*text ) {
-					return;     // all tokens parsed
-				}
-				text += 2;
-			} else {
-				break;          // we are ready to parse a token
-			}
-		}
-
-		// handle quoted strings
-		if ( *text == '"' ) {
-			cmd_argv[cmd_argc] = textOut;
-			cmd_argc++;
-			text++;
-			while ( *text && *text != '"' ) {
-				*textOut++ = *text++;
-			}
-			*textOut++ = 0;
-			if ( !*text ) {
-				return;     // all tokens parsed
-			}
-			text++;
-			continue;
-		}
-
-		// regular token
-		cmd_argv[cmd_argc] = textOut;
-		cmd_argc++;
-
-		// skip until whitespace, quote, or command
-		while ( *text > ' ' ) {
-			if ( text[0] == '"' ) {
-				break;
-			}
-
-			if ( text[0] == '/' && text[1] == '/' ) {
-				break;
-			}
-
-			// skip  comments
-			if ( text[0] == '/' && text[1] == '*' ) {
-				break;
-			}
-
-			*textOut++ = *text++;
-		}
-
-		*textOut++ = 0;
-
-		if ( !*text ) {
-			return;     // all tokens parsed
-		}
-	}
-	*/
-
-}
-
 /*
 ============
 Cmd_TokenizeString
@@ -654,6 +543,117 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 	}
 
 }
+
+/*
+============
+Cmd_TokenizeString
+
+Parses the given string into command line tokens.
+The text is copied to a seperate buffer and 0 characters
+are inserted in the apropriate place, The argv array
+will point into this temporary buffer.
+============
+*/
+void Cmd_TokenizeString( const char *text_in ) {
+
+    Cmd_TokenizeString2( text_in, qfalse );
+    /*
+	const char  *text;
+	char    *textOut;
+
+	// clear previous args
+	cmd_argc = 0;
+
+	if ( !text_in ) {
+		return;
+	}
+
+	Q_strncpyz( cmd_cmd, text_in, sizeof( cmd_cmd ) );
+
+	text = text_in;
+	textOut = cmd_tokenized;
+
+	while ( 1 ) {
+		if ( cmd_argc == MAX_STRING_TOKENS ) {
+			return;         // this is usually something malicious
+		}
+
+		while ( 1 ) {
+			// skip whitespace
+			while ( *text && *text <= ' ' ) {
+				text++;
+			}
+			if ( !*text ) {
+				return;         // all tokens parsed
+			}
+
+			// skip // comments
+			if ( text[0] == '/' && text[1] == '/' ) {
+				return;         // all tokens parsed
+			}
+
+			// skip  comments
+			if ( text[0] == '/' && text[1] == '*' ) {
+				while ( *text && ( text[0] != '*' || text[1] != '/' ) ) {
+					text++;
+				}
+				if ( !*text ) {
+					return;     // all tokens parsed
+				}
+				text += 2;
+			} else {
+				break;          // we are ready to parse a token
+			}
+		}
+
+		// handle quoted strings
+		if ( *text == '"' ) {
+			cmd_argv[cmd_argc] = textOut;
+			cmd_argc++;
+			text++;
+			while ( *text && *text != '"' ) {
+				*textOut++ = *text++;
+			}
+			*textOut++ = 0;
+			if ( !*text ) {
+				return;     // all tokens parsed
+			}
+			text++;
+			continue;
+		}
+
+		// regular token
+		cmd_argv[cmd_argc] = textOut;
+		cmd_argc++;
+
+		// skip until whitespace, quote, or command
+		while ( *text > ' ' ) {
+			if ( text[0] == '"' ) {
+				break;
+			}
+
+			if ( text[0] == '/' && text[1] == '/' ) {
+				break;
+			}
+
+			// skip  comments
+			if ( text[0] == '/' && text[1] == '*' ) {
+				break;
+			}
+
+			*textOut++ = *text++;
+		}
+
+		*textOut++ = 0;
+
+		if ( !*text ) {
+			return;     // all tokens parsed
+		}
+	}
+	*/
+
+}
+
 
 
 /*
