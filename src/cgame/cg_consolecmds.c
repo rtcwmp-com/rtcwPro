@@ -935,6 +935,8 @@ void CG_InitConsoleCommands( void ) {
     trap_AddCommand( "help" );
     trap_AddCommand( "commandsHelp" );
 
+	trap_AddCommand( "lock" );		// Locks team
+	trap_AddCommand( "unlock" );		// Unlocks team
 	trap_AddCommand( "speclock" );		// Locks team from specs
 	trap_AddCommand( "specunlock" );	// Opens team for specs
 	trap_AddCommand( "specinvite" );		// Invites player to spec team
