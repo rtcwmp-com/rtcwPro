@@ -1129,8 +1129,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 
 		}
-        // moved to G_matchClockDump due to cg_autoaction issue
-		/*
+
 		else if ( dwDumpType == EOM_MATCHINFO )
 		{
 			// Don't dump score table for users with stats dump enabled
@@ -1138,7 +1137,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			{
 				G_printMatchInfo(ent,qtrue);
 			}
-
+        // moved to G_matchClockDump due to cg_autoaction issue
+		/*
 			if ( g_gametype.integer == GT_WOLF_STOPWATCH )
 			{
 				// We've already missed the switch
@@ -1206,7 +1206,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 			*/
 			// sswolf - non SW exits
-			else if (g_gametype.integer == GS_PLAYING)
+			//else if (g_gametype.integer == GS_PLAYING)
+			if (g_gametype.integer == GS_PLAYING)
 			{
 				if (g_timelimit.value && !level.warmupTime)
 				{
