@@ -1049,7 +1049,7 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 				tot_gp ) );
 
 	}
-	// temp for printing clock
+	// temp for printing clock & end of round sounds
 	if (fDump && ( g_gametype.integer == GT_WOLF_STOPWATCH ))
     {
         G_matchClockDump( ent );
@@ -1129,6 +1129,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 
 		}
+        // moved to G_matchClockDump due to cg_autoaction issue
+		/*
 		else if ( dwDumpType == EOM_MATCHINFO )
 		{
 			// Don't dump score table for users with stats dump enabled
@@ -1142,11 +1144,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 				// We've already missed the switch
 				if ( g_currentRound.integer == 1 )
 				{
-				    /*
+
 					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
 							g_nextTimeLimit.integer,
 							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
-                    */
+
 
 					if (winner == 0)
 					{
@@ -1156,6 +1158,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						AAPS("sound/match/winallies.wav");
 					}
+
 				}
 				else
 				{
@@ -1163,12 +1166,13 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
 					if ( val < g_timelimit.value )
 					{
-						/*CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+
+						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
 								(int)val,
 								(int)( 60.0 * ( val - (int)val ) ),
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-                        */
+
 
 						if (winner == 0)
 						{
@@ -1178,14 +1182,16 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
+
 					}
 					else
 					{
-						/*CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+
+						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
 
-                        */
+
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
@@ -1194,9 +1200,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
+
 					}
 				}
 			}
+			*/
 			// sswolf - non SW exits
 			else if (g_gametype.integer == GS_PLAYING)
 			{
@@ -1232,13 +1240,23 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 // temp fix for cg_autoaction issue
 void G_matchClockDump( gentity_t *ent ) {
 
+	char cs[MAX_STRING_CHARS];
+	char* buf;
+	int winner;
+	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
+	buf = Info_ValueForKey(cs, "winner");
+	winner = atoi(buf);
+
+    if ( !level.intermissiontime ) {
+		return;
+	}
 
                if ( g_currentRound.integer == 1 )
 				{
 					CP( va( "sc \">>> ^3Clock set to: %d:%02d\n\"",
 							g_nextTimeLimit.integer,
 							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
-                /*
+
 					if (winner == 0)
 					{
 						AAPS("sound/match/winaxis.wav");
@@ -1247,7 +1265,7 @@ void G_matchClockDump( gentity_t *ent ) {
 					{
 						AAPS("sound/match/winallies.wav");
 					}
-					*/
+
 				}
 				else
 				{
@@ -1260,22 +1278,6 @@ void G_matchClockDump( gentity_t *ent ) {
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
 
-					/*	if (winner == 0)
-						{
-							AAPS("sound/match/winaxis.wav");
-						}
-						else if (winner == 1)
-						{
-							AAPS("sound/match/winallies.wav");
-						}
-                    */
-					}
-					else
-					{
-						CP( va( "sc \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-                    /*
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
@@ -1284,7 +1286,23 @@ void G_matchClockDump( gentity_t *ent ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
-                    */
+
+					}
+					else
+					{
+						CP( va( "sc \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+
+						if (winner == 0)
+						{
+							AAPS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							AAPS("sound/match/winallies.wav");
+						}
+
 					}
 				}
 
