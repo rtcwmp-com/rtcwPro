@@ -101,7 +101,6 @@ void PauseHandle( void ) {
 		} else {
 			level.paused = PAUSE_UNPAUSING;
 			AP( "print \"Prepare to fight!\n\"" );
-			APS("sound/match/prepare.wav");
 		}
 
 
@@ -339,7 +338,10 @@ void CountDown(qboolean restart) {
                     if (target_ent->think &&
                         target_ent->nextthink > 0)
                     {
-                        target_ent->nextthink -= level.timeDelta;
+                        if (target_ent->s.eType != ET_ITEM) {   // do not adjust for med/ammo packs
+                            target_ent->nextthink -= level.timeDelta;
+                        }
+
                     }
 
                     if (target_ent->s.eType > TR_INTERPOLATE &&
@@ -368,7 +370,7 @@ void CountDown(qboolean restart) {
 //	if (level.clients->pers.connected == CON_CONNECTED)
 //		doSound(other, EV_ANNOUNCER_SOUND, "sound/scenaric/", va("%s", index));
 
-	if (level.clients->pers.connected == CON_CONNECTED)
+	if ((level.clients->pers.connected == CON_CONNECTED)  && (Q_stricmpn(index,"cn",2) ==0))
 		AAPS(va("sound/match/%s", index));
 
 	level.CNstart++;  // push forward each frame.. :)

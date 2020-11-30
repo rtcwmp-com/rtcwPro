@@ -763,10 +763,6 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	// L0 - connect message
 	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
 
-	// sswolf - moved to ClientConnect
-	// L0 - Advertise
-	//CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
-	//CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
 
@@ -2778,16 +2774,17 @@ static const cmd_reference_t aCommandInfo[] =
 //	{ "?",              qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
 	// copy of ?
     { "cg_muzzleFlash",           qtrue,  qtrue,  NULL,        ":^7 1 = yours OFF, enemies ON   / 0 = yours OFF, enemies OFF"                                                               },
-    { "cg_tracerchance",           qtrue,  qtrue,  NULL,        ":^7 Enable/disable bullet tracers"                                                               },
+    //{ "cg_tracerchance",           qtrue,  qtrue,  NULL,        ":^7 Enable/disable bullet tracers"                                                               },
 	{ "commandsHelp",           qtrue,  qtrue,  NULL,        ":^7 Gives a detailed list of commands"                                                               },
 	{ "commands",       qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
 //	{ "cstats",       qtrue,  qtrue,  NULL,        ":^7 !!!!!!!!!!!!!"                                                               },
 	{ "autorecord",     qtrue,  qtrue,  NULL,                  ":^7 Creates a demo with a consistent naming scheme"                                         },
 	{ "autoscreenshot", qtrue,  qtrue,  NULL,                  ":^7 Creates a screenshot with a consistent naming scheme"                                   },
 	{ "bottomshots",    qtrue,  qfalse, NULL,  ":^7 Shows WORST player for each weapon. Add ^3<weapon_ID>^7 to show all stats for a weapon" },
-//	{ "callvote",       qtrue,  qfalse, (void (*)(gentity_t *, unsigned int, qboolean))Cmd_CallVote_f, " <params>:^7 Calls a vote"                          },
+	{ "callvote",       qtrue,  qfalse, NULL, " <params>:^7 Calls a vote"                          },
 	{ "currenttime",    qtrue,  qtrue,  NULL,                  ":^7 Displays current local time"                                                            },
-//	{ "follow",         qfalse, qtrue,  NULL,          " <player_ID|allies|axis>:^7 Spectates a particular player or team"                          },
+	{ "follow",         qfalse, qtrue,  NULL,          " <player_ID|allies|axis>:^7 Spectates a particular player or team"                          },
+	{ "forcefps",		qtrue, qtrue, NULL,		": ^7Deprecated" },
 //  { "invite",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Invites a player to join a team" },
 	{ "lock",           qtrue,  qfalse,  NULL,            ":^7 Locks a player's team to prevent others from joining"                                   },
 	{ "notready",       qtrue,  qfalse, NULL,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
@@ -2798,7 +2795,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "readyteam",      qfalse, qtrue,  NULL,       ":^7 Sets an entire team's status to ^5ready^7 to start a match"                             },
 	{ "ref",            qtrue,  qtrue,  NULL,             " <password>:^7 Become a referee (admin access)"                                             },
 //  { "remove",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Removes a player from the team" },
-	//{ "say_teamnl",     qtrue,  qtrue,  G_say_teamnl_cmd,      "<msg>:^7 Sends a team chat without location info"                                           },
+	{ "say_teamnl",     qtrue,  qtrue,  NULL,      "<msg>:^7 Sends a team chat without location info"                                           },
 	{ "scores",         qtrue,  qtrue,  NULL,          ":^7 Displays current match stat info"                                                       },
 //    { "sgstats",       qtrue,  qtrue,  NULL,        ":^7 !!!!!!!!!!!!!"                                                               },
 	{ "specinvite",     qtrue,  qtrue,  NULL,      ":^7 Invites a player to spectate a speclock'ed team"                                        },

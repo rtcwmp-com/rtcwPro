@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
-#define GAMEVERSION "RtcwPro 1.0 beta"
+
 // done.
 
 #define BODY_QUEUE_SIZE     8
@@ -653,6 +653,7 @@ typedef struct {
 	// tardo
 	qboolean ready;
 	int restrictedWeapon;
+	qboolean drawHitBoxes;
 } clientPersistant_t;
 
 // L0 - antilag port     nihi added
@@ -787,6 +788,10 @@ struct gclient_s {
 
 	pmoveExt_t pmext;
 */
+
+	clientAnimationInfo_t animationInfo;
+	float legsYawAngle, torsoYawAngle, torsoPitchAngle;
+	qboolean torsoYawing, legsYawing, torsoPitching;
 
 // nihi added below
 	// g_antilag.c
@@ -1251,10 +1256,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
-void RemoveWeaponRestrictions(gentity_t *ent);
-void limbo( gentity_t *ent, qboolean makeCorpse );
-//void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
-//void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+void limbo(gentity_t* ent, qboolean makeCorpse);
+
+//void RemoveWeaponRestrictions(gentity_t *ent);
+//void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);
@@ -1458,6 +1464,7 @@ extern vmCvar_t g_debugMove;
 extern vmCvar_t g_debugAlloc;
 extern vmCvar_t g_debugDamage;
 extern vmCvar_t g_debugBullets;     //----(SA)	added
+extern vmCvar_t g_preciseHeadHitBox;
 extern vmCvar_t g_weaponRespawn;
 extern vmCvar_t g_synchronousClients;
 extern vmCvar_t g_motd;
@@ -1718,7 +1725,7 @@ int     trap_BotAllocateClient( void );
 void    trap_BotFreeClient( int clientNum );
 void    trap_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean    trap_GetEntityToken( char *buffer, int bufferSize );
-qboolean trap_GetTag( int clientNum, char *tagName, orientation_t * or );
+qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* or );
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );

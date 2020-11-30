@@ -7896,7 +7896,7 @@ cvarTable_t cvarTable[] = {
 
 	{ &ui_demoDir, "ui_demoDir", "demos", CVAR_ARCHIVE },
 	{ &fs_game, "fs_game", "", 0 },
-	{ &ui_gameversion, "ui_gameversion", PRO_VERSION, CVAR_ARCHIVE }
+	{ &ui_gameversion, "ui_gameversion", GAMEVERSION, CVAR_ROM }
 };
 
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

@@ -2246,6 +2246,9 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 // RtcwPro
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
 
+// sswolf - time
+char* CG_GetClock(void);
+
 //
 // cg_draw.c, cg_newDraw.c
 //

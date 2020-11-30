@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 // A user mod should never modify this file
 
 #define Q3_VERSION      "Wolf 1.41b-MP"
-#define PRO_VERSION		"Beta 1.0"
+
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
 // 1.3-MP : final for release
@@ -115,6 +115,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
+#ifndef ID_INLINE
+#if defined(NDEBUG) || defined(_WIN32)
+#define ID_INLINE __inline
+#else
+#define ID_INLINE
+#endif
+#endif
 
 // this is the define for determining if we have an asm version of a C function
 #if ( defined _M_IX86 || defined __i386__ ) && !defined __sun__  && !defined __LCC__
@@ -503,7 +510,7 @@ extern vec4_t colorMdOrange;
 extern vec4_t colorMdBlue;
 
 #define Q_COLOR_ESCAPE  '^'
-#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isalnum(*((p)+1))) // ^[0-9a-zA-Z]
+#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isgraph(*((p)+1))) // ^[0-9a-zA-Z]
 // -OSPx
 
 #define COLOR_BLACK     '0'
@@ -1076,6 +1083,10 @@ typedef enum {
 //#define	MAX_CONFIGSTRINGS	1024
 #define MAX_CONFIGSTRINGS   2048
 
+#define NUM_MODELS 2
+#define AXIS_MODEL_HANDLE	0
+#define ALLIED_MODEL_HANDLE 1
+
 #define MAX_DLIGHT_CONFIGSTRINGS    128
 #define MAX_CLIPBOARD_CONFIGSTRINGS 64
 #define MAX_SPLINE_CONFIGSTRINGS    64
@@ -1501,6 +1512,15 @@ typedef struct entityState_s {
 
 
 } entityState_t;
+
+typedef struct {
+	vec3_t legsAxis[3];
+	vec3_t torsoAxis[3];
+	vec3_t headAxis[3];
+	int legsFrame;
+	int torsoFrame;
+	qhandle_t bodyModelHandle;
+} clientAnimationInfo_t;
 
 typedef enum {
 	CA_UNINITIALIZED,

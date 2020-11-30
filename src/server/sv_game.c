@@ -459,7 +459,7 @@ int SV_GameSystemCalls( int *args ) {
 		Sys_SnapVector( VMA( 1 ) );
 		return 0;
 	case G_GETTAG:
-		return SV_GetTag( args[1], VMA( 2 ), VMA( 3 ) );
+		return SV_GetTag(VMA(1), VMA(2), VMA(3), VMA(4));
 
 		//====================================
 
@@ -1015,14 +1015,37 @@ SV_GetTag
 */
 extern qboolean CL_GetTag( int clientNum, char *tagname, orientation_t * or );
 
-qboolean SV_GetTag( int clientNum, char *tagname, orientation_t *or ) {
+qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* orientation) {
 #ifndef DEDICATED // TTimo: dedicated only binary defines DEDICATED
-	if ( com_dedicated->integer ) {
+	if (com_dedicated->integer) {
 		return qfalse;
 	}
 
-	return CL_GetTag( clientNum, tagname, or );
+	return CL_GetTag(ent->s.number, tagname, orientation);
 #else
-	return qfalse;
+	vec3_t tempAxis[3];
+	vec3_t org;
+	int i;
+
+	if (!animInfo) {
+		return qfalse;
+	}
+
+	if (SV_LerpTag(orientation, animInfo, tagname) < 0)
+		return qfalse;
+
+	VectorCopy(ent->r.currentOrigin, org);
+
+	for (i = 0; i < 3; i++) {
+		VectorMA(org, orientation->origin[i], animInfo->legsAxis[i], org);
+	}
+
+	VectorCopy(org, orientation->origin);
+
+	// rotate with entity
+	MatrixMultiply(animInfo->legsAxis, orientation->axis, tempAxis);
+	memcpy(orientation->axis, tempAxis, sizeof(vec3_t) * 3);
+
+	return qtrue;
 #endif
 }

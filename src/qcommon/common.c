@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,9 +47,12 @@ jmp_buf abortframe;     // an ERR_DROP occured, exit the entire frame
 
 FILE *debuglogfile;
 static fileHandle_t logfile;
+
+//static fileHandle_t pipefile;
+
 fileHandle_t com_journalFile;               // events are written here
 fileHandle_t com_journalDataFile;           // config files are written here
-
+//cvar_t	*com_altivec;
 cvar_t  *com_viewlog;
 cvar_t  *com_speeds;
 cvar_t  *com_developer;
@@ -59,6 +62,7 @@ cvar_t  *com_fixedtime;
 cvar_t  *com_dropsim;       // 0.0 to 1.0, simulated packet drops
 cvar_t  *com_journal;
 cvar_t  *com_maxfps;
+cvar_t	*com_pipefile;
 cvar_t  *com_timedemo;
 cvar_t  *com_sv_running;
 cvar_t  *com_cl_running;
@@ -71,6 +75,15 @@ cvar_t  *com_introPlayed;
 cvar_t  *cl_paused;
 cvar_t  *sv_paused;
 cvar_t  *com_cameraMode;
+// new stuff for iortcw port of server defined dl rates
+cvar_t  *sv_dlRate;
+cvar_t	*com_unfocused;
+cvar_t	*com_maxfpsUnfocused;
+cvar_t	*com_minimized;
+cvar_t	*com_maxfpsMinimized;
+cvar_t	*com_abnormalExit;
+cvar_t	*com_busyWait;
+
 #if defined( _WIN32 ) && defined( _DEBUG )
 cvar_t  *com_noErrorInterrupt;
 #endif
@@ -1357,8 +1370,6 @@ void Com_TouchMemory( void ) {
 	Com_Printf( "Com_TouchMemory: %i msec\n", end - start );
 }
 
-
-
 /*
 =================
 Com_InitZoneMemory
@@ -2484,6 +2495,7 @@ void Com_Init( char *commandLine ) {
 	//
 	// init commands and vars
 	//
+	//com_altivec = Cvar_Get ("com_altivec", "1", CVAR_ARCHIVE);
 	com_maxfps = Cvar_Get( "com_maxfps", "85", CVAR_ARCHIVE | CVAR_LATCH );
 	com_blood = Cvar_Get( "com_blood", "1", CVAR_ARCHIVE );
 
@@ -2498,9 +2510,20 @@ void Com_Init( char *commandLine ) {
 	com_speeds = Cvar_Get( "com_speeds", "0", 0 );
 	com_timedemo = Cvar_Get( "timedemo", "0", CVAR_CHEAT );
 	com_cameraMode = Cvar_Get( "com_cameraMode", "0", CVAR_CHEAT );
+    // new stuff for iortcw port of server defined dl rates
+	com_unfocused = Cvar_Get( "com_unfocused", "0", CVAR_ROM );
+	com_maxfpsUnfocused = Cvar_Get( "com_maxfpsUnfocused", "0", CVAR_ARCHIVE );
+	com_minimized = Cvar_Get( "com_minimized", "0", CVAR_ROM );
+	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
+	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
+	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
+    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
 
+
+	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
 	cl_paused = Cvar_Get( "cl_paused", "0", CVAR_ROM );
 	sv_paused = Cvar_Get( "sv_paused", "0", CVAR_ROM );
+
 	com_sv_running = Cvar_Get( "sv_running", "0", CVAR_ROM );
 	com_cl_running = Cvar_Get( "cl_running", "0", CVAR_ROM );
 	com_buildScript = Cvar_Get( "com_buildScript", "0", 0 );
@@ -2577,7 +2600,13 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
-
+	/*
+	com_pipefile = Cvar_Get( "com_pipefile", "", CVAR_ARCHIVE|CVAR_LATCH );
+	if( com_pipefile->string[0] )
+	{
+		pipefile = FS_FCreateOpenPipeFile( com_pipefile->string );
+	}
+	*/
 	com_fullyInitialized = qtrue;
 	Com_Printf( "--- Common Initialization Complete ---\n" );
 }
@@ -2722,16 +2751,21 @@ Com_Frame
 */
 void Com_Frame( void ) {
 
-	int msec, minMsec;
-	static int lastTime;
+
 	int key;
 
-	int timeBeforeFirstEvents;
-	int timeBeforeServer;
-	int timeBeforeEvents;
-	int timeBeforeClient;
-	int timeAfter;
+	int		msec, minMsec;
+	int		timeVal;
+	int		numBlocks = 1;
+	int		dlStart, deltaT, delayT;
+	static int	dlNextRound = 0;
+	static int	lastTime = 0, bias = 0;
 
+	int		timeBeforeFirstEvents;
+	int		timeBeforeServer;
+	int		timeBeforeEvents;
+	int		timeBeforeClient;
+	int		timeAfter;
 
 
 
@@ -2757,48 +2791,137 @@ void Com_Frame( void ) {
 	// write config file if anything changed
 	Com_WriteConfiguration();
 #endif
-
-	// if "viewlog" has been modified, show or hide the log console
-	if ( com_viewlog->modified ) {
-		if ( !com_dedicated->value ) {
-			Sys_ShowConsole( com_viewlog->integer, qfalse );
-		}
-		com_viewlog->modified = qfalse;
-	}
-
-	//
-	// main event loop
-	//
 	if ( com_speeds->integer ) {
-		timeBeforeFirstEvents = Sys_Milliseconds();
+		timeBeforeFirstEvents = Sys_Milliseconds ();
 	}
 
-	// we may want to spin here if things are going too fast
-	if ( !com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer ) {
-		minMsec = 1000 / com_maxfps->integer;
-	} else {
-		minMsec = 1;
-	}
-	do {
-		com_frameTime = Com_EventLoop();
-		if ( lastTime > com_frameTime ) {
-			lastTime = com_frameTime;       // possible on first frame
+	// Figure out how much time we have
+	if(!com_timedemo->integer)
+	{
+		if(com_dedicated->integer)
+			minMsec = SV_FrameMsec();
+		else
+		{
+			if(com_minimized->integer && com_maxfpsMinimized->integer > 0)
+				minMsec = 1000 / com_maxfpsMinimized->integer;
+			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
+				minMsec = 1000 / com_maxfpsUnfocused->integer;
+			else if(com_maxfps->integer > 0)
+				minMsec = 1000 / com_maxfps->integer;
+			else
+				minMsec = 1;
+
+			timeVal = com_frameTime - lastTime;
+			bias += timeVal - minMsec;
+
+			if(bias > minMsec)
+				bias = minMsec;
+
+			// Adjust minMsec if previous frame took too long to render so
+			// that framerate is stable at the requested value.
+			minMsec -= bias;
 		}
-		msec = com_frameTime - lastTime;
-	} while ( msec < minMsec );
-	Cbuf_Execute();
+	}
+	else
+		minMsec = 1;
+
+	timeVal = 0;
+
+	do
+	{
+		// Busy sleep the last millisecond for better timeout precision
+		if(timeVal < 2)
+			NET_Sleep(0);
+		else
+		{
+			if(com_sv_running->integer)
+			{
+				// Send out download messages now that we're idle
+				if(sv_dlRate->integer)
+				{
+					// Rate limiting. This is very imprecise for high
+					// download rates due to millisecond timedelta resolution
+					dlStart = Sys_Milliseconds();
+					deltaT = dlNextRound - dlStart;
+
+					if(deltaT > 0)
+					{
+						if(deltaT < timeVal)
+							timeVal = deltaT + 1;
+					}
+					else
+					{
+						numBlocks = SV_SendDownloadMessages();
+
+						if(numBlocks)
+						{
+							// There are active downloads
+							deltaT = Sys_Milliseconds() - dlStart;
+
+							delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
+							delayT /= sv_dlRate->integer * 1024;
+
+							if(delayT <= deltaT + 1)
+							{
+								// Sending the last round of download messages
+								// took too long for given rate, don't wait for
+								// next round, but always enforce a 1ms delay
+								// between DL message rounds so we don't hog
+								// all of the bandwidth. This will result in an
+								// effective maximum rate of 1MB/s per user, but the
+								// low download window size limits this anyways.
+								timeVal = 2;
+								dlNextRound = dlStart + deltaT + 1;
+							}
+							else
+							{
+								dlNextRound = dlStart + delayT;
+								timeVal = delayT - deltaT;
+							}
+						}
+					}
+				}
+				else
+					SV_SendDownloadMessages();
+			}
+
+			if(com_busyWait->integer)
+				NET_Sleep(0);
+			else
+				NET_Sleep(timeVal - 1);
+		}
+
+		msec = Sys_Milliseconds() - com_frameTime;
+
+		if(msec >= minMsec)
+			timeVal = 0;
+		else
+			timeVal = minMsec - msec;
+
+	} while(timeVal > 0);
 
 	lastTime = com_frameTime;
+	com_frameTime = Com_EventLoop();
+
+	msec = com_frameTime - lastTime;
+
+	Cbuf_Execute ();
+/*
+	if (com_altivec->modified)
+	{
+		Com_DetectAltivec();
+		com_altivec->modified = qfalse;
+	}
+	*/
 
 	// mess with msec if needed
-	com_frameMsec = msec;
-	msec = Com_ModifyMsec( msec );
+	msec = Com_ModifyMsec(msec);
 
 	//
 	// server side
 	//
 	if ( com_speeds->integer ) {
-		timeBeforeServer = Sys_Milliseconds();
+		timeBeforeServer = Sys_Milliseconds ();
 	}
 
 	SV_Frame( msec );
@@ -2812,14 +2935,12 @@ void Com_Frame( void ) {
 		Cvar_Get( "dedicated", "0", 0 );
 		com_dedicated->modified = qfalse;
 		if ( !com_dedicated->integer ) {
-			CL_Init();
-			Sys_ShowConsole( com_viewlog->integer, qfalse );
-		} else {
-			CL_Shutdown();
-			Sys_ShowConsole( 1, qtrue );
+			SV_Shutdown( "dedicated set to 0" );
+			CL_FlushMemory();
 		}
 	}
 
+	#ifndef DEDICATED
 	//
 	// client system
 	//
@@ -2847,7 +2968,14 @@ void Com_Frame( void ) {
 			timeAfter = Sys_Milliseconds();
 		}
 	}
-
+#else
+	if ( com_speeds->integer ) {
+		timeAfter = Sys_Milliseconds ();
+		timeBeforeEvents = timeAfter;
+		timeBeforeClient = timeAfter;
+	}
+#endif
+    NET_FlushPacketQueue();
 	//
 	// report timing information
 	//
@@ -2880,7 +3008,7 @@ void Com_Frame( void ) {
 		c_patch_traces = 0;
 		c_pointcontents = 0;
 	}
-
+  //  Com_ReadFromPipe( );
 	// old net chan encryption key
 	key = lastTime * 0x87243987;
 
@@ -3397,3 +3525,43 @@ void Field_CompleteCommand( field_t *field ) {
 	Cmd_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion( PrintMatches );
 }
+
+
+// new stuff (but found not essential at this time) for iortcw port of server defined dl rates
+/*
+static void Com_DetectAltivec(void)
+{
+	// Only detect if user hasn't forcibly disabled it.
+	if (com_altivec->integer) {
+		static qboolean altivec = qfalse;
+		static qboolean detected = qfalse;
+		if (!detected) {
+			altivec = ( Sys_GetProcessorFeatures( ) & CF_ALTIVEC );
+			detected = qtrue;
+		}
+
+		if (!altivec) {
+			Cvar_Set( "com_altivec", "0" );  // we don't have it! Disable support!
+		}
+	}
+}
+*/
+/*
+===============
+Com_ReadFromPipe
+Read whatever is in com_pipefile, if anything, and execute it
+===============
+
+void Com_ReadFromPipe( void )
+{
+	char buffer[MAX_STRING_CHARS] = {""};
+	qboolean read;
+
+	if( !pipefile )
+		return;
+
+	read = FS_Read( buffer, sizeof( buffer ), pipefile );
+	if( read )
+		Cbuf_ExecuteText( EXEC_APPEND, buffer );
+}
+*/
