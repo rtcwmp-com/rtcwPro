@@ -246,11 +246,22 @@ qboolean G_ParseSettings(int handle, qboolean setvars, config_t *config)
 			//	continue;
 			//else
 			//{
-				if (!trap_PC_ReadToken(handle, &token))
+			if (!trap_PC_ReadToken(handle, &token))
 				{
 					return G_ConfigError(handle, "expected a command value");
 				}
-				trap_SendConsoleCommand(EXEC_NOW, va("%s\n", token.string));
+
+			if (!PC_String_ParseNoAlloc(handle, text, sizeof(text)))
+			{
+				return G_ConfigError(handle, "expected cvar to set");
+			}
+
+            if (!PC_String_ParseNoAlloc(handle, value, sizeof(value)))
+			{
+				return G_ConfigError(handle, "expected cvar value");
+			}
+
+            trap_SendConsoleCommand(EXEC_APPEND, va("%s %s %s\n", token.string, text, value));
 			//}
 		}
 		else if (!Q_stricmp(token.string, "mapscripthash"))
