@@ -1,10 +1,12 @@
 # RtcwPro
 
-Return to Castle Wolfenstein Mod - based on OSPx/xMod with additions from Enemy Territory, ETPub, ioRtcw, and other Q3 mods
+Return to Castle Wolfenstein Mod - based on OSPx/xMod with additions from Enemy Territory, RtcwPub, ETPub, ioRtcw, and other Q3 mods
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
 
 Main features added that are not in OSP:
+ - corrected head hitboxes (RtcwPub port)
+ - faster PK3 downloads (ioRtcw port)
  - unlag antilag
  - antiwarp
  - player HUD names during spectating
@@ -18,4 +20,6 @@ Main features added that are not in OSP:
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/6PHHEWr
 
 RtcwPro Devs
--nihilist, KrazyKaze, Dutchmeat, Tarator, S4NDM4NN
+-nihilist, KrazyKaze, Tarator
+
+Contributions from Dutchmeat, Nobo, and S4NDM4NN
