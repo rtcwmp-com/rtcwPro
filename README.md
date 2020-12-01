@@ -22,4 +22,4 @@ If you have any questions/comments/concerns then feel free to reach out to us on
 RtcwPro Devs
 -nihilist, KrazyKaze, Tarator
 
-Contributions from Dutchmeat, Nobo, and S4NDM4NN
+Contributions from Dutchmeat, Nobo, S4NDM4NN, and Spaztik
