@@ -662,6 +662,7 @@ typedef struct {
     vec3_t    mins, maxs;
     vec3_t    currentOrigin;
     int       time, leveltime;
+	clientAnimationInfo_t animInfo;
 } clientTrail_t;
 
 // L0 - AntiWarp

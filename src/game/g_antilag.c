@@ -39,6 +39,7 @@ void G_ResetTrail( gentity_t *ent ) {
 		VectorCopy( ent->r.currentOrigin, ent->client->trail[i].currentOrigin );
 		ent->client->trail[i].leveltime = time;
 		ent->client->trail[i].time = time;
+		ent->client->trail[i].animInfo = ent->client->animationInfo;
 	}
 }
 
@@ -92,6 +93,7 @@ void G_StoreTrail( gentity_t *ent ) {
 	VectorCopy( ent->r.currentOrigin, ent->client->trail[head].currentOrigin );
 	ent->client->trail[head].leveltime = level.time;
 	ent->client->trail[head].time = newtime;
+	ent->client->trail[head].animInfo = ent->client->animationInfo;
 }
 
 
@@ -150,6 +152,7 @@ void G_TimeShiftClient( gentity_t *ent, int time ) {
 			VectorCopy( ent->r.maxs, ent->client->saved.maxs );
 			VectorCopy( ent->r.currentOrigin, ent->client->saved.currentOrigin );
 			ent->client->saved.leveltime = level.time;
+			ent->client->saved.animInfo = ent->client->animationInfo;
 		}
 
 		// if we haven't wrapped back to the head, we've sandwiched, so
@@ -172,6 +175,7 @@ void G_TimeShiftClient( gentity_t *ent, int time ) {
 				ent->client->trail[k].maxs, ent->client->trail[j].maxs,
 				ent->r.maxs );
 
+			ent->client->animationInfo = ent->client->trail[frac <= 0.5f ? k : j].animInfo;
 			// this will recalculate absmin and absmax
 			trap_LinkEntity( ent );
 		} else {
@@ -179,6 +183,7 @@ void G_TimeShiftClient( gentity_t *ent, int time ) {
 			VectorCopy( ent->client->trail[k].currentOrigin, ent->r.currentOrigin );
 			VectorCopy( ent->client->trail[k].mins, ent->r.mins );
 			VectorCopy( ent->client->trail[k].maxs, ent->r.maxs );
+			ent->client->animationInfo = ent->client->trail[k].animInfo;
 
 			// this will recalculate absmin and absmax
 			trap_LinkEntity( ent );
@@ -230,6 +235,7 @@ void G_UnTimeShiftClient( gentity_t *ent ) {
 		VectorCopy( ent->client->saved.maxs, ent->r.maxs );
 		VectorCopy( ent->client->saved.currentOrigin, ent->r.currentOrigin );
 		ent->client->saved.leveltime = 0;
+		ent->client->animationInfo = ent->client->saved.animInfo;
 
 		// this will recalculate absmin and absmax
 		trap_LinkEntity( ent );
