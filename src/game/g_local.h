@@ -515,6 +515,8 @@ typedef struct {
 	int spectatorTime;              // for determining next-in-line to play
 	spectatorState_t spectatorState;
 	int spectatorClient;            // for chasecam and follow mode
+	int start_time;                 // player starts/begins game
+	int end_time;                   // player ends/leaves game
 	int wins, losses;               // tournament stats
 	int playerType;                 // DHM - Nerve :: for GT_WOLF
 	int playerWeapon;               // DHM - Nerve :: for GT_WOLF
@@ -565,6 +567,12 @@ typedef struct {
 	int acc_hits;	// -||-
 	int killPeak;
 	int knifeKills;
+	int obj_captured;
+	int obj_destroyed;
+	int obj_returned;
+	int obj_taken;
+	int dyn_planted;
+	int dyn_defused;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
@@ -1027,6 +1035,7 @@ typedef struct {
 	int svCvarsCount;
 	// RTCWPro - custom config
 	config_t config;
+	int eventNum;  // event counter
 } level_locals_t;
 
 // OSPx - Team extras

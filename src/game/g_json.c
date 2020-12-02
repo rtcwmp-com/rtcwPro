@@ -55,6 +55,8 @@ void G_stats2JSON(int winner ) {
 
             json_object_set_new(jdata, "name", json_string(n2));
             json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
+            json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));
+            json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));
             json_object_set_new(jdata, "rounds", json_integer(cl->sess.rounds));
             json_object_set_new(jdata, "kills", json_integer(cl->sess.kills));
             json_object_set_new(jdata, "deaths", json_integer(cl->sess.deaths));
@@ -75,6 +77,13 @@ void G_stats2JSON(int winner ) {
             json_object_set_new(jdata, "knifekills", json_integer(cl->sess.knifeKills));
             json_object_set_new(jdata, "killpeak", json_integer(cl->sess.killPeak));
             json_object_set_new(jdata, "efficiency", json_real(eff));
+            json_object_set_new(jdata, "score", json_integer(cl->ps.persistant[PERS_SCORE]));
+            json_object_set_new(jdata, "dyn_planted", json_integer(cl->sess.dyn_planted));
+            json_object_set_new(jdata, "dyn_defused", json_integer(cl->sess.dyn_defused));
+            json_object_set_new(jdata, "obj_captured", json_integer(cl->sess.obj_captured));
+            json_object_set_new(jdata, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
+            json_object_set_new(jdata, "obj_returned", json_integer(cl->sess.obj_returned));
+            json_object_set_new(jdata, "obj_taken", json_integer(cl->sess.obj_taken));
 
             weapArray = json_array();
 
@@ -108,13 +117,14 @@ void G_stats2JSON(int winner ) {
         json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
         json_object_set_new(jdata, "serverIP",    json_string(""));
         json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
+        json_object_set_new(jdata, "g_gametype",    json_integer(g_gametype.integer));
         json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "map",    json_string(mapName));
         json_object_set_new(jdata, "round",    json_integer(g_currentRound.integer));
         json_object_set_new(jdata, "winner",    json_string((winner == 0) ? "Axis" : "Allied"  ));
         json_object_set_new(jdata, "loser",    json_string((winner == 0) ? "Allied" : "Axis"  ));
-        json_object_set_new(jdata, "clocktime",    json_string("1:11"));
+        json_object_set_new(jdata, "clocktime",    json_string("FORGOT TO ADD"));
 
         json_array_append(roundStats, jdata);
         json_decref(jdata);
@@ -169,6 +179,7 @@ void G_writeGameHeader (void){
         json_object_set_new(jdata, "serverIP",    json_string(""));
         json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
         json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
+        json_object_set_new(jdata, "g_gametype",    json_integer(g_gametype.integer));
         json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "map",    json_string(mapName));
@@ -176,7 +187,7 @@ void G_writeGameHeader (void){
 //        json_dumpf( jdata,level.gameStatslogFile, 1 );
         s = json_dumps( jdata, 1 );
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-        trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+        trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
         free(s);
 
 
@@ -193,7 +204,8 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
     time_t unixTime = time(NULL);  // come back and make globally available
     if (eventtype == 0) {
         json_t *eventStats =  json_array();
-        json_object_set_new(jdata, "timestamp",    json_string(" "));
+       // json_object_set_new(jdata, "timestamp",    json_string(" "));
+        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "killer",    json_string(killer));
@@ -208,7 +220,7 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
         if (level.gameStatslogFile) {
                  s = json_dumps( event, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
                 json_decref(eventStats);
                 json_decref(event);
@@ -216,7 +228,7 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
         }
 
     }
-
+    level.eventNum++;
 
 }
 
@@ -226,7 +238,8 @@ void G_writeTeamKillEvent (char* killer, char* victim){
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
-        json_object_set_new(jdata, "timestamp",    json_string(" "));
+       // json_object_set_new(jdata, "timestamp",    json_string(" "));
+        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "killer",    json_string(killer));
@@ -237,7 +250,7 @@ void G_writeTeamKillEvent (char* killer, char* victim){
         if (level.gameStatslogFile) {
                  s = json_dumps( event, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
                 json_decref(eventStats);
                 json_decref(event);
@@ -245,7 +258,7 @@ void G_writeTeamKillEvent (char* killer, char* victim){
         }
 
 
-
+        level.eventNum++;
 
 }
 
@@ -255,7 +268,8 @@ void G_writeSuicideEvent (char* player){
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
-        json_object_set_new(jdata, "timestamp",    json_string(" "));
+      //  json_object_set_new(jdata, "timestamp",    json_string(" "));
+        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "player",    json_string(player));
@@ -265,12 +279,13 @@ void G_writeSuicideEvent (char* player){
         if (level.gameStatslogFile) {
                  s = json_dumps( event, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
                 json_decref(eventStats);
                 json_decref(event);
                 free(s);
         }
+    level.eventNum++;
 }
 
 
@@ -280,7 +295,8 @@ void G_writeReviveEvent (char* revived, char* medic){
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
-        json_object_set_new(jdata, "timestamp",    json_string(" "));
+     //  json_object_set_new(jdata, "timestamp",    json_string(" "));
+        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
          json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "revived",    json_string(revived));
@@ -291,14 +307,15 @@ void G_writeReviveEvent (char* revived, char* medic){
         if (level.gameStatslogFile) {
                  s = json_dumps( event, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
                 json_decref(eventStats);
                 json_decref(event);
                 free(s);
         }
+        level.eventNum++;
 }
-void G_writeObjectiveEvent (char* team, char* objective, char* result){
+void G_writeObjectiveEvent (char* team, char* objective, char* player){
     int eventtype =0;  // plan to condense everything into one event function
     char* s;
     json_t *jdata = json_object();
@@ -306,14 +323,17 @@ void G_writeObjectiveEvent (char* team, char* objective, char* result){
     if (!g_gameStatslog.integer) {
         return;
     }
+
     if (eventtype == 0) {
         json_t *eventStats =  json_array();
-        json_object_set_new(jdata, "timestamp",    json_string(" "));
+      //  json_object_set_new(jdata, "timestamp",    json_string(" "));
+        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
          json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "team",    json_string(team));
+        json_object_set_new(jdata, "player",    json_string(player));
         json_object_set_new(jdata, "objective",    json_string(objective));
-        json_object_set_new(jdata, "result",    json_string(result));
+
 
         json_array_append(eventStats, jdata);
         json_t *event = json_object();
@@ -322,7 +342,7 @@ void G_writeObjectiveEvent (char* team, char* objective, char* result){
         if (level.gameStatslogFile) {
                  s = json_dumps( event, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
                 json_decref(eventStats);
                 json_decref(event);
@@ -330,6 +350,6 @@ void G_writeObjectiveEvent (char* team, char* objective, char* result){
         }
 
     }
-
+    level.eventNum++;
 
 }

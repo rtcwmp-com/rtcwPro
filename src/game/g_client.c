@@ -909,9 +909,9 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 				break;
 		}
 
-		switch ( client->sess.sessionTeam ) { // was playerItem		
+		switch ( client->sess.sessionTeam ) { // was playerItem
 			int nades;
-			
+
 			case TEAM_BLUE:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_PINEAPPLE );
 				client->ps.ammo[BG_FindAmmoForWeapon( WP_GRENADE_PINEAPPLE )] = 0;
@@ -941,7 +941,7 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 				else if ( pc == PC_SOLDIER ) nades = soldNades;
 				else nades = 1;
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_PINEAPPLE )] = nades;
-				break;		
+				break;
 		}
 
 
@@ -2034,6 +2034,7 @@ void ClientBegin( int clientNum ) {
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
+    client->sess.start_time = level.time; // start time of client (come back and change to unix time perhaps?)
 }
 
 /*
@@ -2457,6 +2458,8 @@ void ClientDisconnect( int clientNum ) {
 	ent->client->pers.connected = CON_DISCONNECTED;
 	ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
 	ent->client->sess.sessionTeam = TEAM_FREE;
+
+	ent->client->sess.end_time = level.time; // end time of client (come back and change to unix time perhaps?)
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
@@ -2467,6 +2470,7 @@ void ClientDisconnect( int clientNum ) {
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
+
 }
 
 
