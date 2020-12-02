@@ -2488,7 +2488,7 @@ static void CG_DrawCrosshairNames( void ) {
 	CG_ScanForCrosshairEntity();
 
 	// draw the name of the player being looked at
-	color = CG_FadeColor( cg.crosshairClientTime, 1000 );
+	color = CG_FadeColor( cg.crosshairClientTime, 250 );
 
 	if ( !color ) {
 		trap_R_SetColor( NULL );
