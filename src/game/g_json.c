@@ -8,6 +8,41 @@
 //#define URL_FORMAT   "https://192.168.1.2:3000/gameStats"
 //#define URL_SIZE     256
 
+
+void G_writeGameLogStart(void){
+
+        trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
+
+
+}
+
+void G_writeGameLogEnd(char* endofroundinfo){
+    char* s;
+    json_t *jdata = json_object();
+    json_t *event = json_object();
+     time_t unixTime = time(NULL);  // come back and make globally available
+        json_t *eventStats =  json_array();
+       // json_object_set_new(jdata, "timestamp",    json_string(" "));
+        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+        json_object_set_new(jdata, "result",    json_string(endofroundinfo));
+        json_array_append(eventStats, jdata);
+        json_object_set_new(event,"event", json_string("EOG"));
+        json_object_set_new(event,"stats", eventStats);
+        if (level.gameStatslogFile) {
+                 s = json_dumps( event, 0 );
+                trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+                trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+                json_decref(jdata);
+                json_decref(eventStats);
+                json_decref(event);
+                free(s);
+        }
+
+        trap_FS_Write( "],\n", strlen( "],\n" ), level.gameStatslogFile );
+}
+
 void G_stats2JSON(int winner ) {
 
     int i, j, eff,rc;
@@ -191,10 +226,11 @@ void G_writeGameHeader (void){
         free(s);
 
 
-
+        G_writeGameLogStart();  // write necessary json info for gamelog array
 
 
 }
+
 
 //void G_writeKillEvent (char* killer, char* victim, char* weapon){
 void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealth){

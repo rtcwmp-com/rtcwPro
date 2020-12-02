@@ -1518,12 +1518,12 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	// Run script trigger
 	if ( self->count == TEAM_RED ) {
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
-        G_writeObjectiveEvent("Axis", "Axis Captured Flag", va("%s", other->client->pers.netname)   );
+        G_writeObjectiveEvent("Axis", "Captured flag", va("%s", other->client->pers.netname)   );
         //other->client->sess.obj_captured++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
 
-        G_writeObjectiveEvent("Allied", "Allies Captured Flag", va("%s", other->client->pers.netname)   );
+        G_writeObjectiveEvent("Allied", "Captured flag", va("%s", other->client->pers.netname)   );
         //other->client->sess.obj_captured++;
 	}
 

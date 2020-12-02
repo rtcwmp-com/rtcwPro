@@ -1043,6 +1043,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	// to at least temporarily fix whatevr is causing the cut off
 	char cs[MAX_STRING_CHARS];
 	char* buf;
+	char* endofroundinfo;
 	int winner;
 	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 	buf = Info_ValueForKey(cs, "winner");
@@ -1114,10 +1115,13 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 				// We've already missed the switch
 				if ( g_currentRound.integer == 1 )
 				{
-					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
+					CP( va( "sc \">>> ^3Clock set to: %d:%02d\n\"",
 							g_nextTimeLimit.integer,
 							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
 
+                    endofroundinfo=va( "Clock set to: %d:%02d",
+							g_nextTimeLimit.integer,
+							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
 					if (winner == 0)
 					{
 						AAPS("sound/match/winaxis.wav");
@@ -1132,11 +1136,16 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
 					if ( val < g_timelimit.value )
 					{
-						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+						CP( va( "sc \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
 								(int)val,
 								(int)( 60.0 * ( val - (int)val ) ),
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+                        endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
+								(int)val,
+								(int)( 60.0 * ( val - (int)val ) ),
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
 
 						if (winner == 0)
 						{
@@ -1149,9 +1158,12 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					}
 					else
 					{
-						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+						CP( va( "sc \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+                       endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
 
 						if (winner == 0)
 						{
@@ -1197,7 +1209,9 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	}
     if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
     //if (g_gameStatslog.integer) {
+        G_writeGameLogEnd(endofroundinfo);  // write last event and close the gamelog array
         G_stats2JSON(winner);
+
     }
 }
 
