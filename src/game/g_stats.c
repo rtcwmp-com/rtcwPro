@@ -1211,6 +1211,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
     //if (g_gameStatslog.integer) {
         G_writeGameLogEnd(endofroundinfo);  // write last event and close the gamelog array
         G_stats2JSON(winner);
+        G_writeClosingJson();
 
     }
 }

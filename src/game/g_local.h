@@ -2078,6 +2078,7 @@ void G_writeReviveEvent (char* revived, char* medic);
 void G_writeObjectiveEvent (char* team, char* objective, char* result);
 void G_writeGameLogEnd(char* endofroundinfo);
 void G_writeGameLogStart(void);
+void G_writeClosingJson(void);
 // OSPx - New stuff below
 //
 // g_cmds.c

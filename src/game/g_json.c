@@ -8,15 +8,19 @@
 //#define URL_FORMAT   "https://192.168.1.2:3000/gameStats"
 //#define URL_SIZE     256
 
+// the following 3 functions are silly but for the time being necessary to make the output a true 'json'
 
-void G_writeGameLogStart(void){
-
-        trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
-
-
+void G_writeClosingJson(void)
+{
+    trap_FS_Write( "}\n", strlen( "}\n"), level.gameStatslogFile );
+}
+void G_writeGameLogStart(void)
+{
+    trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
 }
 
-void G_writeGameLogEnd(char* endofroundinfo){
+void G_writeGameLogEnd(char* endofroundinfo)
+{
     char* s;
     json_t *jdata = json_object();
     json_t *event = json_object();
@@ -24,19 +28,21 @@ void G_writeGameLogEnd(char* endofroundinfo){
         json_t *eventStats =  json_array();
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
         json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("EOR"));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "result",    json_string(endofroundinfo));
-        json_array_append(eventStats, jdata);
-        json_object_set_new(event,"event", json_string("EOG"));
-        json_object_set_new(event,"stats", eventStats);
+      //  json_array_append(eventStats, jdata);
+      //  json_object_set_new(event,"event", json_string("EOG"));
+     //   json_object_set_new(event,"stats", eventStats);
         if (level.gameStatslogFile) {
-                 s = json_dumps( event, 0 );
+//                 s = json_dumps( event, 0 );
+                s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
                 json_decref(jdata);
-                json_decref(eventStats);
-                json_decref(event);
+              //  json_decref(eventStats);
+             //   json_decref(event);
                 free(s);
         }
 
@@ -172,7 +178,8 @@ void G_stats2JSON(int winner ) {
         json_object_set_new(root, "games", gameStats);
 
         //s = json_dumps( root, 0 ); // for compact form
-        s = json_dumps( root, 1 ); // for a pretty print form
+        //s = json_dumps( root, 1 ); // for a pretty print form
+         s = json_dumps( playersArray, 1 ); // for a pretty print form
 /*
  previously had it save this in a separate file (not within the event file)
     there are benefits to doing such as this by itself preserves the 'json' structure and can be easily read into memory and updated then written out again
@@ -181,7 +188,9 @@ further note: we will ultimately want the 'timestamps' and 'gameID' match those 
     of how we want this all implemented....
 */
         if (level.gameStatslogFile && g_gameStatslog.integer) {
+            trap_FS_Write( "\"players\": ", strlen( "\"players\": " ), level.gameStatslogFile );
             trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+
             trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
         }
         else {   // forget the comments above and write it to original test json file :)
@@ -196,7 +205,6 @@ further note: we will ultimately want the 'timestamps' and 'gameID' match those 
 }
 
 void G_writeGameHeader (void){
-	float tot_acc = 0.00f;
 	//int s;
 	char* s;
 	char mapName[64];
@@ -209,20 +217,25 @@ void G_writeGameHeader (void){
 	trap_RealTime(&ct);
 
     json_t *jdata = json_object();
-
+   // json_t *jinfo = json_object();
         json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
         json_object_set_new(jdata, "serverIP",    json_string(""));
         json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
         json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
-        json_object_set_new(jdata, "g_gametype",    json_integer(g_gametype.integer));
+        json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
         json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "map",    json_string(mapName));
-        json_object_set_new(jdata, "round",    json_integer(g_currentRound.integer));
+        json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer)));
 //        json_dumpf( jdata,level.gameStatslogFile, 1 );
+//        json_object_set_new(jinfo,"gameinfo",jdata);
         s = json_dumps( jdata, 1 );
+        //s = json_dumps( jinfo, 1 );
+        trap_FS_Write( "{\n \"gameinfo\": \n", strlen( "{\n \"gameinfo\": \n" ), level.gameStatslogFile );
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+        json_decref(jdata);
+       // json_decref(jinfo);
         free(s);
 
 
@@ -239,9 +252,10 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);  // come back and make globally available
     if (eventtype == 0) {
-        json_t *eventStats =  json_array();
+      //  json_t *eventStats =  json_array();
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
         json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("kill"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "killer",    json_string(killer));
@@ -249,17 +263,18 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
         json_object_set_new(jdata, "weapon",    json_string(weapon));
         json_object_set_new(jdata, "khealth",    json_integer(killerhealth));
 
-        json_array_append(eventStats, jdata);
-        json_t *event = json_object();
-        json_object_set_new(event,"event", json_string("kill"));
-        json_object_set_new(event,"stats", eventStats);
+       //json_array_append(eventStats, jdata);
+      //  json_t *event = json_object();
+       // json_object_set_new(event,"event", json_string("kill"));
+      //  json_object_set_new(event,"stats", eventStats);
         if (level.gameStatslogFile) {
-                 s = json_dumps( event, 0 );
+               //  s = json_dumps( event, 0 );
+                 s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
-                json_decref(eventStats);
-                json_decref(event);
+              //  json_decref(eventStats);
+              //  json_decref(event);
                 free(s);
         }
 
@@ -276,20 +291,22 @@ void G_writeTeamKillEvent (char* killer, char* victim){
         json_t *eventStats =  json_array();
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
         json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("teamkill"));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "killer",    json_string(killer));
         json_object_set_new(jdata, "victim",    json_string(victim));
-        json_array_append(eventStats, jdata);
-        json_object_set_new(event,"event", json_string("teamkill"));
-        json_object_set_new(event,"stats", eventStats);
+       // json_array_append(eventStats, jdata);
+       // json_object_set_new(event,"event", json_string("teamkill"));
+      //  json_object_set_new(event,"stats", eventStats);
         if (level.gameStatslogFile) {
-                 s = json_dumps( event, 0 );
+              //   s = json_dumps( event, 0 );
+                s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
-                json_decref(eventStats);
-                json_decref(event);
+              // json_decref(eventStats);
+              //  json_decref(event);
                 free(s);
         }
 
@@ -303,22 +320,24 @@ void G_writeSuicideEvent (char* player){
     json_t *jdata = json_object();
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
-        json_t *eventStats =  json_array();
-      //  json_object_set_new(jdata, "timestamp",    json_string(" "));
+       // json_t *eventStats =  json_array();
+   //   //  json_object_set_new(jdata, "timestamp",    json_string(" "));
         json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("suicide"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "player",    json_string(player));
-        json_array_append(eventStats, jdata);
-        json_object_set_new(event,"event", json_string("suicide"));
-        json_object_set_new(event,"stats", eventStats);
+       // json_array_append(eventStats, jdata);
+     //   json_object_set_new(event,"event", json_string("suicide"));
+    //    json_object_set_new(event,"stats", eventStats);
         if (level.gameStatslogFile) {
-                 s = json_dumps( event, 0 );
+            //     s = json_dumps( event, 0 );
+                s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
-                json_decref(eventStats);
-                json_decref(event);
+              //  json_decref(eventStats);
+              //  json_decref(event);
                 free(s);
         }
     level.eventNum++;
@@ -333,20 +352,22 @@ void G_writeReviveEvent (char* revived, char* medic){
         json_t *eventStats =  json_array();
      //  json_object_set_new(jdata, "timestamp",    json_string(" "));
         json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+        json_object_set_new(jdata, "event",    json_string("suicide"));
+        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "revived",    json_string(revived));
         json_object_set_new(jdata, "reviver",    json_string(medic));
-        json_array_append(eventStats, jdata);
-        json_object_set_new(event,"event", json_string("revive"));
-        json_object_set_new(event,"stats", eventStats);
+       // json_array_append(eventStats, jdata);
+      //  json_object_set_new(event,"event", json_string("revive"));
+      //  json_object_set_new(event,"stats", eventStats);
         if (level.gameStatslogFile) {
-                 s = json_dumps( event, 0 );
+              //   s = json_dumps( event, 0 );
+                s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
-                json_decref(eventStats);
-                json_decref(event);
+            //    json_decref(eventStats);
+            //    json_decref(event);
                 free(s);
         }
         level.eventNum++;
@@ -364,24 +385,26 @@ void G_writeObjectiveEvent (char* team, char* objective, char* player){
         json_t *eventStats =  json_array();
       //  json_object_set_new(jdata, "timestamp",    json_string(" "));
         json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string(objective));
          json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "team",    json_string(team));
         json_object_set_new(jdata, "player",    json_string(player));
-        json_object_set_new(jdata, "objective",    json_string(objective));
+        //json_object_set_new(jdata, "objective",    json_string(objective));
 
 
-        json_array_append(eventStats, jdata);
-        json_t *event = json_object();
-        json_object_set_new(event,"event", json_string("objective"));
-        json_object_set_new(event,"stats", eventStats);
+       // json_array_append(eventStats, jdata);
+       // json_t *event = json_object();
+       // json_object_set_new(event,"event", json_string("objective"));
+      //  json_object_set_new(event,"stats", eventStats);
         if (level.gameStatslogFile) {
-                 s = json_dumps( event, 0 );
+                 //s = json_dumps( event, 0 );
+                s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
                 json_decref(jdata);
-                json_decref(eventStats);
-                json_decref(event);
+               // json_decref(eventStats);
+               // json_decref(event);
                 free(s);
         }
 
