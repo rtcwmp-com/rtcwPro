@@ -2561,6 +2561,10 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 	// show_bug.cgi?id=569
 	//G_ResetMarkers( ent );   //nihi removed
+
+	// sswolf - head stuff
+	// add the head entity if it already hasn't been
+	AddHeadEntity(ent);
 }
 
 
@@ -2697,6 +2701,10 @@ void ClientDisconnect( int clientNum ) {
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
+
+	// sswolf - head stuff
+	FreeHeadEntity(ent);
+
 	trap_SetConfigstring( CS_PLAYERS + clientNum, "" );
 
 	CalculateRanks();
