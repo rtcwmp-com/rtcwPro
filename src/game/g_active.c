@@ -770,6 +770,7 @@ void WolfFindMedic( gentity_t *self ) {
 	}
 }
 
+
 /*
 ==============
 OSPx - LTinfoMsg
@@ -1085,6 +1086,7 @@ void G_PlayerAnimation(gentity_t* ent) {
 	ent->client->animationInfo.torsoFrame = modelInfo->animations[torsoSet].firstFrame + modelInfo->animations[torsoSet].numFrames - 1;
 }
 
+
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
@@ -1140,11 +1142,6 @@ void ClientThink_real( gentity_t *ent ) {
 		VectorCopy( client->cameraOrigin, client->cameraPortal->s.origin2 );
 	}
 
-	// OSPx - LT info bar..
-	//if ((client->ps.stats[STAT_PLAYER_CLASS] == PC_LT) &&
-	//	(level.time >= client->infoTime + 1000)) {
-	//	LTinfoMSG(ent);
-	//}
 
 	// mark the time, so the connection sprite can be removed
 	ucmd = &ent->client->pers.cmd;

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -431,6 +431,118 @@ ATVI Wolfenstein Misc #284
 char *Cmd_Cmd() {
 	return cmd_cmd;
 }
+/*
+============
+Cmd_TokenizeString
+Parses the given string into command line tokens.
+The text is copied to a seperate buffer and 0 characters
+are inserted in the apropriate place, The argv array
+will point into this temporary buffer.
+============
+*/
+// NOTE TTimo define that to track tokenization issues
+//#define TKN_DBG
+static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
+	const char	*text;
+	char	*textOut;
+
+#ifdef TKN_DBG
+  // FIXME TTimo blunt hook to try to find the tokenization of userinfo
+  Com_DPrintf("Cmd_TokenizeString: %s\n", text_in);
+#endif
+
+	// clear previous args
+	cmd_argc = 0;
+
+	if ( !text_in ) {
+		return;
+	}
+
+	Q_strncpyz( cmd_cmd, text_in, sizeof(cmd_cmd) );
+
+	text = text_in;
+	textOut = cmd_tokenized;
+
+	while ( 1 ) {
+		if ( cmd_argc == MAX_STRING_TOKENS ) {
+			return;			// this is usually something malicious
+		}
+
+		while ( 1 ) {
+			// skip whitespace
+			while ( *text && *text <= ' ' ) {
+				text++;
+			}
+			if ( !*text ) {
+				return;			// all tokens parsed
+			}
+
+			// skip // comments
+			if ( text[0] == '/' && text[1] == '/' ) {
+				return;			// all tokens parsed
+			}
+
+			// skip /* */ comments
+			if ( text[0] == '/' && text[1] =='*' ) {
+				while ( *text && ( text[0] != '*' || text[1] != '/' ) ) {
+					text++;
+				}
+				if ( !*text ) {
+					return;		// all tokens parsed
+				}
+				text += 2;
+			} else {
+				break;			// we are ready to parse a token
+			}
+		}
+
+		// handle quoted strings
+    // NOTE TTimo this doesn't handle \" escaping
+		if ( !ignoreQuotes && *text == '"' ) {
+			cmd_argv[cmd_argc] = textOut;
+			cmd_argc++;
+			text++;
+			while ( *text && *text != '"' ) {
+				*textOut++ = *text++;
+			}
+			*textOut++ = 0;
+			if ( !*text ) {
+				return;		// all tokens parsed
+			}
+			text++;
+			continue;
+		}
+
+		// regular token
+		cmd_argv[cmd_argc] = textOut;
+		cmd_argc++;
+
+		// skip until whitespace, quote, or command
+		while ( *text > ' ' ) {
+			if ( !ignoreQuotes && text[0] == '"' ) {
+				break;
+			}
+
+			if ( text[0] == '/' && text[1] == '/' ) {
+				break;
+			}
+
+			// skip /* */ comments
+			if ( text[0] == '/' && text[1] =='*' ) {
+				break;
+			}
+
+			*textOut++ = *text++;
+		}
+
+		*textOut++ = 0;
+
+		if ( !*text ) {
+			return;		// all tokens parsed
+		}
+	}
+
+}
 
 /*
 ============
@@ -443,6 +555,9 @@ will point into this temporary buffer.
 ============
 */
 void Cmd_TokenizeString( const char *text_in ) {
+
+    Cmd_TokenizeString2( text_in, qfalse );
+    /*
 	const char  *text;
 	char    *textOut;
 
@@ -477,7 +592,7 @@ void Cmd_TokenizeString( const char *text_in ) {
 				return;         // all tokens parsed
 			}
 
-			// skip /* */ comments
+			// skip  comments
 			if ( text[0] == '/' && text[1] == '*' ) {
 				while ( *text && ( text[0] != '*' || text[1] != '/' ) ) {
 					text++;
@@ -521,7 +636,7 @@ void Cmd_TokenizeString( const char *text_in ) {
 				break;
 			}
 
-			// skip /* */ comments
+			// skip  comments
 			if ( text[0] == '/' && text[1] == '*' ) {
 				break;
 			}
@@ -535,10 +650,20 @@ void Cmd_TokenizeString( const char *text_in ) {
 			return;     // all tokens parsed
 		}
 	}
+	*/
 
 }
 
 
+
+/*
+============
+Cmd_TokenizeStringIgnoreQuotes
+============
+*/
+void Cmd_TokenizeStringIgnoreQuotes( const char *text_in ) {
+	Cmd_TokenizeString2( text_in, qtrue );
+}
 /*
 ============
 Cmd_AddCommand

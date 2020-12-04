@@ -49,7 +49,8 @@ static const char *DEACTIVATED = "DEACTIVATED";
 static const char *ENABLED = "ENABLED";
 static const char *DISABLED = "DISABLED";
 
-static const char *gameNames[] = {	
+static const char *gameNames[] = {
+	"", "", "", "", "",
 	"Objective",
 	"Stopwatch",
 	"Capture The Flag"
@@ -345,7 +346,7 @@ void G_GametypeList( gentity_t *ent ) {
 
 	G_refPrintf( ent, "\nAvailable gametypes:\n--------------------" );
 
-	for (i = GT_WOLF; i < GT_WOLF_CP; i++) {
+	for (i = GT_WOLF; i <= GT_WOLF_CP; i++) {
 			G_refPrintf( ent, "  %d ^3(%s)", i, gameNames[i] );
 	}
 

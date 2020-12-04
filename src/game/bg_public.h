@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
+#define GAMEVERSION			"RtcwPro 1.0.1" // this will print on the server and show up as the RtcwPro version
 
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -683,7 +684,7 @@ typedef struct ammotable_s {
 	int mod;                // means of death
 } ammotable_t;
 
-extern ammotable_t* GetAmmoTableData(int ammoIndex);
+//extern ammotable_t* GetAmmoTableData(int ammoIndex);
 extern ammotable_t ammoTable[];     // defined in bg_misc.c
 extern int weapAlts[];  // defined in bg_misc.c
 int BG_MaxAmmoForWeapon(weapon_t weaponNum);

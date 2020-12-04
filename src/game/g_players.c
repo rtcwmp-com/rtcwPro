@@ -868,7 +868,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "ready"))				{ G_ready_cmd( ent, qtrue ); return qtrue;}
 	else if(!Q_stricmp(cmd, "unready") ||
 			!Q_stricmp(cmd, "notready"))			{ G_ready_cmd( ent, qfalse ); return qtrue;}
-	else if(!Q_stricmp(cmd, "draw_hitboxes"))		{ G_draw_hitboxes(ent, qfalse); return qtrue; }
+	else if (!Q_stricmp(cmd, "draw_hitboxes")) { G_draw_hitboxes(ent); return qtrue; }
+	else if (!Q_stricmp(cmd, "forcefps")) { return qtrue; }
 	else
 		return qfalse;
 }

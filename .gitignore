@@ -20,6 +20,7 @@ src/.vs/*.*
 src/rtcwpro/wolfconfig_mp.cfg
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+website/
 
 # Build results
 output/

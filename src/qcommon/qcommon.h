@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -174,6 +174,7 @@ void        NET_Init( void );
 void        NET_Shutdown( void );
 void        NET_Restart( void );
 void        NET_Config( qboolean enableNetworking );
+void		NET_FlushPacketQueue(void);
 
 void        NET_SendPacket( netsrc_t sock, int length, const void *data, netadr_t to );
 void QDECL NET_OutOfBandPrint( netsrc_t net_socket, netadr_t adr, const char *format, ... );
@@ -192,8 +193,8 @@ void        NET_Sleep( int msec );
 #define MAX_MSGLEN              32768       // max length of a message, which may
 //#define	MAX_MSGLEN				16384		// max length of a message, which may
 // be fragmented into multiple packets
-#define MAX_DOWNLOAD_WINDOW         8       // max of eight download frames
-#define MAX_DOWNLOAD_BLKSIZE        2048    // 2048 byte block chunks
+#define MAX_DOWNLOAD_WINDOW         48       // max of eight download frames
+#define MAX_DOWNLOAD_BLKSIZE        1024    // 896 byte block chunks
 
 
 /*
@@ -609,6 +610,7 @@ but that's a C++ construct ..
 */
 #define FS_EXCLUDE_DIR 0x1
 #define FS_EXCLUDE_PK3 0x2
+
 int FS_FOpenFileRead_Filtered( const char *qpath, fileHandle_t *file, qboolean uniqueFILE, int filter_flag );
 
 int     FS_FileIsInPAK( const char *filename, int *pChecksum );
@@ -962,8 +964,10 @@ void SV_Shutdown( char *finalmsg );
 void SV_Frame( int msec );
 void SV_PacketEvent( netadr_t from, msg_t *msg );
 qboolean SV_GameCommand( void );
+int SV_SendDownloadMessages(void);
+int SV_FrameMsec(void);
 
-
+void	Cmd_TokenizeStringIgnoreQuotes( const char *text_in );
 //
 // UI interface
 //
@@ -1153,7 +1157,11 @@ extern huffman_t clientHuffTables;
 #define SV_DECODE_START     12
 #define CL_ENCODE_START     12
 #define CL_DECODE_START     4
-
+// flags for sv_allowDownload and cl_allowDownload
+#define DLF_ENABLE 1
+#define DLF_NO_REDIRECT 2
+#define DLF_NO_UDP 4
+#define DLF_NO_DISCONNECT 8
 // TTimo
 // dll checksuming stuff, centralizing OS-dependent parts
 // *_SHIFT is the shifting we applied to the reference string
