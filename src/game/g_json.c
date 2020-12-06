@@ -118,6 +118,7 @@ void G_stats2JSON(int winner ) {
             json_object_set_new(jdata, "knifekills", json_integer(cl->sess.knifeKills));
             json_object_set_new(jdata, "killpeak", json_integer(cl->sess.killPeak));
             json_object_set_new(jdata, "efficiency", json_real(eff));
+            // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
             json_object_set_new(jdata, "score", json_integer(cl->ps.persistant[PERS_SCORE]));
             json_object_set_new(jdata, "dyn_planted", json_integer(cl->sess.dyn_planted));
             json_object_set_new(jdata, "dyn_defused", json_integer(cl->sess.dyn_defused));
