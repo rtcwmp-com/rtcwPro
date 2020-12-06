@@ -759,6 +759,11 @@ void SV_ParseVersionMapping( void ) {
 }
 #endif
 
+void SV_LoadModels(void) {
+	SV_LoadMDS(AXIS_MODEL_HANDLE, "models/players/multi_axis/body.mds");
+	SV_LoadMDS(ALLIED_MODEL_HANDLE, "models/players/multi/body.mds");
+}
+
 /*
 ===============
 SV_Init
@@ -881,6 +886,8 @@ void SV_Init( void ) {
 
 	// init the botlib here because we need the pre-compiler in the UI
 	SV_BotInitBotLib();
+
+	SV_LoadModels();
 
 	// DHM - Nerve
 #ifdef UPDATE_SERVER

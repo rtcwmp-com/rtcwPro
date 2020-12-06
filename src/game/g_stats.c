@@ -547,16 +547,42 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 	// Telefrags only add 100 points.. not 100k!!
 	else if ( mod == MOD_TELEFRAG ) {
 		dmg = 100;
-	} else { dmg = dmg_ref;}
+	}
+	else {
+
+		// RtcwPro do not give more damage the user's full health - in OSP panzer awarded 400 damage on a kill/gib - let's try to even out the damange efficiency
+		if (dmg_ref >= abs(FORCE_LIMBO_HEALTH) && dmg_ref < abs(GIB_HEALTH)) {
+			dmg = abs(FORCE_LIMBO_HEALTH);
+		}
+		else if (dmg_ref >= abs(GIB_HEALTH)) {
+			dmg = abs(GIB_HEALTH);
+		}
+		else
+			dmg = dmg_ref;
+	}
 
 	// Player team stats
-	if ( g_gametype.integer >= GT_WOLF &&
-		 targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam ) {
-		attacker->client->sess.team_damage += dmg;
+	if ( g_gametype.integer >= GT_WOLF && targ->client->sess.sessionTeam == attacker->client->sess.sessionTeam ) {
+
+		if (attacker != targ) { // don't give team damage for suicide (same as OSP)
+			attacker->client->sess.team_damage += dmg;
+		}
+
 		// Don't count self kill as team kill..because it ain't!
 		if ( targ->health <= 0 && !(mod == MOD_SELFKILL || mod == MOD_SUICIDE)) {
-			attacker->client->sess.team_kills++;
-			targ->client->sess.deaths++;	// Record death when TK occurs
+
+			// RtcwPro temporary fixes below - when you panzer yourself and a teammate the MOD for the attacker is not a MOD_SUICIDE it's a MOD_ROCKET/MOD_ROCKET_SPLASH
+
+			if (attacker != targ) {
+				attacker->client->sess.team_kills++;  // if it's NOT a self kill count it as a TK (same as OSP)
+			}
+
+			if (attacker == targ) {
+				attacker->client->sess.suicides++;  // if it IS a self kill count it as a suicide (same as OSP)
+			}
+			else {
+				targ->client->sess.deaths++;	// Record death when TK occurs
+			}
 		}
 		return;
 	}
@@ -572,13 +598,6 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 			// L0 - Life(s) Kill peak
 			if (attacker->client->pers.life_kills >= attacker->client->sess.killPeak)
 				attacker->client->sess.killPeak++;
-
-			// RtcwPro - gib stats
-			/*if (targ->health <= GIB_HEALTH)
-			{
-				attacker->client->sess.gibs++;
-				attacker->client->pers.life_gibs++;
-			}*/
 		}
 	}
 
@@ -896,7 +915,7 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 	}
 	CP( va( "astats%s %d %d %d%s", ( ( state ) ? "" : "b" ), c, iWeap, wBestAcc, z ) );
 }
-void G_printMatchInfo( gentity_t *ent ) {
+void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name but temporary fix for cg_autoaction issue
 	int i, j, cnt, eff;
 	float tot_acc = 0.00f;
 	int tot_rev, tot_kills, tot_deaths, tot_gp, tot_hs, tot_sui, tot_tk, tot_dg, tot_dr, tot_td, tot_hits, tot_shots, tot_gib;
@@ -1027,13 +1046,20 @@ void G_printMatchInfo( gentity_t *ent ) {
 				tot_td,
 				tot_rev,
 				tot_gp ) );
+
 	}
+	// temp for printing clock & end of round sounds
+	if (fDump && ( g_gametype.integer == GT_WOLF_STOPWATCH ))
+    {
+        G_matchClockDump( ent );
+    }
+
+
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
 
 }
 
 // Dumps end-of-match info
-// L0 - FIXME!!!!!!!!!
 void G_matchInfoDump( unsigned int dwDumpType ) {
 	int i, ref;
 	gentity_t *ent;
@@ -1049,6 +1075,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
 
+
+
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
 		ref = level.sortedClients[i];
@@ -1062,7 +1090,6 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 		if ( dwDumpType == EOM_WEAPONSTATS )
 		{
-		// L0 - THIS NEEDS FINE TUNNING - TODO!
 			// If client wants to write stats to a file, don't auto send this stuff
 			if (!(cl->pers.clientFlags & CGF_STATSDUMP)) {
 				if ((cl->pers.autoaction & AA_STATSALL) /*|| cl->pers.mvCount > 0*/)
@@ -1092,6 +1119,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						CP(va("ws %s\n", G_createStats(g_entities + pid)));
 					}
+
 				}
 			}
 
@@ -1102,14 +1130,16 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 
 		}
+
 		else if ( dwDumpType == EOM_MATCHINFO )
 		{
 			// Don't dump score table for users with stats dump enabled
 			if (!(cl->pers.clientFlags & CGF_STATSDUMP))
 			{
-				G_printMatchInfo(ent);
+				G_printMatchInfo(ent,qtrue);
 			}
-
+        // moved to G_matchClockDump due to cg_autoaction issue
+		/*
 			if ( g_gametype.integer == GT_WOLF_STOPWATCH )
 			{
 				// We've already missed the switch
@@ -1121,6 +1151,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 
+
 					if (winner == 0)
 					{
 						AAPS("sound/match/winaxis.wav");
@@ -1129,9 +1160,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						AAPS("sound/match/winallies.wav");
 					}
+
 				}
 				else
 				{
+
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
 					if ( val < g_timelimit.value )
 					{
@@ -1143,6 +1176,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 
+
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
@@ -1151,6 +1185,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
+
 					}
 					else
 					{
@@ -1160,6 +1195,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
 
 
+
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
@@ -1168,11 +1204,14 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
+
 					}
 				}
 			}
+			*/
 			// sswolf - non SW exits
-			else if (g_gametype.integer == GS_PLAYING)
+			//else if (g_gametype.integer == GS_PLAYING)
+			if (g_gametype.integer == GS_PLAYING)
 			{
 				if (g_timelimit.value && !level.warmupTime)
 				{
@@ -1210,139 +1249,74 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
     }
 }
+// temp fix for cg_autoaction issue
+void G_matchClockDump( gentity_t *ent ) {
 
-/***********************************************************************************/
-/* ==================== END Stats code dump from OSP (ET port) ====================*/
-/***********************************************************************************/
+	char cs[MAX_STRING_CHARS];
+	char* buf;
+	int winner;
+	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
+	buf = Info_ValueForKey(cs, "winner");
+	winner = atoi(buf);
 
-
-
-// Backup of old stats output
-/*
-// Prints current player match info.
-// Prints current player match info.
-//	--> FIXME: put the pretty print on the client
-void G_printMatchInfo( gentity_t *ent ) {
-	int i, j, cnt, eff;
-	float tot_acc = 0.00f;
-	int tot_rev, tot_kills, tot_deaths, tot_gp, tot_hs, tot_sui, tot_tk, tot_dg, tot_dr, tot_td, tot_hits, tot_shots;
-	gclient_t *cl;
-	char *ref;
-	char n1[MAX_NETNAME];
-	char n2[MAX_NETNAME];
-
-	qtime_t ct;
-	trap_RealTime(&ct);
-	CP(va("sc \"\nMod: %s \n^7Server: %s  \n^7Time: ^7%02d:%02d:%02d ^d(^7%02d %s %d^d)\n\n\"",
-			GAMEVERSION, sv_hostname.string, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, dMonths[ct.tm_mon], 1900+ct.tm_year));
-
-	cnt = 0;
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		if ( !TeamCount( -1, i ) ) {
-			continue;
-		}
-
-		tot_kills = 0;
-		tot_deaths = 0;
-		tot_hs = 0;
-		tot_sui = 0;
-		tot_tk = 0;
-		tot_dg = 0;
-		tot_dr = 0;
-		tot_td = 0;
-		tot_gp = 0;
-		tot_hits = 0;
-		tot_shots = 0;
-		tot_acc = 0;
-		tot_rev = 0;
-
-		CP( va("sc \"%s ^7Team\n"
-			     "^7--------------------------------------------------------------------------"
-				 "\nPlayer          ^5Kll ^7Dth Sui TK ^3Eff ^7Accrcy   ^5HS    DG    DR   TD  Rev ^7Score\n"
-				 "^7--------------------------------------------------------------------------\n\"", (i == TEAM_RED) ? "^1Axis" : "^4Allied"  ));
-
-		for ( j = 0; j < level.numPlayingClients; j++ ) {
-			cl = level.clients + level.sortedClients[j];
-
-			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != i ) {
-				continue;
-			}
-
-			// Bug fix - ^Pentagram always manages to break stats so it needs different approach. ^^
-			DecolorString(cl->pers.netname, n1);
-			SanitizeString(n1, n2);
-			Q_CleanStr(n2);
-			n2[15] = 0;
-            ref = "^7";
-
-			tot_kills += cl->sess.kills;
-			tot_deaths += cl->sess.deaths;
-			tot_sui += cl->sess.suicides;
-			tot_tk += cl->sess.team_kills;
-			tot_hs += cl->sess.headshots;
-			tot_dg += cl->sess.damage_given;
-			tot_dr += cl->sess.damage_received;
-			tot_td += cl->sess.team_damage;
-			tot_gp += cl->ps.persistant[PERS_SCORE];
-			tot_hits += cl->sess.acc_hits;
-			tot_shots += cl->sess.acc_shots;
-			tot_rev += cl->sess.revives;
-
-			eff = ( cl->sess.deaths + cl->sess.kills == 0 ) ? 0 : 100 * cl->sess.kills / ( cl->sess.deaths + cl->sess.kills );
-			if ( eff < 0 ) {
-				eff = 0;
-			}
-
-			if ( ent->client == cl ||
-				 ( ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
-				   ent->client->sess.spectatorState == SPECTATOR_FOLLOW &&
-				   ent->client->sess.spectatorClient == level.sortedClients[j] ) ) {
-				ref = "^3";
-			}
-
-			cnt++;
-            CP( va( "sc \"%s%-15s^5%4d^7%4d%4d%3d%s^3%4d ^7%6.2f^5%5d%6d%6d%5d%3d^7%7d\n\"",
-//			CP( va( "sc \"%s%-15s^n%4d^7%4d%4d%3d%s^z%4d ^7%6.2f^n%5d%6d%6d%5d^7%7d\n\"",
-					ref,
-					n2,
-					cl->sess.kills,
-					cl->sess.deaths,
-					cl->sess.suicides,
-					cl->sess.team_kills,
-              //      cl->sess.revives,
-					ref,
-					eff,
-					( (cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots ) * 100.00f ),
-					cl->sess.headshots,
-					cl->sess.damage_given,
-					cl->sess.damage_received,
-					cl->sess.team_damage,
-					cl->sess.revives,
-					cl->ps.persistant[PERS_SCORE] ) );
-		}
-
-		eff = ( tot_kills + tot_deaths == 0 ) ? 0 : 100 * tot_kills / ( tot_kills + tot_deaths );
-		if ( eff < 0 ) {
-			eff = 0;
-		}
-		tot_acc = ( (tot_shots == 0) ? 0.00 : ((float)tot_hits / (float)tot_shots ) * 100.00f );
-
-		CP( va( "sc \"^7--------------------------------------------------------------------------\n"
-				"%-19s^5%4d^7%4d%4d%3d^3%4d ^7%6.2f^5%5d%6d%6d%5d%3d^7%7d\n\n\n\"",
-				"^eTotals^7",
-				tot_kills,
-				tot_deaths,
-				tot_sui,
-				tot_tk,
-				eff,
-				tot_acc,
-				tot_hs,
-				tot_dg,
-				tot_dr,
-				tot_td,
-				tot_rev,
-				tot_gp ) );
+    if ( !level.intermissiontime ) {
+		return;
 	}
-	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
+
+               if ( g_currentRound.integer == 1 )
+				{
+					CP( va( "sc \">>> ^3Clock set to: %d:%02d\n\"",
+							g_nextTimeLimit.integer,
+							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
+
+					if (winner == 0)
+					{
+						AAPS("sound/match/winaxis.wav");
+					}
+					else if (winner == 1)
+					{
+						AAPS("sound/match/winallies.wav");
+					}
+
+				}
+				else
+				{
+					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
+					if ( val < g_timelimit.value )
+					{
+						CP( va( "sc \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+								(int)val,
+								(int)( 60.0 * ( val - (int)val ) ),
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+
+						if (winner == 0)
+						{
+							AAPS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							AAPS("sound/match/winallies.wav");
+						}
+
+					}
+					else
+					{
+						CP( va( "sc \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+								g_timelimit.integer,
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+
+						if (winner == 0)
+						{
+							AAPS("sound/match/winaxis.wav");
+						}
+						else if (winner == 1)
+						{
+							AAPS("sound/match/winallies.wav");
+						}
+
+					}
+				}
+
+
 }
-*/

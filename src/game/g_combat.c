@@ -436,8 +436,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			VectorScale( launchvel, 160, launchvel );
 			VectorCopy( self->r.currentOrigin, launchspot );
 			launchspot[2] += 40;
-			fire_grenade( self, launchspot, launchvel, self->s.weapon );
-
+			fire_grenade( self, launchspot, launchvel, self->s.weapon )->damage = 0;
+			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
 		}
 	}
 // jpw
@@ -755,8 +755,15 @@ qboolean IsHeadShot( gentity_t *targ, qboolean isAICharacter, vec3_t dir, vec3_t
 	if ( head_shot_weapon ) {
 		head = G_Spawn();
 
-		if ( trap_GetTag( targ->s.number, "tag_head", &or ) ) {
-			G_SetOrigin( head, or.origin );
+		if (g_preciseHeadHitBox.integer && trap_GetTag(targ, &targ->client->animationInfo, "tag_head", &or )) {
+			G_SetOrigin(head, or .origin);
+			VectorCopy(targ->r.currentAngles, head->s.angles);
+			VectorCopy(head->s.angles, head->s.apos.trBase);
+			VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+			VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
+			head->clipmask = CONTENTS_SOLID;
+			head->r.contents = CONTENTS_SOLID;
+			trap_LinkEntity(head);
 		} else {
 			float height, dest;
 			vec3_t v, angles, forward, up, right;
@@ -848,8 +855,15 @@ gentity_t* G_BuildHead( gentity_t *ent ) {
 
 	head = G_Spawn();
 
-	if ( trap_GetTag( ent->s.number, "tag_head", &or ) ) {
-		G_SetOrigin( head, or.origin );
+	if (g_preciseHeadHitBox.integer && trap_GetTag(ent, &ent->client->animationInfo, "tag_head", &or )) {
+		G_SetOrigin(head, or .origin);
+		VectorCopy(ent->r.currentAngles, head->s.angles);
+		VectorCopy(head->s.angles, head->s.apos.trBase);
+		VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+		VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
+		head->clipmask = CONTENTS_SOLID;
+		head->r.contents = CONTENTS_SOLID;
+		trap_LinkEntity(head);
 	} else {
 		float height, dest;
 		vec3_t v, angles, forward, up, right;
@@ -972,63 +986,6 @@ void G_ArmorDamage( gentity_t *targ ) {
 					targ->s.dmgFlags |= ( 1 << ( numParts + remove ) );
 				}
 			}
-		}
-	}
-}
-/*
-==============
-L0
-
-Hitsounds
-Note that it requires pack for it.
-TODO: Hook this under colors?
-==============
-*/
-void Hitsounds( gentity_t *targ, gentity_t *attacker, qboolean body ) {
-
-	qboolean 	onSameTeam = OnSameTeam( targ, attacker);
-	gentity_t	*te;
-
-	if (g_hitsounds.integer) {
-
-		// if player is hurting him self don't give any sounds
-		if (targ->client == attacker->client) {
-			return;  // this happens at flaming your self... just return silence...
-		}
-
-		// if team mate
-		if (targ->client && attacker->client && onSameTeam ) {
-
-			if (!(attacker->client->sess.clientFlags & CFLAGS_HITSOUNDS)) {
-				return;
-			}
-
-			te = G_TempEntity( attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-			te->s.eventParm = G_SoundIndex("sound/hitsounds/hitTeam.wav");
-			te->s.teamNum = attacker->s.clientNum;
-		}
-
-		// If enemy
-		else if ( targ &&
-				targ->client &&
-				attacker &&
-				attacker->client &&
-				attacker->s.number != ENTITYNUM_NONE &&
-				attacker->s.number != ENTITYNUM_WORLD &&
-				attacker != targ &&
-				g_gamestate.integer == GS_PLAYING &&
-				!onSameTeam )
-		{
-			if (!(attacker->client->sess.clientFlags & CFLAGS_HITSOUNDS)) {
-				return;
-			}
-
-			te = G_TempEntity( attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND );
-			if (body)
-				te->s.eventParm = G_SoundIndex("sound/hitsounds/hit.wav");
-			else
-				te->s.eventParm = G_SoundIndex("sound/hitsounds/hitH.wav");
-			te->s.teamNum = attacker->s.clientNum;
 		}
 	}
 }
@@ -1253,8 +1210,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 	take = damage;
 	save = 0;
-	// L0 - Hitsounds (body)
-	Hitsounds( targ, attacker, qtrue);
 
 	// save some from armor
 	asave = CheckArmor( targ, take, dflags );
@@ -1270,8 +1225,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 		if ( !( targ->client->ps.eFlags & EF_HEADSHOT ) ) {  // only toss hat on first headshot
 			G_AddEvent( targ, EV_LOSE_HAT, DirToByte( dir ) );
-		// L0 - Hitsounds (head)
-		Hitsounds( targ, attacker, qfalse);
 		}
 
 		targ->client->ps.eFlags |= EF_HEADSHOT;
@@ -1280,8 +1233,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-	// L0 - Hitsounds -> Headshot
-		attacker->client->ps.persistant[PERS_HITHEAD]++;
+		
 	}
 
 	if ( g_debugDamage.integer ) {
@@ -1310,15 +1262,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 	}
 
-	// L0 - Hitsounds
-	if ( attacker->client && targ->client && targ != attacker && g_hitsounds.integer ) {
-		qboolean onSameTeam = OnSameTeam( targ, attacker);
 
-		if(onSameTeam)
-			attacker->client->ps.persistant[PERS_HIT] -= damage;
-		else
-			attacker->client->ps.persistant[PERS_HIT] += damage;
-	} // End
 	// See if it's the player hurting the emeny flag carrier
 	Team_CheckHurtCarrier( targ, attacker );
 

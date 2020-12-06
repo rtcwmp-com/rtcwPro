@@ -29,7 +29,6 @@ If you have questions concerning this license or the applicable additional terms
 // cg_scoreboard -- draw the scoreboard on top of the game screen
 #include "cg_local.h"
 
-
 #define SCOREBOARD_WIDTH    ( 31 * BIGCHAR_WIDTH )
 
 /*
@@ -72,6 +71,7 @@ int is_ready( int clientNum ) {
 	for ( i = 0 ; i < cgs.maxclients ; i++ ) {
 		if (cgs.clientinfo[i].team != TEAM_SPECTATOR && cgs.clientinfo[i].clientNum == clientNum) {
 			rdy = (cgs.clientinfo[clientNum].powerups & (1 << PW_READY) ) ? 1 : 0;
+			//rdy = player_ready_status[clientNum].isReady;
 			return rdy;
 		}
 	}
@@ -254,6 +254,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 	if ( cg.snap->ps.pm_type != PM_INTERMISSION ) {
 		CG_DrawSmallString( x, y, CG_TranslateString( "Goals" ), fade );
 	}
+	CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // sswolf - time
 	y += SMALLCHAR_HEIGHT + 3;
 
 	// draw color bands
@@ -295,9 +296,9 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
 				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/l_complete_2.wav"), CHAN_LOCAL_SOUND);
-                trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
+                /*trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
 				// sswolf - temporarily move those to qa
-				/*if (cg_announcer.integer) {
+				if (cg_announcer.integer) {
 					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winallies.wav"), CHAN_ANNOUNCER);
 				}*/
 			}
@@ -310,8 +311,8 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			if (!cg.latchVictorySound) {
 				cg.latchVictorySound = qtrue;
 				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/s_stinglow.wav"), CHAN_LOCAL_SOUND);
-				trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
-				/*if (cg_announcer.integer) {
+				/*trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
+				if (cg_announcer.integer) {
 					trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_ANNOUNCER);
 				}*/
 			}
@@ -509,7 +510,7 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 	// OSPx - Country Flags
 	if ((score->ping != -1) && (score->ping != 999) && (cg_showFlags.integer))
 	{
-		if (cf_draw(tempx - 7, y - 7, fade, ci->clientNum))
+		if (cf_draw(tempx - 6, y - 7, fade, ci->clientNum))
 		{
 			offset += 14;
 			tempx += 18;

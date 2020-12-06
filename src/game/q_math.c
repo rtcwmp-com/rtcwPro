@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -74,21 +74,21 @@ vec4_t g_color_table[32] =
 	{ 0.0, 0.0, 0.5, 1.0 },      // > - md.blue		14
 	{ 0.5, 0.0, 0.0, 1.0 },      // ? - md.red		15
 	{ 0.5, 0.25, 0.0, 1.0 },     // @ - md.orange	16
-	{ 1.0, 0.6f, 0.1f, 1.0 },    // A - lt.orange	17
-	{ 0.0, 0.5, 0.5, 1.0 },      // B - md.cyan		18
-	{ 0.5, 0.0, 0.5, 1.0 },      // C - md.purple	19
-	{ 0.0, 0.5, 1.0, 1.0 },      // D				20
-	{ 0.5, 0.0, 1.0, 1.0 },      // E				21
-	{ 0.2f, 0.6f, 0.8f, 1.0 },   // F				22
-	{ 0.8f, 1.0, 0.8f, 1.0 },    // G				23
-	{ 0.0, 0.4, 0.2f, 1.0 },     // H				24
-	{ 1.0, 0.0, 0.2f, 1.0 },     // I				25
-	{ 0.7f, 0.1f, 0.1f, 1.0 },   // J				26
-	{ 0.6f, 0.2f, 0.0, 1.0 },    // K				27
-	{ 0.8f, 0.6f, 0.2f, 1.0 },   // L				28
-	{ 0.6f, 0.6f, 0.2f, 1.0 },   // M				29
-	{ 1.0, 1.0, 0.75, 1.0 },     // N				30
-	{ 1.0, 1.0, 0.5, 1.0 },      // O				31
+	{ 1.0, 0.6f, 0.1f, 1.0 },    // !, A -lt.orange 17
+	{ 0.0, 0.5, 0.5, 1.0 },      // ", B -md.cyan	18
+	{ 0.5, 0.0, 0.5, 1.0 },      // #, C -md.purple 19
+    { 0.0, 0.5, 1.0, 1.0 },       // $,D        	20
+	{ 0.5, 0.0, 1.0, 1.0 },      // %, E		    21
+	{ 0.2f, 0.6f, 0.8f, 1.0 },   // &,F				22
+	{ 0.8f, 1.0, 0.8f, 1.0 },    // ',G				23
+	{ 0.0, 0.4, 0.2f, 1.0 },     // (,H				24
+	{ 1.0, 0.0, 0.2f, 1.0 },     // ),I				25
+	{ 0.7f, 0.1f, 0.1f, 1.0 },   // *,J				26
+	{ 0.6f, 0.2f, 0.0, 1.0 },    // +,K				27
+	{ 0.8f, 0.6f, 0.2f, 1.0 },   // ,,L				28
+	{ 0.6f, 0.6f, 0.2f, 1.0 },   // -,M				29
+	{ 1.0, 1.0, 0.75, 1.0 },     // .,N				30
+	{ 1.0, 1.0, 0.5, 1.0 }      // /,O				31
 };
 // -OSPx
 

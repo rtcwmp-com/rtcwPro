@@ -77,6 +77,7 @@ vmCvar_t g_debugMove;
 vmCvar_t g_debugDamage;
 vmCvar_t g_debugAlloc;
 vmCvar_t g_debugBullets;    //----(SA)	added
+vmCvar_t g_preciseHeadHitBox;
 vmCvar_t g_weaponRespawn;
 vmCvar_t g_motd;
 vmCvar_t g_synchronousClients;
@@ -279,7 +280,6 @@ vmCvar_t g_allowVote;	// Replaced voteFlags as i hate it and see it to complicat
 vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
 vmCvar_t g_fixedphysics;	// So it's fair for all..
-vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
 vmCvar_t g_allowPMs;		// Allow private messages
 vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
@@ -308,8 +308,9 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-// RTCWPro - custom configs
+// RTCWPro
 vmCvar_t g_customConfig;
+vmCvar_t P; // ET Port Players server info
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -400,9 +401,10 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue },
 	{ &g_inactivity, "g_inactivity", "0", 0, 0, qtrue },
 	{ &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
-	{ &g_debugDamage, "g_debugDamage", "0", CVAR_CHEAT, 0, qfalse },
+	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
-	{ &g_debugBullets, "g_debugBullets", "0", CVAR_CHEAT, 0, qfalse}, //----(SA)	added
+	{ &g_debugBullets, "g_debugBullets", "0", 0, 0, qfalse}, //----(SA)	added
+	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "0", 0, 0, qfalse },
 	{ &g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
@@ -482,7 +484,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
 	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
-	{ &g_drawHitboxes, "g_drawHitboxes", "0", CVAR_CHEAT },
+	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
 	{ &svx_serverStreaming, "svx_serverStreaming", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_extendedLog, "g_extendedLog", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_bannedMSG, "g_bannedMSG", "You are ^3Banned ^7from this server!", CVAR_ARCHIVE, 0, qfalse },
@@ -490,7 +492,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &TXThandle, "TXThandle", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_axisSpawnProtectionTime, "g_axisSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_alliedSpawnProtectionTime, "g_alliedSpawnProtectionTime", "3000", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_serverMessage, "g_serverMessage", "", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_serverMessage, "g_serverMessage", "^1Server running RtcwPro", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
 
@@ -544,7 +546,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_limit,      "vote_limit", "5", 0, 0, qfalse, qfalse },
 	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
 
-	// RTCWPro - custom config
+	// RTCWPro
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
@@ -571,7 +573,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
-
+	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
 // bk001129 - made static to avoid aliasing
@@ -2048,6 +2050,9 @@ void CalculateRanks( void ) {
 		}
 	}
 
+	//RtcwPro player info
+	ServerPlayerInfo();
+
 	// see if it is time to end the level
 	CheckExitRules();
 
@@ -2224,7 +2229,10 @@ void BeginIntermission( void ) {
 	// send the current scoring to all clients
 	SendScoreboardMessageToAllClients();
 
-		G_matchInfoDump( EOM_MATCHINFO );
+	// reset client spawnpoints
+	//SendSpawnpointResetToClients();
+
+	G_matchInfoDump(EOM_MATCHINFO);
 }
 
 
@@ -2267,7 +2275,14 @@ void ExitLevel( void ) {
 			continue;
 		}
 		cl->ps.persistant[PERS_SCORE] = 0;
+		//cl->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on exit
 	}
+
+	// reset all the weapon restrictions so next time the players spawn they get set correctly
+	level.alliedFlamer = level.axisFlamer = 0;
+	level.alliedSniper = level.axisSniper = 0;
+	level.alliedPF = level.axisPF = 0;
+	level.alliedVenom = level.axisVenom = 0;
 
 	// we need to do this here before chaning to CON_CONNECTING
 	G_WriteSessionData();
@@ -2713,7 +2728,6 @@ void CheckExitRules( void ) {
 			return;
 		}
 	}
-
 }
 
 
@@ -3117,20 +3131,23 @@ OSPx - check for team stuff..
 ================
 */
 void handleEmptyTeams(void) {
-	if (g_gamestate.integer == GS_PLAYING) {
-		if (!level.axisPlayers) {
-			G_teamReset(TEAM_RED, qtrue);
 
-			// Reset match if paused with an empty team
-			if (level.paused == PAUSE_NONE )
-				trap_SendConsoleCommand(EXEC_APPEND, va("reset_match"));
+	if (!level.axisPlayers && g_gamestate.integer != GS_INTERMISSION) {
+		G_teamReset(TEAM_RED, qtrue);
+
+		// Reset match if NOT paused with an empty team
+		if (level.paused == PAUSE_NONE) {
+			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
+			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
 		}
-		else if (!level.alliedPlayers) {
-			G_teamReset(TEAM_BLUE, qtrue);
+	}
+	else if (!level.alliedPlayers && g_gamestate.integer != GS_INTERMISSION) {
+		G_teamReset(TEAM_BLUE, qtrue);
 
-			// Reset match if paused with an empty team
-			if (level.paused == PAUSE_NONE )
-				trap_SendConsoleCommand(EXEC_APPEND, va("reset_match"));
+		// Reset match if NOT paused with an empty team
+		if (level.paused == PAUSE_NONE) {
+			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
+			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
 		}
 	}
 }
@@ -3144,22 +3161,29 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
-	// Check now
-	if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
-		trap_Cvar_Set( "g_gamelocked", "0" );
+	if (g_gamestate.integer != GS_INTERMISSION) // RtcwPro added this to avoid erroneous text at the end of the round
+	{
+		// Check now
+		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
+			trap_Cvar_Set("g_gamelocked", "0");
 			AP("chat \"^zconsole: ^7Teams have no players! Server is releasing the team lock^z!\n\"");
-	} else if (!level.axisPlayers && g_gamelocked.integer == 3) {
-		trap_Cvar_Set( "g_gamelocked", "2" );
+		}
+		else if (!level.axisPlayers && g_gamelocked.integer == 3) {
+			trap_Cvar_Set("g_gamelocked", "2");
 			AP("chat \"^zconsole: ^1Axis ^7team has no players! Server unlocked Axis team^z!\n\"");
-	} else if (!level.axisPlayers && g_gamelocked.integer == 1) {
-		trap_Cvar_Set( "g_gamelocked", "0" );
+		}
+		else if (!level.axisPlayers && g_gamelocked.integer == 1) {
+			trap_Cvar_Set("g_gamelocked", "0");
 			AP("chat \"^zconsole: ^1Axis ^7team has no players! Server unlocked Axis team^z!\n\"");
-	} else if (!level.alliedPlayers && g_gamelocked.integer == 2) {
-		trap_Cvar_Set( "g_gamelocked", "0" );
+		}
+		else if (!level.alliedPlayers && g_gamelocked.integer == 2) {
+			trap_Cvar_Set("g_gamelocked", "0");
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
-	} else if (!level.alliedPlayers && g_gamelocked.integer == 3) {
-		trap_Cvar_Set( "g_gamelocked", "1" );
+		}
+		else if (!level.alliedPlayers && g_gamelocked.integer == 3) {
+			trap_Cvar_Set("g_gamelocked", "1");
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
+		}
 	}
 }
 
@@ -3176,6 +3200,49 @@ void pauseCheck(void) {
 }
 
 
+/*
+Player Info (port from ET)
+sane replacement for OSP's Players_Axis/Players_Allies
+*/
+void ServerPlayerInfo(void) {
+	//128 bits
+	char playerinfo[MAX_CLIENTS + 1];
+	gentity_t* e;
+	team_t playerteam;
+	int i;
+	int lastclient;
+
+	memset(playerinfo, 0, sizeof(playerinfo));
+
+	lastclient = -1;
+	e = &g_entities[0];
+	for (i = 0; i < MAX_CLIENTS; i++, e++) {
+		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED) {
+			playerinfo[i] = '-';
+			continue;
+		}
+
+		//keep track of highest connected/connecting client
+		lastclient = i;
+
+		if (e->inuse == qfalse) {
+			playerteam = 0;
+		}
+		else {
+			playerteam = e->client->sess.sessionTeam;
+		}
+		playerinfo[i] = (char)'0' + playerteam;
+	}
+	//terminate the string, if we have any non-0 clients
+	if (lastclient != -1) {
+		playerinfo[lastclient + 1] = (char)0;
+	}
+	else {
+		playerinfo[0] = (char)0;
+	}
+
+	trap_Cvar_Set("P", playerinfo);
+}
 
 
 /*
@@ -3201,12 +3268,12 @@ void G_RunFrame( int levelTime ) {
 		level.timeCurrent = levelTime - level.timeDelta;
 	} else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		//if ( ( level.time % 500 ) == 0 ) {
+		if ( ( level.time % 500 ) == 0 ) { // nihi (re)-added to avoid cmd overflow to connecting clients
 			// Respawn and time issuses
 			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
 			// Print stuff.. FIXME one day...
 			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
-		//}
+		}
 	} // End
 //	level.frameTime = trap_Milliseconds();   // nihi removed
 	level.frameStartTime = trap_Milliseconds(); // nihi added
@@ -3447,6 +3514,7 @@ void G_RunFrame( int levelTime ) {
 		TeamLockStatus();
 		// L0 - Pause
 		pauseCheck();
+
 		handleEmptyTeams();
 	}
 }

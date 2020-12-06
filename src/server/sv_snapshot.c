@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -756,7 +756,7 @@ void SV_SendClientSnapshot( client_t *client ) {
 	SV_WriteSnapshotToClient( client, &msg );
 
 	// Add any download data if the client is downloading
-	SV_WriteDownloadToClient( client, &msg );
+	//SV_WriteDownloadToClient( client, &msg );
 
 	// check for overflow
 	if ( msg.overflowed ) {
@@ -794,6 +794,8 @@ void SV_SendClientMessages( void ) {
 		if ( svs.time < c->nextSnapshotTime ) {
 			continue;       // not time yet
 		}
+		if(*c->downloadName)
+			continue;		// Client is downloading, don't send snapshots
 
 		numclients++;       // NERVE - SMF - net debugging
 

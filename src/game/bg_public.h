@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
+#define GAMEVERSION			"RtcwPro 1.0.1" // this will print on the server and show up as the RtcwPro version
 
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -421,10 +422,9 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
-	// L0 - Hitsounds
-	PERS_HITHEAD,
-	PERS_HIT
+	PERS_WOLFKICK
+	// Weapon Restrictions
+	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
 } persEnum_t;
 
 
@@ -684,7 +684,7 @@ typedef struct ammotable_s {
 	int mod;                // means of death
 } ammotable_t;
 
-extern ammotable_t* GetAmmoTableData(int ammoIndex);
+//extern ammotable_t* GetAmmoTableData(int ammoIndex);
 extern ammotable_t ammoTable[];     // defined in bg_misc.c
 extern int weapAlts[];  // defined in bg_misc.c
 int BG_MaxAmmoForWeapon(weapon_t weaponNum);
@@ -1183,6 +1183,13 @@ typedef struct weap_ws_convert_s {
 	extWeaponStats_t iWS;
 } weap_ws_convert_t;
 // OSP
+
+// RtcwPro - struct for holding client ready info that both server and client can access
+typedef struct {
+	int isReady;
+} player_ready_status_t;
+
+player_ready_status_t player_ready_status[MAX_CLIENTS];
 
 // How many players on the overlay
 #define TEAM_MAXOVERLAY     8

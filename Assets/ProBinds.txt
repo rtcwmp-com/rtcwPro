@@ -1,0 +1,5 @@
+// RtcwPro binds not in OSP
+
++stats 			// stats window
+forcetapout 	// helps not miss spawn at the last second (you can add this to your jump bind i.e. bind key +moveup; forcetapout or create a new bind)
+minimize		// minimize the client

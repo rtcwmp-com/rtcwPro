@@ -37,7 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
-
+// sswolf - minimizer
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 void CG_TargetCommand_f( void ) {
 	int targetNum;
@@ -575,7 +578,6 @@ void CG_vstrUp_f(void) {
 	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
 }
 
-
 // +wstats
 void CG_wStatsDown_f( void ) {
 	if ( !cg.demoPlayback ) {
@@ -719,6 +721,28 @@ void CG_ForceTapOut_f(void) {
 	trap_SendClientCommand("forcetapout");
 }
 /************ L0 - OSP dump ends here ************/
+
+/*
+================
+sswolf - minimizer (windows only)
+Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
+================
+*/
+static void CG_Minimize_f(void) 
+{
+#ifdef _WIN32
+	HWND wnd;
+
+	wnd = GetForegroundWindow();
+	if (wnd) 
+	{
+		ShowWindow(wnd, SW_MINIMIZE);
+	}
+#else
+	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
+#endif
+}
+
 typedef struct {
 	char    *cmd;
 	void ( *function )( void );
@@ -787,7 +811,13 @@ static consoleCommand_t commands[] = {
 	{ "+wtopshots", CG_topshotsDown_f },
 	{ "-wtopshots", CG_topshotsUp_f },
 	{ "forcetapout", CG_ForceTapOut_f },
+	{ "timerSet", CG_TimerSet_f },
+	{ "timerReset", CG_TimerReset_f },
+	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
 	// -OSPx
+
+	// sswolf - minimizer
+	{ "minimize", CG_Minimize_f },
 
 	// Arnout
 	{ "dumploc", CG_DumpLocation_f },
@@ -884,8 +914,8 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "follownext" );
 	trap_AddCommand( "followprev" );
 
-	trap_AddCommand( "start_match" );
-	trap_AddCommand( "reset_match" );
+	trap_AddCommand( "startmatch" );
+	trap_AddCommand( "resetmatch" );
 	trap_AddCommand( "swap_teams" );
 	// -NERVE - SMF
 	// L0 - Make it more available..
@@ -905,6 +935,8 @@ void CG_InitConsoleCommands( void ) {
     trap_AddCommand( "help" );
     trap_AddCommand( "commandsHelp" );
 
+	trap_AddCommand( "lock" );		// Locks team
+	trap_AddCommand( "unlock" );		// Unlocks team
 	trap_AddCommand( "speclock" );		// Locks team from specs
 	trap_AddCommand( "specunlock" );	// Opens team for specs
 	trap_AddCommand( "specinvite" );		// Invites player to spec team
@@ -921,6 +953,7 @@ void CG_InitConsoleCommands( void ) {
 	// Misc
 	trap_AddCommand("players");
 	trap_AddCommand("say_teamnl");
+	trap_AddCommand("forcefps");		// adding this so we don't get an invalid command error
 	// Stats
 	trap_AddCommand( "scores" );		// Prints score table
 	trap_AddCommand( "weaponstats" );	// +wstats equivalent for console
@@ -929,6 +962,9 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "stats" );			// Dumps to console (same as +stats just no fancy window)
 	trap_AddCommand( "statsall" );		// Dumps stats of all players
 	trap_AddCommand( "statsdump" );		// Dumps current stats
+	// Enemy spawn timer
+	trap_AddCommand("timerSet");
+	trap_AddCommand("timerReset");
 	// End
 }
 /**

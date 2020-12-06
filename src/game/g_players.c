@@ -112,7 +112,7 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 		/*if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
 		}
-		
+
 		if (cl->sess.coach_team) {
 			tteam = cl->sess.coach_team;
 			coach = (ent) ? "^3C" : "C";
@@ -271,7 +271,7 @@ void cmd_pmsg(gentity_t *ent)
 }
 
 // Actual command
-void cmd_throwKnives( gentity_t *ent ) {
+/*void cmd_throwKnives( gentity_t *ent ) {
 	vec3_t velocity, angles, offset, org, mins, maxs;
 	trace_t tr;
 	gentity_t *ent2;
@@ -290,7 +290,6 @@ void cmd_throwKnives( gentity_t *ent ) {
 	//	 ( g_throwKnives.integer != -1 ) ) {
 	//return;
 	//}
-/*
 	AngleVectors( ent->client->ps.viewangles, velocity, NULL, NULL );
 	VectorScale( velocity, 64, offset );
 	offset[2] += ent->client->ps.viewheight / 2;
@@ -320,9 +319,8 @@ void cmd_throwKnives( gentity_t *ent ) {
 	}
 
 ent->thrownKnifeTime = level.time;
-*/
-
 }
+*/
 
 /*
 ===================
@@ -548,7 +546,8 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 			if ( state ) {
 				ent->client->pers.ready = qtrue;
 				ent->client->ps.powerups[PW_READY] = INT_MAX;
-			} else {
+			}
+			else {
 				ent->client->pers.ready = qfalse;
 				ent->client->ps.powerups[PW_READY] = 0;
 			}
@@ -621,6 +620,8 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
     int team = ent->client->sess.sessionTeam;
     char tName[MAX_NETNAME];
 	char *tag, *log, *action;
+	gentity_t *target_ent;
+	int i;
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
 		return;
@@ -671,6 +672,32 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
 		AAPS("sound/match/klaxon1.wav");
+
+		// nihi: added from rtcwpub for freezing grenades/dyno/airstrikes/etc
+			// NOTE(nobo): pm_type of PM_FREEZE is enough to keep clients in-place. missiles, however, need some help.
+        for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
+        {
+            target_ent = g_entities + i;
+
+            if (target_ent->inuse)
+            {
+                // NOTE(nobo): force moving entities in the world to stop in-place.
+                if (target_ent->s.eType > TR_INTERPOLATE &&
+                    target_ent->s.pos.trTime > 0)
+                {
+                    // NOTE(nobo): Store trBase so it can be restored upon unpause of game.
+                    // trBase is what's used to determine a missile's position in the world, not r.currentOrigin or s.origin
+                    VectorCopy(target_ent->s.pos.trBase, target_ent->trBase_pre_pause);
+                    VectorCopy(target_ent->r.currentOrigin, target_ent->s.pos.trBase);
+                    target_ent->trType_pre_pause = target_ent->s.pos.trType;
+                    target_ent->s.pos.trType = TR_STATIONARY;
+                }
+            }
+        }
+        // end import from rtcwpub
+
+
+
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");
@@ -703,7 +730,6 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 	//tag = sortTag(ent);
     DecolorString(aTeams[team], tName);
 
-	// Deals with unlocking
 	// Deals with unlocking
 	if (unlock) {
 		if (!g_gamelocked.integer) {
@@ -785,13 +811,28 @@ OSP's stats
 ===================
 */
 void G_scores_cmd( gentity_t *ent ) {
-	G_printMatchInfo( ent );
+	G_printMatchInfo( ent , qfalse);
+}
+// temp fix for cg_autoaction issue
+void G_matchClock_cmd( gentity_t *ent ) {
+	G_matchClockDump(ent);
+}
+void G_scoresDump_cmd( gentity_t *ent ) {
+	G_printMatchInfo( ent , qtrue);
 }
 // Shows a player's stats to the requesting client.
 void G_weaponStats_cmd( gentity_t *ent ) {
 	G_statsPrint( ent, 0 );
 }
 
+void G_draw_hitboxes( gentity_t* ent ) {
+	if (!g_drawHitboxes.integer) {
+		CP("cp \"g_drawHitboxes is disabled.\n\"");
+		return;
+	}
+
+	ent->client->pers.drawHitBoxes = !ent->client->pers.drawHitBoxes;
+}
 
 /******************* Client commands *******************/
 qboolean playerCmds (gentity_t *ent, char *cmd ) {
@@ -813,6 +854,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "sgstats"))				{ G_statsPrint( ent, 2 );	return qtrue;}
 	else if(!Q_stricmp(cmd, "stshots"))				{ G_weaponStatsLeaders_cmd( ent, qtrue, qtrue );	return qtrue;}
 	else if(!Q_stricmp(cmd, "scores"))				{ G_scores_cmd(ent);	return qtrue;}
+	else if(!Q_stricmp(cmd, "scoresdump"))				{ G_scoresDump_cmd(ent);	return qtrue;}// temp fix for cg_autoaction issue
+   // else if(!Q_stricmp(cmd, "matchClock"))			{ G_matchClock_cmd(ent);	return qtrue;} // temp fix for cg_autoaction issue
 	else if(!Q_stricmp(cmd, "statsall"))			{ G_statsall_cmd( ent, 0, qfalse );	return qtrue;}
 	else if(!Q_stricmp(cmd, "bottomshots"))			{ G_weaponRankings_cmd( ent, qtrue, qfalse );	return qtrue;}
 	else if(!Q_stricmp(cmd, "topshots"))			{ G_weaponRankings_cmd( ent, qtrue, qtrue );	return qtrue;}
@@ -825,6 +868,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "ready"))				{ G_ready_cmd( ent, qtrue ); return qtrue;}
 	else if(!Q_stricmp(cmd, "unready") ||
 			!Q_stricmp(cmd, "notready"))			{ G_ready_cmd( ent, qfalse ); return qtrue;}
+	else if (!Q_stricmp(cmd, "draw_hitboxes")) { G_draw_hitboxes(ent); return qtrue; }
+	else if (!Q_stricmp(cmd, "forcefps")) { return qtrue; }
 	else
 		return qfalse;
 }

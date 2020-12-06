@@ -1894,18 +1894,32 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_NOAMMO:
 		DEBUGNAME( "EV_NOAMMO" );
-		if ( ( es->weapon != WP_GRENADE_LAUNCHER ) && ( es->weapon != WP_GRENADE_PINEAPPLE ) && ( es->weapon != WP_DYNAMITE )  && ( es->weapon != WP_DYNAMITE2 ) ) {
+		if (	( es->weapon != WP_GRENADE_LAUNCHER ) && 
+				( es->weapon != WP_GRENADE_PINEAPPLE ) && 
+				( es->weapon != WP_DYNAMITE ) && 
+				( es->weapon != WP_DYNAMITE2 ) &&
+				( es->weapon != WP_AMMO ) &&
+				( es->weapon != WP_MEDKIT ) ) {
 			trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound );
 		}
+		/*
 		if ( es->number == cg.snap->ps.clientNum ) {
 			CG_OutOfAmmoChange(qtrue);
 		}
 		break;
-	/*	if ( es->number == cg.snap->ps.clientNum  &&
-			(cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable(cg.weaponSelect)) ) {
-			CG_OutOfAmmoChange(event == EV_NOAMMO ? qfalse : qtrue);
+		*/
+		if ( es->number == cg.snap->ps.clientNum && (
+				 ( cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable( cg.weaponSelect ) ) ||
+				 es->weapon == WP_GRENADE_LAUNCHER ||
+				 es->weapon == WP_GRENADE_PINEAPPLE ||
+				 es->weapon == WP_DYNAMITE ||
+				 es->weapon == WP_PANZERFAUST ||
+				 es->weapon == WP_AMMO ||
+				 es->weapon == WP_MEDKIT ||
+				 es->weapon == WP_SMOKE_GRENADE) ) {
+			CG_OutOfAmmoChange(qtrue); // event == EV_NOAMMO ? qfalse : qtrue);
 		}
-		break;*/
+		break;
 	case EV_CHANGE_WEAPON:
 	{
 

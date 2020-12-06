@@ -743,6 +743,7 @@ typedef struct {
 	int playerAmmoClip;
 	int playerWeapon;
 	int playerNades;
+	//int isReady;
 
 } clientInfo_t;
 
@@ -2130,6 +2131,9 @@ extern vmCvar_t int_cl_timenudge;
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
 
+static void CG_TimerSet_f(void);
+static void CG_TimerReset_f(void);
+
 //
 // cg_main.c
 //
@@ -2242,6 +2246,9 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 // RtcwPro
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
 
+// sswolf - time
+char* CG_GetClock(void);
+
 //
 // cg_draw.c, cg_newDraw.c
 //
@@ -2313,8 +2320,6 @@ void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, entityState_t *es, const vec3_t fireRiseDir );
 void CG_NewClientInfo( int clientNum );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
-int CG_GetPlayersReady(void);
-int CG_GetTeamPlayers(void);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -2895,7 +2900,7 @@ int CG_Text_Height_ext2(const char *text, float scale, int limit);
 void CG_ParsePause( const char *pState );
 // Ready
 void CG_ParseReady(const char* pState);
-void CG_ParsePlayersReady(const char* pState);
+
 void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int border, const float *color );
 // OSP's Autoaction values
 #define AA_DEMORECORD   0x01
@@ -2909,3 +2914,4 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 // OSP's macro's
 #define Pri( x ) CG_Printf( "[cgnotify]%s", CG_LocalizeServerCommand( x ) )
 #define CPri( x ) CG_CenterPrint( CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH );
+#define CPriP( x ) CG_PriorityCenterPrint(CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH, -1 );

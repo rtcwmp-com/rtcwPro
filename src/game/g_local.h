@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 //----(SA) Wolfenstein
 #define GAMEVERSION "RtcwPro 1.0 beta"
 #define JSONGAMESTATVERSION "0.1"
+
 // done.
 
 #define BODY_QUEUE_SIZE     8
@@ -417,6 +418,10 @@ struct gentity_s {
 	int playerAmmoClip;
 	int playerWeapon;
 	int playerNades;
+
+    // pause stuff from rtcwPub
+	int			trType_pre_pause;
+	vec3_t		trBase_pre_pause;
 };
 
 // Ridah
@@ -630,8 +635,6 @@ typedef struct {
 	char cmd2[128]; // !command attribute
 	char cmd3[128];	// !command attribute extra
 	qboolean nameLocked; // Takes ability to rename from client..it's cleared next round, map load..
-	// Weapon restrictions
-	int restrictedWeapon;
 
 	// Server Bot
 	int sb_teamBleed;
@@ -659,6 +662,8 @@ typedef struct {
 	unsigned int int_selectedWeapon;
 	// tardo
 	qboolean ready;
+	int restrictedWeapon;
+	qboolean drawHitBoxes;
 } clientPersistant_t;
 
 // L0 - antilag port     nihi added
@@ -667,6 +672,7 @@ typedef struct {
     vec3_t    mins, maxs;
     vec3_t    currentOrigin;
     int       time, leveltime;
+	clientAnimationInfo_t animInfo;
 } clientTrail_t;
 
 // L0 - AntiWarp
@@ -793,6 +799,10 @@ struct gclient_s {
 
 	pmoveExt_t pmext;
 */
+
+	clientAnimationInfo_t animationInfo;
+	float legsYawAngle, torsoYawAngle, torsoPitchAngle;
+	qboolean torsoYawing, legsYawing, torsoPitching;
 
 // nihi added below
 	// g_antilag.c
@@ -1260,6 +1270,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
+void limbo(gentity_t* ent, qboolean makeCorpse);
+
+//void RemoveWeaponRestrictions(gentity_t *ent);
+//void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);
@@ -1278,7 +1293,7 @@ void AddIPBan( const char *str );
 
 void Svcmd_ShuffleTeams_f( void );
 void Svcmd_StartMatch_f( void );
-void Svcmd_ResetMatch_f(); // qboolean fDoReset, qboolean fDoRestart
+void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart);
 void Svcmd_SwapTeams_f( void );
 
 //
@@ -1464,6 +1479,7 @@ extern vmCvar_t g_debugMove;
 extern vmCvar_t g_debugAlloc;
 extern vmCvar_t g_debugDamage;
 extern vmCvar_t g_debugBullets;     //----(SA)	added
+extern vmCvar_t g_preciseHeadHitBox;
 extern vmCvar_t g_weaponRespawn;
 extern vmCvar_t g_synchronousClients;
 extern vmCvar_t g_motd;
@@ -1671,8 +1687,12 @@ extern vmCvar_t vote_percent;
 
 // QCon edition cvars
 extern vmCvar_t		g_antiWarp;
-// RTCWPro - custom configs
+
+// RTCWPro
 extern vmCvar_t g_customConfig;
+//extern vmCvar_t Players_Allies;
+//extern vmCvar_t Players_Axis;
+extern vmCvar_t P;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1720,7 +1740,7 @@ int     trap_BotAllocateClient( void );
 void    trap_BotFreeClient( int clientNum );
 void    trap_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean    trap_GetEntityToken( char *buffer, int bufferSize );
-qboolean trap_GetTag( int clientNum, char *tagName, orientation_t * or );
+qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* or );
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );
@@ -1937,6 +1957,7 @@ void G_ResetMarkers( gentity_t* ent );
 void G_UpdateCvars(void);
 void G_wipeCvars(void);
 void G_teamReset(int, qboolean);
+void ServerPlayerInfo(void);
 ///////////////////////
 // RTCWPro - g_config.c
 qboolean G_ConfigSet(const char* configname);
@@ -1984,6 +2005,10 @@ void G_MuteClient(void);
 void G_UnMuteClient(void);
 void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
+
+// g_shared.c
+char *Q_StrReplace(char *haystack, char *needle, char *newp);
+void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
 void Cmd_hitsounds(gentity_t *ent);
@@ -2063,7 +2088,7 @@ char *G_createClientStats( gentity_t *refEnt );
 void G_clientStatsPrint( gentity_t *ent, int nType, qboolean toWindow );
 void G_weaponStatsLeaders_cmd( gentity_t* ent, qboolean doTop, qboolean doWindow );
 void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean state );
-void G_printMatchInfo( gentity_t *ent );
+void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 
@@ -2079,6 +2104,7 @@ void G_writeObjectiveEvent (char* team, char* objective, char* result);
 void G_writeGameLogEnd(char* endofroundinfo);
 void G_writeGameLogStart(void);
 void G_writeClosingJson(void);
+void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 // OSPx - New stuff below
 //
 // g_cmds.c
@@ -2109,7 +2135,7 @@ extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
 void CountDown(qboolean restart);
 int isWeaponLimited (gclient_t *client, int weap);
-void setDefaultWeapon(gclient_t *client, qboolean isSold);
+void SetDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
 //

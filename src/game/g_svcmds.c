@@ -741,28 +741,35 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 	int i;
 
 	for (i = 0; i < level.numConnectedClients; i++) {
-		g_entities[level.sortedClients[i]].client->pers.ready = 0;
+		g_entities[level.sortedClients[i]].client->pers.ready = qfalse;
+		//g_entities[level.sortedClients[i]].client->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on restart
 	}
+
+	// reset all the weapon restrictions so next time the players spawn they get set correctly
+	level.alliedFlamer = level.axisFlamer = 0;
+	level.alliedSniper = level.axisSniper = 0;
+	level.alliedPF = level.axisPF = 0;
+	level.alliedVenom = level.axisVenom = 0;
 	
 
 	if (fDoReset) {
 		G_resetRoundState();
 		G_resetModeState();
 	}
-	else
-	{
-		if (fDoRestart && !g_noTeamSwitching.integer || ( g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer ) ) {
-			trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
-			return;
-		} else { // L0 - Tournament..
-			if (g_tournament.integer) {
-				trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
-				trap_SetConfigstring( CS_READY, va( "%i", READY_PENDING ) );
-			} else {
-				trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WAITING_FOR_PLAYERS ) );
-			}
-			return;
+
+	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
+		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
+		return;
+	}
+	else { // L0 - Tournament..
+		if (g_tournament.integer) {
+			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
+			trap_SetConfigstring(CS_READY, va("%i", READY_PENDING));
 		}
+		else {
+			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WAITING_FOR_PLAYERS));
+		}
+		return;
 	}
 }
 
@@ -1167,12 +1174,12 @@ qboolean    ConsoleCommand( void ) {
 
 
 	// NERVE - SMF
-	if ( Q_stricmp( cmd, "start_match" ) == 0 ) {
+	if ( Q_stricmp( cmd, "startmatch" ) == 0 ) {
 		Svcmd_StartMatch_f();
 		return qtrue;
 	}
 
-	if ( Q_stricmp( cmd, "reset_match" ) == 0 ) {
+	if ( Q_stricmp( cmd, "resetmatch" ) == 0 ) {
 		Svcmd_ResetMatch_f(qtrue, qtrue);
 		return qtrue;
 	}

@@ -1,4 +1,5 @@
 /*
+/*
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
@@ -93,9 +94,9 @@ static const char *teamArenaGameTypes[] = {
 	"SP",
 	"TEAM DM",
 	"CTF",
-	"WOLF MP",               // NERVE - SMF
-	"WOLF SW",               // NERVE - SMF
-	"WOLF CP",               // NERVE - SMF
+	"MP",               // NERVE - SMF
+	"SW",               // NERVE - SMF
+	"CP",               // NERVE - SMF
 	"TEAMTOURNAMENT"
 };
 
@@ -3599,30 +3600,47 @@ static void UI_LoadDemos() {
 	char demolist[30000];
 	char demoExt[32];
 	char    *demoname;
-	int i, len;
-
+	char  demoPathName[300];
+	int i, len, j;
+    int		numdirs;
+	int		numfiles;
+	char	dirlist[2048];
+	int		dirlen;
+	char*	dirptr;
 	Com_sprintf( demoExt, sizeof( demoExt ), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
 	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, sizeof( demolist ) );
 
 	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
-	if ( uiInfo.demoCount ) {
-		if ( uiInfo.demoCount > MAX_DEMOS ) {
-			uiInfo.demoCount = MAX_DEMOS;
-		}
-		demoname = demolist;
-		for ( i = 0; i < uiInfo.demoCount; i++ ) {
+	numdirs = trap_FS_GetFileList("../rtcwpro/demos", "/", dirlist, 2048 );
+	dirptr  = dirlist;
+	// iterate over all sub-directories
+	for (i=0; i<numdirs && uiInfo.demoCount < MAX_DEMOS; i++,dirptr+=dirlen+1)
+	{
+		dirlen = strlen(dirptr);
+
+		if (dirlen && dirptr[dirlen-1]=='/') dirptr[dirlen-1]='\0';
+
+		if (!strcmp(dirptr,".") || !strcmp(dirptr,".."))
+			continue;
+
+		// iterate all demo files in directory
+
+		numfiles = trap_FS_GetFileList( va("demos/%s",dirptr), demoExt, demolist, sizeof( demolist )  );
+		demoname  = demolist;
+		for (j=0; j<numfiles &&  uiInfo.demoCount < MAX_DEMOS;j++,demoname+=len+1)
+		{
 			len = strlen( demoname );
 			if ( !Q_stricmp( demoname +  len - strlen( demoExt ), demoExt ) ) {
 				demoname[len - strlen( demoExt )] = '\0';
 			}
-//			Q_strupr(demoname);
-			uiInfo.demoList[i] = String_Alloc( demoname );
-			demoname += len + 1;
+			Com_sprintf( demoPathName, sizeof( demoPathName ), "%s/%s", dirptr, demoname );
+			uiInfo.demoList[i+j] = String_Alloc( demoPathName );
+            //uiInfo.demoList[i+j] = String_Alloc( demoname );
+			uiInfo.demoCount++;
 		}
 	}
-
 }
 
 
@@ -4367,10 +4385,10 @@ static void UI_Update( const char *name ) {
 			trap_Cvar_Set( "cl_maxpackets", "30" );
 			trap_Cvar_Set( "cl_packetdup", "1" );
 		} else if ( rate >= 4000 ) {
-			trap_Cvar_Set( "cl_maxpackets", "15" );
+			trap_Cvar_Set( "cl_maxpackets", "30" );
 			trap_Cvar_Set( "cl_packetdup", "2" );       // favor less prediction errors when there's packet loss
 		} else {
-			trap_Cvar_Set( "cl_maxpackets", "15" );
+			trap_Cvar_Set( "cl_maxpackets", "30" );
 			trap_Cvar_Set( "cl_packetdup", "1" );       // favor lower bandwidth
 		}
 	} else if ( Q_stricmp( name, "ui_GetName" ) == 0 ) {
@@ -4494,7 +4512,7 @@ static void UI_UpdateVoteFlags( qboolean open ) {
 		trap_Cvar_SetValue( "ui_voteSwap", flags & VOTEFLAGS_SWAP );
 		trap_Cvar_SetValue( "ui_voteType", flags & VOTEFLAGS_TYPE );
 		trap_Cvar_SetValue( "ui_voteKick", flags & VOTEFLAGS_KICK );
-		trap_Cvar_SetValue( "ui_voteMap", flags & VOTEFLAGS_MAP );
+		trap_Cvar_SetValue("ui_voteMap", flags & VOTEFLAGS_MAP);
 	} else {
 		flags = 0;
 		flags |= trap_Cvar_VariableValue( "ui_voteRestart" ) ? VOTEFLAGS_RESTART : 0;
@@ -4504,7 +4522,7 @@ static void UI_UpdateVoteFlags( qboolean open ) {
 		flags |= trap_Cvar_VariableValue( "ui_voteSwap" ) ? VOTEFLAGS_SWAP : 0;
 		flags |= trap_Cvar_VariableValue( "ui_voteType" ) ? VOTEFLAGS_TYPE : 0;
 		flags |= trap_Cvar_VariableValue( "ui_voteKick" ) ? VOTEFLAGS_KICK : 0;
-		flags |= trap_Cvar_VariableValue( "ui_voteMap" ) ? VOTEFLAGS_MAP : 0;
+		flags |= trap_Cvar_VariableValue("ui_voteMap") ? VOTEFLAGS_MAP : 0;
 		trap_Cvar_SetValue( "g_voteFlags", flags );
 		// maintain consistency, if we turned one option back on, set the global on
 		if ( flags != 0 ) {
@@ -4705,9 +4723,9 @@ static void UI_RunMenuScript( char **args ) {
 			uiInfo.nextServerStatusRefresh = 0;
 			uiInfo.nextFindPlayerRefresh = 0;
 		} else if ( Q_stricmp( name, "UpdateFilter" ) == 0 ) {
-			if ( ui_netSource.integer == AS_LOCAL ) {
+			//if (ui_netSource.integer == AS_LOCAL) {
 				UI_StartServerRefresh( qtrue );
-			}
+			//}
 			UI_BuildServerDisplayList( qtrue );
 			UI_FeederSelection( FEEDER_SERVERS, 0 );
 		} else if ( Q_stricmp( name, "check_ServerStatus" ) == 0 ) {
@@ -4815,70 +4833,92 @@ static void UI_RunMenuScript( char **args ) {
 				// make sure we sort again
 				UI_ServersSort( sortColumn, qtrue );
 			}
+
 		} else if ( Q_stricmp( name, "nextSkirmish" ) == 0 ) {
 			UI_StartSkirmish( qtrue );
+
 		} else if ( Q_stricmp( name, "SkirmishStart" ) == 0 ) {
 			UI_StartSkirmish( qfalse );
+
 		} else if ( Q_stricmp( name, "closeingame" ) == 0 ) {
 			trap_Key_SetCatcher( trap_Key_GetCatcher() & ~KEYCATCH_UI );
 			trap_Key_ClearStates();
 			trap_Cvar_Set( "cl_paused", "0" );
 			Menus_CloseAll();
+
 		} else if ( Q_stricmp( name, "voteMap" ) == 0 ) {
 			if ( ui_currentNetMap.integer >= 0 && ui_currentNetMap.integer < uiInfo.mapCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote map %s\n",uiInfo.mapList[ui_currentNetMap.integer].mapLoadName ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteKick" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote kick \"%s\"\n",uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteMute" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote mute \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteUnMute" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote unmute \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteReferee" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote referee \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteUnReferee" ) == 0 ) {
 			if ( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote unreferee \"%s\"\n", uiInfo.playerNames[uiInfo.playerIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteGame" ) == 0 ) {
 			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
 			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", ui_voteGameType ) );
 			}
+
 		} else if ( Q_stricmp( name, "refGame" ) == 0 ) {
 			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
 			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", ui_voteGameType ) );
 			}
+
 		} else if ( Q_stricmp( name, "voteTimelimit" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote timelimit %f\n", trap_Cvar_VariableValue( "ui_voteTimelimit" ) ) );
+
 		} else if ( Q_stricmp( name, "voteWarmupDamage" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote warmupdamage %d\n", (int)trap_Cvar_VariableValue( "ui_voteWarmupDamage" ) ) );
 
+		} else if (Q_stricmp(name, "voteAntilag") == 0) {
+			trap_Cmd_ExecuteText(EXEC_APPEND, va("callvote antilag %f\n", trap_Cvar_VariableValue("ui_voteAntilag")));
+
 		} else if ( Q_stricmp( name, "refTimelimit" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref timelimit %f\n", trap_Cvar_VariableValue( "ui_voteTimelimit" ) ) );
+
 		} else if ( Q_stricmp( name, "refWarmupDamage" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref warmupdamage %d\n", (int)trap_Cvar_VariableValue( "ui_voteWarmupDamage" ) ) );
+
 		} else if ( Q_stricmp( name, "voteInitToggles" ) == 0 ) {
 			char info[MAX_INFO_STRING];
 
 			trap_GetConfigString( CS_SERVERTOGGLES, info, sizeof( info ) );
 			trap_Cvar_Set( "ui_voteWarmupDamage", va( "%d", ( ( atoi( info ) & CV_SVS_WARMUPDMG ) >> 2 ) ) );
 
+			trap_Cvar_Set("ui_voteAntilag", va("%d", atoi(Info_ValueForKey(info, "g_antilag"))));
+
 			trap_GetConfigString( CS_SERVERINFO, info, sizeof( info ) );
 			trap_Cvar_Set( "ui_voteTimelimit", va( "%i", atoi( Info_ValueForKey( info, "timelimit" ) ) ) );
+
 		} else if ( Q_stricmp( name, "voteLeader" ) == 0 ) {
 			if ( uiInfo.teamIndex >= 0 && uiInfo.teamIndex < uiInfo.myTeamCount ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callteamvote leader %s\n",uiInfo.teamNames[uiInfo.teamIndex] ) );
 			}
+
 		} else if ( Q_stricmp( name, "addBot" ) == 0 ) {
 			if ( trap_Cvar_VariableValue( "g_gametype" ) >= GT_TEAM ) {
 				trap_Cmd_ExecuteText( EXEC_APPEND, va( "addbot %s %i %s\n", uiInfo.characterList[uiInfo.botIndex].name, uiInfo.skillIndex + 1, ( uiInfo.redBlue == 0 ) ? "Red" : "Blue" ) );
@@ -4886,6 +4926,7 @@ static void UI_RunMenuScript( char **args ) {
 				// NERVE - SMF - no bots in wolf multiplayer
 //				trap_Cmd_ExecuteText( EXEC_APPEND, va("addbot %s %i %s\n", UI_GetBotNameByNumber(uiInfo.botIndex), uiInfo.skillIndex+1, (uiInfo.redBlue == 0) ? "Red" : "Blue") );
 			}
+
 		} else if ( Q_stricmp( name, "addFavorite" ) == 0 ) {
 			if ( ui_netSource.integer != AS_FAVORITES ) {
 				char name[MAX_NAME_LENGTH];
@@ -4910,6 +4951,7 @@ static void UI_RunMenuScript( char **args ) {
 					}
 				}
 			}
+
 		} else if ( Q_stricmp( name, "deleteFavorite" ) == 0 ) {
 			if ( ui_netSource.integer == AS_FAVORITES ) {
 				char addr[MAX_NAME_LENGTH];
@@ -4920,6 +4962,7 @@ static void UI_RunMenuScript( char **args ) {
 					trap_LAN_RemoveServer( AS_FAVORITES, addr );
 				}
 			}
+
 		} else if ( Q_stricmp( name, "createFavorite" ) == 0 ) {
 			if ( ui_netSource.integer == AS_FAVORITES ) {
 				char name[MAX_NAME_LENGTH];
@@ -4943,6 +4986,7 @@ static void UI_RunMenuScript( char **args ) {
 					}
 				}
 			}
+
 		} else if ( Q_stricmp( name, "orders" ) == 0 ) {
 			const char *orders;
 			if ( String_Parse( args, &orders ) ) {
@@ -4967,6 +5011,7 @@ static void UI_RunMenuScript( char **args ) {
 				trap_Cvar_Set( "cl_paused", "0" );
 				Menus_CloseAll();
 			}
+
 		} else if ( Q_stricmp( name, "voiceOrdersTeam" ) == 0 ) {
 			const char *orders;
 			if ( String_Parse( args, &orders ) ) {
@@ -6136,6 +6181,9 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 	static char hostname[1024];
 	static char clientBuff[32];
 	static char pingstr[10];
+	static char fs_game[32];
+	static char gamename[32];
+	static char mapname_clean[32];
 	static int lastColumn = -1;
 	static int lastTime = 0;
 	*handle = -1;
@@ -6178,14 +6226,31 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 						return Info_ValueForKey( info, "hostname" );
 					}
 				}
-			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
+			case SORT_MAP:
+				if (Info_ValueForKey( info, "mapname" ) != "" )
+				{
+					Q_strncpyz( mapname_clean, Q_CleanStr( Q_strlwr( Info_ValueForKey( info, "mapname" ) ) ), sizeof( mapname_clean ) );
+					return va( "%.15s", mapname_clean );
+				}
+				else
+				{
+					return " ";
+				}
 			case SORT_CLIENTS:
 				Com_sprintf( clientBuff, sizeof( clientBuff ), "%s (%s)", Info_ValueForKey( info, "clients" ), Info_ValueForKey( info, "sv_maxclients" ) );
 				return clientBuff;
 			case SORT_GAME:
 				game = atoi( Info_ValueForKey( info, "gametype" ) );
 				if ( game >= 0 && game < numTeamArenaGameTypes ) {
-					return teamArenaGameTypes[game];
+					Q_strncpyz( fs_game, Q_strlwr( Info_ValueForKey( info, "game" ) ), sizeof( fs_game ) );   // Get it so we can filter
+					if ( !Q_stricmp( fs_game, "" ) ) {
+						Q_strncpyz( fs_game, "main", sizeof( fs_game ) );       // none set, replace with main
+
+					}
+					// martin - 6/1 - clean the string here because it might be a null fs_game which will crash
+					Com_sprintf( gamename, sizeof( gamename ), "%.2s/^N%.7s", teamArenaGameTypes[game], Q_CleanStr( fs_game ) );
+					return gamename;
+					//return teamArenaGameTypes[game];
 				} else {
 					return "Unknown";
 				}
@@ -7706,6 +7771,7 @@ vmCvar_t ui_showtooltips;
 // -OSPx
 vmCvar_t ui_demoDir;
 vmCvar_t ui_gameversion;
+vmCvar_t fs_game;
 
 cvarTable_t cvarTable[] = {
 
@@ -7847,7 +7913,8 @@ cvarTable_t cvarTable[] = {
 	{ &ui_hudAlpha, "cg_hudAlpha", "1.0", CVAR_ARCHIVE },
 
 	{ &ui_demoDir, "ui_demoDir", "demos", CVAR_ARCHIVE },
-	{ &ui_gameversion, "ui_gameversion", PRO_VERSION, CVAR_ARCHIVE }
+	{ &fs_game, "fs_game", "", 0 },
+	{ &ui_gameversion, "ui_gameversion", GAMEVERSION, CVAR_ROM }
 };
 
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
