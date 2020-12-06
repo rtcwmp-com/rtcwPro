@@ -2749,6 +2749,11 @@ int Com_ModifyMsec( int msec ) {
 Com_Frame
 =================
 */
+/*
+=================
+Com_Frame
+=================
+*/
 void Com_Frame( void ) {
 
 
@@ -2795,6 +2800,7 @@ void Com_Frame( void ) {
 		timeBeforeFirstEvents = Sys_Milliseconds ();
 	}
 
+
 	// Figure out how much time we have
 	if(!com_timedemo->integer)
 	{
@@ -2827,72 +2833,84 @@ void Com_Frame( void ) {
 
 	timeVal = 0;
 
+
 	do
 	{
-		// Busy sleep the last millisecond for better timeout precision
-		if(timeVal < 2)
-			NET_Sleep(0);
-		else
-		{
-			if(com_sv_running->integer)
+#ifdef _WIN32     // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+		com_frameTime = Com_EventLoop();
+		if (lastTime > com_frameTime) {
+			lastTime = com_frameTime;
+		}
+#endif
+			// Busy sleep the last millisecond for better timeout precision
+			if (timeVal < 2) {
+				NET_Sleep(0);
+			}
+			else
 			{
-				// Send out download messages now that we're idle
-				if(sv_dlRate->integer)
+
+				if (com_sv_running->integer)
 				{
-					// Rate limiting. This is very imprecise for high
-					// download rates due to millisecond timedelta resolution
-					dlStart = Sys_Milliseconds();
-					deltaT = dlNextRound - dlStart;
-
-					if(deltaT > 0)
+					// Send out download messages now that we're idle
+					if (sv_dlRate->integer)
 					{
-						if(deltaT < timeVal)
-							timeVal = deltaT + 1;
-					}
-					else
-					{
-						numBlocks = SV_SendDownloadMessages();
-
-						if(numBlocks)
+						// Rate limiting. This is very imprecise for high
+						// download rates due to millisecond timedelta resolution
+						dlStart = Sys_Milliseconds();
+						deltaT = dlNextRound - dlStart;
+						if (deltaT > 0)
 						{
-							// There are active downloads
-							deltaT = Sys_Milliseconds() - dlStart;
-
-							delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
-							delayT /= sv_dlRate->integer * 1024;
-
-							if(delayT <= deltaT + 1)
+							if (deltaT < timeVal)
+								timeVal = deltaT + 1;
+						}
+						else
+						{
+							numBlocks = SV_SendDownloadMessages();
+							if (numBlocks)
 							{
-								// Sending the last round of download messages
-								// took too long for given rate, don't wait for
-								// next round, but always enforce a 1ms delay
-								// between DL message rounds so we don't hog
-								// all of the bandwidth. This will result in an
-								// effective maximum rate of 1MB/s per user, but the
-								// low download window size limits this anyways.
-								timeVal = 2;
-								dlNextRound = dlStart + deltaT + 1;
-							}
-							else
-							{
-								dlNextRound = dlStart + delayT;
-								timeVal = delayT - deltaT;
+								// There are active downloads
+								deltaT = Sys_Milliseconds() - dlStart;
+
+								delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
+								delayT /= sv_dlRate->integer * 1024;
+
+								if (delayT <= deltaT + 1)
+								{
+									// Sending the last round of download messages
+									// took too long for given rate, don't wait for
+									// next round, but always enforce a 1ms delay
+									// between DL message rounds so we don't hog
+									// all of the bandwidth. This will result in an
+									// effective maximum rate of 1MB/s per user, but the
+									// low download window size limits this anyways.
+									timeVal = 2;
+									dlNextRound = dlStart + deltaT + 1;
+								}
+								else
+								{
+									dlNextRound = dlStart + delayT;
+									timeVal = delayT - deltaT;
+								}
 							}
 						}
 					}
+					else {
+						SV_SendDownloadMessages();
+					}
 				}
-				else
-					SV_SendDownloadMessages();
+
+				if (com_busyWait->integer) {
+					NET_Sleep(0);
+				}
+				else {
+					NET_Sleep(timeVal - 1);
+				}
 			}
-
-			if(com_busyWait->integer)
-				NET_Sleep(0);
-			else
-				NET_Sleep(timeVal - 1);
-		}
-
-		msec = Sys_Milliseconds() - com_frameTime;
-
+#ifdef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+			msec = com_frameTime - lastTime;
+#else
+			msec = Sys_Milliseconds() - com_frameTime;
+#endif
 		if(msec >= minMsec)
 			timeVal = 0;
 		else
@@ -2900,10 +2918,13 @@ void Com_Frame( void ) {
 
 	} while(timeVal > 0);
 
+
 	lastTime = com_frameTime;
 	com_frameTime = Com_EventLoop();
-
+#ifndef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
 	msec = com_frameTime - lastTime;
+#endif
+
 
 	Cbuf_Execute ();
 /*
@@ -2923,6 +2944,7 @@ void Com_Frame( void ) {
 	if ( com_speeds->integer ) {
 		timeBeforeServer = Sys_Milliseconds ();
 	}
+
 
 	SV_Frame( msec );
 
