@@ -93,8 +93,8 @@ void G_stats2JSON(int winner ) {
 				eff = 0;
 			}
             jdata = json_object();
-
-            json_object_set_new(jdata, "name", json_string(n2));
+            json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
+            json_object_set_new(jdata, "alias", json_string(n2));
             json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
             json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));
             json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));
@@ -153,6 +153,7 @@ void G_stats2JSON(int winner ) {
 
 
     }
+    /*
         json_t *roundStats =  json_array();
         jdata = json_object();
         json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
@@ -176,7 +177,7 @@ void G_stats2JSON(int winner ) {
         json_object_set_new(gameStats, "players", playersArray);
 
         json_object_set_new(root, "games", gameStats);
-
+*/
         //s = json_dumps( root, 0 ); // for compact form
         //s = json_dumps( root, 1 ); // for a pretty print form
          s = json_dumps( playersArray, 1 ); // for a pretty print form
@@ -226,6 +227,7 @@ void G_writeGameHeader (void){
         json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "map",    json_string(mapName));
+        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer)));
 //        json_dumpf( jdata,level.gameStatslogFile, 1 );
 //        json_object_set_new(jinfo,"gameinfo",jdata);

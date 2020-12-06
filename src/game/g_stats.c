@@ -1115,13 +1115,12 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 				// We've already missed the switch
 				if ( g_currentRound.integer == 1 )
 				{
-					CP( va( "sc \">>> ^3Clock set to: %d:%02d\n\"",
-							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
-
                     endofroundinfo=va( "Clock set to: %d:%02d",
 							g_nextTimeLimit.integer,
 							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
+					CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
+
+
 					if (winner == 0)
 					{
 						AAPS("sound/match/winaxis.wav");
@@ -1136,16 +1135,13 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
 					if ( val < g_timelimit.value )
 					{
-						CP( va( "sc \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
-								(int)val,
-								(int)( 60.0 * ( val - (int)val ) ),
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-                        endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
+					    endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
 								(int)val,
 								(int)( 60.0 * ( val - (int)val ) ),
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
+						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
+
 
 						if (winner == 0)
 						{
@@ -1158,12 +1154,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					}
 					else
 					{
-						CP( va( "sc \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
-                       endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
+					    endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
 								g_timelimit.integer,
 								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
+						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
+
 
 						if (winner == 0)
 						{
@@ -1207,8 +1202,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 		}
 	}
-    if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
-    //if (g_gameStatslog.integer) {
+   // if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
+    if (g_gameStatslog.integer) {
         G_writeGameLogEnd(endofroundinfo);  // write last event and close the gamelog array
         G_stats2JSON(winner);
         G_writeClosingJson();
