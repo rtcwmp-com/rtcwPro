@@ -1679,6 +1679,7 @@ extern vmCvar_t g_customConfig;
 //extern vmCvar_t Players_Allies;
 //extern vmCvar_t Players_Axis;
 extern vmCvar_t P;
+extern vmCvar_t	g_customSpawns;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1727,6 +1728,10 @@ void    trap_BotFreeClient( int clientNum );
 void    trap_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean    trap_GetEntityToken( char *buffer, int bufferSize );
 qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* or );
+// sswolf - custom spawns
+void trap_AppendEntityString(char* fileName);
+void trap_FreeEntityString(void);
+// custom spawns end
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );

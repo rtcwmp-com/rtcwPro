@@ -383,6 +383,10 @@ void        SV_ShutdownGameProgs( void );
 void        SV_RestartGameProgs( void );
 qboolean    SV_inPVS( const vec3_t p1, const vec3_t p2 );
 qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* or );
+// sswolf - custom spawns
+void SV_AppendEntityString(char* fileName);
+void SV_FreeEntityString();
+// custom spawns end
 
 // sv_animation.c
 int SV_LerpTag(orientation_t* tag, clientAnimationInfo_t* animInfo, char* tagname);

@@ -241,6 +241,16 @@ qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagN
 	return syscall(G_GETTAG, ent, animInfo, tagName, or );
 }
 
+// sswolf - custom spawns
+void trap_AppendEntityString(char* fileName) {
+	syscall(G_APPEND_ENTITY_STRING, fileName);
+}
+
+void trap_FreeEntityString() {
+	syscall(G_FREE_ENTITY_STRING);
+}
+// custom spawns end
+
 int trap_PC_LoadSource(const char* filename) {
 	return syscall(BOTLIB_PC_LOAD_SOURCE, filename);
 }
