@@ -3137,6 +3137,9 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
+	if (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP)
+		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
+
 	if (g_gamestate.integer != GS_INTERMISSION) // RtcwPro added this to avoid erroneous text at the end of the round
 	{
 		// Check now
