@@ -1797,6 +1797,7 @@ typedef enum
 // Global Function Decs
 
 animModelInfo_t *BG_ModelInfoForModelname( char *modelname );
+animModelInfo_t* BG_ModelInfoForClient(int client);
 qboolean BG_AnimParseAnimConfig( animModelInfo_t *animModelInfo, const char *filename, const char *input );
 void BG_AnimParseAnimScript( animModelInfo_t *modelInfo, animScriptData_t *scriptData, int client, char *filename, char *input );
 int BG_AnimScriptAnimation( playerState_t *ps, aistateEnum_t state, scriptAnimMoveTypes_t movetype, qboolean isContinue );
