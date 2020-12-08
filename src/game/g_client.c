@@ -1203,7 +1203,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->pers.restrictedWeapon = WP_MAUSER;
 					}
 				}
-				
+
 				COM_BitSet( client->ps.weapons, WP_SNIPERRIFLE );
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_SNIPERRIFLE )] = 10;
 				client->ps.ammo[BG_FindAmmoForWeapon( WP_SNIPERRIFLE )] = 10;
@@ -1232,7 +1232,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->pers.restrictedWeapon = WP_PANZERFAUST;
 					}
 				}
-				
+
 				COM_BitSet( client->ps.weapons, WP_PANZERFAUST );
 				client->ps.ammo[BG_FindAmmoForWeapon( WP_PANZERFAUST )] = 4;
 				client->ps.weapon = WP_PANZERFAUST;
@@ -1255,7 +1255,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->pers.restrictedWeapon = WP_VENOM;
 					}
 				}
-				
+
 				COM_BitSet( client->ps.weapons, WP_VENOM );
 				client->ps.ammoclip[BG_FindAmmoForWeapon( WP_VENOM )] = 500;
 				client->ps.weapon = WP_VENOM;
@@ -1278,7 +1278,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->pers.restrictedWeapon = WP_FLAMETHROWER;
 					}
 				}
-				
+
 				COM_BitSet( client->ps.weapons, WP_FLAMETHROWER );
 				client->ps.ammoclip[BG_FindAmmoForWeapon( WP_FLAMETHROWER )] = 200;
 				client->ps.weapon = WP_FLAMETHROWER;
@@ -2688,6 +2688,11 @@ void ClientDisconnect( int clientNum ) {
 		ClientUserinfoChanged( level.sortedClients[0] );
 	}
 
+    if (g_gameStatslog.integer) {
+        G_writeDisconnectEvent(va("%s", ent->client->pers.netname));
+
+    }
+
 	trap_UnlinkEntity( ent );
 	ent->s.modelindex = 0;
 	ent->inuse = qfalse;
@@ -2697,6 +2702,8 @@ void ClientDisconnect( int clientNum ) {
 	ent->client->sess.sessionTeam = TEAM_FREE;
 
 	ent->client->sess.end_time = level.time; // end time of client (come back and change to unix time perhaps?)
+
+
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
