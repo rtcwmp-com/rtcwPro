@@ -23,8 +23,8 @@ void G_writeGameLogStart(void)
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
 
 
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-        json_object_set_new(jdata, "event",    json_string("SOR"));
+        //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("round_start"));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
@@ -47,8 +47,8 @@ void G_writeGameLogEnd(char* endofroundinfo)
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-        json_object_set_new(jdata, "event",    json_string("EOR"));
+        //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("round_end"));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "result",    json_string(endofroundinfo));
@@ -82,7 +82,6 @@ void G_stats2JSON(int winner ) {
     json_t* jplayer;
     json_t* weapOb;
     json_t *root = json_object();
-    json_t *playersArray =  json_array();
     json_t* weapArray;
 
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
@@ -112,7 +111,7 @@ void G_stats2JSON(int winner ) {
 			if ( eff < 0 ) {
 				eff = 0;
 			}
-			sprintf(pGUID,"%s",cl->sess.guid );
+			sprintf(pGUID,"%s%i",cl->sess.guid,j );
 
             jdata = json_object();
            // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
@@ -183,8 +182,8 @@ void G_stats2JSON(int winner ) {
     }
 
         s = json_dumps( jteam, 1 ); // for a pretty print form
-         //s = json_dumps( playersArray, 1 ); // for a pretty print form
-         puts(s);
+
+
 /*
  previously had it save this in a separate file (not within the event file)
     there are benefits to doing such as this by itself preserves the 'json' structure and can be easily read into memory and updated then written out again
@@ -254,6 +253,7 @@ ahead a bit more before starting...
 */
 
 //void G_writeKillEvent (char* killer, char* victim, char* weapon){
+/*
 void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealth){
     int eventtype =0;  // plan to condense everything into one event function
     char* s;
@@ -262,7 +262,7 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
     if (eventtype == 0) {
       //  json_t *eventStats =  json_array();
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("kill"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
@@ -290,7 +290,8 @@ void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealt
     level.eventNum++;
 
 }
-
+*/
+/*
 void G_writeTeamKillEvent (char* killer, char* victim){
     char* s;
     json_t *jdata = json_object();
@@ -298,7 +299,7 @@ void G_writeTeamKillEvent (char* killer, char* victim){
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("teamkill"));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
@@ -318,13 +319,14 @@ void G_writeTeamKillEvent (char* killer, char* victim){
         level.eventNum++;
 
 }
-
+*/
+/*
 void G_writeSuicideEvent (char* player){
     char* s;
     json_t *jdata = json_object();
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("suicide"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
@@ -339,14 +341,36 @@ void G_writeSuicideEvent (char* player){
     level.eventNum++;
 }
 
+void G_writeSuicideEvent (gclient_t* client){
+    char* s;
+    json_t *jdata = json_object();
+    json_t *event = json_object();
+     time_t unixTime = time(NULL);  // come back and make globally available
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "event",    json_string("suicide"));
+        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+        json_object_set_new(jdata, "player",    json_string(va("%s",client->sess.guid)));
+        if (level.gameStatslogFile) {
+                s = json_dumps( jdata, 0 );
+                trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+                json_decref(jdata);
+                free(s);
+        }
+    level.eventNum++;
+}
+*/
 
+
+/*
 void G_writeReviveEvent (char* revived, char* medic){
     char* s;
     json_t *jdata = json_object();
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("revive"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
@@ -362,7 +386,7 @@ void G_writeReviveEvent (char* revived, char* medic){
         }
         level.eventNum++;
 }
-
+*/
 void G_writeObjectiveEvent (char* team, char* objective, char* player){
     int eventtype =0;  // plan to condense everything into one event function
     char* s;
@@ -374,7 +398,7 @@ void G_writeObjectiveEvent (char* team, char* objective, char* player){
     if (eventtype == 0) {
         json_t *eventStats =  json_array();
       //  json_object_set_new(jdata, "timestamp",    json_string(" "));
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string(objective));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
@@ -393,12 +417,57 @@ void G_writeObjectiveEvent (char* team, char* objective, char* player){
     level.eventNum++;
 }
 
+void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType){
+    char* s;
+    json_t *jdata = json_object();
+    json_t *event = json_object();
+     time_t unixTime = time(NULL);  // come back and make globally available
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+       json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+       if (eventType == eventSuicide) {
+            json_object_set_new(jdata, "event",    json_string("suicide"));
+            json_object_set_new(jdata, "player",    json_string(va("%s",agent->client->sess.guid)));
+       }
+       else if (eventType == eventKill) {
+            json_object_set_new(jdata, "event",    json_string("kill"));
+            json_object_set_new(jdata, "killer",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "victim",    json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "weapon",    json_string(weapon));
+            json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
+        }
+       else if (eventType == eventTeamkill) {
+            json_object_set_new(jdata, "event",    json_string("teamkill"));
+            json_object_set_new(jdata, "killer",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "victim",    json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "weapon",    json_string(weapon));
+            json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
+        }
+        else if (eventType == eventRevive) {
+            json_object_set_new(jdata, "event",   json_string("revive"));
+            json_object_set_new(jdata, "revived",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "reviver",  json_string(va("%s",other->client->sess.guid)));
+        }
+       // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+
+        if (level.gameStatslogFile) {
+                s = json_dumps( jdata, 0 );
+                trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+                json_decref(jdata);
+                free(s);
+        }
+    level.eventNum++;
+}
+
+
+
+
 void G_writeDisconnectEvent (char* player){
     char* s;
     json_t *jdata = json_object();
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
-        json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("disconnect"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));

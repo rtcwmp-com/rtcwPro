@@ -368,8 +368,8 @@ void Weapon_Syringe( gentity_t *ent ) {
 					ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
 					ent->client->sess.revives++;
 					if (g_gameStatslog.integer) {
-					//if (qtrue) { // place holder for controlling gamestats via cvar
-                        G_writeReviveEvent (traceEnt->client->pers.netname, ent->client->pers.netname);
+                        G_writeGeneralEvent(traceEnt,ent," ",eventRevive);
+                       // G_writeReviveEvent (traceEnt->client->pers.netname, ent->client->pers.netname);
 					}
 				} // End
 

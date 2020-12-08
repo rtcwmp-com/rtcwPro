@@ -379,15 +379,19 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
         // GameStats logging .... probably want to control this via cvar (as well as do a better job in general)
-        if (qtrue) {
+        if (g_gameStatslog.integer) {
             if (killer == self->s.number) {
-                G_writeSuicideEvent(self->client->pers.netname);
+                 G_writeGeneralEvent(self,self,obit,eventSuicide);
             }
             else if (OnSameTeam(attacker, self)) {
-                G_writeTeamKillEvent(killerName,self->client->pers.netname);
+                if ( attacker->client ) {
+                    G_writeGeneralEvent(attacker,self,obit,eventTeamkill);
+                }
             }
             else {
-                G_writeKillEvent(killerName,self->client->pers.netname, obit,attacker->health);
+                if ( attacker->client ) {
+                    G_writeGeneralEvent(attacker,self,obit,eventKill);
+                }
             }
 
         }
@@ -1233,7 +1237,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-		
+
 	}
 
 	if ( g_debugDamage.integer ) {

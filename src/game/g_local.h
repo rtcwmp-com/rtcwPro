@@ -2092,19 +2092,30 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 
+
+#define eventSuicide 0
+#define eventKill 1
+#define eventTeamkill 2
+#define eventRevive 3
+
+
+
 // g_json.c
 void G_stats2JSON(int winner );
 void G_writeGameInfo (void);
 //void G_writeKillEvent (char* killer, char* victim, char* weapon);
 void G_writeKillEvent (char* killer, char* victim, char* weapon, int killerhealth);
 void G_writeTeamKillEvent (char* killer, char* victim);
-void G_writeSuicideEvent (char* player);
+//void G_writeSuicideEvent (char* player);
+void G_writeSuicideEvent (gclient_t* client);
 void G_writeReviveEvent (char* revived, char* medic);
 void G_writeDisconnectEvent (char* player);
 void G_writeObjectiveEvent (char* team, char* objective, char* result);
 void G_writeGameLogEnd(char* endofroundinfo);
 void G_writeGameLogStart(void);
 void G_writeClosingJson(void);
+void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
+
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 // OSPx - New stuff below
 //
