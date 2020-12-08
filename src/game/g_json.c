@@ -89,13 +89,14 @@ void G_stats2JSON(int winner ) {
 	qtime_t ct;
 	trap_RealTime(&ct);
     jteam =  json_object();
+
 	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
 		if ( !TeamCount( -1, i ) ) {
 			continue;
 		}
         sprintf(teamname,"%s",(i == TEAM_RED) ? "Axis" : "Allied"  );
 
-
+         jplayer = json_object();
         for ( j = 0; j < level.numPlayingClients; j++ ) {
 			cl = level.clients + level.sortedClients[j];
 
@@ -167,13 +168,9 @@ void G_stats2JSON(int winner ) {
             }
 
             json_object_set(jdata, "wstats", weapArray);
-
-            jplayer = json_object();
             json_object_set(jplayer, pGUID, jdata);
             json_decref(weapArray);
             json_decref(jdata);
-
-
 
         }
 
