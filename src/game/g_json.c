@@ -72,10 +72,14 @@ void G_stats2JSON(int winner ) {
 	char mapName[64];
 	char n1[MAX_NETNAME];
 	char n2[MAX_NETNAME];
+	char teamname[10];
+	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
 	time_t unixTime = time(NULL);
     json_t* jdata;
+    json_t* jteam;
+    json_t* jplayer;
     json_t* weapOb;
     json_t *root = json_object();
     json_t *playersArray =  json_array();
@@ -85,13 +89,15 @@ void G_stats2JSON(int winner ) {
 
 	qtime_t ct;
 	trap_RealTime(&ct);
-
+    jteam =  json_object();
 	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
 		if ( !TeamCount( -1, i ) ) {
 			continue;
 		}
+        sprintf(teamname,"%s",(i == TEAM_RED) ? "Axis" : "Allied"  );
 
-		for ( j = 0; j < level.numPlayingClients; j++ ) {
+
+        for ( j = 0; j < level.numPlayingClients; j++ ) {
 			cl = level.clients + level.sortedClients[j];
 
 			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != i ) {
@@ -106,12 +112,14 @@ void G_stats2JSON(int winner ) {
 			if ( eff < 0 ) {
 				eff = 0;
 			}
+			sprintf(pGUID,"%s",cl->sess.guid );
+
             jdata = json_object();
-            json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
+           // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
             json_object_set_new(jdata, "alias", json_string(n2));
-            json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
-            json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));
-            json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));
+          //  json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
+            json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
+            json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
             json_object_set_new(jdata, "rounds", json_integer(cl->sess.rounds));
             json_object_set_new(jdata, "kills", json_integer(cl->sess.kills));
             json_object_set_new(jdata, "deaths", json_integer(cl->sess.deaths));
@@ -160,16 +168,23 @@ void G_stats2JSON(int winner ) {
             }
 
             json_object_set(jdata, "wstats", weapArray);
-            json_array_append(playersArray, jdata);
+
+            jplayer = json_object();
+            json_object_set(jplayer, pGUID, jdata);
             json_decref(weapArray);
             json_decref(jdata);
 
+
+
         }
 
+        json_object_set(jteam, teamname, jplayer);
 
     }
 
-         s = json_dumps( playersArray, 1 ); // for a pretty print form
+        s = json_dumps( jteam, 1 ); // for a pretty print form
+         //s = json_dumps( playersArray, 1 ); // for a pretty print form
+         puts(s);
 /*
  previously had it save this in a separate file (not within the event file)
     there are benefits to doing such as this by itself preserves the 'json' structure and can be easily read into memory and updated then written out again
