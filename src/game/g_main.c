@@ -1573,7 +1573,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 if ( !level.gameStatslogFile ) {
                     G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
                 } else {
-                    G_writeGameHeader();
+                    G_writeGameInfo();
 
                 }
 
