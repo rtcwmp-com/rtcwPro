@@ -403,9 +403,6 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 void Team_ReturnFlag( int team ) {
 	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
-	if (g_gameStatslog.integer) { // still needs some fixing....
-        G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), ".."  );
-	}
 }
 
 void Team_FreeEntity( gentity_t *ent ) {
@@ -484,7 +481,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_secure.wav" );
 				//G_matchPrintInfo(va("Axis have returned %s!", ent->message), qfalse);
 				trap_SendServerCommand( -1, va( "cp \"Axis have returned %s!\n\" 2", ent->message ) );
-				G_writeObjectiveEvent("Axis", "Returned objective", va("%s", cl->pers.netname)  );
+				//G_writeObjectiveEvent("Axis", "Returned objective", va("%s", cl->pers.netname)  );
+                G_writeObjectiveEvent(other, objReturned  );
 				//G_writeObjectiveEvent("Axis", "Axis have returned the objective", va("%s", cl->pers.netname)  );
 				cl->sess.obj_returned++;
 
@@ -495,9 +493,10 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
 				//G_matchPrintInfo(va("Allies have returned %s!", ent->message), qfalse);
 				trap_SendServerCommand( -1, va( "cp \"Allies have returned %s!\n\" 2", ent->message ) );
+//                G_writeObjectiveEvent("Allied", "Returned objective", va("%s", cl->pers.netname)   );
 
-                G_writeObjectiveEvent("Allied", "Returned objective", va("%s", cl->pers.netname)   );
-				//G_writeObjectiveEvent("Allied", "Allies have returned the objective", va("%s", cl->pers.netname)   );
+                G_writeObjectiveEvent(other, objReturned  );
+
 				cl->sess.obj_returned++;
 
 				if ( gm ) {
@@ -532,7 +531,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 	PrintMsg( NULL, "%s" S_COLOR_WHITE " captured the %s flag!\n",
 			  cl->pers.netname, TeamName( OtherTeam( team ) ) );
-    G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("captured the %s flag!", (team == TEAM_RED ? "Axis" : "Allied")), va("%s", cl->pers.netname)  );
+    //G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("captured the %s flag!", (team == TEAM_RED ? "Axis" : "Allied")), va("%s", cl->pers.netname)  );
+    G_writeObjectiveEvent(other, objSpawnFlag  );
 	cl->ps.powerups[enemy_flag] = 0;
 
 	teamgame.last_flag_capture = level.time;
@@ -547,7 +547,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	if ( g_gametype.integer >= GT_WOLF ) {
 		AddScore( other, WOLF_CAPTURE_BONUS );
 		PrintMsg( NULL,"%s" S_COLOR_WHITE " captured enemy objective!\n",cl->pers.netname );
-		G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
+		//G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
+		G_writeObjectiveEvent(cl, objCapture  );
 	} else {
 		AddScore( other, CTF_CAPTURE_BONUS );
 	}
@@ -630,8 +631,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			//G_matchPrintInfo(va("Axis have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Axis have stolen %s!\n\" 2", ent->message ) );
 			cl->sess.obj_taken++;
-            G_writeObjectiveEvent("Axis", va( "Taken objective", ent->message ), va("%s", cl->pers.netname)  );
-			//G_writeObjectiveEvent("Axis", va( "Axis have stolen %s!", ent->message ), va("%s", cl->pers.netname)  );
+            //G_writeObjectiveEvent("Axis", va( "Taken objective", ent->message ), va("%s", cl->pers.netname)  );
+            G_writeObjectiveEvent(other, objTaken  );
 
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "allied_object_stolen" );
@@ -641,8 +642,9 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Allies have stolen %s!\n\" 2", ent->message ) );
 			cl->sess.obj_taken++;
-            G_writeObjectiveEvent("Allied", va( "Taken objective", ent->message ), va("%s", cl->pers.netname)  );
-			//G_writeObjectiveEvent("Allied", va( "Allies have stolen %s!", ent->message ), va("%s", cl->pers.netname)  );
+            G_writeObjectiveEvent(other, objTaken  );
+            //G_writeObjectiveEvent("Allied", va( "Taken objective", ent->message ), va("%s", cl->pers.netname)  );
+
 
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "axis_object_stolen" );
@@ -1522,12 +1524,14 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	// Run script trigger
 	if ( self->count == TEAM_RED ) {
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
-        G_writeObjectiveEvent("Axis", "Captured flag", va("%s", other->client->pers.netname)   );
+        //G_writeObjectiveEvent("Axis", "Captured flag", va("%s", other->client->pers.netname)   );
+        G_writeObjectiveEvent(other, objSpawnFlag  );
         //other->client->sess.obj_captured++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
 
-        G_writeObjectiveEvent("Allied", "Captured flag", va("%s", other->client->pers.netname)   );
+        //G_writeObjectiveEvent("Allied", "Captured flag", va("%s", other->client->pers.netname)   );
+        G_writeObjectiveEvent(other, objSpawnFlag  );
         //other->client->sess.obj_captured++;
 	}
 

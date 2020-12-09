@@ -584,8 +584,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 								G_matchPrintInfo(va("Dynamite planted near %s!", hit->track), qfalse);
 								ent->client->sess.dyn_planted++;
 								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", va( "Dynamite planted near %s!", hit->track), va("%s",ent->client->pers.netname) );
-                                    G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                    G_writeObjectiveEvent(ent, objDynPlant  );
 
 								}
 							} else {
@@ -593,8 +593,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 								G_matchPrintInfo(va("Dynamite planted near objective #%d!", hit->count), qfalse);
 								ent->client->sess.dyn_planted++;
 								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", va("Dynamite planted near objective #%d!", hit->count), va("%s",ent->client->pers.netname)   );
-                                    G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                   //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                   G_writeObjectiveEvent(ent, objDynPlant  );
 
 								}
 							}
@@ -669,8 +669,8 @@ void Weapon_Engineer( gentity_t *ent ) {
                                 ent->client->sess.dyn_defused++;
 
 								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent("Axis", va("Axis defused dynamite near %s!", hit->track), va("%s",ent->client->pers.netname)  );
-                                    G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+                                    G_writeObjectiveEvent(ent, objDynDefuse  );
+                                    //G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
 								}
 
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_defused.wav" );
@@ -685,8 +685,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 								G_matchPrintInfo(va("Allies defused dynamite near %s!", hit->track), qfalse);
 								ent->client->sess.dyn_defused++;
 								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent("Allies", va("A defused dynamite near %s!", hit->track), va("%s",ent->client->pers.netname)  );
-                                    G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+                                    G_writeObjectiveEvent(ent, objDynDefuse  );
+                                   // G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
 								}
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_BLUE;

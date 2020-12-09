@@ -2095,12 +2095,18 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 
-
+// come back and do this better...
 #define eventSuicide 0
 #define eventKill 1
 #define eventTeamkill 2
 #define eventRevive 3
 
+#define objTaken 0
+#define objReturned 1
+#define objCapture 2
+#define objDynPlant 3
+#define objDynDefuse 4
+#define objSpawnFlag 5
 
 
 
@@ -2109,7 +2115,8 @@ void G_stats2JSON(int winner );
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);
 void G_writeDisconnectEvent (char* player);
-void G_writeObjectiveEvent (char* team, char* objective, char* result);
+//void G_writeObjectiveEvent (char* team, char* objective, char* result);
+void G_writeObjectiveEvent (gentity_t* agent,int objType);
 void G_writeGameLogEnd(char* endofroundinfo);
 void G_writeGameLogStart(void);
 void G_writeClosingJson(void);

@@ -134,14 +134,6 @@ void G_stats2JSON(int winner ) {
 
         s = json_dumps( jteam, 1 ); // for a pretty print form
 
-
-/*
- previously had it save this in a separate file (not within the event file)
-    there are benefits to doing such as this by itself preserves the 'json' structure and can be easily read into memory and updated then written out again
-    we may want to do two separate saves: 1 within the events log and the other within a gamestats log or something
-further note: we will ultimately want the 'timestamps' and 'gameID' match those of the 'root' object's .... easily can do this once we figure out the fine details
-    of how we want this all implemented....
-*/
         if (level.gameStatslogFile && g_gameStatslog.integer) {
             trap_FS_Write( "\"players\": ", strlen( "\"players\": " ), level.gameStatslogFile );
             trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
@@ -248,9 +240,7 @@ void G_writeGameInfo (int winner ){
     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
 
     json_t *jdata = json_object();
-   // json_t *jinfo = json_object();
         buf = Info_ValueForKey(cs, "matchid");
-        G_Printf("output stats buf=%s",buf);
         json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
         buf3 = Info_ValueForKey(cs, "round");
         json_object_set_new(jdata, "round",    json_string(buf3));
@@ -268,40 +258,55 @@ void G_writeGameInfo (int winner ){
 
 
 }
-/*
-Plan to combine all writing of events into a single writeEvent function....should have thought
-ahead a bit more before starting...
-*/
 
-void G_writeObjectiveEvent (char* team, char* objective, char* player){
-    int eventtype =0;  // plan to condense everything into one event function
+// Probably should have just made an array of all events to loop over.....bah will do that when more events are added
+
+void G_writeObjectiveEvent (gentity_t* agent,int objType){
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);  // come back and make globally available
     if (!g_gameStatslog.integer) {
         return;
     }
-    if (eventtype == 0) {
-        json_t *eventStats =  json_array();
-      //  json_object_set_new(jdata, "timestamp",    json_string(" "));
-       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-        json_object_set_new(jdata, "event",    json_string(objective));
-        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
-        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
-        json_object_set_new(jdata, "team",    json_string(team));
-        json_object_set_new(jdata, "player",    json_string(player));
-        if (level.gameStatslogFile) {
-                 //s = json_dumps( event, 0 );
-                s = json_dumps( jdata, 0 );
-                trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
-                json_decref(jdata);
-                free(s);
-        }
+
+
+    json_t *eventStats =  json_array();
+    json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+    if (objType == objReturned) {
+        json_object_set_new(jdata, "event",    json_string("ObjReturned"));
+    }
+    else if (objType == objTaken) {
+        json_object_set_new(jdata, "event",    json_string("ObjTaken"));
+    }
+    else if (objType == objCapture) {
+        json_object_set_new(jdata, "event",    json_string("ObjCapture"));
+    }
+    else if (objType == objDynDefuse) {
+        json_object_set_new(jdata, "event",    json_string("ObjDynDefused"));
+    }
+    else if (objType == objDynPlant) {
+        json_object_set_new(jdata, "event",    json_string("ObjDynPlanted"));
+    }
+    else if (objType == objSpawnFlag) {
+        json_object_set_new(jdata, "event",    json_string("ObjSpawnFlagCaptured"));
+    }
+
+    // json_object_set_new(jdata, "team",    json_string(team));
+    json_object_set_new(jdata, "agent",    json_string(agent->client->sess.guid));
+
+    if (level.gameStatslogFile) {
+         s = json_dumps( jdata, 0 );
+         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+         trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
 
     }
+         json_decref(jdata);
+         free(s);
+
     level.eventNum++;
 }
+
+
 
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType){
     char* s;
