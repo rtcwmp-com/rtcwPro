@@ -977,9 +977,8 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 	}
 }
 
-void SetWolfSpawnWeapons( gentity_t *ent ) {
+void SetWolfSpawnWeapons( gclient_t *client ) {
 
-	gclient_t *client = ent->client;
 
 	int pc = client->sess.playerType;
 	int starthealth = 100,i,numMedics = 0;   // JPW NERVE
@@ -2089,16 +2088,18 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	if ( firstTime ) {
+
 		// Ridah
 		if ( !ent->r.svFlags & SVF_CASTAI ) {
 			// done.
 			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]connected\n\"", client->pers.netname ) );
 		}
-	}
 
-	// sswolf - move here from SetTeam
-	CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
-	CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
+		// sswolf - move here from SetTeam
+		CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
+		CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
+		if (strlen(g_serverMessage.string) > 0) CPx(clientNum, va( "cp \"%s\n\"2", g_serverMessage.string));
+	}
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
@@ -2505,7 +2506,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		}
 
 		// End Xian
-		SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
+		SetWolfSpawnWeapons( client ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
 	}
 	// dhm - end
 
