@@ -761,7 +761,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	}
 
 	// L0 - connect message
-	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
+	//CP(va( "cp \"%s\n\"2", g_serverMessage.string));  // moved to g_client
 
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
