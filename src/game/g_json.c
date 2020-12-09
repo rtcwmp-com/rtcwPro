@@ -8,7 +8,14 @@
 //#define URL_FORMAT   "https://192.168.1.2:3000/gameStats"
 //#define URL_SIZE     256
 
+/*
+===========
+stats2JSON
 
+Output the end of round stats in Json format ...
+ ... should rename this function to something more appropriate
+===========
+*/
 
 void G_stats2JSON(int winner ) {
 
@@ -151,8 +158,15 @@ further note: we will ultimately want the 'timestamps' and 'gameID' match those 
         free( s );
         json_decref( root );
 }
+/*
+===========
+writeServerInfo
 
-void G_writeGameInfo (void){
+Output server related information
+===========
+*/
+
+void G_writeServerInfo (void){
 	//int s;
 	char* s;
 	char mapName[64];
@@ -160,9 +174,21 @@ void G_writeGameInfo (void){
     FILE		*gsfile;
     time_t unixTime = time(NULL);  // come back and make globally available
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+    char *buf;
+    char cs[MAX_STRING_CHARS];
 
 	qtime_t ct;
 	trap_RealTime(&ct);
+	// we want to save some information for the match and round
+    trap_GetConfigstring( CS_ROUNDINFO, cs, sizeof( cs ) );
+
+    Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
+    Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
+
+    if (g_currentRound.integer == 0) {
+        Info_SetValueForKey( cs, "matchid", va("%ld", unixTime) );
+    }
+    trap_SetConfigstring( CS_ROUNDINFO, cs );
 
     json_t *jdata = json_object();
    // json_t *jinfo = json_object();
@@ -170,24 +196,75 @@ void G_writeGameInfo (void){
         json_object_set_new(jdata, "serverIP",    json_string(""));
         json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
         json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
-        //json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig)));
+        //json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig)));  // use level.config hash
         json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
         json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "map",    json_string(mapName));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer)));
+
         s = json_dumps( jdata, 1 );
-        //s = json_dumps( jinfo, 1 );
-        trap_FS_Write( "{\n \"gameinfo\": \n", strlen( "{\n \"gameinfo\": \n" ), level.gameStatslogFile );
+
+        trap_FS_Write( "{\n \"serverinfo\": \n", strlen( "{\n \"serverinfo\": \n" ), level.gameStatslogFile );
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
         json_decref(jdata);
-       // json_decref(jinfo);
+
         free(s);
 
 
-        G_writeGameLogStart();  // write necessary json info for gamelog array
+        G_writeGameLogStart();  // write necessary json info for gamelog array....will provide better solution later
+
+
+}
+
+
+/*
+===========
+writeGameInfo
+
+Output end of info (i.e. round, winner, etc)
+===========
+*/
+
+void G_writeGameInfo (int winner ){
+	//int s;
+	char* s;
+	char mapName[64];
+    char newGamestatFile[MAX_QPATH];
+    char *buf;
+    char *buf2;
+    char *buf3;
+    char cs[MAX_STRING_CHARS];
+
+    FILE		*gsfile;
+    time_t unixTime = time(NULL);  // come back and make globally available
+    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+
+	qtime_t ct;
+	trap_RealTime(&ct);
+
+    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+
+    json_t *jdata = json_object();
+   // json_t *jinfo = json_object();
+        buf = Info_ValueForKey(cs, "matchid");
+        G_Printf("output stats buf=%s",buf);
+        json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
+        buf3 = Info_ValueForKey(cs, "round");
+        json_object_set_new(jdata, "round",    json_string(buf3));
+        buf2 = Info_ValueForKey(cs, "roundStart");
+        json_object_set_new(jdata, "round_start",    json_string(buf2));
+        json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
+       // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+        json_object_set_new(jdata, "winner",    json_string(va("%s", (winner == 0) ? "Axis" : "Allied")));
+        s = json_dumps( jdata, 1 );
+        trap_FS_Write( "\"gameinfo\": \n", strlen( "\"gameinfo\": \n" ), level.gameStatslogFile );
+        trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+        trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+        json_decref(jdata);
+        free(s);
 
 
 }

@@ -1046,6 +1046,9 @@ typedef struct {
 	// RTCWPro - custom config
 	config_t config;
 	int eventNum;  // event counter
+	char *match_id; // for stats round matching...
+
+
 } level_locals_t;
 
 // OSPx - Team extras
@@ -2103,7 +2106,8 @@ void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 
 // g_json.c
 void G_stats2JSON(int winner );
-void G_writeGameInfo (void);
+void G_writeGameInfo (int winner);
+void G_writeServerInfo (void);
 void G_writeDisconnectEvent (char* player);
 void G_writeObjectiveEvent (char* team, char* objective, char* result);
 void G_writeGameLogEnd(char* endofroundinfo);

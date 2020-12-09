@@ -592,7 +592,7 @@ void G_globalSound(char *sound) {
 void G_resetRoundState(void) {
 	if (g_gametype.integer == GT_WOLF_STOPWATCH) {
 		trap_Cvar_Set("g_currentRound", "0");
-	}
+    }
 	/*else if (g_gametype.integer == GT_WOLF_LMS) {
 		trap_Cvar_Set("g_currentRound", "0");
 		trap_Cvar_Set("g_lms_currentMatch", "0");
