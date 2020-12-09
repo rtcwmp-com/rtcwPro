@@ -2689,7 +2689,7 @@ void ClientDisconnect( int clientNum ) {
 	}
 
     if (g_gameStatslog.integer) {
-        G_writeDisconnectEvent(va("%s", ent->client->pers.netname));
+        G_writeDisconnectEvent(ent);
 
     }
 

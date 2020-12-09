@@ -139,6 +139,7 @@ void G_stats2JSON(int winner ) {
             trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
 
             trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+            free( s );
         }
         else {   // forget the comments above and write it to original test json file :)
             rc = json_dump_file(root, "./test.json", 0);
@@ -147,7 +148,7 @@ void G_stats2JSON(int winner ) {
             }
         }
 
-        free( s );
+
         json_decref( root );
 }
 /*
@@ -196,14 +197,16 @@ void G_writeServerInfo (void){
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer)));
 
-        s = json_dumps( jdata, 1 );
+        if (level.gameStatslogFile) {
+            s = json_dumps( jdata, 1 );
 
-        trap_FS_Write( "{\n \"serverinfo\": \n", strlen( "{\n \"serverinfo\": \n" ), level.gameStatslogFile );
-        trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-        trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
-        json_decref(jdata);
+            trap_FS_Write( "{\n \"serverinfo\": \n", strlen( "{\n \"serverinfo\": \n" ), level.gameStatslogFile );
+            trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+            trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+            json_decref(jdata);
 
-        free(s);
+            free(s);
+        }
 
 
         G_writeGameLogStart();  // write necessary json info for gamelog array....will provide better solution later
@@ -249,12 +252,15 @@ void G_writeGameInfo (int winner ){
         json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
        // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "winner",    json_string(va("%s", (winner == 0) ? "Axis" : "Allied")));
-        s = json_dumps( jdata, 1 );
-        trap_FS_Write( "\"gameinfo\": \n", strlen( "\"gameinfo\": \n" ), level.gameStatslogFile );
-        trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-        trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
-        json_decref(jdata);
-        free(s);
+        if (level.gameStatslogFile) {
+            s = json_dumps( jdata, 1 );
+            trap_FS_Write( "\"gameinfo\": \n", strlen( "\"gameinfo\": \n" ), level.gameStatslogFile );
+            trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+            trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+            json_decref(jdata);
+            free(s);
+
+        }
 
 
 }
@@ -298,10 +304,11 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
          s = json_dumps( jdata, 0 );
          trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
          trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+         free(s);
 
     }
          json_decref(jdata);
-         free(s);
+
 
     level.eventNum++;
 }
@@ -338,42 +345,45 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
             json_object_set_new(jdata, "revived",  json_string(va("%s",agent->client->sess.guid)));
             json_object_set_new(jdata, "reviver",  json_string(va("%s",other->client->sess.guid)));
         }
+        else if (eventType == eventPause) {
+            json_object_set_new(jdata, "event",   json_string("pause"));
+            json_object_set_new(jdata, "player",  json_string(va("%s",agent->client->sess.guid)));
+        }
+        else if (eventType == eventUnpause) {
+            json_object_set_new(jdata, "event",   json_string("unpause"));
+            json_object_set_new(jdata, "player",  json_string(va("%s",agent->client->sess.guid)));
+        }
        // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
 
         if (level.gameStatslogFile) {
                 s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
-                json_decref(jdata);
+
                 free(s);
         }
+        json_decref(jdata);
     level.eventNum++;
 }
 
-
-
-
-void G_writeDisconnectEvent (char* player){
+void G_writeDisconnectEvent (gentity_t* agent){
     char* s;
     json_t *jdata = json_object();
-    json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
        // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("disconnect"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
-        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
-        json_object_set_new(jdata, "player",    json_string(player));
+        json_object_set_new(jdata, "player",    json_string(va("%s",agent->client->sess.guid)));
         if (level.gameStatslogFile) {
                 s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
-                json_decref(jdata);
                 free(s);
         }
+        json_decref(jdata);
+
     level.eventNum++;
 }
-
-
 // the following 3 functions are silly but for the time being necessary to make the output a true 'json'
 
 void G_writeClosingJson(void)

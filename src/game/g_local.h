@@ -2100,6 +2100,8 @@ void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 #define eventKill 1
 #define eventTeamkill 2
 #define eventRevive 3
+#define eventPause 4
+#define eventUnpause 5
 
 #define objTaken 0
 #define objReturned 1
@@ -2114,8 +2116,8 @@ void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 void G_stats2JSON(int winner );
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);
-void G_writeDisconnectEvent (char* player);
-//void G_writeObjectiveEvent (char* team, char* objective, char* result);
+void G_writeDisconnectEvent (gentity_t* agent);
+//void G_writeDisconnectEvent (char* player);
 void G_writeObjectiveEvent (gentity_t* agent,int objType);
 void G_writeGameLogEnd(char* endofroundinfo);
 void G_writeGameLogStart(void);

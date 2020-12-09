@@ -709,6 +709,10 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
 	}
 
+    if (g_gameStatslog.integer) {
+        G_writeGeneralEvent (ent , ent, " ", (dPause) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
+    }
+
 }
 
 /*
