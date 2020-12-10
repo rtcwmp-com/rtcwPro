@@ -6226,7 +6226,9 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 						return Info_ValueForKey( info, "hostname" );
 					}
 				}
-			case SORT_MAP:
+			
+			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
+			/*case SORT_MAP:
 				if (Info_ValueForKey( info, "mapname" ) != "" )
 				{
 					Q_strncpyz( mapname_clean, Q_CleanStr( Q_strlwr( Info_ValueForKey( info, "mapname" ) ) ), sizeof( mapname_clean ) );
@@ -6235,7 +6237,7 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 				else
 				{
 					return " ";
-				}
+				}*/
 			case SORT_CLIENTS:
 				Com_sprintf( clientBuff, sizeof( clientBuff ), "%s (%s)", Info_ValueForKey( info, "clients" ), Info_ValueForKey( info, "sv_maxclients" ) );
 				return clientBuff;
