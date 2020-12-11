@@ -350,9 +350,10 @@ void Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip ) {
 
 	} else {                                        // using clips
 		totalcount = ent->client->ps.ammo[ammoweap] + ent->client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
-		if ( totalcount > ammoTable[ammoweap].maxammo ) {
-			ent->client->ps.ammo[ammoweap] = ammoTable[ammoweap].maxammo - ent->client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
-		}
+		// RtcwPro - let the user keep adding ammo from guns they pickup
+		//if ( totalcount > ammoTable[ammoweap].maxammo ) {
+		//	ent->client->ps.ammo[ammoweap] = ammoTable[ammoweap].maxammo - ent->client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
+		//}
 
 	}
 
