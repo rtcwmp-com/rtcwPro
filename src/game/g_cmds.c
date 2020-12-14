@@ -2702,8 +2702,8 @@ void ClientCommand( int clientNum ) {
 // -OSPx
 	} else if ( Q_stricmp( cmd, "gib" ) == 0 )  {
 		Cmd_Gib_f( ent );
-	} else if (Q_stricmp(cmd, "hitsound") == 0) {
-		Cmd_hitsounds(ent);
+	/*} else if (Q_stricmp(cmd, "hitsound") == 0) {
+		Cmd_hitsounds(ent);*/
 	// End
 	} else if ( Q_stricmp( cmd, "levelshot" ) == 0 )  {
 		Cmd_LevelShot_f( ent );
