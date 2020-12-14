@@ -220,6 +220,11 @@ void G_refLockTeams_cmd(gentity_t *ent, qboolean fLock) {
 	teamInfo[TEAM_RED].team_lock = (TeamCount(-1, TEAM_RED)) ? fLock : qfalse;
 	teamInfo[TEAM_BLUE].team_lock = (TeamCount(-1, TEAM_BLUE)) ? fLock : qfalse;
 
+	if (fLock)
+		trap_Cvar_Set("g_gamelocked", "3"); // This actually locks the teams based on logic from xMod
+	else
+		trap_Cvar_Set("g_gamelocked", "0"); // This actually unlocks the teams based on logic from xMod
+
 	status = va("Referee has ^3%sLOCKED^7 teams", ((fLock) ? "" : "UN"));
 
 	G_printFull(status, ent);

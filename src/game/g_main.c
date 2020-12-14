@@ -231,7 +231,7 @@ vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
-vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
+//vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
 vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ban) can be disabled..
 vmCvar_t g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
@@ -280,7 +280,7 @@ vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
 vmCvar_t g_fixedphysics;	// So it's fair for all..
 vmCvar_t g_allowPMs;		// Allow private messages
-vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
+//vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
@@ -289,11 +289,11 @@ vmCvar_t team_nocontrols;
 // Match specific
 vmCvar_t team_commands; // Team commands (captain..)
 vmCvar_t g_tournament;	// Ready-unready system
-vmCvar_t g_ltNades;			// Number of nades a lt starts with 
-vmCvar_t g_medicNades;		// Number of nades a med starts with 
+vmCvar_t g_ltNades;			// Number of nades a lt starts with
+vmCvar_t g_medicNades;		// Number of nades a med starts with
 vmCvar_t g_soldNades;		// Number of nades sold starts with
 vmCvar_t g_engNades;		// Number of nades eng starts with
-vmCvar_t g_medicClips;		// Number of clips in weapon med starts with 
+vmCvar_t g_medicClips;		// Number of clips in weapon med starts with
 vmCvar_t g_engineerClips;	// Number of clips in weapon eng starts with
 vmCvar_t g_soldierClips;	// Number of clips in weapon sold starts with
 vmCvar_t g_leutClips;		// Number of clips in weapon leut starts with
@@ -309,8 +309,6 @@ vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 
 
 // RTCWPro
 vmCvar_t g_customConfig;
-//vmCvar_t Players_Allies;
-//vmCvar_t Players_Axis;
 vmCvar_t P; // ET Port Players server info
 
 cvarTable_t gameCvarTable[] = {
@@ -483,7 +481,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_showFlags, "g_showFlags", "1", 0 },
 	{ &g_noTeamSwitching, "g_noTeamSwitching", "1", 0, 0, qfalse, qfalse },
 	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
-	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
+	//{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
 	{ &svx_serverStreaming, "svx_serverStreaming", "", CVAR_SERVERINFO, 0, qfalse },
@@ -574,8 +572,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
-	//{ &Players_Allies, "Players_Allies", "(None)", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue }, 
-	//{ &Players_Axis, "Players_Axis", "(None)", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
@@ -3111,7 +3107,7 @@ OSPx - check for team stuff..
 ================
 */
 void handleEmptyTeams(void) {
-	
+
 	if (!level.axisPlayers && g_gamestate.integer != GS_INTERMISSION) {
 		G_teamReset(TEAM_RED, qtrue);
 
@@ -3141,7 +3137,10 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
-	if (g_gamestate.integer == GS_PLAYING) // RtcwPro added this to avoid erroneous text at the end of the round
+	if (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP)
+		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
+
+	if (g_gamestate.integer != GS_INTERMISSION) // RtcwPro added this to avoid erroneous text at the end of the round
 	{
 		// Check now
 		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
@@ -3248,12 +3247,12 @@ void G_RunFrame( int levelTime ) {
 		level.timeCurrent = levelTime - level.timeDelta;
 	} else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		//if ( ( level.time % 500 ) == 0 ) {
+		if ( ( level.time % 500 ) == 0 ) { // nihi (re)-added to avoid cmd overflow to connecting clients
 			// Respawn and time issuses
 			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
 			// Print stuff.. FIXME one day...
 			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
-		//}
+		}
 	} // End
 //	level.frameTime = trap_Milliseconds();   // nihi removed
 	level.frameStartTime = trap_Milliseconds(); // nihi added

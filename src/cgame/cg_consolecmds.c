@@ -935,6 +935,8 @@ void CG_InitConsoleCommands( void ) {
     trap_AddCommand( "help" );
     trap_AddCommand( "commandsHelp" );
 
+	trap_AddCommand( "lock" );		// Locks team
+	trap_AddCommand( "unlock" );		// Unlocks team
 	trap_AddCommand( "speclock" );		// Locks team from specs
 	trap_AddCommand( "specunlock" );	// Opens team for specs
 	trap_AddCommand( "specinvite" );		// Invites player to spec team
@@ -951,6 +953,7 @@ void CG_InitConsoleCommands( void ) {
 	// Misc
 	trap_AddCommand("players");
 	trap_AddCommand("say_teamnl");
+	trap_AddCommand("forcefps");		// adding this so we don't get an invalid command error
 	// Stats
 	trap_AddCommand( "scores" );		// Prints score table
 	trap_AddCommand( "weaponstats" );	// +wstats equivalent for console

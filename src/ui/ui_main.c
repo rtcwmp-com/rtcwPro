@@ -1,4 +1,5 @@
 /*
+/*
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
@@ -3599,30 +3600,47 @@ static void UI_LoadDemos() {
 	char demolist[30000];
 	char demoExt[32];
 	char    *demoname;
-	int i, len;
-
+	char  demoPathName[300];
+	int i, len, j;
+    int		numdirs;
+	int		numfiles;
+	char	dirlist[2048];
+	int		dirlen;
+	char*	dirptr;
 	Com_sprintf( demoExt, sizeof( demoExt ), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
 	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, sizeof( demolist ) );
 
 	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
-	if ( uiInfo.demoCount ) {
-		if ( uiInfo.demoCount > MAX_DEMOS ) {
-			uiInfo.demoCount = MAX_DEMOS;
-		}
-		demoname = demolist;
-		for ( i = 0; i < uiInfo.demoCount; i++ ) {
+	numdirs = trap_FS_GetFileList("../rtcwpro/demos", "/", dirlist, 2048 );
+	dirptr  = dirlist;
+	// iterate over all sub-directories
+	for (i=0; i<numdirs && uiInfo.demoCount < MAX_DEMOS; i++,dirptr+=dirlen+1)
+	{
+		dirlen = strlen(dirptr);
+
+		if (dirlen && dirptr[dirlen-1]=='/') dirptr[dirlen-1]='\0';
+
+		if (!strcmp(dirptr,".") || !strcmp(dirptr,".."))
+			continue;
+
+		// iterate all demo files in directory
+
+		numfiles = trap_FS_GetFileList( va("demos/%s",dirptr), demoExt, demolist, sizeof( demolist )  );
+		demoname  = demolist;
+		for (j=0; j<numfiles &&  uiInfo.demoCount < MAX_DEMOS;j++,demoname+=len+1)
+		{
 			len = strlen( demoname );
 			if ( !Q_stricmp( demoname +  len - strlen( demoExt ), demoExt ) ) {
 				demoname[len - strlen( demoExt )] = '\0';
 			}
-//			Q_strupr(demoname);
-			uiInfo.demoList[i] = String_Alloc( demoname );
-			demoname += len + 1;
+			Com_sprintf( demoPathName, sizeof( demoPathName ), "%s/%s", dirptr, demoname );
+			uiInfo.demoList[i+j] = String_Alloc( demoPathName );
+            //uiInfo.demoList[i+j] = String_Alloc( demoname );
+			uiInfo.demoCount++;
 		}
 	}
-
 }
 
 
@@ -6208,7 +6226,9 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 						return Info_ValueForKey( info, "hostname" );
 					}
 				}
-			case SORT_MAP:
+			
+			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
+			/*case SORT_MAP:
 				if (Info_ValueForKey( info, "mapname" ) != "" )
 				{
 					Q_strncpyz( mapname_clean, Q_CleanStr( Q_strlwr( Info_ValueForKey( info, "mapname" ) ) ), sizeof( mapname_clean ) );
@@ -6217,7 +6237,7 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 				else
 				{
 					return " ";
-				}
+				}*/
 			case SORT_CLIENTS:
 				Com_sprintf( clientBuff, sizeof( clientBuff ), "%s (%s)", Info_ValueForKey( info, "clients" ), Info_ValueForKey( info, "sv_maxclients" ) );
 				return clientBuff;
@@ -7896,7 +7916,7 @@ cvarTable_t cvarTable[] = {
 
 	{ &ui_demoDir, "ui_demoDir", "demos", CVAR_ARCHIVE },
 	{ &fs_game, "fs_game", "", 0 },
-	{ &ui_gameversion, "ui_gameversion", PRO_VERSION, CVAR_ARCHIVE }
+	{ &ui_gameversion, "ui_gameversion", GAMEVERSION, CVAR_ROM }
 };
 
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

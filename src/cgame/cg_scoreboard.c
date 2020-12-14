@@ -254,6 +254,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 	if ( cg.snap->ps.pm_type != PM_INTERMISSION ) {
 		CG_DrawSmallString( x, y, CG_TranslateString( "Goals" ), fade );
 	}
+	CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // sswolf - time
 	y += SMALLCHAR_HEIGHT + 3;
 
 	// draw color bands
@@ -345,7 +346,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 		tens = seconds / 10;
 		seconds -= tens * 10;
 
-		if ( msec < 0 ) {
+		if ( msec < 0 && cgs.gamestate != GS_WARMUP) { // don't show sudden death during warmup
 			s = va( "%s %s", CG_TranslateString( "Mission time:" ),  CG_TranslateString( "Sudden Death" ) );
 			CG_DrawSmallString(x, y, s, fade);
 		} else {

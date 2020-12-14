@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -209,6 +209,70 @@ void Netchan_Transmit( netchan_t *chan, int length, const byte *data ) {
 					, chan->incomingSequence );
 	}
 }
+
+
+// new stuff for iortcw port of server defined dl rates
+typedef struct packetQueue_s {
+        struct packetQueue_s *next;
+        int length;
+        byte *data;
+        netadr_t to;
+        int release;
+} packetQueue_t;
+
+packetQueue_t *packetQueue = NULL;
+
+
+static void NET_QueuePacket( int length, const void *data, netadr_t to,
+	int offset )
+{
+	packetQueue_t *new, *next = packetQueue;
+
+	if(offset > 999)
+		offset = 999;
+
+	new = S_Malloc(sizeof(packetQueue_t));
+	new->data = S_Malloc(length);
+	Com_Memcpy(new->data, data, length);
+	new->length = length;
+	new->to = to;
+	new->release = Sys_Milliseconds() + (int)((float)offset / com_timescale->value);
+	new->next = NULL;
+
+	if(!packetQueue) {
+		packetQueue = new;
+		return;
+	}
+	while(next) {
+		if(!next->next) {
+			next->next = new;
+			return;
+		}
+		next = next->next;
+	}
+}
+
+
+void NET_FlushPacketQueue(void)
+{
+	packetQueue_t *last;
+	int now;
+
+	while(packetQueue) {
+		now = Sys_Milliseconds();
+		if(packetQueue->release >= now)
+			break;
+		Sys_SendPacket(packetQueue->length, packetQueue->data,
+			packetQueue->to);
+		last = packetQueue;
+		packetQueue = packetQueue->next;
+		Z_Free(last->data);
+		Z_Free(last);
+	}
+}
+
+
+// end new stuff
 
 /*
 =================
@@ -533,7 +597,6 @@ void NET_SendLoopPacket( netsrc_t sock, int length, const void *data, netadr_t t
 	loop->msgs[i].datalen = length;
 }
 
-//=============================================================================
 
 
 void NET_SendPacket( netsrc_t sock, int length, const void *data, netadr_t to ) {

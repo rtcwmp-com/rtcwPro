@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
-#define GAMEVERSION "RtcwPro 1.0 beta"
+
 // done.
 
 #define BODY_QUEUE_SIZE     8
@@ -420,6 +420,11 @@ struct gentity_s {
     // pause stuff from rtcwPub
 	int			trType_pre_pause;
 	vec3_t		trBase_pre_pause;
+
+	// sswolf - head stuff
+	qboolean	headshot;
+	qboolean	is_head;
+	gentity_t*  head;
 };
 
 // Ridah
@@ -662,6 +667,7 @@ typedef struct {
     vec3_t    mins, maxs;
     vec3_t    currentOrigin;
     int       time, leveltime;
+	clientAnimationInfo_t animInfo;
 } clientTrail_t;
 
 // L0 - AntiWarp
@@ -1154,7 +1160,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientItems( gentity_t *self );
-gentity_t* G_BuildHead( gentity_t *ent );
+//gentity_t* G_BuildHead( gentity_t *ent ); // sswolf - unused
 
 // damage flags
 #define DAMAGE_RADIUS           0x00000001  // damage was indirect
@@ -1239,6 +1245,12 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon );
 void CalcMuzzlePointForActivate( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 // done.
 
+// sswolf - head stuff
+void AddHeadEntity(gentity_t* ent);
+void FreeHeadEntity(gentity_t* ent);
+void UpdateHeadEntity(gentity_t* ent);
+void RemoveHeadEntity(gentity_t* ent);
+
 //
 // g_client.c
 //
@@ -1256,10 +1268,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
-void RemoveWeaponRestrictions(gentity_t *ent);
-void limbo( gentity_t *ent, qboolean makeCorpse );
-//void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
-//void CheckTeamForWeapon(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+void limbo(gentity_t* ent, qboolean makeCorpse);
+
+//void RemoveWeaponRestrictions(gentity_t *ent);
+//void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
+
 
 // RTCWPro - custom config - g_sha1.c
 char* G_SHA1(const char* string);
@@ -1608,7 +1621,7 @@ extern vmCvar_t sab_maxPingHits;
 extern vmCvar_t sab_censorPenalty;
 extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
-extern vmCvar_t	g_hitsounds;
+//extern vmCvar_t	g_hitsounds;
 extern vmCvar_t	g_crouchRate;
 extern vmCvar_t g_drawHitboxes;
 extern vmCvar_t team_nocontrols;
@@ -1920,16 +1933,15 @@ typedef enum
 
 
 // nihi added below
+// sswolf - removed unused declarations
 
 // g_antilag.c
 //
-void G_ResetTrail( gentity_t *ent );
-void G_StoreTrail( gentity_t *ent );
-void G_TimeShiftClient( gentity_t *ent, int time );
-void G_TimeShiftAllClients( int time, gentity_t *skip );
-void G_UnTimeShiftClient( gentity_t *ent );
-void G_UnTimeShiftAllClients( gentity_t *skip );
-void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
+void G_ResetTrail(gentity_t* ent);
+void G_StoreTrail(gentity_t* ent);
+void G_TimeShiftAllClients(int time, gentity_t* skip);
+void G_UnTimeShiftAllClients(gentity_t* skip);
+//void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
 
 // End
 
@@ -1994,7 +2006,7 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp);
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
-void Cmd_hitsounds(gentity_t *ent);
+//void Cmd_hitsounds(gentity_t *ent);
 ///////////////////////
 // g_vote.c
 //
@@ -2104,7 +2116,7 @@ qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
 void CountDown(qboolean restart);
-//int isWeaponLimited (gclient_t *client, int weap);
+int isWeaponLimited (gclient_t *client, int weap);
 void SetDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
