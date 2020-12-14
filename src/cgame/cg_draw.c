@@ -2561,7 +2561,7 @@ static void CG_DrawCrosshairNames( void ) {
 	// -NERVE - SMF
 
 	// RtcwPro add player ammo if player class is LT
-	if (cgClass == 3)
+	if (cgClass == 3 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
 		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
