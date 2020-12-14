@@ -109,7 +109,12 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			}
 		}
 
-		/*if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
+		if (cl->sess.referee) {
+			strcpy(ref, "REF");
+		}
+
+		/* this stuff crashed the command???
+		if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
 		}
 
@@ -622,6 +627,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	char *tag, *log, *action;
 	gentity_t *target_ent;
 	int i;
+
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
 		return;
@@ -639,7 +645,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 
 	if (level.numPlayingClients == 0) {
 		CP("print \"^jError: ^7You cannot use pause feature with no playing clients..\n\"");
-	return;
+		return;
 	}
 	DecolorString(aTeams[team], tName);
 
@@ -670,7 +676,8 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	*/
 		level.paused = !PAUSE_NONE;
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
-		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
+		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7the match!\n\"", tName));
+		level.axisCalledTimeout = (team == TEAM_RED ? qtrue : qfalse);
 		AAPS("sound/match/klaxon1.wav");
 
 		// nihi: added from rtcwpub for freezing grenades/dyno/airstrikes/etc
@@ -701,12 +708,17 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-		return;
+			return;
+		}
+
+		if (level.axisCalledTimeout && team != TEAM_RED) {
+			CP("print \"^jError: ^7Only the team that paused the match may unpause the match^j.\n\"");
+			return;
 		}
 
 		level.CNstart = 0; // Resets countdown if it was aborted before
 		level.paused = PAUSE_UNPAUSING;
-		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
+		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7the match!\n\"", tName));
 	}
 
 }

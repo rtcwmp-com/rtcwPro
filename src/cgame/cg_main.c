@@ -931,7 +931,9 @@ char *CG_generateFilename( void ) {
 
 // Console prints for stats
 void CG_printConsoleString( char *str ) {
-	CG_Printf( "[skipnotify]%s", str ); // keep skipnotify for current stat parser compatability
+	//CG_Printf( "[skipnotify]%s", str ); // keep skipnotify for current stat parser compatability
+    CG_Printf( "%s", str ); // remove skipnotify  for CP
+
 }
 // End
 

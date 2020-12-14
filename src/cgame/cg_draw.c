@@ -1113,7 +1113,7 @@ static float CG_DrawEnemyTimer(float y) {
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
 	else {
-        return;
+        return y;
 	}
 
 	return y += TINYCHAR_HEIGHT;
