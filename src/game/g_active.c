@@ -362,6 +362,57 @@ void    G_TouchTriggers( gentity_t *ent ) {
 
 /*
 =================
+sswolf - follow clients in freecam
+by aiming/shooting at them
+Note: using hisotircal trace
+to compensate
+
+Credits: ETLegacy and rtcwPub
+G_SpectatorAttackFollow
+=================
+*/
+qboolean G_SpectatorAttackFollow(gentity_t* ent)
+{
+	trace_t       tr;
+	vec3_t        forward, right, up;
+	vec3_t        start, end;
+	vec3_t        mins, maxs;
+	static vec3_t enlargeMins = { -5, -5, -5 };
+	static vec3_t enlargeMaxs = { 5, 5, 5 };
+
+	if (!ent->client)
+	{
+		return qfalse;
+	}
+
+	AngleVectors(ent->client->ps.viewangles, forward, right, up);
+	VectorCopy(ent->client->ps.origin, start);
+	VectorMA(start, 8192, forward, end);
+
+	// enlarge the hitboxes, so spectators can easily click on them..
+	VectorCopy(ent->r.mins, mins);
+	VectorCopy(ent->r.maxs, maxs);
+	VectorAdd(mins, enlargeMins, mins);
+	VectorAdd(maxs, enlargeMaxs, maxs);
+
+	// also put the start-point a bit forward, so we don't start the trace in solid..
+	VectorMA(start, 75.0f, forward, start);
+
+	//trap_Trace(&tr, start, mins, maxs, end, ent->client->ps.clientNum, CONTENTS_BODY | CONTENTS_CORPSE);
+	G_HistoricalTrace(ent, &tr, start, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE);
+
+	if ((&g_entities[tr.entityNum])->client)
+	{
+		ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+		ent->client->sess.spectatorClient = tr.entityNum;
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+/*
+=================
 SpectatorThink
 =================
 */
@@ -415,7 +466,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		ent->client->ps.sprintTime = 20000;
 	}
 
-
 	client->oldbuttons = client->buttons;
 	client->buttons = ucmd->buttons;
 
@@ -424,14 +474,36 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	client->wbuttons = ucmd->wbuttons;
 
 	// attack button cycles through spectators
-	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) ) {
-		Cmd_FollowCycle_f( ent, 1 );
-	} else if (
-		( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
+	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) ) 
+	{
+		// sswolf - make it usable by aiming/shooting
+		if (client->sess.spectatorState == SPECTATOR_FREE && client->sess.sessionTeam == TEAM_SPECTATOR)
+		{
+			if (G_SpectatorAttackFollow(ent))
+			{
+				return;
+			}
+		}
+
+		Cmd_FollowCycle_f(ent, 1);
+	}
+	// sswolf - make it usable by m1/2 for both directions
+	else if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK) &&
+		!(client->buttons & BUTTON_ACTIVATE))
+	{
+		Cmd_FollowCycle_f(ent, 1);
+	}
+	else if ((client->wbuttons & WBUTTON_ATTACK2) && !(client->oldwbuttons & WBUTTON_ATTACK2) &&
+		!(client->buttons & BUTTON_ACTIVATE))
+	{
+		Cmd_FollowCycle_f(ent, -1);
+	}
+	else if (( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
 		( client->sess.spectatorState == SPECTATOR_FOLLOW ) &&
 		( client->buttons & BUTTON_ACTIVATE ) &&
 		!( client->oldbuttons & BUTTON_ACTIVATE ) &&
-		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) ) { // OSPx - Speclock
+		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) ) 
+	{ // OSPx - Speclock
 		// code moved to StopFollowing
 		StopFollowing( ent );
 	}
