@@ -394,7 +394,13 @@ void G_writeDisconnectEvent (gentity_t* agent){
 
 void G_writeClosingJson(void)
 {
-    trap_FS_Write( "}\n", strlen( "}\n"), level.gameStatslogFile );
+
+    if (level.gameStatslogFile) {
+        trap_FS_Write( "}\n", strlen( "}\n"), level.gameStatslogFile );
+      }
+
+
+
 }
 
 

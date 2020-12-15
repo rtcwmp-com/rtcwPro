@@ -1075,7 +1075,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
 
-
+    endofroundinfo=va( "  .."); // plan to remove this soon.....just safety measure
 
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
@@ -1215,6 +1215,8 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			//else if (g_gametype.integer == GS_PLAYING)
 			if (g_gametype.integer == GS_PLAYING)
 			{
+
+
 				if (g_timelimit.value && !level.warmupTime)
 				{
 					if (level.time - level.startTime >= g_timelimit.value * 60000)
