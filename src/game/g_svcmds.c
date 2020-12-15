@@ -1014,7 +1014,7 @@ void CC_svcvar(void)
 
 	if (trap_Argc() <= 3)
 	{
-		G_Printf("usage: sv_cvar <cvar name> <mode> <value1> <value2>\nexamples: sv_cvar cg_hitsounds EQ 1\n          sv_cvar cl_maxpackets IN 60 125\n");
+		G_Printf("usage: sv_cvar <cvar name> <mode> <value1> <value2>\nexamples: sv_cvar r_rmse EQ 0\n          sv_cvar cl_maxpackets IN 60 125\n");
 		return;
 	}
 	trap_Argv(1, cvarName, sizeof(cvarName));
