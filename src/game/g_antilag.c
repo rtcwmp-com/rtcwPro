@@ -261,8 +261,6 @@ void G_UnTimeShiftAllClients(gentity_t* skip) {
 	}
 }
 
-// sswolf - unused
-#if 0
 void G_AttachBodyParts(gentity_t* ent) {
 	int i;
 	gentity_t   *list;
@@ -315,5 +313,4 @@ void G_HistoricalTrace(gentity_t* ent, trace_t *results, const vec3_t start, con
 		G_DettachBodyParts();
 	return;
 }
-#endif
 
