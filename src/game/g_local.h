@@ -2095,22 +2095,21 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
 
-// come back and do this better...
-#define eventSuicide 0
-#define eventKill 1
-#define eventTeamkill 2
-#define eventRevive 3
-#define eventPause 4
-#define eventUnpause 5
-
-#define objTaken 0
-#define objReturned 1
-#define objCapture 2
-#define objDynPlant 3
-#define objDynDefuse 4
-#define objSpawnFlag 5
-
-
+enum eventList {
+    eventSuicide=0,
+    eventKill,
+    eventTeamkill,
+    eventRevive,
+    eventPause,
+    eventUnpause,
+    objTaken,
+    objReturned,
+    objCapture,
+    objDynPlant,
+    objDynDefuse,
+    objSpawnFlag,
+    objDestroyed
+};
 
 // g_json.c
 void G_stats2JSON(int winner );

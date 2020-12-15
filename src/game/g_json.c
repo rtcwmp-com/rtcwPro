@@ -296,6 +296,9 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     else if (objType == objSpawnFlag) {
         json_object_set_new(jdata, "event",    json_string("ObjSpawnFlagCaptured"));
     }
+    else if (objType == objDestroyed) {
+        json_object_set_new(jdata, "event",    json_string("ObjDestroyed"));
+    }
 
     // json_object_set_new(jdata, "team",    json_string(team));
     json_object_set_new(jdata, "agent",    json_string(agent->client->sess.guid));
@@ -324,7 +327,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
        if (eventType == eventSuicide) {
             json_object_set_new(jdata, "event",    json_string("suicide"));
-            json_object_set_new(jdata, "player",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
        }
        else if (eventType == eventKill) {
             json_object_set_new(jdata, "event",    json_string("kill"));

@@ -576,6 +576,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 // JPW NERVE
 				if ( g_gametype.integer >= GT_WOLF ) {
 					AddScore( player, WOLF_CAPTURE_BONUS );
+					G_writeObjectiveEvent(player, objCapture  );
 				} else {
 // jpw
 					AddScore( player, CTF_CAPTURE_BONUS );
@@ -1444,7 +1445,7 @@ void checkpoint_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 
 	}
 
-    other->client->sess.obj_captured++;
+    //other->client->sess.obj_checkpoint++;
 
 	// Play a sound
 	G_AddEvent( self, EV_GENERAL_SOUND, self->soundPos1 );
@@ -1526,16 +1527,16 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
         //G_writeObjectiveEvent("Axis", "Captured flag", va("%s", other->client->pers.netname)   );
         G_writeObjectiveEvent(other, objSpawnFlag  );
-        //other->client->sess.obj_captured++;
+        //other->client->sess.obj_checkpoint++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
 
         //G_writeObjectiveEvent("Allied", "Captured flag", va("%s", other->client->pers.netname)   );
         G_writeObjectiveEvent(other, objSpawnFlag  );
-        //other->client->sess.obj_captured++;
+        //other->client->sess.obj_checkpoint++;
 	}
 
-    other->client->sess.obj_captured++;
+    //other->client->sess.obj_checkpoint+;
 	// Don't allow touch again until animation is finished
 	self->touch = NULL;
 
