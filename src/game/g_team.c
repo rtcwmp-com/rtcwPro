@@ -548,7 +548,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		AddScore( other, WOLF_CAPTURE_BONUS );
 		PrintMsg( NULL,"%s" S_COLOR_WHITE " captured enemy objective!\n",cl->pers.netname );
 		//G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
-		G_writeObjectiveEvent(cl, objCapture  );
+		G_writeObjectiveEvent(other, objCapture  );
 	} else {
 		AddScore( other, CTF_CAPTURE_BONUS );
 	}

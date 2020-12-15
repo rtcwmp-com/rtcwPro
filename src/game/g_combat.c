@@ -343,19 +343,22 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	/* new stats if (meansOfDeath == MOD_KNIFE2 && g_gamestate.integer == GS_PLAYING) {
 		attacker->client->pers.stats.knife++;
 	}*/
+
 	// If person gets stabbed use custom sound from soundpack
 	// it's broadcasted to victim and heard only if standing near victim...
-	if ( meansOfDeath == MOD_KNIFE_STEALTH && !OnSameTeam(self, attacker) && g_fastStabSound.integer) {
+	if ( (meansOfDeath == MOD_KNIFE_STEALTH || meansOfDeath == MOD_KNIFE) && !OnSameTeam(self, attacker) && g_fastStabSound.integer > 0) {
 		int r = rand() %2;
-		char *snd;
+		char *snd = "goat.wav"; // default
 
-		if (r == 0)
+		if (r == 0 || g_fastStabSound.integer == 1)
 			snd = "goat.wav";
-		else
+		else if (r == 1 || g_fastStabSound.integer == 2)
 			snd = "humiliation.wav";
 
-		APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" :
-			((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
+		APS(va("sound/match/%s", snd));
+
+		//APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" :
+		//	((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
 
 		attacker->client->sess.knifeKills++;
 		//write_RoundStats(attacker->client->pers.netname, attacker->client->pers.stats.knifeStealth, ROUND_FASTSTABS);
@@ -1293,11 +1296,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			targ->health = GIB_HEALTH - 1;
 
 			// gibbed by a nade or other explosion
-			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
 			{
-				attacker->client->sess.gibs++;	//gibbed an enemy
-				attacker->client->pers.life_gibs++;
-			}
+                    attacker->client->sess.gibs++;	//gibbed an enemy
+                    attacker->client->pers.life_gibs++;
+            }
 		}
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
@@ -1310,10 +1313,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 							limbo(targ, qtrue);
 
 							// gibbed by something another player (eg. smg)
-							if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+							if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
 							{
-								attacker->client->sess.gibs++;
-								attacker->client->pers.life_gibs++;
+                                    attacker->client->sess.gibs++;
+                                    attacker->client->pers.life_gibs++;
 							}
 						}
 					// jpw

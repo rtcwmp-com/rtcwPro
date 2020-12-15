@@ -761,7 +761,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	}
 
 	// L0 - connect message
-	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
+	//CP(va( "cp \"%s\n\"2", g_serverMessage.string));  // moved to g_client
 
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
@@ -2702,8 +2702,8 @@ void ClientCommand( int clientNum ) {
 // -OSPx
 	} else if ( Q_stricmp( cmd, "gib" ) == 0 )  {
 		Cmd_Gib_f( ent );
-	} else if (Q_stricmp(cmd, "hitsound") == 0) {
-		Cmd_hitsounds(ent);
+	/*} else if (Q_stricmp(cmd, "hitsound") == 0) {
+		Cmd_hitsounds(ent);*/
 	// End
 	} else if ( Q_stricmp( cmd, "levelshot" ) == 0 )  {
 		Cmd_LevelShot_f( ent );

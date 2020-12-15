@@ -1627,7 +1627,7 @@ extern vmCvar_t sab_maxPingHits;
 extern vmCvar_t sab_censorPenalty;
 extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
-extern vmCvar_t	g_hitsounds;
+//extern vmCvar_t	g_hitsounds;
 extern vmCvar_t	g_crouchRate;
 extern vmCvar_t g_drawHitboxes;
 extern vmCvar_t team_nocontrols;
@@ -2014,7 +2014,7 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp);
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
-void Cmd_hitsounds(gentity_t *ent);
+//void Cmd_hitsounds(gentity_t *ent);
 ///////////////////////
 // g_vote.c
 //
