@@ -74,7 +74,7 @@ void G_stats2JSON(int winner ) {
           //  json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
             json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
             json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
-            json_object_set_new(jdata, "rounds", json_integer(cl->sess.rounds));
+            json_object_set_new(jdata, "num_rounds", json_integer(cl->sess.rounds));
             json_object_set_new(jdata, "kills", json_integer(cl->sess.kills));
             json_object_set_new(jdata, "deaths", json_integer(cl->sess.deaths));
             json_object_set_new(jdata, "gibs", json_integer(cl->sess.gibs));
@@ -195,7 +195,7 @@ void G_writeServerInfo (void){
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
         json_object_set_new(jdata, "map",    json_string(mapName));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
-        json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer)));
+        json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer+1)));
 
         if (level.gameStatslogFile) {
             s = json_dumps( jdata, 1 );
@@ -246,7 +246,10 @@ void G_writeGameInfo (int winner ){
         buf = Info_ValueForKey(cs, "matchid");
         json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
         buf3 = Info_ValueForKey(cs, "round");
-        json_object_set_new(jdata, "round",    json_string(buf3));
+
+        //json_object_set_new(jdata, "round",    json_string(buf3));
+        json_object_set_new(jdata, "round",    json_string(va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2")));
+
         buf2 = Info_ValueForKey(cs, "roundStart");
         json_object_set_new(jdata, "round_start",    json_string(buf2));
         json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
