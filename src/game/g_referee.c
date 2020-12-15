@@ -315,9 +315,10 @@ void G_refPlayerPut_cmd(gentity_t *ent, int team_id) {
 		SetTeam(player, "blue", qtrue); //, -1, -1, qfalse);
 	}
 
-	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
-		G_readyStart(); // ET had G_readyMatchState
-	}
+	// why the hell is this here? issue #178
+	//if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
+	//	G_readyStart(); // ET had G_readyMatchState
+	//}
 }
 
 
