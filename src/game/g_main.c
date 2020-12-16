@@ -1593,8 +1593,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 
 
-                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_map_%s.json", buf,g_currentRound.integer+1,mapName);
-                trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_map_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
+                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
+                trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
                 //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName);
                 //trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName ), &level.gameStatslogFile, FS_WRITE );
                 if ( !level.gameStatslogFile ) {
