@@ -69,6 +69,7 @@
     <ClCompile Include="g_sha1.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha1.c" />
+    <ClCompile Include="g_json.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\botai\ai_chat.h" />

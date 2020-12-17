@@ -584,6 +584,18 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="qcommon\jansson\dump.c" />
+    <ClCompile Include="qcommon\jansson\error.c" />
+    <ClCompile Include="qcommon\jansson\hashtable.c" />
+    <ClCompile Include="qcommon\jansson\hashtable_seed.c" />
+    <ClCompile Include="qcommon\jansson\load.c" />
+    <ClCompile Include="qcommon\jansson\memory.c" />
+    <ClCompile Include="qcommon\jansson\pack_unpack.c" />
+    <ClCompile Include="qcommon\jansson\strbuffer.c" />
+    <ClCompile Include="qcommon\jansson\strconv.c" />
+    <ClCompile Include="qcommon\jansson\utf.c" />
+    <ClCompile Include="qcommon\jansson\value.c" />
+    <ClCompile Include="qcommon\jansson\version.c" />
     <ClCompile Include="qcommon\md4.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
@@ -827,6 +839,14 @@
     <ClInclude Include="qcommon\cm_patch.h" />
     <ClInclude Include="qcommon\cm_polylib.h" />
     <ClInclude Include="qcommon\cm_public.h" />
+    <ClInclude Include="qcommon\jansson\hashtable.h" />
+    <ClInclude Include="qcommon\jansson\jansson.h" />
+    <ClInclude Include="qcommon\jansson\jansson_config.h" />
+    <ClInclude Include="qcommon\jansson\jansson_private.h" />
+    <ClInclude Include="qcommon\jansson\jansson_private_config.h" />
+    <ClInclude Include="qcommon\jansson\lookup3.h" />
+    <ClInclude Include="qcommon\jansson\strbuffer.h" />
+    <ClInclude Include="qcommon\jansson\utf.h" />
     <ClInclude Include="qcommon\qcommon.h" />
     <ClInclude Include="qcommon\qfiles.h" />
     <ClInclude Include="qcommon\unzip.h" />
