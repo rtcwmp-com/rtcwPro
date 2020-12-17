@@ -76,6 +76,11 @@ void G_loadMatchGame(void)
 	level.dwRedReinfOffset  = 1000 * aRandomValues[dwRedOffset] / aReinfSeeds[dwRedOffset];
 
 	trap_SetConfigstring(CS_REINFSEEDS, strReinfSeeds);
+    // write first respawn time
+    if (g_gameStatslog.integer) {
+        gentity_t *dummy;
+        G_writeGeneralEvent(dummy,dummy,"",teamFirstSpawn);
+    }
 }
 /*
 =================

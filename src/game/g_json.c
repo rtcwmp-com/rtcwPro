@@ -164,6 +164,7 @@ void G_writeServerInfo (void){
 	char* s;
 	char mapName[64];
     char newGamestatFile[MAX_QPATH];
+
     FILE		*gsfile;
     time_t unixTime = time(NULL);  // come back and make globally available
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
@@ -210,6 +211,7 @@ void G_writeServerInfo (void){
 
 
         G_writeGameLogStart();  // write necessary json info for gamelog array....will provide better solution later
+
 
 
 }
@@ -359,6 +361,15 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
             json_object_set_new(jdata, "event",   json_string("unpause"));
             json_object_set_new(jdata, "player",  json_string(va("%s",agent->client->sess.guid)));
         }
+        else if (eventType == teamFirstSpawn) {
+            //json_object_set_new(jdata, "event",   json_string("respawnTimer"));
+            json_object_set_new(jdata, "event",   json_string("firstRespawn"));
+            int redRespawnTime = (g_redlimbotime.integer - level.dwRedReinfOffset) / 1000;
+            int blueRespawnTime = (g_bluelimbotime.integer - level.dwBlueReinfOffset) / 1000;
+
+            json_object_set_new(jdata, "Axis",  json_string(va("%ld",unixTime +redRespawnTime)));
+            json_object_set_new(jdata, "Allied",  json_string(va("%ld",unixTime +blueRespawnTime)));
+        }
        // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
 
         if (level.gameStatslogFile) {
@@ -412,22 +423,25 @@ void G_writeGameLogStart(void)
     if (level.gameStatslogFile) {
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
 
-
         //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
         json_object_set_new(jdata, "event",    json_string("round_start"));
         json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
-                s = json_dumps( jdata, 0 );
-                trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
-                json_decref(jdata);
+        s = json_dumps( jdata, 0 );
+        trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+        trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+        json_decref(jdata);
 
-                free(s);
+        free(s);
+
     }
 
 
 }
+
+
+
 
 void G_writeGameLogEnd(char* endofroundinfo)
 {

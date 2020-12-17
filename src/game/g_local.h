@@ -2108,7 +2108,11 @@ enum eventList {
     objDynPlant,
     objDynDefuse,
     objSpawnFlag,
-    objDestroyed
+    objDestroyed,
+    redRespawn,
+    blueRespawn,
+    classChange,
+    teamFirstSpawn,
 };
 
 // g_json.c

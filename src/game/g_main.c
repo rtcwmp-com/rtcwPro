@@ -1573,14 +1573,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 char cs[MAX_STRING_CHARS];
 
                 // we want to save some information for the match and round
-/*
-                trap_GetConfigstring( CS_ROUNDINFO, cs, sizeof( cs ) );
-
-                Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
-                Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
-*/
-
-
                 if (g_currentRound.integer == 1) {
                     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
                     buf = Info_ValueForKey(cs, "matchid");
@@ -1602,6 +1594,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 } else {
                     //G_writeGameInfo();
                     G_writeServerInfo();
+
 
                 }
 
