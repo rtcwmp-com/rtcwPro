@@ -2046,8 +2046,9 @@ void WolfReviveBbox( gentity_t *self ) {
 
 // dhm
 
+// sswolf - patched for the pub head stuff
 void G_DrawHitBoxes(gentity_t* ent) {
-	gentity_t* bboxEnt, * headEnt;
+	gentity_t* bboxEnt;
 	vec3_t b1, b2;
 
 	// Draw body hitbox
@@ -2061,16 +2062,16 @@ void G_DrawHitBoxes(gentity_t* ent) {
 	bboxEnt->s.otherEntityNum2 = ent->s.number;
 
 	// Draw head hitbox
-	headEnt = G_BuildHead(ent);
-	VectorCopy(headEnt->r.currentOrigin, b1);
-	VectorCopy(headEnt->r.currentOrigin, b2);
-	VectorAdd(b1, headEnt->r.mins, b1);
-	VectorAdd(b2, headEnt->r.maxs, b2);
+	UpdateHeadEntity(ent);
+	VectorCopy(ent->head->r.currentOrigin, b1);
+	VectorCopy(ent->head->r.currentOrigin, b2);
+	VectorAdd(b1, ent->head->r.mins, b1);
+	VectorAdd(b2, ent->head->r.maxs, b2);
 	bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
 	VectorCopy(b2, bboxEnt->s.origin2);
 	bboxEnt->s.dmgFlags = 1;
 	bboxEnt->s.otherEntityNum2 = ent->s.number;
-	G_FreeEntity(headEnt);
+	RemoveHeadEntity(ent);
 }
 
 /*
