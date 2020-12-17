@@ -78,7 +78,8 @@ void G_loadMatchGame(void)
 	trap_SetConfigstring(CS_REINFSEEDS, strReinfSeeds);
     // write first respawn time
     if (g_gameStatslog.integer) {
-        gentity_t *dummy;
+        gentity_t *dummy = g_entities;
+
         G_writeGeneralEvent(dummy,dummy,"",teamFirstSpawn);
     }
 }
