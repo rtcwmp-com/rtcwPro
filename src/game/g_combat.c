@@ -1074,11 +1074,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			targ->health = GIB_HEALTH - 1;
 
 			// gibbed by a nade or other explosion
-			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
+			/*if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
 			{
                     attacker->client->sess.gibs++;	//gibbed an enemy
                     attacker->client->pers.life_gibs++;
-            }
+            }*/
 		}
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
@@ -1086,17 +1086,19 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			if (client) {
 				targ->flags |= FL_NO_KNOCKBACK;
 				if (g_gametype.integer >= GT_WOLF) {
-						// JPW NERVE -- repeated shooting sends to limbo
-						if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
-							limbo(targ, qtrue);
 
-							// gibbed by something another player (eg. smg)
-							if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
-							{
-                                    attacker->client->sess.gibs++;
-                                    attacker->client->pers.life_gibs++;
-							}
-						}
+					// do gib counting before sending them to limbo
+					if ((targ->health <= FORCE_LIMBO_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO)
+						&& attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP))) //do not add gibs to stats during warmup.
+					{
+						attacker->client->sess.gibs++;
+						attacker->client->pers.life_gibs++;
+					}
+
+					// JPW NERVE -- repeated shooting sends to limbo
+					if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
+						limbo(targ, qtrue);
+					}
 					// jpw
 				}
 			}
