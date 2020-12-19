@@ -451,6 +451,7 @@ NET_CompareBaseAdr
 Compares without the port
 ===================
 */
+/*
 qboolean    NET_CompareBaseAdr( netadr_t a, netadr_t b ) {
 	if ( a.type != b.type ) {
 		return qfalse;
@@ -478,7 +479,8 @@ qboolean    NET_CompareBaseAdr( netadr_t a, netadr_t b ) {
 	Com_Printf( "NET_CompareBaseAdr: bad address type\n" );
 	return qfalse;
 }
-
+*/
+/*
 const char  *NET_AdrToString( netadr_t a ) {
 	static char s[64];
 
@@ -497,7 +499,8 @@ const char  *NET_AdrToString( netadr_t a ) {
 
 	return s;
 }
-
+*/
+/*
 
 qboolean    NET_CompareAdr( netadr_t a, netadr_t b ) {
 	if ( a.type != b.type ) {
@@ -531,7 +534,7 @@ qboolean    NET_IsLocalAddress( netadr_t adr ) {
 	return adr.type == NA_LOOPBACK;
 }
 
-
+*/
 
 /*
 =============================================================================

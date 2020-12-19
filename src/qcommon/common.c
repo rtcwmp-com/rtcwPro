@@ -75,8 +75,6 @@ cvar_t  *com_introPlayed;
 cvar_t  *cl_paused;
 cvar_t  *sv_paused;
 cvar_t  *com_cameraMode;
-// new stuff for iortcw port of server defined dl rates
-cvar_t  *sv_dlRate;
 cvar_t	*com_unfocused;
 cvar_t	*com_maxfpsUnfocused;
 cvar_t	*com_minimized;
@@ -2517,7 +2515,7 @@ void Com_Init( char *commandLine ) {
 	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
-    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
+    //sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
 
 
 	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
@@ -2743,7 +2741,25 @@ int Com_ModifyMsec( int msec ) {
 
 	return msec;
 }
+/*
+=================
+Com_TimeVal
+=================
+*/
 
+int Com_TimeVal(int minMsec)
+{
+	int timeVal;
+
+	timeVal = Sys_Milliseconds() - com_frameTime;
+
+	if(timeVal >= minMsec)
+		timeVal = 0;
+	else
+		timeVal = minMsec - timeVal;
+
+	return timeVal;
+}
 /*
 =================
 Com_Frame
@@ -2759,28 +2775,21 @@ void Com_Frame( void ) {
 
 	int key;
 
-	int		msec, minMsec;
-	int		timeVal;
-	int		numBlocks = 1;
-	int		dlStart, deltaT, delayT;
-	static int	dlNextRound = 0;
+	int msec, minMsec;
+	int		timeVal, timeValSV;
 	static int	lastTime = 0, bias = 0;
 
-	int		timeBeforeFirstEvents;
-	int		timeBeforeServer;
-	int		timeBeforeEvents;
-	int		timeBeforeClient;
-	int		timeAfter;
-
-
+	int timeBeforeFirstEvents;
+	int timeBeforeServer;
+	int timeBeforeEvents;
+	int timeBeforeClient;
+	int timeAfter;
 
 
 	if ( setjmp( abortframe ) ) {
 		return;         // an ERR_DROP was thrown
 	}
 
-	// bk001204 - init to zero.
-	//  also:  might be clobbered by `longjmp' or `vfork'
 	timeBeforeFirstEvents = 0;
 	timeBeforeServer = 0;
 	timeBeforeEvents = 0;
@@ -2788,18 +2797,18 @@ void Com_Frame( void ) {
 	timeAfter = 0;
 
 
-	// old net chan encryption key
-	key = 0x87243987;
-
 	// DHM - Nerve :: Don't write config on Update Server
 #ifndef UPDATE_SERVER
 	// write config file if anything changed
 	Com_WriteConfiguration();
 #endif
-	if ( com_speeds->integer ) {
-		timeBeforeFirstEvents = Sys_Milliseconds ();
-	}
 
+	//
+	// main event loop
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeFirstEvents = Sys_Milliseconds();
+	}
 
 	// Figure out how much time we have
 	if(!com_timedemo->integer)
@@ -2831,110 +2840,39 @@ void Com_Frame( void ) {
 	else
 		minMsec = 1;
 
-	timeVal = 0;
-
-
 	do
 	{
-#ifdef _WIN32     // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
-		com_frameTime = Com_EventLoop();
-		if (lastTime > com_frameTime) {
-			lastTime = com_frameTime;
+		if(com_sv_running->integer)
+		{
+			timeValSV = SV_SendQueuedPackets();
+
+			timeVal = Com_TimeVal(minMsec);
+
+			if(timeValSV < timeVal)
+				timeVal = timeValSV;
 		}
-#endif
-			// Busy sleep the last millisecond for better timeout precision
-			if (timeVal < 2) {
-				NET_Sleep(0);
-			}
-			else
-			{
-
-				if (com_sv_running->integer)
-				{
-					// Send out download messages now that we're idle
-					if (sv_dlRate->integer)
-					{
-						// Rate limiting. This is very imprecise for high
-						// download rates due to millisecond timedelta resolution
-						dlStart = Sys_Milliseconds();
-						deltaT = dlNextRound - dlStart;
-						if (deltaT > 0)
-						{
-							if (deltaT < timeVal)
-								timeVal = deltaT + 1;
-						}
-						else
-						{
-							numBlocks = SV_SendDownloadMessages();
-							if (numBlocks)
-							{
-								// There are active downloads
-								deltaT = Sys_Milliseconds() - dlStart;
-
-								delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
-								delayT /= sv_dlRate->integer * 1024;
-
-								if (delayT <= deltaT + 1)
-								{
-									// Sending the last round of download messages
-									// took too long for given rate, don't wait for
-									// next round, but always enforce a 1ms delay
-									// between DL message rounds so we don't hog
-									// all of the bandwidth. This will result in an
-									// effective maximum rate of 1MB/s per user, but the
-									// low download window size limits this anyways.
-									timeVal = 2;
-									dlNextRound = dlStart + deltaT + 1;
-								}
-								else
-								{
-									dlNextRound = dlStart + delayT;
-									timeVal = delayT - deltaT;
-								}
-							}
-						}
-					}
-					else {
-						SV_SendDownloadMessages();
-					}
-				}
-
-				if (com_busyWait->integer) {
-					NET_Sleep(0);
-				}
-				else {
-					NET_Sleep(timeVal - 1);
-				}
-			}
-#ifdef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
-			msec = com_frameTime - lastTime;
-#else
-			msec = Sys_Milliseconds() - com_frameTime;
-#endif
-		if(msec >= minMsec)
-			timeVal = 0;
 		else
-			timeVal = minMsec - msec;
+			timeVal = Com_TimeVal(minMsec);
 
-	} while(timeVal > 0);
-
+		if(com_busyWait->integer || timeVal < 1)
+			NET_Sleep(0);
+		else
+			NET_Sleep(timeVal - 1);
+	} while(Com_TimeVal(minMsec));
 
 	lastTime = com_frameTime;
 	com_frameTime = Com_EventLoop();
-#ifndef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+
 	msec = com_frameTime - lastTime;
-#endif
 
-
-	Cbuf_Execute ();
+	Cbuf_Execute();
 /*
 	if (com_altivec->modified)
 	{
 		Com_DetectAltivec();
 		com_altivec->modified = qfalse;
 	}
-	*/
-
+*/
 	// mess with msec if needed
 	msec = Com_ModifyMsec(msec);
 
@@ -2942,9 +2880,8 @@ void Com_Frame( void ) {
 	// server side
 	//
 	if ( com_speeds->integer ) {
-		timeBeforeServer = Sys_Milliseconds ();
+		timeBeforeServer = Sys_Milliseconds();
 	}
-
 
 	SV_Frame( msec );
 
@@ -2962,33 +2899,32 @@ void Com_Frame( void ) {
 		}
 	}
 
-	#ifndef DEDICATED
+#ifndef DEDICATED
 	//
 	// client system
 	//
-	if ( !com_dedicated->integer ) {
-		//
-		// run event loop a second time to get server to client packets
-		// without a frame of latency
-		//
-		if ( com_speeds->integer ) {
-			timeBeforeEvents = Sys_Milliseconds();
-		}
-		Com_EventLoop();
-		Cbuf_Execute();
+	//
+	// run event loop a second time to get server to client packets
+	// without a frame of latency
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeEvents = Sys_Milliseconds ();
+	}
+	Com_EventLoop();
+	Cbuf_Execute ();
 
-		//
-		// client side
-		//
-		if ( com_speeds->integer ) {
-			timeBeforeClient = Sys_Milliseconds();
-		}
 
-		CL_Frame( msec );
+	//
+	// client side
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeClient = Sys_Milliseconds ();
+	}
 
-		if ( com_speeds->integer ) {
-			timeAfter = Sys_Milliseconds();
-		}
+	CL_Frame( msec );
+
+	if ( com_speeds->integer ) {
+		timeAfter = Sys_Milliseconds ();
 	}
 #else
 	if ( com_speeds->integer ) {
@@ -2997,6 +2933,9 @@ void Com_Frame( void ) {
 		timeBeforeClient = timeAfter;
 	}
 #endif
+
+
+
     NET_FlushPacketQueue();
 	//
 	// report timing information
@@ -3036,6 +2975,7 @@ void Com_Frame( void ) {
 
 	com_frameNumber++;
 }
+
 
 /*
 =================

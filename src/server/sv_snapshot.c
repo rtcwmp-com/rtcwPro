@@ -632,8 +632,9 @@ to take to clear, based on the current rate
 TTimo - use sv_maxRate or sv_dl_maxRate depending on regular or downloading client
 ====================
 */
+/*
 #define HEADER_RATE_BYTES   48      // include our header, IP header, and some overhead
-static int SV_RateMsec( client_t *client, int messageSize ) {
+int SV_RateMsec( client_t *client, int messageSize ) {
 	int rate;
 	int rateMsec;
 	int maxRate;
@@ -663,7 +664,7 @@ static int SV_RateMsec( client_t *client, int messageSize ) {
 
 	return rateMsec;
 }
-
+*/
 /*
 =======================
 SV_SendMessageToClient
@@ -693,7 +694,8 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 	}
 
 	// normal rate / snapshotMsec calculation
-	rateMsec = SV_RateMsec( client, msg->cursize );
+	//rateMsec = SV_RateMsec( client, msg->cursize );
+	rateMsec = SV_RateMsec( client );
 
 	// TTimo - during a download, ignore the snapshotMsec
 	// the update server on steroids, with this disabled and sv_fps 60, the download can reach 30 kb/s
@@ -803,7 +805,8 @@ void SV_SendClientMessages( void ) {
 		// was too large to send at once
 		if ( c->netchan.unsentFragments ) {
 			c->nextSnapshotTime = svs.time +
-								  SV_RateMsec( c, c->netchan.unsentLength - c->netchan.unsentFragmentStart );
+                                    SV_RateMsec( c);
+								  //SV_RateMsec( c, c->netchan.unsentLength - c->netchan.unsentFragmentStart );
 			SV_Netchan_TransmitNextFragment( c );
 			continue;
 		}
