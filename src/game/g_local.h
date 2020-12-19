@@ -2116,7 +2116,10 @@ enum eventList {
 };
 
 // g_json.c
-void G_stats2JSON(int winner );
+void G_jstatsByTeam();
+void G_jstatsByPlayers();
+void G_jWeaponStats();
+
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);
 void G_writeDisconnectEvent (gentity_t* agent);
