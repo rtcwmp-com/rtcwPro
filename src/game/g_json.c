@@ -67,7 +67,7 @@ void G_jstatsByPlayers() {
             json_object_set_new(jdata, "alias", json_string(n2));
             json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
             json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
-            json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
+           // json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
             json_object_set_new(jdata, "num_rounds", json_integer(cl->sess.rounds));
 
             jcat = json_object();
@@ -133,10 +133,10 @@ void G_jstatsByPlayers() {
         s = json_dumps( jstats, 1 ); // for a pretty print form
 
         if (level.gameStatslogFile && g_gameStatslog.integer) {
-            trap_FS_Write( "\"players\": ", strlen( "\"players\": " ), level.gameStatslogFile );
+            trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.gameStatslogFile );
             trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-
-            trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+            trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );  // for writing weapon stats after
+            //trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile ); // for keeping weapon stats in playerstats
             free( s );
         }
         else {   // forget the comments above and write it to original test json file :)
@@ -209,7 +209,7 @@ void G_jstatsByTeam() {
             json_object_set_new(jdata, "alias", json_string(n2));
           //  json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
             json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
-            json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
+            //json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
             json_object_set_new(jdata, "num_rounds", json_integer(cl->sess.rounds));
             json_object_set_new(jdata, "kills", json_integer(cl->sess.kills));
             json_object_set_new(jdata, "deaths", json_integer(cl->sess.deaths));
@@ -271,10 +271,10 @@ void G_jstatsByTeam() {
         s = json_dumps( jteam, 1 ); // for a pretty print form
 
         if (level.gameStatslogFile && g_gameStatslog.integer) {
-            trap_FS_Write( "\"players\": ", strlen( "\"players\": " ), level.gameStatslogFile );
+            trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.gameStatslogFile );
             trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
-
-            trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
+            trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );  // for writing weapon stats after
+            //trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile ); // for keeping weapon stats in playerstats
             free( s );
         }
         else {   // forget the comments above and write it to original test json file :)
@@ -413,6 +413,7 @@ void G_writeServerInfo (void){
 
     Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
     Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
+    Info_SetValueForKey( cs, "timelimit", va("%s",GetLevelTime()));
 
     if (g_currentRound.integer == 0) {
         Info_SetValueForKey( cs, "matchid", va("%ld", unixTime) );
@@ -427,10 +428,10 @@ void G_writeServerInfo (void){
         json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
         //json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig)));  // use level.config hash
         json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
-        json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
+      //  json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
-        json_object_set_new(jdata, "map",    json_string(mapName));
-        json_object_set_new(jdata, "time_limit",    json_string(GetLevelTime()));
+      //  json_object_set_new(jdata, "map",    json_string(mapName));
+     //   json_object_set_new(jdata, "time_limit",    json_string(GetLevelTime()));
         //json_object_set_new(jdata, "round",    json_string(va("%i",g_currentRound.integer+1)));
 
         if (level.gameStatslogFile) {
@@ -468,14 +469,13 @@ void G_writeGameInfo (int winner ){
     char *buf;
     char *buf2;
     char *buf3;
+    char *buf4;
     char cs[MAX_STRING_CHARS];
 
     FILE		*gsfile;
     time_t unixTime = time(NULL);  // come back and make globally available
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
 
-	qtime_t ct;
-	trap_RealTime(&ct);
 
     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
 
@@ -490,8 +490,17 @@ void G_writeGameInfo (int winner ){
         buf2 = Info_ValueForKey(cs, "roundStart");
         json_object_set_new(jdata, "round_start",    json_string(buf2));
         json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
+        json_object_set_new(jdata, "map",    json_string(mapName));
+        buf4 = Info_ValueForKey(cs, "timelimit");
+        json_object_set_new(jdata, "time_limit",    json_string(buf4));
        // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+
+       // note we want to write the winner on the second round but since this is called at
+       // the end of each round we only write out when g_currentRound = 0
+       if (g_currentRound.integer == 0) {
         json_object_set_new(jdata, "winner",    json_string(va("%s", (winner == 0) ? "Axis" : "Allied")));
+
+        }
         if (level.gameStatslogFile) {
             s = json_dumps( jdata, 1 );
             trap_FS_Write( "\"gameinfo\": \n", strlen( "\"gameinfo\": \n" ), level.gameStatslogFile );
