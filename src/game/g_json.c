@@ -99,7 +99,8 @@ void G_jstatsByPlayers() {
             json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
-
+// todo: include argument to include wstats here or separately
+/*
             weapArray = json_array();
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
@@ -117,10 +118,11 @@ void G_jstatsByPlayers() {
                         json_decref(weapOb);
                 }
             }
+*/
             json_object_set(jdata, "categories", jcat);
-            json_object_set(jdata, "wstats", weapArray);
+//            json_object_set(jdata, "wstats", weapArray);
             json_object_set(jplayer, pGUID, jdata);
-            json_decref(weapArray);
+//            json_decref(weapArray);
             json_decref(jcat);
             json_decref(jdata);
 
@@ -148,6 +150,8 @@ void G_jstatsByPlayers() {
 
 
         json_decref( root );
+ // todo: include argument to include wstats here or separately
+        G_jWeaponStats(); // write weapon stats separately
 }
 
 /*
@@ -238,7 +242,8 @@ void G_jstatsByTeam() {
             json_object_set_new(jdata, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jdata, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jdata, "obj_taken", json_integer(cl->sess.obj_taken));
-
+// todo: include argument to include wstats here or separately
+/*
             weapArray = json_array();
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
@@ -258,8 +263,9 @@ void G_jstatsByTeam() {
             }
 
             json_object_set(jdata, "wstats", weapArray);
+*/
             json_object_set(jplayer, pGUID, jdata);
-            json_decref(weapArray);
+//            json_decref(weapArray);
             json_decref(jdata);
 
         }
@@ -286,6 +292,9 @@ void G_jstatsByTeam() {
 
 
         json_decref( root );
+
+// todo: include argument to include wstats here or separately
+        G_jWeaponStats(); // write weapon stats separately
 }
 
 /*
@@ -565,7 +574,7 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     level.eventNum++;
 }
 
-
+// using switches would probably be better idea .... oh well ... for now
 
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType){
     char* s;
