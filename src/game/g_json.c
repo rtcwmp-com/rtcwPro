@@ -502,13 +502,19 @@ void G_writeGameInfo (int winner ){
         json_object_set_new(jdata, "map",    json_string(mapName));
         buf4 = Info_ValueForKey(cs, "timelimit");
         json_object_set_new(jdata, "time_limit",    json_string(buf4));
+
+        json_object_set_new(jdata, "allies_cycle",    json_string(va("%i",g_bluelimbotime.integer / 1000)));
+        json_object_set_new(jdata, "axis_cycle",    json_string(va("%i",g_redlimbotime.integer / 1000)));
+
        // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
 
        // note we want to write the winner on the second round but since this is called at
        // the end of each round we only write out when g_currentRound = 0
        if (g_currentRound.integer == 0) {
         json_object_set_new(jdata, "winner",    json_string(va("%s", (winner == 0) ? "Axis" : "Allied")));
-
+        }
+       else {
+            json_object_set_new(jdata, "winner",    json_string(" "));
         }
         if (level.gameStatslogFile) {
             s = json_dumps( jdata, 1 );
@@ -536,26 +542,28 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
 
     json_t *eventStats =  json_array();
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+    json_object_set_new(jdata, "group",    json_string("player"));
     if (objType == objReturned) {
-        json_object_set_new(jdata, "event",    json_string("ObjReturned"));
+
+        json_object_set_new(jdata, "label",    json_string("ObjReturned"));
     }
     else if (objType == objTaken) {
-        json_object_set_new(jdata, "event",    json_string("ObjTaken"));
+        json_object_set_new(jdata, "label",    json_string("ObjTaken"));
     }
     else if (objType == objCapture) {
-        json_object_set_new(jdata, "event",    json_string("ObjCapture"));
+        json_object_set_new(jdata, "label",    json_string("ObjCapture"));
     }
     else if (objType == objDynDefuse) {
-        json_object_set_new(jdata, "event",    json_string("ObjDynDefused"));
+        json_object_set_new(jdata, "label",    json_string("ObjDynDefused"));
     }
     else if (objType == objDynPlant) {
-        json_object_set_new(jdata, "event",    json_string("ObjDynPlanted"));
+        json_object_set_new(jdata, "label",    json_string("ObjDynPlanted"));
     }
     else if (objType == objSpawnFlag) {
-        json_object_set_new(jdata, "event",    json_string("ObjSpawnFlagCaptured"));
+        json_object_set_new(jdata, "label",    json_string("ObjSpawnFlagCaptured"));
     }
     else if (objType == objDestroyed) {
-        json_object_set_new(jdata, "event",    json_string("ObjDestroyed"));
+        json_object_set_new(jdata, "label",    json_string("ObjDestroyed"));
     }
 
     // json_object_set_new(jdata, "team",    json_string(team));
@@ -584,39 +592,46 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
        // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
        if (eventType == eventSuicide) {
-            json_object_set_new(jdata, "event",    json_string("suicide"));
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",    json_string("suicide"));
             json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
        }
        else if (eventType == eventKill) {
-            json_object_set_new(jdata, "event",    json_string("kill"));
-            json_object_set_new(jdata, "killer",    json_string(va("%s",agent->client->sess.guid)));
-            json_object_set_new(jdata, "victim",    json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",    json_string("kill"));
+            json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
             json_object_set_new(jdata, "weapon",    json_string(weapon));
             json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
         }
        else if (eventType == eventTeamkill) {
-            json_object_set_new(jdata, "event",    json_string("teamkill"));
-            json_object_set_new(jdata, "killer",    json_string(va("%s",agent->client->sess.guid)));
-            json_object_set_new(jdata, "victim",    json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",    json_string("teamkill"));
+            json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
             json_object_set_new(jdata, "weapon",    json_string(weapon));
             json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
         }
         else if (eventType == eventRevive) {
-            json_object_set_new(jdata, "event",   json_string("revive"));
-            json_object_set_new(jdata, "revived",  json_string(va("%s",agent->client->sess.guid)));
-            json_object_set_new(jdata, "reviver",  json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",   json_string("revive"));
+            json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",  json_string(va("%s",other->client->sess.guid)));
         }
         else if (eventType == eventPause) {
-            json_object_set_new(jdata, "event",   json_string("pause"));
-            json_object_set_new(jdata, "player",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("pause"));
+            json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->sess.guid)));
         }
         else if (eventType == eventUnpause) {
-            json_object_set_new(jdata, "event",   json_string("unpause"));
-            json_object_set_new(jdata, "player",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("unpause"));
+            json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->sess.guid)));
         }
         else if (eventType == teamFirstSpawn) {
             //json_object_set_new(jdata, "event",   json_string("respawnTimer"));
-            json_object_set_new(jdata, "event",   json_string("firstRespawn"));
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("firstRespawn"));
             int redRespawnTime = (g_redlimbotime.integer - level.dwRedReinfOffset) / 1000;
             int blueRespawnTime = (g_bluelimbotime.integer - level.dwBlueReinfOffset) / 1000;
 
@@ -641,9 +656,10 @@ void G_writeDisconnectEvent (gentity_t* agent){
     json_t *jdata = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
        // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-        json_object_set_new(jdata, "event",    json_string("disconnect"));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
-        json_object_set_new(jdata, "player",    json_string(va("%s",agent->client->sess.guid)));
+        json_object_set_new(jdata, "group",    json_string("player"));
+        json_object_set_new(jdata, "label",    json_string("disconnect"));
+        json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
         if (level.gameStatslogFile) {
                 s = json_dumps( jdata, 0 );
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
@@ -675,11 +691,12 @@ void G_writeGameLogStart(void)
     time_t unixTime = time(NULL);  // come back and make globally available
     if (level.gameStatslogFile) {
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
-
-        //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-        json_object_set_new(jdata, "event",    json_string("round_start"));
-        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+        //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+         json_object_set_new(jdata, "group",    json_string("server"));
+        json_object_set_new(jdata, "label",    json_string("round_start"));
+     //   json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+
 
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
@@ -703,11 +720,13 @@ void G_writeGameLogEnd(char* endofroundinfo)
     json_t *event = json_object();
      time_t unixTime = time(NULL);  // come back and make globally available
         json_t *eventStats =  json_array();
+        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
        // json_object_set_new(jdata, "timestamp",    json_string(" "));
         //json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
-        json_object_set_new(jdata, "event",    json_string("round_end"));
-        json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
-        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+        json_object_set_new(jdata, "group",    json_string("server"));
+        json_object_set_new(jdata, "label",    json_string("round_end"));
+     //   json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+
        // json_object_set_new(jdata, "result",    json_string(endofroundinfo));
         if (level.gameStatslogFile) {
                 s = json_dumps( jdata, 0 );
