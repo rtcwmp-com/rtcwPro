@@ -1246,13 +1246,25 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 		}
 	}
    // if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
+
+   // this will all be redone in a much more efficient way but since time is limited and with no real direction...it is done the lazy way
     if (g_gameStatslog.integer) {
+        qboolean wstats;
+        wstats = ((g_gameStatslog.integer & JSON_WSTAT) ? qtrue : qfalse);
         G_writeGameLogEnd(endofroundinfo);  // write last event and close the gamelog array...will provide better solution later
         G_writeGameInfo(winner);  // write out the game info relating to the match & round
-        G_stats2JSON(winner); // write out the player stats
+
+        if (g_gameStatslog.integer & JSON_TEAM) {
+            G_jstatsByTeam(wstats); // write out the player stats
+        }
+        else {
+            G_jstatsByPlayers(wstats);  // write out player stats
+        }
+
         G_writeClosingJson();  // need a closing bracket....will provide better solution later
 
     }
+
 }
 // temp fix for cg_autoaction issue
 void G_matchClockDump( gentity_t *ent ) {

@@ -1,7 +1,7 @@
 #include "g_local.h"
 #include "g_stats.h"
-#include <jansson.h>
-//#include "../qcommon/jansson/jansson.h"
+//#include <jansson.h>
+#include "../qcommon/jansson/jansson.h"
 #include <time.h>
 // send/receive to json server: only need to include a few additional functions
 //   although tested and works.....not necessary until we
@@ -15,7 +15,7 @@ Output the end of round stats in Json format with player array...
 ===========
 */
 
-void G_jstatsByPlayers() {
+void G_jstatsByPlayers(qboolean wstats) {
 
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
@@ -99,8 +99,8 @@ void G_jstatsByPlayers() {
             json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
-// todo: include argument to include wstats here or separately
-/*
+
+
             weapArray = json_array();
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
@@ -118,11 +118,20 @@ void G_jstatsByPlayers() {
                         json_decref(weapOb);
                 }
             }
-*/
+
+
             json_object_set(jdata, "categories", jcat);
-//            json_object_set(jdata, "wstats", weapArray);
-            json_object_set(jplayer, pGUID, jdata);
-//            json_decref(weapArray);
+
+            if (wstats) {
+                json_object_set(jdata, "wstats", weapArray);
+                json_object_set(jplayer, pGUID, jdata);
+                json_decref(weapArray);
+            }
+            else {
+                json_object_set(jplayer, pGUID, jdata);
+            }
+
+
             json_decref(jcat);
             json_decref(jdata);
 
@@ -150,8 +159,9 @@ void G_jstatsByPlayers() {
 
 
         json_decref( root );
- // todo: include argument to include wstats here or separately
-        G_jWeaponStats(); // write weapon stats separately
+        if (!wstats) {// write weapon stats separately
+            G_jWeaponStats();
+        }
 }
 
 /*
@@ -162,7 +172,7 @@ Output the end of round stats in Json format with team array ...
 ===========
 */
 
-void G_jstatsByTeam() {
+void G_jstatsByTeam(qboolean wstats) {
 
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
@@ -242,8 +252,7 @@ void G_jstatsByTeam() {
             json_object_set_new(jdata, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jdata, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jdata, "obj_taken", json_integer(cl->sess.obj_taken));
-// todo: include argument to include wstats here or separately
-/*
+
             weapArray = json_array();
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
@@ -262,10 +271,15 @@ void G_jstatsByTeam() {
                 }
             }
 
-            json_object_set(jdata, "wstats", weapArray);
-*/
-            json_object_set(jplayer, pGUID, jdata);
-//            json_decref(weapArray);
+            if (wstats) {  // include wstats with player stats
+                json_object_set(jdata, "wstats", weapArray);
+                json_object_set(jplayer, pGUID, jdata);
+                json_decref(weapArray);
+            }
+            else {
+                json_object_set(jplayer, pGUID, jdata);
+            }
+
             json_decref(jdata);
 
         }
@@ -293,8 +307,9 @@ void G_jstatsByTeam() {
 
         json_decref( root );
 
-// todo: include argument to include wstats here or separately
-        G_jWeaponStats(); // write weapon stats separately
+        if (!wstats) {// write weapon stats separately
+            G_jWeaponStats();
+        }
 }
 
 /*
@@ -305,7 +320,7 @@ Output the weapon stats for each player
 ===========
 */
 
-void G_jWeaponStats() {
+void G_jWeaponStats(void) {
 
     int i, j, eff,rc;
 	char* s;
@@ -435,6 +450,7 @@ void G_writeServerInfo (void){
         json_object_set_new(jdata, "serverIP",    json_string(""));
         json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
         json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
+        json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i",g_gameStatslog.integer)));
         //json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig)));  // use level.config hash
         json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
       //  json_object_set_new(jdata, "date",    json_string(va("%02d:%02d:%02d (%02d /%d /%d)", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year )));

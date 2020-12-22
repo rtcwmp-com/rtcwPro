@@ -2094,7 +2094,7 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
-
+// json stat stuff
 enum eventList {
     eventSuicide=0,
     eventKill,
@@ -2114,11 +2114,17 @@ enum eventList {
     classChange,
     teamFirstSpawn,
 };
+// for different json output
+#define JSON_STAT 1   // output stats
+#define JSON_WSTAT 2  // output wstats in player stats
+#define JSON_CATEGORIES 4  // output player stats in categories
+#define JSON_TEAM 8  // output player stats by team
+
 
 // g_json.c
-void G_jstatsByTeam();
-void G_jstatsByPlayers();
-void G_jWeaponStats();
+void G_jstatsByTeam(qboolean wstats);
+void G_jstatsByPlayers(qboolean wstats);
+void G_jWeaponStats(void);
 
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);

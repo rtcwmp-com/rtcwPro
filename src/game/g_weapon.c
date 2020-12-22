@@ -605,7 +605,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-							G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
+						//	G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
 //	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
