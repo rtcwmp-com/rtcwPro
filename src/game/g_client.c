@@ -1803,6 +1803,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
 			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", oldname,
 											client->pers.netname ) );
+
+            if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) {
+                G_writeGeneralEvent (ent,ent, " ", eventNameChange);
+            }
+
 		}
 	}
 
@@ -1827,6 +1832,10 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	// DHM - Nerve :: Forcibly set both model and skin for multiplayer.
 	if ( g_gametype.integer >= GT_WOLF ) {
+
+
+
+
 
 		// To communicate it to cgame
 		client->ps.stats[ STAT_PLAYER_CLASS ] = client->sess.playerType;
@@ -1951,6 +1960,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
 	G_DPrintf( "ClientUserinfoChanged: %i :: %s\n", clientNum, s );
+
 }
 
 
@@ -2485,6 +2495,10 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 			if ( update ) {
 				ClientUserinfoChanged( index );
+
+                if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING) ) {
+                    G_writeGeneralEvent (ent,ent, " ", eventClassChange);
+                }
 			}
 		}
 

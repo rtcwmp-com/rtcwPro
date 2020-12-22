@@ -654,7 +654,18 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
             json_object_set_new(jdata, "Axis",  json_string(va("%ld",unixTime +redRespawnTime)));
             json_object_set_new(jdata, "Allied",  json_string(va("%ld",unixTime +blueRespawnTime)));
         }
-       // json_object_set_new(jdata, "levelTime",    json_string(GetLevelTime()));
+        else if (eventType == eventClassChange) {
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",   json_string("class_change"));
+            json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",  json_string(va("%i",agent->client->sess.playerType)));
+        }
+        else if (eventType == eventNameChange) {
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",   json_string("name_change"));
+            json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->pers.netname)));
+        }
 
         if (level.gameStatslogFile) {
                 s = json_dumps( jdata, 0 );

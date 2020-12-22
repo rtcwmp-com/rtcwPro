@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
 //#define GAMEVERSION "RtcwPro 1.0 beta"
-#define JSONGAMESTATVERSION "0.1"
+#define JSONGAMESTATVERSION "0.1.1"
 
 // done.
 
@@ -2102,6 +2102,8 @@ enum eventList {
     eventRevive,
     eventPause,
     eventUnpause,
+    eventClassChange,
+    eventNameChange,
     objTaken,
     objReturned,
     objCapture,
@@ -2111,7 +2113,6 @@ enum eventList {
     objDestroyed,
     redRespawn,
     blueRespawn,
-    classChange,
     teamFirstSpawn,
 };
 // for different json output
