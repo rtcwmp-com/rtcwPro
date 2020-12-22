@@ -958,8 +958,7 @@ G_UpdateSvCvars
 */
 void G_UpdateSvCvars(void)
 {
-//	char cs[MAX_INFO_STRING];
- 	char cs[BIG_INFO_STRING];  
+	char cs[MAX_INFO_STRING];
 	int  i;
 
 	cs[0] = '\0';
