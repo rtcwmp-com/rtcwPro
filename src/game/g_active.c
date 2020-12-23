@@ -364,8 +364,7 @@ void    G_TouchTriggers( gentity_t *ent ) {
 =================
 sswolf - follow clients in freecam
 by aiming/shooting at them
-Note: using hisotircal trace
-to compensate
+Note: using generic tracing
 
 Credits: ETLegacy and rtcwPub
 G_SpectatorAttackFollow
@@ -398,8 +397,8 @@ qboolean G_SpectatorAttackFollow(gentity_t* ent)
 	// also put the start-point a bit forward, so we don't start the trace in solid..
 	VectorMA(start, 75.0f, forward, start);
 
-	//trap_Trace(&tr, start, mins, maxs, end, ent->client->ps.clientNum, CONTENTS_BODY | CONTENTS_CORPSE);
-	G_HistoricalTrace(ent, &tr, start, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE);
+	trap_Trace(&tr, start, mins, maxs, end, ent->client->ps.clientNum, CONTENTS_BODY | CONTENTS_CORPSE);
+	//G_HistoricalTrace(ent, &tr, start, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE);
 
 	if ((&g_entities[tr.entityNum])->client)
 	{
