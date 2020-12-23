@@ -69,11 +69,11 @@ static qboolean	winsockInitialized = qfalse;
 #	include <netinet/in.h>
 #	include <arpa/inet.h>
 #	include <net/if.h>
-#	include <netinet/in.h>
 #	include <sys/ioctl.h>
 #	include <sys/types.h>
 #	include <sys/time.h>
 #	include <unistd.h>
+
 #	if !defined(__sun) && !defined(__sgi)
 #		include <ifaddrs.h>
 #	endif
@@ -294,7 +294,7 @@ Sys_StringToAdr
 =============
 */
 qboolean    Sys_StringToAdr( const char *s, netadr_t *a ) {
-	struct sockaddr_in sadr;
+	struct sockaddr sadr;
 
 	if ( !Sys_StringToSockaddr( s, (struct sockaddr *)&sadr ) ) {
 		return qfalse;
@@ -309,8 +309,7 @@ int ipx_socket;
 
 qboolean    Sys_GetPacket( netadr_t *net_from, msg_t *net_message ) {
 	int ret;
-	//struct sockaddr_in from;
-	struct sockaddr_in from;
+	struct sockaddr from;
 	int fromlen;
 	int net_socket;
 	int protocol;
@@ -1056,7 +1055,7 @@ static void NET_AddLocalAddress(char *ifname, struct sockaddr *addr, struct sock
 	{
 		if(family == AF_INET)
 		{
-			addrlen = sizeof(struct sockaddr_in);
+			addrlen = sizeof(struct sockaddr);
 			localIP[numIP].type = NA_IP;
 		}
 		else
