@@ -90,7 +90,7 @@ static const vote_reference_t aVoteInfo[] = {
 	{ 0x1ff, "kick",			G_Kick_v,			"KICK",							" <player_id>^7\n  Attempts to kick player from server" },
 	{ 0x1ff, "mute",			G_Mute_v,			"MUTE",							" <player_id>^7\n  Removes the chat capabilities of a player" },
 	{ 0x1ff, "unmute",			G_UnMute_v,			"UN-MUTE",						" <player_id>^7\n  Restores the chat capabilities of a player" },
-	{ 0x1ff, "map",				G_Map_v,			"Change map to",				" <mapname>^7\n  Votes for a new map to be loaded" },	
+	{ 0x1ff, "map",				G_Map_v,			"Change map to",				" <mapname>^7\n  Votes for a new map to be loaded" },
 	{ 0x1ff, "maprestart",		G_MapRestart_v,		"Map Restart",					"^7\n  Restarts the current map in progress" },
 	{ 0x1ff, "matchreset",		G_MatchReset_v,		"Match Reset",					"^7\n  Resets the entire match" },
 	{ 0x1ff, "mutespecs",		G_Mutespecs_v,		"Mute Spectators",				" <0|1>^7\n  Mutes in-game spectator chat" },
@@ -333,6 +333,9 @@ int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, 
 			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 		}
 		else {
+                if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
+                    G_writeGameEarlyExit();  // properly close current stats output
+                }
 			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 		}
 	}
@@ -557,10 +560,10 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 		// Vote action (vote has passed)
 	} else {
 		char s[MAX_STRING_CHARS];
-		
+
 		Svcmd_ResetMatch_f( qtrue, qfalse );
 		trap_Cvar_VariableStringBuffer( "nextmap", s, sizeof( s ) );
-		trap_SendConsoleCommand( EXEC_APPEND, va( "map %s%s\n", level.voteInfo.vote_value, ( ( *s ) ? va( "; set nextmap \"%s\"", s ) : "" ) ) );		
+		trap_SendConsoleCommand( EXEC_APPEND, va( "map %s%s\n", level.voteInfo.vote_value, ( ( *s ) ? va( "; set nextmap \"%s\"", s ) : "" ) ) );
 	}
 
 	return( G_OK );
@@ -651,10 +654,10 @@ int G_Nextmap_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2
 			}
 		}
 	// Vote action (vote has passed)
-	} else {		
+	} else {
 		// Load in the nextmap
 		trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
-		AP( "cp \"^3*** Loading nextmap! ***\n\"" );		
+		AP( "cp \"^3*** Loading nextmap! ***\n\"" );
 	}
 
 	return( G_OK );
@@ -837,7 +840,7 @@ int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char
 	} else {
 		// Balanced Teams (g_balancedteams)
 		G_voteSetOnOff( "Balanced Teams", "g_teamForceBalance" );
-		trap_Cvar_Set( "g_teamForceBalance", level.voteInfo.vote_value );		
+		trap_Cvar_Set( "g_teamForceBalance", level.voteInfo.vote_value );
 	}
 
 	return( G_OK );

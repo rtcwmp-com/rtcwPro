@@ -1251,7 +1251,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
     if (g_gameStatslog.integer) {
         qboolean wstats;
         wstats = ((g_gameStatslog.integer & JSON_WSTAT) ? qtrue : qfalse);
-        G_writeGameLogEnd(endofroundinfo);  // write last event and close the gamelog array...will provide better solution later
+        G_writeGameLogEnd();  // write last event and close the gamelog array...will provide better solution later
         G_writeGameInfo(winner);  // write out the game info relating to the match & round
 
         if (g_gameStatslog.integer & JSON_TEAM) {
