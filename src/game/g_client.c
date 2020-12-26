@@ -2196,8 +2196,7 @@ void ClientBegin( int clientNum ) {
 
 	// DHM - Nerve :: Start players in limbo mode if they change teams during the match
 	if ( g_gametype.integer >= GT_WOLF && client->sess.sessionTeam != TEAM_SPECTATOR
-	//	 && ( level.time - client->pers.connectTime ) > 60000 ) {
-		 && ( level.time - client->pers.connectTime ) > 5000 ) { // reduced time to avoid the "instant respawn issue when in limbo and following a player that disconnects"
+		 && ((g_tournament.integer) || ( level.time - client->pers.connectTime ) > 6000)) {
 		ent->client->ps.pm_type = PM_DEAD;
 		ent->r.contents = CONTENTS_CORPSE;
 		ent->health = 0;
