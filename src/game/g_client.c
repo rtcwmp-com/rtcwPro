@@ -513,8 +513,9 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 		// TODO Check this against OSPx
 		for ( i = 0 ; i < level.maxclients ; i++ ) {
 			if ( level.clients[i].ps.pm_flags & PMF_LIMBO
-				 && level.clients[i].sess.spectatorClient == ent->s.number ) {
-				Cmd_FollowCycle_f( &g_entities[i], 1 );
+				 && level.clients[i].sess.spectatorClient == ent->s.number
+				 &&  level.clients[i].sess.sessionTeam == ent->client->sess.sessionTeam) {
+			     Cmd_FollowCycle_f( &g_entities[i], 1 );
 			}
 		}
 	}
@@ -530,7 +531,6 @@ void reinforce( gentity_t *ent ) {
 	int p, team; // numDeployable=0, finished=0; // TTimo unused
 	char *classname;
 	gclient_t *rclient;
-
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		G_Printf( "FIXME: reinforce called from single player game.  Shouldn't see this\n" );
 		return;
@@ -554,11 +554,11 @@ void reinforce( gentity_t *ent ) {
 
 	// DHM - Nerve :: restore persistant data now that we're out of Limbo
 	rclient = ent->client;
+
 	for ( p = 0; p < MAX_PERSISTANT; p++ )
 		rclient->ps.persistant[p] = rclient->saved_persistant[p];
 	// dhm
-
-	respawn( ent );
+    respawn( ent );
 }
 // jpw
 
@@ -2202,11 +2202,11 @@ void ClientBegin( int clientNum ) {
 			ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = -1;
 		}
 	}
-	// nihi commented below
-/*
+
+
 	// DHM - Nerve :: Start players in limbo mode if they change teams during the match
 	if ( g_gametype.integer >= GT_WOLF && client->sess.sessionTeam != TEAM_SPECTATOR
-		 && ( level.time - client->pers.connectTime ) > 60000 ) {
+		 && ((g_tournament.integer) || ( level.time - client->pers.connectTime ) > 6000)) {
 		ent->client->ps.pm_type = PM_DEAD;
 		ent->r.contents = CONTENTS_CORPSE;
 		ent->health = 0;
@@ -2218,7 +2218,7 @@ void ClientBegin( int clientNum ) {
 
 		limbo( ent, qfalse );
 	}
-*/
+
 	// Ridah, trigger a spawn event
 	// DHM - Nerve :: Only in single player
 	if ( g_gametype.integer == GT_SINGLE_PLAYER && !( ent->r.svFlags & SVF_CASTAI ) ) {
@@ -2577,6 +2577,10 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 	// show_bug.cgi?id=569
 	//G_ResetMarkers( ent );   //nihi removed
+
+	// sswolf - head stuff
+	// add the head entity if it already hasn't been
+	AddHeadEntity(ent);
 }
 
 
@@ -2722,6 +2726,10 @@ void ClientDisconnect( int clientNum ) {
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
+
+	// sswolf - head stuff
+	FreeHeadEntity(ent);
+
 	trap_SetConfigstring( CS_PLAYERS + clientNum, "" );
 
 	CalculateRanks();

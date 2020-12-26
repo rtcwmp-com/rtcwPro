@@ -968,10 +968,10 @@ G_UpdateSvCvars
 void G_UpdateSvCvars(void)
 {
 	char cs[MAX_INFO_STRING];
+	//char cs[BIG_INFO_STRING];
 	int  i;
 
 	cs[0] = '\0';
-
 	for (i = 0; i < level.svCvarsCount; i++)
 	{
 		if (level.svCvars[i].Val2[0] == 0) // don't send a space char when not set
@@ -990,6 +990,7 @@ void G_UpdateSvCvars(void)
 
 	// FIXME: print a warning when this configstring has nearly reached MAX_INFO_STRING size and don't set it if greater
 	trap_SetConfigstring(CS_SVCVAR, cs);
+
 }
 
 /*
@@ -1026,6 +1027,7 @@ void CC_svcvar(void)
 		G_Printf("usage: sv_cvar <cvar name> <mode> <value1> <value2>\nexamples: sv_cvar r_rmse EQ 0\n          sv_cvar cl_maxpackets IN 60 125\n");
 		return;
 	}
+
 	trap_Argv(1, cvarName, sizeof(cvarName));
 	trap_Argv(2, mode, sizeof(mode));
 	trap_Argv(3, cvarValue1, sizeof(cvarValue1));
@@ -1038,6 +1040,7 @@ void CC_svcvar(void)
 	if (trap_Argc() == 5)
 	{
 		trap_Argv(4, cvarValue2, sizeof(cvarValue2));
+
 	}
 	else
 	{
@@ -1127,7 +1130,7 @@ void CC_svcvar(void)
 		level.svCvarsCount++;
 	}
 
-	G_UpdateSvCvars();
+//	G_UpdateSvCvars();   // cause of lag on map_restart...moved call after all cvars are loaded
 }
 
 /*
@@ -1224,6 +1227,11 @@ qboolean    ConsoleCommand( void ) {
 	// RTCWPro - cvar limiting
 	if (Q_stricmp(cmd, "sv_cvarempty") == 0) {
 		CC_cvarempty();
+		return qtrue;
+	}
+	if (Q_stricmp(cmd, "sv_cvarload") == 0) {
+		G_UpdateSvCvars();
+
 		return qtrue;
 	}
 	if (Q_stricmp(cmd, "sv_cvar") == 0) {

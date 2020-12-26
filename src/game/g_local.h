@@ -422,6 +422,11 @@ struct gentity_s {
     // pause stuff from rtcwPub
 	int			trType_pre_pause;
 	vec3_t		trBase_pre_pause;
+
+	// sswolf - head stuff
+	qboolean	headshot;
+	qboolean	is_head;
+	gentity_t*  head;
 };
 
 // Ridah
@@ -1171,7 +1176,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientItems( gentity_t *self );
-gentity_t* G_BuildHead( gentity_t *ent );
+//gentity_t* G_BuildHead( gentity_t *ent ); // sswolf - unused
 
 // damage flags
 #define DAMAGE_RADIUS           0x00000001  // damage was indirect
@@ -1255,6 +1260,12 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon );
 // Rafael - for activate
 void CalcMuzzlePointForActivate( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 // done.
+
+// sswolf - head stuff
+void AddHeadEntity(gentity_t* ent);
+void FreeHeadEntity(gentity_t* ent);
+void UpdateHeadEntity(gentity_t* ent);
+void RemoveHeadEntity(gentity_t* ent);
 
 //
 // g_client.c
@@ -1939,16 +1950,15 @@ typedef enum
 
 
 // nihi added below
+// sswolf - removed unused declarations
 
 // g_antilag.c
 //
-void G_ResetTrail( gentity_t *ent );
-void G_StoreTrail( gentity_t *ent );
-void G_TimeShiftClient( gentity_t *ent, int time );
-void G_TimeShiftAllClients( int time, gentity_t *skip );
-void G_UnTimeShiftClient( gentity_t *ent );
-void G_UnTimeShiftAllClients( gentity_t *skip );
-void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
+void G_ResetTrail(gentity_t* ent);
+void G_StoreTrail(gentity_t* ent);
+void G_TimeShiftAllClients(int time, gentity_t* skip);
+void G_UnTimeShiftAllClients(gentity_t* skip);
+//void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
 
 // End
 

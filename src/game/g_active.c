@@ -362,6 +362,56 @@ void    G_TouchTriggers( gentity_t *ent ) {
 
 /*
 =================
+sswolf - follow clients in freecam
+by aiming/shooting at them
+Note: using generic tracing
+
+Credits: ETLegacy and rtcwPub
+G_SpectatorAttackFollow
+=================
+*/
+qboolean G_SpectatorAttackFollow(gentity_t* ent)
+{
+	trace_t       tr;
+	vec3_t        forward, right, up;
+	vec3_t        start, end;
+	vec3_t        mins, maxs;
+	static vec3_t enlargeMins = { -5, -5, -5 };
+	static vec3_t enlargeMaxs = { 5, 5, 5 };
+
+	if (!ent->client)
+	{
+		return qfalse;
+	}
+
+	AngleVectors(ent->client->ps.viewangles, forward, right, up);
+	VectorCopy(ent->client->ps.origin, start);
+	VectorMA(start, 8192, forward, end);
+
+	// enlarge the hitboxes, so spectators can easily click on them..
+	VectorCopy(ent->r.mins, mins);
+	VectorCopy(ent->r.maxs, maxs);
+	VectorAdd(mins, enlargeMins, mins);
+	VectorAdd(maxs, enlargeMaxs, maxs);
+
+	// also put the start-point a bit forward, so we don't start the trace in solid..
+	VectorMA(start, 75.0f, forward, start);
+
+	trap_Trace(&tr, start, mins, maxs, end, ent->client->ps.clientNum, CONTENTS_BODY | CONTENTS_CORPSE);
+	//G_HistoricalTrace(ent, &tr, start, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE);
+
+	if ((&g_entities[tr.entityNum])->client)
+	{
+		ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+		ent->client->sess.spectatorClient = tr.entityNum;
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+/*
+=================
 SpectatorThink
 =================
 */
@@ -415,7 +465,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		ent->client->ps.sprintTime = 20000;
 	}
 
-
 	client->oldbuttons = client->buttons;
 	client->buttons = ucmd->buttons;
 
@@ -424,14 +473,36 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	client->wbuttons = ucmd->wbuttons;
 
 	// attack button cycles through spectators
-	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) ) {
-		Cmd_FollowCycle_f( ent, 1 );
-	} else if (
-		( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
+	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) )
+	{
+		// sswolf - make it usable by aiming/shooting
+		if (client->sess.spectatorState == SPECTATOR_FREE && client->sess.sessionTeam == TEAM_SPECTATOR)
+		{
+			if (G_SpectatorAttackFollow(ent))
+			{
+				return;
+			}
+		}
+
+		Cmd_FollowCycle_f(ent, 1);
+	}
+	// sswolf - make it usable by m1/2 for both directions
+	else if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK) &&
+		!(client->buttons & BUTTON_ACTIVATE))
+	{
+		Cmd_FollowCycle_f(ent, 1);
+	}
+	else if ((client->wbuttons & WBUTTON_ATTACK2) && !(client->oldwbuttons & WBUTTON_ATTACK2) &&
+		!(client->buttons & BUTTON_ACTIVATE))
+	{
+		Cmd_FollowCycle_f(ent, -1);
+	}
+	else if (( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
 		( client->sess.spectatorState == SPECTATOR_FOLLOW ) &&
 		( client->buttons & BUTTON_ACTIVATE ) &&
 		!( client->oldbuttons & BUTTON_ACTIVATE ) &&
-		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) ) { // OSPx - Speclock
+		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) )
+	{ // OSPx - Speclock
 		// code moved to StopFollowing
 		StopFollowing( ent );
 	}
@@ -1087,7 +1158,7 @@ void G_PlayerAnimation(gentity_t* ent) {
 }
 
 
-void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
+//void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
 void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id );        // NERVE - SMF
@@ -1720,29 +1791,37 @@ TODO check this against OSPx its wayyy different
 */
 void SpectatorClientEndFrame( gentity_t *ent ) {
 	int savedClass;		// NERVE - SMF
+	   	int do_respawn = 0; // JPW NERVE
 	// if we are doing a chase cam or a remote view, grab the latest info
 	if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW || (ent->client->ps.pm_flags & PMF_LIMBO))
 	{
 		int       clientNum, testtime;
 		gclient_t *cl;
-		qboolean  do_respawn = qfalse;
+	//	qboolean  do_respawn = qfalse;
 
 		// Players can respawn quickly in warmup
 		if (g_gamestate.integer != GS_PLAYING && ent->client->respawnTime <= level.timeCurrent &&
 		    ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 		{
-			do_respawn = qtrue;
+//			do_respawn = qtrue;
+			do_respawn = 1;
 		}
 		else if (ent->client->sess.sessionTeam == TEAM_RED)
 		{
 			testtime                            = (level.dwRedReinfOffset + level.timeCurrent - level.startTime) % g_redlimbotime.integer;
-			do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			//do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			if (testtime < ent->client->pers.lastReinforceTime) {
+                do_respawn = 1;
+			}
 			ent->client->pers.lastReinforceTime = testtime;
 		}
 		else if (ent->client->sess.sessionTeam == TEAM_BLUE)
 		{
 			testtime                            = (level.dwBlueReinfOffset + level.timeCurrent - level.startTime) % g_bluelimbotime.integer;
-			do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			//do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			if (testtime < ent->client->pers.lastReinforceTime) {
+                do_respawn = 1;
+			}
 			ent->client->pers.lastReinforceTime = testtime;
 		}
 
@@ -1764,6 +1843,7 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 		} else if ( clientNum == -2 ) {
 			clientNum = level.follow2;
 		}
+
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
 			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
@@ -1777,7 +1857,11 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 				if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR && ent->client->ps.pm_flags & PMF_LIMBO ) {
 					// abuse do_respawn var
 			//		savedScore = ent->client->ps.persistant[PERS_SCORE];
+
+
 					do_respawn = ent->client->ps.pm_time;
+
+
 			//		savedRespawns = ent->client->ps.persistant[PERS_RESPAWNS_LEFT];
 					savedClass = ent->client->ps.stats[STAT_PLAYER_CLASS];
 
@@ -1974,8 +2058,9 @@ void WolfReviveBbox( gentity_t *self ) {
 
 // dhm
 
+// sswolf - patched for the pub head stuff
 void G_DrawHitBoxes(gentity_t* ent) {
-	gentity_t* bboxEnt, * headEnt;
+	gentity_t* bboxEnt;
 	vec3_t b1, b2;
 
 	// Draw body hitbox
@@ -1989,16 +2074,16 @@ void G_DrawHitBoxes(gentity_t* ent) {
 	bboxEnt->s.otherEntityNum2 = ent->s.number;
 
 	// Draw head hitbox
-	headEnt = G_BuildHead(ent);
-	VectorCopy(headEnt->r.currentOrigin, b1);
-	VectorCopy(headEnt->r.currentOrigin, b2);
-	VectorAdd(b1, headEnt->r.mins, b1);
-	VectorAdd(b2, headEnt->r.maxs, b2);
+	UpdateHeadEntity(ent);
+	VectorCopy(ent->head->r.currentOrigin, b1);
+	VectorCopy(ent->head->r.currentOrigin, b2);
+	VectorAdd(b1, ent->head->r.mins, b1);
+	VectorAdd(b2, ent->head->r.maxs, b2);
 	bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
 	VectorCopy(b2, bboxEnt->s.origin2);
 	bboxEnt->s.dmgFlags = 1;
 	bboxEnt->s.otherEntityNum2 = ent->s.number;
-	G_FreeEntity(headEnt);
+	RemoveHeadEntity(ent);
 }
 
 /*

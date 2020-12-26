@@ -858,7 +858,7 @@ static float CG_DrawTeamOverlay( float y ) {
 			} else {
 				pcolor = deathcolor;
 				// RtcwPro
-				if (!(cg.snap->ps.pm_flags & PMF_LIMBO && cg.snap->ps.stats[STAT_HEALTH] > GIB_HEALTH))
+				if (ci->health <= 0 && ci->health > GIB_HEALTH)
 					isRevivable = "*";
 			}
 			// jpw
@@ -2630,7 +2630,7 @@ static void CG_DrawVote( void ) {
 		}
 
 		// OSPx - Complaint popup
-		if (cg_complaintPopUp.integer)
+		if (cg_complaintPopUp.integer && cgs.gamestate != GS_WARMUP)
 		{
 			s = va(CG_TranslateString("File complaint against %s for team-killing?"), cgs.clientinfo[cgs.complaintClient].name);
 			CG_DrawStringExt(8, 200, s, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
