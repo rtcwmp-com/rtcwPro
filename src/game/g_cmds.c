@@ -982,7 +982,7 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 	int original;
    // nihi added below
 	// L0 - Pause
-	if (level.paused != PAUSE_NONE)
+	if (level.paused != PAUSE_NONE && ent->client->sess.sessionTeam != TEAM_SPECTATOR)  //added to allow spectators to cycle during pause
 		return;
 //end
 	// if they are playing a tournement game, count as a loss
