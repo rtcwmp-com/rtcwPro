@@ -642,6 +642,18 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
             json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
             json_object_set_new(jdata, "weapon",    json_string(weapon));
             json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
+            if (g_gameStatslog.integer & JSON_TEST) {
+                json_object_set_new(jdata, "agent_loc",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
+                json_object_set_new(jdata, "agent_angles",    json_string(va("%f,%f,%f",agent->client->ps.viewangles[1],agent->client->ps.viewangles[2],agent->client->ps.viewangles[3])));
+                json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
+                json_object_set_new(jdata, "other_loc",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
+                json_object_set_new(jdata, "other_angles",    json_string(va("%f,%f,%f",other->client->ps.viewangles[1],other->client->ps.viewangles[2],other->client->ps.viewangles[3])));
+                int axisAlive, alliedAlive;
+                axisAlive=G_teamAlive(TEAM_RED);
+                alliedAlive=G_teamAlive(TEAM_BLUE);
+                json_object_set_new(jdata, "AlliesAlive",    json_string(va("%i",alliedAlive)));
+                json_object_set_new(jdata, "AxisAlive",    json_string(va("%i",axisAlive)));
+            }
         }
        else if (eventType == eventTeamkill) {
             json_object_set_new(jdata, "group",    json_string("player"));
@@ -707,6 +719,35 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
         json_decref(jdata);
     level.eventNum++;
 }
+
+// dir is direction from which the attack occured
+
+void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
+    char* s;
+    json_t *jdata = json_object();
+     time_t unixTime = time(NULL);  // come back and make globally available
+       // json_object_set_new(jdata, "event_order",    json_integer(level.eventNum));
+        json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
+        json_object_set_new(jdata, "group",    json_string("combat"));
+        json_object_set_new(jdata, "label",    json_string("kill"));
+        json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+        json_object_set_new(jdata, "agent_loc",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
+        json_object_set_new(jdata, "agent_angles",    json_string(va("%f,%f,%f",agent->client->ps.viewangles[1],agent->client->ps.viewangles[2],agent->client->ps.viewangles[3])));
+        json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
+        json_object_set_new(jdata, "other_loc",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
+        json_object_set_new(jdata, "other_angles",    json_string(va("%f,%f,%f",other->client->ps.viewangles[1],other->client->ps.viewangles[2],other->client->ps.viewangles[3])));
+        json_object_set_new(jdata, "attack_dir",    json_string(va("%f,%f,%f",dir[1],dir[2],dir[3])));
+        if (level.gameStatslogFile) {
+                s = json_dumps( jdata, 0 );
+                trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
+                trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
+                free(s);
+        }
+        json_decref(jdata);
+
+    level.eventNum++;
+}
+
 
 void G_writeDisconnectEvent (gentity_t* agent){
     char* s;
@@ -816,3 +857,34 @@ void G_writeGameEarlyExit(void)
 
 
 }
+
+
+// number of enemies alive .... probably will move this elsewhere
+//   actually could put this in level or something
+int G_teamAlive(int team ) {
+
+    int i, j;
+	gclient_t *cl;
+    int numAlive = 0;
+
+    for ( j = 0; j < level.numPlayingClients; j++ ) {
+			cl = level.clients + level.sortedClients[j];
+
+			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != team ) {
+				continue;
+			}
+
+            if (!(cl->ps.pm_flags & PMF_LIMBO) && !(cl->ps.pm_type == PM_DEAD)) {
+                numAlive++;
+            }
+
+
+
+        }
+    return numAlive;
+
+}
+
+
+
+

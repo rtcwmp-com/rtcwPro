@@ -2130,7 +2130,7 @@ enum eventList {
 #define JSON_WSTAT 2  // output wstats in player stats
 #define JSON_CATEGORIES 4  // output player stats in categories
 #define JSON_TEAM 8  // output player stats by team
-
+#define JSON_TEST 11  // for testing
 
 // g_json.c
 void G_jstatsByTeam(qboolean wstats);
@@ -2147,8 +2147,12 @@ void G_writeGameEarlyExit(void);
 void G_writeGameLogStart(void);
 void G_writeClosingJson(void);
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
+void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
+int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
+
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
+
 // OSPx - New stuff below
 //
 // g_cmds.c
