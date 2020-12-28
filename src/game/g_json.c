@@ -1,7 +1,12 @@
 #include "g_local.h"
 #include "g_stats.h"
 //#include <jansson.h>
+#ifdef _WIN32
+#include "../qcommon/jansson_win/jansson.h"
+#else
 #include "../qcommon/jansson/jansson.h"
+#endif // _WIN32
+
 #include <time.h>
 // send/receive to json server: only need to include a few additional functions
 //   although tested and works.....not necessary until we
@@ -345,14 +350,14 @@ Output the weapon stats for each player
 
 void G_jWeaponStats(void) {
 
-    int i, j, eff,rc;
+    int i, j, rc;
 	char* s;
 	gclient_t *cl;
 	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
 	time_t unixTime = time(NULL);
-    json_t* jdata;
+   // json_t* jdata;
     json_t* jwstat;
     json_t* jplayer;
     json_t* weapOb;
@@ -445,12 +450,12 @@ void G_writeServerInfo (void){
 	//int s;
 	char* s;
 	char mapName[64];
-    char newGamestatFile[MAX_QPATH];
+   // char newGamestatFile[MAX_QPATH];
 
-    FILE		*gsfile;
+   // FILE		*gsfile;
     time_t unixTime = time(NULL);  // come back and make globally available
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
-    char *buf;
+   // char *buf;
     char cs[MAX_STRING_CHARS];
 
 	qtime_t ct;
@@ -513,14 +518,14 @@ void G_writeGameInfo (int winner ){
 	//int s;
 	char* s;
 	char mapName[64];
-    char newGamestatFile[MAX_QPATH];
+   // char newGamestatFile[MAX_QPATH];
     char *buf;
     char *buf2;
     char *buf3;
     char *buf4;
     char cs[MAX_STRING_CHARS];
 
-    FILE		*gsfile;
+   // FILE		*gsfile;
     time_t unixTime = time(NULL);  // come back and make globally available
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
 
@@ -642,7 +647,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
             json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
             json_object_set_new(jdata, "weapon",    json_string(weapon));
             json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
-            if (g_gameStatslog.integer & JSON_TEST) {
+            if (g_gameStatslog.integer & JSON_KILLDATA) {
                 json_object_set_new(jdata, "agent_pos",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
                 json_object_set_new(jdata, "agent_angle",    json_string(va("%f",agent->client->ps.viewangles[1])));
                 json_object_set_new(jdata, "other_pos",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
@@ -651,8 +656,8 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
                 int axisAlive, alliedAlive;
                 axisAlive=G_teamAlive(TEAM_RED);
                 alliedAlive=G_teamAlive(TEAM_BLUE);
-                json_object_set_new(jdata, "AlliesAlive",    json_string(va("%i",alliedAlive)));
-                json_object_set_new(jdata, "AxisAlive",    json_string(va("%i",axisAlive)));
+                json_object_set_new(jdata, "allies_alive",    json_string(va("%i",alliedAlive)));
+                json_object_set_new(jdata, "axis_alive",    json_string(va("%i",axisAlive)));
             }
         }
        else if (eventType == eventTeamkill) {
@@ -867,7 +872,7 @@ void G_writeGameEarlyExit(void)
   level.axisalive and level.alliedalive then increment/decrement where needed
 */
 int G_teamAlive(int team ) {
-    int i, j;
+    int  j;
 	gclient_t *cl;
     int numAlive = 0;
 

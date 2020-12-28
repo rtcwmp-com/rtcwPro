@@ -2130,7 +2130,7 @@ enum eventList {
 #define JSON_WSTAT 2  // output wstats in player stats
 #define JSON_CATEGORIES 4  // output player stats in categories
 #define JSON_TEAM 8  // output player stats by team
-#define JSON_TEST 11  // for testing
+#define JSON_KILLDATA 16  // include additional data on "kill event"
 
 // g_json.c
 void G_jstatsByTeam(qboolean wstats);
