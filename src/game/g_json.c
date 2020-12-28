@@ -643,11 +643,11 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
             json_object_set_new(jdata, "weapon",    json_string(weapon));
             json_object_set_new(jdata, "killer_health",    json_integer(agent->health));
             if (g_gameStatslog.integer & JSON_TEST) {
-                json_object_set_new(jdata, "agent_loc",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
-                json_object_set_new(jdata, "agent_angles",    json_string(va("%f,%f,%f",agent->client->ps.viewangles[1],agent->client->ps.viewangles[2],agent->client->ps.viewangles[3])));
-                json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
-                json_object_set_new(jdata, "other_loc",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
-                json_object_set_new(jdata, "other_angles",    json_string(va("%f,%f,%f",other->client->ps.viewangles[1],other->client->ps.viewangles[2],other->client->ps.viewangles[3])));
+                json_object_set_new(jdata, "agent_pos",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
+                json_object_set_new(jdata, "agent_angle",    json_string(va("%f",agent->client->ps.viewangles[1])));
+                json_object_set_new(jdata, "other_pos",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
+                json_object_set_new(jdata, "other_angle",    json_string(va("%f",other->client->ps.viewangles[1])));
+                // straight up stupid way to do this...
                 int axisAlive, alliedAlive;
                 axisAlive=G_teamAlive(TEAM_RED);
                 alliedAlive=G_teamAlive(TEAM_BLUE);
@@ -720,8 +720,10 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
     level.eventNum++;
 }
 
-// dir is direction from which the attack occured
-
+/*
+    Unused at the moment.....plan to remove once set on formating and such
+     dir is direction from which the attack occured
+*/
 void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
     char* s;
     json_t *jdata = json_object();
@@ -859,10 +861,12 @@ void G_writeGameEarlyExit(void)
 }
 
 
-// number of enemies alive .... probably will move this elsewhere
-//   actually could put this in level or something
+/*
+ number of enemies alive .... will move elsewhere (if we decide to keep it)
+  note: for efficiency purposes we should introduce new level vars
+  level.axisalive and level.alliedalive then increment/decrement where needed
+*/
 int G_teamAlive(int team ) {
-
     int i, j;
 	gclient_t *cl;
     int numAlive = 0;
@@ -877,9 +881,6 @@ int G_teamAlive(int team ) {
             if (!(cl->ps.pm_flags & PMF_LIMBO) && !(cl->ps.pm_type == PM_DEAD)) {
                 numAlive++;
             }
-
-
-
         }
     return numAlive;
 
