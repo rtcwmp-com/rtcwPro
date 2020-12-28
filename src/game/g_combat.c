@@ -393,7 +393,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
             }
             else {
                 if ( attacker->client ) {
-                    G_writeGeneralEvent(attacker,self,obit,eventKill);
+                    int weapID;
+                    weapID = G_weapStatIndex_MOD( meansOfDeath );
+                    //G_writeGeneralEvent(attacker,self,obit,eventKill);
+                    G_writeGeneralEvent(attacker,self,va("%s",aWeaponInfo[weapID].pszName),eventKill);
+
                 }
             }
 
