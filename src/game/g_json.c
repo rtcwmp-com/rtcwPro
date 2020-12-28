@@ -466,7 +466,7 @@ void G_writeServerInfo (void){
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
     json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i",g_gameStatslog.integer)));
-    //json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig)));  // use level.config hash
+    json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig.string)));
     json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
