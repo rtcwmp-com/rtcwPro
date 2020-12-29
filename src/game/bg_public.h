@@ -1195,7 +1195,7 @@ typedef struct {
 player_ready_status_t player_ready_status[MAX_CLIENTS];
 
 // How many players on the overlay
-#define TEAM_MAXOVERLAY     8
+#define TEAM_MAXOVERLAY     10 // RtcwPro changed this to 10
 
 // means of death
 typedef enum {

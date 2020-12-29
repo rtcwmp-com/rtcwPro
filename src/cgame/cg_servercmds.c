@@ -123,7 +123,6 @@ static void CG_ParseTeamInfo( void ) {
 		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 10 + 10));
 		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 10 + 11));
 		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 10 + 12));
-		//cgs.clientinfo[client].isReady = atoi(CG_Argv(i * 10 + 13));
 		player_ready_status[client].isReady = atoi(CG_Argv(i * 10 + 13));
 	}
 }
