@@ -990,7 +990,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	stringlength = 0;
 
 	// Do each team for team information
-	for (i = 0, cnt = 0; i < level.numConnectedClients && cnt < TEAM_MAXOVERLAY; i++) {
+	for (i = 0, cnt = 0; i < level.numConnectedClients /*&& cnt < TEAM_MAXOVERLAY*/; i++) {
 
 		player = g_entities + level.sortedClients[i];
 
