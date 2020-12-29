@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
+//#define GAMEVERSION "RtcwPro 1.0 beta"
+#define JSONGAMESTATVERSION "0.1.2"
 
 // done.
 
@@ -523,6 +525,8 @@ typedef struct {
 	int spectatorTime;              // for determining next-in-line to play
 	spectatorState_t spectatorState;
 	int spectatorClient;            // for chasecam and follow mode
+	int start_time;                 // player starts/begins game
+	int end_time;                   // player ends/leaves game
 	int wins, losses;               // tournament stats
 	int playerType;                 // DHM - Nerve :: for GT_WOLF
 	int playerWeapon;               // DHM - Nerve :: for GT_WOLF
@@ -573,6 +577,12 @@ typedef struct {
 	int acc_hits;	// -||-
 	int killPeak;
 	int knifeKills;
+	int obj_captured;
+	int obj_destroyed;
+	int obj_returned;
+	int obj_taken;
+	int dyn_planted;
+	int dyn_defused;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
@@ -872,6 +882,8 @@ typedef struct {
 
 	fileHandle_t logFile;
 
+    fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+
 	// store latched cvars here that we want to get at often
 	int maxclients;
 
@@ -1038,6 +1050,10 @@ typedef struct {
 	int svCvarsCount;
 	// RTCWPro - custom config
 	config_t config;
+	int eventNum;  // event counter
+	char *match_id; // for stats round matching...
+
+
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1451,6 +1467,7 @@ extern vmCvar_t g_gametype;
 // Rafael gameskill
 extern vmCvar_t g_gameskill;
 // done
+extern vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
@@ -1975,6 +1992,7 @@ void G_globalSound(char *sound);
 void G_resetRoundState(void);
 void G_resetModeState(void);
 int G_checkServerToggle(vmCvar_t *cv);
+char* GetLevelTime(void);
 ///////////////////////
 // g_referee.c
 //
@@ -2086,7 +2104,55 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
+// json stat stuff
+enum eventList {
+    eventSuicide=0,
+    eventKill,
+    eventTeamkill,
+    eventRevive,
+    eventPause,
+    eventUnpause,
+    eventClassChange,
+    eventNameChange,
+    objTaken,
+    objReturned,
+    objCapture,
+    objDynPlant,
+    objDynDefuse,
+    objSpawnFlag,
+    objDestroyed,
+    redRespawn,
+    blueRespawn,
+    teamFirstSpawn,
+};
+// for different json output
+#define JSON_STAT 1   // output stats
+#define JSON_WSTAT 2  // output wstats in player stats
+#define JSON_CATEGORIES 4  // output player stats in categories
+#define JSON_TEAM 8  // output player stats by team
+#define JSON_KILLDATA 16  // include additional data on "kill event"
+
+// g_json.c
+void G_jstatsByTeam(qboolean wstats);
+void G_jstatsByPlayers(qboolean wstats);
+void G_jWeaponStats(void);
+
+void G_writeGameInfo (int winner);
+void G_writeServerInfo (void);
+void G_writeDisconnectEvent (gentity_t* agent);
+//void G_writeDisconnectEvent (char* player);
+void G_writeObjectiveEvent (gentity_t* agent,int objType);
+void G_writeGameLogEnd(void);
+void G_writeGameEarlyExit(void);
+void G_writeGameLogStart(void);
+void G_writeClosingJson(void);
+void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
+void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
+int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
+
+
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
+
 // OSPx - New stuff below
 //
 // g_cmds.c

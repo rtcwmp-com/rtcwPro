@@ -1803,6 +1803,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
 			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", oldname,
 											client->pers.netname ) );
+
+            if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) {
+                G_writeGeneralEvent (ent,ent, " ", eventNameChange);
+            }
+
 		}
 	}
 
@@ -1827,6 +1832,10 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	// DHM - Nerve :: Forcibly set both model and skin for multiplayer.
 	if ( g_gametype.integer >= GT_WOLF ) {
+
+
+
+
 
 		// To communicate it to cgame
 		client->ps.stats[ STAT_PLAYER_CLASS ] = client->sess.playerType;
@@ -1951,6 +1960,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
 	G_DPrintf( "ClientUserinfoChanged: %i :: %s\n", clientNum, s );
+
 }
 
 
@@ -2246,6 +2256,7 @@ void ClientBegin( int clientNum ) {
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
+    client->sess.start_time = level.time; // start time of client (come back and change to unix time perhaps?)
 }
 
 /*
@@ -2485,6 +2496,10 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 			if ( update ) {
 				ClientUserinfoChanged( index );
+
+                if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING) ) {
+                    G_writeGeneralEvent (ent,ent, " ", eventClassChange);
+                }
 			}
 		}
 
@@ -2693,6 +2708,11 @@ void ClientDisconnect( int clientNum ) {
 		ClientUserinfoChanged( level.sortedClients[0] );
 	}
 
+    if (g_gameStatslog.integer) {
+        G_writeDisconnectEvent(ent);
+
+    }
+
 	trap_UnlinkEntity( ent );
 	ent->s.modelindex = 0;
 	ent->inuse = qfalse;
@@ -2700,6 +2720,10 @@ void ClientDisconnect( int clientNum ) {
 	ent->client->pers.connected = CON_DISCONNECTED;
 	ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
 	ent->client->sess.sessionTeam = TEAM_FREE;
+
+	ent->client->sess.end_time = level.time; // end time of client (come back and change to unix time perhaps?)
+
+
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
@@ -2714,6 +2738,7 @@ void ClientDisconnect( int clientNum ) {
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
+
 }
 
 

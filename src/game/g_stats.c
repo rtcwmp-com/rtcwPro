@@ -923,7 +923,6 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 	char *ref;
 	char n1[MAX_NETNAME];
 	char n2[MAX_NETNAME];
-
 	qtime_t ct;
 	trap_RealTime(&ct);
 	CP(va("sc \"\nMod: %s \n^7Server: %s  \n^7Time: ^7%02d:%02d:%02d ^d(^7%02d %s %d^d)\n\n\"",
@@ -1057,6 +1056,7 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 
 
 	CP( va( "sc \"%s\n\" 0", ( ( !cnt ) ? "^3\nNo scores to report." : "" ) ) );
+
 }
 
 // Dumps end-of-match info
@@ -1069,12 +1069,13 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	// to at least temporarily fix whatevr is causing the cut off
 	char cs[MAX_STRING_CHARS];
 	char* buf;
+	char* endofroundinfo;
 	int winner;
 	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
 
-
+    endofroundinfo=va( "  .."); // plan to remove this soon.....just safety measure
 
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
@@ -1138,18 +1139,19 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 				G_printMatchInfo(ent,qtrue);
 			}
         // moved to G_matchClockDump due to cg_autoaction issue
-		/*
+
 			if ( g_gametype.integer == GT_WOLF_STOPWATCH )
 			{
 				// We've already missed the switch
 				if ( g_currentRound.integer == 1 )
 				{
-
-					CP( va( "print \">>> ^3Clock set to: %d:%02d\n\"",
+                    endofroundinfo=va( "Clock set to: %d:%02d",
 							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
+							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
+					//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 
+                    /*
 					if (winner == 0)
 					{
 						AAPS("sound/match/winaxis.wav");
@@ -1158,6 +1160,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						AAPS("sound/match/winallies.wav");
 					}
+					*/
 
 				}
 				else
@@ -1166,14 +1169,15 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
 					if ( val < g_timelimit.value )
 					{
-
-						CP( va( "print \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+					    endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
 								(int)val,
 								(int)( 60.0 * ( val - (int)val ) ),
 								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
+						//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 
+                        /*
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
@@ -1182,16 +1186,18 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
+						*/
 
 					}
 					else
 					{
-
-						CP( va( "print \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+					    endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
 								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
+						//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
 
 
+                        /*
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
@@ -1200,15 +1206,17 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						{
 							AAPS("sound/match/winallies.wav");
 						}
-
+						*/
 					}
 				}
 			}
-			*/
+
 			// sswolf - non SW exits
 			//else if (g_gametype.integer == GS_PLAYING)
 			if (g_gametype.integer == GS_PLAYING)
 			{
+
+
 				if (g_timelimit.value && !level.warmupTime)
 				{
 					if (level.time - level.startTime >= g_timelimit.value * 60000)
@@ -1237,6 +1245,26 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 		}
 	}
+   // if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
+
+   // this will all be redone in a much more efficient way but since time is limited and with no real direction...it is done the lazy way
+    if (g_gameStatslog.integer) {
+        qboolean wstats;
+        wstats = ((g_gameStatslog.integer & JSON_WSTAT) ? qtrue : qfalse);
+        G_writeGameLogEnd();  // write last event and close the gamelog array...will provide better solution later
+        G_writeGameInfo(winner);  // write out the game info relating to the match & round
+
+        if (g_gameStatslog.integer & JSON_TEAM) {
+            G_jstatsByTeam(wstats); // write out the player stats
+        }
+        else {
+            G_jstatsByPlayers(wstats);  // write out player stats
+        }
+
+        G_writeClosingJson();  // need a closing bracket....will provide better solution later
+
+    }
+
 }
 // temp fix for cg_autoaction issue
 void G_matchClockDump( gentity_t *ent ) {
@@ -1247,6 +1275,7 @@ void G_matchClockDump( gentity_t *ent ) {
 	trap_GetConfigstring(CS_MULTI_MAPWINNER, cs, sizeof(cs));
 	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
+	char* endofroundinfo;
 
     if ( !level.intermissiontime ) {
 		return;
@@ -1254,9 +1283,10 @@ void G_matchClockDump( gentity_t *ent ) {
 
                if ( g_currentRound.integer == 1 )
 				{
-					CP( va( "sc \">>> ^3Clock set to: %d:%02d\n\"",
+                    endofroundinfo=va( "Clock set to: %d:%02d",
 							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) ) );
+							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
+					CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 					if (winner == 0)
 					{
@@ -1273,11 +1303,12 @@ void G_matchClockDump( gentity_t *ent ) {
 					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
 					if ( val < g_timelimit.value )
 					{
-						CP( va( "sc \">>> ^3Objective reached at %d:%02d (original: %d:%02d)\n\"",
+					    endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
 								(int)val,
 								(int)( 60.0 * ( val - (int)val ) ),
 								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
+						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 						if (winner == 0)
 						{
@@ -1291,9 +1322,10 @@ void G_matchClockDump( gentity_t *ent ) {
 					}
 					else
 					{
-						CP( va( "sc \">>> ^3Objective NOT reached in time (%d:%02d)\n\"",
+					    endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
 								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) );
+								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
+						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
 
 						if (winner == 0)
 						{

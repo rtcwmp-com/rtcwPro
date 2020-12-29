@@ -345,6 +345,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}*/
 
 	// If person gets stabbed use custom sound from soundpack
+	// it's broadcasted to victim and heard only if standing near victim...
 	if ( (meansOfDeath == MOD_KNIFE_STEALTH || meansOfDeath == MOD_KNIFE) && !OnSameTeam(self, attacker) && g_fastStabSound.integer > 0) {
 		int r = rand() %2;
 		char *snd = "goat.wav"; // default
@@ -380,6 +381,27 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
+        // GameStats logging .... probably want to control this via cvar (as well as do a better job in general)
+        if (g_gameStatslog.integer) {
+            if (killer == self->s.number) {
+                 G_writeGeneralEvent(self,self,obit,eventSuicide);
+            }
+            else if (OnSameTeam(attacker, self)) {
+                if ( attacker->client ) {
+                    G_writeGeneralEvent(attacker,self,obit,eventTeamkill);
+                }
+            }
+            else {
+                if ( attacker->client ) {
+                    int weapID;
+                    weapID = G_weapStatIndex_MOD( meansOfDeath );
+                    //G_writeGeneralEvent(attacker,self,obit,eventKill);
+                    G_writeGeneralEvent(attacker,self,va("%s",aWeaponInfo[weapID].pszName),eventKill);
+
+                }
+            }
+
+        }
 	}
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
@@ -527,6 +549,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				item = BG_FindItem( "Objective" );
 			}
 			G_matchPrintInfo(va("Axis have lost %s!", self->message), qfalse);
+
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}
 
