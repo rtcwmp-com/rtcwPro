@@ -2117,6 +2117,10 @@ void Weapon_RocketLauncher_Fire( gentity_t *ent ) {
 	m->damage *= s_quadFactor;
 	m->splashDamage *= s_quadFactor;
 
+	if (g_gamestate.integer == GS_PLAYING) {  // add panzer attempts to accuracy
+		ent->client->pers.life_acc_shots++;
+		ent->client->sess.acc_shots++;
+	}
 //	VectorAdd( m->s.pos.trDelta, ent->client->ps.velocity, m->s.pos.trDelta );	// "real" physics
 }
 
