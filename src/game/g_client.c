@@ -2637,7 +2637,7 @@ void ClientDisconnect( int clientNum ) {
 		ClientUserinfoChanged( level.sortedClients[0] );
 	}
 
-    if (g_gameStatslog.integer) {
+    if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
         G_writeDisconnectEvent(ent);
 
     }
