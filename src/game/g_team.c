@@ -531,8 +531,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 	PrintMsg( NULL, "%s" S_COLOR_WHITE " captured the %s flag!\n",
 			  cl->pers.netname, TeamName( OtherTeam( team ) ) );
-    //G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("captured the %s flag!", (team == TEAM_RED ? "Axis" : "Allied")), va("%s", cl->pers.netname)  );
-    G_writeObjectiveEvent(other, objSpawnFlag  );
+
+
 	cl->ps.powerups[enemy_flag] = 0;
 
 	teamgame.last_flag_capture = level.time;
@@ -1463,7 +1463,7 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	qboolean playsound = qtrue;
 	qboolean firsttime = qfalse;
 
-	if ( self->count == other->client->sess.sessionTeam ) {
+	if ( self->count == other->client->sess.sessionTeam || other->health <= 0 ) {
 		return;
 	}
 

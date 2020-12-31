@@ -151,6 +151,7 @@ void G_jstatsByPlayers(qboolean wstats) {
     }
 
         s = json_dumps( jstats, 1 ); // for a pretty print form
+        //s = json_dumps( jstats, 0 );
 
         if (level.gameStatslogFile && g_gameStatslog.integer) {
             trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.gameStatslogFile );
@@ -315,8 +316,8 @@ void G_jstatsByTeam(qboolean wstats) {
         json_object_set(jteam, teamname, jplayer);
 
     }
-
         s = json_dumps( jteam, 1 ); // for a pretty print form
+        //s = json_dumps( jteam, 0 );
 
         if (level.gameStatslogFile && g_gameStatslog.integer) {
             trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.gameStatslogFile );
@@ -366,17 +367,19 @@ void G_jWeaponStats(void) {
 
     jwstat =  json_array();
 
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
+	/*for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
 		if ( !TeamCount( -1, i ) ) {
 			continue;
 		}
+		*/
 
 
-         jplayer = json_object();
+
         for ( j = 0; j < level.numPlayingClients; j++ ) {
+            jplayer = json_object();
 			cl = level.clients + level.sortedClients[j];
 
-			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != i ) {
+			if ( cl->pers.connected != CON_CONNECTED ) {
 				continue;
 			}
 			sprintf(pGUID,"%s",cl->sess.guid);
@@ -406,8 +409,8 @@ void G_jWeaponStats(void) {
 
 
 
-    }
 
+        //s = json_dumps( jwstat, 0 ); // for a pretty print form
         s = json_dumps( jwstat, 1 ); // for a pretty print form
 
         if (level.gameStatslogFile && g_gameStatslog.integer) {
@@ -472,6 +475,7 @@ void G_writeServerInfo (void){
 
     if (level.gameStatslogFile) {
         s = json_dumps( jdata, 1 );
+        //s = json_dumps( jdata, 0 );
 
         trap_FS_Write( "{\n \"serverinfo\": \n", strlen( "{\n \"serverinfo\": \n" ), level.gameStatslogFile );
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
@@ -539,6 +543,7 @@ void G_writeGameInfo (int winner ){
         json_object_set_new(jdata, "winner",    json_string(" "));
     }
     if (level.gameStatslogFile) {
+        //s = json_dumps( jdata, 0 );
         s = json_dumps( jdata, 1 );
         trap_FS_Write( "\"gameinfo\": \n", strlen( "\"gameinfo\": \n" ), level.gameStatslogFile );
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
@@ -557,7 +562,8 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
-    if (!g_gameStatslog.integer) {
+        // additional safety check
+    if (!g_gameStatslog.integer || g_gamestate.integer != GS_PLAYING) {
         return;
     }
 
@@ -615,6 +621,11 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
     json_t *jdata = json_object();
     json_t *event = json_object();
     time_t unixTime = time(NULL);
+    // additional safety check
+    if ( g_gamestate.integer != GS_PLAYING ) {
+        return;
+    }
+
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
         switch ( eventType ) {
@@ -697,7 +708,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
                 break;
             default:
                 json_object_set_new(jdata, "group",    json_string("server"));
-                 json_object_set_new(jdata, "label",   json_string("unkown event"));
+                json_object_set_new(jdata, "label",   json_string("unknown event"));
                 break;
 			}
 
@@ -720,6 +731,10 @@ void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
+        // additional safety check
+    if ( g_gamestate.integer != GS_PLAYING ) {
+        return;
+    }
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("combat"));
     json_object_set_new(jdata, "label",    json_string("kill"));
@@ -744,7 +759,10 @@ void G_writeDisconnectEvent (gentity_t* agent){
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
-
+    // additional safety check
+    if ( g_gamestate.integer != GS_PLAYING ) {
+        return;
+    }
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     json_object_set_new(jdata, "label",    json_string("disconnect"));
