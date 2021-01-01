@@ -384,7 +384,7 @@ void G_jWeaponStats(void) {
 			}
 			sprintf(pGUID,"%s",cl->sess.guid);
             weapArray = json_array();
-
+            i = cl->sess.sessionTeam;
             for (m = WS_KNIFE; m < WS_MAX; m++) {
                 if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
                     cl->sess.aWeaponStats[m].deaths) {
@@ -760,7 +760,7 @@ void G_writeDisconnectEvent (gentity_t* agent){
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
     // additional safety check
-    if ( g_gamestate.integer != GS_PLAYING ) {
+    if ( g_gamestate.integer != GS_PLAYING || agent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         return;
     }
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
