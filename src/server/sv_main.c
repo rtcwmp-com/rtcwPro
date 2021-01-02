@@ -1116,6 +1116,7 @@ int SV_FrameMsec()
 	else
 		return 1;
 }
+#ifndef _WIN32
 /*
 ====================
 SV_RateMsec
@@ -1243,5 +1244,5 @@ int SV_SendQueuedPackets(void)
 
 	return timeVal;
 }
-
+#endif
 //============================================================================

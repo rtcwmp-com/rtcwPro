@@ -632,7 +632,7 @@ to take to clear, based on the current rate
 TTimo - use sv_maxRate or sv_dl_maxRate depending on regular or downloading client
 ====================
 */
-/*
+#ifdef _WIN32
 #define HEADER_RATE_BYTES   48      // include our header, IP header, and some overhead
 int SV_RateMsec( client_t *client, int messageSize ) {
 	int rate;
@@ -664,7 +664,7 @@ int SV_RateMsec( client_t *client, int messageSize ) {
 
 	return rateMsec;
 }
-*/
+#endif
 /*
 =======================
 SV_SendMessageToClient

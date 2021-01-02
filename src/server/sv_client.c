@@ -982,7 +982,7 @@ Send one round of fragments, or queued messages to all clients that have data pe
 Return the shortest time interval for sending next packet to client
 ==================
 */
-
+#ifndef _WIN32
 int SV_SendQueuedMessages(void)
 {
 	int i, retval = -1, nextFragT;
@@ -1006,7 +1006,7 @@ int SV_SendQueuedMessages(void)
 
 	return retval;
 }
-
+#endif
 /*
 ==================
 SV_SendDownloadMessages
