@@ -694,8 +694,11 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 	}
 
 	// normal rate / snapshotMsec calculation
-	//rateMsec = SV_RateMsec( client, msg->cursize );
+	#ifdef _WIN32
+	rateMsec = SV_RateMsec( client, msg->cursize );
+	#else
 	rateMsec = SV_RateMsec( client );
+	#endif
 
 	// TTimo - during a download, ignore the snapshotMsec
 	// the update server on steroids, with this disabled and sv_fps 60, the download can reach 30 kb/s
@@ -805,8 +808,11 @@ void SV_SendClientMessages( void ) {
 		// was too large to send at once
 		if ( c->netchan.unsentFragments ) {
 			c->nextSnapshotTime = svs.time +
+#ifndef _WIN32
                                     SV_RateMsec( c);
-								  //SV_RateMsec( c, c->netchan.unsentLength - c->netchan.unsentFragmentStart );
+#else
+								  SV_RateMsec( c, c->netchan.unsentLength - c->netchan.unsentFragmentStart );
+#endif
 			SV_Netchan_TransmitNextFragment( c );
 			continue;
 		}

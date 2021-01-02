@@ -75,6 +75,10 @@ cvar_t  *com_introPlayed;
 cvar_t  *cl_paused;
 cvar_t  *sv_paused;
 cvar_t  *com_cameraMode;
+#ifdef _WIN32
+// new stuff for iortcw port of server defined dl rates
+cvar_t  *sv_dlRate;
+#endif
 cvar_t	*com_unfocused;
 cvar_t	*com_maxfpsUnfocused;
 cvar_t	*com_minimized;
@@ -2515,6 +2519,9 @@ void Com_Init( char *commandLine ) {
 	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
+	#ifdef _WIN32
+	    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
+	#endif
     //sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
 
 
