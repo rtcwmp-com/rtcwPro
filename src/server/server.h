@@ -356,8 +356,10 @@ void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
 int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+#ifndef _WIN32
 int SV_SendQueuedMessages(void);
 int SV_RateMsec( client_t *client ) ;
+#endif
 //
 // sv_ccmds.c
 //

@@ -31,7 +31,12 @@ If you have questions concerning this license or the applicable additional terms
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
-
+//Ignore __attribute__ on non-gcc platforms
+#ifndef __GNUC__
+#ifndef __attribute__
+#define __attribute__(x)
+#endif
+#endif
 //#define	PRE_RELEASE_DEMO
 
 //============================================================================
@@ -180,7 +185,11 @@ void        NET_Config( qboolean enableNetworking );
 
 void		NET_FlushPacketQueue(void);
 void        NET_SendPacket( netsrc_t sock, int length, const void *data, netadr_t to );
+#ifndef _WIN32
 void		QDECL NET_OutOfBandPrint( netsrc_t net_socket, netadr_t adr, const char *format, ...) __attribute__ ((format (printf, 3, 4)));
+#else
+void QDECL NET_OutOfBandPrint( netsrc_t net_socket, netadr_t adr, const char *format, ... );
+#endif
 void QDECL NET_OutOfBandData( netsrc_t sock, netadr_t adr, byte *format, int len );
 
 qboolean    NET_CompareAdr( netadr_t a, netadr_t b );
