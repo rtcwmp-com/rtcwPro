@@ -473,7 +473,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	client->wbuttons = ucmd->wbuttons;
 
 	// attack button cycles through spectators
-	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) ) 
+	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) )
 	{
 		// sswolf - make it usable by aiming/shooting
 		if (client->sess.spectatorState == SPECTATOR_FREE && client->sess.sessionTeam == TEAM_SPECTATOR)
@@ -501,7 +501,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		( client->sess.spectatorState == SPECTATOR_FOLLOW ) &&
 		( client->buttons & BUTTON_ACTIVATE ) &&
 		!( client->oldbuttons & BUTTON_ACTIVATE ) &&
-		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) ) 
+		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) )
 	{ // OSPx - Speclock
 		// code moved to StopFollowing
 		StopFollowing( ent );
@@ -1158,7 +1158,7 @@ void G_PlayerAnimation(gentity_t* ent) {
 }
 
 
-void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
+//void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
 void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id );        // NERVE - SMF
@@ -1791,29 +1791,37 @@ TODO check this against OSPx its wayyy different
 */
 void SpectatorClientEndFrame( gentity_t *ent ) {
 	int savedClass;		// NERVE - SMF
+	   	int do_respawn = 0; // JPW NERVE
 	// if we are doing a chase cam or a remote view, grab the latest info
 	if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW || (ent->client->ps.pm_flags & PMF_LIMBO))
 	{
 		int       clientNum, testtime;
 		gclient_t *cl;
-		qboolean  do_respawn = qfalse;
+	//	qboolean  do_respawn = qfalse;
 
 		// Players can respawn quickly in warmup
 		if (g_gamestate.integer != GS_PLAYING && ent->client->respawnTime <= level.timeCurrent &&
 		    ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 		{
-			do_respawn = qtrue;
+//			do_respawn = qtrue;
+			do_respawn = 1;
 		}
 		else if (ent->client->sess.sessionTeam == TEAM_RED)
 		{
 			testtime                            = (level.dwRedReinfOffset + level.timeCurrent - level.startTime) % g_redlimbotime.integer;
-			do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			//do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			if (testtime < ent->client->pers.lastReinforceTime) {
+                do_respawn = 1;
+			}
 			ent->client->pers.lastReinforceTime = testtime;
 		}
 		else if (ent->client->sess.sessionTeam == TEAM_BLUE)
 		{
 			testtime                            = (level.dwBlueReinfOffset + level.timeCurrent - level.startTime) % g_bluelimbotime.integer;
-			do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			//do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
+			if (testtime < ent->client->pers.lastReinforceTime) {
+                do_respawn = 1;
+			}
 			ent->client->pers.lastReinforceTime = testtime;
 		}
 
@@ -1835,6 +1843,7 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 		} else if ( clientNum == -2 ) {
 			clientNum = level.follow2;
 		}
+
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
 			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
@@ -1848,7 +1857,11 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 				if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR && ent->client->ps.pm_flags & PMF_LIMBO ) {
 					// abuse do_respawn var
 			//		savedScore = ent->client->ps.persistant[PERS_SCORE];
+
+
 					do_respawn = ent->client->ps.pm_time;
+
+
 			//		savedRespawns = ent->client->ps.persistant[PERS_RESPAWNS_LEFT];
 					savedClass = ent->client->ps.stats[STAT_PLAYER_CLASS];
 

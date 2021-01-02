@@ -513,8 +513,9 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 		// TODO Check this against OSPx
 		for ( i = 0 ; i < level.maxclients ; i++ ) {
 			if ( level.clients[i].ps.pm_flags & PMF_LIMBO
-				 && level.clients[i].sess.spectatorClient == ent->s.number ) {
-				Cmd_FollowCycle_f( &g_entities[i], 1 );
+				 && level.clients[i].sess.spectatorClient == ent->s.number
+				 &&  level.clients[i].sess.sessionTeam == ent->client->sess.sessionTeam) {
+			     Cmd_FollowCycle_f( &g_entities[i], 1 );
 			}
 		}
 	}
@@ -530,7 +531,6 @@ void reinforce( gentity_t *ent ) {
 	int p, team; // numDeployable=0, finished=0; // TTimo unused
 	char *classname;
 	gclient_t *rclient;
-
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		G_Printf( "FIXME: reinforce called from single player game.  Shouldn't see this\n" );
 		return;
@@ -554,11 +554,11 @@ void reinforce( gentity_t *ent ) {
 
 	// DHM - Nerve :: restore persistant data now that we're out of Limbo
 	rclient = ent->client;
+
 	for ( p = 0; p < MAX_PERSISTANT; p++ )
 		rclient->ps.persistant[p] = rclient->saved_persistant[p];
 	// dhm
-
-	respawn( ent );
+    respawn( ent );
 }
 // jpw
 
@@ -735,186 +735,7 @@ void SetWolfUserVars( gentity_t *ent, char *wolfinfo ) {
 	client->sess.latchPlayerWeapon = ( client->pers.cmd.mpSetup & mask ) >> MP_WEAPON_OFFSET;
 }
 
-/*
-===========
-SetWolfUserVarsClient (RtcwPro same as vanilla but client parameter)
-===========
-*/
-void SetWolfUserVarsClient(gclient_t* client) {
-
-	int mask, team;
-
-	if (!client) {
-		return;
-	}
-
-	// check if we have a valid snapshot
-	mask = MP_TEAM_MASK;
-	team = (client->pers.cmd.mpSetup & mask) >> MP_TEAM_OFFSET;
-
-	if (!team) {
-		return;
-	}
-
-	// set player class
-	mask = MP_CLASS_MASK;
-	client->sess.latchPlayerType = (client->pers.cmd.mpSetup & mask) >> MP_CLASS_OFFSET;
-
-	// set weapon
-	mask = MP_WEAPON_MASK;
-	client->sess.latchPlayerWeapon = (client->pers.cmd.mpSetup & mask) >> MP_WEAPON_OFFSET;
-}
-
 // -NERVE - SMF
-
-// RtcwPro - remove invalid weapon restrictions
-/*
-void RemoveWeaponRestrictions(gentity_t* ent) {
-
-	gclient_t* client = ent->client;
-
-	// return if not on a team
-	if (!(client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED))
-		return;
-
-	// reset team weapon restricitons in case someone lagged out or disconnected
-	if (g_maxTeamSniper.integer != -1) ResetTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_MAUSER, 6);
-	if (g_maxTeamPF.integer != -1) ResetTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_PANZERFAUST, 8);
-	if (g_maxTeamVenom.integer != -1) ResetTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_VENOM, 9);
-	if (g_maxTeamFlamer.integer != -1) ResetTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_FLAMETHROWER, 10);
-
-	// the server spawns the clients in order - so we need to remove other players restrictions if they aren't using that weapon
-	//this code wouldn't work right but leaving in place for future reference
-	//if (g_maxTeamSniper.integer && ((client->sess.sessionTeam == TEAM_RED) ? level.axisSniper > 0 : level.alliedSniper > 0)) {
-	//	RemoveTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_MAUSER, 6);
-	//}
-
-	//if (g_maxTeamPF.integer && ((client->sess.sessionTeam == TEAM_RED) ? level.axisPF > 0 : level.alliedPF > 0)) {
-	//	RemoveTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_PANZERFAUST, 8);
-	//}
-
-	//if (g_maxTeamVenom.integer && ((client->sess.sessionTeam == TEAM_RED) ? level.axisVenom > 0 : level.alliedVenom > 0)) {
-	//	RemoveTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_VENOM, 9);
-	//}
-
-	//if (g_maxTeamFlamer.integer && ((client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer > 0 : level.alliedFlamer > 0)) {
-	//	RemoveTeamWeaponRestrictions(client->ps.clientNum, client->sess.sessionTeam, WP_FLAMETHROWER, 10);
-	//}
-}
-
-// RtcwPro - If someone disconnects or lags out the weapon restriction for that user is not resetting the team's limit for that weapon
-void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon) {
-
-	int i, axisWeaponCount = 0, alliedWeaponCount = 0;
-	qboolean weaponInUse = qfalse;
-	gclient_t* teammate = level.clients + 0; // initialize it so we don't get an error
-
-	// if not on a team exit out
-	if (!(team == TEAM_BLUE || team == TEAM_RED))
-		return;
-
-	for (i = 0; i < level.numPlayingClients; i++) {
-
-		teammate = level.clients + level.sortedClients[i];
-
-		if (teammate->pers.connected != CON_CONNECTED || teammate->sess.sessionTeam != team) {
-			continue;
-		}
-
-		// if someone on the team has the weapon set flag true and up the count
-		if (teammate->sess.playerWeapon == weapon) { // && teammate->pers.restrictedWeapon == enumWeapon) {
-			weaponInUse = qtrue;
-			//(teammate->sess.sessionTeam == TEAM_RED) ? axisWeaponCount++ : alliedWeaponCount++;
-		}
-
-	}
-
-	if (!weaponInUse)
-	{
-		switch (enumWeapon)
-		{
-			case WP_MAUSER:
-				if (teammate->sess.sessionTeam == TEAM_RED) level.axisSniper = 0; else level.alliedSniper = 0;
-				break;
-			case WP_PANZERFAUST:
-				if (teammate->sess.sessionTeam == TEAM_RED) level.axisPF = 0; else level.alliedPF = 0;
-				break;
-			case WP_FLAMETHROWER:
-				if (teammate->sess.sessionTeam == TEAM_RED) level.axisFlamer = 0; else level.alliedFlamer = 0;
-				break;
-			case WP_VENOM:
-				if (teammate->sess.sessionTeam == TEAM_RED) level.axisVenom = 0; else level.alliedVenom = 0;
-				break;
-		}
-	}
-	//else // this is handled in WolfSetSpawnWeapons
-	//{
-	//	switch (enumWeapon)
-	//	{
-	//		case WP_MAUSER:
-	//			if (teammate->sess.sessionTeam == TEAM_RED) level.axisSniper = axisWeaponCount; else level.alliedSniper = alliedWeaponCount;
-	//			break;
-	//		case WP_PANZERFAUST:
-	//			if (teammate->sess.sessionTeam == TEAM_RED) level.axisPF = axisWeaponCount; else level.alliedPF = alliedWeaponCount;
-	//			break;
-	//		case WP_FLAMETHROWER:
-	//			if (teammate->sess.sessionTeam == TEAM_RED) level.axisFlamer = axisWeaponCount; else level.alliedFlamer = alliedWeaponCount;
-	//			break;
-	//		case WP_VENOM:
-	//			if (teammate->sess.sessionTeam == TEAM_RED) level.axisVenom = axisWeaponCount; else level.alliedVenom = alliedWeaponCount;
-	//			break;
-	//	}
-	//}
-
-}
-*/
-/*
-// RtcwPro - Check player's teammates to see if anyone has a specific weapon restriction - remove it if they aren't using that weapon
-this code wouldn't work right but leaving in place for future reference
-void RemoveTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon) {
-
-	int i;
-	gclient_t *teammate;
-
-	// if not on a team exit out
-	if (!(team == TEAM_BLUE || team == TEAM_RED))
-		return;
-
-	for (i = 0; i < level.numPlayingClients; i++) {
-
-		teammate = level.clients + level.sortedClients[i];
-
-		// if player is not connected, on other team, or equal to the client we're on continue
-		if (teammate->pers.connected != CON_CONNECTED || teammate->sess.sessionTeam != team || teammate->ps.clientNum == clientNum) {
-			continue;
-		}
-
-		SetWolfUserVarsClient(teammate); // make sure their latched weapon is setup
-
-		if (teammate->ps.persistant[PERS_RESTRICTEDWEAPON] == enumWeapon && teammate->sess.latchPlayerWeapon != weapon) {
-
-			switch (enumWeapon)
-			{
-				case WP_MAUSER:
-					(teammate->sess.sessionTeam == TEAM_RED) ? level.axisSniper-- : level.alliedSniper--;
-					break;
-				case WP_PANZERFAUST:
-					(teammate->sess.sessionTeam == TEAM_RED) ? level.axisPF-- : level.alliedPF--;
-					break;
-				case WP_FLAMETHROWER:
-					(teammate->sess.sessionTeam == TEAM_RED) ? level.axisFlamer-- : level.alliedFlamer--;
-					break;
-				case WP_VENOM:
-					(teammate->sess.sessionTeam == TEAM_RED) ? level.axisVenom-- : level.alliedVenom--;
-					break;
-			}
-
-			teammate->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE;
-		}
-
-	}
-}
-*/
 
 // DHM - Nerve
 /*
@@ -977,8 +798,9 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 	}
 }
 
-void SetWolfSpawnWeapons( gclient_t *client ) {
+void SetWolfSpawnWeapons( gentity_t *ent ) {
 
+	gclient_t* client = ent->client;
 
 	int pc = client->sess.playerType;
 	int starthealth = 100,i,numMedics = 0;   // JPW NERVE
@@ -1090,9 +912,9 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 				break;
 		}
 
-		switch ( client->sess.sessionTeam ) { // was playerItem		
+		switch ( client->sess.sessionTeam ) { // was playerItem
 			int nades;
-			
+
 			case TEAM_BLUE:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_PINEAPPLE );
 				client->ps.ammo[BG_FindAmmoForWeapon( WP_GRENADE_PINEAPPLE )] = 0;
@@ -1122,7 +944,7 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 				else if ( pc == PC_SOLDIER ) nades = soldNades;
 				else nades = 1;
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_PINEAPPLE )] = nades;
-				break;		
+				break;
 		}
 
 
@@ -1152,139 +974,7 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 			// jpw
 			switch ( client->sess.playerWeapon ) {
 
-			case 3:     // WP_MP40
-				COM_BitSet( client->ps.weapons, WP_MP40 );
-				client->ps.ammoclip[BG_FindClipForWeapon( WP_MP40 )] += 32;
-				if ( pc == PC_SOLDIER ) {
-					client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * soldClips);
-				} else {
-					client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
-				}
-				client->ps.weapon = WP_MP40;
-				break;
-
-			case 4:     // WP_THOMPSON
-				COM_BitSet( client->ps.weapons, WP_THOMPSON );
-				client->ps.ammoclip[BG_FindClipForWeapon( WP_THOMPSON )] += 30;
-				if ( pc == PC_SOLDIER ) {
-					client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * soldClips);
-				} else {
-					client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
-				}
-				client->ps.weapon = WP_THOMPSON;
-				break;
-
-			case 5:     // WP_STEN
-				COM_BitSet( client->ps.weapons, WP_STEN );
-				client->ps.ammoclip[BG_FindClipForWeapon( WP_STEN )] += 32;
-				if ( pc == PC_SOLDIER ) {
-					client->ps.ammo[BG_FindAmmoForWeapon( WP_STEN )] += (32 * soldClips);
-				} else {
-					client->ps.ammo[BG_FindAmmoForWeapon( WP_STEN )] += (32 * ltClips);
-				}
-				client->ps.weapon = WP_STEN;
-				break;
-
-			case 6:     // WP_MAUSER, WP_SNIPERRIFLE
-				if ( pc != PC_SOLDIER ) {
-					return;
-				}
-
-				if (g_maxTeamSniper.integer != -1 ) {
-					if (isWeaponLimited(client, client->sess.playerWeapon)) {
-						trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Sniper limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamSniper.integer));
-						SetDefaultWeapon(client, qtrue);
-						break;
-					}
-
-					if (client->pers.restrictedWeapon != WP_MAUSER) {
-						(client->sess.sessionTeam == TEAM_RED) ? level.axisSniper++ : level.alliedSniper++;
-						client->pers.restrictedWeapon = WP_MAUSER;
-					}
-				}
-				
-				COM_BitSet( client->ps.weapons, WP_SNIPERRIFLE );
-				client->ps.ammoclip[BG_FindClipForWeapon( WP_SNIPERRIFLE )] = 10;
-				client->ps.ammo[BG_FindAmmoForWeapon( WP_SNIPERRIFLE )] = 10;
-				client->ps.weapon = WP_SNIPERRIFLE;
-
-				COM_BitSet( client->ps.weapons, WP_MAUSER );
-				client->ps.ammoclip[BG_FindClipForWeapon( WP_MAUSER )] = 10;
-				client->ps.ammo[BG_FindAmmoForWeapon( WP_MAUSER )] = 10;
-				client->ps.weapon = WP_MAUSER;
-				break;
-
-			case 8:     // WP_PANZERFAUST
-				if ( pc != PC_SOLDIER ) {
-					return;
-				}
-
-				if ( g_maxTeamPF.integer != -1 ) {
-					if (isWeaponLimited(client, client->sess.playerWeapon)) {
-						trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Panzer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamPF.integer));
-						SetDefaultWeapon(client, qtrue);
-						break;
-					}
-
-					if (client->pers.restrictedWeapon != WP_PANZERFAUST) {
-						(client->sess.sessionTeam == TEAM_RED) ? level.axisPF++ : level.alliedPF++;
-						client->pers.restrictedWeapon = WP_PANZERFAUST;
-					}
-				}
-				
-				COM_BitSet( client->ps.weapons, WP_PANZERFAUST );
-				client->ps.ammo[BG_FindAmmoForWeapon( WP_PANZERFAUST )] = 4;
-				client->ps.weapon = WP_PANZERFAUST;
-				break;
-
-			case 9:     // WP_VENOM
-				if ( pc != PC_SOLDIER ) {
-					return;
-				}
-
-				if ( g_maxTeamVenom.integer != -1 ) {
-					if (isWeaponLimited(client, client->sess.playerWeapon)) {
-						trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Venom limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamVenom.integer));
-						SetDefaultWeapon(client, qtrue);
-						break;
-					}
-
-					if (client->pers.restrictedWeapon != WP_VENOM) {
-						(client->sess.sessionTeam == TEAM_RED) ? level.axisVenom++ : level.alliedVenom++;
-						client->pers.restrictedWeapon = WP_VENOM;
-					}
-				}
-				
-				COM_BitSet( client->ps.weapons, WP_VENOM );
-				client->ps.ammoclip[BG_FindAmmoForWeapon( WP_VENOM )] = 500;
-				client->ps.weapon = WP_VENOM;
-				break;
-
-			case 10:    // WP_FLAMETHROWER
-				if ( pc != PC_SOLDIER ) {
-					return;
-				}
-
-				if ( g_maxTeamFlamer.integer != -1 ) {
-					if (isWeaponLimited(client, client->sess.playerWeapon)) {
-						trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Flamer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamFlamer.integer));
-						SetDefaultWeapon(client, qtrue);
-						break;
-					}
-
-					if (client->pers.restrictedWeapon != WP_FLAMETHROWER) {
-						(client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer++ : level.alliedFlamer++;
-						client->pers.restrictedWeapon = WP_FLAMETHROWER;
-					}
-				}
-				
-				COM_BitSet( client->ps.weapons, WP_FLAMETHROWER );
-				client->ps.ammoclip[BG_FindAmmoForWeapon( WP_FLAMETHROWER )] = 200;
-				client->ps.weapon = WP_FLAMETHROWER;
-				break;
-
-			default:    // give MP40 if given invalid weapon number
-				if ( client->sess.sessionTeam == TEAM_RED ) { // JPW NERVE
+				case 3:     // WP_MP40
 					COM_BitSet( client->ps.weapons, WP_MP40 );
 					client->ps.ammoclip[BG_FindClipForWeapon( WP_MP40 )] += 32;
 					if ( pc == PC_SOLDIER ) {
@@ -1293,7 +983,9 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
 					}
 					client->ps.weapon = WP_MP40;
-				} else { // TEAM_BLUE
+					break;
+
+				case 4:     // WP_THOMPSON
 					COM_BitSet( client->ps.weapons, WP_THOMPSON );
 					client->ps.ammoclip[BG_FindClipForWeapon( WP_THOMPSON )] += 30;
 					if ( pc == PC_SOLDIER ) {
@@ -1302,8 +994,128 @@ void SetWolfSpawnWeapons( gclient_t *client ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
 					}
 					client->ps.weapon = WP_THOMPSON;
-				}
-				break;
+					break;
+
+				case 5:     // WP_STEN
+					COM_BitSet( client->ps.weapons, WP_STEN );
+					client->ps.ammoclip[BG_FindClipForWeapon( WP_STEN )] += 32;
+					if ( pc == PC_SOLDIER ) {
+						client->ps.ammo[BG_FindAmmoForWeapon( WP_STEN )] += (32 * soldClips);
+					} else {
+						client->ps.ammo[BG_FindAmmoForWeapon( WP_STEN )] += (32 * ltClips);
+					}
+					client->ps.weapon = WP_STEN;
+					break;
+
+
+				// NOTES - when porting ET pub IsWeaponDisabled they were doing in ClientSpawn and checking both sess.latchPlayerWeapon and sess.playerWeapon values
+				// we are already past that point and sess.playerWeapon has been set to sess.latchPlayerWeapon
+				// so we're going to call the method with sess.playerWeapon
+
+				case 6:     // WP_MAUSER, WP_SNIPERRIFLE
+					if ( pc != PC_SOLDIER ) {
+						return;
+					}
+
+					if (g_maxTeamSniper.integer != -1 ) {
+						if (IsWeaponDisabled(ent, WP_MAUSER, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Sniper limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamSniper.integer));
+							SetDefaultWeapon(client, qtrue);
+							break;
+						}
+					}
+				
+					COM_BitSet( client->ps.weapons, WP_SNIPERRIFLE );
+					client->ps.ammoclip[BG_FindClipForWeapon( WP_SNIPERRIFLE )] = 10;
+					client->ps.ammo[BG_FindAmmoForWeapon( WP_SNIPERRIFLE )] = 10;
+					client->ps.weapon = WP_SNIPERRIFLE;
+
+					COM_BitSet( client->ps.weapons, WP_MAUSER );
+					client->ps.ammoclip[BG_FindClipForWeapon( WP_MAUSER )] = 10;
+					client->ps.ammo[BG_FindAmmoForWeapon( WP_MAUSER )] = 10;
+					client->ps.weapon = WP_MAUSER;
+					break;
+
+				case 8:     // WP_PANZERFAUST
+					if ( pc != PC_SOLDIER ) {
+						return;
+					}
+
+					if ( g_maxTeamPF.integer != -1 ) {
+						if (IsWeaponDisabled(ent, WP_PANZERFAUST, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Panzer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamPF.integer));
+							SetDefaultWeapon(client, qtrue);
+							break;
+						}
+					}
+				
+					COM_BitSet( client->ps.weapons, WP_PANZERFAUST );
+					client->ps.ammo[BG_FindAmmoForWeapon( WP_PANZERFAUST )] = 4;
+					client->ps.weapon = WP_PANZERFAUST;
+					break;
+
+				case 9:     // WP_VENOM
+					if ( pc != PC_SOLDIER ) {
+						return;
+					}
+
+					if ( g_maxTeamVenom.integer != -1 ) {
+						if (IsWeaponDisabled(ent, WP_VENOM, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Venom limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamVenom.integer));
+							SetDefaultWeapon(client, qtrue);
+							break;
+						}
+					}
+				
+					COM_BitSet( client->ps.weapons, WP_VENOM );
+					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_VENOM )] = 500;
+					client->ps.weapon = WP_VENOM;
+					break;
+
+				case 10:    // WP_FLAMETHROWER
+					if ( pc != PC_SOLDIER ) {
+						return;
+					}
+
+					if ( g_maxTeamFlamer.integer != -1 ) {
+						if (IsWeaponDisabled(ent, WP_FLAMETHROWER, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Flamer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamFlamer.integer));
+							SetDefaultWeapon(client, qtrue);
+							break;
+						}
+
+						if (client->pers.restrictedWeapon != WP_FLAMETHROWER) {
+							(client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer++ : level.alliedFlamer++;
+							client->pers.restrictedWeapon = WP_FLAMETHROWER;
+						}
+					}
+				
+					COM_BitSet( client->ps.weapons, WP_FLAMETHROWER );
+					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_FLAMETHROWER )] = 200;
+					client->ps.weapon = WP_FLAMETHROWER;
+					break;
+
+				default:    // give MP40 if given invalid weapon number
+					if ( client->sess.sessionTeam == TEAM_RED ) { // JPW NERVE
+						COM_BitSet( client->ps.weapons, WP_MP40 );
+						client->ps.ammoclip[BG_FindClipForWeapon( WP_MP40 )] += 32;
+						if ( pc == PC_SOLDIER ) {
+							client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * soldClips);
+						} else {
+							client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
+						}
+						client->ps.weapon = WP_MP40;
+					} else { // TEAM_BLUE
+						COM_BitSet( client->ps.weapons, WP_THOMPSON );
+						client->ps.ammoclip[BG_FindClipForWeapon( WP_THOMPSON )] += 30;
+						if ( pc == PC_SOLDIER ) {
+							client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * soldClips);
+						} else {
+							client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
+						}
+						client->ps.weapon = WP_THOMPSON;
+					}
+					break;
 			}
 		} else { // medic or engineer gets assigned MP40 or Thompson with one magazine ammo
 			// L0 - Removed and handled in g_players.c now...due custom MG spawning..
@@ -1803,6 +1615,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
 			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", oldname,
 											client->pers.netname ) );
+
+            if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) {
+                G_writeGeneralEvent (ent,ent, " ", eventNameChange);
+            }
+
 		}
 	}
 
@@ -1827,6 +1644,10 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	// DHM - Nerve :: Forcibly set both model and skin for multiplayer.
 	if ( g_gametype.integer >= GT_WOLF ) {
+
+
+
+
 
 		// To communicate it to cgame
 		client->ps.stats[ STAT_PLAYER_CLASS ] = client->sess.playerType;
@@ -1906,7 +1727,7 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 
-		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\country\\255\\mu\\%i",  // nihi added
+		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\country\\255\\mu\\%i",
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
@@ -1914,7 +1735,7 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->sess.uci, (client->sess.ignored ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",  // nihi added
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
 				client->sess.uci, (client->sess.ignored ? 1 : 0),
@@ -1951,6 +1772,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
 	G_DPrintf( "ClientUserinfoChanged: %i :: %s\n", clientNum, s );
+
 }
 
 
@@ -2192,11 +2014,12 @@ void ClientBegin( int clientNum ) {
 			ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = -1;
 		}
 	}
-	// nihi commented below
-/*
+
+
 	// DHM - Nerve :: Start players in limbo mode if they change teams during the match
 	if ( g_gametype.integer >= GT_WOLF && client->sess.sessionTeam != TEAM_SPECTATOR
-		 && ( level.time - client->pers.connectTime ) > 60000 ) {
+		 && (((g_tournament.integer) && ( level.time - client->pers.connectTime ) > 1000)
+        || ( level.time - client->pers.connectTime ) > 6000)) {
 		ent->client->ps.pm_type = PM_DEAD;
 		ent->r.contents = CONTENTS_CORPSE;
 		ent->health = 0;
@@ -2208,7 +2031,7 @@ void ClientBegin( int clientNum ) {
 
 		limbo( ent, qfalse );
 	}
-*/
+
 	// Ridah, trigger a spawn event
 	// DHM - Nerve :: Only in single player
 	if ( g_gametype.integer == GT_SINGLE_PLAYER && !( ent->r.svFlags & SVF_CASTAI ) ) {
@@ -2245,7 +2068,167 @@ void ClientBegin( int clientNum ) {
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
+    client->sess.start_time = level.time; // start time of client (come back and change to unix time perhaps?)
 }
+
+// ------------------------------------------------------
+// Team Weapon Count - ET Pub Port
+// ------------------------------------------------------
+int TeamWeaponCount(gentity_t* ent, team_t team, int weap) {
+	int i, j, cnt;
+
+	if (weap == -1) { // we aint checking for a weapon, so always include ourselves
+		cnt = 1;
+	}
+	else { // we ARE checking for a weapon, so ignore ourselves
+		cnt = 0;
+	}
+
+	// RtcwPro - without this loop we still have problems switching mid-round
+	// loops through players and set all the latched weapons
+	for (i = 0; i < level.maxclients; i++) {
+
+		j = level.sortedClients[i];
+
+		if (j == ent - g_entities) {
+			continue;
+		}
+
+		if (level.clients[j].sess.sessionTeam != team) {
+			continue;
+		}
+
+		SetWolfUserVars(&g_entities[j], NULL);
+	}
+
+	for (i = 0; i < level.numConnectedClients; i++) {
+
+		j = level.sortedClients[i];
+
+		if (j == ent - g_entities) {
+			continue;
+		}
+
+		if (level.clients[j].sess.sessionTeam != team) {
+			continue;
+		}
+
+		if (weap != -1) {
+
+			if (weap == WP_PANZERFAUST) weap = 8; // fudge the number - sess.playerWeapon uses 8 for panzer
+
+			gentity_t *player;
+			player = g_entities + level.sortedClients[j];
+
+			// if player is not in limbo and has the weapon
+			if (!(player->client->ps.pm_flags & PMF_LIMBO) && level.clients[j].sess.playerWeapon == weap && level.clients[j].sess.latchPlayerWeapon == weap) {
+				cnt++;
+			}
+		}
+	}
+
+	return cnt;
+}
+
+// ------------------------------------------------------
+// Weapon Limiting - ET Pub Port
+// ------------------------------------------------------
+qboolean IsWeaponDisabled(
+	gentity_t* ent,
+	weapon_t weapon,
+	team_t team,
+	qboolean quiet)
+{
+	int playerCount, weaponCount, maxCount;
+
+	// tjw: specs can have any weapon they want
+	if (team == TEAM_SPECTATOR) {
+		return qfalse;
+	}
+
+	// forty - Flames heavy weapons restriction fix
+	playerCount = TeamWeaponCount(ent, team, -1);
+	weaponCount = TeamWeaponCount(ent, team, weapon);
+
+	switch (weapon) {
+		case WP_PANZERFAUST:
+			maxCount = g_maxTeamPF.integer;
+			if (maxCount == -1) {
+				return qfalse;
+			}
+			/*if (strstr(team_maxPanzers.string, "%-")) { // these 2 if blocks allows a percentage
+				maxCount = floor(maxCount * playerCount * 0.01f);
+			}
+			else if (strstr(team_maxPanzers.string, "%")) {
+				maxCount = ceil(maxCount * playerCount * 0.01f);
+			}*/
+			if (weaponCount >= maxCount) {
+				/*if (!quiet && !(ent->client->ps.pm_flags & PMF_LIMBO)) {
+					CP("cp \"^1*^3 PANZERFAUST not available!^1 *\" 1");
+				}*/
+				return qtrue;
+			}
+			break;
+		case WP_VENOM:
+			maxCount = g_maxTeamVenom.integer;
+			if (maxCount == -1) {
+				return qfalse;
+			}
+			/*if (strstr(team_maxMG42s.string, "%-")) { // these 2 if blocks allows a percentage
+				maxCount = floor(maxCount * playerCount * 0.01f);
+			}
+			else if (strstr(team_maxMG42s.string, "%")) {
+				maxCount = ceil(maxCount * playerCount * 0.01f);
+			}*/
+			if (weaponCount >= maxCount) {
+				/*if (!quiet && !(ent->client->ps.pm_flags & PMF_LIMBO)) {
+					CP("cp \"^1*^3 VENOM not available!^1 *\" 1");
+				}*/
+				return qtrue;
+			}
+			break;
+		case WP_FLAMETHROWER:
+			maxCount = g_maxTeamFlamer.integer;
+			if (maxCount == -1) {
+				return qfalse;
+			}
+			/*if (strstr(team_maxFlamers.string, "%-")) { // these 2 if blocks allows a percentage
+				maxCount = floor(maxCount * playerCount * 0.01f);
+			}
+			else if (strstr(team_maxFlamers.string, "%")) {
+				maxCount = ceil(maxCount * playerCount * 0.01f);
+			}*/
+			if (weaponCount >= maxCount) {
+				/*if (!quiet && !(ent->client->ps.pm_flags & PMF_LIMBO)) {
+					CP("cp \"^1*^3 FLAMETHROWER not available!^1 *\" 1");
+				}*/
+				return qtrue;
+			}
+			break;
+		case WP_MAUSER:
+			maxCount = g_maxTeamSniper.integer;
+			if (maxCount == -1) {
+				return qfalse;
+			}
+			/*if (strstr(team_maxMortars.string, "%-")) { // these 2 if blocks allows a percentage
+				maxCount = floor(maxCount * playerCount * 0.01f);
+			}
+			else if (strstr(team_maxMortars.string, "%")) {
+				maxCount = ceil(maxCount * playerCount * 0.01f);
+			}*/
+			if (weaponCount >= maxCount) {
+				/*if (!quiet && !(ent->client->ps.pm_flags & PMF_LIMBO)) {
+					CP("cp \"^1*^3 SNIPER not available!^1 *\" 1");
+				}*/
+				return qtrue;
+			}
+			break;
+
+	}
+
+	return qfalse;
+}
+
 
 /*
 ===========
@@ -2456,34 +2439,18 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 				update = qtrue;
 			}
 
-			if ( ( g_maxTeamPF.integer ) && ( client->pers.restrictedWeapon == WP_PANZERFAUST ) && ( client->sess.latchPlayerWeapon != 8 ) ) {
-				( client->sess.sessionTeam == TEAM_RED ) ? level.axisPF-- : level.alliedPF--;
-				client->pers.restrictedWeapon = WP_NONE;
-			}
 
-			if ( ( g_maxTeamVenom.integer ) && ( client->pers.restrictedWeapon == WP_VENOM ) && ( client->sess.latchPlayerWeapon != 9 ) ) {
-				( client->sess.sessionTeam == TEAM_RED ) ? level.axisVenom-- : level.alliedVenom--;
-				client->pers.restrictedWeapon = WP_NONE;
-			}
-
-			if ( ( g_maxTeamFlamer.integer ) && ( client->pers.restrictedWeapon == WP_FLAMETHROWER ) && ( client->sess.latchPlayerWeapon != 10 ) ) {
-				( client->sess.sessionTeam == TEAM_RED ) ? level.axisFlamer-- : level.alliedFlamer--;
-				client->pers.restrictedWeapon = WP_NONE;
-			}
-
-			if ( ( g_maxTeamSniper.integer ) && ( client->pers.restrictedWeapon == WP_MAUSER ) && ( client->sess.latchPlayerWeapon != 6 ) ) {
-				( client->sess.sessionTeam == TEAM_RED ) ? level.axisSniper-- : level.alliedSniper--;
-				client->pers.restrictedWeapon = WP_NONE;
-			}
 			client->sess.playerType = client->sess.latchPlayerType;
 			client->sess.playerWeapon = client->sess.latchPlayerWeapon;
 			client->sess.playerItem = client->sess.latchPlayerItem;
 			client->sess.playerSkin = client->sess.latchPlayerSkin;
 
-			//RemoveWeaponRestrictions(ent); // RtcwPro check for invalid weapon restrictions
-
 			if ( update ) {
 				ClientUserinfoChanged( index );
+
+                if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING) ) {
+                    G_writeGeneralEvent (ent,ent, " ", eventClassChange);
+                }
 			}
 		}
 
@@ -2506,7 +2473,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		}
 
 		// End Xian
-		SetWolfSpawnWeapons( client ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
+		SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
 	}
 	// dhm - end
 
@@ -2661,28 +2628,6 @@ void ClientDisconnect( int clientNum ) {
 		}
 	}
 
-	// RtcwPro remove weapon restriction when player drops
-	if (ent->client->pers.restrictedWeapon != WP_NONE) {
-
-		switch (ent->client->pers.restrictedWeapon)
-		{
-			case WP_MAUSER:
-				if (ent->client->sess.sessionTeam == TEAM_RED) level.axisSniper--; else level.alliedSniper--;
-				break;
-			case WP_PANZERFAUST:
-				if (ent->client->sess.sessionTeam == TEAM_RED) level.axisPF--; else level.alliedPF--;
-				break;
-			case WP_VENOM:
-				if (ent->client->sess.sessionTeam == TEAM_RED) level.axisVenom--; else level.alliedVenom--;
-				break;
-			case WP_FLAMETHROWER:
-				if (ent->client->sess.sessionTeam == TEAM_RED) level.axisFlamer--; else level.alliedFlamer--;
-				break;
-		}
-
-		ent->client->pers.restrictedWeapon = WP_NONE;
-	}
-
 	G_LogPrintf( "ClientDisconnect: %i\n", clientNum );
 
 	// if we are playing in tourney mode and losing, give a win to the other player
@@ -2692,6 +2637,11 @@ void ClientDisconnect( int clientNum ) {
 		ClientUserinfoChanged( level.sortedClients[0] );
 	}
 
+    if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
+        G_writeDisconnectEvent(ent);
+
+    }
+
 	trap_UnlinkEntity( ent );
 	ent->s.modelindex = 0;
 	ent->inuse = qfalse;
@@ -2699,6 +2649,10 @@ void ClientDisconnect( int clientNum ) {
 	ent->client->pers.connected = CON_DISCONNECTED;
 	ent->client->ps.persistant[PERS_TEAM] = TEAM_FREE;
 	ent->client->sess.sessionTeam = TEAM_FREE;
+
+	ent->client->sess.end_time = level.time; // end time of client (come back and change to unix time perhaps?)
+
+
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
@@ -2713,6 +2667,7 @@ void ClientDisconnect( int clientNum ) {
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
+
 }
 
 
