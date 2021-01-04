@@ -1950,9 +1950,12 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 		level.CNstart = 0; // Resets countdown if it was aborted before
 		level.paused = PAUSE_UNPAUSING;
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tag));
+
 	}
 
-
+    if (g_gameStatslog.integer) {
+        G_writeGeneralEvent (ent , ent, " ", (resume) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
+    }
 
 	// Log it
 	action = (resume) ? "resumed the match." : "paused a match.";

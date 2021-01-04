@@ -4088,7 +4088,13 @@ void CG_WeaponBank_f( void ) {
 
 	bank = atoi( CG_Argv( 1 ) );
 
-	if ( bank <= 0 || bank > maxWeapBanks ) {
+	// if not multiplayer do maxWeapBanks
+	if (cg_gameType.integer < GT_WOLF) {
+		if ( bank <= 0 || bank > maxWeapBanks )
+			return;
+	}
+	// multiplayer only do banks less than 7
+	else if (bank <= 0 || bank > 6) {
 		return;
 	}
 

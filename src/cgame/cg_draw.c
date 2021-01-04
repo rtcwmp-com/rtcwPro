@@ -858,7 +858,7 @@ static float CG_DrawTeamOverlay( float y ) {
 			} else {
 				pcolor = deathcolor;
 				// RtcwPro
-				if (!(cg.snap->ps.pm_flags & PMF_LIMBO && cg.snap->ps.stats[STAT_HEALTH] > GIB_HEALTH))
+				if (!(cg_entities[ci->clientNum].currentState.eType & ET_INVISIBLE) && (cg_entities[ci->clientNum].currentState.eFlags & EF_DEAD))
 					isRevivable = "*";
 			}
 			// jpw
@@ -1113,7 +1113,7 @@ static float CG_DrawEnemyTimer(float y) {
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
 	else {
-        return;
+        return y;
 	}
 
 	return y += TINYCHAR_HEIGHT;
@@ -2488,7 +2488,7 @@ static void CG_DrawCrosshairNames( void ) {
 	CG_ScanForCrosshairEntity();
 
 	// draw the name of the player being looked at
-	color = CG_FadeColor( cg.crosshairClientTime, 1000 );
+	color = CG_FadeColor( cg.crosshairClientTime, 250 );
 
 	if ( !color ) {
 		trap_R_SetColor( NULL );
@@ -2561,7 +2561,7 @@ static void CG_DrawCrosshairNames( void ) {
 	// -NERVE - SMF
 
 	// RtcwPro add player ammo if player class is LT
-	if (cgClass == 3)
+	if (cgClass == 3 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
 		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
@@ -2630,7 +2630,7 @@ static void CG_DrawVote( void ) {
 		}
 
 		// OSPx - Complaint popup
-		if (cg_complaintPopUp.integer)
+		if (cg_complaintPopUp.integer && cgs.gamestate != GS_WARMUP)
 		{
 			s = va(CG_TranslateString("File complaint against %s for team-killing?"), cgs.clientinfo[cgs.complaintClient].name);
 			CG_DrawStringExt(8, 200, s, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);

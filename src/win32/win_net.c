@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1002,7 +1002,36 @@ NET_Sleep
 sleeps msec or until net socket is ready
 ====================
 */
-void NET_Sleep( int msec ) {
+// fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+void NET_Sleep(int msec) {
+	struct timeval timeout;
+	fd_set fdset;
+	SOCKET highestfd = INVALID_SOCKET;
+	if (msec < 0)
+		msec = 0;
+	if (!ip_socket || !com_dedicated->integer) {
+		return; // we're not a server, just run full speed
+
+	}
+	FD_ZERO(&fdset);
+	if (ip_socket != INVALID_SOCKET)
+	{
+		FD_SET(ip_socket, &fdset);
+
+		highestfd = ip_socket;
+	}
+
+	//    #ifdef _WIN32
+	if (highestfd == INVALID_SOCKET)
+	{
+		// windows ain't happy when select is called without valid FDs
+		SleepEx(msec, 0);
+		return;
+	}
+	//#endif
+	timeout.tv_sec = msec / 1000;
+	timeout.tv_usec = (msec % 1000) * 1000;
+	select(ip_socket + 1, &fdset, NULL, NULL, &timeout);
 }
 
 

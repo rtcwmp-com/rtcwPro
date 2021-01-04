@@ -334,8 +334,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	if ( meansOfDeath == MOD_SELFKILL && g_gamestate.integer == GS_PLAYING) {
 		int r = rand() %2; // randomize messages
-			
-		if (r == 0)			
+
+		if (r == 0)
 			AP(va("print \"%s ^7slit his throat.\n\"", self->client->pers.netname));
 		else if (r == 1)
 			AP(va("print \"%s ^7commited suicide.\n\"", self->client->pers.netname));
@@ -343,26 +343,29 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	/* new stats if (meansOfDeath == MOD_KNIFE2 && g_gamestate.integer == GS_PLAYING) {
 		attacker->client->pers.stats.knife++;
 	}*/
+
 	// If person gets stabbed use custom sound from soundpack
 	// it's broadcasted to victim and heard only if standing near victim...
-	if ( meansOfDeath == MOD_KNIFE_STEALTH && !OnSameTeam(self, attacker) && g_fastStabSound.integer) {
-		int r = rand() %2; 
-		char *snd;
+	if ( (meansOfDeath == MOD_KNIFE_STEALTH || meansOfDeath == MOD_KNIFE) && !OnSameTeam(self, attacker) && g_fastStabSound.integer > 0) {
+		int r = rand() %2;
+		char *snd = "goat.wav"; // default
 
-		if (r == 0)
+		if (r == 0 || g_fastStabSound.integer == 1)
 			snd = "goat.wav";
-		else
+		else if (r == 1 || g_fastStabSound.integer == 2)
 			snd = "humiliation.wav";
 
-		APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" : 
-			((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
+		APS(va("sound/match/%s", snd));
+
+		//APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" :
+		//	((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
 
 		attacker->client->sess.knifeKills++;
 		//write_RoundStats(attacker->client->pers.netname, attacker->client->pers.stats.knifeStealth, ROUND_FASTSTABS);
 	}
 
 	// RtcwPro commented this out - we want artillery distinguished from airstrike
-	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {		
+	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {
 	//	meansOfDeath = MOD_AIRSTRIKE; // Just Remaps it back..
 	//}
 
@@ -378,12 +381,33 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
+        // GameStats logging .... probably want to control this via cvar (as well as do a better job in general)
+        if (g_gameStatslog.integer) {
+            if (killer == self->s.number) {
+                 G_writeGeneralEvent(self,self,obit,eventSuicide);
+            }
+            else if (OnSameTeam(attacker, self)) {
+                if ( attacker->client ) {
+                    G_writeGeneralEvent(attacker,self,obit,eventTeamkill);
+                }
+            }
+            else {
+                if ( attacker->client ) {
+                    int weapID;
+                    weapID = G_weapStatIndex_MOD( meansOfDeath );
+                    //G_writeGeneralEvent(attacker,self,obit,eventKill);
+                    G_writeGeneralEvent(attacker,self,va("%s",aWeaponInfo[weapID].pszName),eventKill);
+
+                }
+            }
+
+        }
 	}
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
 		if (!OnSameTeam(attacker, self)) {
-			
+
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
 			attacker->client->pers.life_kills++;		// life kills
 
@@ -525,6 +549,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				item = BG_FindItem( "Objective" );
 			}
 			G_matchPrintInfo(va("Axis have lost %s!", self->message), qfalse);
+
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}
 
@@ -684,218 +709,6 @@ int CheckArmor( gentity_t *ent, int damage, int dflags ) {
 	client->ps.stats[STAT_ARMOR] -= save;
 
 	return save;
-}
-
-qboolean IsHeadShotWeapon( int mod, qboolean aicharacter ) {
-	if ( aicharacter ) {       // ai's are allowed headshots from these weapons
-		if ( mod == MOD_SNIPERRIFLE ||
-			 mod == MOD_SNOOPERSCOPE ) {
-			return qtrue;
-		}
-
-		return qfalse;
-	}
-
-	// players are allowed headshots from these weapons
-	if (    mod == MOD_LUGER ||
-			mod == MOD_COLT ||
-			mod == MOD_AKIMBO ||    //----(SA)	added
-			mod == MOD_MP40 ||
-			mod == MOD_THOMPSON ||
-			mod == MOD_STEN ||
-			mod == MOD_BAR ||
-			mod == MOD_FG42 ||
-			mod == MOD_FG42SCOPE ||
-			mod == MOD_MAUSER ||
-			mod == MOD_GARAND || // JPW NERVE this was left out
-			mod == MOD_SNIPERRIFLE ||
-			mod == MOD_SNOOPERSCOPE ||
-			mod == MOD_SILENCER ||  //----(SA)	modified
-			mod == MOD_SNIPERRIFLE ) {
-		return qtrue;
-	}
-
-	return qfalse;
-}
-
-qboolean IsHeadShot( gentity_t *targ, qboolean isAICharacter, vec3_t dir, vec3_t point, int mod ) {
-	gentity_t   *head;
-	trace_t tr;
-	vec3_t start, end;
-	gentity_t   *traceEnt;
-	orientation_t or;           // DHM - Nerve
-
-	qboolean head_shot_weapon = qfalse;
-
-	// not a player or critter so bail
-	if ( !( targ->client ) ) {
-		return qfalse;
-	}
-
-	if ( targ->health <= 0 ) {
-		return qfalse;
-	}
-
-	head_shot_weapon = IsHeadShotWeapon( mod, isAICharacter );
-
-	if ( head_shot_weapon ) {
-		head = G_Spawn();
-
-		if (g_preciseHeadHitBox.integer && trap_GetTag(targ, &targ->client->animationInfo, "tag_head", &or )) {
-			G_SetOrigin(head, or .origin);
-			VectorCopy(targ->r.currentAngles, head->s.angles);
-			VectorCopy(head->s.angles, head->s.apos.trBase);
-			VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
-			VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
-			head->clipmask = CONTENTS_SOLID;
-			head->r.contents = CONTENTS_SOLID;
-			trap_LinkEntity(head);
-		} else {
-			float height, dest;
-			vec3_t v, angles, forward, up, right;
-
-			G_SetOrigin( head, targ->r.currentOrigin );
-
-			if ( targ->client->ps.pm_flags & PMF_DUCKED ) { // closer fake offset for 'head' box when crouching
-				height = targ->client->ps.crouchViewHeight - 12;
-			} else {
-				height = targ->client->ps.viewheight;
-			}
-
-			// NERVE - SMF - this matches more closely with WolfMP models
-			VectorCopy( targ->client->ps.viewangles, angles );
-			if ( angles[PITCH] > 180 ) {
-				dest = ( -360 + angles[PITCH] ) * 0.75;
-			} else {
-				dest = angles[PITCH] * 0.75;
-			}
-			angles[PITCH] = dest;
-
-			AngleVectors( angles, forward, right, up );
-			VectorScale( forward, 5, v );
-            VectorScale(right, 3, v);	//Elver added this for more aligned head box
-		//	VectorMA( v, 18, up, v );
-			VectorMA( v, 18, up, v );
-
-			VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
-            head->r.currentOrigin[2] += height / 2;
-			head->r.currentOrigin[2] += 1;   //nihi added for more accurate headshot //elver added from nihi src
-			// -NERVE - SMF
-		}
-
-		VectorCopy( head->r.currentOrigin, head->s.origin );
-		VectorCopy( targ->r.currentAngles, head->s.angles );
-		VectorCopy( head->s.angles, head->s.apos.trBase );
-		VectorCopy( head->s.angles, head->s.apos.trDelta );
-		VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
-		VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
-		head->clipmask = CONTENTS_SOLID;
-		head->r.contents = CONTENTS_SOLID;
-
-		trap_LinkEntity( head );
-
-		// trace another shot see if we hit the head
-		VectorCopy( point, start );
-		VectorMA( start, 64, dir, end );
-		trap_Trace( &tr, start, NULL, NULL, end, targ->s.number, MASK_SHOT );
-
-		traceEnt = &g_entities[ tr.entityNum ];
-
-		if ( g_debugBullets.integer >= 3 ) {   // show hit player head bb
-			gentity_t *tent;
-			vec3_t b1, b2;
-			VectorCopy( head->r.currentOrigin, b1 );
-			VectorCopy( head->r.currentOrigin, b2 );
-			VectorAdd( b1, head->r.mins, b1 );
-			VectorAdd( b2, head->r.maxs, b2 );
-			tent = G_TempEntity( b1, EV_RAILTRAIL );
-			VectorCopy( b2, tent->s.origin2 );
-			tent->s.dmgFlags = 1;
-
-			// show headshot trace
-			// end the headshot trace at the head box if it hits
-			if ( tr.fraction != 1 ) {
-				VectorMA( start, ( tr.fraction * 64 ), dir, end );
-			}
-			tent = G_TempEntity( start, EV_RAILTRAIL );
-			VectorCopy( end, tent->s.origin2 );
-			tent->s.dmgFlags = 0;
-		}
-
-		G_FreeEntity( head );
-
-		if ( traceEnt == head ) {
-			level.totalHeadshots++;         // NERVE - SMF
-			return qtrue;
-		} else {
-			level.missedHeadshots++;    // NERVE - SMF
-		}
-	}
-
-	return qfalse;
-}
-
-gentity_t* G_BuildHead( gentity_t *ent ) {
-	gentity_t* head;
-	orientation_t or;           // DHM - Nerve
-
-	head = G_Spawn();
-
-	if (g_preciseHeadHitBox.integer && trap_GetTag(ent, &ent->client->animationInfo, "tag_head", &or )) {
-		G_SetOrigin(head, or .origin);
-		VectorCopy(ent->r.currentAngles, head->s.angles);
-		VectorCopy(head->s.angles, head->s.apos.trBase);
-		VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
-		VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
-		head->clipmask = CONTENTS_SOLID;
-		head->r.contents = CONTENTS_SOLID;
-		trap_LinkEntity(head);
-	} else {
-		float height, dest;
-		vec3_t v, angles, forward, up, right;
-
-		G_SetOrigin( head, ent->r.currentOrigin );
-
-		if ( ent->client->ps.pm_flags & PMF_DUCKED ) { // closer fake offset for 'head' box when crouching
-			height = ent->client->ps.crouchViewHeight - 12;
-		} else {
-			height = ent->client->ps.viewheight;
-		}
-
-		// NERVE - SMF - this matches more closely with WolfMP models
-		VectorCopy( ent->client->ps.viewangles, angles );
-		if ( angles[PITCH] > 180 ) {
-			dest = ( -360 + angles[PITCH] ) * 0.75;
-		} else {
-			dest = angles[PITCH] * 0.75;
-		}
-		angles[PITCH] = dest;
-
-		AngleVectors( angles, forward, right, up );
-		VectorScale( forward, 5, v );
-		//VectorMA( v, 18, up, v );
-        VectorMA( v, 18, up, v );
-
-		VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
-		head->r.currentOrigin[2] += height / 2;
-		head->r.currentOrigin[2] += 1;   //nihi added for more accurate headshot
-		// -NERVE - SMF
-	}
-
-	VectorCopy( head->r.currentOrigin, head->s.origin );
-	VectorCopy( ent->r.currentAngles, head->s.angles );
-	VectorCopy( head->s.angles, head->s.apos.trBase );
-	VectorCopy( head->s.angles, head->s.apos.trDelta );
-	VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
-	VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
-	head->clipmask = CONTENTS_SOLID;
-	head->r.contents = CONTENTS_SOLID;
-	head->parent = ent;
-	head->s.eType = ET_TEMPHEAD;
-
-	trap_LinkEntity( head );
-
-	return head;
 }
 
 /*
@@ -1201,7 +1014,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
-	if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
+	// sswolf - head stuff
+	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
+	if (targ->headshot && targ->client) {
 
 		if ( take * 2 < 50 ) { // head shots, all weapons, do minimum 50 points damage
 			take = 50;
@@ -1209,8 +1024,15 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			take *= 2; // sniper rifles can do full-kill (and knock into limbo)
 
 		}
+
 		if ( !( targ->client->ps.eFlags & EF_HEADSHOT ) ) {  // only toss hat on first headshot
 			G_AddEvent( targ, EV_LOSE_HAT, DirToByte( dir ) );
+		}
+
+		// sswolf - some debug info
+		if (g_debugBullets.integer > 0)
+		{
+			AP(va("print \"%s ^7headshot for %i dmg\n\"", targ->client->pers.netname, take));
 		}
 
 		targ->client->ps.eFlags |= EF_HEADSHOT;
@@ -1219,7 +1041,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-		
+
 	}
 
 	if ( g_debugDamage.integer ) {
@@ -1273,13 +1095,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 // JPW NERVE overcome previous chunk of code for making grenades work again
 		if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) && ( take > 190 ) ) { // 190 is greater than 2x mauser headshot, so headshots don't gib
 			targ->health = GIB_HEALTH - 1;
-			
+
 			// gibbed by a nade or other explosion
-			if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
+			/*if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
 			{
-				attacker->client->sess.gibs++;	//gibbed an enemy
-				attacker->client->pers.life_gibs++;
-			}
+                    attacker->client->sess.gibs++;	//gibbed an enemy
+                    attacker->client->pers.life_gibs++;
+            }*/
 		}
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
@@ -1287,17 +1109,19 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			if (client) {
 				targ->flags |= FL_NO_KNOCKBACK;
 				if (g_gametype.integer >= GT_WOLF) {
-						// JPW NERVE -- repeated shooting sends to limbo
-						if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
-							limbo(targ, qtrue);
 
-							// gibbed by something another player (eg. smg)
-							if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ))
-							{
-								attacker->client->sess.gibs++;
-								attacker->client->pers.life_gibs++;
-							}
-						}
+					// do gib counting before sending them to limbo
+					if ((targ->health <= FORCE_LIMBO_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO)
+						&& attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP))) //do not add gibs to stats during warmup.
+					{
+						attacker->client->sess.gibs++;
+						attacker->client->pers.life_gibs++;
+					}
+
+					// JPW NERVE -- repeated shooting sends to limbo
+					if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
+						limbo(targ, qtrue);
+					}
 					// jpw
 				}
 			}
