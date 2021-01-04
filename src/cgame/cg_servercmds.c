@@ -1703,12 +1703,12 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
 
 	if ( fFull ) {
-		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^2%-5d  ^1%-5d  ^4%-5d\n\n",
+		txt_dump( va( "%-4d  %-3d   %-3d  %-2d  %-2d       ^2%-5d  ^1%-5d  ^4%-5d\n\n",
 					kills, deaths, headshots,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	} else {
-		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^2%-5d ^1%-5d ^4%-4d\n\n\n",
+		txt_dump( va( "^z%-4d^7 %-3d%-3d %-2d %-2d  ^2%-5d ^1%-5d ^4%-4d\n\n\n",
 					kills, deaths, headshots,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
@@ -1721,7 +1721,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	if (kill_peak > 0 || gibs > 0)
 		txt_dump(va("^3Kill Peak: ^7%-3d    ^3Gibbed     : ^7%d\n", kill_peak, gibs));
 	if (acc_shots > 0 || acc_hits > 0)
-		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Hits/Shots : ^7%d/^n%d\n", acc, acc_hits, acc_shots));
+		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Hits/Shots : ^7%d/^7%d\n", acc, acc_hits, acc_shots));
 
 	if ( !fFull ) {
 		txt_dump( "\n" );

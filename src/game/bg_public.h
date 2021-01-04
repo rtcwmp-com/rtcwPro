@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.0.1" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.1" // this will print on the server and show up as the RtcwPro version
 
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -212,6 +212,9 @@ typedef struct forceCvar_s
 #define CS_READY				41
 #define CS_SVCVAR               42		// RTCWPro - Cvar limiting
 #define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
+#define CS_MATCHID              44    // match id for stats
+#define CS_ROUNDINFO              45    // match id for stats
+
 
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )

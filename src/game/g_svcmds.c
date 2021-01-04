@@ -751,11 +751,16 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 	level.alliedPF = level.axisPF = 0;
 	level.alliedVenom = level.axisVenom = 0;
 
+    if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
+        G_writeGameEarlyExit();  // properly close current stats output
+    }
 
 	if (fDoReset) {
 		G_resetRoundState();
 		G_resetModeState();
 	}
+
+
 
 	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
 		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
@@ -809,7 +814,11 @@ void Svcmd_SwapTeams_f() {
 		trap_Cvar_Set( "g_gamelocked", "2" );
 	// L0 - end
 	*/
+    if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
+        G_writeGameEarlyExit();  // properly close current stats output
+    }
 	trap_Cvar_Set( "g_swapteams", "1" );
+
 	trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
 }
 

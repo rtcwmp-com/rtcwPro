@@ -75,8 +75,10 @@ cvar_t  *com_introPlayed;
 cvar_t  *cl_paused;
 cvar_t  *sv_paused;
 cvar_t  *com_cameraMode;
+#ifdef _WIN32
 // new stuff for iortcw port of server defined dl rates
 cvar_t  *sv_dlRate;
+#endif
 cvar_t	*com_unfocused;
 cvar_t	*com_maxfpsUnfocused;
 cvar_t	*com_minimized;
@@ -2517,7 +2519,10 @@ void Com_Init( char *commandLine ) {
 	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
-    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
+	#ifdef _WIN32
+	    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
+	#endif
+    //sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
 
 
 	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
@@ -2743,7 +2748,26 @@ int Com_ModifyMsec( int msec ) {
 
 	return msec;
 }
+/*
+=================
+Com_TimeVal
+=================
+*/
 
+int Com_TimeVal(int minMsec)
+{
+	int timeVal;
+
+	timeVal = Sys_Milliseconds() - com_frameTime;
+
+	if(timeVal >= minMsec)
+		timeVal = 0;
+	else
+		timeVal = minMsec - timeVal;
+
+	return timeVal;
+}
+#ifdef _WIN32
 /*
 =================
 Com_Frame
@@ -3036,6 +3060,220 @@ void Com_Frame( void ) {
 
 	com_frameNumber++;
 }
+
+
+#else
+/*
+=================
+Com_Frame
+=================
+*/
+void Com_Frame( void ) {
+
+
+	int key;
+
+	int msec, minMsec;
+	int		timeVal, timeValSV;
+	static int	lastTime = 0, bias = 0;
+
+	int timeBeforeFirstEvents;
+	int timeBeforeServer;
+	int timeBeforeEvents;
+	int timeBeforeClient;
+	int timeAfter;
+
+
+	if ( setjmp( abortframe ) ) {
+		return;         // an ERR_DROP was thrown
+	}
+
+	timeBeforeFirstEvents = 0;
+	timeBeforeServer = 0;
+	timeBeforeEvents = 0;
+	timeBeforeClient = 0;
+	timeAfter = 0;
+
+
+	// DHM - Nerve :: Don't write config on Update Server
+#ifndef UPDATE_SERVER
+	// write config file if anything changed
+	Com_WriteConfiguration();
+#endif
+
+	//
+	// main event loop
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeFirstEvents = Sys_Milliseconds();
+	}
+
+	// Figure out how much time we have
+	if(!com_timedemo->integer)
+	{
+		if(com_dedicated->integer)
+			minMsec = SV_FrameMsec();
+		else
+		{
+			if(com_minimized->integer && com_maxfpsMinimized->integer > 0)
+				minMsec = 1000 / com_maxfpsMinimized->integer;
+			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
+				minMsec = 1000 / com_maxfpsUnfocused->integer;
+			else if(com_maxfps->integer > 0)
+				minMsec = 1000 / com_maxfps->integer;
+			else
+				minMsec = 1;
+
+			timeVal = com_frameTime - lastTime;
+			bias += timeVal - minMsec;
+
+			if(bias > minMsec)
+				bias = minMsec;
+
+			// Adjust minMsec if previous frame took too long to render so
+			// that framerate is stable at the requested value.
+			minMsec -= bias;
+		}
+	}
+	else
+		minMsec = 1;
+
+	do
+	{
+		if(com_sv_running->integer)
+		{
+			timeValSV = SV_SendQueuedPackets();
+
+			timeVal = Com_TimeVal(minMsec);
+
+			if(timeValSV < timeVal)
+				timeVal = timeValSV;
+		}
+		else
+			timeVal = Com_TimeVal(minMsec);
+
+		if(com_busyWait->integer || timeVal < 1)
+			NET_Sleep(0);
+		else
+			NET_Sleep(timeVal - 1);
+	} while(Com_TimeVal(minMsec));
+
+	lastTime = com_frameTime;
+	com_frameTime = Com_EventLoop();
+
+	msec = com_frameTime - lastTime;
+
+	Cbuf_Execute();
+/*
+	if (com_altivec->modified)
+	{
+		Com_DetectAltivec();
+		com_altivec->modified = qfalse;
+	}
+*/
+	// mess with msec if needed
+	msec = Com_ModifyMsec(msec);
+
+	//
+	// server side
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeServer = Sys_Milliseconds();
+	}
+
+	SV_Frame( msec );
+
+	// if "dedicated" has been modified, start up
+	// or shut down the client system.
+	// Do this after the server may have started,
+	// but before the client tries to auto-connect
+	if ( com_dedicated->modified ) {
+		// get the latched value
+		Cvar_Get( "dedicated", "0", 0 );
+		com_dedicated->modified = qfalse;
+		if ( !com_dedicated->integer ) {
+			SV_Shutdown( "dedicated set to 0" );
+			CL_FlushMemory();
+		}
+	}
+
+#ifndef DEDICATED
+	//
+	// client system
+	//
+	//
+	// run event loop a second time to get server to client packets
+	// without a frame of latency
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeEvents = Sys_Milliseconds ();
+	}
+	Com_EventLoop();
+	Cbuf_Execute ();
+
+
+	//
+	// client side
+	//
+	if ( com_speeds->integer ) {
+		timeBeforeClient = Sys_Milliseconds ();
+	}
+
+	CL_Frame( msec );
+
+	if ( com_speeds->integer ) {
+		timeAfter = Sys_Milliseconds ();
+	}
+#else
+	if ( com_speeds->integer ) {
+		timeAfter = Sys_Milliseconds ();
+		timeBeforeEvents = timeAfter;
+		timeBeforeClient = timeAfter;
+	}
+#endif
+
+
+
+    NET_FlushPacketQueue();
+	//
+	// report timing information
+	//
+	if ( com_speeds->integer ) {
+		int all, sv, ev, cl;
+
+		all = timeAfter - timeBeforeServer;
+		sv = timeBeforeEvents - timeBeforeServer;
+		ev = timeBeforeServer - timeBeforeFirstEvents + timeBeforeClient - timeBeforeEvents;
+		cl = timeAfter - timeBeforeClient;
+		sv -= time_game;
+		cl -= time_frontend + time_backend;
+
+		Com_Printf( "frame:%i all:%3i sv:%3i ev:%3i cl:%3i gm:%3i rf:%3i bk:%3i\n",
+					com_frameNumber, all, sv, ev, cl, time_game, time_frontend, time_backend );
+	}
+
+	//
+	// trace optimization tracking
+	//
+	if ( com_showtrace->integer ) {
+
+		extern int c_traces, c_brush_traces, c_patch_traces;
+		extern int c_pointcontents;
+
+		Com_Printf( "%4i traces  (%ib %ip) %4i points\n", c_traces,
+					c_brush_traces, c_patch_traces, c_pointcontents );
+		c_traces = 0;
+		c_brush_traces = 0;
+		c_patch_traces = 0;
+		c_pointcontents = 0;
+	}
+  //  Com_ReadFromPipe( );
+	// old net chan encryption key
+	key = lastTime * 0x87243987;
+
+	com_frameNumber++;
+}
+#endif
 
 /*
 =================

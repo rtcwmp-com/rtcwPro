@@ -899,7 +899,8 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// OSPx - Et port..
-	if (ent->client->ps.pm_flags & PMF_LIMBO) {
+	if (ent->client->ps.pm_flags & PMF_LIMBO && ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	{
 		CP("print \"Can't issue a follow command while in limbo.\n\"");
 		CP("print \"Hit FIRE to switch between teammates.\n\"");
 		return;
@@ -1031,11 +1032,16 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		}
 
 // JPW NERVE -- couple extra checks for limbo mode
-		if ( ent->client->ps.pm_flags & PMF_LIMBO ) {
-			if ( level.clients[clientnum].ps.pm_flags & PMF_LIMBO ) {
+		if (ent->client->ps.pm_flags & PMF_LIMBO) 
+		{
+			if (level.clients[clientnum].ps.pm_flags & PMF_LIMBO) 
+			{
 				continue;
 			}
-			if ( level.clients[clientnum].sess.sessionTeam != ent->client->sess.sessionTeam ) {
+
+			if (level.clients[clientnum].sess.sessionTeam != ent->client->sess.sessionTeam &&
+				ent->client->sess.sessionTeam != TEAM_SPECTATOR) 
+			{
 				continue;
 			}
 		}

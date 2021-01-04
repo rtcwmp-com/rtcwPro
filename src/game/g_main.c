@@ -98,6 +98,7 @@ vmCvar_t g_swapteams;
 
 vmCvar_t g_restarted;
 vmCvar_t g_log;
+vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -381,7 +382,7 @@ cvarTable_t gameCvarTable[] = {
 
 	{ &g_log, "g_log", "", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
-
+	{ &g_gameStatslog, "g_gameStatslog", "0", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
 	// show_bug.cgi?id=500
@@ -1561,11 +1562,50 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			G_LogPrintf( "------------------------------------------------------------\n" );
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
 		}
+        if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) { // definitely needs improving but here for testing purposes
+                char newGamestatFile[MAX_QPATH];
+                char mapName[64];
+                qtime_t ct;
+                trap_RealTime(&ct);
+                trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+                char *buf;
+                time_t unixTime = time(NULL);  // come back and make globally available
+                char cs[MAX_STRING_CHARS];
+
+                // we want to save some information for the match and round
+                if (g_currentRound.integer == 1) {
+                    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+                    buf = Info_ValueForKey(cs, "matchid");
+                    trap_SetConfigstring( CS_ROUNDINFO, cs );
+                }
+                else {
+                     buf=va("%ld", unixTime);
+                }
+
+
+
+
+                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
+                trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
+                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName);
+                //trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName ), &level.gameStatslogFile, FS_WRITE );
+                if ( !level.gameStatslogFile ) {
+                    G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
+                } else {
+                    //G_writeGameInfo();
+                    G_writeServerInfo();
+
+
+                }
+
+            }
+
 	} else {
 		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 			G_Printf( "Not logging to disk.\n" );
 		}
 	}
+
 
 	G_InitWorldSession();
 
@@ -1672,6 +1712,11 @@ void G_ShutdownGame( int restart ) {
 		G_LogPrintf( "ShutdownGame:\n" );
 		G_LogPrintf( "------------------------------------------------------------\n" );
 		trap_FS_FCloseFile( level.logFile );
+	}
+	if (level.gameStatslogFile) {
+        // we may want to put some closing information into the gamestat file...
+        trap_FS_FCloseFile( level.gameStatslogFile );
+
 	}
 
 	// Ridah, shutdown the Botlib, so weapons and things get reset upon doing a "map xxx" command
