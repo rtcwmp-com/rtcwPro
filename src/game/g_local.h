@@ -1606,16 +1606,9 @@ extern vmCvar_t	a4_cmds;
 extern vmCvar_t	a5_cmds;
 extern vmCvar_t	a5_allowAll;
 extern vmCvar_t	adm_help;
+
 // Server stuff
 extern vmCvar_t	g_dropReload;
-extern vmCvar_t match_latejoin;
-extern vmCvar_t match_minplayers;
-extern vmCvar_t match_mutespecs;
-extern vmCvar_t match_readypercent;
-extern vmCvar_t match_timeoutcount;
-extern vmCvar_t match_timeoutlength;
-extern vmCvar_t match_warmupDamage;
-
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
 extern vmCvar_t g_gamelocked;
@@ -1699,14 +1692,10 @@ extern vmCvar_t vote_percent;
 // Ref tag..
 #define REFEREE	"^3Ref^7"
 
-// QCon edition cvars
-extern vmCvar_t		g_antiWarp;
-
 // RTCWPro
-extern vmCvar_t g_customConfig;
-//extern vmCvar_t Players_Allies;
-//extern vmCvar_t Players_Axis;
-extern vmCvar_t P;
+extern vmCvar_t	g_antiWarp; // antiwarp port
+extern vmCvar_t g_customConfig; // ET config port
+extern vmCvar_t P; // player teams in server info
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
