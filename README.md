@@ -1,5 +1,7 @@
 # RtcwPro
 
+![Alt tag](Assets/rtcwpro.png?raw=true "Title")
+
 Return to Castle Wolfenstein Mod - based on OSPx/xMod with additions from Enemy Territory, RtcwPub, ETPub, ioRtcw, and other Q3 mods
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
