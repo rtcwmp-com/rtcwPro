@@ -167,6 +167,7 @@ vmCvar_t url;
 
 vmCvar_t g_dbgRevive;
 
+// rtcwpro begin
 // L0 - New cvars
 // Admins
 vmCvar_t a1_pass;		// Level 1 admin
@@ -304,13 +305,12 @@ vmCvar_t g_maxTeamSniper;	// Max snipers per team
 vmCvar_t g_maxTeamVenom;	// Max venoms per team
 vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 
-// QCon edition cvars
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-// RTCWPro
 vmCvar_t g_customConfig;
 vmCvar_t P; // ET Port Players server info
+vmCvar_t g_hsDamage;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -404,7 +404,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
 	{ &g_debugBullets, "g_debugBullets", "0", 0, 0, qfalse}, //----(SA)	added
-	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "0", 0, 0, qfalse },
+	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "1", 0, 0, qfalse },
 	{ &g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
@@ -573,6 +573,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
+	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
