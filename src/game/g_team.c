@@ -1009,7 +1009,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	int i, j;
 	gentity_t   *player;
 	int cnt;
-	int h;
+	int actualHealth, displayHealth, playerLimbo;
 
 	// send the latest information on all clients
 	string[0] = 0;
@@ -1024,16 +1024,20 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
 
+			actualHealth = player->client->ps.stats[STAT_HEALTH]; // actual health used for gibbed status
+
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
 			if (player->client->ps.pm_flags & PMF_LIMBO) {
-				h = 0;
+				displayHealth = 0;
+				playerLimbo = 1;
 			}
 			else {
-				h = player->client->ps.stats[STAT_HEALTH];
+				displayHealth = player->client->ps.stats[STAT_HEALTH];
+				playerLimbo = 0;
 			}
 
-			if (h < 0) {
-				h = 0;
+			if (actualHealth < 0) {
+				displayHealth = 0;
 			}
 
 			playerWeapon = player->client->ps.weapon;
@@ -1043,9 +1047,9 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i",
-				level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, player->client->pers.ready); // set ready status on each client
+				" %i %i %i %i %i %i %i %i %i %i %i",
+				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 

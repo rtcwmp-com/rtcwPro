@@ -682,6 +682,7 @@ typedef struct {
 	int score;                      // updated by score servercmds
 	int location;                   // location index for team mode
 	int health;                     // you only get this info about your teammates
+	int playerLimbo;				// player is in limbo
 	int armor;
 	int curWeapon;
 

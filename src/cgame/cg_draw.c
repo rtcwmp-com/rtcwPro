@@ -858,8 +858,9 @@ static float CG_DrawTeamOverlay( float y ) {
 			} else {
 				pcolor = deathcolor;
 				// RtcwPro
-				if (!(cg_entities[ci->clientNum].currentState.eType & ET_INVISIBLE) && (cg_entities[ci->clientNum].currentState.eFlags & EF_DEAD))
+				if (ci->playerLimbo != 1) {
 					isRevivable = "*";
+				}
 			}
 			// jpw
 
@@ -2437,13 +2438,13 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 
 	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
 		s = va("[G:%i]", playerNades);
-		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
+		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
 	else {
 		s = va("[A:%i-G:%i]", playerAmmoClip + playerAmmo, playerNades);
-		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
+		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
 }
 
@@ -3050,7 +3051,7 @@ static void CG_DrawWarmup( void ) {
 			   ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
 				s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
 				w = CG_DrawStrlen( s1 );
-				CG_DrawStringExt( 320 - w * cw / 2, 160, s1, colorWhite,
+				CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
 								  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 			}
 		}
@@ -3072,11 +3073,11 @@ static void CG_DrawWarmup( void ) {
 			s2 = CG_TranslateString( "or call a vote to start match" );
 
 			w = CG_DrawStrlen( s1 );
-			CG_DrawStringExt( 320 - w * cw / 2, 160, s1, colorWhite,
+			CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
 							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 
 			w = CG_DrawStrlen( s2 );
-			CG_DrawStringExt( 320 - w * cw / 2, 180, s2, colorWhite,
+			CG_DrawStringExt( 320 - w * cw / 2, 160, s2, colorWhite,
 							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 
 			return;
