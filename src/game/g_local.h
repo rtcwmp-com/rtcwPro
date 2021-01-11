@@ -1571,6 +1571,7 @@ extern vmCvar_t g_antilag;
 
 extern vmCvar_t g_dbgRevive;
 
+// rtcwpro begin
 // Referee/Voting - New cvars
 extern vmCvar_t refereePassword;
 extern vmCvar_t team_maxplayers;
@@ -1692,10 +1693,10 @@ extern vmCvar_t vote_percent;
 // Ref tag..
 #define REFEREE	"^3Ref^7"
 
-// RTCWPro
 extern vmCvar_t	g_antiWarp; // antiwarp port
 extern vmCvar_t g_customConfig; // ET config port
 extern vmCvar_t P; // player teams in server info
+extern vmCvar_t	g_hsDamage;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

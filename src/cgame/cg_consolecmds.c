@@ -468,6 +468,12 @@ static void CG_SetWeaponCrosshair_f( void ) {
 }
 // -NERVE - SMF
 
+// sswolf - reset the top speed for cg_drawspeed
+static void CG_ResetMaxSpeed_f(void)
+{
+	cg.resetmaxspeed = qtrue;
+}
+
 /*
 ===================
 CG_DumpLocation_f
@@ -816,8 +822,8 @@ static consoleCommand_t commands[] = {
 	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
 	// -OSPx
 
-	// sswolf - minimizer
 	{ "minimize", CG_Minimize_f },
+	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
 
 	// Arnout
 	{ "dumploc", CG_DumpLocation_f },

@@ -987,10 +987,6 @@ int CG_CalculateReinfTime(qboolean menu)
 	return (int)(CG_CalculateReinfTime_Float(menu));
 }
 
-
-
-
-
 /*
 ========================
 OSPx
@@ -1141,6 +1137,93 @@ void CG_startCounter(void) {
 	// It is aligned under Respawn timer..
 	CG_DrawStringExt(16, 243, str, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH - 3, SMALLCHAR_HEIGHT - 4, 0);
 	return;
+}
+
+/*
+===================
+sswolf - draw speed
+with extra features
+Source: PubJ
+
+CG_DrawTJSpeed
+===================
+*/
+void CG_DrawTJSpeed(void) {
+	char         status[128];
+	float        sizex, sizey, x, y;
+	int          w;
+	static vec_t speed;
+	vec4_t       color;
+	static vec_t topSpeed;
+
+	if (cg.resetmaxspeed)
+	{
+		cg.topSpeed = 0;
+		topSpeed = 0;
+		cg.resetmaxspeed = qfalse;
+	}
+
+	if (!cg_drawSpeed.integer)
+	{
+		return;
+	}
+
+	speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+
+	// pp velocity is sometimes NaN, so check it
+	if (speed != speed)
+	{
+		speed = 0;
+	}
+
+	if (speed > topSpeed)
+	{
+		topSpeed = speed;
+	}
+
+	sizex = sizey = 0.25f;
+
+	x = cg_speedX.value;
+	y = cg_speedY.value;
+
+	switch (cg_drawSpeed.integer)
+	{
+	case 1:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
+		break;
+	case 2:
+		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
+		break;
+	case 3:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
+		break;
+	case 4:
+		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
+		break;
+	default:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
+		break;
+	}
+
+	w = CG_Text_Width_Ext(status, sizex, sizey, &cgDC.Assets.textFont) / 2;
+	BG_ParseColorCvar("white", color);
+
+	if (cg_drawSpeed.integer > 2 && speed > cg.oldSpeed + 0.001f * 100)
+	{
+		BG_ParseColorCvar("green", color);
+		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
+	}
+	else if (cg_drawSpeed.integer > 2 && speed < cg.oldSpeed - 0.001f * 100)
+	{
+		BG_ParseColorCvar("red", color);
+		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
+	}
+	else
+	{
+		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
+	}
+
+	cg.oldSpeed = speed;
 }
 
 /*
@@ -4236,6 +4319,12 @@ static void CG_Draw2D( void ) {
 
 		CG_DrawLimboMessage();
 		// -NERVE - SMF
+
+		if (cg_drawSpeed.integer)
+		{
+			CG_DrawTJSpeed();
+		}
+
 	}
 
 	// OSPx - Announcer

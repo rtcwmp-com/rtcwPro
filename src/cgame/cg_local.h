@@ -1217,6 +1217,12 @@ typedef struct {
 	forceCvar_t cvarBackups[MAX_SVCVARS];
 	int cvarBackupsCount;
 
+	// sswolf - tj stuff
+	qboolean resetmaxspeed;
+	float topSpeed;
+	float oldSpeed;
+	// tj stuff end
+
 	pmoveExt_t pmext;
 
 } cg_t;
@@ -2127,6 +2133,10 @@ extern vmCvar_t	demo_noAdvertisement;
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
 
+// draw speed
+extern vmCvar_t cg_drawSpeed;
+extern vmCvar_t cg_speedX;
+extern vmCvar_t cg_speedY;
 
 //added from et - nihi
 extern vmCvar_t cg_spawnTimer_period;

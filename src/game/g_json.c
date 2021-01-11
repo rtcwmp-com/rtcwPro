@@ -43,17 +43,11 @@ void G_jstatsByPlayers(qboolean wstats) {
 
     jstats =  json_array();
 
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		if ( !TeamCount( -1, i ) ) {
-			continue;
-		}
-        sprintf(teamname,"%s",(i == TEAM_RED) ? "Axis" : "Allied"  );
-
-         jplayer = json_object();
+	jplayer = json_object();
         for ( j = 0; j < level.numPlayingClients; j++ ) {
 			cl = level.clients + level.sortedClients[j];
 
-			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != i ) {
+			if ( cl->pers.connected != CON_CONNECTED ) {
 				continue;
 			}
 			DecolorString(cl->pers.netname, n1);
@@ -107,7 +101,7 @@ void G_jstatsByPlayers(qboolean wstats) {
 
 
             weapArray = json_array();
-
+            i = cl->sess.sessionTeam;
             for (m = WS_KNIFE; m < WS_MAX; m++) {
                 if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
                     cl->sess.aWeaponStats[m].deaths) {
@@ -148,7 +142,7 @@ void G_jstatsByPlayers(qboolean wstats) {
 
         json_array_append_new(jstats, jplayer);
 
-    }
+
 
         s = json_dumps( jstats, 1 ); // for a pretty print form
         //s = json_dumps( jstats, 0 );
