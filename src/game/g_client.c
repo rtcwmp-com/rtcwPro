@@ -1542,10 +1542,10 @@ void ClientUserinfoChanged( int clientNum ) {
 	//if (s[0] != 0) {
 	//	SaveIP_f(client, s);
 	//}
-	//if ( s && !strcmp( s, "localhost" ) ) {
-	//	client->pers.localClient = qtrue;
+	if ( s && !strcmp( s, "localhost" ) ) {
+		client->pers.localClient = qtrue;
 	//	client->sess.referee = RL_REFEREE;
-	//}
+	}
 // L0
 	// Save IP for getstatus..
 	s = Info_ValueForKey( userinfo, "ip" );
