@@ -1827,6 +1827,7 @@ extern animStringItem_t animBodyPartsStr[];
 
 // Crosshairs
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
+void BG_ParseColorCvar(char* cvarString, float* color);
 // Client flags for server processing
 #define CGF_AUTORELOAD      0x01
 #define CGF_STATSDUMP       0x02
