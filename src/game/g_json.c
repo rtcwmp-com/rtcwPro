@@ -60,7 +60,7 @@ void G_jstatsByPlayers(qboolean wstats) {
 				eff = 0;
 			}
 			sprintf(pGUID,"%s",cl->sess.guid);
-
+            i = cl->sess.sessionTeam;
             jdata = json_object();
            // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
             json_object_set_new(jdata, "alias", json_string(n2));
