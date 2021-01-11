@@ -554,9 +554,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		}
 
 		if ( item ) {
-			launchvel[0] = crandom() * 20;
-			launchvel[1] = crandom() * 20;
-			launchvel[2] = 10 + random() * 10;
+			launchvel[0] = 0;
+			launchvel[1] = 0;
+			launchvel[2] = 0;
 
 			flag = LaunchItem( item,self->r.currentOrigin,launchvel,self->s.number );
 			flag->s.modelindex2 = self->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
