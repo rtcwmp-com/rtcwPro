@@ -31,7 +31,7 @@
     <ProjectGuid>{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}</ProjectGuid>
     <RootNamespace>game</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>game</ProjectName>
+    <ProjectName>qagame</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

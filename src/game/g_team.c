@@ -1905,7 +1905,7 @@ void G_readyResetOnPlayerLeave( int team ) {
 			randomPlayer = i;
 		}
 
-		if (!teamIsReady && randomPlayer > 0) {
+		if (teamIsReady && randomPlayer > 0) {
 			level.clients[randomPlayer].pers.ready = qfalse;
 			CPx(randomPlayer, "print \"^5Please READY your self once more.\n\"");
 		}

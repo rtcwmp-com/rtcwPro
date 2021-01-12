@@ -741,7 +741,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	if ( team == TEAM_SPECTATOR ) {
 		client->sess.spectatorTime = level.time;
 
-		if (oldTeam != TEAM_SPECTATOR && !client->pers.ready && g_tournament.integer) {
+		if (oldTeam != TEAM_SPECTATOR && g_tournament.integer) {
 			G_readyResetOnPlayerLeave(oldTeam);
 		}
 	}
