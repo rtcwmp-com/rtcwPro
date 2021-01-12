@@ -1886,6 +1886,32 @@ void G_readyReset( qboolean aForced ) {
 	trap_SetConfigstring( CS_READY, va( "%i", (g_noTeamSwitching.integer ? READY_PENDING : READY_AWAITING) ));
 }
 
+void G_readyResetOnPlayerLeave( int team ) {
+	if (g_gamestate.integer == GS_WARMUP && g_tournament.integer) {
+		int i, randomPlayer = 0;
+		qboolean teamIsReady = qtrue;
+
+		for (i = 0; i < level.maxclients; i++) {
+			if (level.clients[i].pers.connected == CON_DISCONNECTED) {
+				continue;
+			}
+			if (level.clients[i].sess.sessionTeam != team) {
+				continue;
+			}
+			if (!level.clients[i].pers.ready) {
+				teamIsReady = qfalse;
+				break;
+			}
+			randomPlayer = i;
+		}
+
+		if (!teamIsReady && randomPlayer > 0) {
+			level.clients[randomPlayer].pers.ready = qfalse;
+			CPx(randomPlayer, "print \"^5Please READY your self once more.\n\"");
+		}
+	}
+}
+
 void G_readyStart( void ) {
 	level.ref_allready = qtrue;
 	level.CNstart = 0; // Resets countdown
