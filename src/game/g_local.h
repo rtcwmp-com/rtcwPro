@@ -1377,6 +1377,7 @@ void G_updateSpecLock( int nTeam, qboolean fLock );
 void G_removeSpecInvite( int team );
 qboolean G_playersReady( void );
 void G_readyReset( qboolean aForced );
+void G_readyResetOnPlayerLeave(int team);
 void G_readyStart( void );
 void G_readyTeamLock( void );
 

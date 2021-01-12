@@ -740,6 +740,10 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	// they go to the end of the line for tournements
 	if ( team == TEAM_SPECTATOR ) {
 		client->sess.spectatorTime = level.time;
+
+		if (oldTeam != TEAM_SPECTATOR && !client->pers.ready && g_tournament.integer) {
+			G_readyResetOnPlayerLeave(oldTeam);
+		}
 	}
 
 	client->sess.specLocked = 0;
