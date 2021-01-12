@@ -827,6 +827,9 @@
     <ClInclude Include="qcommon\cm_patch.h" />
     <ClInclude Include="qcommon\cm_polylib.h" />
     <ClInclude Include="qcommon\cm_public.h" />
+    <ClInclude Include="qcommon\jansson\hashtable.h" />
+    <ClInclude Include="qcommon\jansson\jansson.h" />
+    <ClInclude Include="qcommon\jansson\jansson_config.h" />
     <ClInclude Include="qcommon\qcommon.h" />
     <ClInclude Include="qcommon\qfiles.h" />
     <ClInclude Include="qcommon\unzip.h" />

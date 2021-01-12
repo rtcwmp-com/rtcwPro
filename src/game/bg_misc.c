@@ -4368,6 +4368,79 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
 	trap_Cvar_Set(cvarName, "White");
 }
 
+/*
+===============
+sswolf - because I'm lazy
+
+BG_ParseColorCvar
+Reads RBG(A) cvars and sets parsed color var components
+===============
+*/
+void BG_ParseColorCvar(char* cvarString, float* color) {
+	char* s = cvarString;
+	unsigned int i = 0;
+
+	// white in case we have no good format
+	Vector4Copy(colorWhite, color);
+
+	// hex format
+	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
+		s += 2;
+		if (Q_IsHexColorString(s)) {
+			color[0] = ((float)(gethex(*(s)) * 16 + gethex(*(s + 1)))) / 255.00;
+			color[1] = ((float)(gethex(*(s + 2)) * 16 + gethex(*(s + 3)))) / 255.00;
+			color[2] = ((float)(gethex(*(s + 4)) * 16 + gethex(*(s + 5)))) / 255.00;
+			return;
+		}
+	}
+
+	// colortable
+	while (OSP_Colortable[i].colorname != NULL) {
+		if (!Q_stricmp(s, OSP_Colortable[i].colorname)) {
+			color[0] = (*OSP_Colortable[i].color)[0];
+			color[1] = (*OSP_Colortable[i].color)[1];
+			color[2] = (*OSP_Colortable[i].color)[2];
+			return;
+		}
+		i++;
+	}
+
+	// get space count
+	int spaces = 0;
+	for (i = 0; i < strlen(s); ++i) {
+		if (s[i] == ' ') {
+			spaces++;
+		}
+	}
+
+	// "R G B( A)" format
+	if (spaces >= 2) {
+		char temp[4][8];
+		int j = 0, k = 0;
+		for (i = 0; i < strlen(s) + 1; ++i) {
+			if (s[i] == ' ' || i == strlen(s)) {
+				color[j] = atof(temp[j]);
+				k = i + 1;
+				j++;
+				if (j == 4) {
+					if (color[0] > 1 || color[1] > 1 || color[2] > 1 || color[3] > 1) { // true RGB(A)
+						color[0] /= 255.0f;
+						color[1] /= 255.0f;
+						color[2] /= 255.0f;
+						color[3] /= 255.0f;
+					}
+					return;
+				}
+				continue;
+			}
+
+			if (i - k < 10) {
+				temp[j][i - k] = s[i];
+			}
+		}
+	}
+}
+
 const voteType_t voteToggles[] =
 {
 	{ "vote_allow_comp",         CV_SVF_COMP },

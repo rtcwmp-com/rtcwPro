@@ -435,6 +435,7 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 		if ( gm ) {
 			//G_matchPrintInfo( "Axis have returned the objective!", qfalse);
 			trap_SendServerCommand( -1, "cp \"Axis have returned the objective!\" 2" );
+			//G_writeObjectiveEvent("Axis", "Axis have returned the objective", ".."  );
 			G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 		}
 	} else if ( ent->item->giTag == PW_BLUEFLAG )     {
@@ -442,6 +443,7 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 		if ( gm ) {
 			//G_matchPrintInfo("Allies have returned the objective!", qfalse);
 			trap_SendServerCommand( -1, "cp \"Allies have returned the objective!\" 2" );
+			//G_writeObjectiveEvent("Allied", "Allies have returned the objective", ".."  );
 			G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 		}
 	}
@@ -482,6 +484,9 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 				}
+				G_writeObjectiveEvent(other, objReturned  );
+				cl->sess.obj_returned++;
+
 			} else {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
 				//G_matchPrintInfo(va("Allies have returned %s!", ent->message), qfalse);
@@ -489,6 +494,9 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 				}
+
+                G_writeObjectiveEvent(other, objReturned  );
+				cl->sess.obj_returned++;
 			}
 			// dhm
 		}
@@ -519,6 +527,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	PrintMsg( NULL, "%s" S_COLOR_WHITE " captured the %s flag!\n",
 			  cl->pers.netname, TeamName( OtherTeam( team ) ) );
 
+
 	cl->ps.powerups[enemy_flag] = 0;
 
 	teamgame.last_flag_capture = level.time;
@@ -533,6 +542,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 	if ( g_gametype.integer >= GT_WOLF ) {
 		AddScore( other, WOLF_CAPTURE_BONUS );
 		PrintMsg( NULL,"%s" S_COLOR_WHITE " captured enemy objective!\n",cl->pers.netname );
+		//G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
+		G_writeObjectiveEvent(other, objCapture  );
 	} else {
 		AddScore( other, CTF_CAPTURE_BONUS );
 	}
@@ -560,6 +571,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 // JPW NERVE
 				if ( g_gametype.integer >= GT_WOLF ) {
 					AddScore( player, WOLF_CAPTURE_BONUS );
+					G_writeObjectiveEvent(player, objCapture  );
 				} else {
 // jpw
 					AddScore( player, CTF_CAPTURE_BONUS );
@@ -617,13 +629,18 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "allied_object_stolen" );
 			}
+            cl->sess.obj_taken++;
+            G_writeObjectiveEvent(other, objTaken  );
 		} else {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_taken.wav" );
 			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Allies have stolen %s!\n\" 2", ent->message ) );
+
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "axis_object_stolen" );
 			}
+            G_writeObjectiveEvent(other, objTaken  );
+            cl->sess.obj_taken++;
 		}
 		// dhm
 // jpw
@@ -983,14 +1000,14 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	int i, j;
 	gentity_t   *player;
 	int cnt;
-	int h;
+	int actualHealth, displayHealth, playerLimbo;
 
 	// send the latest information on all clients
 	string[0] = 0;
 	stringlength = 0;
 
 	// Do each team for team information
-	for (i = 0, cnt = 0; i < level.numConnectedClients && cnt < TEAM_MAXOVERLAY; i++) {
+	for (i = 0, cnt = 0; i < level.numConnectedClients /*&& cnt < TEAM_MAXOVERLAY*/; i++) {
 
 		player = g_entities + level.sortedClients[i];
 
@@ -998,16 +1015,20 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
 
+			actualHealth = player->client->ps.stats[STAT_HEALTH]; // actual health used for gibbed status
+
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
 			if (player->client->ps.pm_flags & PMF_LIMBO) {
-				h = 0;
+				displayHealth = 0;
+				playerLimbo = 1;
 			}
 			else {
-				h = player->client->ps.stats[STAT_HEALTH];
+				displayHealth = player->client->ps.stats[STAT_HEALTH];
+				playerLimbo = 0;
 			}
 
-			if (h < 0) {
-				h = 0;
+			if (actualHealth < 0) {
+				displayHealth = 0;
 			}
 
 			playerWeapon = player->client->ps.weapon;
@@ -1017,9 +1038,9 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i",
-				level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, player->client->pers.ready); // set ready status on each client
+				" %i %i %i %i %i %i %i %i %i %i %i",
+				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 
@@ -1412,10 +1433,14 @@ void checkpoint_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	if ( self->count == TEAM_RED ) {
 		self->health = 0;
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
+
 	} else {
 		self->health = 10;
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
+
 	}
+
+    //other->client->sess.obj_checkpoint++;
 
 	// Play a sound
 	G_AddEvent( self, EV_GENERAL_SOUND, self->soundPos1 );
@@ -1433,7 +1458,7 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	qboolean playsound = qtrue;
 	qboolean firsttime = qfalse;
 
-	if ( self->count == other->client->sess.sessionTeam ) {
+	if ( self->count == other->client->sess.sessionTeam || other->health <= 0 ) {
 		return;
 	}
 
@@ -1495,10 +1520,17 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	// Run script trigger
 	if ( self->count == TEAM_RED ) {
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
+
+        G_writeObjectiveEvent(other, objSpawnFlag  );
+        //other->client->sess.obj_checkpoint++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
+
+        G_writeObjectiveEvent(other, objSpawnFlag  );
+        //other->client->sess.obj_checkpoint++;
 	}
 
+    //other->client->sess.obj_checkpoint+;
 	// Don't allow touch again until animation is finished
 	self->touch = NULL;
 

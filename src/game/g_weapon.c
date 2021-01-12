@@ -367,6 +367,10 @@ void Weapon_Syringe( gentity_t *ent ) {
 				if ( g_gamestate.integer == GS_PLAYING ) {
 					ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
 					ent->client->sess.revives++;
+					if (g_gameStatslog.integer) {
+                        G_writeGeneralEvent(traceEnt,ent," ",eventRevive);
+                       // G_writeReviveEvent (traceEnt->client->pers.netname, ent->client->pers.netname);
+					}
 				} // End
 
 				// sound
@@ -578,9 +582,21 @@ void Weapon_Engineer( gentity_t *ent ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
 								G_matchPrintInfo(va("Dynamite planted near %s!", hit->track), qfalse);
+								ent->client->sess.dyn_planted++;
+								if (g_gameStatslog.integer) {
+                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                    G_writeObjectiveEvent(ent, objDynPlant  );
+
+								}
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
 								G_matchPrintInfo(va("Dynamite planted near objective #%d!", hit->count), qfalse);
+								ent->client->sess.dyn_planted++;
+								if (g_gameStatslog.integer) {
+                                   //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                   G_writeObjectiveEvent(ent, objDynPlant  );
+
+								}
 							}
 						}
 						i = num;
@@ -589,6 +605,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
+						//	G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
 //	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
@@ -649,6 +666,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 								}
 								trap_SendServerCommand( -1, "cp \"Axis engineer disarmed the Dynamite!\n\"" );
 								G_matchPrintInfo(va("Axis defused dynamite near %s!", hit->track), qfalse);
+
+                                ent->client->sess.dyn_defused++;
+
+								if (g_gameStatslog.integer) {
+                                    G_writeObjectiveEvent(ent, objDynDefuse  );
+                                    //G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+								}
+
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_RED;
 							} else { // TEAM_BLUE
@@ -659,6 +684,11 @@ void Weapon_Engineer( gentity_t *ent ) {
 								}
 								trap_SendServerCommand( -1, "cp \"Allied engineer disarmed the Dynamite!\n\"" );
 								G_matchPrintInfo(va("Allies defused dynamite near %s!", hit->track), qfalse);
+								ent->client->sess.dyn_defused++;
+								if (g_gameStatslog.integer) {
+                                    G_writeObjectiveEvent(ent, objDynDefuse  );
+                                   // G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+								}
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_BLUE;
 							}
@@ -2420,6 +2450,10 @@ void Weapon_RocketLauncher_Fire( gentity_t *ent ) {
 	m->damage *= s_quadFactor;
 	m->splashDamage *= s_quadFactor;
 
+	if (g_gamestate.integer == GS_PLAYING) {  // add panzer attempts to accuracy
+		ent->client->pers.life_acc_shots++;
+		ent->client->sess.acc_shots++;
+	}
 //	VectorAdd( m->s.pos.trDelta, ent->client->ps.velocity, m->s.pos.trDelta );	// "real" physics
 }
 
