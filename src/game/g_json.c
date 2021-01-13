@@ -566,6 +566,9 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     switch ( objType ) {
+        case objDropped:
+            json_object_set_new(jdata, "label",    json_string("ObjDropped"));
+            break;
         case objReturned:
             json_object_set_new(jdata, "label",    json_string("ObjReturned"));
             break;
