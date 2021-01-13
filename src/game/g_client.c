@@ -2640,8 +2640,7 @@ void ClientDisconnect( int clientNum ) {
 	// if a player disconnects during warmup make sure the team's ready status doesn't start the match
 	if (g_tournament.integer
 		&& g_gamestate.integer == GS_WARMUP 
-		&& level.sortedClients[1] == clientNum
-		&&  (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
+		&& (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
 	{
 		G_readyResetOnPlayerLeave(ent->client->sess.sessionTeam);
 	}
