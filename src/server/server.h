@@ -103,10 +103,6 @@ typedef struct {
 	// -NERVE - SMF
 } server_t;
 
-
-
-
-
 typedef struct {
 	int areabytes;
 	byte areabits[MAX_MAP_AREA_BYTES];                  // portalarea visibility bits
@@ -229,9 +225,7 @@ typedef struct {
 	qboolean connected;
 } challenge_t;
 
-
 #define MAX_MASTERS 8               // max recipients for heartbeat packets
-
 
 // this structure will be cleared only when the game dll changes
 typedef struct {
@@ -325,6 +319,13 @@ extern cvar_t  *sv_gameskill;
 
 // TTimo - autodl
 extern cvar_t *sv_dl_maxRate;
+
+// Anti wallhack
+extern cvar_t* wh_active;
+extern cvar_t* wh_bbox_horz;
+extern cvar_t* wh_bbox_vert;
+extern cvar_t* wh_add_xy;
+extern cvar_t* wh_check_fov;
 
 
 //===========================================================
@@ -432,6 +433,15 @@ int         SV_BotGetConsoleMessage( int client, char *buf, int size );
 
 int BotImport_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void BotImport_DebugPolygonDelete( int id );
+
+//
+// sv_wallhack.c
+//
+void SV_RandomizePos(int player, int other);
+void SV_InitWallhack(void);
+void SV_RestorePos(int cli);
+int SV_CanSee(int player, int other);
+int SV_PositionChanged(int cli);
 
 //============================================================
 //

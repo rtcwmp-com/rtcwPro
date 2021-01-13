@@ -79,6 +79,13 @@ cvar_t  *sv_gameskill;
 
 cvar_t  *sv_showAverageBPS;     // NERVE - SMF - net debugging
 
+// Anti-Wallhack
+cvar_t* wh_active;
+cvar_t* wh_bbox_horz;
+cvar_t* wh_bbox_vert;
+cvar_t* wh_add_xy;
+cvar_t* wh_check_fov;
+
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
 /*
