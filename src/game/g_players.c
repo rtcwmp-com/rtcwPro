@@ -774,7 +774,7 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
 				} else if (g_gamelocked.integer == 3) {
 					trap_Cvar_Set( "g_gamelocked", "1" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^1Allied ^7team^z!\n\"", tName));
+					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
 				} else {
 					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
 				return;
@@ -810,7 +810,7 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
 				} else if (g_gamelocked.integer == 1) {
 					trap_Cvar_Set( "g_gamelocked", "3" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^1Allied ^7team^z!\n\"", tName));
+					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
 				} else {
 					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
 				return;
