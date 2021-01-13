@@ -2891,7 +2891,7 @@ void CheckGameState( void ) {
 
 				if (!level.readyPrint) {
 					// show all players ready for both right now - need to fix pause for noteamswitching = 1
-					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "All players are now ^nready^7!"))); //"Ready threshold reached!") ));
+					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "^3All players are now ready!" : "^3All players are now ready!"))); //"Ready threshold reached!") ));
 					level.readyPrint = qtrue;
 				}
 			} else {
