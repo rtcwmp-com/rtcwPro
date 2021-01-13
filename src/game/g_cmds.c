@@ -742,6 +742,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 		client->sess.spectatorTime = level.time;
 	}
 
+	// if a player changes teams (not from spectator) make sure round does not start
+	if (oldTeam != TEAM_SPECTATOR && g_tournament.integer) {
+		G_readyResetOnPlayerLeave(oldTeam);
+	}
+
 	client->sess.specLocked = 0;
 	client->sess.sessionTeam = team;
 	client->sess.spectatorState = specState;
