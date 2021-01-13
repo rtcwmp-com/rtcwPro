@@ -498,3 +498,4 @@ int SV_Netchan_TransmitNextFragment( client_t *client );
 #endif
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
 
+qboolean SV_CheckDRDoS(netadr_t from);

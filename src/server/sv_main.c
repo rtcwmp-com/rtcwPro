@@ -725,7 +725,7 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	oldest = 0;
 	oldestTime = 0x7fffffff;
 	for (i = 0; i < MAX_INFO_RECEIPTS; i++, receipt++) {
-		if (receipt->time + 2000 > svs.time) {
+		if (receipt->time + 1400 > svs.time) {
 			if (receipt->time) {
 				// When the server starts, all receipt times are at zero.  Furthermore,
 				// svs.time is close to zero.  We check that the receipt time is already
@@ -745,8 +745,8 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 		}
 	}
 
-	if (specificCount >= 8) { // Already sent 8 to this IP in last 2 seconds.
-		Com_Printf("Detected flood or possible DRDoS attack from<->to address %s, putting into temporary getinfo/getstatus ban list\n", NET_AdrToString(exactFrom));
+	if (specificCount >= 8) { // Already sent 8 to this IP in last 1.4 seconds.
+		Com_Printf("Possible server flood attempt detected (from address %s). Server is ignoring any requests from this address for the next 2 minutes.\n", NET_AdrToString(exactFrom));
 		ban = &svs.infoFloodBans[oldestBan];
 		ban->adr = from;
 		ban->time = svs.time;
@@ -755,7 +755,7 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 		return qtrue;
 	}
 
-	if (globalCount == MAX_INFO_RECEIPTS) { // All receipts happened in last 2 seconds.
+	if (globalCount == MAX_INFO_RECEIPTS) { // All receipts happened in last 1.4 seconds.
 		// Detect time wrap where the server sets time back to zero.  Problem
 		// is that we're using a static variable here that doesn't get zeroed out when
 		// the time wraps.  TTimo's way of doing this is casting everything including

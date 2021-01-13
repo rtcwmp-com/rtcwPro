@@ -270,6 +270,10 @@ void SV_DirectConnect( netadr_t from ) {
 
 	Q_strncpyz( userinfo, Cmd_Argv( 1 ), sizeof( userinfo ) );
 
+	if (SV_CheckDRDoS(from)) {
+		return;
+	} 
+
 	// DHM - Nerve :: Update Server allows any protocol to connect
 #ifndef UPDATE_SERVER
 	version = atoi( Info_ValueForKey( userinfo, "protocol" ) );

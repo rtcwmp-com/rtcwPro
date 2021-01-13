@@ -860,6 +860,12 @@ void RB_CalcFogTexCoords( float *st ) {
 	vec3_t local;
 	vec4_t fogDistanceVector, fogDepthVector;
 
+	// L0 - msvc debug fix &| play's nice with 1.0 ..
+	fogDepthVector[0] = 0;
+	fogDepthVector[1] = 0;
+	fogDepthVector[2] = 0;
+	fogDepthVector[3] = 0;
+
 	fog = tr.world->fogs + tess.fogNum;
 
 	// all fogging distance is based on world Z units
