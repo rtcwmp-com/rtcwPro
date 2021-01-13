@@ -832,7 +832,7 @@ void SV_Init( void ) {
 	Cvar_Get( "nextmap", "", CVAR_TEMP );
 
 	sv_allowDownload = Cvar_Get( "sv_allowDownload", "1", CVAR_ARCHIVE );
-	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", 0 );      // NERVE - SMF - wolfMP master server
+	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", CVAR_ARCHIVE );      // NERVE - SMF - wolfMP master server
 	sv_master[1] = Cvar_Get( "sv_master2", "", CVAR_ARCHIVE );
 	sv_master[2] = Cvar_Get( "sv_master3", "", CVAR_ARCHIVE );
 	sv_master[3] = Cvar_Get( "sv_master4", "", CVAR_ARCHIVE );
