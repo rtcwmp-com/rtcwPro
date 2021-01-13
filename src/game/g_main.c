@@ -2890,7 +2890,8 @@ void CheckGameState( void ) {
 				G_readyTeamLock();
 
 				if (!level.readyPrint) {
-					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "Ready threshold reached!") ));
+					// show all players ready for both right now - need to fix pause for noteamswitching = 1
+					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "All players are now ^nready^7!"))); //"Ready threshold reached!") ));
 					level.readyPrint = qtrue;
 				}
 			} else {
@@ -2970,7 +2971,7 @@ void CheckVote( void ) {
 		return;
 	}
 	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
-		trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+		trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
 		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
 	} else {
 // OSPx - Vote percent..
@@ -2986,7 +2987,7 @@ void CheckVote( void ) {
 		if ( (total == 1) || ( 100 * level.voteInfo.voteYes / total >= vCnt) ) {
 // -OSPx
 			// execute the command, then remove the vote
-			trap_SendServerCommand( -1, "print \"Vote passed.\n\"" );
+			trap_SendServerCommand( -1, "print \"^5Vote passed.\n\"" );
 			level.voteExecuteTime = level.time + 3000;
 			level.prevVoteExecuteTime = level.time + 4000;
 			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
@@ -3025,7 +3026,7 @@ void CheckVote( void ) {
 
 		} else if ( level.voteInfo.voteNo >= level.voteInfo.numVotingClients / 2 ) {
 			// same behavior as a timeout
-			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+			trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
 		} else {
 			// still waiting for a majority
 			return;
