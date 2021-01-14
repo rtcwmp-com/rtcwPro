@@ -20,12 +20,12 @@ New features added that are not in OSP:
    - allow teams feature for ET map porting (i.e. specific team can open doors with lock)
    - minimizer using "minimize" console command
  
- - 1.1 [changelog](Releases/1.1/changelog.txt)
+ - 1.1 [changelog](changelog/1.1-changelog.txt)
    - dead bodies cannot grab spawn flags
    - specatator freecam can select a player by aiming at them and pressing +attack
    - JSON stat files created for web stats (in progress)
  
- - 1.1.1 [changelog](Releases/1.1.1/changelog.txt)
+ - 1.1.1 [changelog](changelog/1.1.1-changelog.txt)
    - UPS meter (cg_drawSpeed)
    - Added headshot damage cvar to help with antilag/hitbox changes (g_hsDamage)
 
