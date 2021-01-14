@@ -608,7 +608,13 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 	// Player weapon stats
 	ref = G_weapStatIndex_MOD( mod );
 	if ( dmg > 0 ) {
+
+        if (mod == MOD_ROCKET || mod == MOD_ROCKET_SPLASH) {
+            attacker->client->sess.acc_hits++;    // cheap easy way for counting panzer hits in total acc (g_damage /player_die works but messier)
+        }
+
 		attacker->client->sess.aWeaponStats[ref].hits++;
+
 	}
 	if ( targ->health <= 0 ) {
 		attacker->client->sess.aWeaponStats[ref].kills++;

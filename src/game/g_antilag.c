@@ -263,6 +263,7 @@ void G_UnTimeShiftAllClients(gentity_t* skip) {
 
 // sswolf - unused for now
 #if 0
+
 void G_AttachBodyParts(gentity_t* ent) {
 	int i;
 	gentity_t   *list;

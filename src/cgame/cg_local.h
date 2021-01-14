@@ -682,6 +682,7 @@ typedef struct {
 	int score;                      // updated by score servercmds
 	int location;                   // location index for team mode
 	int health;                     // you only get this info about your teammates
+	int playerLimbo;				// player is in limbo
 	int armor;
 	int curWeapon;
 
@@ -1215,6 +1216,12 @@ typedef struct {
 	// backuping, forceCvar_t is good format, it holds name and value only
 	forceCvar_t cvarBackups[MAX_SVCVARS];
 	int cvarBackupsCount;
+
+	// sswolf - tj stuff
+	qboolean resetmaxspeed;
+	float topSpeed;
+	float oldSpeed;
+	// tj stuff end
 
 	pmoveExt_t pmext;
 
@@ -2126,6 +2133,10 @@ extern vmCvar_t	demo_noAdvertisement;
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
 
+// draw speed
+extern vmCvar_t cg_drawSpeed;
+extern vmCvar_t cg_speedX;
+extern vmCvar_t cg_speedY;
 
 //added from et - nihi
 extern vmCvar_t cg_spawnTimer_period;

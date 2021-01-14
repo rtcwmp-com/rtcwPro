@@ -48,7 +48,7 @@ void Shaker_think( gentity_t *ent ) {
 	gentity_t   *player;
 	float len, radius = ent->splashDamage, bounceamt;
 	int i;
-	char cmd[64];       //DAJ
+	//char cmd[64];       //DAJ
 /* JPW NERVE used for trigger_concussive_dust, currently not working
 	vec3_t		mins, maxs; // JPW NERVE
 	static vec3_t	range; // JPW NERVE
