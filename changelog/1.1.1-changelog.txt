@@ -1,0 +1,20 @@
+Issue Fixes
+
+#145 Team overlay gib status
+#166 Authorized ref messages now only printed to user authorized
+#212 minor format/color changes for in-game messages
+#213 Fixed objective getting lost through objects/walls
+#214 Do not allow knockback for a player getting revived
+#215 team ready status reset on player disconnect/change teams
+
+Other Fixes
+
+fix for the ending of match during pause (when pause is longer than game clock)
+fixed defaultpublic config and removed duplicate cvars
+fixed extra prepare to fight messages on unpause
+added new pro logo
+
+New Features
+
+Added UPS meter (cg_drawSpeed)
+Added headshot damage cvar to help with antilag/hitbox changes (g_hsDamage)

@@ -1,0 +1,42 @@
+Issue Fixes
+
+#119 instant respawn bug
+#152 do not reset ammo clips when picking up weapon
+#161 game server list broken
+#162 only team that pauses match may unpause it
+#166 do not print ref authorization information to all users
+#167 ref unlock not working
+#173 cvar restrictions causing lag spike at round start
+#174 weapon restrictions
+#177 do not include gibs during warmup into stats
+#178 do not start match when referee puts player on a team
+#185 allow spectating player during pause
+#186 updated GeoIP database
+#189 fixed gib stats when damage > 190
+#193 player ready status; fixed
+
+Other Fixes
+
+goat sound for knife kill (random with humiliation)
+added REF tag in /players command
+g_weapon and antilag
+make crosshair health info disappear faster
+do not show LT ammo info during spectating
+ignore complaint popups during warmup
+moved referee message to popup message instead of printing to all
+updated sv dlrate
+minor fix for uninitialized variable wstats
+fixed wstats when printed outside of stats/removed duplicates
+only log disconnects during a a match
+small adjustment for instant respawn fix
+fixed overlay gib status
+fixed cvar negative values
+fixed sten magic ammo
+prevent weaponbank 7 bug
+
+New Features
+
+implemented JSON stats
+updated bullet fire logic for animation hitboxes
+implemented #43 dead bodies should not grab spawn flags
+implemented #182 freecam pick player by +attack
