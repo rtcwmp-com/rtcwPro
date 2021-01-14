@@ -1585,9 +1585,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 
 
-
-                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
-                trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
+                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
+                trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
+                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
+                //trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
                 //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName);
                 //trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName ), &level.gameStatslogFile, FS_WRITE );
                 if ( !level.gameStatslogFile ) {
@@ -2891,7 +2892,7 @@ void CheckGameState( void ) {
 
 				if (!level.readyPrint) {
 					// show all players ready for both right now - need to fix pause for noteamswitching = 1
-					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "All players are now ^nready^7!"))); //"Ready threshold reached!") ));
+					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "^3All players are now ready!" : "^3All players are now ready!"))); //"Ready threshold reached!") ));
 					level.readyPrint = qtrue;
 				}
 			} else {

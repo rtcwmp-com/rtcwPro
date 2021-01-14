@@ -554,6 +554,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		}
 
 		if ( item ) {
+      G_writeObjectiveEvent(self, objDropped  );
 			launchvel[0] = 0;
 			launchvel[1] = 0;
 			launchvel[2] = 0;
@@ -895,7 +896,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	client = targ->client;
 
 	if ( client ) {
-		if ( client->noclip ) {
+		if ( client->noclip || client->ps.powerups[PW_INVULNERABLE]  ) {
 			return;
 		}
 	}
