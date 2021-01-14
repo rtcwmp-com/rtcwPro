@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.0.1" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.1.1" // this will print on the server and show up as the RtcwPro version
 
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -1195,7 +1195,7 @@ typedef struct {
 player_ready_status_t player_ready_status[MAX_CLIENTS];
 
 // How many players on the overlay
-#define TEAM_MAXOVERLAY     8
+#define TEAM_MAXOVERLAY     10 // RtcwPro changed this to 10
 
 // means of death
 typedef enum {
@@ -1827,6 +1827,7 @@ extern animStringItem_t animBodyPartsStr[];
 
 // Crosshairs
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
+void BG_ParseColorCvar(char* cvarString, float* color);
 // Client flags for server processing
 #define CGF_AUTORELOAD      0x01
 #define CGF_STATSDUMP       0x02

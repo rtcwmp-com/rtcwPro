@@ -518,7 +518,7 @@ void G_readyHandle( gentity_t* ent, qboolean ready ) {
 }
 
 void G_ready_cmd( gentity_t *ent, qboolean state ) {
-	char *status[2] = { "^zNOT READY^7", "^nREADY^7" };
+	char *status[2] = { "^zNOT READY^7", "^3READY^7" };
 
 	if (!g_tournament.integer) {
 		return;
@@ -538,10 +538,12 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 		CP( va("print \"Specs cannot use %s ^7command!\n\"", status[state] ));
 		return;
 	}
-	if (level.readyTeam[ent->client->sess.sessionTeam] == qtrue && !state) { // Doesn't cope with unreadyteam but it's out anyway..
-		CP(va("print \"%s ^7ignored. Your team has issued ^3TEAM READY ^7command..\n\"", status[state]));
-		return;
-	}
+
+	//if (level.readyTeam[ent->client->sess.sessionTeam] == qtrue && !state) { // Doesn't cope with unreadyteam but it's out anyway..
+	//	CP(va("print \"%s ^7ignored. Your team has issued ^3TEAM READY ^7command..\n\"", status[state]));
+	//	return;
+	//}
+
 	// Move them to correct ready state
 	if ( ent->client->pers.ready == state ) {
 		CP( va( "print \"You are already %s!\n\"", status[state] ) );
@@ -558,7 +560,7 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 			}
 
 			// Doesn't rly matter..score tab will show slow ones..
-			AP( va( "cp \"\n%s \n^7is %s!\n\"", ent->client->pers.netname, status[state] ) );
+			AP( va( "cp \"\n%s \n^3is %s!\n\"", ent->client->pers.netname, status[state] ) );
 		}
 	}
 }
@@ -612,7 +614,7 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 		CP(va("print \"Your team is already ^3%s^7!\n\"", status[ready]));
 	}
 	else {
-		AP(va("popin \"%s ^7team is %s%s!\n\"", aTeams[team], (ready ? "^n" : "^z"), status[ready]));
+		AP(va("cp \"%s ^7team is %s%s!\n\"", aTeams[team], (ready ? "^3" : "^z"), status[ready]));
 		level.readyTeam[team] = ready;
 	}
 }
@@ -624,7 +626,7 @@ Pause/Unpause
 void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
     int team = ent->client->sess.sessionTeam;
     char tName[MAX_NETNAME];
-	char *tag, *log, *action;
+	//char *tag, *log, *action;
 	gentity_t *target_ent;
 	int i;
 
@@ -737,7 +739,7 @@ What a mess...
 void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
     int team = ent->client->sess.sessionTeam;
     char tName[MAX_NETNAME];
-	char *tag, *log;
+	//char *tag, *log;
 
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
@@ -772,7 +774,7 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
 				} else if (g_gamelocked.integer == 3) {
 					trap_Cvar_Set( "g_gamelocked", "1" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^1Allied ^7team^z!\n\"", tName));
+					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
 				} else {
 					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
 				return;
@@ -808,7 +810,7 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
 				} else if (g_gamelocked.integer == 1) {
 					trap_Cvar_Set( "g_gamelocked", "3" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^1Allied ^7team^z!\n\"", tName));
+					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
 				} else {
 					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
 				return;

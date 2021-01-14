@@ -540,7 +540,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("Allies have lost %s!", self->message), qfalse);
+			G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
 			self->client->ps.powerups[PW_REDFLAG] = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
@@ -548,18 +548,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("Axis have lost %s!", self->message), qfalse);
+			G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}
 
 		if ( item ) {
-
-            G_writeObjectiveEvent(self, objDropped  );
-
-			launchvel[0] = crandom() * 20;
-			launchvel[1] = crandom() * 20;
-			launchvel[2] = 10 + random() * 10;
+      G_writeObjectiveEvent(self, objDropped  );
+			launchvel[0] = 0;
+			launchvel[1] = 0;
+			launchvel[2] = 0;
 
 			flag = LaunchItem( item,self->r.currentOrigin,launchvel,self->s.number );
 			flag->s.modelindex2 = self->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
@@ -1021,9 +1019,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 	if (targ->headshot && targ->client) {
 
-		if ( take * 2 < 50 ) { // head shots, all weapons, do minimum 50 points damage
-			take = 50;
-		} else {
+		if ( take * 2 < g_hsDamage.integer ) 
+		{
+			take = g_hsDamage.integer; // head shots, all weapons, do minimum 50 points damage
+		} 
+		else 
+		{
 			take *= 2; // sniper rifles can do full-kill (and knock into limbo)
 
 		}
@@ -1033,7 +1034,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 
 		// sswolf - some debug info
-		if (g_debugBullets.integer > 0)
+		if (g_debugBullets.integer)
 		{
 			AP(va("print \"%s ^7headshot for %i dmg\n\"", targ->client->pers.netname, take));
 		}

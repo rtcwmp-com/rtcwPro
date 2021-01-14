@@ -167,6 +167,7 @@ vmCvar_t url;
 
 vmCvar_t g_dbgRevive;
 
+// rtcwpro begin
 // L0 - New cvars
 // Admins
 vmCvar_t a1_pass;		// Level 1 admin
@@ -304,13 +305,12 @@ vmCvar_t g_maxTeamSniper;	// Max snipers per team
 vmCvar_t g_maxTeamVenom;	// Max venoms per team
 vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 
-// QCon edition cvars
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-// RTCWPro
 vmCvar_t g_customConfig;
 vmCvar_t P; // ET Port Players server info
+vmCvar_t g_hsDamage;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -404,7 +404,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
 	{ &g_debugBullets, "g_debugBullets", "0", 0, 0, qfalse}, //----(SA)	added
-	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "0", 0, 0, qfalse },
+	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "1", 0, 0, qfalse }, // default to 1
 	{ &g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
@@ -573,6 +573,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
+	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
@@ -2890,7 +2891,8 @@ void CheckGameState( void ) {
 				G_readyTeamLock();
 
 				if (!level.readyPrint) {
-					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "Ready threshold reached!") ));
+					// show all players ready for both right now - need to fix pause for noteamswitching = 1
+					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "^3All players are now ready!" : "^3All players are now ready!"))); //"Ready threshold reached!") ));
 					level.readyPrint = qtrue;
 				}
 			} else {
@@ -2970,7 +2972,7 @@ void CheckVote( void ) {
 		return;
 	}
 	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
-		trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+		trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
 		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
 	} else {
 // OSPx - Vote percent..
@@ -2986,7 +2988,7 @@ void CheckVote( void ) {
 		if ( (total == 1) || ( 100 * level.voteInfo.voteYes / total >= vCnt) ) {
 // -OSPx
 			// execute the command, then remove the vote
-			trap_SendServerCommand( -1, "print \"Vote passed.\n\"" );
+			trap_SendServerCommand( -1, "print \"^5Vote passed.\n\"" );
 			level.voteExecuteTime = level.time + 3000;
 			level.prevVoteExecuteTime = level.time + 4000;
 			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
@@ -3025,7 +3027,7 @@ void CheckVote( void ) {
 
 		} else if ( level.voteInfo.voteNo >= level.voteInfo.numVotingClients / 2 ) {
 			// same behavior as a timeout
-			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+			trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
 		} else {
 			// still waiting for a majority
 			return;
