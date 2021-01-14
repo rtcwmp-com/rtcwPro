@@ -178,6 +178,7 @@ typedef struct {
 	unsigned long	scope_id;	// Needed for IPv6 link-local addresses
 } netadr_t;
 
+void		NET_Restart(void);
 void        NET_Init( void );
 void        NET_Shutdown( void );
 void		NET_Restart_f( void );

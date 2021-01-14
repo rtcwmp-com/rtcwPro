@@ -1166,16 +1166,6 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 						pak->referenced |= FS_UI_REF;
 					}
 
-#if !defined( PRE_RELEASE_DEMO ) && !defined( DO_LIGHT_DEDICATED )
-					// DHM -- Nerve :: Don't allow maps to be loaded from pak0 (singleplayer)
-					if ( Q_stricmp( filename + l - 4, ".bsp" ) == 0 &&
-						 Q_stricmp( pak->pakBasename, "pak0" ) == 0 ) {
-
-						*file = 0;
-						return -1;
-					}
-#endif
-
 					if ( uniqueFILE ) {
 						// open a new file on the pakfile
 						fsh[*file].handleFiles.file.z = unzReOpen( pak->pakFilename, pak->handle );

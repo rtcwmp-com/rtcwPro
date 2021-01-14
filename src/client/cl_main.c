@@ -2214,6 +2214,10 @@ void CL_Frame( int msec ) {
 		}
 	}
 
+	if (!clc.demoplaying) {
+		com_timescale->value = 1;
+	}
+
 	// save the msec before checking pause
 	cls.realFrametime = msec;
 
