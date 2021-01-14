@@ -43,8 +43,9 @@ void G_jstatsByPlayers(qboolean wstats) {
 
     jstats =  json_array();
 
-	jplayer = json_object();
+
         for ( j = 0; j < level.numPlayingClients; j++ ) {
+            jplayer = json_object();
 			cl = level.clients + level.sortedClients[j];
 
 			if ( cl->pers.connected != CON_CONNECTED ) {
@@ -137,10 +138,12 @@ void G_jstatsByPlayers(qboolean wstats) {
 
             json_decref(jcat);
             json_decref(jdata);
+            json_array_append(jstats, jplayer);
+            json_decref(jplayer);
 
         }
 
-        json_array_append_new(jstats, jplayer);
+//        json_array_append_new(jstats, jplayer);
 
 
 
@@ -566,6 +569,9 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     switch ( objType ) {
+        case objDropped:
+            json_object_set_new(jdata, "label",    json_string("ObjDropped"));
+            break;
         case objReturned:
             json_object_set_new(jdata, "label",    json_string("ObjReturned"));
             break;

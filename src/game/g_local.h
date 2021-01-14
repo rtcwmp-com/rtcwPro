@@ -2106,6 +2106,7 @@ enum eventList {
     eventClassChange,
     eventNameChange,
     objTaken,
+    objDropped,
     objReturned,
     objCapture,
     objDynPlant,
