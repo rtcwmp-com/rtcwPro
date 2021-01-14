@@ -13,6 +13,7 @@ fix for the ending of match during pause (when pause is longer than game clock)
 fixed defaultpublic config and removed duplicate cvars
 fixed extra prepare to fight messages on unpause
 added new pro logo
+enhanced JSON stats to be saved in subdirectory (date) and added objective dropped event
 
 New Features
 
