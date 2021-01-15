@@ -14,6 +14,8 @@ fixed defaultpublic config and removed duplicate cvars
 fixed extra prepare to fight messages on unpause
 added new pro logo
 enhanced JSON stats to be saved in subdirectory (date) and added objective dropped event
+make crosshair names disappear faster
+changed LT ammo information to tinytext
 
 New Features
 
