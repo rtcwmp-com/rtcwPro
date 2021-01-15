@@ -43,17 +43,12 @@ void G_jstatsByPlayers(qboolean wstats) {
 
     jstats =  json_array();
 
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		if ( !TeamCount( -1, i ) ) {
-			continue;
-		}
-        sprintf(teamname,"%s",(i == TEAM_RED) ? "Axis" : "Allied"  );
 
-         jplayer = json_object();
         for ( j = 0; j < level.numPlayingClients; j++ ) {
+            jplayer = json_object();
 			cl = level.clients + level.sortedClients[j];
 
-			if ( cl->pers.connected != CON_CONNECTED || cl->sess.sessionTeam != i ) {
+			if ( cl->pers.connected != CON_CONNECTED ) {
 				continue;
 			}
 			DecolorString(cl->pers.netname, n1);
@@ -66,7 +61,7 @@ void G_jstatsByPlayers(qboolean wstats) {
 				eff = 0;
 			}
 			sprintf(pGUID,"%s",cl->sess.guid);
-
+            i = cl->sess.sessionTeam;
             jdata = json_object();
            // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
             json_object_set_new(jdata, "alias", json_string(n2));
@@ -107,7 +102,7 @@ void G_jstatsByPlayers(qboolean wstats) {
 
 
             weapArray = json_array();
-
+            i = cl->sess.sessionTeam;
             for (m = WS_KNIFE; m < WS_MAX; m++) {
                 if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
                     cl->sess.aWeaponStats[m].deaths) {
@@ -143,12 +138,14 @@ void G_jstatsByPlayers(qboolean wstats) {
 
             json_decref(jcat);
             json_decref(jdata);
+            json_array_append(jstats, jplayer);
+            json_decref(jplayer);
 
         }
 
-        json_array_append_new(jstats, jplayer);
+//        json_array_append_new(jstats, jplayer);
 
-    }
+
 
         s = json_dumps( jstats, 1 ); // for a pretty print form
         //s = json_dumps( jstats, 0 );
@@ -572,6 +569,9 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     switch ( objType ) {
+        case objDropped:
+            json_object_set_new(jdata, "label",    json_string("ObjDropped"));
+            break;
         case objReturned:
             json_object_set_new(jdata, "label",    json_string("ObjReturned"));
             break;

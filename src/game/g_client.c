@@ -1542,10 +1542,10 @@ void ClientUserinfoChanged( int clientNum ) {
 	//if (s[0] != 0) {
 	//	SaveIP_f(client, s);
 	//}
-	//if ( s && !strcmp( s, "localhost" ) ) {
-	//	client->pers.localClient = qtrue;
+	if ( s && !strcmp( s, "localhost" ) ) {
+		client->pers.localClient = qtrue;
 	//	client->sess.referee = RL_REFEREE;
-	//}
+	}
 // L0
 	// Save IP for getstatus..
 	s = Info_ValueForKey( userinfo, "ip" );
@@ -2635,6 +2635,14 @@ void ClientDisconnect( int clientNum ) {
 		 && !level.warmupTime && level.sortedClients[1] == clientNum ) {
 		level.clients[ level.sortedClients[0] ].sess.wins++;
 		ClientUserinfoChanged( level.sortedClients[0] );
+	}
+
+	// if a player disconnects during warmup make sure the team's ready status doesn't start the match
+	if (g_tournament.integer
+		&& g_gamestate.integer == GS_WARMUP 
+		&& (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
+	{
+		G_readyResetOnPlayerLeave(ent->client->sess.sessionTeam);
 	}
 
     if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
