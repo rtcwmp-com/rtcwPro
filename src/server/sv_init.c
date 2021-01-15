@@ -819,6 +819,15 @@ void SV_Init( void ) {
 	Cvar_Get( "sv_referencedPaks", "", CVAR_SYSTEMINFO | CVAR_ROM );
 	Cvar_Get( "sv_referencedPakNames", "", CVAR_SYSTEMINFO | CVAR_ROM );
 
+	// Wallhack
+	wh_active = Cvar_Get("wh_active", "0", CVAR_ARCHIVE);
+	// FIXME: adjust bounding box ?
+	wh_bbox_horz = Cvar_Get("wh_bbox_horz", "30", CVAR_ARCHIVE);
+	wh_bbox_vert = Cvar_Get("wh_bbox_vert", "60", CVAR_ARCHIVE);
+	wh_add_xy = Cvar_Get("wh_add_xy", "0", CVAR_ARCHIVE);
+	wh_check_fov = Cvar_Get("wh_check_fov", "0", CVAR_ARCHIVE);
+	SV_InitWallhack();
+
 	// server vars
 	sv_rconPassword = Cvar_Get( "rconPassword", "", CVAR_TEMP );
 	sv_privatePassword = Cvar_Get( "sv_privatePassword", "", CVAR_TEMP );
@@ -832,7 +841,7 @@ void SV_Init( void ) {
 	Cvar_Get( "nextmap", "", CVAR_TEMP );
 
 	sv_allowDownload = Cvar_Get( "sv_allowDownload", "1", CVAR_ARCHIVE );
-	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", 0 );      // NERVE - SMF - wolfMP master server
+	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", CVAR_ARCHIVE );      // NERVE - SMF - wolfMP master server
 	sv_master[1] = Cvar_Get( "sv_master2", "", CVAR_ARCHIVE );
 	sv_master[2] = Cvar_Get( "sv_master3", "", CVAR_ARCHIVE );
 	sv_master[3] = Cvar_Get( "sv_master4", "", CVAR_ARCHIVE );
