@@ -481,27 +481,22 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_secure.wav" );
 				//G_matchPrintInfo(va("Axis have returned %s!", ent->message), qfalse);
 				trap_SendServerCommand( -1, va( "cp \"Axis have returned %s!\n\" 2", ent->message ) );
-				//G_writeObjectiveEvent("Axis", "Returned objective", va("%s", cl->pers.netname)  );
-                G_writeObjectiveEvent(other, objReturned  );
-				//G_writeObjectiveEvent("Axis", "Axis have returned the objective", va("%s", cl->pers.netname)  );
-				cl->sess.obj_returned++;
-
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 				}
+				G_writeObjectiveEvent(other, objReturned  );
+				cl->sess.obj_returned++;
+
 			} else {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
 				//G_matchPrintInfo(va("Allies have returned %s!", ent->message), qfalse);
 				trap_SendServerCommand( -1, va( "cp \"Allies have returned %s!\n\" 2", ent->message ) );
-//                G_writeObjectiveEvent("Allied", "Returned objective", va("%s", cl->pers.netname)   );
-
-                G_writeObjectiveEvent(other, objReturned  );
-
-				cl->sess.obj_returned++;
-
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 				}
+
+                G_writeObjectiveEvent(other, objReturned  );
+				cl->sess.obj_returned++;
 			}
 			// dhm
 		}
@@ -631,25 +626,21 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_taken.wav" );
 			//G_matchPrintInfo(va("Axis have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Axis have stolen %s!\n\" 2", ent->message ) );
-			cl->sess.obj_taken++;
-            //G_writeObjectiveEvent("Axis", va( "Taken objective", ent->message ), va("%s", cl->pers.netname)  );
-            G_writeObjectiveEvent(other, objTaken  );
-
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "allied_object_stolen" );
 			}
+            cl->sess.obj_taken++;
+            G_writeObjectiveEvent(other, objTaken  );
 		} else {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_taken.wav" );
 			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
 			trap_SendServerCommand( -1, va( "cp \"Allies have stolen %s!\n\" 2", ent->message ) );
-			cl->sess.obj_taken++;
-            G_writeObjectiveEvent(other, objTaken  );
-            //G_writeObjectiveEvent("Allied", va( "Taken objective", ent->message ), va("%s", cl->pers.netname)  );
-
 
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "axis_object_stolen" );
 			}
+            G_writeObjectiveEvent(other, objTaken  );
+            cl->sess.obj_taken++;
 		}
 		// dhm
 // jpw
@@ -1009,7 +1000,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	int i, j;
 	gentity_t   *player;
 	int cnt;
-	int h;
+	int actualHealth, displayHealth, playerLimbo;
 
 	// send the latest information on all clients
 	string[0] = 0;
@@ -1024,16 +1015,20 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
 
+			actualHealth = player->client->ps.stats[STAT_HEALTH]; // actual health used for gibbed status
+
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
 			if (player->client->ps.pm_flags & PMF_LIMBO) {
-				h = 0;
+				displayHealth = 0;
+				playerLimbo = 1;
 			}
 			else {
-				h = player->client->ps.stats[STAT_HEALTH];
+				displayHealth = player->client->ps.stats[STAT_HEALTH];
+				playerLimbo = 0;
 			}
 
-			if (h < 0) {
-				h = 0;
+			if (actualHealth < 0) {
+				displayHealth = 0;
 			}
 
 			playerWeapon = player->client->ps.weapon;
@@ -1043,9 +1038,9 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i",
-				level.sortedClients[i], player->client->pers.teamState.location, h, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, player->client->pers.ready); // set ready status on each client
+				" %i %i %i %i %i %i %i %i %i %i %i",
+				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 
@@ -1525,13 +1520,12 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	// Run script trigger
 	if ( self->count == TEAM_RED ) {
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
-        //G_writeObjectiveEvent("Axis", "Captured flag", va("%s", other->client->pers.netname)   );
+
         G_writeObjectiveEvent(other, objSpawnFlag  );
         //other->client->sess.obj_checkpoint++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
 
-        //G_writeObjectiveEvent("Allied", "Captured flag", va("%s", other->client->pers.netname)   );
         G_writeObjectiveEvent(other, objSpawnFlag  );
         //other->client->sess.obj_checkpoint++;
 	}
@@ -1890,6 +1884,35 @@ void G_readyReset( qboolean aForced ) {
 	level.readyPrint = qfalse;
 	trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
 	trap_SetConfigstring( CS_READY, va( "%i", (g_noTeamSwitching.integer ? READY_PENDING : READY_AWAITING) ));
+}
+
+// if a player leaves a team (disconnect to change teams) reset the team's ready status by setting one player to not ready
+void G_readyResetOnPlayerLeave( int team ) {
+	if (g_gamestate.integer == GS_WARMUP && g_tournament.integer) {
+		int i, randomPlayer = -1;
+		qboolean resetStatus = qfalse;
+
+		for (i = 0; i < level.maxclients; i++) {
+			if (level.clients[i].pers.connected == CON_DISCONNECTED) {
+				continue;
+			}
+			if (level.clients[i].sess.sessionTeam != team) {
+				continue;
+			}
+			if (level.clients[i].pers.ready) {
+				resetStatus = qtrue;
+				randomPlayer = i;
+				break;
+			}
+		}
+
+		if (resetStatus && randomPlayer > 0) {
+			level.clients[randomPlayer].pers.ready = qfalse;
+			level.clients[randomPlayer].ps.powerups[PW_READY] = 0;
+			player_ready_status[randomPlayer].isReady = qfalse;
+			CPx(randomPlayer, "print \"^3Team count changed. Please READY your self once more.\n\"");
+		}
+	}
 }
 
 void G_readyStart( void ) {

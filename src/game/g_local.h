@@ -1377,6 +1377,7 @@ void G_updateSpecLock( int nTeam, qboolean fLock );
 void G_removeSpecInvite( int team );
 qboolean G_playersReady( void );
 void G_readyReset( qboolean aForced );
+void G_readyResetOnPlayerLeave(int team);
 void G_readyStart( void );
 void G_readyTeamLock( void );
 
@@ -1571,6 +1572,7 @@ extern vmCvar_t g_antilag;
 
 extern vmCvar_t g_dbgRevive;
 
+// rtcwpro begin
 // Referee/Voting - New cvars
 extern vmCvar_t refereePassword;
 extern vmCvar_t team_maxplayers;
@@ -1606,16 +1608,9 @@ extern vmCvar_t	a4_cmds;
 extern vmCvar_t	a5_cmds;
 extern vmCvar_t	a5_allowAll;
 extern vmCvar_t	adm_help;
+
 // Server stuff
 extern vmCvar_t	g_dropReload;
-extern vmCvar_t match_latejoin;
-extern vmCvar_t match_minplayers;
-extern vmCvar_t match_mutespecs;
-extern vmCvar_t match_readypercent;
-extern vmCvar_t match_timeoutcount;
-extern vmCvar_t match_timeoutlength;
-extern vmCvar_t match_warmupDamage;
-
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
 extern vmCvar_t g_gamelocked;
@@ -1699,14 +1694,10 @@ extern vmCvar_t vote_percent;
 // Ref tag..
 #define REFEREE	"^3Ref^7"
 
-// QCon edition cvars
-extern vmCvar_t		g_antiWarp;
-
-// RTCWPro
-extern vmCvar_t g_customConfig;
-//extern vmCvar_t Players_Allies;
-//extern vmCvar_t Players_Axis;
-extern vmCvar_t P;
+extern vmCvar_t	g_antiWarp; // antiwarp port
+extern vmCvar_t g_customConfig; // ET config port
+extern vmCvar_t P; // player teams in server info
+extern vmCvar_t	g_hsDamage;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -2115,6 +2106,7 @@ enum eventList {
     eventClassChange,
     eventNameChange,
     objTaken,
+    objDropped,
     objReturned,
     objCapture,
     objDynPlant,

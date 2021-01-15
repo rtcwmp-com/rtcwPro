@@ -89,7 +89,7 @@ menuDef {
 		name OSP
 		style WINDOW_STYLE_SHADER
 		rect 450 1 142 80
-		background "gfx/2d/wpro.tga"
+		background "gfx/2d/rtcwpro.tga"
 		visible 1
 		decoration
 	}

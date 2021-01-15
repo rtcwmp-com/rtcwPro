@@ -320,6 +320,11 @@ vmCvar_t cg_forceTapout;
 //vmCvar_t cg_hitsounds;
 vmCvar_t cg_uinfo;
 
+// draw speed
+vmCvar_t cg_drawSpeed;
+vmCvar_t cg_speedX;
+vmCvar_t cg_speedY;
+
 // Stats - Font scale
 vmCvar_t cf_wstats;
 vmCvar_t cf_wtopshots;
@@ -609,6 +614,11 @@ cvarTable_t cvarTable[] = {
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
 	{ &cg_antilag, "g_antilag", "0", 0 },
+
+	// draw speed
+	{ &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },
+	{ &cg_speedX, "cg_speedX", "315", CVAR_ARCHIVE },
+	{ &cg_speedY, "cg_speedY", "340", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
