@@ -6108,9 +6108,8 @@ void SnapVectorTowards( vec3_t v, vec3_t to ) {
  * @param[in] pstart
  * @param[in] pend
  * @param[in] sourceEntityNum
- * @param[in] otherEntityNum
  */
-void CG_DrawBulletTracer(vec3_t pstart, vec3_t pend, int sourceEntityNum, int otherEntityNum)
+void CG_DrawBulletTracer(vec3_t pstart, vec3_t pend, int sourceEntityNum)
 {
 	if (cg_tracers.integer == 2 && sourceEntityNum != cg.clientNum) {
 		return; // Only own tracers
@@ -6206,8 +6205,8 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 					if ( !wolfkick && random() < cg_tracerChance.value ) {
 						CG_Tracer( start, end, 0 );
 					}
-				} else {    // (not flesh)
-				    CG_DrawBulletTracer(start, end, sourceEntityNum, otherEntNum2);
+				} else { // (not flesh)
+				    CG_DrawBulletTracer(start, end, sourceEntityNum);
 				}
 			}
 			// End
