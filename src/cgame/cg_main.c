@@ -624,7 +624,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_speedY, "cg_speedY", "340", CVAR_ARCHIVE },
 
 	// draw tracers
-	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE, 0 },
+	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
