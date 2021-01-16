@@ -368,6 +368,9 @@ vmCvar_t int_ui_blackout;
 vmCvar_t cg_spawnTimer_set;         // spawntimer
 vmCvar_t cg_spawnTimer_period;      // spawntimer
 
+// added from et-legacy - crumbs
+vmCvar_t cg_tracers;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -619,6 +622,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },
 	{ &cg_speedX, "cg_speedX", "315", CVAR_ARCHIVE },
 	{ &cg_speedY, "cg_speedY", "340", CVAR_ARCHIVE },
+
+	// draw tracers
+	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE, 0 },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
