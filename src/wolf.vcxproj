@@ -137,8 +137,8 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir  "$(SolutionDir)..\output/"
-copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output/"</Command>
+      <Command>mkdir "..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -189,8 +189,8 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <ProfileGuidedDatabase>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)..\output/"
-copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output/"</Command>
+      <Command>mkdir "..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -241,8 +241,8 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <AdditionalLibraryDirectories>$(SolutionDir)Builds\Release\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)..\output/"
-copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
+      <Command>mkdir "..\output/"
+copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -293,8 +293,8 @@ copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "$(So
       <AdditionalLibraryDirectories>$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(SolutionDir)..\output/"
-copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
+      <Command>mkdir "..\output/"
+copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
