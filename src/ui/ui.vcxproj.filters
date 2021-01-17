@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ui.def" />
+    <None Include="makefile" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

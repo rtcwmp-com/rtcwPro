@@ -324,4 +324,7 @@
       <UniqueIdentifier>{b37a064e-a701-4410-b6ee-5263e890836d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile" />
+  </ItemGroup>
 </Project>

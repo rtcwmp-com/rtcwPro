@@ -273,10 +273,12 @@
     <ClInclude Include="qcommon\unzip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="unix\ChangeLog" />
     <None Include="unix\Construct" />
+    <None Include="unix\Makefile" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -285,5 +287,11 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{860a9ba0-0afb-446a-9ded-2f41646731ac}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="wolf.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="win32\wolf.ico" />
   </ItemGroup>
 </Project>
