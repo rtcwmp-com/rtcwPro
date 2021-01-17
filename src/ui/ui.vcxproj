@@ -105,7 +105,8 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
+      <Command>mkdir "$(SolutionDir)..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -158,7 +159,8 @@
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
+      <Command>mkdir "$(SolutionDir)..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>

@@ -146,7 +146,8 @@
     </Link>
     <ProjectReference />
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
+      <Command>mkdir "$(SolutionDir)..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -173,7 +174,8 @@
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
+      <Command>mkdir "$(SolutionDir)..\output/"
+copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -222,7 +224,8 @@
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
+      <Command>mkdir "$(SolutionDir)..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)..\output\"</Command>
       <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
     <Bscmake>
