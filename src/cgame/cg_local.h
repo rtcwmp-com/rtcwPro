@@ -2141,6 +2141,9 @@ extern vmCvar_t cg_speedY;
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
 
+// added from et-legacy - crumbs
+extern vmCvar_t cg_tracers;
+
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
 
