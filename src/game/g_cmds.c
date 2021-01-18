@@ -543,7 +543,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
 /*	if ( g_gamestate.integer != GS_PLAYING ) {
 		return;
 	}
-	*/     // nihi commented to allow \kill during warmups
+	*/
 	if ( g_gametype.integer >= GT_WOLF && ent->client->ps.pm_flags & PMF_LIMBO ) {
 		return;
 	}
@@ -554,7 +554,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
 //	player_die( ent, ent, ent, 100000, MOD_SUICIDE );
 
     player_die( ent, ent, ent, dmg, MOD_SUICIDE );
-	if (g_gamestate.integer == GS_PLAYING) ent->client->sess.suicides++;	// L0 - Record it here..as it's easier.. // nihi added
+	if (g_gamestate.integer == GS_PLAYING) ent->client->sess.suicides++;	// L0 - Record it here..as it's easier..
 }
 
 
@@ -688,7 +688,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 								"cp \"You can't switch teams because you are out of lives.\n\" 3" );
 		return; // ignore the request
 	}
-// nihi commented below
+
 /*
 	// DHM - Nerve :: Force players to wait 30 seconds before they can join a new team.
 	if ( g_gametype.integer >= GT_WOLF && team != oldTeam && level.warmupTime == 0 && !client->pers.initialSpawn
@@ -986,7 +986,7 @@ Cmd_FollowCycle_f
 void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 	int clientnum;
 	int original;
-   // nihi added below
+
 	// L0 - Pause
 	if (level.paused != PAUSE_NONE && ent->client->sess.sessionTeam != TEAM_SPECTATOR)  //added to allow spectators to cycle during pause
 		return;
@@ -1003,7 +1003,6 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 	if ( dir != 1 && dir != -1 ) {
 		G_Error( "Cmd_FollowCycle_f: bad dir %i", dir );
 	}
-    // nihi added below
 	// if dedicated follow client, just switch between the two auto clients
 	if (ent->client->sess.spectatorClient < 0) {
 		if (ent->client->sess.spectatorClient == -1) {
@@ -1037,15 +1036,15 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		}
 
 // JPW NERVE -- couple extra checks for limbo mode
-		if (ent->client->ps.pm_flags & PMF_LIMBO) 
+		if (ent->client->ps.pm_flags & PMF_LIMBO)
 		{
-			if (level.clients[clientnum].ps.pm_flags & PMF_LIMBO) 
+			if (level.clients[clientnum].ps.pm_flags & PMF_LIMBO)
 			{
 				continue;
 			}
 
 			if (level.clients[clientnum].sess.sessionTeam != ent->client->sess.sessionTeam &&
-				ent->client->sess.sessionTeam != TEAM_SPECTATOR) 
+				ent->client->sess.sessionTeam != TEAM_SPECTATOR)
 			{
 				continue;
 			}
@@ -1057,7 +1056,6 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 				continue;
 			}
 		}
- 		  // nihi added below
 		// OSP
 		if ( !G_desiredFollow( ent, level.clients[clientnum].sess.sessionTeam ) ) {
 			continue;

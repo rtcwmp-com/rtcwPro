@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -578,7 +578,7 @@ static void CG_OffsetFirstPersonView( void ) {
 	}
 
 	// add angles based on weapon kick
-	VectorAdd( angles, cg.kick_angles, angles );  //nihi comment
+	VectorAdd( angles, cg.kick_angles, angles );
 
 	// RF, add new weapon kick angles
 	CG_KickAngles();
@@ -968,7 +968,7 @@ static int CG_CalcZoomedFov(void) {
 	else
 		value = cg_zoomedSens.value;
 
-	
+
 //	if (cg.snap->ps.pm_type == PM_FREEZE || (cg.snap->ps.pm_type == PM_DEAD && (cg.snap->ps.pm_flags & PMF_LIMBO)) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER) {
 if (cg.snap->ps.pm_type == PM_FREEZE) {
 		// No movement for pauses
@@ -1108,7 +1108,7 @@ static int CG_CalcFov( void ) {
 	} else {
 		cg.refdef.rdflags &= ~RDF_UNDERWATER;
 	}
-/* nihi commented out due to no poison
+/*
 	// L0 - Poison										// Pause handling
 	if (  cg.predictedPlayerState.eFlags & EF_POISONED && !cg.snap->ps.pm_type == PM_FREEZE )
 	{
@@ -1125,9 +1125,9 @@ static int CG_CalcFov( void ) {
 	cg.refdef.fov_x = fov_x;
 	cg.refdef.fov_y = fov_y;
 
-	// L0 - Freezed 
+	// L0 - Freezed
 //	if ( cg.snap->ps.pm_type == PM_FREEZE || ( cg.snap->ps.pm_type == PM_DEAD && ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER ) {
-	if ( cg.snap->ps.pm_type == PM_FREEZE ) { // nihi changed
+	if ( cg.snap->ps.pm_type == PM_FREEZE ) {
 		// No movement for pauses
 		cg.zoomSensitivity = 0;
 	} else if ( !cg.zoomedBinoc ) {

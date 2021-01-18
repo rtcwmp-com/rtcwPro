@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -687,7 +687,7 @@ void G_RunMover( gentity_t *ent ) {
 
 	// if stationary at one of the positions, don't move anything
 	if ( ent->s.pos.trType != TR_STATIONARY || ent->s.apos.trType != TR_STATIONARY ) {
-		// L0 - Pause   nihi added
+		// L0 - Pause
 		if ( level.paused == PAUSE_NONE ) {
 			G_MoverTeam( ent );
 		} else { ent->s.pos.trTime += level.time - level.previousTime;}
@@ -2149,17 +2149,17 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	walking = (qboolean)( ent->flags & FL_SOFTACTIVATE );
 
 
-	if ( ( ent->s.apos.trType == TR_STATIONARY && ent->s.pos.trType == TR_STATIONARY ) ) 
+	if ( ( ent->s.apos.trType == TR_STATIONARY && ent->s.pos.trType == TR_STATIONARY ) )
 	{
-		if ( ent->active == qfalse ) 
+		if ( ent->active == qfalse )
 		{
 			// door force locked
 			//if ( ent->key < 0 )
 			// sswolf - allowteams ET - port
 			if (ent->key < 0 || !G_AllowTeamsAllowed(ent, activator))
-			{ 
+			{
 				// only send audible event if not trying to open slowly
-				if ( !walking && activator ) 
+				if ( !walking && activator )
 				{
 					AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_LOCKED );   // "someone tried locked door near me!"
 				}
@@ -2167,9 +2167,9 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 				return;
 			}
 
-			if ( activator ) 
+			if ( activator )
 			{
-				if ( ent->key > 0 ) 
+				if ( ent->key > 0 )
 				{  // door requires key
 					gitem_t *item = BG_FindItemForKey( ent->key, 0 );
 					//if ( !( activator->client->ps.stats[STAT_KEYS] & ( 1 << item->giTag ) ) )
@@ -2177,7 +2177,7 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 					if (!(activator->client->ps.stats[STAT_KEYS] & (1 << item->giTag)) || (!G_AllowTeamsAllowed(ent, activator)))
 					{
 						// only send audible event if not trying to open slowly
-						if ( !walking ) 
+						if ( !walking )
 						{
 							AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_LOCKED );   // "someone tried locked door near me!"
 						}

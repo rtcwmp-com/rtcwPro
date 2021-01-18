@@ -543,7 +543,7 @@ typedef struct {
 	//int incognito;		// Admin is hidden
 	//int ignored;		// User is ignored
 	unsigned int uci;   // mcwf's GeoIP
-//	unsigned char ip[4];// IPs  // nihi commented
+//	unsigned char ip[4];// IPs
 	unsigned int ip[4];						// IP
 	char guid[15];		// Guid
 	adminStatus_t admin;					// Admin, ref..
@@ -586,7 +586,7 @@ typedef struct {
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
-	int			clientFlags;		// Sort some stuff based upon user settings   // nihi addded
+	int			clientFlags;		// Sort some stuff based upon user settings
 } clientSession_t;
 
 //
@@ -671,7 +671,7 @@ typedef struct {
 	qboolean drawHitBoxes;
 } clientPersistant_t;
 
-// L0 - antilag port     nihi added
+// L0 - antilag port
 #define NUM_CLIENT_TRAILS 10
 typedef struct {
     vec3_t    mins, maxs;
@@ -794,7 +794,7 @@ struct gclient_s {
 	int lastBurnTime;         // JPW NERVE last time index for flamethrower burn
 	int PCSpecialPickedUpCount;         // JPW NERVE used to count # of times somebody's picked up this LTs ammo (or medic health) (for scoring)
 	int saved_persistant[MAX_PERSISTANT];           // DHM - Nerve :: Save ps->persistant here during Limbo
-/* nihi removed below
+/*
 	// g_antilag.c
 	int topMarker;
 	clientMarker_t clientMarkers[MAX_CLIENT_MARKERS];
@@ -809,7 +809,7 @@ struct gclient_s {
 	float legsYawAngle, torsoYawAngle, torsoPitchAngle;
 	qboolean torsoYawing, legsYawing, torsoPitching;
 
-// nihi added below
+
 	// g_antilag.c
 	// L0 - antilag port
     int              trailHead;
@@ -1468,7 +1468,7 @@ extern vmCvar_t g_gametype;
 // Rafael gameskill
 extern vmCvar_t g_gameskill;
 // done
-extern vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
+extern vmCvar_t g_gameStatslog; // temp cvar for event logging
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
@@ -1702,7 +1702,7 @@ extern vmCvar_t	g_hsDamage;
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
 int     trap_Milliseconds( void );
-int		trap_RealTime( qtime_t *qtime );  // nihi - added from wolfX
+int		trap_RealTime( qtime_t *qtime );  // added from wolfX
 int     trap_Argc( void );
 void    trap_Argv( int n, char *buffer, int bufferLength );
 void    trap_Args( char *buffer, int bufferLength );
@@ -1940,7 +1940,7 @@ typedef enum
 #define AA_STATSTEAM    0x02    // Client AutoAction: Dump TEAM player stats
 
 
-// nihi added below
+
 // sswolf - removed unused declarations
 
 // g_antilag.c

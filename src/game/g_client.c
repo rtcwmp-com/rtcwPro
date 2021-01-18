@@ -606,7 +606,7 @@ void respawn( gentity_t *ent ) {
 	}
 
 	ClientSpawn( ent, qfalse );
-	// nihi added below
+
 	// L0 - antilag
 	G_ResetTrail( ent );
     ent->client->saved.leveltime = 0;
@@ -1214,7 +1214,7 @@ static void ClientCleanName( const char *in, char *out, int outSize ) {
 				in++;
 				continue;
 			}
-			*/   // nihi commented out to allow black names
+			*/
 
 			// make sure room in dest for both chars
 			if ( len > outSize - 2 ) {
@@ -1992,7 +1992,7 @@ void ClientBegin( int clientNum ) {
 
 	// locate ent at a spawn point
 	ClientSpawn( ent, qfalse );
-// nihi added below
+
 	// L0 - antilag
 	G_ResetTrail( ent );
     ent->client->saved.leveltime = 0;
@@ -2529,7 +2529,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 
 	// show_bug.cgi?id=569
-	//G_ResetMarkers( ent );   //nihi removed
+	//G_ResetMarkers( ent );
 
 	// sswolf - head stuff
 	// add the head entity if it already hasn't been

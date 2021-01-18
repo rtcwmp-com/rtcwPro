@@ -35,9 +35,7 @@ Last Updated: 28. Apr / 2013
 */
 
 
-/*
-nihi - replaced MOD_ADMKILL with MOD_ZOMBIESPIT for the time being
-*/
+
 #include "g_local.h"
 
 /*
@@ -1847,7 +1845,7 @@ Reveal location of a player.
 ==================
 */
 void cmd_revealCamper(gentity_t *ent) {
-/* // nihi commented below
+/*
 	char location[64];
 	int	clientNum;
 	char *tag, *log, *log2;
@@ -1895,11 +1893,11 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 
 	tag = sortTag(ent);
 /*	if (!resume) {
-		//level.paused = !PAUSE_NONE; // nihi commented
+		//level.paused = !PAUSE_NONE;
 		 level.paused = 100 + ((ent) ? (1 + ent - g_entities) : 0);
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);   // nihi added
-		//G_spawnPrintf(DP_PAUSEINFO, level.time, NULL);   // nihi added
+		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
+		//G_spawnPrintf(DP_PAUSEINFO, level.time, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tag));
 		AAPS("sound/world/klaxon1.wav");
 	} else if (level.paused != PAUSE_UNPAUSING){
