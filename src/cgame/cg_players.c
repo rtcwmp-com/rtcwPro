@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -2084,12 +2084,12 @@ CG_HasteTrail
 static void CG_HasteTrail( centity_t *cent ) {
 	localEntity_t   *smoke;
 	vec3_t origin;
-	int anim; 
+	int anim;
 
 	if ( cent->trailTime > cg.time ) {
 		return;
 	}
-	anim = cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT; 
+	anim = cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT;
 // RF, this is all broken by scripting system
 //	if ( anim != LEGS_RUN && anim != LEGS_BACK ) {
 //		return;
@@ -2865,7 +2865,7 @@ void CG_Player( centity_t *cent ) {
 
 	shadow = qfalse;                                                // gjd added to make sure it was initialized
 	shadowPlane = 0.0;                                              // ditto
-//	VectorCopy( vec3_origin, playerOrigin );    // nihi commented
+//	VectorCopy( vec3_origin, playerOrigin );
 
 	// if set to invisible, skip
 	if ( cent->currentState.eFlags & EF_NODRAW ) {
@@ -2986,7 +2986,7 @@ void CG_Player( centity_t *cent ) {
 
 	// sswolf - complete OSP demo features
 	// L0 - Keeping this in for demo preview..
-	if (cg.demoPlayback && cgs.wallhack) 
+	if (cg.demoPlayback && cgs.wallhack)
 	{
 		if (cent->currentState.number != cg.snap->ps.clientNum)
 			renderfx = RF_DEPTHHACK;

@@ -112,7 +112,6 @@ If you have questions concerning this license or the applicable additional terms
 #define LIMBO_3D_W  420
 #define LIMBO_3D_H  312
 // -NERVE - SMF
-/* NIHI ADDED BELOW */
 // L0 - OSP's window's dump
 #define MAX_WINDOW_COUNT        10
 #define MAX_WINDOW_LINES        64
@@ -248,7 +247,7 @@ typedef struct {
 	int requestTime;
 } topshotStats_t;
 // End OSP's dump
-/* END NIHI ADDITION */
+
 //=================================================
 
 // player entities need to track more information
@@ -1868,11 +1867,11 @@ typedef struct {
 	int ccSelectedTeam;					// Reinforcements offset
 	int fixedphysics;	// Fixed pshysics
 	int pauseState;		// Pause
-	int pauseTime;   // pause time nihi added
+	int pauseTime;
 	int readyState;		// Ready
 	int playersReady;   // number of players ready so far
 	int playerCount;	// number of players
-// nihi added below
+
 	// Pause
 	cPauseSts_t match_paused;
 	int match_resumes;
@@ -2094,7 +2093,7 @@ extern vmCvar_t cg_drawReinforcementTime;
 extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
-// nihi added
+
 extern vmCvar_t	vp_drawnames;
 extern vmCvar_t	cg_drawNames;
 extern vmCvar_t cg_announcer;
@@ -2171,7 +2170,7 @@ qboolean CG_GetTag( int clientNum, char *tagname, orientation_t * or );
 qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t * or );
 
 qboolean CG_CheckCenterView();
-// nihi added lines below
+
 char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port

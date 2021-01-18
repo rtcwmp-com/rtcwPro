@@ -364,7 +364,7 @@ vmCvar_t int_sensitivity;
 vmCvar_t int_timescale;
 vmCvar_t int_ui_blackout;
 
-// added from et - nihi
+// added from et
 vmCvar_t cg_spawnTimer_set;         // spawntimer
 vmCvar_t cg_spawnTimer_period;      // spawntimer
 
@@ -1115,13 +1115,13 @@ static void CG_RegisterSounds( void ) {
 //	cgs.media.teleInSound = trap_S_RegisterSound( "sound/world/telein.wav" );
 //	cgs.media.teleOutSound = trap_S_RegisterSound( "sound/world/teleout.wav" );
 //	cgs.media.respawnSound = trap_S_RegisterSound( "sound/items/respawn1.wav" );
-    cgs.media.prepFight = trap_S_RegisterSound( "sound/match/prepare.wav" ); //---- nihi added
-    cgs.media.count1Sound = trap_S_RegisterSound( "sound/match/cn_1.wav" ); //---- nihi added
-    cgs.media.count2Sound = trap_S_RegisterSound( "sound/match/cn_2.wav" ); //---- nihi added
-	cgs.media.count3Sound = trap_S_RegisterSound("sound/match/cn_3.wav"); //---- nihi added
-	cgs.media.count4Sound = trap_S_RegisterSound("sound/match/cn_4.wav"); //---- nihi added
-	cgs.media.count5Sound = trap_S_RegisterSound("sound/match/cn_5.wav"); //---- nihi added
-    cgs.media.announceFight = trap_S_RegisterSound( "sound/match/fight.wav" ); //---- nihi added
+    cgs.media.prepFight = trap_S_RegisterSound( "sound/match/prepare.wav" );
+    cgs.media.count1Sound = trap_S_RegisterSound( "sound/match/cn_1.wav" );
+    cgs.media.count2Sound = trap_S_RegisterSound( "sound/match/cn_2.wav" );
+	cgs.media.count3Sound = trap_S_RegisterSound("sound/match/cn_3.wav");
+	cgs.media.count4Sound = trap_S_RegisterSound("sound/match/cn_4.wav");
+	cgs.media.count5Sound = trap_S_RegisterSound("sound/match/cn_5.wav");
+    cgs.media.announceFight = trap_S_RegisterSound( "sound/match/fight.wav" );
 	cgs.media.grenadebounce1 = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb1a.wav" );
 	cgs.media.grenadebounce2 = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb2a.wav" );
 

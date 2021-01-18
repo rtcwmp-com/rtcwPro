@@ -911,7 +911,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( knockback > 200 ) {
 		knockback = 200;
 	}
-	//else { knockback = .5*knockback;}  // TODO did OSP do this?? //nihi added to reduce knockback
+	//else { knockback = .5*knockback;}  // TODO did OSP do this??
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
@@ -1019,11 +1019,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 	if (targ->headshot && targ->client) {
 
-		if ( take * 2 < g_hsDamage.integer ) 
+		if ( take * 2 < g_hsDamage.integer )
 		{
 			take = g_hsDamage.integer; // head shots, all weapons, do minimum 50 points damage
-		} 
-		else 
+		}
+		else
 		{
 			take *= 2; // sniper rifles can do full-kill (and knock into limbo)
 

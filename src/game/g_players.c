@@ -167,7 +167,7 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 Get client number from name
 ===========
 */
-/* // nihi commented out below
+/*
 int ClientNumberFromNameMatch(char *name, int *matches){
 	int i, textLen;
 	char nm[32];
@@ -652,16 +652,16 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	DecolorString(aTeams[team], tName);
 
 	if (!dPause) {
-/*	//	level.paused = !PAUSE_NONE;  // nihi commented
-		level.paused = team + 128; // nihi added
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL); // nihi added
+/*	//	level.paused = !PAUSE_NONE;
+		level.paused = team + 128;
+		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
 		AAPS("sound/match/klaxon1.wav");
 	}
    // else if (level.paused != PAUSE_UNPAUSING){
-    else if (team + 128 != level.paused) {// nihi added
+    else if (team + 128 != level.paused) {
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");
 		return;
@@ -673,7 +673,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		level.CNstart = 0; // Resets countdown if it was aborted before
 		level.paused = PAUSE_UNPAUSING;
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
-		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL); // nihi added
+		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 	}
 	*/
 		level.paused = !PAUSE_NONE;

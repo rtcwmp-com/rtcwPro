@@ -1616,7 +1616,7 @@ void ClientThink_real( gentity_t *ent ) {
 	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 
 	// store the client's current position for antilag traces
-//	G_StoreClientPosition( ent );    // nihi commented out and added below
+
 	// L0 - antilag
 	G_StoreTrail( ent );
 	// L0 - end

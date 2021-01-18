@@ -27,7 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "g_local.h"
-
+#include <time.h>
 // g_client.c -- client functions that don't happen every frame
 
 // Ridah, new bounding box
@@ -606,7 +606,7 @@ void respawn( gentity_t *ent ) {
 	}
 
 	ClientSpawn( ent, qfalse );
-	// nihi added below
+
 	// L0 - antilag
 	G_ResetTrail( ent );
     ent->client->saved.leveltime = 0;
@@ -1024,7 +1024,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							break;
 						}
 					}
-				
+
 					COM_BitSet( client->ps.weapons, WP_SNIPERRIFLE );
 					client->ps.ammoclip[BG_FindClipForWeapon( WP_SNIPERRIFLE )] = 10;
 					client->ps.ammo[BG_FindAmmoForWeapon( WP_SNIPERRIFLE )] = 10;
@@ -1048,7 +1048,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							break;
 						}
 					}
-				
+
 					COM_BitSet( client->ps.weapons, WP_PANZERFAUST );
 					client->ps.ammo[BG_FindAmmoForWeapon( WP_PANZERFAUST )] = 4;
 					client->ps.weapon = WP_PANZERFAUST;
@@ -1066,7 +1066,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							break;
 						}
 					}
-				
+
 					COM_BitSet( client->ps.weapons, WP_VENOM );
 					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_VENOM )] = 500;
 					client->ps.weapon = WP_VENOM;
@@ -1089,7 +1089,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							client->pers.restrictedWeapon = WP_FLAMETHROWER;
 						}
 					}
-				
+
 					COM_BitSet( client->ps.weapons, WP_FLAMETHROWER );
 					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_FLAMETHROWER )] = 200;
 					client->ps.weapon = WP_FLAMETHROWER;
@@ -1214,7 +1214,7 @@ static void ClientCleanName( const char *in, char *out, int outSize ) {
 				in++;
 				continue;
 			}
-			*/   // nihi commented out to allow black names
+			*/
 
 			// make sure room in dest for both chars
 			if ( len > outSize - 2 ) {
@@ -1992,7 +1992,7 @@ void ClientBegin( int clientNum ) {
 
 	// locate ent at a spawn point
 	ClientSpawn( ent, qfalse );
-// nihi added below
+
 	// L0 - antilag
 	G_ResetTrail( ent );
     ent->client->saved.leveltime = 0;
@@ -2068,7 +2068,8 @@ void ClientBegin( int clientNum ) {
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
-    client->sess.start_time = level.time; // start time of client (come back and change to unix time perhaps?)
+    time_t unixTime = time(NULL);
+    client->sess.start_time = unixTime;//level.time; // start time of client (come back and change to unix time perhaps?)
 }
 
 // ------------------------------------------------------
@@ -2528,7 +2529,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 
 	// show_bug.cgi?id=569
-	//G_ResetMarkers( ent );   //nihi removed
+	//G_ResetMarkers( ent );
 
 	// sswolf - head stuff
 	// add the head entity if it already hasn't been
@@ -2639,7 +2640,7 @@ void ClientDisconnect( int clientNum ) {
 
 	// if a player disconnects during warmup make sure the team's ready status doesn't start the match
 	if (g_tournament.integer
-		&& g_gamestate.integer == GS_WARMUP 
+		&& g_gamestate.integer == GS_WARMUP
 		&& (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
 	{
 		G_readyResetOnPlayerLeave(ent->client->sess.sessionTeam);

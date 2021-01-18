@@ -93,7 +93,7 @@ void PauseHandle( void ) {
 	if (level.paused == !PAUSE_NONE) {
 		// TODO: Add auto timeout..
 		if (level.paused != PAUSE_UNPAUSING) {
-            if ( ( level.time % 500 ) == 0 ) { // nihi added due to cmd overflow on connecting clients
+            if ( ( level.time % 500 ) == 0 ) {
                     if (!g_duelAutoPause.integer){
                         AP( va("cp \"Call a vote to resume the match.\n Timeouts remaining: ^1A^7(%i)/^4A^7(%i)\n\"",
                             g_pauseLimit.integer - level.axisTimeouts, g_pauseLimit.integer - level.alliedTimeouts));

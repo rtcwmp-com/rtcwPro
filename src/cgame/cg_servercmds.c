@@ -1569,7 +1569,7 @@ const char* CG_LocalizeServerCommand( const char *buf ) {
 }
 // -NERVE - SMF
 
-// nihi added below
+
 /*
 =================
 L0
@@ -1587,7 +1587,7 @@ NOTE: My changes aren't commented really.
 void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
 	qboolean fFull = ( txt_dump != CG_printWindow );
-//	qboolean fFull = qfalse;  // nihi added
+//	qboolean fFull = qfalse;
 	qboolean fHasStats = qfalse;
 	char strName[MAX_STRING_CHARS];
 	int atts, deaths, dmg_given, dmg_rcvd, hits, kills, team_dmg, headshots, gibs;
@@ -1662,7 +1662,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
 	qboolean fFull = ( txt_dump != CG_printWindow );
 
-//	qboolean fFull = qtrue;  // nihi added
+//	qboolean fFull = qtrue;
 	char strName[MAX_STRING_CHARS];
 	int kills, headshots, deaths, team_kills, suicides, acc_shots, acc_hits, damage_giv, damage_rec;
 	int bleed, ammo_giv, med_giv, revived, gibs, kill_peak;
@@ -1738,8 +1738,7 @@ void CG_parseBestShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 	int iArg = 1;
 	qboolean fFull = ( txt_dump != CG_printWindow );
-//	qboolean fFull = qtrue;  // nihi added
-
+//	qboolean fFull = qtrue;
 
 	int iWeap = atoi( CG_Argv( iArg++ ) );
 	if ( !iWeap ) {

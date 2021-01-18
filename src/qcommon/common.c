@@ -2860,7 +2860,7 @@ void Com_Frame( void ) {
 
 	do
 	{
-#ifdef _WIN32     // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+#ifdef _WIN32
 		com_frameTime = Com_EventLoop();
 		if (lastTime > com_frameTime) {
 			lastTime = com_frameTime;
@@ -2930,7 +2930,7 @@ void Com_Frame( void ) {
 					NET_Sleep(timeVal - 1);
 				}
 			}
-#ifdef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+#ifdef _WIN32
 			msec = com_frameTime - lastTime;
 #else
 			msec = Sys_Milliseconds() - com_frameTime;
@@ -2945,7 +2945,7 @@ void Com_Frame( void ) {
 
 	lastTime = com_frameTime;
 	com_frameTime = Com_EventLoop();
-#ifndef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
+#ifndef _WIN32
 	msec = com_frameTime - lastTime;
 #endif
 

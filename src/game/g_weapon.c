@@ -326,7 +326,7 @@ void Weapon_Syringe( gentity_t *ent ) {
 				memcpy( weapons,traceEnt->client->ps.weapons,sizeof( int ) * ( MAX_WEAPONS / ( sizeof( int ) * 8 ) ) );
 
 				ClientSpawn( traceEnt, qtrue );
-				// nihi added below
+
 				// L0 - Antilag
 				G_ResetTrail(traceEnt);
 				traceEnt->client->saved.leveltime = 0;
@@ -1877,10 +1877,10 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		ent->client->ps.powerups[PW_INVULNERABLE] = 0;
 	}
 
-	if (ent->client) 
+	if (ent->client)
 	{
 		// antilag lerp if enough delay between client and server.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT)) 
+		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
 		}
@@ -1892,10 +1892,10 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	Bullet_Endpos(ent, spread, &end);
 	Bullet_Fire_Extended(ent, ent, muzzleTrace, end, spread, damage);
 
-	if (ent->client) 
+	if (ent->client)
 	{
 		// restore all client positions to before the antilag lerp.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT)) 
+		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_UnTimeShiftAllClients(ent);
 		}
@@ -1906,21 +1906,21 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 }
 
 qboolean LogAccuracyShot(gentity_t* target, gentity_t* attacker) {
-	if (attacker && attacker->client) 
+	if (attacker && attacker->client)
 	{
-		if (target && target->client) 
+		if (target && target->client)
 		{
 			if (target->client->ps.stats[STAT_HEALTH] > 0 || (OnSameTeam(attacker, target)))
 			{
-				if ((target->client->ps.powerups[PW_INVULNERABLE] <= level.time)) 
+				if ((target->client->ps.powerups[PW_INVULNERABLE] <= level.time))
 				{
 					return qtrue;
 				}
 			}
 		}
-		else 
+		else
 		{
-			if (!target || !target->takedamage) 
+			if (!target || !target->takedamage)
 			{
 				return qtrue;
 			}
@@ -1963,7 +1963,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		traceEnt = head->parent;
 	}
 
-	if (LogAccuracyShot(traceEnt, source)) 
+	if (LogAccuracyShot(traceEnt, source))
 	{
 		source->client->pers.life_acc_shots++;
 		source->client->sess.acc_shots++;
@@ -2322,9 +2322,9 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	VectorNormalize2( origin2, forward );
 	PerpendicularVector( right, forward );
 	CrossProduct( forward, right, up );
-	
+
 	// sswolf - leaving this intact
-	// nihi added below
+
 	// L0 Antilag
     if ( g_antilag.integer && ent->client &&
         !(ent->r.svFlags & SVF_BOT) ) {
@@ -2352,7 +2352,7 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 
 	}
 
-	// nihi added below
+
 	// L0 - Antilag
     if ( g_antilag.integer && ent->client &&
         !(ent->r.svFlags & SVF_BOT) ) {
@@ -2579,12 +2579,12 @@ LogAccuracyHit
 ===============
 */
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
-	
+
 	// sswolf - patched
 	if (!LogAccuracyShot(target, attacker)) {
 		return qfalse;
 	}
-	
+
 	if ( !target->takedamage ) {
 		return qfalse;
 	}

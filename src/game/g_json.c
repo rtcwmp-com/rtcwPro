@@ -892,5 +892,3 @@ int G_teamAlive(int team ) {
 }
 
 
-
-

@@ -3187,7 +3187,6 @@ static void CG_DrawWarmup( void ) {
 
 	w = CG_DrawStrlen( s );
 	CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
-	// nihi added
 
     if (sec == 10 && !announced)
 	{

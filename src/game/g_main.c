@@ -98,7 +98,7 @@ vmCvar_t g_swapteams;
 
 vmCvar_t g_restarted;
 vmCvar_t g_log;
-vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
+vmCvar_t g_gameStatslog; // temp cvar for event logging
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -1504,7 +1504,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	we need to clear the list even if enforce maxlives is not active
 	in cas ethe g_maxlives was changed, and a map_restart happened
 	*/
-	// nihi commented below
+
 /*
 
 	ClearMaxLivesGUID();
@@ -2318,7 +2318,7 @@ void ExitLevel( void ) {
 			level.clients[i].pers.connected = CON_CONNECTING;
 		}
 	}
-	// nihi added as temporary fix for stopwatch not autoswapping teams
+
 
 	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
 		G_swapTeams();
@@ -3295,15 +3295,15 @@ void G_RunFrame( int levelTime ) {
 		level.timeCurrent = levelTime - level.timeDelta;
 	} else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		if ( ( level.time % 500 ) == 0 ) { // nihi (re)-added to avoid cmd overflow to connecting clients
+		if ( ( level.time % 500 ) == 0 ) {
 			// Respawn and time issuses
 			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
 			// Print stuff.. FIXME one day...
 			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
 		}
 	} // End
-//	level.frameTime = trap_Milliseconds();   // nihi removed
-	level.frameStartTime = trap_Milliseconds(); // nihi added
+//	level.frameTime = trap_Milliseconds();
+	level.frameStartTime = trap_Milliseconds();
 
 	level.framenum++;
 	level.previousTime = level.time;
@@ -3408,7 +3408,7 @@ void G_RunFrame( int levelTime ) {
 			 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
 			 || ent->s.eType == ET_EXPLO_PART
 			 || ent->s.eType == ET_RAMJET ) {
-// nihi
+
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
 				G_RunMissile( ent );

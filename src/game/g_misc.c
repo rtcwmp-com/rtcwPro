@@ -154,7 +154,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 	// L0 - Antilag
-	G_ResetTrail(player);    // nihi added
+	G_ResetTrail(player);
 }
 
 
