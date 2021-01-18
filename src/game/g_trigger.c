@@ -471,6 +471,12 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		return;
 	}
 
+	// L0 - if game is paused don't hurt at all.
+	// Would be kinda lame to be paused on barbwire with damage on :D
+	if ( level.paused ) {
+		return;
+	}
+	// L0 - end
 	if ( self->spawnflags & 16 ) {
 		self->timestamp = level.time + 1000;
 	} else {
