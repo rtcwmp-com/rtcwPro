@@ -369,10 +369,10 @@ void AssetCache() {
 	uiInfo.uiDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 
 	for ( n = 0; n < NUM_CROSSHAIRS; n++ ) {
-		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_OSPx", 'a' + n ) );  //nihi commented
+		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_rtcwpro", 'a' + n ) );  //nihi commented
 	//	uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c", 'a' + n ) );  //nihi addded
 		// OSPx - Crosshairs
-        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_OSPx", 'a' + n)); //nihi commented
+        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_rtcwpro", 'a' + n)); //nihi commented
 //		uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n)); //nihi added
 	}
 
