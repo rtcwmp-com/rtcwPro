@@ -495,7 +495,7 @@ typedef enum {
 	PW_BLUEFLAG,
 	PW_BALL,
 	PW_READY,			// Ready
-	PW_BLACKOUT = 14,	// Specklock
+	PW_BLACKOUT,		// Specklock
 
 	PW_NUM_POWERUPS
 } powerup_t;

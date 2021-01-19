@@ -3316,13 +3316,14 @@ static void CG_DrawFlashFade( void ) {
 		VectorClear( col );
 		col[3] = ( fBlackout ) ? 1.0f : cgs.fadeAlphaCurrent;
 		CG_FillRect( -10, -10, 650, 490, col );
+		CG_DrawScoreboard();
 		//bani - #127 - bail out if we're a speclocked spectator with cg_draw2d = 0
 		if ( cgs.clientinfo[ cg.clientNum ].team == TEAM_SPECTATOR && !cg_draw2D.integer ) {
 			return;
 		}
 
 		// OSP - Show who is speclocked
-		if ( fBlackout ) {
+		if ( fBlackout  && !cg.showScores) {
 			int i, nOffset = 90;
 			char *str, *format = "The %s team is speclocked!";
 			char *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIED", "???" };
