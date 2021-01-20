@@ -570,6 +570,10 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	spectatorState_t specState;
 	int specClient;
 
+	if (level.paused != PAUSE_NONE && !forced) {
+		return CP("cp \"^3You cannot switch teams during Pause!\n\"2");
+	}
+
 	//
 	// see what change is requested
 	//
