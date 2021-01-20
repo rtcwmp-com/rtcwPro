@@ -114,7 +114,7 @@ If you have questions concerning this license or the applicable additional terms
 #define SLIDER_HEIGHT       16.0
 #define SLIDER_THUMB_WIDTH  12.0
 #define SLIDER_THUMB_HEIGHT 20.0
-#define NUM_CROSSHAIRS      10
+#define NUM_CROSSHAIRS      16
 
 typedef struct {
 	const char *command;
