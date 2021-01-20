@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />
+    <None Include="makefile" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

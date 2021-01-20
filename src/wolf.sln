@@ -22,6 +22,190 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logic", "Logic", "{90F8875C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{7339CD1A-41B6-4F70-9C60-5AA9EA25EEDF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{7C21B9CB-6BFD-4996-86E3-79391FBD8F4C}"
+	ProjectSection(SolutionItems) = preProject
+		..\Assets\alpha.shader = ..\Assets\alpha.shader
+		..\Assets\ProBinds.txt = ..\Assets\ProBinds.txt
+		..\Assets\rtcwpro.png = ..\Assets\rtcwpro.png
+		..\Assets\rtcwpro.tga = ..\Assets\rtcwpro.tga
+		..\Assets\rtcwpro.xcf = ..\Assets\rtcwpro.xcf
+		..\Assets\wpro.png = ..\Assets\wpro.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MAIN", "MAIN", "{CF22FABC-5D40-4C42-A983-427EA0BE8334}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\GeoIP.dat = ..\MAIN\GeoIP.dat
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{8DEB4DA1-0A4A-4FB6-A4D7-C7C50DC5AD08}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\configs\defaultcomp.config = ..\MAIN\configs\defaultcomp.config
+		..\MAIN\configs\defaultpublic.config = ..\MAIN\configs\defaultpublic.config
+		..\MAIN\configs\pug.config = ..\MAIN\configs\pug.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gfx", "gfx", "{ADCF54BB-AD92-4EA3-9365-A347AD4DCED5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{2BA08BD6-08D0-4F36-9054-8BB6752D9A52}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\scripts\chars.shader = ..\MAIN\scripts\chars.shader
+		..\MAIN\scripts\crosshairs.shader = ..\MAIN\scripts\crosshairs.shader
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sound", "sound", "{F258684B-6BFE-4405-B029-A06D06E9EDAD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui_mp", "ui_mp", "{36E26727-3A97-445C-91EE-CE60A3F65B34}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\ui_mp\connect.menu = ..\MAIN\ui_mp\connect.menu
+		..\MAIN\ui_mp\controls.menu = ..\MAIN\ui_mp\controls.menu
+		..\MAIN\ui_mp\credit.menu = ..\MAIN\ui_mp\credit.menu
+		..\MAIN\ui_mp\demos.menu = ..\MAIN\ui_mp\demos.menu
+		..\MAIN\ui_mp\ingame.menu = ..\MAIN\ui_mp\ingame.menu
+		..\MAIN\ui_mp\ingame.txt = ..\MAIN\ui_mp\ingame.txt
+		..\MAIN\ui_mp\ingame_callvote.menu = ..\MAIN\ui_mp\ingame_callvote.menu
+		..\MAIN\ui_mp\ingame_controls.menu = ..\MAIN\ui_mp\ingame_controls.menu
+		..\MAIN\ui_mp\ingame_options.menu = ..\MAIN\ui_mp\ingame_options.menu
+		..\MAIN\ui_mp\main.menu = ..\MAIN\ui_mp\main.menu
+		..\MAIN\ui_mp\menudef.h = ..\MAIN\ui_mp\menudef.h
+		..\MAIN\ui_mp\menus.txt = ..\MAIN\ui_mp\menus.txt
+		..\MAIN\ui_mp\options.menu = ..\MAIN\ui_mp\options.menu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2d", "2d", "{7372EA9F-A9B3-40FE-9723-8EE91D4D46A6}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\gfx\2d\black.tga = ..\MAIN\gfx\2d\black.tga
+		..\MAIN\gfx\2d\blender_180.tga = ..\MAIN\gfx\2d\blender_180.tga
+		..\MAIN\gfx\2d\closeWidget.tga = ..\MAIN\gfx\2d\closeWidget.tga
+		..\MAIN\gfx\2d\closeWindow.tga = ..\MAIN\gfx\2d\closeWindow.tga
+		..\MAIN\gfx\2d\hudchars_OSP1.tga = ..\MAIN\gfx\2d\hudchars_OSP1.tga
+		..\MAIN\gfx\2d\hudchars_OSP2.tga = ..\MAIN\gfx\2d\hudchars_OSP2.tga
+		..\MAIN\gfx\2d\maximizeWindow.tga = ..\MAIN\gfx\2d\maximizeWindow.tga
+		..\MAIN\gfx\2d\openWidget.tga = ..\MAIN\gfx\2d\openWidget.tga
+		..\MAIN\gfx\2d\resizeWindow.tga = ..\MAIN\gfx\2d\resizeWindow.tga
+		..\MAIN\gfx\2d\rtcw-red-layered.tga = ..\MAIN\gfx\2d\rtcw-red-layered.tga
+		..\MAIN\gfx\2d\rtcwpro.tga = ..\MAIN\gfx\2d\rtcwpro.tga
+		..\MAIN\gfx\2d\wpro.tga = ..\MAIN\gfx\2d\wpro.tga
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "flags", "flags", "{D7F73321-1DFB-457D-A27A-3B3DE43F8AAE}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\gfx\flags\world_flags.tga = ..\MAIN\gfx\flags\world_flags.tga
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hitsounds", "hitsounds", "{8CD3B6D9-6B13-40C7-9C62-CD501ACD3F35}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\sound\hitsounds\hit.wav = ..\MAIN\sound\hitsounds\hit.wav
+		..\MAIN\sound\hitsounds\hitH.wav = ..\MAIN\sound\hitsounds\hitH.wav
+		..\MAIN\sound\hitsounds\hitteam.wav = ..\MAIN\sound\hitsounds\hitteam.wav
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "match", "match", "{3EEB2B4E-E348-4C9D-B95D-B920F935C813}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\sound\match\cn_1.wav = ..\MAIN\sound\match\cn_1.wav
+		..\MAIN\sound\match\cn_2.wav = ..\MAIN\sound\match\cn_2.wav
+		..\MAIN\sound\match\cn_3.wav = ..\MAIN\sound\match\cn_3.wav
+		..\MAIN\sound\match\cn_4.wav = ..\MAIN\sound\match\cn_4.wav
+		..\MAIN\sound\match\cn_5.wav = ..\MAIN\sound\match\cn_5.wav
+		..\MAIN\sound\match\fight.wav = ..\MAIN\sound\match\fight.wav
+		..\MAIN\sound\match\goat.wav = ..\MAIN\sound\match\goat.wav
+		..\MAIN\sound\match\humiliation.wav = ..\MAIN\sound\match\humiliation.wav
+		..\MAIN\sound\match\klaxon1.wav = ..\MAIN\sound\match\klaxon1.wav
+		..\MAIN\sound\match\klaxon2.wav = ..\MAIN\sound\match\klaxon2.wav
+		..\MAIN\sound\match\normalchat.wav = ..\MAIN\sound\match\normalchat.wav
+		..\MAIN\sound\match\pause.wav = ..\MAIN\sound\match\pause.wav
+		..\MAIN\sound\match\prepare.wav = ..\MAIN\sound\match\prepare.wav
+		..\MAIN\sound\match\referee.wav = ..\MAIN\sound\match\referee.wav
+		..\MAIN\sound\match\teamchat.wav = ..\MAIN\sound\match\teamchat.wav
+		..\MAIN\sound\match\winallies.wav = ..\MAIN\sound\match\winallies.wav
+		..\MAIN\sound\match\winaxis.wav = ..\MAIN\sound\match\winaxis.wav
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{E0486AEB-338C-473F-A72F-CEC9C1CBD862}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\ui_mp\assets\cursor_OSP.tga = ..\MAIN\ui_mp\assets\cursor_OSP.tga
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "french", "french", "{D26357BD-D584-484D-B7FF-19F632918FE3}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\ui_mp\french\controls.menu = ..\MAIN\ui_mp\french\controls.menu
+		..\MAIN\ui_mp\french\credit.menu = ..\MAIN\ui_mp\french\credit.menu
+		..\MAIN\ui_mp\french\demos.menu = ..\MAIN\ui_mp\french\demos.menu
+		..\MAIN\ui_mp\french\ingame.menu = ..\MAIN\ui_mp\french\ingame.menu
+		..\MAIN\ui_mp\french\ingame_callvote.menu = ..\MAIN\ui_mp\french\ingame_callvote.menu
+		..\MAIN\ui_mp\french\ingame_controls.menu = ..\MAIN\ui_mp\french\ingame_controls.menu
+		..\MAIN\ui_mp\french\ingame_options.menu = ..\MAIN\ui_mp\french\ingame_options.menu
+		..\MAIN\ui_mp\french\main.menu = ..\MAIN\ui_mp\french\main.menu
+		..\MAIN\ui_mp\french\options.menu = ..\MAIN\ui_mp\french\options.menu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "german", "german", "{1D1033B1-FF7A-4212-8C98-AA30ECF35FF2}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\ui_mp\german\controls.menu = ..\MAIN\ui_mp\german\controls.menu
+		..\MAIN\ui_mp\german\credit.menu = ..\MAIN\ui_mp\german\credit.menu
+		..\MAIN\ui_mp\german\demos.menu = ..\MAIN\ui_mp\german\demos.menu
+		..\MAIN\ui_mp\german\ingame.menu = ..\MAIN\ui_mp\german\ingame.menu
+		..\MAIN\ui_mp\german\ingame_callvote.menu = ..\MAIN\ui_mp\german\ingame_callvote.menu
+		..\MAIN\ui_mp\german\ingame_controls.menu = ..\MAIN\ui_mp\german\ingame_controls.menu
+		..\MAIN\ui_mp\german\ingame_options.menu = ..\MAIN\ui_mp\german\ingame_options.menu
+		..\MAIN\ui_mp\german\ingame_system.menu = ..\MAIN\ui_mp\german\ingame_system.menu
+		..\MAIN\ui_mp\german\main.menu = ..\MAIN\ui_mp\german\main.menu
+		..\MAIN\ui_mp\german\multi.menu = ..\MAIN\ui_mp\german\multi.menu
+		..\MAIN\ui_mp\german\options.menu = ..\MAIN\ui_mp\german\options.menu
+		..\MAIN\ui_mp\german\setup.menu = ..\MAIN\ui_mp\german\setup.menu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "italian", "italian", "{CCFA4742-B66D-4FAA-B8DF-C350B2B41DD4}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\ui_mp\italian\controls.menu = ..\MAIN\ui_mp\italian\controls.menu
+		..\MAIN\ui_mp\italian\credit.menu = ..\MAIN\ui_mp\italian\credit.menu
+		..\MAIN\ui_mp\italian\demos.menu = ..\MAIN\ui_mp\italian\demos.menu
+		..\MAIN\ui_mp\italian\ingame.menu = ..\MAIN\ui_mp\italian\ingame.menu
+		..\MAIN\ui_mp\italian\ingame_callvote.menu = ..\MAIN\ui_mp\italian\ingame_callvote.menu
+		..\MAIN\ui_mp\italian\ingame_controls.menu = ..\MAIN\ui_mp\italian\ingame_controls.menu
+		..\MAIN\ui_mp\italian\ingame_options.menu = ..\MAIN\ui_mp\italian\ingame_options.menu
+		..\MAIN\ui_mp\italian\main.menu = ..\MAIN\ui_mp\italian\main.menu
+		..\MAIN\ui_mp\italian\options.menu = ..\MAIN\ui_mp\italian\options.menu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spanish", "spanish", "{CFB3A9B3-6921-4244-839C-B20C9040171A}"
+	ProjectSection(SolutionItems) = preProject
+		..\MAIN\ui_mp\spanish\controls.menu = ..\MAIN\ui_mp\spanish\controls.menu
+		..\MAIN\ui_mp\spanish\credit.menu = ..\MAIN\ui_mp\spanish\credit.menu
+		..\MAIN\ui_mp\spanish\demos.menu = ..\MAIN\ui_mp\spanish\demos.menu
+		..\MAIN\ui_mp\spanish\ingame.menu = ..\MAIN\ui_mp\spanish\ingame.menu
+		..\MAIN\ui_mp\spanish\ingame_callvote.menu = ..\MAIN\ui_mp\spanish\ingame_callvote.menu
+		..\MAIN\ui_mp\spanish\ingame_controls.menu = ..\MAIN\ui_mp\spanish\ingame_controls.menu
+		..\MAIN\ui_mp\spanish\ingame_options.menu = ..\MAIN\ui_mp\spanish\ingame_options.menu
+		..\MAIN\ui_mp\spanish\main.menu = ..\MAIN\ui_mp\spanish\main.menu
+		..\MAIN\ui_mp\spanish\options.menu = ..\MAIN\ui_mp\spanish\options.menu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "old", "old", "{5D9883F6-91A8-440E-9942-F9BBF5C8806B}"
+	ProjectSection(SolutionItems) = preProject
+		..\Assets\old\metal.jpg = ..\Assets\old\metal.jpg
+		..\Assets\old\metal.xcf = ..\Assets\old\metal.xcf
+		..\Assets\old\pro.xcf = ..\Assets\old\pro.xcf
+		..\Assets\old\rtcw-chrome-layered.png = ..\Assets\old\rtcw-chrome-layered.png
+		..\Assets\old\rtcw-chrome-layered.xcf = ..\Assets\old\rtcw-chrome-layered.xcf
+		..\Assets\old\rtcw-linelayer.xcf = ..\Assets\old\rtcw-linelayer.xcf
+		..\Assets\old\rtcw-logo-layered.xcf = ..\Assets\old\rtcw-logo-layered.xcf
+		..\Assets\old\rtcw-logo.png = ..\Assets\old\rtcw-logo.png
+		..\Assets\old\rtcw-metal-layered.png = ..\Assets\old\rtcw-metal-layered.png
+		..\Assets\old\rtcw-metal-layered.xcf = ..\Assets\old\rtcw-metal-layered.xcf
+		..\Assets\old\rtcw-metal.png = ..\Assets\old\rtcw-metal.png
+		..\Assets\old\rtcw-red-layered.png = ..\Assets\old\rtcw-red-layered.png
+		..\Assets\old\rtcw-white-layered.png = ..\Assets\old\rtcw-white-layered.png
+		..\Assets\old\rtcw-white-layered.xcf = ..\Assets\old\rtcw-white-layered.xcf
+		..\Assets\old\rtcwlogo1_2.png = ..\Assets\old\rtcwlogo1_2.png
+		..\Assets\old\wolf128.png = ..\Assets\old\wolf128.png
+		..\Assets\old\wolf512.png = ..\Assets\old\wolf512.png
+		..\Assets\old\wolfmetal.gif = ..\Assets\old\wolfmetal.gif
+		..\Assets\old\wpro-flat.xcf = ..\Assets\old\wpro-flat.xcf
+		..\Assets\old\wpro-flat2.xcf = ..\Assets\old\wpro-flat2.xcf
+		..\Assets\old\wpro-white.png = ..\Assets\old\wpro-white.png
+		..\Assets\old\wpro.xcf = ..\Assets\old\wpro.xcf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Dedicated|Win32 = Debug Dedicated|Win32
@@ -35,26 +219,32 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
+		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug Dedicated|Win32.Build.0 = Debug|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug Dedicated|x64.ActiveCfg = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug Dedicated|x64.Build.0 = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug|Win32.Build.0 = Debug|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Debug|x64.ActiveCfg = Debug|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release Dedicated|Win32.ActiveCfg = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release Dedicated|Win32.Build.0 = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release Dedicated|x64.ActiveCfg = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release Dedicated|x64.Build.0 = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release|Win32.ActiveCfg = Release|Win32
+		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release|Win32.Build.0 = Release|Win32
 		{B6842D42-FBA7-4494-A393-802CA7E94351}.Release|x64.ActiveCfg = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
+		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug Dedicated|Win32.Build.0 = Debug|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug Dedicated|x64.ActiveCfg = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug Dedicated|x64.Build.0 = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug|Win32.Build.0 = Debug|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Debug|x64.ActiveCfg = Debug|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release Dedicated|Win32.ActiveCfg = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release Dedicated|Win32.Build.0 = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release Dedicated|x64.ActiveCfg = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release Dedicated|x64.Build.0 = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release|Win32.ActiveCfg = Release|Win32
+		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release|Win32.Build.0 = Release|Win32
 		{4E5F4E34-0E6A-4200-916F-D33805505B54}.Release|x64.ActiveCfg = Release|Win32
 		{A16F9DCF-7F32-43AB-A044-74B7C660FC9B}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
 		{A16F9DCF-7F32-43AB-A044-74B7C660FC9B}.Debug Dedicated|Win32.Build.0 = Debug|Win32
@@ -71,15 +261,18 @@ Global
 		{A16F9DCF-7F32-43AB-A044-74B7C660FC9B}.Release|Win32.Build.0 = Release|Win32
 		{A16F9DCF-7F32-43AB-A044-74B7C660FC9B}.Release|x64.ActiveCfg = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
+		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug Dedicated|Win32.Build.0 = Debug|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug Dedicated|x64.ActiveCfg = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug Dedicated|x64.Build.0 = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug|Win32.Build.0 = Debug|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Debug|x64.ActiveCfg = Debug|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Release Dedicated|Win32.ActiveCfg = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Release Dedicated|Win32.Build.0 = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Release Dedicated|x64.ActiveCfg = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Release Dedicated|x64.Build.0 = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Release|Win32.ActiveCfg = Release|Win32
+		{E7BAACA8-3530-402D-9C27-947A36926100}.Release|Win32.Build.0 = Release|Win32
 		{E7BAACA8-3530-402D-9C27-947A36926100}.Release|x64.ActiveCfg = Release|Win32
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Debug Dedicated|Win32.Build.0 = Debug|Win32
@@ -98,15 +291,18 @@ Global
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release|x64.ActiveCfg = Release|x64
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release|x64.Build.0 = Release|x64
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
+		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug Dedicated|Win32.Build.0 = Debug|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug Dedicated|x64.ActiveCfg = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug Dedicated|x64.Build.0 = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug|Win32.ActiveCfg = Debug|Win32
+		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug|Win32.Build.0 = Debug|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Debug|x64.ActiveCfg = Debug|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release Dedicated|Win32.ActiveCfg = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release Dedicated|Win32.Build.0 = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release Dedicated|x64.ActiveCfg = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release Dedicated|x64.Build.0 = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release|Win32.ActiveCfg = Release|Win32
+		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release|Win32.Build.0 = Release|Win32
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048}.Release|x64.ActiveCfg = Release|Win32
 		{64DCBC13-78A6-43E9-931D-B63FBB0421C7}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
 		{64DCBC13-78A6-43E9-931D-B63FBB0421C7}.Debug Dedicated|Win32.Build.0 = Debug|Win32
@@ -123,6 +319,7 @@ Global
 		{64DCBC13-78A6-43E9-931D-B63FBB0421C7}.Release|Win32.Build.0 = Release|Win32
 		{64DCBC13-78A6-43E9-931D-B63FBB0421C7}.Release|x64.ActiveCfg = Release|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Debug Dedicated|Win32.ActiveCfg = Debug Dedicated|Win32
+		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Debug Dedicated|Win32.Build.0 = Debug Dedicated|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Debug Dedicated|x64.ActiveCfg = Debug Dedicated|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Debug|Win32.ActiveCfg = Debug|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Debug|Win32.Build.0 = Debug|Win32
@@ -131,6 +328,7 @@ Global
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Release Dedicated|Win32.Build.0 = Release Dedicated|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Release Dedicated|x64.ActiveCfg = Release Dedicated|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Release|Win32.ActiveCfg = Release|Win32
+		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Release|Win32.Build.0 = Release|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
@@ -145,6 +343,22 @@ Global
 		{544C7EF5-2A74-4206-8B74-24D4FAD83048} = {7339CD1A-41B6-4F70-9C60-5AA9EA25EEDF}
 		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {90F8875C-E793-4C34-9F8C-11F249C324CC}
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02} = {7339CD1A-41B6-4F70-9C60-5AA9EA25EEDF}
+		{CF22FABC-5D40-4C42-A983-427EA0BE8334} = {7C21B9CB-6BFD-4996-86E3-79391FBD8F4C}
+		{8DEB4DA1-0A4A-4FB6-A4D7-C7C50DC5AD08} = {CF22FABC-5D40-4C42-A983-427EA0BE8334}
+		{ADCF54BB-AD92-4EA3-9365-A347AD4DCED5} = {CF22FABC-5D40-4C42-A983-427EA0BE8334}
+		{2BA08BD6-08D0-4F36-9054-8BB6752D9A52} = {CF22FABC-5D40-4C42-A983-427EA0BE8334}
+		{F258684B-6BFE-4405-B029-A06D06E9EDAD} = {CF22FABC-5D40-4C42-A983-427EA0BE8334}
+		{36E26727-3A97-445C-91EE-CE60A3F65B34} = {CF22FABC-5D40-4C42-A983-427EA0BE8334}
+		{7372EA9F-A9B3-40FE-9723-8EE91D4D46A6} = {ADCF54BB-AD92-4EA3-9365-A347AD4DCED5}
+		{D7F73321-1DFB-457D-A27A-3B3DE43F8AAE} = {ADCF54BB-AD92-4EA3-9365-A347AD4DCED5}
+		{8CD3B6D9-6B13-40C7-9C62-CD501ACD3F35} = {F258684B-6BFE-4405-B029-A06D06E9EDAD}
+		{3EEB2B4E-E348-4C9D-B95D-B920F935C813} = {F258684B-6BFE-4405-B029-A06D06E9EDAD}
+		{E0486AEB-338C-473F-A72F-CEC9C1CBD862} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
+		{D26357BD-D584-484D-B7FF-19F632918FE3} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
+		{1D1033B1-FF7A-4212-8C98-AA30ECF35FF2} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
+		{CCFA4742-B66D-4FAA-B8DF-C350B2B41DD4} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
+		{CFB3A9B3-6921-4244-839C-B20C9040171A} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
+		{5D9883F6-91A8-440E-9942-F9BBF5C8806B} = {7C21B9CB-6BFD-4996-86E3-79391FBD8F4C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ED097182-3E06-48EF-98DD-99CA0795FF83}
