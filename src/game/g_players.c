@@ -676,6 +676,10 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 	}
 	*/
+		if (level.paused != PAUSE_NONE) {
+			return CP("print \"^jError: ^7Match is already paused^j!\n\"");
+		}
+
 		level.paused = !PAUSE_NONE;
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7the match!\n\"", tName));

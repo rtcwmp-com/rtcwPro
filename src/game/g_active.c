@@ -429,7 +429,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		}
 
 		// L0 - Pause
-		if ( level.paused != PAUSE_NONE ) {
+		if ( level.paused != PAUSE_NONE && client->sess.referee == RL_NONE) {
 			client->ps.pm_type = PM_FREEZE;
 			ucmd->buttons = 0;
 			ucmd->forwardmove = 0;
