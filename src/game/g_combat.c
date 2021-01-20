@@ -821,6 +821,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	int asave;
 	int knockback;
 
+	if (level.paused != PAUSE_NONE) {
+		return qfalse;
+	}
+
 	if ( !targ->takedamage ) {
 		return;
 	}
