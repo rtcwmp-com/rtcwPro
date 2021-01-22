@@ -72,7 +72,8 @@ RENDEROBJS := \
 	../renderer/tr_scene.o ../renderer/tr_shade.o \
 	../renderer/tr_shade_calc.o ../renderer/tr_shader.o \
 	../renderer/tr_shadows.o ../renderer/tr_sky.o \
-	../renderer/tr_surface.o ../renderer/tr_world.o
+	../renderer/tr_surface.o ../renderer/tr_world.o \
+	../renderer/tr_bloom.o
 CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \

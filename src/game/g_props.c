@@ -68,7 +68,7 @@ void DropToFloor( gentity_t *ent ) {
 		return;
 	}
 
-	if ( fabs( ent->r.currentOrigin[2] - tr.endpos[2] ) > 1.0 ) {
+	if ( Q_fabs( ent->r.currentOrigin[2] - tr.endpos[2] ) > 1.0 ) {
 		tr.endpos[2] = ( ent->r.currentOrigin[2] - 1.0 );
 	}
 
@@ -2196,7 +2196,7 @@ void Props_OilSlickSlippery( gentity_t *ent ) {
 			len = VectorLength( player->client->ps.velocity );
 
 			if ( len && !( player->client->ps.pm_time ) ) {
-				VectorSet( dir, fabs( crandom() ), fabs( crandom() ), 0 );
+				VectorSet( dir, Q_fabs( crandom() ), Q_fabs( crandom() ), 0 );
 				VectorScale( dir, 32, kvel );
 				VectorAdd( player->client->ps.velocity, kvel, player->client->ps.velocity );
 

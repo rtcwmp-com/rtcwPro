@@ -410,7 +410,7 @@ void CG_KickAngles( void ) {
 					cg.kickAngles[i] += kickChange;
 					if ( !cg.kickAngles[i] && frametime ) {
 						cg.kickAVel[i] = 0;
-					} else if ( fabs( cg.kickAngles[i] ) > maxKickAngles[i] ) {
+					} else if ( Q_fabs( cg.kickAngles[i] ) > maxKickAngles[i] ) {
 						cg.kickAngles[i] = maxKickAngles[i] * ( ( 2 * ( cg.kickAngles[i] > 0 ) ) - 1 );
 						cg.kickAVel[i] = 0; // force Avel to return us to center rather than keep going outside range
 					}
@@ -424,7 +424,7 @@ void CG_KickAngles( void ) {
 		// recoil is added to input viewangles per frame
 		if ( cg.recoilPitch ) {
 			// apply max recoil
-			if ( fabs( cg.recoilPitch ) > recoilMaxSpeed ) {
+			if ( Q_fabs( cg.recoilPitch ) > recoilMaxSpeed ) {
 				if ( cg.recoilPitch > 0 ) {
 					cg.recoilPitch = recoilMaxSpeed;
 				} else {
@@ -435,7 +435,7 @@ void CG_KickAngles( void ) {
 			if ( frametime ) {
 				idealCenterSpeed = -( 2.0 * ( cg.recoilPitch > 0 ) - 1.0 ) * recoilCenterSpeed * ft;
 				if ( idealCenterSpeed ) {
-					if ( fabs( idealCenterSpeed ) < fabs( cg.recoilPitch ) ) {
+					if ( Q_fabs( idealCenterSpeed ) < Q_fabs( cg.recoilPitch ) ) {
 						cg.recoilPitch += idealCenterSpeed;
 					} else {    // back zero out
 						cg.recoilPitch = 0;
@@ -443,7 +443,7 @@ void CG_KickAngles( void ) {
 				}
 			}
 		}
-		if ( fabs( cg.recoilPitch ) > recoilIgnoreCutoff ) {
+		if ( Q_fabs( cg.recoilPitch ) > recoilIgnoreCutoff ) {
 			cg.recoilPitchAngle += cg.recoilPitch * ft;
 		}
 	}
@@ -1217,7 +1217,7 @@ static void CG_DamageBlendBlob( void ) {
 		VectorMA( ent.origin, vd->damageX * -8, cg.refdef.viewaxis[1], ent.origin );
 		VectorMA( ent.origin, vd->damageY * 8, cg.refdef.viewaxis[2], ent.origin );
 
-		ent.radius = vd->damageValue * 0.4 * ( 0.5 + 0.5 * (float)t / maxTime ) * ( 0.75 + 0.5 * fabs( sin( vd->damageTime ) ) );
+		ent.radius = vd->damageValue * 0.4 * ( 0.5 + 0.5 * (float)t / maxTime ) * ( 0.75 + 0.5 * Q_fabs( sin( vd->damageTime ) ) );
 
 		ent.customShader = cgs.media.viewBloodAni[(int)( floor( ( (float)t / maxTime ) * 4.9 ) )]; //cgs.media.viewBloodShader;
 		ent.shaderRGBA[0] = 255;
@@ -1233,7 +1233,7 @@ static void CG_DamageBlendBlob( void ) {
 
 	/* moved over to cg_draw.c
 	if (cg.v_dmg_time > cg.time) {
-		redFlash = fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
+		redFlash = Q_fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
 
 		// blend the entire screen red
 		if (redFlash > 5)
@@ -1356,7 +1356,7 @@ static int CG_CalcViewValues( void ) {
 	}
 
 	cg.bobcycle = ( ps->bobCycle & 128 ) >> 7;
-	cg.bobfracsin = fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
+	cg.bobfracsin = Q_fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
 	cg.xyspeed = sqrt( ps->velocity[0] * ps->velocity[0] +
 					   ps->velocity[1] * ps->velocity[1] );
 

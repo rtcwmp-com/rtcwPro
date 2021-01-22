@@ -1030,8 +1030,8 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs ) {
 	float a, b;
 
 	for ( i = 0 ; i < 3 ; i++ ) {
-		a = fabs( mins[i] );
-		b = fabs( maxs[i] );
+		a = Q_fabs( mins[i] );
+		b = Q_fabs( maxs[i] );
 		corner[i] = a > b ? a : b;
 	}
 
@@ -1308,9 +1308,9 @@ void PerpendicularVector( vec3_t dst, const vec3_t src ) {
 	*/
 	for ( pos = 0, i = 0; i < 3; i++ )
 	{
-		if ( fabs( src[i] ) < minelem ) {
+		if ( Q_fabs( src[i] ) < minelem ) {
 			pos = i;
-			minelem = fabs( src[i] );
+			minelem = Q_fabs( src[i] );
 		}
 	}
 	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;

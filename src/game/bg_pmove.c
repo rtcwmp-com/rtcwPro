@@ -2324,11 +2324,11 @@ void PM_AdjustAimSpreadScale( void ) {
 		// TODO: also check for jump/crouch and adjust accordingly
 		if ( pm->ps->weapon == WP_SNIPERRIFLE || pm->ps->weapon == WP_SNOOPERSCOPE ) {
 			for ( i = 0; i < 2; i++ )
-				viewchange += fabs( pm->ps->velocity[i] );
+				viewchange += Q_fabs( pm->ps->velocity[i] );
 		} else {
 			// take player view rotation into account
 			for ( i = 0; i < 2; i++ )
-				viewchange += fabs( SHORT2ANGLE( pm->cmd.angles[i] ) - SHORT2ANGLE( pm->oldcmd.angles[i] ) );
+				viewchange += Q_fabs( SHORT2ANGLE( pm->cmd.angles[i] ) - SHORT2ANGLE( pm->oldcmd.angles[i] ) );
 		}
 
 		viewchange = (float)viewchange / cmdTime;   // convert into this movement for a second

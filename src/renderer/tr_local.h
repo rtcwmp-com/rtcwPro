@@ -25,9 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
-
 #ifndef TR_LOCAL_H
 #define TR_LOCAL_H
 
@@ -923,6 +920,10 @@ typedef struct {
 	byte color2D[4];
 	qboolean vertexes2D;        // shader needs to be finished
 	trRefEntity_t entity2D;     // currentEntity will point at this when doing 2D rendering
+
+	// L0 - Bloom
+	qboolean doneBloom;		// done bloom this frame
+	qboolean doneSurfaces;   // done any 3d surfaces already
 } backEndState_t;
 
 /*
@@ -1048,6 +1049,8 @@ extern glstate_t glState;           // outside of TR since it shouldn't be clear
 //
 extern cvar_t   *r_flareSize;
 extern cvar_t   *r_flareFade;
+#define FLARE_STDCOEFF "150"			// coefficient for the flare intensity falloff function.
+extern cvar_t* r_flareCoeff;
 
 extern cvar_t   *r_railWidth;
 extern cvar_t   *r_railCoreWidth;
@@ -1139,6 +1142,7 @@ extern cvar_t  *r_glDriver;
 extern cvar_t  *r_glIgnoreWicked3D;
 extern cvar_t  *r_swapInterval;
 extern cvar_t  *r_textureMode;
+extern cvar_t  *r_textureAnisotropy;
 extern cvar_t  *r_offsetFactor;
 extern cvar_t  *r_offsetUnits;
 
@@ -1241,6 +1245,7 @@ void    GL_Bind( image_t *image );
 void    GL_SetDefaultState( void );
 void    GL_SelectTexture( int unit );
 void    GL_TextureMode( const char *string );
+void    GL_TextureAnisotropy(float anisotropy);
 void    GL_CheckErrors( void );
 void    GL_State( unsigned long stateVector );
 void    GL_TexEnv( int env );
@@ -1410,6 +1415,7 @@ typedef struct shaderCommands_s
 
 extern shaderCommands_t tess;
 
+void RB_SetGL2D(void);
 void RB_BeginSurface( shader_t *shader, int fogNum );
 void RB_EndSurface( void );
 void RB_CheckOverflow( int verts, int indexes );
@@ -1736,6 +1742,10 @@ void SaveJPG( char * filename, int quality, int image_width, int image_height, u
 void R_InitFreeType();
 void R_DoneFreeType();
 void RE_RegisterFont( const char *fontName, int pointSize, fontInfo_t *font );
+
+// L0 - Bloom
+void R_BloomInit(void);
+void R_BloomScreen(void);
 
 // Ridah, caching system
 // NOTE: to disable this for development, set "r_cache 0" in autoexec.cfg

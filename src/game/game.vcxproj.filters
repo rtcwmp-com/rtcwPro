@@ -187,9 +187,6 @@
     <ClCompile Include="g_utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_vehicles.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_vote.c">
       <Filter>Source Files</Filter>
     </ClCompile>

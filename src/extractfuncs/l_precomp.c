@@ -123,29 +123,6 @@ int Q_stricmp( const char *s1, const char *s2 ) {
 	return Q_stricmpn( s1, s2, 99999 );
 }
 
-
-char *Q_strlwr( char *s1 ) {
-	char    *s;
-
-	s = s1;
-	while ( *s ) {
-		*s = tolower( *s );
-		s++;
-	}
-	return s1;
-}
-
-char *Q_strupr( char *s1 ) {
-	char    *s;
-
-	s = s1;
-	while ( *s ) {
-		*s = toupper( *s );
-		s++;
-	}
-	return s1;
-}
-
 #endif //SCREWUP
 
 #ifdef BOTLIB

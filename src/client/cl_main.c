@@ -595,6 +595,7 @@ void CL_PlayDemo_f( void ) {
 	Con_Close();
 
 	cls.state = CA_CONNECTED;
+	clientIsConnected = qtrue;
 	clc.demoplaying = qtrue;
 
 	if ( Cvar_VariableValue( "cl_wavefilerecord" ) ) {
@@ -734,6 +735,7 @@ void CL_MapLoading( void ) {
 	// if we are already connected to the local host, stay connected
 	if ( cls.state >= CA_CONNECTED && !Q_stricmp( cls.servername, "localhost" ) ) {
 		cls.state = CA_CONNECTED;       // so the connect screen is drawn
+		clientIsConnected = qtrue;
 		memset( cls.updateInfoString, 0, sizeof( cls.updateInfoString ) );
 		memset( clc.serverMessage, 0, sizeof( clc.serverMessage ) );
 		memset( &cl.gameState, 0, sizeof( cl.gameState ) );
@@ -821,6 +823,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		CL_WritePacket();
 		CL_WritePacket();
 		CL_WritePacket();
+		clientIsConnected = qfalse;
 	}
 
 	CL_ClearState();
@@ -828,15 +831,31 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	// wipe the client connection
 	memset( &clc, 0, sizeof( clc ) );
 
-	cls.state = CA_DISCONNECTED;
+// L0 - Fix shutdowns ..
+	if (uivm && cls.state > CA_DISCONNECTED) {
+		cls.state = CA_DISCONNECTED;
+		clientIsConnected = qfalse;
+
+		// shutdown the UI
+		CL_ShutdownUI();
+
+		// init the UI
+		CL_InitUI();
+	}
+	else {
+		cls.state = CA_DISCONNECTED;
+		clientIsConnected = qfalse;	
+	} 
 
 	// allow cheats locally
 	Cvar_Set( "sv_cheats", "1" );
 
 	// not connected to a pure server anymore
 	cl_connectedToPureServer = qfalse;
-}
 
+	// L0 - Set this to off as well
+	clientIsConnected = qfalse;
+}
 
 /*
 ===================
@@ -1588,6 +1607,7 @@ void CL_InitDownloads( void ) {
 			Q_strncpyz( autoupdateFilename, cl_updatefiles->string, sizeof( autoupdateFilename ) );
 			Q_strncpyz( clc.downloadList, va( "@%s/%s@%s/%s", dir, cl_updatefiles->string, dir, cl_updatefiles->string ), MAX_INFO_STRING );
 			cls.state = CA_CONNECTED;
+			clientIsConnected = qtrue;
 			CL_NextDownload();
 			return;
 		}
@@ -1607,6 +1627,7 @@ void CL_InitDownloads( void ) {
 			if ( *clc.downloadList ) {
 				// if autodownloading is not enabled on the server
 				cls.state = CA_CONNECTED;
+				clientIsConnected = qtrue;
 				CL_NextDownload();
 				return;
 			}
@@ -2006,6 +2027,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 		Netchan_Setup( NS_CLIENT, &clc.netchan, from, Cvar_VariableValue( "net_qport" ) );
 		cls.state = CA_CONNECTED;
 		clc.lastPacketSentTime = -9999;     // send first packet immediately
+		clientIsConnected = qfalse;
 		return;
 	}
 
@@ -2199,6 +2221,7 @@ void CL_Frame( int msec ) {
 		// if disconnected, bring up the menu
 		S_StopAllSounds();
 		VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_MAIN );
+		clientIsConnected = qfalse;
 	}
 
 	// if recording an avi, lock to a fixed fps
@@ -2604,6 +2627,7 @@ void CL_GetAutoUpdate( void ) {
 	if ( cls.autoupdateServer.type == NA_BAD ) {
 		Com_Printf( "Bad server address\n" );
 		cls.state = CA_DISCONNECTED;
+		clientIsConnected = qfalse;
 		return;
 	}
 
