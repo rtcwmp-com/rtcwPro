@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "../game/q_shared.h"
 #include "qcommon.h"
 #include <setjmp.h>
+#ifndef  _WIN32
+#include <stdint.h>
+#endif // ! _WIN32
 
 #define MAX_NUM_ARGVS   50
 
