@@ -1018,7 +1018,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if (g_maxTeamSniper.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_MAUSER, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_MAUSER, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Sniper limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamSniper.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1042,7 +1042,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if ( g_maxTeamPF.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_PANZERFAUST, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_PANZERFAUST, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Panzer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamPF.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1060,7 +1060,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if ( g_maxTeamVenom.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_VENOM, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_VENOM, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Venom limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamVenom.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1078,7 +1078,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if ( g_maxTeamFlamer.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_FLAMETHROWER, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_FLAMETHROWER, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Flamer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamFlamer.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1613,8 +1613,25 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( client->pers.connected == CON_CONNECTED ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
-			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", oldname,
-											client->pers.netname ) );
+			// L0 
+			// Do not allow renaming in intermissions.
+			// Name animations for one; 
+			//	Generally suck,
+			// & two;
+			//	Push score table up which is annoying.
+			// Name change could simply be ignored but then in certain scenarios,
+			// it may be difficult for Admins to pinpoint a problematic player.
+			if (level.intermissiontime) {
+				Q_strncpyz(client->pers.netname, oldname, sizeof(client->pers.netname));
+				Info_SetValueForKey(userinfo, "name", oldname);
+				trap_SetUserinfo(clientNum, userinfo);
+				// It will only push score table up for them so they get taste of their own medicine..
+				CPx(client->ps.clientNum, "print \"^1Denied! ^7You cannot rename during intermission^1!\n\"");
+				return;
+			}
+			else {
+				AP(va("print \"[lof]%s" S_COLOR_WHITE " [lon]renamed to[lof] %s\n\"", oldname, client->pers.netname));
+			}
 
             if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) {
                 G_writeGeneralEvent (ent,ent, " ", eventNameChange);
@@ -1801,10 +1818,20 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	gclient_t   *client;
 	char userinfo[MAX_INFO_STRING];
 	gentity_t   *ent;
+	int			i;
 
-	ent = &g_entities[ clientNum ];
+	ent = &g_entities[clientNum];
 
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
+
+	// L0 - ASCII name bug crap..
+	value = Info_ValueForKey(userinfo, "name");
+	for (i = 0; i < strlen(value); i++) {
+		if (value[i] < 0) {
+			// extended ASCII chars have values between -128 and 0 (signed char)
+			return "Change your name, extended ASCII chars are ^1NOT allowed!";
+		}
+	}
 
 	// IP filtering
 	// show_bug.cgi?id=500
@@ -2115,7 +2142,6 @@ int TeamWeaponCount(gentity_t* ent, team_t team, int weap) {
 
 		if (weap != -1) {
 
-			if (weap == WP_PANZERFAUST) weap = 8; // fudge the number - sess.playerWeapon uses 8 for panzer
 
 			gentity_t *player;
 			player = g_entities + level.sortedClients[j];
@@ -2135,6 +2161,7 @@ int TeamWeaponCount(gentity_t* ent, team_t team, int weap) {
 // ------------------------------------------------------
 qboolean IsWeaponDisabled(
 	gentity_t* ent,
+	int sessionWeapon,
 	weapon_t weapon,
 	team_t team,
 	qboolean quiet)
@@ -2148,7 +2175,7 @@ qboolean IsWeaponDisabled(
 
 	// forty - Flames heavy weapons restriction fix
 	playerCount = TeamWeaponCount(ent, team, -1);
-	weaponCount = TeamWeaponCount(ent, team, weapon);
+	weaponCount = TeamWeaponCount(ent, team, sessionWeapon);
 
 	switch (weapon) {
 		case WP_PANZERFAUST:

@@ -2594,7 +2594,7 @@ textures/tree/ivy_c02
 textures/tree/ivy_c02a
 {
 	nopicmip
-	surfaceparm alphashadow		
+	    surfaceparm alphashadow		
 	cull twosided
 	{
 		map textures/tree/ivy_c02a.tga
