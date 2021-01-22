@@ -166,6 +166,9 @@
     <ClCompile Include="win32\win_wndproc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="qcommon\dl_main_curl.c">
+      <Filter>Source Files\downloads</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -274,6 +277,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="qcommon\dl_local.h">
+      <Filter>Header Files\downloads</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\dl_public.h">
+      <Filter>Header Files\downloads</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="unix\ChangeLog" />
@@ -286,6 +295,12 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{860a9ba0-0afb-446a-9ded-2f41646731ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\downloads">
+      <UniqueIdentifier>{ad45dd7d-ac6c-42ed-b896-bc895f1559c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\downloads">
+      <UniqueIdentifier>{e35940fb-1cfd-4bf4-b544-5f794211b8d9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

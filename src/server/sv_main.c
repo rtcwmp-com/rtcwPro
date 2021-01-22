@@ -86,6 +86,14 @@ cvar_t* wh_bbox_vert;
 cvar_t* wh_add_xy;
 cvar_t* wh_check_fov;
 
+// -> HTTP downloads
+cvar_t* sv_wwwDownload;	// server does a www dl redirect
+cvar_t* sv_wwwBaseURL;		// base URL for redirect
+							// tell clients to perform their downloads while disconnected from the server
+							// this gets you a better throughput, but you loose the ability to control the download usage
+cvar_t* sv_wwwDlDisconnected;
+cvar_t* sv_wwwFallbackURL;	// URL to send to if an http/ftp fails or is refused client side
+
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
 /*
