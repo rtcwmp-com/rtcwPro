@@ -3771,7 +3771,7 @@ void Controls_SetConfig( qboolean restart ) {
 	//if ( s_controls.invertmouse.curvalue )
 	//	DC->setCVar("m_pitch", va("%f),-fabs( DC->getCVarValue( "m_pitch" ) ) );
 	//else
-	//	trap_Cvar_SetValue( "m_pitch", fabs( trap_Cvar_VariableValue( "m_pitch" ) ) );
+	//	trap_Cvar_SetValue( "m_pitch", Q_fabs( trap_Cvar_VariableValue( "m_pitch" ) ) );
 
 	//trap_Cvar_SetValue( "m_filter", s_controls.smoothmouse.curvalue );
 	//trap_Cvar_SetValue( "cl_run", s_controls.alwaysrun.curvalue );

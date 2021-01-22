@@ -257,7 +257,7 @@ void SV_CalcBoneLerp(mdsHeader_t *header, clientAnimationInfo_t *animInfo, int b
 			// blend the angles together
 			for (j = 0; j < 3; j++) {
 				diff = tangles[j] - angles[j];
-				if (fabs(diff) > 180) {
+				if (Q_fabs(diff) > 180) {
 					diff = AngleNormalize180(diff);
 				}
 				angles[j] = angles[j] + thisBoneInfo->torsoWeight * diff;
@@ -388,7 +388,7 @@ void SV_CalcBone(mdsHeader_t *header, clientAnimationInfo_t *animInfo, int boneN
 			// blend the angles together
 			for (j = 0; j < 3; j++) {
 				diff = tangles[j] - angles[j];
-				if (fabs(diff) > 180) {
+				if (Q_fabs(diff) > 180) {
 					diff = AngleNormalize180(diff);
 				}
 				angles[j] = angles[j] + thisBoneInfo->torsoWeight * diff;

@@ -996,7 +996,7 @@ void CG_AddClientCritter( localEntity_t *le ) {
 		if ( le->leType == LE_ZOMBIE_BAT ) {
 			VectorSubtract( le->pos.trDelta, oDelta, v2 );
 			ang[ROLL] = -5.0 * DotProduct( le->refEntity.axis[1], v2 );
-			if ( fabs( ang[ROLL] ) > 80 ) {
+			if ( Q_fabs( ang[ROLL] ) > 80 ) {
 				if ( ang[ROLL] > 80 ) {
 					ang[ROLL] = 80;
 				} else { ang[ROLL] = -80;}

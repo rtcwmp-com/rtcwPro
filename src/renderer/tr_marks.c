@@ -642,7 +642,7 @@ int R_MarkFragments(int orientation, const vec3_t* points, const vec3_t projecti
 		dot -= surf->plane.dist;
 		if (!bestdist) {
 		if (dot < 0)
-		bestdist = fabs(dot) + 1000;	// avoid this surface, since the point is behind it
+		bestdist = Q_fabs(dot) + 1000;	// avoid this surface, since the point is behind it
 		else
 		bestdist = dot;
 		VectorCopy( surf->plane.normal, bestnormal );
@@ -784,7 +784,7 @@ int R_MarkFragments(int orientation, const vec3_t* points, const vec3_t projecti
 					if (dot < -epsilon && DotProduct(surfnormal, projectionDir) >= 0.01) {
 						continue;
 					}
-					else if (fabs(dot) > radius) {
+					else if (Q_fabs(dot) > radius) {
 						continue;
 					}
 					// if the impact point is behind the surface, subtract the projection, otherwise add it

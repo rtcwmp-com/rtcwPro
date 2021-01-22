@@ -771,7 +771,7 @@ void CG_AddFlameSpriteToScene( flameChunk_t *f, float lifeFrac, float alpha ) {
 		rdist[0] = -1.0 * DotProduct( rright, projVec );
 		rdist[1] = -1.0 * DotProduct( rup, projVec );
 
-		if ( fabs( rdist[0] ) > radius || fabs( rdist[1] ) > radius ) {
+		if ( Q_fabs( rdist[0] ) > radius || Q_fabs( rdist[1] ) > radius ) {
 			return; // completely off-screen
 
 		}
@@ -1103,8 +1103,8 @@ void CG_AddFlameToScene( flameChunk_t *fHead ) {
 			// should we merge it with the next sprite?
 			while ( fNext && !droppedTrail ) {
 				if ( ( Distance( f->org, fNext->org ) < ( ( 0.1 + 0.9 * f->lifeFrac ) * f->size * 0.35 ) )
-					 &&  ( fabs( f->size - fNext->size ) < ( 40.0 ) )
-					 &&  ( fabs( f->timeStart - fNext->timeStart ) < 100 )
+					 &&  ( Q_fabs( f->size - fNext->size ) < ( 40.0 ) )
+					 &&  ( Q_fabs( f->timeStart - fNext->timeStart ) < 100 )
 					 &&  ( DotProduct( f->velDir, fNext->velDir ) > 0.99 )
 					 ) {
 					if ( !droppedTrail ) {

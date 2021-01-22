@@ -541,7 +541,7 @@ static void UI_SwingAngles( float destination, float swingTolerance, float clamp
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract( destination, *angle );
-	scale = fabs( swing );
+	scale = Q_fabs( swing );
 	if ( scale < swingTolerance * 0.5 ) {
 		scale = 0.5;
 	} else if ( scale < swingTolerance ) {

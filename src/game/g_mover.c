@@ -1843,8 +1843,8 @@ static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_
 
 	axis = ent->count;
 	VectorClear( dir );
-	if ( fabs( other->s.origin[axis] - ent->r.absmax[axis] ) <
-		 fabs( other->s.origin[axis] - ent->r.absmin[axis] ) ) {
+	if ( Q_fabs( other->s.origin[axis] - ent->r.absmax[axis] ) <
+		 Q_fabs( other->s.origin[axis] - ent->r.absmin[axis] ) ) {
 		origin[axis] = ent->r.absmin[axis] - 10;
 		dir[axis] = -1;
 	} else {
@@ -2324,9 +2324,9 @@ void SP_func_door( gentity_t *ent ) {
 	// calculate second position
 	trap_SetBrushModel( ent, ent->model );
 	G_SetMovedir( ent->s.angles, ent->movedir );
-	abs_movedir[0] = fabs( ent->movedir[0] );
-	abs_movedir[1] = fabs( ent->movedir[1] );
-	abs_movedir[2] = fabs( ent->movedir[2] );
+	abs_movedir[0] = Q_fabs( ent->movedir[0] );
+	abs_movedir[1] = Q_fabs( ent->movedir[1] );
+	abs_movedir[2] = Q_fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = DotProduct( abs_movedir, size ) - lip;
 	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
@@ -2455,18 +2455,18 @@ void SP_func_secret( gentity_t *ent ) {
 	// calculate second position
 	trap_SetBrushModel( ent, ent->model );
 	G_SetMovedir( ent->s.angles, ent->movedir );
-	abs_movedir[0] = fabs( ent->movedir[0] );
-	abs_movedir[1] = fabs( ent->movedir[1] );
-	abs_movedir[2] = fabs( ent->movedir[2] );
+	abs_movedir[0] = Q_fabs( ent->movedir[0] );
+	abs_movedir[1] = Q_fabs( ent->movedir[1] );
+	abs_movedir[2] = Q_fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = DotProduct( abs_movedir, size ) - lip;
 	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
 
 	// calculate third position
 	G_SetMovedir( angles2, ent->movedir );
-	abs_movedir[0] = fabs( ent->movedir[0] );
-	abs_movedir[1] = fabs( ent->movedir[1] );
-	abs_movedir[2] = fabs( ent->movedir[2] );
+	abs_movedir[0] = Q_fabs( ent->movedir[0] );
+	abs_movedir[1] = Q_fabs( ent->movedir[1] );
+	abs_movedir[2] = Q_fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = DotProduct( abs_movedir, size ) - lip;
 	VectorMA( ent->pos2, distance, ent->movedir, ent->pos3 );
@@ -2703,9 +2703,9 @@ void SP_func_button( gentity_t *ent ) {
 	G_SpawnFloat( "lip", "4", &lip );
 
 	G_SetMovedir( ent->s.angles, ent->movedir );
-	abs_movedir[0] = fabs( ent->movedir[0] );
-	abs_movedir[1] = fabs( ent->movedir[1] );
-	abs_movedir[2] = fabs( ent->movedir[2] );
+	abs_movedir[0] = Q_fabs( ent->movedir[0] );
+	abs_movedir[1] = Q_fabs( ent->movedir[1] );
+	abs_movedir[2] = Q_fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = abs_movedir[0] * size[0] + abs_movedir[1] * size[1] + abs_movedir[2] * size[2] - lip;
 	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
@@ -3801,7 +3801,7 @@ void SP_func_pendulum( gentity_t *ent ) {
 	trap_SetBrushModel( ent, ent->model );
 
 	// find pendulum length
-	length = fabs( ent->r.mins[2] );
+	length = Q_fabs( ent->r.mins[2] );
 	if ( length < 8 ) {
 		length = 8;
 	}

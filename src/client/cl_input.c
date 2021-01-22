@@ -666,7 +666,7 @@ usercmd_t CL_CreateCmd( void ) {
 
 	// RF, set the kickAngles so aiming is effected
 	recoilAdd = cl_recoilPitch->value;
-	if ( fabs( cl.viewangles[PITCH] + recoilAdd ) < 40 ) {
+	if ( Q_fabs( cl.viewangles[PITCH] + recoilAdd ) < 40 ) {
 		cl.viewangles[PITCH] += recoilAdd;
 	}
 	// the recoilPitch has been used, so clear it out
