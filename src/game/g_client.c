@@ -1018,7 +1018,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if (g_maxTeamSniper.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_MAUSER, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_MAUSER, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Sniper limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamSniper.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1042,7 +1042,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if ( g_maxTeamPF.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_PANZERFAUST, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_PANZERFAUST, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Panzer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamPF.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1060,7 +1060,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if ( g_maxTeamVenom.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_VENOM, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_VENOM, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Venom limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamVenom.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1078,7 +1078,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					}
 
 					if ( g_maxTeamFlamer.integer != -1 ) {
-						if (IsWeaponDisabled(ent, WP_FLAMETHROWER, client->sess.sessionTeam, qtrue)) { //client, client->sess.playerWeapon)) {
+						if (IsWeaponDisabled(ent, client->sess.playerWeapon, WP_FLAMETHROWER, client->sess.sessionTeam, qtrue)) {
 							trap_SendServerCommand( client->ps.clientNum, va("cp \"^3*** Flamer limit(^1%d^3) has been reached. Select a different weapon.\n\"2", g_maxTeamFlamer.integer));
 							SetDefaultWeapon(client, qtrue);
 							break;
@@ -1820,9 +1820,18 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	gentity_t   *ent;
 	int			i;
 
-	ent = &g_entities[ clientNum ];
+	ent = &g_entities[clientNum];
 
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
+
+	// L0 - ASCII name bug crap..
+	value = Info_ValueForKey(userinfo, "name");
+	for (i = 0; i < strlen(value); i++) {
+		if (value[i] < 0) {
+			// extended ASCII chars have values between -128 and 0 (signed char)
+			return "Change your name, extended ASCII chars are ^1NOT allowed!";
+		}
+	}
 
 	// L0 - ASCII name bug crap..
 	value = Info_ValueForKey(userinfo, "name");
@@ -2143,7 +2152,6 @@ int TeamWeaponCount(gentity_t* ent, team_t team, int weap) {
 
 		if (weap != -1) {
 
-			if (weap == WP_PANZERFAUST) weap = 8; // fudge the number - sess.playerWeapon uses 8 for panzer
 
 			gentity_t *player;
 			player = g_entities + level.sortedClients[j];
@@ -2163,6 +2171,7 @@ int TeamWeaponCount(gentity_t* ent, team_t team, int weap) {
 // ------------------------------------------------------
 qboolean IsWeaponDisabled(
 	gentity_t* ent,
+	int sessionWeapon,
 	weapon_t weapon,
 	team_t team,
 	qboolean quiet)
@@ -2176,7 +2185,7 @@ qboolean IsWeaponDisabled(
 
 	// forty - Flames heavy weapons restriction fix
 	playerCount = TeamWeaponCount(ent, team, -1);
-	weaponCount = TeamWeaponCount(ent, team, weapon);
+	weaponCount = TeamWeaponCount(ent, team, sessionWeapon);
 
 	switch (weapon) {
 		case WP_PANZERFAUST:

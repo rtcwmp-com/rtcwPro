@@ -1589,7 +1589,6 @@ static char *gc_orders[] = {
 	"report"
 };
 
-
 /*
 ==================
 Cmd_Where_f
@@ -2731,14 +2730,13 @@ void ClientCommand( int clientNum ) {
 		Cmd_CallVote_f( ent, qfalse);
 	} else if ( Q_stricmp( cmd, "vote" ) == 0 )  {
 		Cmd_Vote_f( ent );
-	}
 //	else if (Q_stricmp (cmd, "startCamera") == 0)
 //		Cmd_StartCamera_f( ent );
 //	else if (Q_stricmp (cmd, "stopCamera") == 0)
 //		Cmd_StopCamera_f( ent );
 //	else if (Q_stricmp (cmd, "setCameraOrigin") == 0)
 //		Cmd_SetCameraOrigin_f( ent );
-	else if ( Q_stricmp( cmd, "setviewpos" ) == 0 ) {
+	} else if ( Q_stricmp( cmd, "setviewpos" ) == 0 ) {
 		Cmd_SetViewpos_f( ent );
 	} else if ( Q_stricmp( cmd, "entitycount" ) == 0 )  {
 		Cmd_EntityCount_f( ent );
