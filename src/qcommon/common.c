@@ -296,6 +296,9 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		Cvar_Set( "com_errorMessage", com_errorMessage );
 	}
 
+	// L0 / Fixes the issue with modal boxes when Bloom is enabled.
+	clientIsConnected = qfalse;
+
 	if ( code == ERR_SERVERDISCONNECT ) {
 		CL_Disconnect( qtrue );
 		CL_FlushMemory();
