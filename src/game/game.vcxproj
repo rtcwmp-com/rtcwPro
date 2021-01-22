@@ -311,7 +311,6 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
     <ClCompile Include="g_tramcar.c" />
     <ClCompile Include="g_trigger.c" />
     <ClCompile Include="g_utils.c" />
-    <ClCompile Include="g_vehicles.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />

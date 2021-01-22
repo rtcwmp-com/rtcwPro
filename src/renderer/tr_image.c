@@ -57,6 +57,8 @@ static unsigned char s_gammatable[256];
 int gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int gl_filter_max = GL_LINEAR;
 
+float gl_anisotropy = 1.0; // L0 - ET port
+
 #define FILE_HASH_SIZE      4096
 static image_t*        hashTable[FILE_HASH_SIZE];
 
@@ -199,6 +201,38 @@ void GL_TextureMode( const char *string ) {
 			qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min );
 			qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max );
 		}
+	}
+}
+
+/*
+===============
+L0 - ET port
+
+GL_TextureAnisotropy
+===============
+*/
+void GL_TextureAnisotropy(float anisotropy) {
+	int i;
+	image_t* glt;
+
+	if (r_ext_texture_filter_anisotropic->integer == 1) {
+		if (anisotropy < 1.0 || anisotropy > glConfig.maxAnisotropy) {
+			ri.Printf(PRINT_ALL, "anisotropy out of range\n");
+			return;
+		}
+	}
+
+	gl_anisotropy = anisotropy;
+
+	if (!glConfig.anisotropicAvailable) {
+		return;
+	}
+
+	// change all the existing texture objects
+	for (i = 0; i < tr.numImages; i++) {
+		glt = tr.images[i];
+		GL_Bind(glt);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, gl_anisotropy);
 	}
 }
 
@@ -820,6 +854,10 @@ done:
 		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	}
 
+	if (glConfig.anisotropicAvailable) {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, gl_anisotropy);
+	}
+
 	GL_CheckErrors();
 
 	//if ( scaledBuffer != 0 )
@@ -862,6 +900,11 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 		noCompress = qtrue;
 	}
 
+	// ydnar: don't compress textures smaller or equal to 128x128 pixels
+	if ((width * height) <= (128 * 128)) {
+		noCompress = qtrue;
+	}
+
 	if ( tr.numImages == MAX_DRAWIMAGES ) {
 		ri.Error( ERR_DROP, "R_CreateImage: MAX_DRAWIMAGES hit\n" );
 	}
@@ -869,13 +912,14 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 	// Ridah
 	image = tr.images[tr.numImages] = R_CacheImageAlloc( sizeof( image_t ) );
 
-	image->texnum = 1024 + tr.numImages;
-
 	// Ridah
 	if ( r_cacheShaders->integer ) {
 		R_FindFreeTexnum( image );
 	}
 	// done.
+
+	// ydnar: ok, let's try the recommended way
+	qglGenTextures(1, &image->texnum);
 
 	tr.numImages++;
 
@@ -1120,12 +1164,16 @@ PCX LOADING
 /*
 ==============
 LoadPCX
+
+L0 - ET port (patched existing)
 ==============
 */
+#define DECODEPCX( b, d, r ) d = *b++; if ( ( d & 0xC0 ) == 0xC0 ) {r = d & 0x3F; d = *b++;} else {r = 1;}
+
 static void LoadPCX( const char *filename, byte **pic, byte **palette, int *width, int *height ) {
 	byte    *raw;
 	pcx_t   *pcx;
-	int x, y;
+	int x, y, lsize;
 	int len;
 	int dataByte, runLength;
 	byte    *out, *pix;
@@ -1133,6 +1181,7 @@ static void LoadPCX( const char *filename, byte **pic, byte **palette, int *widt
 
 	*pic = NULL;
 	*palette = NULL;
+	runLength = 0;
 
 	//
 	// load the file
@@ -1180,23 +1229,24 @@ static void LoadPCX( const char *filename, byte **pic, byte **palette, int *widt
 	}
 // FIXME: use bytes_per_line here?
 
-	for ( y = 0 ; y <= ymax ; y++, pix += xmax + 1 )
-	{
-		for ( x = 0 ; x <= xmax ; )
-		{
-			dataByte = *raw++;
+	lsize = pcx->color_planes * pcx->bytes_per_line;
 
-			if ( ( dataByte & 0xC0 ) == 0xC0 ) {
-				runLength = dataByte & 0x3F;
-				dataByte = *raw++;
-			} else {
-				runLength = 1;
-			}
-
-			while ( runLength-- > 0 )
+	// go scanline by scanline
+	for (y = 0; y <= pcx->ymax; y++, pix += pcx->xmax + 1) {
+		// do a scanline
+		for (x = 0; x <= pcx->xmax;) {
+			DECODEPCX(raw, dataByte, runLength);
+			while (runLength-- > 0)
 				pix[x++] = dataByte;
 		}
 
+		// discard any other data
+		while (x < lsize) {
+			DECODEPCX(raw, dataByte, runLength);
+			x++;
+		}
+		while (runLength-- > 0)
+			x++;
 	}
 
 	if ( raw - (byte *)pcx > len ) {
@@ -1207,7 +1257,6 @@ static void LoadPCX( const char *filename, byte **pic, byte **palette, int *widt
 
 	ri.FS_FreeFile( pcx );
 }
-
 
 /*
 ==============
@@ -2293,11 +2342,23 @@ void R_SetColorMappings( void ) {
 		ri.Cvar_Set( "r_intensity", "1" );
 	}
 
-	if ( r_gamma->value < 0.5f ) {
-		ri.Cvar_Set( "r_gamma", "0.5" );
-	} else if ( r_gamma->value > 3.0f ) {
-		ri.Cvar_Set( "r_gamma", "3.0" );
+#ifdef __linux__
+	if (r_gamma->value != -1) {
+#endif
+		if (r_gamma->value < 0.5f) {
+			ri.Cvar_Set("r_gamma", "0.5");
+		}
+		else if (r_gamma->value > 3.0f) {
+			ri.Cvar_Set("r_gamma", "3.0");
+		}
+		g = r_gamma->value;
+
+#ifdef __linux__
 	}
+	else {
+		g = 1.0f;
+	}
+#endif
 
 	g = r_gamma->value;
 
@@ -2548,7 +2609,10 @@ qhandle_t RE_GetShaderFromModel( qhandle_t modelid, int surfnum, int withlightma
 			}
 
 			surf = bmodel->firstSurface + surfnum;
-//			if(surf->shader->lightmapIndex != LIGHTMAP_NONE) {
+			// RF, check for null shader (can happen on func_explosive's with botclips attached)
+			if (!surf->shader) {
+				return 0;
+			}
 			if ( surf->shader->lightmapIndex > LIGHTMAP_NONE ) {
 				image_t *image;
 				long hash;

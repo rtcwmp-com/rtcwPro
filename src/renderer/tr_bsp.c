@@ -141,7 +141,7 @@ R_LoadLightmaps
 static void R_LoadLightmaps( lump_t *l ) {
 	byte        *buf, *buf_p;
 	int len;
-	MAC_STATIC byte image[LIGHTMAP_SIZE * LIGHTMAP_SIZE * 4];
+	byte image[LIGHTMAP_SIZE * LIGHTMAP_SIZE * 4];
 	int i, j;
 	float maxIntensity = 0;
 	double sumIntensity = 0;
@@ -179,7 +179,7 @@ static void R_LoadLightmaps( lump_t *l ) {
 				float g = buf_p[j * 3 + 1];
 				float b = buf_p[j * 3 + 2];
 				float intensity;
-				float out[3];
+				float out[3] = {0.0, 0.0, 0.0};
 
 				intensity = 0.33f * r + 0.685f * g + 0.063f * b;
 
@@ -288,12 +288,6 @@ static shader_t *ShaderForShaderNum( int shaderNum, int lightmapNum ) {
 		lightmapNum = LIGHTMAP_BY_VERTEX;
 	}
 
-// JPW NERVE removed per atvi request
-/*
-	if ( r_fullbright->integer ) {
-		lightmapNum = LIGHTMAP_WHITEIMAGE;
-	}
-*/
 	shader = R_FindShader( dsh->shader, lightmapNum, qtrue );
 
 	// if the shader had errors, just use default shader
@@ -378,7 +372,7 @@ static void ParseFace( dsurface_t *ds, drawVert_t *verts, msurface_t *surf, int 
 	numIndexes = LittleLong( ds->numIndexes );
 
 	// create the srfSurfaceFace_t
-	sfaceSize = ( int ) &( (srfSurfaceFace_t *)0 )->points[numPoints];
+	sfaceSize = ( size_t )&((srfSurfaceFace_t *)0)->points[numPoints];
 	ofsIndexes = sfaceSize;
 	sfaceSize += sizeof( int ) * numIndexes;
 
@@ -428,7 +422,7 @@ static void ParseMesh( dsurface_t *ds, drawVert_t *verts, msurface_t *surf ) {
 	srfGridMesh_t   *grid;
 	int i, j;
 	int width, height, numPoints;
-	MAC_STATIC drawVert_t points[MAX_PATCH_SIZE * MAX_PATCH_SIZE];
+	drawVert_t points[MAX_PATCH_SIZE * MAX_PATCH_SIZE];
 	int lightmapNum;
 	vec3_t bounds[2];
 	vec3_t tmpVec;
@@ -1452,7 +1446,7 @@ void R_MovePatchSurfacesToHunk( void ) {
 		Com_Memcpy( hunkgrid->widthLodError, grid->widthLodError, grid->width * 4 );
 
 		hunkgrid->heightLodError = ri.Hunk_Alloc( grid->height * 4, h_low );
-		Com_Memcpy( grid->heightLodError, grid->heightLodError, grid->height * 4 );
+		Com_Memcpy(hunkgrid->heightLodError, grid->heightLodError, grid->height * 4);
 
 		R_FreeSurfaceGridMesh( grid );
 
@@ -1568,6 +1562,9 @@ static void R_LoadSubmodels( lump_t *l ) {
 		model = R_AllocModel();
 
 		assert( model != NULL );            // this should never happen
+		if (model == NULL) {
+			ri.Error(ERR_DROP, "R_LoadSubmodels: R_AllocModel() failed");
+		}
 
 		model->type = MOD_BRUSH;
 		model->bmodel = out;
