@@ -180,10 +180,10 @@ client-w32-clean:
 #####################################################################
 
 server: CC := gcc
-server: NASM := nasm
+server: NASM := nasm 
 server: CFLAGS := \
 	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl
+server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -194,7 +194,7 @@ server-debug: CC := gcc
 server-debug: NASM := nasm
 server-debug: CFLAGS := \
 	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl
+server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl --verbose
 server-debug: $(SVOBJS)
 	$(CC) -o wolfded_debug.x86 $(SVOBJS) $(LDFLAGS)
 server-debug-clean:
@@ -230,7 +230,7 @@ CURLCONF := \
 	--without-gnutls --without-zlib --without-ssl --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual --disable-ipv6
+	--disable-nonblocking --disable-manual
 
 curl: 
 	cd ../../libs/curl-7.29.0 && ./configure $(CURLCONF)
