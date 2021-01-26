@@ -4354,7 +4354,7 @@ void CG_ShakeCamera() {
 
 	// JPW NERVE starts at 1, approaches 0 over time
 	x = ( cg.cameraShakeTime - cg.time ) / cg.cameraShakeLength;
-/*
+
 	// OSPx - NQ's shake cam..
 	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[2] += val;
@@ -4363,17 +4363,7 @@ void CG_ShakeCamera() {
 	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[0] += val;
 	// End
-*/   // nihi commented for shake
 
-
-	// up/down
-
-	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
-	cg.refdefViewAngles[0] += val;
-
-	// left/right
-	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
-	cg.refdefViewAngles[1] += val;
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 }
 // -NERVE - SMF
