@@ -166,6 +166,36 @@
     <ClCompile Include="win32\win_wndproc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="unix\const-arg.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_common.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_glimp.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_joystick.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_qgl.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_signals.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_snd.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\unix_main.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\unix_net.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\unix_shared.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -274,6 +304,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="unix\linux_local.h">
+      <Filter>Source Files\unix</Filter>
+    </ClInclude>
+    <ClInclude Include="unix\qasm.h">
+      <Filter>Source Files\unix</Filter>
+    </ClInclude>
+    <ClInclude Include="unix\unix_glw.h">
+      <Filter>Source Files\unix</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="unix\ChangeLog" />
@@ -286,6 +325,9 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{860a9ba0-0afb-446a-9ded-2f41646731ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\unix">
+      <UniqueIdentifier>{f435585b-7cbe-4ffd-bb0e-1b1370ea62d4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
