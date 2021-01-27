@@ -2796,6 +2796,18 @@ void CL_LoadTranslations_f( void ) {
 // -NERVE - SMF
 #endif
 
+/*
+==============
+L0 - Porting this from ET
+
+CL_EatMe_f
+Eat misc console commands to prevent exploits
+==============
+*/
+void CL_EatMe_f(void) {
+	//do nothing kthxbye
+}
+
 //===========================================================================================
 
 /*
@@ -3008,6 +3020,9 @@ void CL_Init( void ) {
 	Cmd_AddCommand( "singlePlayLink", CL_singlePlayLink_f );            // NERVE - SMF
 
 	Cmd_AddCommand( "setRecommended", CL_SetRecommended_f );
+
+	//bani - we eat these commands to prevent exploits
+	Cmd_AddCommand("userinfo", CL_EatMe_f);
 
 	CL_InitRef();
 
