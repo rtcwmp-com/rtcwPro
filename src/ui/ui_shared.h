@@ -74,6 +74,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WINDOW_TIMEDVISIBLE     0x00800000  // visibility timing ( NOT implemented )
 #define WINDOW_IGNORE_HUDALPHA  0x01000000  // window will apply cg_hudAlpha value to colors unless this flag is set
 #define WINDOW_MODAL                        0x02000000 // window is modal, the window to go back to is stored in a stack
+#define WINDOW_LB_SOMEWHERE     0x40000000	// L0 - ET Port
 #define WINDOW_DRAWALWAYSONTOP  0x02000000  // added from ET for tooltips
 // CGAME cursor type bits
 #define CURSOR_NONE             0x00000001
@@ -473,6 +474,7 @@ void Menu_PaintAll();
 menuDef_t *Menus_ActivateByName( const char *p, qboolean modalStack );
 void Menu_Reset();
 qboolean Menus_AnyFullScreenVisible();
+qboolean trap_Key_IsDown(int keynum);
 void  Menus_Activate( menuDef_t *menu );
 
 displayContextDef_t *Display_GetContext();
