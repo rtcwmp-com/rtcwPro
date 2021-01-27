@@ -450,6 +450,11 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	char systemInfo[MAX_INFO_STRING];
 	const char  *p;
 
+	// ydnar: broadcast a level change to all connected clients
+	if (svs.clients && !com_errorEntered) {
+		SV_FinalMessage("spawnserver", qfalse);
+	}
+
 	// shut down the existing game if it is running
 	SV_ShutdownGameProgs();
 
@@ -935,7 +940,7 @@ not just stuck on the outgoing message list, because the server is going
 to totally exit after returning from this function.
 ==================
 */
-void SV_FinalMessage( char *message ) {
+void SV_FinalMessage( char *message, qboolean disconnect) {
 	int i, j;
 	client_t    *cl;
 
@@ -946,7 +951,9 @@ void SV_FinalMessage( char *message ) {
 				// don't send a disconnect to a local client
 				if ( cl->netchan.remoteAddress.type != NA_LOOPBACK ) {
 					SV_SendServerCommand( cl, "print \"%s\"", message );
-					SV_SendServerCommand( cl, "disconnect" );
+					if (disconnect) {
+						SV_SendServerCommand(cl, "disconnect \"%s\"", message);
+					}
 				}
 				// force a snapshot to be sent
 				cl->nextSnapshotTime = -1;
@@ -973,7 +980,7 @@ void SV_Shutdown( char *finalmsg ) {
 	Com_Printf( "----- Server Shutdown -----\n" );
 
 	if ( svs.clients && !com_errorEntered ) {
-		SV_FinalMessage( finalmsg );
+		SV_FinalMessage( finalmsg, qtrue);
 	}
 
 	SV_RemoveOperatorCommands();

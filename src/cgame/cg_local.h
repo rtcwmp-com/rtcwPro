@@ -1206,6 +1206,8 @@ typedef struct {
 	// Time Counter
 	int timein;
 	int timeCounter;
+
+	qboolean serverRespawning;
 // -OSPx
 
 	// RTCWPro - cvar limiting

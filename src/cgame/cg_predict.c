@@ -758,6 +758,12 @@ void CG_PredictPlayerState( void ) {
 			cg_pmove.cmd.serverTime = ( ( cg_pmove.cmd.serverTime + pmove_msec.integer - 1 ) / pmove_msec.integer ) * pmove_msec.integer;
 		}
 
+		// ydnar: if server respawning, freeze the player
+		if (cg.serverRespawning) {
+			cg_pmove.ps->pm_type = PM_FREEZE;
+		}
+
+
 		// RF, if waiting for mission stats to go, ignore all input
 		if ( strlen( cg_missionStats.string ) > 1 || cg_norender.integer ) {
 			cg_pmove.cmd.buttons = 0;

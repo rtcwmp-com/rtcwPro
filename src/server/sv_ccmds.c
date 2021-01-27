@@ -445,8 +445,7 @@ static void SV_MapRestart_f( void ) {
 			// the client will hang because we'll use the last Usercmd from the previous map,
 			// which is wrong obviously.
 			SV_ClientEnterWorld(client, NULL);
-		} // End
-
+		} 
 	}
 
 	// run another frame to allow things to look at all the players

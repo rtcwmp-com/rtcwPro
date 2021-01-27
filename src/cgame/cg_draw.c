@@ -1577,6 +1577,12 @@ static void CG_DrawDisconnect( void ) {
 		return;
 	}
 
+	// ydnar: don't draw if the server is respawning
+	if (cg.serverRespawning) {
+		return;
+	}
+
+
 	// draw the phone jack if we are completely past our buffers
 	cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
 	trap_GetUserCmd( cmdNum, &cmd );
