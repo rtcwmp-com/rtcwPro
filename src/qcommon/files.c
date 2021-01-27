@@ -1231,8 +1231,9 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 				 && Q_stricmp( filename + l - 5, ".menu" )  // menu files
 				 && Q_stricmp( filename + l - 5, ".game" )  // menu files
 				 && Q_stricmp( filename + l - strlen( demoExt ), demoExt ) // menu files
-				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files
-				fs_fakeChkSum = random();
+				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files	
+				if (!(fs_fakeChkSum = random())) 
+					fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
 			}
 
 			Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
