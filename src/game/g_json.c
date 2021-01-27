@@ -28,7 +28,6 @@ void G_jstatsByPlayers(qboolean wstats) {
 	gclient_t *cl;
 	char n1[MAX_NETNAME];
 	char n2[MAX_NETNAME];
-	char teamname[10];
 	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
