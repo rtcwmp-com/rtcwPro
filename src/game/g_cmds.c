@@ -571,7 +571,8 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	int specClient;
 
 	if (level.paused != PAUSE_NONE && !forced) {
-		return CP("cp \"^3You cannot switch teams during Pause!\n\"2");
+		CP("cp \"^3You cannot switch teams during Pause!\n\"2");
+		return;
 	}
 
 	//
@@ -1620,6 +1621,8 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	int i;
 	char arg1[MAX_STRING_TOKENS];
 	char arg2[MAX_STRING_TOKENS];
+	char* c;
+	char* strCmdBase = (!fRefCommand)?"vote":"ref command";
 
 	// Normal checks, if its not being issued as a referee command
 	if (!fRefCommand) {
@@ -1651,13 +1654,17 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	trap_Argv(1, arg1, sizeof(arg1));
 	trap_Argv(2, arg2, sizeof(arg2));
 
-	if (strchr(arg1, ';') || strchr(arg2, ';')) {
-		char *strCmdBase = (!fRefCommand) ? "vote" : "ref command";
-
-		G_refPrintf(ent, "Invalid %s string.", strCmdBase);
-		return(qfalse);
+	// L0 - ioquake callvote exploit fix 
+	for (c = arg2; *c; ++c) {
+		switch (*c) {
+			case '\n':
+			case '\r':
+			case ';':
+			G_refPrintf(ent, "Invalid %s string.", strCmdBase);
+			return(qfalse);
+			break;
+		}
 	}
-
 
 	if (trap_Argc() > 1 && (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND) {   //  --OSP
 		if (i != G_OK) {
@@ -2910,19 +2917,12 @@ void G_commands_cmd(gentity_t *ent)
  * @param dwCommand - unused
  * @param fValue - unused
  */
-void G_commandsHelp_cmd(gentity_t *ent)
-{
-	int i, rows, num_cmds = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]) - 1;
-
+void G_commandsHelp_cmd(gentity_t *ent) {
+	int i, num_cmds = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]) - 1;
 
 	CP("print \"^5\nAvailable Game Commands:\n------------------------\n\"");
-	for (i = 0; i < num_cmds; i++)
-	{
+	for (i = 0; i < num_cmds; i++) {
 		CP(va("print \"^3%s%s\n\"", aCommandInfo[i].pszCommandName, aCommandInfo[i].pszHelpInfo));
 
-
-
 	}
-
-	//CP("print \"\nType: ^3\\command_name ?^7 for more information\n\"");
 }
