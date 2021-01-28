@@ -495,7 +495,9 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-static qboolean FS_CreatePath( char *OSPath ) {
+int FS_CreatePath(const char *OSPath_) {
+	// use va() to have a clean const char* prototype
+	char *OSPath = va("%s", OSPath_);
 	char    *ofs;
 
 	// make absolutely sure that it can't back up the path
@@ -739,9 +741,8 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 	if ( f ) {
 		return FS_filelength( f );
 	}
-	return 0;
+	return -1;
 }
-
 
 /*
 ===========
@@ -1085,6 +1086,8 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	// The searchpaths do guarantee that something will always
 	// be prepended, so we don't need to worry about "c:" or "//limbo"
 	if ( strstr( filename, ".." ) || strstr( filename, "::" ) ) {
+		if (file == NULL)
+			return -1;
 		*file = 0;
 		return -1;
 	}
@@ -2818,7 +2821,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 		havepak = qfalse;
 
 		// never autodownload any of the id paks
-		if ( FS_idPak( fs_serverReferencedPakNames[i], "main" ) ) {
+		if ( FS_idPak( fs_serverReferencedPakNames[i], BASEGAME) ) {
 			continue;
 		}
 
