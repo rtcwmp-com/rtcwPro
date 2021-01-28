@@ -261,6 +261,8 @@ void SV_Startup( void ) {
 	svs.initialized = qtrue;
 
 	Cvar_Set( "sv_running", "1" );
+
+	NET_JoinMulticast6();
 }
 
 
@@ -904,6 +906,9 @@ void SV_Init( void ) {
 	// init the botlib here because we need the pre-compiler in the UI
 	SV_BotInitBotLib();
 
+	// Load saved Bans
+	Cbuf_AddText("rehashbans\n");
+
 	SV_LoadModels();
 
 	// DHM - Nerve
@@ -978,6 +983,8 @@ void SV_Shutdown( char *finalmsg ) {
 	}
 
 	Com_Printf( "----- Server Shutdown -----\n" );
+
+	NET_LeaveMulticast6();
 
 	if ( svs.clients && !com_errorEntered ) {
 		SV_FinalMessage( finalmsg, qtrue);
