@@ -939,7 +939,6 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg) {
 	char errorMessage[1024];
 	char pakbuf[MAX_QPATH], *pakptr;
 	int numRefPaks;
-	int download_flag;
 
 	if (!*cl->downloadName) {
 		return 0;	// Nothing being downloaded
