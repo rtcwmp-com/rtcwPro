@@ -710,7 +710,7 @@ void CG_PredictPlayerState( void ) {
 				}
 				cg.thisFrameTeleport = qfalse;
 			} else {
-				vec3_t adjusted, new_angles; //vec3_t adjusted;
+				vec3_t adjusted; //vec3_t adjusted;
 				CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
 				//cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, cg.predictedPlayerState.viewangles, new_angles);
 				cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles );

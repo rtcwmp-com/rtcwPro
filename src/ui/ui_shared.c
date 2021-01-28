@@ -48,9 +48,6 @@ typedef struct scrollInfo_s {
 	qboolean scrollDir;
 } scrollInfo_t;
 
-
-
-
 static scrollInfo_t scrollInfo;
 
 static void ( *captureFunc )( void *p ) = NULL;

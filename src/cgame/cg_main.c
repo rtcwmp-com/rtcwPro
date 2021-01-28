@@ -41,6 +41,7 @@ displayContextDef_t cgDC;
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
+qboolean CG_CheckExecKey(int key);
 
 /*
 ================
@@ -88,6 +89,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_GetTag( arg0, (char *)arg1, (orientation_t *)arg2 );
 	case CG_CHECKCENTERVIEW:
 		return CG_CheckCenterView();
+	case CG_CHECKEXECKEY:
+		return CG_CheckExecKey(arg0);
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -2763,3 +2766,13 @@ void CG_Shutdown( void ) {
 	cvarsLoaded = qfalse;
 }
 
+/*
+=================
+CG_CheckExecKey
+
+L0 - we'll need this later on ..
+=================
+*/
+qboolean CG_CheckExecKey(int key) {
+	return qfalse;
+}
