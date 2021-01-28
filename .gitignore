@@ -348,3 +348,4 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 *.pk3
+/src/servercache.dat
