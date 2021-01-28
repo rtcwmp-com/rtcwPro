@@ -28,9 +28,6 @@
     <ClCompile Include="ui_syscalls.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui_util.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\game\bg_public.h">

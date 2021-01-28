@@ -2095,6 +2095,10 @@ void Com_RunAndTimeServerPacket( netadr_t *evFrom, msg_t *buf ) {
 	}
 }
 
+#ifndef DEDICATED
+extern qboolean consoleButtonWasPressed;
+#endif
+
 /*
 =================
 Com_EventLoop
@@ -2142,6 +2146,16 @@ int Com_EventLoop( void ) {
 			CL_KeyEvent( ev.evValue, ev.evValue2, ev.evTime );
 			break;
 		case SE_CHAR:
+#ifndef DEDICATED
+		// we just pressed the console button,
+		// so ignore this event
+		// this prevents chars appearing at console input
+		// when you just opened it
+		if (consoleButtonWasPressed) {
+			consoleButtonWasPressed = qfalse;
+			break;
+		}
+#endif
 			CL_CharEvent( ev.evValue );
 			break;
 		case SE_MOUSE:

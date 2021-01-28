@@ -1347,7 +1347,43 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 	strcat( s, newi );
 }
 
+// L0 - ET port
 
+// strips whitespaces and bad characters
+qboolean Q_isBadDirChar(char c) {
+	char badchars[] = {';', '&', '(', ')', '|', '<', '>', '*', '?', '[', ']', '~', '+', '@', '!', '\\', '/', ' ', '\'', '\"', '\0'};
+	int i;
 
+	for (i = 0; badchars[i] != '\0'; i++) {
+		if (c == badchars[i]) {
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
+char* Q_CleanDirName(char* dirname) {
+	char* d;
+	char* s;
+
+	s = dirname;
+	d = dirname;
+
+	// clear trailing .'s
+	while (*s == '.') {
+		s++;
+	}
+
+	while (*s != '\0') {
+		if (!Q_isBadDirChar(*s)) {
+			*d++ = *s;
+		}
+		s++;
+	}
+	*d = '\0';
+
+	return dirname;
+}
 
 //====================================================================

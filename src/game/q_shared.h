@@ -724,6 +724,8 @@ void GetPerpendicularViewVector( const vec3_t point, const vec3_t p1, const vec3
 void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj );
 // done.
 
+char* Q_CleanDirName(char* dirname);
+
 //=============================================
 
 float Com_Clamp( float min, float max, float value );

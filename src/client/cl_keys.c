@@ -60,6 +60,7 @@ typedef struct {
 } keyname_t;
 
 qboolean UI_checkKeyExec( int key );        // NERVE - SMF
+qboolean CL_CGameCheckKeyExec(int key);
 
 // names not in this list can either be lowercase ascii, or '0xnn' hex sequences
 keyname_t keynames[] =
@@ -79,7 +80,6 @@ keyname_t keynames[] =
 	{"SHIFT", K_SHIFT},
 
 	{"CAPSLOCK", K_CAPSLOCK},
-
 
 	{"F1", K_F1},
 	{"F2", K_F2},
@@ -1609,14 +1609,31 @@ Key_Bindlist_f
 */
 void Key_Bindlist_f( void ) {
 	int i;
+	int freeKeys = 0;
 
-	for ( i = 0 ; i < 256 ; i++ ) {
-		if ( keys[i].binding && keys[i].binding[0] ) {
-			Com_Printf( "%s \"%s\"\n", Key_KeynumToString( i, qfalse ), keys[i].binding );
+	Com_Printf("key             bind\n");
+
+	Com_Printf("-----------------------------------\n");
+
+	for (i = 0; i < MAX_KEYS; i++) {
+		if (keys[i].binding && keys[i].binding[0]) {
+			if (Cmd_Argc() != 2) {
+				Com_Printf("%-15s \"%s\"\n", Key_KeynumToString(i, qfalse), keys[i].binding);
+			}
+		}
+		else {
+			++freeKeys;
+
+			if (Cmd_Argc() == 2) {
+				Com_Printf("%-15s *free to bind*\n", Key_KeynumToString(i, qfalse));
+			}
 		}
 	}
-}
 
+	Com_Printf("-----------------------------------\n");
+	Com_Printf("%i free keys available.\n", freeKeys);
+	Com_Printf("Enter /bindlist -f to see free keys.\n"); // or any other param ... :)
+}
 
 /*
 ===================
@@ -1638,11 +1655,15 @@ CL_KeyEvent
 Called by the system for both key up and key down events
 ===================
 */
-//static consoleCount = 0;
+qboolean consoleButtonWasPressed = qfalse;
 void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	char    *kb;
 	char cmd[1024];
 	qboolean bypassMenu = qfalse;       // NERVE - SMF
+
+	if (!key) {
+		return;
+	}
 
 	// update auto-repeat status and BUTTON_ANY status
 	keys[key].down = down;
@@ -1715,13 +1736,18 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	}
 
 	// console key is hardcoded, so the user can never unbind it
-	if ( key == '`' || key == '~' ) {
+	if (key == (unsigned char)'`' || key == (unsigned char)'~' || key == (unsigned char)'\xAC') {
 		if ( !down ) {
 			return;
 
 		}
 		Con_ToggleConsole_f();
+
+		consoleButtonWasPressed = qtrue;
 		return;
+	}
+	else {
+		consoleButtonWasPressed = qfalse;
 	}
 
 	// most keys during demo playback will bring up the menu, but non-ascii
@@ -1790,12 +1816,13 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 
 	// NERVE - SMF - if we just want to pass it along to game
 	if ( cl_bypassMouseInput && cl_bypassMouseInput->integer ) {    //DAJ BUG in dedicated cl_missionStats don't exist
-		if ( ( key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3 ) ) {
-			if ( cl_bypassMouseInput->integer == 1 ) {
+		if ((key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3 || key == K_MOUSE4 || key == K_MOUSE5)) {
+			if (cl_bypassMouseInput->integer == 1) {
 				bypassMenu = qtrue;
 			}
-		} else if ( !UI_checkKeyExec( key ) ) {
-			bypassMenu = qtrue;
+			else if (((cls.keyCatchers & KEYCATCH_UI) && !UI_checkKeyExec(key)) || ((cls.keyCatchers & KEYCATCH_CGAME) && !CL_CGameCheckKeyExec(key))) {
+				bypassMenu = qtrue;
+			}
 		}
 	}
 
@@ -1868,8 +1895,9 @@ Normal keyboard characters, already shifted / capslocked / etc
 ===================
 */
 void CL_CharEvent( int key ) {
+
 	// the console key should never be used as a char
-	if ( key == '`' || key == '~' ) {
+	if (key == (unsigned char)'`' || key == (unsigned char)'~' || key == (unsigned char)'\xAC') {
 		return;
 	}
 
@@ -1878,13 +1906,14 @@ void CL_CharEvent( int key ) {
 		Field_CharEvent( &g_consoleField, key );
 	} else if ( cls.keyCatchers & KEYCATCH_UI )   {
 		VM_Call( uivm, UI_KEY_EVENT, key | K_CHAR_FLAG, qtrue );
-	} else if ( cls.keyCatchers & KEYCATCH_MESSAGE )   {
+	} else if (cls.keyCatchers & KEYCATCH_CGAME) {
+		VM_Call( cgvm, CG_KEY_EVENT, key | K_CHAR_FLAG, qtrue );
+	} else if ( cls.keyCatchers & KEYCATCH_MESSAGE ) {
 		Field_CharEvent( &chatField, key );
 	} else if ( cls.state == CA_DISCONNECTED )   {
 		Field_CharEvent( &g_consoleField, key );
 	}
 }
-
 
 /*
 ===================

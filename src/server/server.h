@@ -333,7 +333,7 @@ extern cvar_t* wh_check_fov;
 //
 // sv_main.c
 //
-void SV_FinalMessage( char *message );
+void SV_FinalMessage( char *message, qboolean disconnect);
 void QDECL SV_SendServerCommand( client_t *cl, const char *fmt, ... );
 
 

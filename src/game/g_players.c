@@ -677,7 +677,8 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	}
 	*/
 		if (level.paused != PAUSE_NONE) {
-			return CP("print \"^jError: ^7Match is already paused^j!\n\"");
+			CP("print \"^jError: ^7Match is already paused^j!\n\"");
+			return;
 		}
 
 		level.paused = !PAUSE_NONE;
