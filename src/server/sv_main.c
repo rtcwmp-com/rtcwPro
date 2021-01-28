@@ -624,6 +624,7 @@ void SVC_Info( netadr_t from ) {
 	if ( *gamedir ) {
 		Info_SetValueForKey( infostring, "game", gamedir );
 	}
+	Info_SetValueForKey( infostring, "gamename", "rtcwmp" ); // L0 - dpmaster fix
 	Info_SetValueForKey( infostring, "sv_allowAnonymous", va( "%i", sv_allowAnonymous->integer ) );
 
 	// Rafael gameskill

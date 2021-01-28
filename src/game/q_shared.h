@@ -31,7 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-
+// L0 - Never modify codename without knowing what and where is being used for.
+#define CODENAME		"BlazkowiczIsBack"
 #define Q3_VERSION      "Wolf 1.41b-MP"
 
 // 1.41b-MP: fix autodl sploit
