@@ -259,6 +259,18 @@ typedef struct {
 
 } serverStatic_t;
 
+// L0 - ioquake ipv6 banning
+#define SERVER_MAXBANS	1024
+#define SERVER_BANFILE	"serverbans.dat"
+// Structure for managing bans
+typedef struct {
+	netadr_t ip;
+	// For a CIDR-Notation type suffix
+	int subnet;
+
+	qboolean isexception;
+} serverBan_t;
+
 //================
 // DHM - Nerve
 #ifdef UPDATE_SERVER
@@ -346,6 +358,10 @@ extern cvar_t* sv_wwwFallbackURL;
 
 
 //===========================================================
+
+// L0 - ioquake ipv6 banning
+extern	serverBan_t serverBans[SERVER_MAXBANS];
+extern	int serverBansCount;
 
 //
 // sv_main.c
