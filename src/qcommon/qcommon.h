@@ -728,7 +728,7 @@ char *FS_ShiftStr( const char *string, int shift );
 
 void FS_CopyFile( char *fromOSPath, char *toOSPath );
 
-qboolean FS_VerifyPak( const char *pak );
+int FS_CreatePath(const char* OSPath_);
 
 /*
 ==============================================================
