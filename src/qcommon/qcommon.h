@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
+#include "dl_public.h" // L0 - HTTP downloads
+
 //Ignore __attribute__ on non-gcc platforms
 #ifndef __GNUC__
 #ifndef __attribute__
@@ -727,7 +729,7 @@ char *FS_ShiftedStrStr( const char *string, const char *substring, int shift );
 char *FS_ShiftStr( const char *string, int shift );
 
 void FS_CopyFile( char *fromOSPath, char *toOSPath );
-
+int FS_CreatePath(const char* OSPath_);
 qboolean FS_VerifyPak( const char *pak );
 
 /*
@@ -920,6 +922,7 @@ void CL_InitKeyCommands( void );
 // config files, but the rest of client startup will happen later
 
 void CL_Init( void );
+void CL_ClearStaticDownload(void);
 void CL_Disconnect( qboolean showMainMenu );
 void CL_Shutdown( void );
 void CL_Frame( int msec );

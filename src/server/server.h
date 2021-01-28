@@ -163,6 +163,14 @@ typedef struct client_s {
 	qboolean downloadEOF;               // We have sent the EOF block
 	int downloadSendTime;               // time we last got an ack from the client
 
+	// L0 - HTTP downloads
+	qboolean bDlOK;					// passed from cl_wwwDownload CVAR_USERINFO, wether this client supports www dl
+	char downloadURL[MAX_OSPATH];	// the URL we redirected the client to
+	qboolean bWWWDl;				// we have a www download going
+	qboolean bWWWing;				// the client is doing an ftp/http download
+	qboolean bFallback;				// last www download attempt failed, fallback to regular download
+									// note: this is one-shot, multiple downloads would cause a www download to be attempted again
+
 	int deltaMessage;                   // frame last client usercmd message
 	int nextReliableTime;               // svs.time when another reliable command will be allowed
 	int lastPacketTime;                 // svs.time when packet was last received
@@ -183,6 +191,7 @@ typedef struct client_s {
 	// buffer them into this queue, and hand them out to netchan as needed
 	netchan_buffer_t *netchan_start_queue;
 	netchan_buffer_t **netchan_end_queue;
+	int downloadnotify; //bani
 } client_t;
 
 //=============================================================================
@@ -327,6 +336,14 @@ extern cvar_t* wh_bbox_vert;
 extern cvar_t* wh_add_xy;
 extern cvar_t* wh_check_fov;
 
+// HTTP Downloads
+extern cvar_t* sv_wwwDownload;	// general flag to enable/disable www download redirects
+extern cvar_t* sv_wwwBaseURL;	// the base URL of all the files
+								// tell clients to perform their downloads while disconnected from the server
+								// this gets you a better throughput, but you loose the ability to control the download usage
+extern cvar_t* sv_wwwDlDisconnected;
+extern cvar_t* sv_wwwFallbackURL;
+
 
 //===========================================================
 
@@ -380,7 +397,11 @@ void SV_DropClient( client_t *drop, const char *reason );
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
+#ifdef DEDICATED
 int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+#else
+void SV_WriteDownloadToClient(client_t* cl, msg_t* msg);
+#endif
 #ifndef _WIN32
 int SV_SendQueuedMessages(void);
 int SV_RateMsec( client_t *client ) ;
@@ -509,3 +530,8 @@ int SV_Netchan_TransmitNextFragment( client_t *client );
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
 
 qboolean SV_CheckDRDoS(netadr_t from);
+
+// L0 - HTTP downloads
+#define DLNOTIFY_REDIRECT   0x00000001  // "Redirecting client ..."
+#define DLNOTIFY_BEGIN      0x00000002  // "clientDownload: 4 : beginning ..."
+#define DLNOTIFY_ALL        ( DLNOTIFY_REDIRECT | DLNOTIFY_BEGIN )
