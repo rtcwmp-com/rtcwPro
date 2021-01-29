@@ -1052,7 +1052,7 @@ typedef struct {
 	config_t config;
 	int eventNum;  // event counter
 	char *match_id; // for stats round matching...
-
+    char *round_id; //
 
 } level_locals_t;
 
@@ -2141,7 +2141,7 @@ void G_writeClosingJson(void);
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
 void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
 int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
-
+int sendToMongo(char* jsondata); // temp function to send events to mongodb
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 
