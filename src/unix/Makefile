@@ -10,7 +10,6 @@ CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
 
-
 DCFLAGSREL := \
 	 -pipe -m32 -march=pentium4 -g -fomit-frame-pointer -ffast-math \
 	-falign-loops=2 -falign-jumps=2 \
@@ -137,10 +136,10 @@ client: NASM := nasm
 client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
-	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++
+	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -lcurl
 client: $(CLOBJS)
-	$(CC) -o wolfX.x86 $(CLOBJS) $(LDFLAGS)
-	strip -s wolfX.x86
+	$(CC) -o wolfMP.x86 $(CLOBJS) $(LDFLAGS)
+	strip -s wolfMP.x86
 client-clean:
 	rm $(CLOBJS) 2> /dev/null ; exit 0
 	
@@ -173,18 +172,18 @@ client-w32: LDFLAGS := \
 	 -lwinmm -lopengl32 -lgdi32 -lws2_32 -static-libgcc `$(CXX) \
 	-print-file-name=libstdc++.a`
 client-w32: $(CLWINOBJS)
-	$(CXX) -o wolfX.exe $(CLWINOBJS) $(LDFLAGS)
-	strip -s wolfX.exe
+	$(CXX) -o wolfMP.exe $(CLWINOBJS) $(LDFLAGS)
+	strip -s wolfMP.exe
 client-w32-clean:
 	rm $(CLWINOBJS) 2> /dev/null ; exit 0
 
 #####################################################################
 
 server: CC := gcc
-server: NASM := nasm
+server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY # -DFEATURE_ANTICHEAT
-server: LDFLAGS := -m32 -ldl -lm
+	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
+server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -194,8 +193,8 @@ server-clean:
 server-debug: CC := gcc
 server-debug: NASM := nasm
 server-debug: CFLAGS := \
-	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -DFEATURE_ANTICHEAT
-server-debug: LDFLAGS := -m32 -ldl -lm
+	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
+server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl --verbose
 server-debug: $(SVOBJS)
 	$(CC) -o wolfded_debug.x86 $(SVOBJS) $(LDFLAGS)
 server-debug-clean:
@@ -213,7 +212,7 @@ server-w32: CFLAGS := \
 	$(CFLAGSREL) -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY \
 	-DCPUSTRING=\"`uname -m`\" -U__i386__  -DWIN32 \
 	-DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING
-server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32
+server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl
 server-w32: $(SVWINOBJS)
 	$(CC) -o wolfded.exe $(SVWINOBJS) $(LDFLAGS)
 	strip -s wolfded.exe
@@ -231,11 +230,11 @@ CURLCONF := \
 	--without-gnutls --without-zlib --without-ssl --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual --disable-ipv6
+	--disable-nonblocking --disable-manual
 
 curl: 
-	cd ../curl && ./configure $(CURLCONF)
-	cd ../curl && make
+	cd ../../libs/curl-7.29.0 && ./configure $(CURLCONF)
+	cd ../../libs/curl-7.29.0 && make
 	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_linux.a
 	cp -R ../curl/include/curl ../curl/include/curl_linux
 

@@ -495,10 +495,10 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-int FS_CreatePath(const char *OSPath_) {
+int FS_CreatePath(const char* OSPath_) {
 	// use va() to have a clean const char* prototype
-	char *OSPath = va("%s", OSPath_);
-	char    *ofs;
+	char* OSPath = va("%s", OSPath_);
+	char* ofs;
 
 	// make absolutely sure that it can't back up the path
 	// FIXME: is c: allowed???
@@ -2804,6 +2804,7 @@ we are not interested in a download string format, we want something human-reada
 
 ================
 */
+qboolean CL_WWWBadChecksum(const char* pakname); 
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 	searchpath_t    *sp;
 	qboolean havepak, badchecksum;
@@ -2832,38 +2833,51 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 			}
 		}
 
-		if ( !havepak && fs_serverReferencedPakNames[i] && *fs_serverReferencedPakNames[i] ) {
+		if (!havepak && fs_serverReferencedPakNames[i] && *fs_serverReferencedPakNames[i]) {
 			// Don't got it
 
-			if ( dlstring ) {
+			if (dlstring) {
 				// Remote name
-				Q_strcat( neededpaks, len, "@" );
-				Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
-				Q_strcat( neededpaks, len, ".pk3" );
+				Q_strcat(neededpaks, len, "@");
+				Q_strcat(neededpaks, len, fs_serverReferencedPakNames[i]);
+				Q_strcat(neededpaks, len, ".pk3");
 
 				// Local name
-				Q_strcat( neededpaks, len, "@" );
+				Q_strcat(neededpaks, len, "@");
 				// Do we have one with the same name?
-				if ( FS_SV_FileExists( va( "%s.pk3", fs_serverReferencedPakNames[i] ) ) ) {
+				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
 					char st[MAX_ZPATH];
 					// We already have one called this, we need to download it to another name
 					// Make something up with the checksum in it
-					Com_sprintf( st, sizeof( st ), "%s.%08x.pk3", fs_serverReferencedPakNames[i], fs_serverReferencedPaks[i] );
-					Q_strcat( neededpaks, len, st );
-				} else
-				{
-					Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
-					Q_strcat( neededpaks, len, ".pk3" );
+					Com_sprintf(st, sizeof(st), "%s.%08x.pk3", fs_serverReferencedPakNames[i], fs_serverReferencedPaks[i]);
+					Q_strcat(neededpaks, len, st);
 				}
-			} else
-			{
-				Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
-				Q_strcat( neededpaks, len, ".pk3" );
+				else {
+					Q_strcat(neededpaks, len, fs_serverReferencedPakNames[i]);
+					Q_strcat(neededpaks, len, ".pk3");
+				}
+			}
+			else {
+				Q_strcat(neededpaks, len, fs_serverReferencedPakNames[i]);
+				Q_strcat(neededpaks, len, ".pk3");
 				// Do we have one with the same name?
-				if ( FS_SV_FileExists( va( "%s.pk3", fs_serverReferencedPakNames[i] ) ) ) {
-					Q_strcat( neededpaks, len, " (local file exists with wrong checksum)" );
+				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
+					Q_strcat(neededpaks, len, " (local file exists with wrong checksum)");
+					// L0 - HTTP downloads
+#ifndef DEDICATED
+					// let the client subsystem track bad download redirects (dl file with wrong checksums)
+					// this is a bit ugly but the only other solution would have been callback passing..
+					if (CL_WWWBadChecksum(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
+						// remove a potentially malicious download file
+						// (this is also intended to avoid expansion of the pk3 into a file with different checksum .. messes up wwwdl chkfail)
+						char* rmv = FS_BuildOSPath(fs_homepath->string, va("%s.pk3", fs_serverReferencedPakNames[i]), "");
+						rmv[strlen(rmv) - 1] = '\0';
+						FS_Remove(rmv);
+					}
+#endif
+					// End
 				}
-				Q_strcat( neededpaks, len, "\n" );
+				Q_strcat(neededpaks, len, "\n");
 			}
 		}
 	}
