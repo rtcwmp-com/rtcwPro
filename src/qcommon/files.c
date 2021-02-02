@@ -495,7 +495,9 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-static qboolean FS_CreatePath( char *OSPath ) {
+int FS_CreatePath(const char *OSPath_) {
+	// use va() to have a clean const char* prototype
+	char *OSPath = va("%s", OSPath_);
 	char    *ofs;
 
 	// make absolutely sure that it can't back up the path
@@ -739,9 +741,8 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 	if ( f ) {
 		return FS_filelength( f );
 	}
-	return 0;
+	return -1;
 }
-
 
 /*
 ===========
@@ -1085,6 +1086,8 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	// The searchpaths do guarantee that something will always
 	// be prepended, so we don't need to worry about "c:" or "//limbo"
 	if ( strstr( filename, ".." ) || strstr( filename, "::" ) ) {
+		if (file == NULL)
+			return -1;
 		*file = 0;
 		return -1;
 	}
@@ -1166,16 +1169,6 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 						pak->referenced |= FS_UI_REF;
 					}
 
-#if !defined( PRE_RELEASE_DEMO ) && !defined( DO_LIGHT_DEDICATED )
-					// DHM -- Nerve :: Don't allow maps to be loaded from pak0 (singleplayer)
-					if ( Q_stricmp( filename + l - 4, ".bsp" ) == 0 &&
-						 Q_stricmp( pak->pakBasename, "pak0" ) == 0 ) {
-
-						*file = 0;
-						return -1;
-					}
-#endif
-
 					if ( uniqueFILE ) {
 						// open a new file on the pakfile
 						fsh[*file].handleFiles.file.z = unzReOpen( pak->pakFilename, pak->handle );
@@ -1241,8 +1234,9 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 				 && Q_stricmp( filename + l - 5, ".menu" )  // menu files
 				 && Q_stricmp( filename + l - 5, ".game" )  // menu files
 				 && Q_stricmp( filename + l - strlen( demoExt ), demoExt ) // menu files
-				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files
-				fs_fakeChkSum = random();
+				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files	
+				if (!(fs_fakeChkSum = random())) 
+					fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
 			}
 
 			Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
@@ -2827,7 +2821,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 		havepak = qfalse;
 
 		// never autodownload any of the id paks
-		if ( FS_idPak( fs_serverReferencedPakNames[i], "main" ) ) {
+		if ( FS_idPak( fs_serverReferencedPakNames[i], BASEGAME) ) {
 			continue;
 		}
 

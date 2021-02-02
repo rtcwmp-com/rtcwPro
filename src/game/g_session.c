@@ -66,7 +66,8 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		// write wstats
 		G_WriteWeaponStatsData(client);
 	}/// End
-	s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+	//s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
 			client->sess.sessionTeam,
 			client->sess.spectatorTime,
 			client->sess.spectatorState,
@@ -111,14 +112,21 @@ void G_WriteClientSessionData( gclient_t *client ) {
 			client->sess.med_given,
 			client->sess.ammo_given,
 			client->sess.revives,
-			client->sess.knifeKills
+			client->sess.knifeKills,
+            //new below
+			client->sess.dyn_planted,
+            client->sess.dyn_defused,
+            client->sess.obj_captured,
+            client->sess.obj_destroyed,
+            client->sess.obj_returned,
+            client->sess.obj_taken
 			);
 
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_Set( var, s );
 }
 
-// nihi added below
+
 /*
 ================
 G_ClientSwap
@@ -177,7 +185,8 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // nihi changed
+	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -222,7 +231,14 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.med_given,
 			&client->sess.ammo_given,
 			&client->sess.revives,
-			&client->sess.knifeKills
+			&client->sess.knifeKills,
+			//new below
+			&client->sess.dyn_planted,
+            &client->sess.dyn_defused,
+            &client->sess.obj_captured,
+            &client->sess.obj_destroyed,
+            &client->sess.obj_returned,
+            &client->sess.obj_taken
 			);
 
 	// L0 - OSP stats -- pull and parse weapon stats

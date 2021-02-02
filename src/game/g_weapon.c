@@ -326,7 +326,7 @@ void Weapon_Syringe( gentity_t *ent ) {
 				memcpy( weapons,traceEnt->client->ps.weapons,sizeof( int ) * ( MAX_WEAPONS / ( sizeof( int ) * 8 ) ) );
 
 				ClientSpawn( traceEnt, qtrue );
-				// nihi added below
+
 				// L0 - Antilag
 				G_ResetTrail(traceEnt);
 				traceEnt->client->saved.leveltime = 0;
@@ -367,6 +367,10 @@ void Weapon_Syringe( gentity_t *ent ) {
 				if ( g_gamestate.integer == GS_PLAYING ) {
 					ent->client->sess.aWeaponStats[WS_SYRINGE].hits++;
 					ent->client->sess.revives++;
+					if (g_gameStatslog.integer) {
+                        G_writeGeneralEvent(traceEnt,ent," ",eventRevive);
+                       // G_writeReviveEvent (traceEnt->client->pers.netname, ent->client->pers.netname);
+					}
 				} // End
 
 				// sound
@@ -578,9 +582,21 @@ void Weapon_Engineer( gentity_t *ent ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
 								G_matchPrintInfo(va("Dynamite planted near %s!", hit->track), qfalse);
+								ent->client->sess.dyn_planted++;
+								if (g_gameStatslog.integer) {
+                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                    G_writeObjectiveEvent(ent, objDynPlant  );
+
+								}
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
 								G_matchPrintInfo(va("Dynamite planted near objective #%d!", hit->count), qfalse);
+								ent->client->sess.dyn_planted++;
+								if (g_gameStatslog.integer) {
+                                   //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+                                   G_writeObjectiveEvent(ent, objDynPlant  );
+
+								}
 							}
 						}
 						i = num;
@@ -589,6 +605,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
+						//	G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
 //	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
@@ -649,6 +666,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 								}
 								trap_SendServerCommand( -1, "cp \"Axis engineer disarmed the Dynamite!\n\"" );
 								G_matchPrintInfo(va("Axis defused dynamite near %s!", hit->track), qfalse);
+
+                                ent->client->sess.dyn_defused++;
+
+								if (g_gameStatslog.integer) {
+                                    G_writeObjectiveEvent(ent, objDynDefuse  );
+                                    //G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+								}
+
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_RED;
 							} else { // TEAM_BLUE
@@ -659,6 +684,11 @@ void Weapon_Engineer( gentity_t *ent ) {
 								}
 								trap_SendServerCommand( -1, "cp \"Allied engineer disarmed the Dynamite!\n\"" );
 								G_matchPrintInfo(va("Allies defused dynamite near %s!", hit->track), qfalse);
+								ent->client->sess.dyn_defused++;
+								if (g_gameStatslog.integer) {
+                                    G_writeObjectiveEvent(ent, objDynDefuse  );
+                                   // G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+								}
 								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_defused.wav" );
 								traceEnt->s.teamNum = TEAM_BLUE;
 							}
@@ -1566,6 +1596,236 @@ void SniperSoundEFX( vec3_t pos ) {
 	sniperEnt = G_TempEntity( pos, EV_SNIPER_SOUND );
 }
 
+// sswolf - begin head stuff
+qboolean IsHeadshotWeapon(int mod)
+{
+	// players are allowed headshots from these weapons
+	if (mod == MOD_LUGER ||
+		mod == MOD_COLT ||
+		mod == MOD_AKIMBO ||	//----(SA)	added
+		mod == MOD_MP40 ||
+		mod == MOD_THOMPSON ||
+		mod == MOD_STEN ||
+		mod == MOD_BAR ||
+		mod == MOD_FG42 ||
+		mod == MOD_FG42SCOPE ||
+		mod == MOD_MAUSER ||
+		mod == MOD_GARAND || // JPW NERVE this was left out
+		mod == MOD_SNIPERRIFLE ||
+		mod == MOD_SNOOPERSCOPE ||
+		mod == MOD_SILENCER ||	//----(SA)	modified
+		mod == MOD_SNIPERRIFLE)
+	{
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+qboolean IsHeadshot(gentity_t* targ, gentity_t** head, vec3_t start, vec3_t dir, int mod)
+{
+	trace_t		tr;
+	vec3_t		new_end;
+	gentity_t* traceEnt;
+
+	if (!head || !targ || !targ->client || targ->health <= 0)
+	{
+		return qfalse;
+	}
+
+	if (IsHeadshotWeapon(mod))
+	{
+		if (*head)
+		{
+			return qtrue;
+		}
+
+		*head = targ->head;
+
+		// trace another shot to see if we hit the head
+		VectorMA(start, 64, dir, new_end);
+		// NOTE(nobo): this second trace _completely_ ignores the random aim spread.
+		// Which results in more headshots than it should.. but this is what the previous
+		// 1.0 code did and the current 1.4 OSP code does as well, so it's what players are used to.
+		// and who doesn't like a couple extra headshots here and there? ;)
+		trap_Trace(&tr, start, NULL, NULL, new_end, targ->s.number, MASK_SHOT);
+
+		traceEnt = &g_entities[tr.entityNum];
+
+		if (traceEnt->is_head && traceEnt->parent == targ)
+		{
+			level.totalHeadshots++;			// NERVE - SMF
+			return qtrue;
+		}
+
+		level.missedHeadshots++;	// NERVE - SMF
+	}
+
+	return qfalse;
+}
+
+void AddHeadEntity(gentity_t* ent)
+{
+	if (ent->head)
+	{
+		return;
+	}
+
+	ent->head = G_Spawn();
+	ent->head->parent = ent;
+	ent->head->is_head = qtrue;
+}
+
+void UpdateHeadEntity(gentity_t* ent)
+{
+	gentity_t* head;
+	orientation_t or ;
+
+	if (!ent || !ent->client || ent->health <= 0 ||
+		ent->client->ps.pm_type == PM_DEAD || (ent->client->ps.pm_flags & PMF_LIMBO))
+	{
+		return;
+	}
+
+	AddHeadEntity(ent);
+	head = ent->head;
+
+	if (g_preciseHeadHitBox.integer && trap_GetTag(ent, &ent->client->animationInfo, "tag_head", &or )) {
+		G_SetOrigin(head, or .origin);
+		VectorCopy(ent->r.currentAngles, head->s.angles);
+		VectorCopy(head->s.angles, head->s.apos.trBase);
+		VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+		VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
+		head->clipmask = CONTENTS_SOLID;
+		head->r.contents = CONTENTS_SOLID;
+		trap_LinkEntity(head);
+		return;
+	}
+
+	float height, dest, upscale, forwardscale, rightscale;
+	vec3_t v, angles, forward2, right2, up2;
+
+	G_SetOrigin(head, ent->r.currentOrigin);
+
+	if (ent->client->ps.pm_flags & PMF_DUCKED)	// closer fake offset for 'head' box when crouching
+	{
+		height = ent->client->ps.crouchViewHeight - 12;
+	}
+	else
+	{
+		height = ent->client->ps.viewheight;
+	}
+
+	// NERVE - SMF - this matches more closely with WolfMP models
+	VectorCopy(ent->client->ps.viewangles, angles);
+	if (angles[PITCH] > 180)
+	{
+		dest = (-360 + angles[PITCH]) * 0.95;
+	}
+	else
+	{
+		dest = angles[PITCH] * 0.95;
+	}
+	angles[PITCH] = dest;
+
+	if (abs(dest) > 60)
+	{
+		upscale = 22;
+	}
+	else
+	{
+		upscale = 18;
+	}
+
+	if (ent->client->ps.weapon == WP_KNIFE ||
+		ent->client->ps.weapon == WP_MEDIC_SYRINGE)
+	{
+		forwardscale = 10;
+		rightscale = -3;
+	}
+	else
+	{
+		forwardscale = 5;
+		rightscale = 3;
+	}
+
+	AngleVectors(angles, forward2, right2, up2);
+	VectorScale(forward2, forwardscale, v);
+	VectorMA(v, rightscale, right2, v);
+	VectorMA(v, upscale, up2, v);
+
+	VectorAdd(v, head->r.currentOrigin, head->r.currentOrigin);
+	head->r.currentOrigin[2] += height / 2;
+	// -NERVE - SMF
+
+	VectorCopy(head->r.currentOrigin, head->s.origin);
+	VectorCopy(ent->r.currentAngles, head->s.angles);
+	VectorCopy(head->s.angles, head->s.apos.trBase);
+	VectorCopy(head->s.angles, head->s.apos.trDelta);
+	VectorSet(head->r.mins, -6, -6, -2); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+	VectorSet(head->r.maxs, 6, 6, 10); // changed this z from 0 to 6
+	head->clipmask = CONTENTS_SOLID;
+	head->r.contents = CONTENTS_SOLID;
+
+	trap_LinkEntity(head);
+}
+
+void UpdateHeadEntities(gentity_t* skip)
+{
+	int i;
+	gentity_t* potential_targ;
+
+	for (i = 0; i < level.numPlayingClients; ++i)
+	{
+		potential_targ = g_entities + level.sortedClients[i];
+
+		if (potential_targ == skip)
+		{
+			continue;
+		}
+
+		UpdateHeadEntity(potential_targ);
+	}
+}
+
+void FreeHeadEntity(gentity_t* ent)
+{
+	if (ent && ent->client && ent->head)
+	{
+		G_FreeEntity(ent->head);
+		ent->head = NULL;
+	}
+}
+
+void RemoveHeadEntity(gentity_t* ent)
+{
+	if (ent && ent->client && ent->head)
+	{
+		if (ent->head->r.linked)
+		{
+			trap_UnlinkEntity(ent->head);
+		}
+	}
+}
+
+void RemoveHeadEntities(gentity_t* skip)
+{
+	int i;
+	gentity_t* potential_targ;
+
+	for (i = 0; i < level.numPlayingClients; ++i)
+	{
+		potential_targ = g_entities + level.sortedClients[i];
+
+		if (potential_targ == skip)
+		{
+			continue;
+		}
+
+		RemoveHeadEntity(potential_targ);
+	}
+}
+// sswolf - head stuff end
 
 /*
 ==============
@@ -1603,35 +1863,72 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 	}
 }
 
+// sswolf - begin head stuff
 /*
 ==============
 Bullet_Fire
 ==============
 */
 void Bullet_Fire(gentity_t* ent, float spread, int damage) {
-	vec3_t end;
-	// nihi added below
-   // L0 - Antilag
-	if (g_antilag.integer && ent->client &&
-		!(ent->r.svFlags & SVF_BOT)) {
-		G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
-	} // End
+	vec3_t		end;
 
-	// L0 - disable invincible time when player spawns and starts shooting
 	if (g_disableInv.integer)
+	{
 		ent->client->ps.powerups[PW_INVULNERABLE] = 0;
-	// end
+	}
+
+	if (ent->client)
+	{
+		// antilag lerp if enough delay between client and server.
+		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		{
+			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
+		}
+
+		// update head entitiy positions and link them into the world (for headshots).
+		UpdateHeadEntities(ent);
+	}
 
 	Bullet_Endpos(ent, spread, &end);
 	Bullet_Fire_Extended(ent, ent, muzzleTrace, end, spread, damage);
-	// L0 - Stats
-	if (g_gamestate.integer == GS_PLAYING) {
-		ent->client->pers.life_acc_shots++;
-		ent->client->sess.acc_shots++;
+
+	if (ent->client)
+	{
+		// restore all client positions to before the antilag lerp.
+		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		{
+			G_UnTimeShiftAllClients(ent);
+		}
+
+		// unlink all head entities so they don't collide with players.
+		RemoveHeadEntities(ent);
 	}
-	// End
 }
 
+qboolean LogAccuracyShot(gentity_t* target, gentity_t* attacker) {
+	if (attacker && attacker->client)
+	{
+		if (target && target->client)
+		{
+			if (target->client->ps.stats[STAT_HEALTH] > 0 || (OnSameTeam(attacker, target)))
+			{
+				if ((target->client->ps.powerups[PW_INVULNERABLE] <= level.time))
+				{
+					return qtrue;
+				}
+			}
+		}
+		else
+		{
+			if (!target || !target->takedamage)
+			{
+				return qtrue;
+			}
+		}
+	}
+
+	return qfalse;
+}
 
 /*
 ==============
@@ -1642,187 +1939,218 @@ Bullet_Fire_Extended
 	uses for this include shooting through entities (windows, doors, other players, etc.) and reflecting bullets
 ==============
 */
-void Bullet_Fire_Extended( gentity_t *source, gentity_t *attacker, vec3_t start, vec3_t end, float spread, int damage ) {
-	trace_t tr;
-	gentity_t   *tent;
-	gentity_t   *traceEnt;
+void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, vec3_t end, float spread, int damage) {
+	trace_t		tr;
+	vec3_t		initial_start;
+	gentity_t* tent;
+	gentity_t* traceEnt;
+	gentity_t* head = NULL;
+
+	// since start is overwritten halfway through this function.
+	VectorCopy(start, initial_start);
 
 	damage *= s_quadFactor;
 
-	G_HistoricalTrace(source, &tr, start, NULL, NULL, end, source->s.number, MASK_SHOT);
+	// (SA) changed so player could shoot his own dynamite.
+	// (SA) whoops, but that broke bullets going through explosives...
+	trap_Trace(&tr, start, NULL, NULL, end, source->s.number, MASK_SHOT);
+	//	trap_Trace (&tr, start, NULL, NULL, end, ENTITYNUM_NONE, MASK_SHOT);
 
-	// nihi added below
-	 // L0 - antilag
-	if ( tr.surfaceFlags & SURF_NOIMPACT ) {
-		goto untimeshift;
-    } // End
-	// DHM - Nerve :: only in single player
-	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
-		AICast_ProcessBullet( attacker, start, tr.endpos );
+	traceEnt = &g_entities[tr.entityNum];
+
+	if (traceEnt->is_head) {
+		head = traceEnt;
+		traceEnt = head->parent;
 	}
 
+	if (LogAccuracyShot(traceEnt, source))
+	{
+		source->client->pers.life_acc_shots++;
+		source->client->sess.acc_shots++;
+	}
+
+	// DHM - Nerve :: only in single player
+	if (g_gametype.integer == GT_SINGLE_PLAYER)
+		AICast_ProcessBullet(attacker, start, tr.endpos);
+
 	// bullet debugging using Q3A's railtrail
-	if ( g_debugBullets.integer & 1 ) {
-		tent = G_TempEntity( start, EV_RAILTRAIL );
-		VectorCopy( tr.endpos, tent->s.origin2 );
+	if (g_debugBullets.integer & 1) {
+		tent = G_TempEntity(start, EV_RAILTRAIL);
+		VectorCopy(tr.endpos, tent->s.origin2);
 		tent->s.otherEntityNum2 = attacker->s.number;
 	}
 
 
-//----(SA)	commented out
-//	if ( tr.surfaceFlags & SURF_NOIMPACT ) {
-//		if (attacker->s.weapon == WP_MAUSER && attacker->r.svFlags & SVF_CASTAI)
-//			SniperSoundEFX (tr.endpos);
-//
-//		return;
-//	}
-//----(SA)	end
+	//----(SA)	commented out
+	//	if ( tr.surfaceFlags & SURF_NOIMPACT ) {
+	//		if (attacker->s.weapon == WP_MAUSER && attacker->r.svFlags & SVF_CASTAI)
+	//			SniperSoundEFX (tr.endpos);
+	//
+	//		return;
+	//	}
+	//----(SA)	end
 
-	RubbleFlagCheck( attacker, tr );
+	RubbleFlagCheck(attacker, tr);
 
-	traceEnt = &g_entities[ tr.entityNum ];
-
-	EmitterCheck( traceEnt, attacker, &tr );
+	EmitterCheck(traceEnt, attacker, &tr);
 
 	// snap the endpos to integers, but nudged towards the line
-	SnapVectorTowards( tr.endpos, start );
+	SnapVectorTowards(tr.endpos, start);
 
-//----(SA)	commented out
-//	if (attacker->s.weapon == WP_MAUSER && attacker->r.svFlags & SVF_CASTAI)
-//	{
-//		SniperSoundEFX (tr.endpos);
-//	}
-//----(SA)	end
+	//----(SA)	commented out
+	//	if (attacker->s.weapon == WP_MAUSER && attacker->r.svFlags & SVF_CASTAI)
+	//	{
+	//		SniperSoundEFX (tr.endpos);
+	//	}
+	//----(SA)	end
 
-	// send bullet impact
-	if ( traceEnt->takedamage && traceEnt->client && !( traceEnt->flags & FL_DEFENSE_GUARD ) ) {
-		tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
+		// send bullet impact
+	if (traceEnt->takedamage && (traceEnt->client) && !(traceEnt->flags & FL_DEFENSE_GUARD)) {
+		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
 		tent->s.eventParm = traceEnt->s.number;
-		if ( LogAccuracyHit( traceEnt, attacker ) ) {
+		if (LogAccuracyHit(traceEnt, attacker)) {
 			attacker->client->ps.persistant[PERS_ACCURACY_HITS]++;
 			// L0 - Stats
-			if (g_gamestate.integer == GS_PLAYING) {
-				attacker->client->pers.life_acc_hits++;
-				attacker->client->sess.acc_hits++;
-			}
-			// End
+			attacker->client->pers.life_acc_hits++;
+			attacker->client->sess.acc_hits++;
 		}
 
-//----(SA)	added
-		if ( g_debugBullets.integer >= 2 ) {   // show hit player bb
-			gentity_t *bboxEnt;
+		//----(SA)	added
+		if (g_debugBullets.integer >= 2) {	// show hit player bb
+			gentity_t* bboxEnt;
 			vec3_t b1, b2;
-			VectorCopy( traceEnt->r.currentOrigin, b1 );
-			VectorCopy( traceEnt->r.currentOrigin, b2 );
-			VectorAdd( b1, traceEnt->r.mins, b1 );
-			VectorAdd( b2, traceEnt->r.maxs, b2 );
-			bboxEnt = G_TempEntity( b1, EV_RAILTRAIL );
-			VectorCopy( b2, bboxEnt->s.origin2 );
-			bboxEnt->s.dmgFlags = 1;    // ("type")
+			VectorCopy(traceEnt->r.currentOrigin, b1);
+			VectorCopy(traceEnt->r.currentOrigin, b2);
+			VectorAdd(b1, traceEnt->r.mins, b1);
+			VectorAdd(b2, traceEnt->r.maxs, b2);
+			bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
+			VectorCopy(b2, bboxEnt->s.origin2);
+			bboxEnt->s.dmgFlags = 1;	// ("type")
+			bboxEnt->s.otherEntityNum2 = attacker->s.number;
 		}
-//----(SA)	end
+		//----(SA)	end
 
-	} else if ( traceEnt->takedamage && traceEnt->s.eType == ET_BAT ) {
-		tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
+	}
+	else if (traceEnt->takedamage && traceEnt->s.eType == ET_BAT) {
+		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
 		tent->s.eventParm = traceEnt->s.number;
-	} else {
+	}
+	else {
 		// Ridah, bullet impact should reflect off surface
-		vec3_t reflect;
-		float dot;
+		vec3_t	reflect;
+		float	dot;
 
-		if ( g_debugBullets.integer <= -2 ) {  // show hit thing bb
-			gentity_t *bboxEnt;
+		if (g_debugBullets.integer >= 4) {	// show hit thing bb
+			gentity_t* bboxEnt;
 			vec3_t b1, b2;
-			VectorCopy( traceEnt->r.currentOrigin, b1 );
-			VectorCopy( traceEnt->r.currentOrigin, b2 );
-			VectorAdd( b1, traceEnt->r.mins, b1 );
-			VectorAdd( b2, traceEnt->r.maxs, b2 );
-			bboxEnt = G_TempEntity( b1, EV_RAILTRAIL );
-			VectorCopy( b2, bboxEnt->s.origin2 );
-			bboxEnt->s.dmgFlags = 1;    // ("type")
+			VectorCopy(traceEnt->r.currentOrigin, b1);
+			VectorCopy(traceEnt->r.currentOrigin, b2);
+			VectorAdd(b1, traceEnt->r.mins, b1);
+			VectorAdd(b2, traceEnt->r.maxs, b2);
+			bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
+			VectorCopy(b2, bboxEnt->s.origin2);
+			bboxEnt->s.dmgFlags = 1;	// ("type")
+			bboxEnt->s.otherEntityNum2 = attacker->s.number;
 		}
 
-		if ( traceEnt->flags & FL_DEFENSE_GUARD ) {
+		if (traceEnt->flags & FL_DEFENSE_GUARD) {
 			// reflect off sheild
-			VectorSubtract( tr.endpos, traceEnt->r.currentOrigin, reflect );
-			VectorNormalize( reflect );
-			VectorMA( traceEnt->r.currentOrigin, 15, reflect, reflect );
-			tent = G_TempEntity( reflect, EV_BULLET_HIT_WALL );
-		} else {
-			tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_WALL );
+			VectorSubtract(tr.endpos, traceEnt->r.currentOrigin, reflect);
+			VectorNormalize(reflect);
+			VectorMA(traceEnt->r.currentOrigin, 15, reflect, reflect);
+			tent = G_TempEntity(reflect, EV_BULLET_HIT_WALL);
+		}
+		else {
+			tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_WALL);
 		}
 
-		dot = DotProduct( forward, tr.plane.normal );
-		VectorMA( forward, -2 * dot, tr.plane.normal, reflect );
-		VectorNormalize( reflect );
+		dot = DotProduct(forward, tr.plane.normal);
+		VectorMA(forward, -2 * dot, tr.plane.normal, reflect);
+		VectorNormalize(reflect);
 
-		tent->s.eventParm = DirToByte( reflect );
+		tent->s.eventParm = DirToByte(reflect);
 
-		if ( traceEnt->flags & FL_DEFENSE_GUARD ) {
-			tent->s.otherEntityNum2 = traceEnt->s.number;   // force sparks
-		} else {
+		if (traceEnt->flags & FL_DEFENSE_GUARD) {
+			tent->s.otherEntityNum2 = traceEnt->s.number;	// force sparks
+		}
+		else {
 			tent->s.otherEntityNum2 = ENTITYNUM_NONE;
 		}
 		// done.
 	}
 	tent->s.otherEntityNum = attacker->s.number;
 
-	if ( traceEnt->takedamage ) {
+	if (traceEnt->takedamage) {
 		qboolean reflectBool = qfalse;
-		vec3_t trDir;
+		vec3_t	trDir;
 
-		if ( traceEnt->flags & FL_DEFENSE_GUARD ) {
+		if (traceEnt->flags & FL_DEFENSE_GUARD) {
 			// if we are facing the direction the bullet came from, then reflect it
-			AngleVectors( traceEnt->s.apos.trBase, trDir, NULL, NULL );
-			if ( DotProduct( forward, trDir ) < 0.6 ) {
+			AngleVectors(traceEnt->s.apos.trBase, trDir, NULL, NULL);
+			if (DotProduct(forward, trDir) < 0.6) {
 				reflectBool = qtrue;
 			}
 		}
 
-		if ( reflectBool ) {
+		if (reflectBool) {
 			vec3_t reflect_end;
 			// reflect this bullet
-			G_AddEvent( traceEnt, EV_GENERAL_SOUND, level.bulletRicochetSound );
-			CalcMuzzlePoints( traceEnt, traceEnt->s.weapon );
+			G_AddEvent(traceEnt, EV_GENERAL_SOUND, level.bulletRicochetSound);
+			CalcMuzzlePoints(traceEnt, traceEnt->s.weapon);
 
-//----(SA)	modified to use extended version so attacker would pass through
-//			Bullet_Fire( traceEnt, 1000, damage );
-			Bullet_Endpos( traceEnt, spread, &reflect_end );
-			Bullet_Fire_Extended( traceEnt, attacker, muzzleTrace, reflect_end, spread, damage );
-//----(SA)	end
+			//----(SA)	modified to use extended version so attacker would pass through
+			//			Bullet_Fire( traceEnt, 1000, damage );
+			Bullet_Endpos(traceEnt, spread, &reflect_end);
+			Bullet_Fire_Extended(traceEnt, attacker, muzzleTrace, reflect_end, spread, damage);
+			//----(SA)	end
 
-		} else {
+		}
+		else {
+			vec3_t backwards;
+
 			// Ridah, don't hurt team-mates
 			// DHM - Nerve :: Only in single player
-			if ( attacker->client && traceEnt->client && g_gametype.integer == GT_SINGLE_PLAYER && ( traceEnt->r.svFlags & SVF_CASTAI ) && ( attacker->r.svFlags & SVF_CASTAI ) && AICast_SameTeam( AICast_GetCastState( attacker->s.number ), traceEnt->s.number ) ) {
+			if (attacker->client && traceEnt->client && g_gametype.integer == GT_SINGLE_PLAYER && (traceEnt->r.svFlags & SVF_CASTAI) && (attacker->r.svFlags & SVF_CASTAI) && AICast_SameTeam(AICast_GetCastState(attacker->s.number), traceEnt->s.number)) {
 				// AI's don't hurt members of their own team
 				return;
 			}
 			// done.
 
-			G_Damage( traceEnt, attacker, attacker, forward, tr.endpos, damage, 0, ammoTable[attacker->s.weapon].mod );
+			VectorSubtract(initial_start, tr.endpos, backwards);
+			VectorNormalize(backwards);
+			VectorMA(tr.endpos, 1, backwards, initial_start);
+			traceEnt->headshot = IsHeadshot(traceEnt, &head, initial_start, forward, ammoTable[attacker->s.weapon].mod);
 
-			// allow bullets to "pass through" func_explosives if they break by taking another simultanious shot
-			if ( Q_stricmp( traceEnt->classname, "func_explosive" ) == 0 ) {
-				if ( traceEnt->health <= damage ) {
-					// start new bullet at position this hit the bmodel and continue to the end position (ignoring shot-through bmodel in next trace)
-					// spread = 0 as this is an extension of an already spread shot
-					Bullet_Fire_Extended( traceEnt, attacker, tr.endpos, end, 0, damage );
-				}
+			if (head && g_debugBullets.integer >= 3) // show hit player head bb
+			{
+				gentity_t* bboxEnt;
+				vec3_t b1, b2;
+				VectorCopy(head->r.currentOrigin, b1);
+				VectorCopy(head->r.currentOrigin, b2);
+				VectorAdd(b1, head->r.mins, b1);
+				VectorAdd(b2, head->r.maxs, b2);
+				bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
+				VectorCopy(b2, bboxEnt->s.origin2);
+				bboxEnt->s.dmgFlags = 1;
+				bboxEnt->s.otherEntityNum2 = attacker->s.number;
 			}
 
+			G_Damage(traceEnt, attacker, attacker, forward, tr.endpos, damage, 0, ammoTable[attacker->s.weapon].mod);
+
+			traceEnt->headshot = qfalse;
+
+			// allow bullets to "pass through" func_explosives if they break by taking another simultanious shot
+			if (Q_stricmp(traceEnt->classname, "func_explosive") == 0) {
+				if (traceEnt->health <= damage) {
+					// start new bullet at position this hit the bmodel and continue to the end position (ignoring shot-through bmodel in next trace)
+					// spread = 0 as this is an extension of an already spread shot
+					Bullet_Fire_Extended(traceEnt, attacker, tr.endpos, end, 0, damage);
+				}
+			}
 		}
 	}
-	// nihi added below
-	// L0 - antilag
-	untimeshift:
-    if ( g_antilag.integer && attacker->client &&
-        !(attacker->r.svFlags & SVF_BOT) ) {
-        G_UnTimeShiftAllClients( attacker );
-    } // L0 - end
 }
-
-
+// sswolf - head stuff end
 
 /*
 ======================================================================
@@ -1994,13 +2322,17 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	VectorNormalize2( origin2, forward );
 	PerpendicularVector( right, forward );
 	CrossProduct( forward, right, up );
-	// nihi added below
+
+	// sswolf - leaving this intact
+
 	// L0 Antilag
     if ( g_antilag.integer && ent->client &&
         !(ent->r.svFlags & SVF_BOT) ) {
         G_TimeShiftAllClients( ent->client->pers.cmd.serverTime, ent );
     } // end
+
 	oldScore = ent->client->ps.persistant[PERS_SCORE];
+
 	// L0 - disable invincible time when player spawns and starts shooting
 	if (g_disableInv.integer)
 		ent->client->ps.powerups[PW_INVULNERABLE] = 0;
@@ -2019,8 +2351,9 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 		}
 
 	}
-		// nihi added below
-		// L0 - Antilag
+
+
+	// L0 - Antilag
     if ( g_antilag.integer && ent->client &&
         !(ent->r.svFlags & SVF_BOT) ) {
         G_UnTimeShiftAllClients( ent );
@@ -2117,6 +2450,10 @@ void Weapon_RocketLauncher_Fire( gentity_t *ent ) {
 	m->damage *= s_quadFactor;
 	m->splashDamage *= s_quadFactor;
 
+	if (g_gamestate.integer == GS_PLAYING) {  // add panzer attempts to accuracy
+		ent->client->pers.life_acc_shots++;
+		ent->client->sess.acc_shots++;
+	}
 //	VectorAdd( m->s.pos.trDelta, ent->client->ps.velocity, m->s.pos.trDelta );	// "real" physics
 }
 
@@ -2242,6 +2579,12 @@ LogAccuracyHit
 ===============
 */
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
+
+	// sswolf - patched
+	if (!LogAccuracyShot(target, attacker)) {
+		return qfalse;
+	}
+
 	if ( !target->takedamage ) {
 		return qfalse;
 	}

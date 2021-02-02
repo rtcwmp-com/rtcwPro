@@ -41,6 +41,7 @@ displayContextDef_t cgDC;
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
+qboolean CG_CheckExecKey(int key);
 
 /*
 ================
@@ -88,6 +89,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_GetTag( arg0, (char *)arg1, (orientation_t *)arg2 );
 	case CG_CHECKCENTERVIEW:
 		return CG_CheckCenterView();
+	case CG_CHECKEXECKEY:
+		return CG_CheckExecKey(arg0);
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -291,6 +294,8 @@ vmCvar_t cg_crosshairAlpha;
 vmCvar_t cg_crosshairAlphaAlt;
 vmCvar_t cg_crosshairColor;
 vmCvar_t cg_crosshairColorAlt;
+vmCvar_t cg_crosshairX;
+vmCvar_t cg_crosshairY;
 vmCvar_t cg_coloredCrosshairNames;
 vmCvar_t cg_drawWeaponIconFlash;
 vmCvar_t cg_printObjectiveInfo;
@@ -317,8 +322,13 @@ vmCvar_t cg_chatBackgroundColor;
 vmCvar_t cg_chatBeep;
 vmCvar_t cg_instantTapout;
 vmCvar_t cg_forceTapout;
-vmCvar_t cg_hitsounds;
+//vmCvar_t cg_hitsounds;
 vmCvar_t cg_uinfo;
+
+// draw speed
+vmCvar_t cg_drawSpeed;
+vmCvar_t cg_speedX;
+vmCvar_t cg_speedY;
 
 // Stats - Font scale
 vmCvar_t cf_wstats;
@@ -359,9 +369,12 @@ vmCvar_t int_sensitivity;
 vmCvar_t int_timescale;
 vmCvar_t int_ui_blackout;
 
-// added from et - nihi
+// added from et
 vmCvar_t cg_spawnTimer_set;         // spawntimer
 vmCvar_t cg_spawnTimer_period;      // spawntimer
+
+// added from et-legacy - crumbs
+vmCvar_t cg_tracers;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -577,8 +590,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE },
 	{ &ch_font, "ch_font", "0", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &cg_drawWeaponIconFlash, "cg_drawWeaponIconFlash", "0", CVAR_ARCHIVE },
-	{ &cg_hitsounds, "cg_hitsounds", "0", CVAR_ARCHIVE},
-//	{ &cg_hitsounds, "cg_hitsounds", "0", CVAR_ARCHIVE},
+	//{ &cg_hitsounds, "cg_hitsounds", "0", CVAR_ARCHIVE},
 	{ &cg_printObjectiveInfo, "cg_printObjectiveInfo", "1", CVAR_ARCHIVE },
 	{ &cg_muzzleFlash, "cg_muzzleFlash", "1", CVAR_ARCHIVE },
 	{ &cg_complaintPopUp, "cg_complaintPopUp", "1", CVAR_ARCHIVE },
@@ -610,6 +622,14 @@ cvarTable_t cvarTable[] = {
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
 	{ &cg_antilag, "g_antilag", "0", 0 },
+
+	// draw speed
+	{ &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },
+	{ &cg_speedX, "cg_speedX", "315", CVAR_ARCHIVE },
+	{ &cg_speedY, "cg_speedY", "340", CVAR_ARCHIVE },
+
+	// draw tracers
+	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -931,7 +951,9 @@ char *CG_generateFilename( void ) {
 
 // Console prints for stats
 void CG_printConsoleString( char *str ) {
-	CG_Printf( "[skipnotify]%s", str ); // keep skipnotify for current stat parser compatability
+	//CG_Printf( "[skipnotify]%s", str ); // keep skipnotify for current stat parser compatability
+    CG_Printf( "%s", str ); // remove skipnotify  for CP
+
 }
 // End
 
@@ -1104,13 +1126,13 @@ static void CG_RegisterSounds( void ) {
 //	cgs.media.teleInSound = trap_S_RegisterSound( "sound/world/telein.wav" );
 //	cgs.media.teleOutSound = trap_S_RegisterSound( "sound/world/teleout.wav" );
 //	cgs.media.respawnSound = trap_S_RegisterSound( "sound/items/respawn1.wav" );
-    cgs.media.prepFight = trap_S_RegisterSound( "sound/match/prepare.wav" ); //---- nihi added
-    cgs.media.count1Sound = trap_S_RegisterSound( "sound/match/cn_1.wav" ); //---- nihi added
-    cgs.media.count2Sound = trap_S_RegisterSound( "sound/match/cn_2.wav" ); //---- nihi added
-	cgs.media.count3Sound = trap_S_RegisterSound("sound/match/cn_3.wav"); //---- nihi added
-	cgs.media.count4Sound = trap_S_RegisterSound("sound/match/cn_4.wav"); //---- nihi added
-	cgs.media.count5Sound = trap_S_RegisterSound("sound/match/cn_5.wav"); //---- nihi added
-    cgs.media.announceFight = trap_S_RegisterSound( "sound/match/fight.wav" ); //---- nihi added
+    cgs.media.prepFight = trap_S_RegisterSound( "sound/match/prepare.wav" );
+    cgs.media.count1Sound = trap_S_RegisterSound( "sound/match/cn_1.wav" );
+    cgs.media.count2Sound = trap_S_RegisterSound( "sound/match/cn_2.wav" );
+	cgs.media.count3Sound = trap_S_RegisterSound("sound/match/cn_3.wav");
+	cgs.media.count4Sound = trap_S_RegisterSound("sound/match/cn_4.wav");
+	cgs.media.count5Sound = trap_S_RegisterSound("sound/match/cn_5.wav");
+    cgs.media.announceFight = trap_S_RegisterSound( "sound/match/fight.wav" );
 	cgs.media.grenadebounce1 = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb1a.wav" );
 	cgs.media.grenadebounce2 = trap_S_RegisterSound( "sound/weapons/grenade/hgrenb2a.wav" );
 
@@ -1316,9 +1338,9 @@ static void CG_RegisterSounds( void ) {
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// Hitsounds
-	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
+	/*cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
 	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
-	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
+	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );*/
 	// chats
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");
@@ -1524,8 +1546,8 @@ static void CG_RegisterGraphics( void ) {
 //----(SA)	end
 
 	for ( i = 0 ; i < NUM_CROSSHAIRS ; i++ ) {
-		cgs.media.crosshairShader[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_OSPx", 'a' + i ) );
-		cg.crosshairShaderAlt[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_alt_OSPx", 'a' + i ) );
+		cgs.media.crosshairShader[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_rtcwpro", 'a' + i ) );
+		cg.crosshairShaderAlt[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_alt_rtcwpro", 'a' + i ) );
 	}
 
 	// L0 - Charset
@@ -2744,3 +2766,13 @@ void CG_Shutdown( void ) {
 	cvarsLoaded = qfalse;
 }
 
+/*
+=================
+CG_CheckExecKey
+
+L0 - we'll need this later on ..
+=================
+*/
+qboolean CG_CheckExecKey(int key) {
+	return qfalse;
+}

@@ -70,12 +70,21 @@ cvar_t  *sv_maxlives;           // NERVE - SMF
 cvar_t  *sv_tourney;            // NERVE - SMF
 
 cvar_t *sv_dl_maxRate;
-
+cvar_t  *sv_dlRate;
+cvar_t	*sv_minRate;
+cvar_t  *sv_maxRate;
 // Rafael gameskill
 cvar_t  *sv_gameskill;
 // done
 
 cvar_t  *sv_showAverageBPS;     // NERVE - SMF - net debugging
+
+// Anti-Wallhack
+cvar_t* wh_active;
+cvar_t* wh_bbox_horz;
+cvar_t* wh_bbox_vert;
+cvar_t* wh_add_xy;
+cvar_t* wh_check_fov;
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
@@ -362,6 +371,30 @@ CONNECTIONLESS COMMANDS
 */
 
 /*
+===============
+SV_VerifyChallenge
+===============
+*/
+qboolean SV_VerifyChallenge(char* challenge) {
+	int i, j;
+
+	if (!challenge) {
+		return qfalse;
+	}
+
+	j = strlen(challenge);
+	if (j > 64) {
+		return qfalse;
+	}
+	for (i = 0; i < j; i++) {
+		if (challenge[i] == '\\' || challenge[i] == '/' || challenge[i] == '%' || challenge[i] == ';' || challenge[i] == '"' || challenge[i] < 32 || /*// non-ascii */ challenge[i] > 126) { // non-ascii
+			return qfalse;
+		}
+	}
+	return qtrue;
+}
+
+/*
 ================
 SVC_Status
 
@@ -384,6 +417,11 @@ void SVC_Status( netadr_t from ) {
 	if ( Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER ) {
 		return;
 	}
+
+	if (!SV_VerifyChallenge(Cmd_Argv(1))) {
+		return;
+	}
+
 
 	// DHM - Nerve
 #ifdef UPDATE_SERVER
@@ -509,6 +547,10 @@ void SVC_Info( netadr_t from ) {
 		return;
 	}
 
+	if (!SV_VerifyChallenge(Cmd_Argv(1))) {
+		return;
+	}
+
 	// don't count privateclients
 	count = 0;
 	for ( i = sv_privateClients->integer ; i < sv_maxclients->integer ; i++ ) {
@@ -619,6 +661,130 @@ void SV_FlushRedirect( char *outputbuf ) {
 
 /*
 ===============
+SV_CheckDRDoS
+
+Returns false if we're good.  true return value means we need to block.
+If the address isn't NA_IP, it's automatically denied.
+===============
+*/
+qboolean SV_CheckDRDoS(netadr_t from) {
+	int             i, oldestBan, oldestBanTime, globalCount, specificCount, oldest, oldestTime;
+	receipt_t* receipt;
+	netadr_t        exactFrom;
+	floodBan_t* ban;
+	static int      lastGlobalLogTime = 0;
+
+	// Usually the network is smart enough to not allow incoming UDP packets
+	// with a source address being a spoofed LAN address.  Even if that's not
+	// the case, sending packets to other hosts in the LAN is not a big deal.
+	// NA_LOOPBACK qualifies as a LAN address.
+#ifndef _DEBUG
+	if (Sys_IsLANAddress(from)) {
+		return qfalse;
+	}
+#endif
+
+	exactFrom = from;
+	if (from.type == NA_IP) {
+		from.ip[3] = 0; // xx.xx.xx.0
+	}
+	// L0 - FIXME - commented out since there's no ipv6 atm..
+	/*
+	else {
+		from.ip6[15] = 0;
+	}
+	*/
+
+	// This quick exit strategy while we're being bombarded by getinfo/getstatus requests
+	// directed at a specific IP address doesn't really impact server performance.
+	// The code below does its duty very quickly if we're handling a flood packet.
+	ban = &svs.infoFloodBans[0];
+	oldestBan = 0;
+	oldestBanTime = 0x7fffffff;
+	for (i = 0; i < MAX_INFO_FLOOD_BANS; i++, ban++) {
+		if (svs.time - ban->time < 120000 && // Two minute ban.
+			NET_CompareBaseAdr(from, ban->adr)) {
+			ban->count++;
+			if (!ban->flood && ((svs.time - ban->time) >= 3000) && ban->count <= 5) {
+				Com_DPrintf("Unban info flood protect for address %s, they're not flooding\n", NET_AdrToString(exactFrom));
+				Com_Memset(ban, 0, sizeof(floodBan_t));
+				oldestBan = i;
+				break;
+			}
+			if (ban->count >= 180) {
+				Com_DPrintf("Renewing info flood ban for address %s, received %i getinfo/getstatus requests in %i milliseconds\n", NET_AdrToString(exactFrom), ban->count, svs.time - ban->time);
+				ban->time = svs.time;
+				ban->count = 0;
+				ban->flood = qtrue;
+			}
+			return qtrue;
+		}
+		if (ban->time < oldestBanTime) {
+			oldestBanTime = ban->time;
+			oldestBan = i;
+		}
+	}
+
+	// Count receipts in last 2 seconds.
+	globalCount = 0;
+	specificCount = 0;
+	receipt = &svs.infoReceipts[0];
+	oldest = 0;
+	oldestTime = 0x7fffffff;
+	for (i = 0; i < MAX_INFO_RECEIPTS; i++, receipt++) {
+		if (receipt->time + 1400 > svs.time) {
+			if (receipt->time) {
+				// When the server starts, all receipt times are at zero.  Furthermore,
+				// svs.time is close to zero.  We check that the receipt time is already
+				// set so that during the first two seconds after server starts, queries
+				// from the master servers don't get ignored.  As a consequence a potentially
+				// unlimited number of getinfo+getstatus responses may be sent during the
+				// first frame of a server's life.
+				globalCount++;
+			}
+			if (NET_CompareBaseAdr(from, receipt->adr)) {
+				specificCount++;
+			}
+		}
+		if (receipt->time < oldestTime) {
+			oldestTime = receipt->time;
+			oldest = i;
+		}
+	}
+
+	if (specificCount >= 8) { // Already sent 8 to this IP in last 1.4 seconds.
+		Com_Printf("Possible server flood attempt detected (from address %s). Server is ignoring any requests from this address for the next 2 minutes.\n", NET_AdrToString(exactFrom));
+		ban = &svs.infoFloodBans[oldestBan];
+		ban->adr = from;
+		ban->time = svs.time;
+		ban->count = 0;
+		ban->flood = qfalse;
+		return qtrue;
+	}
+
+	if (globalCount == MAX_INFO_RECEIPTS) { // All receipts happened in last 1.4 seconds.
+		// Detect time wrap where the server sets time back to zero.  Problem
+		// is that we're using a static variable here that doesn't get zeroed out when
+		// the time wraps.  TTimo's way of doing this is casting everything including
+		// the difference to unsigned int, but I think that's confusing to the programmer.
+		if (svs.time < lastGlobalLogTime) {
+			lastGlobalLogTime = 0;
+		}
+		if (lastGlobalLogTime + 1000 <= svs.time) { // Limit one log every second.
+			Com_Printf("Detected flood of arbitrary getinfo/getstatus connectionless packets\n");
+			lastGlobalLogTime = svs.time;
+		}
+		return qtrue;
+	}
+
+	receipt = &svs.infoReceipts[oldest];
+	receipt->adr = from;
+	receipt->time = svs.time;
+	return qfalse;
+}
+
+/*
+===============
 SVC_RemoteCommand
 
 An rcon packet arrived from the network.
@@ -724,8 +890,14 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	Com_DPrintf( "SV packet %s : %s\n", NET_AdrToString( from ), c );
 
 	if ( !Q_stricmp( c,"getstatus" ) ) {
+		if (SV_CheckDRDoS(from)) {
+			return; 
+		}
 		SVC_Status( from  );
 	} else if ( !Q_stricmp( c,"getinfo" ) ) {
+		if (SV_CheckDRDoS(from)) {
+			return;
+		}
 		SVC_Info( from );
 	} else if ( !Q_stricmp( c,"getchallenge" ) ) {
 		SV_GetChallenge( from );
@@ -734,6 +906,9 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	} else if ( !Q_stricmp( c,"ipAuthorize" ) ) {
 		SV_AuthorizeIpPacket( from );
 	} else if ( !Q_stricmp( c, "rcon" ) ) {
+		if (SV_CheckDRDoS(from)) {
+			return;
+		}
 		SVC_RemoteCommand( from, msg );
 // DHM - Nerve
 #ifdef UPDATE_SERVER
@@ -1073,7 +1248,6 @@ void SV_Frame( int msec ) {
 	while ( sv.timeResidual >= frameMsec ) {
 		sv.timeResidual -= frameMsec;
 		svs.time += frameMsec;
-
 		// let everything in the world think and move
 #ifndef UPDATE_SERVER
 		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
@@ -1115,5 +1289,133 @@ int SV_FrameMsec()
 	else
 		return 1;
 }
+#ifndef _WIN32
+/*
+====================
+SV_RateMsec
 
+Return the number of msec until another message can be sent to
+a client based on its rate settings
+====================
+*/
+
+#define UDPIP_HEADER_SIZE 28
+#define UDPIP6_HEADER_SIZE 48
+
+int SV_RateMsec(client_t *client)
+{
+	int rate, rateMsec;
+	int messageSize;
+
+	messageSize = client->netchan.lastSentSize;
+	rate = client->rate;
+
+	if(sv_maxRate->integer)
+	{
+		if(sv_maxRate->integer < 1000)
+			Cvar_Set( "sv_MaxRate", "1000" );
+		if(sv_maxRate->integer < rate)
+			rate = sv_maxRate->integer;
+	}
+
+	if(sv_minRate->integer)
+	{
+		if(sv_minRate->integer < 1000)
+			Cvar_Set("sv_minRate", "1000");
+		if(sv_minRate->integer > rate)
+			rate = sv_minRate->integer;
+	}
+
+	messageSize += UDPIP_HEADER_SIZE;
+
+	rateMsec = messageSize * 1000 / ((int) (rate * com_timescale->value));
+	rate = Sys_Milliseconds() - client->netchan.lastSentTime;
+
+	if(rate > rateMsec)
+		return 0;
+	else
+		return rateMsec - rate;
+}
+
+
+/*
+====================
+SV_SendQueuedPackets
+
+Send download messages and queued packets in the time that we're idle, i.e.
+not computing a server frame or sending client snapshots.
+Return the time in msec until we expect to be called next
+====================
+*/
+
+int SV_SendQueuedPackets(void)
+{
+	int numBlocks;
+	int dlStart, deltaT, delayT;
+	static int dlNextRound = 0;
+	int timeVal = INT_MAX;
+
+	// Send out fragmented packets now that we're idle
+	delayT = SV_SendQueuedMessages();
+	if(delayT >= 0)
+		timeVal = delayT;
+
+	if(sv_dlRate->integer)
+	{
+		// Rate limiting. This is very imprecise for high
+		// download rates due to millisecond timedelta resolution
+		dlStart = Sys_Milliseconds();
+		deltaT = dlNextRound - dlStart;
+
+		if(deltaT > 0)
+		{
+			if(deltaT < timeVal)
+				timeVal = deltaT + 1;
+		}
+		else
+		{
+			numBlocks = SV_SendDownloadMessages();
+
+			if(numBlocks)
+			{
+				// There are active downloads
+				deltaT = Sys_Milliseconds() - dlStart;
+
+				delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
+				delayT /= sv_dlRate->integer * 1024;
+
+				if(delayT <= deltaT + 1)
+				{
+					// Sending the last round of download messages
+					// took too long for given rate, don't wait for
+					// next round, but always enforce a 1ms delay
+					// between DL message rounds so we don't hog
+					// all of the bandwidth. This will result in an
+					// effective maximum rate of 1MB/s per user, but the
+					// low download window size limits this anyways.
+					if(timeVal > 2)
+						timeVal = 2;
+
+					dlNextRound = dlStart + deltaT + 1;
+				}
+				else
+				{
+					dlNextRound = dlStart + delayT;
+					delayT -= deltaT;
+
+					if(delayT < timeVal)
+						timeVal = delayT;
+				}
+			}
+		}
+	}
+	else
+	{
+		if(SV_SendDownloadMessages())
+			timeVal = 0;
+	}
+
+	return timeVal;
+}
+#endif
 //============================================================================

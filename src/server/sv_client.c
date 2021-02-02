@@ -270,6 +270,10 @@ void SV_DirectConnect( netadr_t from ) {
 
 	Q_strncpyz( userinfo, Cmd_Argv( 1 ), sizeof( userinfo ) );
 
+	if (SV_CheckDRDoS(from)) {
+		return;
+	} 
+
 	// DHM - Nerve :: Update Server allows any protocol to connect
 #ifndef UPDATE_SERVER
 	version = atoi( Info_ValueForKey( userinfo, "protocol" ) );
@@ -658,7 +662,10 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 
 	client->deltaMessage = -1;
 	client->nextSnapshotTime = svs.time;    // generate a snapshot immediately
-	client->lastUsercmd = *cmd;
+	if (cmd)
+		memcpy(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
+	else
+		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
 
 	// call the game begin function
 	VM_Call( gvm, GAME_CLIENT_BEGIN, client - svs.clients );
@@ -974,7 +981,39 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 
 	return 1;
 }
+/*
+==================
+SV_SendQueuedMessages
 
+Send one round of fragments, or queued messages to all clients that have data pending.
+Return the shortest time interval for sending next packet to client
+==================
+*/
+#ifndef _WIN32
+int SV_SendQueuedMessages(void)
+{
+	int i, retval = -1, nextFragT;
+	client_t *cl;
+
+	for(i=0; i < sv_maxclients->integer; i++)
+	{
+		cl = &svs.clients[i];
+
+		if(cl->state)
+		{
+			nextFragT = SV_RateMsec(cl);
+
+			if(!nextFragT)
+				nextFragT = SV_Netchan_TransmitNextFragment(cl);
+
+			if(nextFragT >= 0 && (retval == -1 || retval > nextFragT))
+				retval = nextFragT;
+		}
+	}
+
+	return retval;
+}
+#endif
 /*
 ==================
 SV_SendDownloadMessages

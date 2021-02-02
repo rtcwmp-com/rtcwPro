@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -384,14 +384,14 @@ void CG_CalcMoveSpeeds( clientInfo_t *ci ) {
 				} else {
 					low = 1;
 				}
-				totalSpeed += fabs( oldPos[low][2] - o[low].origin[2] );
+				totalSpeed += Q_fabs( oldPos[low][2] - o[low].origin[2] );
 			} else {
 				if ( o[0].origin[2] < o[1].origin[2] ) {
 					low = 0;
 				} else {
 					low = 1;
 				}
-				totalSpeed += fabs( oldPos[low][0] - o[low].origin[0] );
+				totalSpeed += Q_fabs( oldPos[low][0] - o[low].origin[0] );
 			}
 
 			numSpeed++;
@@ -1208,13 +1208,14 @@ void CG_NewClientInfo( int clientNum ) {
 			const char *info = CG_ConfigString(CS_SERVERINFO);
 
 			trap_Cvar_Set("cg_ui_voteFlags", Info_ValueForKey(info, "voteFlags"));
-			CG_Printf("[cgnotify]^3*** You have been stripped of your referee status! ***\n");
+			char *str = "^3*** ^1You have been stripped of your referee status! ^3***\n";
+			//CG_PopinPrint(str, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH, qfalse);
+			CPri(str);
 
 		}
 		else {
 			trap_Cvar_Set("cg_ui_voteFlags", "0");
-			CG_Printf("[cgnotify]^2*** You have been authorized \"%s\" status ***\n", ((newInfo.refStatus == RL_RCON) ? "rcon" : "referee"));
-			CG_Printf("Type: ^3ref^7 (by itself) for a list of referee commands.\n");
+			// don't print a message as the MakeRef code already does a center print
 		}
 	}
 
@@ -1790,7 +1791,7 @@ static void CG_SwingAngles( float destination, float swingTolerance, float clamp
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract( destination, *angle );
-	scale = fabs( swing );
+	scale = Q_fabs( swing );
 	scale *= 0.05;
 	if ( scale < 0.5 ) {
 		scale = 0.5;
@@ -1901,11 +1902,11 @@ static void CG_AddPainTwitch( centity_t *cent, vec3_t torsoAngles ) {
 		f = (float)t / duration;
 		if ( f < FADEIN_RATIO ) {
 			torsoAngles[ROLL] += ( 0.5 * direction * ( f * ( 1.0 / FADEIN_RATIO ) ) );
-			torsoAngles[PITCH] -= ( fabs( direction ) * ( f * ( 1.0 / FADEIN_RATIO ) ) );
+			torsoAngles[PITCH] -= ( Q_fabs( direction ) * ( f * ( 1.0 / FADEIN_RATIO ) ) );
 			torsoAngles[YAW] += ( direction * ( f * ( 1.0 / FADEIN_RATIO ) ) );
 		} else {
 			torsoAngles[ROLL] += ( 0.5 * direction * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
-			torsoAngles[PITCH] -= ( fabs( direction ) * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
+			torsoAngles[PITCH] -= ( Q_fabs( direction ) * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
 			torsoAngles[YAW] += ( direction * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
 		}
 	} else {    // fast, Q3 style
@@ -1996,7 +1997,7 @@ static void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], v
 			clampTolerance = 90;
 		} else {    // must be firing
 			torsoAngles[YAW] = headAngles[YAW]; // always face firing direction
-			//if (fabs(cent->currentState.angles2[YAW]) > 30)
+			//if (Q_fabs(cent->currentState.angles2[YAW]) > 30)
 			//	legsAngles[YAW] = headAngles[YAW];
 			clampTolerance = 60;
 		}
@@ -2083,12 +2084,12 @@ CG_HasteTrail
 static void CG_HasteTrail( centity_t *cent ) {
 	localEntity_t   *smoke;
 	vec3_t origin;
-	int anim; 
+	int anim;
 
 	if ( cent->trailTime > cg.time ) {
 		return;
 	}
-	anim = cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT; 
+	anim = cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT;
 // RF, this is all broken by scripting system
 //	if ( anim != LEGS_RUN && anim != LEGS_BACK ) {
 //		return;
@@ -2864,7 +2865,7 @@ void CG_Player( centity_t *cent ) {
 
 	shadow = qfalse;                                                // gjd added to make sure it was initialized
 	shadowPlane = 0.0;                                              // ditto
-//	VectorCopy( vec3_origin, playerOrigin );    // nihi commented
+//	VectorCopy( vec3_origin, playerOrigin );
 
 	// if set to invisible, skip
 	if ( cent->currentState.eFlags & EF_NODRAW ) {
@@ -2985,7 +2986,7 @@ void CG_Player( centity_t *cent ) {
 
 	// sswolf - complete OSP demo features
 	// L0 - Keeping this in for demo preview..
-	if (cg.demoPlayback && cgs.wallhack) 
+	if (cg.demoPlayback && cgs.wallhack)
 	{
 		if (cent->currentState.number != cg.snap->ps.clientNum)
 			renderfx = RF_DEPTHHACK;

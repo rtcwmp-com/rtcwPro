@@ -543,7 +543,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
 /*	if ( g_gamestate.integer != GS_PLAYING ) {
 		return;
 	}
-	*/     // nihi commented to allow \kill during warmups
+	*/
 	if ( g_gametype.integer >= GT_WOLF && ent->client->ps.pm_flags & PMF_LIMBO ) {
 		return;
 	}
@@ -554,7 +554,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
 //	player_die( ent, ent, ent, 100000, MOD_SUICIDE );
 
     player_die( ent, ent, ent, dmg, MOD_SUICIDE );
-	if (g_gamestate.integer == GS_PLAYING) ent->client->sess.suicides++;	// L0 - Record it here..as it's easier.. // nihi added
+	if (g_gamestate.integer == GS_PLAYING) ent->client->sess.suicides++;	// L0 - Record it here..as it's easier..
 }
 
 
@@ -569,6 +569,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	int clientNum;
 	spectatorState_t specState;
 	int specClient;
+
+	if (level.paused != PAUSE_NONE && !forced) {
+		CP("cp \"^3You cannot switch teams during Pause!\n\"2");
+		return;
+	}
 
 	//
 	// see what change is requested
@@ -688,7 +693,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 								"cp \"You can't switch teams because you are out of lives.\n\" 3" );
 		return; // ignore the request
 	}
-// nihi commented below
+
 /*
 	// DHM - Nerve :: Force players to wait 30 seconds before they can join a new team.
 	if ( g_gametype.integer >= GT_WOLF && team != oldTeam && level.warmupTime == 0 && !client->pers.initialSpawn
@@ -742,6 +747,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 		client->sess.spectatorTime = level.time;
 	}
 
+	// if a player changes teams (not from spectator) make sure round does not start
+	if (oldTeam != TEAM_SPECTATOR && g_tournament.integer) {
+		G_readyResetOnPlayerLeave(oldTeam);
+	}
+
 	client->sess.specLocked = 0;
 	client->sess.sessionTeam = team;
 	client->sess.spectatorState = specState;
@@ -761,7 +771,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	}
 
 	// L0 - connect message
-	CP(va( "cp \"%s\n\"2", g_serverMessage.string));
+	//CP(va( "cp \"%s\n\"2", g_serverMessage.string));  // moved to g_client
 
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
@@ -899,7 +909,8 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// OSPx - Et port..
-	if (ent->client->ps.pm_flags & PMF_LIMBO) {
+	if (ent->client->ps.pm_flags & PMF_LIMBO && ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	{
 		CP("print \"Can't issue a follow command while in limbo.\n\"");
 		CP("print \"Hit FIRE to switch between teammates.\n\"");
 		return;
@@ -980,9 +991,9 @@ Cmd_FollowCycle_f
 void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 	int clientnum;
 	int original;
-   // nihi added below
+
 	// L0 - Pause
-	if (level.paused != PAUSE_NONE)
+	if (level.paused != PAUSE_NONE && ent->client->sess.sessionTeam != TEAM_SPECTATOR)  //added to allow spectators to cycle during pause
 		return;
 //end
 	// if they are playing a tournement game, count as a loss
@@ -997,7 +1008,6 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 	if ( dir != 1 && dir != -1 ) {
 		G_Error( "Cmd_FollowCycle_f: bad dir %i", dir );
 	}
-    // nihi added below
 	// if dedicated follow client, just switch between the two auto clients
 	if (ent->client->sess.spectatorClient < 0) {
 		if (ent->client->sess.spectatorClient == -1) {
@@ -1031,11 +1041,16 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		}
 
 // JPW NERVE -- couple extra checks for limbo mode
-		if ( ent->client->ps.pm_flags & PMF_LIMBO ) {
-			if ( level.clients[clientnum].ps.pm_flags & PMF_LIMBO ) {
+		if (ent->client->ps.pm_flags & PMF_LIMBO)
+		{
+			if (level.clients[clientnum].ps.pm_flags & PMF_LIMBO)
+			{
 				continue;
 			}
-			if ( level.clients[clientnum].sess.sessionTeam != ent->client->sess.sessionTeam ) {
+
+			if (level.clients[clientnum].sess.sessionTeam != ent->client->sess.sessionTeam &&
+				ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+			{
 				continue;
 			}
 		}
@@ -1046,7 +1061,6 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 				continue;
 			}
 		}
- 		  // nihi added below
 		// OSP
 		if ( !G_desiredFollow( ent, level.clients[clientnum].sess.sessionTeam ) ) {
 			continue;
@@ -1136,6 +1150,15 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 
 	// Admin commands
 	Q_strncpyz ( text, chatText, sizeof( text ) );
+
+	// L0 - Not sure if 1.4 has this fixed but i'm lazy.. so check for the Nuke
+	if (strlen(text) >= 700) {
+		trap_SendServerCommand(-1, va("chat \"console: %s ^7kicked: ^3Nuking^7.\n\"", ent->client->pers.netname));
+		G_LogPrintf("Nuking(text >= 700): %s  (Guid: %s).\n", ent->client->pers.netname, ent->client->sess.guid);
+		trap_DropClient(ent - g_entities, "^7Player Kicked: ^3Nuking");
+		return;
+	}
+
 	if ( !ent->client->sess.admin == ADM_NONE ) {
 		// Command
 		if ( text[0] == '!' ){
@@ -1166,8 +1189,6 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 			CP( "print \"You are ^zpermanently ^7ignored^1!\n\"" );
 		return;
 	} // End
-
-
 
 	// L0 - Deal with Admin tags..
 	if (!ent->client->sess.incognito) {
@@ -1354,6 +1375,14 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, qbool
 
 	if ( g_gametype.integer < GT_TEAM && mode == SAY_TEAM ) {
 		mode = SAY_ALL;
+	}
+
+	// L0 - Not sure if 1.4 has this fixed but i'm lazy.. so check for the Nuke
+	if (strlen(id) >= 700) {
+		trap_SendServerCommand(-1, va("chat \"console: %s ^7kicked: ^3Nuking^7.\n\"", ent->client->pers.netname));
+		G_LogPrintf("Nuking(voice >= 700): %s  (Guid: %s).\n", ent->client->pers.netname, ent->client->sess.guid);
+		trap_DropClient(ent - g_entities, "^7Player Kicked: ^3Nuking");
+		return;
 	}
 
 	// DHM - Nerve :: Don't allow excessive spamming of voice chats
@@ -1561,26 +1590,6 @@ static char *gc_orders[] = {
 	"report"
 };
 
-void Cmd_GameCommand_f( gentity_t *ent ) {
-	int player;
-	int order;
-	char str[MAX_TOKEN_CHARS];
-
-	trap_Argv( 1, str, sizeof( str ) );
-	player = atoi( str );
-	trap_Argv( 2, str, sizeof( str ) );
-	order = atoi( str );
-
-	if ( player < 0 || player >= MAX_CLIENTS ) {
-		return;
-	}
-	if ( order < 0 || order > sizeof( gc_orders ) / sizeof( char * ) ) {
-		return;
-	}
-	G_Say( ent, &g_entities[player], SAY_TELL, gc_orders[order] );
-	G_Say( ent, ent, SAY_TELL, gc_orders[order] );
-}
-
 /*
 ==================
 Cmd_Where_f
@@ -1612,6 +1621,8 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	int i;
 	char arg1[MAX_STRING_TOKENS];
 	char arg2[MAX_STRING_TOKENS];
+	char* c;
+	char* strCmdBase = (!fRefCommand)?"vote":"ref command";
 
 	// Normal checks, if its not being issued as a referee command
 	if (!fRefCommand) {
@@ -1643,13 +1654,17 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	trap_Argv(1, arg1, sizeof(arg1));
 	trap_Argv(2, arg2, sizeof(arg2));
 
-	if (strchr(arg1, ';') || strchr(arg2, ';')) {
-		char *strCmdBase = (!fRefCommand) ? "vote" : "ref command";
-
-		G_refPrintf(ent, "Invalid %s string.", strCmdBase);
-		return(qfalse);
+	// L0 - ioquake callvote exploit fix 
+	for (c = arg2; *c; ++c) {
+		switch (*c) {
+			case '\n':
+			case '\r':
+			case ';':
+			G_refPrintf(ent, "Invalid %s string.", strCmdBase);
+			return(qfalse);
+			break;
+		}
 	}
-
 
 	if (trap_Argc() > 1 && (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND) {   //  --OSP
 		if (i != G_OK) {
@@ -2702,8 +2717,8 @@ void ClientCommand( int clientNum ) {
 // -OSPx
 	} else if ( Q_stricmp( cmd, "gib" ) == 0 )  {
 		Cmd_Gib_f( ent );
-	} else if (Q_stricmp(cmd, "hitsound") == 0) {
-		Cmd_hitsounds(ent);
+	/*} else if (Q_stricmp(cmd, "hitsound") == 0) {
+		Cmd_hitsounds(ent);*/
 	// End
 	} else if ( Q_stricmp( cmd, "levelshot" ) == 0 )  {
 		Cmd_LevelShot_f( ent );
@@ -2722,16 +2737,13 @@ void ClientCommand( int clientNum ) {
 		Cmd_CallVote_f( ent, qfalse);
 	} else if ( Q_stricmp( cmd, "vote" ) == 0 )  {
 		Cmd_Vote_f( ent );
-	} else if ( Q_stricmp( cmd, "gc" ) == 0 )  {
-		Cmd_GameCommand_f( ent );
-	}
 //	else if (Q_stricmp (cmd, "startCamera") == 0)
 //		Cmd_StartCamera_f( ent );
 //	else if (Q_stricmp (cmd, "stopCamera") == 0)
 //		Cmd_StopCamera_f( ent );
 //	else if (Q_stricmp (cmd, "setCameraOrigin") == 0)
 //		Cmd_SetCameraOrigin_f( ent );
-	else if ( Q_stricmp( cmd, "setviewpos" ) == 0 ) {
+	} else if ( Q_stricmp( cmd, "setviewpos" ) == 0 ) {
 		Cmd_SetViewpos_f( ent );
 	} else if ( Q_stricmp( cmd, "entitycount" ) == 0 )  {
 		Cmd_EntityCount_f( ent );
@@ -2905,19 +2917,12 @@ void G_commands_cmd(gentity_t *ent)
  * @param dwCommand - unused
  * @param fValue - unused
  */
-void G_commandsHelp_cmd(gentity_t *ent)
-{
-	int i, rows, num_cmds = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]) - 1;
-
+void G_commandsHelp_cmd(gentity_t *ent) {
+	int i, num_cmds = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]) - 1;
 
 	CP("print \"^5\nAvailable Game Commands:\n------------------------\n\"");
-	for (i = 0; i < num_cmds; i++)
-	{
+	for (i = 0; i < num_cmds; i++) {
 		CP(va("print \"^3%s%s\n\"", aCommandInfo[i].pszCommandName, aCommandInfo[i].pszHelpInfo));
 
-
-
 	}
-
-	//CP("print \"\nType: ^3\\command_name ?^7 for more information\n\"");
 }

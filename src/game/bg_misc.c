@@ -51,6 +51,7 @@ extern vmCvar_t g_gametype;
 #define MAX_AMMO_45     32		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_9MM    32		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_MP40	96		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_STEN	96		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_THOM	90		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_PANZ   3		// RtcwPro - modified for AddMagicAmmo
 #define MAX_AMMO_VENOM  1000
@@ -140,7 +141,7 @@ ammotable_t ammoTable[] = {
 
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42SCOPE           },  //	WP_FG42SCOPE			// 23
 	{   MAX_AMMO_BAR,   1,      20,     2000,   DELAY_LOW,      90,     0,      0,      MOD_BAR                 },  //	WP_BAR2					// 24
-	{   MAX_AMMO_9MM,   1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
+	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
 	{   3,              1,      1,      1500,   50,             1000,   0,      0,      MOD_SYRINGE             },  //	WP_MEDIC_SYRINGE		// 26 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_AMMO,               },  //	WP_AMMO					// 27 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_ARTY,               },  //	WP_ARTY
@@ -3405,7 +3406,6 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 	int needsAmmo = qfalse;
 	int maxammo;
 	int clip;
-	int weapNumOfClips;
 
 	// Gordon: handle grenades first
 	i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS]);
@@ -3533,7 +3533,7 @@ This needs to be the same for client side prediction and server use.
 qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *ps ) {
 	gitem_t *item;
 	int ammoweap,weapbank;     // JPW NERVE
-// nihi
+
 // L0 - unlockWeapons
 #ifdef GAMEDLL
 		extern vmCvar_t g_unlockWeapons;
@@ -3570,7 +3570,7 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	// End
 
 	// JPW NERVE -- medics & engineers can only pick up same weapon type
-		
+
 			if (item->giTag == WP_AMMO) // magic ammo for any two-handed weapon
 			{
 				return BG_AddMagicAmmo((playerState_t*)ps, ps->persistant[PERS_TEAM]); // RtcwPro - check to see if player needs the ammo (ET Port)
@@ -4365,6 +4365,79 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
 	}
 
 	trap_Cvar_Set(cvarName, "White");
+}
+
+/*
+===============
+sswolf - because I'm lazy
+
+BG_ParseColorCvar
+Reads RBG(A) cvars and sets parsed color var components
+===============
+*/
+void BG_ParseColorCvar(char* cvarString, float* color) {
+	char* s = cvarString;
+	unsigned int i = 0;
+
+	// white in case we have no good format
+	Vector4Copy(colorWhite, color);
+
+	// hex format
+	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
+		s += 2;
+		if (Q_IsHexColorString(s)) {
+			color[0] = ((float)(gethex(*(s)) * 16 + gethex(*(s + 1)))) / 255.00;
+			color[1] = ((float)(gethex(*(s + 2)) * 16 + gethex(*(s + 3)))) / 255.00;
+			color[2] = ((float)(gethex(*(s + 4)) * 16 + gethex(*(s + 5)))) / 255.00;
+			return;
+		}
+	}
+
+	// colortable
+	while (OSP_Colortable[i].colorname != NULL) {
+		if (!Q_stricmp(s, OSP_Colortable[i].colorname)) {
+			color[0] = (*OSP_Colortable[i].color)[0];
+			color[1] = (*OSP_Colortable[i].color)[1];
+			color[2] = (*OSP_Colortable[i].color)[2];
+			return;
+		}
+		i++;
+	}
+
+	// get space count
+	int spaces = 0;
+	for (i = 0; i < strlen(s); ++i) {
+		if (s[i] == ' ') {
+			spaces++;
+		}
+	}
+
+	// "R G B( A)" format
+	if (spaces >= 2) {
+		char temp[4][8];
+		int j = 0, k = 0;
+		for (i = 0; i < strlen(s) + 1; ++i) {
+			if (s[i] == ' ' || i == strlen(s)) {
+				color[j] = atof(temp[j]);
+				k = i + 1;
+				j++;
+				if (j == 4) {
+					if (color[0] > 1 || color[1] > 1 || color[2] > 1 || color[3] > 1) { // true RGB(A)
+						color[0] /= 255.0f;
+						color[1] /= 255.0f;
+						color[2] /= 255.0f;
+						color[3] /= 255.0f;
+					}
+					return;
+				}
+				continue;
+			}
+
+			if (i - k < 10) {
+				temp[j][i - k] = s[i];
+			}
+		}
+	}
 }
 
 const voteType_t voteToggles[] =

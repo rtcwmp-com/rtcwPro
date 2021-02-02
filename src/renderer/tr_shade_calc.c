@@ -141,7 +141,7 @@ void RB_CalcDeformVertexes( deformStage_t *ds ) {
 			VectorCopy( backEnd.currentEntity->e.fireRiseDir, worldUp );
 		}
 		// don't go so far if sideways, since they must be moving
-		VectorScale( worldUp, 0.4 + 0.6 * fabs( backEnd.currentEntity->e.fireRiseDir[2] ), worldUp );
+		VectorScale( worldUp, 0.4 + 0.6 * Q_fabs( backEnd.currentEntity->e.fireRiseDir[2] ), worldUp );
 
 		ds->deformationWave.frequency *= -1;
 		if ( ds->deformationWave.frequency > 999 ) {  // hack for negative Z deformation (ack)
@@ -666,7 +666,7 @@ void RB_CalcColorFromEntity( unsigned char *dstColors ) {
 void RB_CalcColorFromOneMinusEntity( unsigned char *dstColors ) {
 	int i;
 	int *pColors = ( int * ) dstColors;
-	unsigned char invModulate[3];
+	unsigned char invModulate[4]; // L0 - ioquake static buffer overflow fix.
 	int c;
 
 	if ( !backEnd.currentEntity ) {
@@ -859,6 +859,12 @@ void RB_CalcFogTexCoords( float *st ) {
 	fog_t       *fog;
 	vec3_t local;
 	vec4_t fogDistanceVector, fogDepthVector;
+
+	// L0 - msvc debug fix &| play's nice with 1.0 ..
+	fogDepthVector[0] = 0;
+	fogDepthVector[1] = 0;
+	fogDepthVector[2] = 0;
+	fogDepthVector[3] = 0;
 
 	fog = tr.world->fogs + tess.fogNum;
 

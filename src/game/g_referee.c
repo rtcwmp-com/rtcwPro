@@ -181,6 +181,9 @@ void G_ref_cmd(gentity_t *ent, qboolean fValue) { //unsigned int dwCommand,
 
 		ent->client->sess.referee = 1;
 		ent->client->sess.spec_invite = TEAM_RED | TEAM_BLUE;
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_NORMAL;
+		}
 		AP(va("cp \"%s\n^3has become a referee\n\"", ent->client->pers.netname));
 		ClientUserinfoChanged(ent - g_entities);
 	}
@@ -219,6 +222,11 @@ void G_refLockTeams_cmd(gentity_t *ent, qboolean fLock) {
 
 	teamInfo[TEAM_RED].team_lock = (TeamCount(-1, TEAM_RED)) ? fLock : qfalse;
 	teamInfo[TEAM_BLUE].team_lock = (TeamCount(-1, TEAM_BLUE)) ? fLock : qfalse;
+
+	if (fLock)
+		trap_Cvar_Set("g_gamelocked", "3"); // This actually locks the teams based on logic from xMod
+	else
+		trap_Cvar_Set("g_gamelocked", "0"); // This actually unlocks the teams based on logic from xMod
 
 	status = va("Referee has ^3%sLOCKED^7 teams", ((fLock) ? "" : "UN"));
 
@@ -310,9 +318,10 @@ void G_refPlayerPut_cmd(gentity_t *ent, int team_id) {
 		SetTeam(player, "blue", qtrue); //, -1, -1, qfalse);
 	}
 
-	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
-		G_readyStart(); // ET had G_readyMatchState
-	}
+	// why the hell is this here? issue #178
+	//if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
+	//	G_readyStart(); // ET had G_readyMatchState
+	//}
 }
 
 
@@ -543,6 +552,10 @@ void G_RemoveReferee() {
 	if (cnum != MAX_CLIENTS) {
 		if (level.clients[cnum].sess.referee == RL_REFEREE) {
 			level.clients[cnum].sess.referee = RL_NONE;
+
+			if (level.paused != PAUSE_NONE) {
+				level.clients[cnum].ps.pm_type = PM_FREEZE;
+			}
 			G_Printf("%s is no longer a referee.\n", cmd);
 		}
 		else {

@@ -109,7 +109,12 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			}
 		}
 
-		/*if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
+		if (cl->sess.referee) {
+			strcpy(ref, "REF");
+		}
+
+		/* this stuff crashed the command???
+		if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
 		}
 
@@ -162,7 +167,7 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 Get client number from name
 ===========
 */
-/* // nihi commented out below
+/*
 int ClientNumberFromNameMatch(char *name, int *matches){
 	int i, textLen;
 	char nm[32];
@@ -384,13 +389,13 @@ Do it like in shrub just permanently
 (A hack tied to color so one doesn't need to type it all the time..)
 =================
 */
-void Cmd_hitsounds(gentity_t *ent) {
-	char *action = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? "^3Disable^7" : "^3Enable^7");
-	int	flag = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? 0 : 1);
-
-	CP(va("print \"Bit flag to %s Hitsounds is /color %d \nType ^3/commands bitflags^7 for explanation.\n\"", action, flag));
-	return;
-}
+//void Cmd_hitsounds(gentity_t *ent) {
+//	char *action = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? "^3Disable^7" : "^3Enable^7");
+//	int	flag = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? 0 : 1);
+//
+//	CP(va("print \"Bit flag to %s Hitsounds is /color %d \nType ^3/commands bitflags^7 for explanation.\n\"", action, flag));
+//	return;
+//}
 
 /*
 ===================
@@ -513,7 +518,7 @@ void G_readyHandle( gentity_t* ent, qboolean ready ) {
 }
 
 void G_ready_cmd( gentity_t *ent, qboolean state ) {
-	char *status[2] = { "^zNOT READY^7", "^nREADY^7" };
+	char *status[2] = { "^zNOT READY^7", "^3READY^7" };
 
 	if (!g_tournament.integer) {
 		return;
@@ -533,10 +538,12 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 		CP( va("print \"Specs cannot use %s ^7command!\n\"", status[state] ));
 		return;
 	}
-	if (level.readyTeam[ent->client->sess.sessionTeam] == qtrue && !state) { // Doesn't cope with unreadyteam but it's out anyway..
-		CP(va("print \"%s ^7ignored. Your team has issued ^3TEAM READY ^7command..\n\"", status[state]));
-		return;
-	}
+
+	//if (level.readyTeam[ent->client->sess.sessionTeam] == qtrue && !state) { // Doesn't cope with unreadyteam but it's out anyway..
+	//	CP(va("print \"%s ^7ignored. Your team has issued ^3TEAM READY ^7command..\n\"", status[state]));
+	//	return;
+	//}
+
 	// Move them to correct ready state
 	if ( ent->client->pers.ready == state ) {
 		CP( va( "print \"You are already %s!\n\"", status[state] ) );
@@ -553,7 +560,7 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 			}
 
 			// Doesn't rly matter..score tab will show slow ones..
-			AP( va( "cp \"\n%s \n^7is %s!\n\"", ent->client->pers.netname, status[state] ) );
+			AP( va( "cp \"\n%s \n^3is %s!\n\"", ent->client->pers.netname, status[state] ) );
 		}
 	}
 }
@@ -607,7 +614,7 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 		CP(va("print \"Your team is already ^3%s^7!\n\"", status[ready]));
 	}
 	else {
-		AP(va("popin \"%s ^7team is %s%s!\n\"", aTeams[team], (ready ? "^n" : "^z"), status[ready]));
+		AP(va("cp \"%s ^7team is %s%s!\n\"", aTeams[team], (ready ? "^3" : "^z"), status[ready]));
 		level.readyTeam[team] = ready;
 	}
 }
@@ -619,9 +626,10 @@ Pause/Unpause
 void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
     int team = ent->client->sess.sessionTeam;
     char tName[MAX_NETNAME];
-	char *tag, *log, *action;
+	//char *tag, *log, *action;
 	gentity_t *target_ent;
 	int i;
+
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
 		return;
@@ -639,21 +647,21 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 
 	if (level.numPlayingClients == 0) {
 		CP("print \"^jError: ^7You cannot use pause feature with no playing clients..\n\"");
-	return;
+		return;
 	}
 	DecolorString(aTeams[team], tName);
 
 	if (!dPause) {
-/*	//	level.paused = !PAUSE_NONE;  // nihi commented
-		level.paused = team + 128; // nihi added
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL); // nihi added
+/*	//	level.paused = !PAUSE_NONE;
+		level.paused = team + 128;
+		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
 		AAPS("sound/match/klaxon1.wav");
 	}
    // else if (level.paused != PAUSE_UNPAUSING){
-    else if (team + 128 != level.paused) {// nihi added
+    else if (team + 128 != level.paused) {
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");
 		return;
@@ -665,12 +673,18 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		level.CNstart = 0; // Resets countdown if it was aborted before
 		level.paused = PAUSE_UNPAUSING;
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
-		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL); // nihi added
+		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 	}
 	*/
+		if (level.paused != PAUSE_NONE) {
+			CP("print \"^jError: ^7Match is already paused^j!\n\"");
+			return;
+		}
+
 		level.paused = !PAUSE_NONE;
 		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
-		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
+		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7the match!\n\"", tName));
+		level.axisCalledTimeout = (team == TEAM_RED ? qtrue : qfalse);
 		AAPS("sound/match/klaxon1.wav");
 
 		// nihi: added from rtcwpub for freezing grenades/dyno/airstrikes/etc
@@ -701,13 +715,22 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-		return;
+			return;
+		}
+
+		if (level.axisCalledTimeout && team != TEAM_RED) {
+			CP("print \"^jError: ^7Only the team that paused the match may unpause the match^j.\n\"");
+			return;
 		}
 
 		level.CNstart = 0; // Resets countdown if it was aborted before
 		level.paused = PAUSE_UNPAUSING;
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
 	}
+
+    if (g_gameStatslog.integer) {
+        G_writeGeneralEvent (ent , ent, " ", (dPause) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
+    }
 
 }
 
@@ -721,7 +744,7 @@ What a mess...
 void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
     int team = ent->client->sess.sessionTeam;
     char tName[MAX_NETNAME];
-	char *tag, *log;
+	//char *tag, *log;
 
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
@@ -756,7 +779,7 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
 				} else if (g_gamelocked.integer == 3) {
 					trap_Cvar_Set( "g_gamelocked", "1" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^1Allied ^7team^z!\n\"", tName));
+					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
 				} else {
 					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
 				return;
@@ -792,7 +815,7 @@ void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
 					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
 				} else if (g_gamelocked.integer == 1) {
 					trap_Cvar_Set( "g_gamelocked", "3" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^1Allied ^7team^z!\n\"", tName));
+					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
 				} else {
 					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
 				return;

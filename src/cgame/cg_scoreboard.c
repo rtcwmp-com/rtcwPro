@@ -346,7 +346,7 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 		tens = seconds / 10;
 		seconds -= tens * 10;
 
-		if ( msec < 0 ) {
+		if ( msec < 0 && cgs.gamestate != GS_WARMUP) { // don't show sudden death during warmup
 			s = va( "%s %s", CG_TranslateString( "Mission time:" ),  CG_TranslateString( "Sudden Death" ) );
 			CG_DrawSmallString(x, y, s, fade);
 		} else {

@@ -1,53 +1,146 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="cg_consolecmds.c" />
-    <ClCompile Include="cg_draw.c" />
-    <ClCompile Include="cg_drawtools.c" />
-    <ClCompile Include="cg_effects.c" />
-    <ClCompile Include="cg_ents.c" />
-    <ClCompile Include="cg_event.c" />
-    <ClCompile Include="cg_flamethrower.c" />
-    <ClCompile Include="cg_info.c" />
-    <ClCompile Include="cg_localents.c" />
-    <ClCompile Include="cg_main.c" />
-    <ClCompile Include="cg_marks.c" />
-    <ClCompile Include="cg_newDraw.c" />
-    <ClCompile Include="cg_particles.c" />
-    <ClCompile Include="cg_players.c" />
-    <ClCompile Include="cg_playerstate.c" />
-    <ClCompile Include="cg_predict.c" />
-    <ClCompile Include="cg_scoreboard.c" />
-    <ClCompile Include="cg_servercmds.c" />
-    <ClCompile Include="cg_snapshot.c" />
-    <ClCompile Include="cg_sound.c" />
-    <ClCompile Include="cg_spawn.c" />
-    <ClCompile Include="cg_syscalls.c" />
-    <ClCompile Include="cg_trails.c" />
-    <ClCompile Include="cg_view.c" />
-    <ClCompile Include="cg_weapons.c" />
-    <ClCompile Include="cg_window.c" />
-    <ClCompile Include="..\game\bg_animation.c" />
-    <ClCompile Include="..\game\bg_misc.c" />
-    <ClCompile Include="..\game\bg_pmove.c" />
-    <ClCompile Include="..\game\bg_slidemove.c" />
-    <ClCompile Include="..\game\q_math.c" />
-    <ClCompile Include="..\game\q_shared.c" />
-    <ClCompile Include="..\ui\ui_shared.c" />
+    <ClCompile Include="..\game\bg_animation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_pmove.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\bg_slidemove.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_consolecmds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_draw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_drawtools.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_effects.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_ents.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_event.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_flamethrower.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_info.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_localents.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_marks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_newDraw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_particles.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_players.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_playerstate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_predict.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_scoreboard.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_servercmds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_snapshot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_sound.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_spawn.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_syscalls.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_trails.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_view.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_weapons.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_window.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\q_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\ui_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cg_local.h" />
-    <ClInclude Include="cg_public.h" />
-    <ClInclude Include="tr_types.h" />
     <ClInclude Include="..\..\main\ui\menudef.h" />
-    <ClInclude Include="..\game\bg_local.h" />
-    <ClInclude Include="..\game\bg_public.h" />
-    <ClInclude Include="..\game\q_shared.h" />
-    <ClInclude Include="..\game\surfaceflags.h" />
-    <ClInclude Include="..\ui\keycodes.h" />
-    <ClInclude Include="..\ui\ui_shared.h" />
+    <ClInclude Include="..\game\bg_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\bg_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\keycodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\q_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tr_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\surfaceflags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\ui_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />
+    <None Include="makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{1f84a6bb-3bbf-4fd0-8a6e-8e4411b68143}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0b1209f0-55b6-497d-aa25-01ea2cf8ecb6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

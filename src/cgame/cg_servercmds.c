@@ -109,22 +109,22 @@ static void CG_ParseTeamInfo( void ) {
 	numSortedTeamPlayers = atoi( CG_Argv( 3 ) );
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
-		client = atoi( CG_Argv( i * 10 + 4 ) );
+		client = atoi( CG_Argv( i * 11 + 4 ) );
 
 		sortedTeamPlayers[i] = client;
 
-		cgs.clientinfo[client].location = atoi( CG_Argv( i * 10 + 5 ) );
-		cgs.clientinfo[client].health = atoi( CG_Argv( i * 10 + 6 ) );
-		cgs.clientinfo[client].powerups = atoi( CG_Argv( i * 10 + 7 ) );
+		cgs.clientinfo[client].location = atoi( CG_Argv( i * 11 + 5 ) );
+		cgs.clientinfo[client].health = atoi( CG_Argv( i * 11 + 6 ) );
+		cgs.clientinfo[client].powerups = atoi( CG_Argv( i * 11 + 7 ) );
 
-		cg_entities[client].currentState.teamNum = atoi( CG_Argv( i * 10 + 8 ) );
+		cg_entities[client].currentState.teamNum = atoi( CG_Argv( i * 11 + 8 ) );
 
-		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 10 + 9));
-		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 10 + 10));
-		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 10 + 11));
-		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 10 + 12));
-		//cgs.clientinfo[client].isReady = atoi(CG_Argv(i * 10 + 13));
-		player_ready_status[client].isReady = atoi(CG_Argv(i * 10 + 13));
+		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 11 + 9));
+		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 11 + 10));
+		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 11 + 11));
+		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 11 + 12));
+		cgs.clientinfo[client].playerLimbo = atoi(CG_Argv(i * 11 + 13));
+		player_ready_status[client].isReady = atoi(CG_Argv(i * 11 + 14));
 	}
 }
 
@@ -1569,7 +1569,7 @@ const char* CG_LocalizeServerCommand( const char *buf ) {
 }
 // -NERVE - SMF
 
-// nihi added below
+
 /*
 =================
 L0
@@ -1587,7 +1587,7 @@ NOTE: My changes aren't commented really.
 void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
 	qboolean fFull = ( txt_dump != CG_printWindow );
-//	qboolean fFull = qfalse;  // nihi added
+//	qboolean fFull = qfalse;
 	qboolean fHasStats = qfalse;
 	char strName[MAX_STRING_CHARS];
 	int atts, deaths, dmg_given, dmg_rcvd, hits, kills, team_dmg, headshots, gibs;
@@ -1662,7 +1662,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
 	qboolean fFull = ( txt_dump != CG_printWindow );
 
-//	qboolean fFull = qtrue;  // nihi added
+//	qboolean fFull = qtrue;
 	char strName[MAX_STRING_CHARS];
 	int kills, headshots, deaths, team_kills, suicides, acc_shots, acc_hits, damage_giv, damage_rec;
 	int bleed, ammo_giv, med_giv, revived, gibs, kill_peak;
@@ -1704,12 +1704,12 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	acc = ( acc_shots > 0 ) ? (((float)acc_hits / (float)acc_shots ) * 100.00f) : 0.00;
 
 	if ( fFull ) {
-		txt_dump( va( "%-4d  %-3d  %-3d    %-2d  %-2d       ^2%-5d  ^1%-5d  ^4%-5d\n\n",
+		txt_dump( va( "%-4d  %-3d   %-3d  %-2d  %-2d       ^2%-5d  ^1%-5d  ^4%-5d\n\n",
 					kills, deaths, headshots,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
 	} else {
-		txt_dump( va( "^z%-4d ^7%-3d %-3d %-2d %-2d  ^2%-5d ^1%-5d ^4%-4d\n\n\n",
+		txt_dump( va( "^z%-4d^7 %-3d%-3d %-2d %-2d  ^2%-5d ^1%-5d ^4%-4d\n\n\n",
 					kills, deaths, headshots,
 					team_kills, suicides, damage_giv,
 					damage_rec, bleed) );
@@ -1722,7 +1722,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	if (kill_peak > 0 || gibs > 0)
 		txt_dump(va("^3Kill Peak: ^7%-3d    ^3Gibbed     : ^7%d\n", kill_peak, gibs));
 	if (acc_shots > 0 || acc_hits > 0)
-		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Hits/Shots : ^7%d/^n%d\n", acc, acc_hits, acc_shots));
+		txt_dump(va("^3Accuracy: ^7%-3.2f  ^3Hits/Shots : ^7%d/^7%d\n", acc, acc_hits, acc_shots));
 
 	if ( !fFull ) {
 		txt_dump( "\n" );
@@ -1738,8 +1738,7 @@ void CG_parseBestShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 	int iArg = 1;
 	qboolean fFull = ( txt_dump != CG_printWindow );
-//	qboolean fFull = qtrue;  // nihi added
-
+//	qboolean fFull = qtrue;
 
 	int iWeap = atoi( CG_Argv( iArg++ ) );
 	if ( !iWeap ) {
@@ -2330,6 +2329,17 @@ static void CG_ServerCommand( void ) {
 	// the menu system during development
 	if ( !strcmp( cmd, "clientLevelShot" ) ) {
 		cg.levelShot = qtrue;
+		return;
+	}
+
+	// ydnar: bug 267: server sends this command when it's about to kill the current server, before the client can reconnect
+	if (!Q_stricmp(cmd, "spawnserver")) {
+		// print message informing player the server is restarting with a new map
+		CG_PriorityCenterPrint(va("%s", CG_TranslateString("^nServer Restarting")), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH, 999999);
+
+		// hack here
+		cg.serverRespawning = qtrue;
+
 		return;
 	}
 

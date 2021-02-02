@@ -858,8 +858,9 @@ static float CG_DrawTeamOverlay( float y ) {
 			} else {
 				pcolor = deathcolor;
 				// RtcwPro
-				if (!(cg.snap->ps.pm_flags & PMF_LIMBO && cg.snap->ps.stats[STAT_HEALTH] > GIB_HEALTH))
+				if (ci->playerLimbo != 1) {
 					isRevivable = "*";
+				}
 			}
 			// jpw
 
@@ -986,10 +987,6 @@ int CG_CalculateReinfTime(qboolean menu)
 	return (int)(CG_CalculateReinfTime_Float(menu));
 }
 
-
-
-
-
 /*
 ========================
 OSPx
@@ -1113,7 +1110,7 @@ static float CG_DrawEnemyTimer(float y) {
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
 	else {
-        return;
+        return y;
 	}
 
 	return y += TINYCHAR_HEIGHT;
@@ -1140,6 +1137,93 @@ void CG_startCounter(void) {
 	// It is aligned under Respawn timer..
 	CG_DrawStringExt(16, 243, str, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH - 3, SMALLCHAR_HEIGHT - 4, 0);
 	return;
+}
+
+/*
+===================
+sswolf - draw speed
+with extra features
+Source: PubJ
+
+CG_DrawTJSpeed
+===================
+*/
+void CG_DrawTJSpeed(void) {
+	char         status[128];
+	float        sizex, sizey, x, y;
+	int          w;
+	static vec_t speed;
+	vec4_t       color;
+	static vec_t topSpeed;
+
+	if (cg.resetmaxspeed)
+	{
+		cg.topSpeed = 0;
+		topSpeed = 0;
+		cg.resetmaxspeed = qfalse;
+	}
+
+	if (!cg_drawSpeed.integer)
+	{
+		return;
+	}
+
+	speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+
+	// pp velocity is sometimes NaN, so check it
+	if (speed != speed)
+	{
+		speed = 0;
+	}
+
+	if (speed > topSpeed)
+	{
+		topSpeed = speed;
+	}
+
+	sizex = sizey = 0.25f;
+
+	x = cg_speedX.value;
+	y = cg_speedY.value;
+
+	switch (cg_drawSpeed.integer)
+	{
+	case 1:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
+		break;
+	case 2:
+		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
+		break;
+	case 3:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
+		break;
+	case 4:
+		Com_sprintf(status, sizeof(status), va("%.0f %.0f", speed, topSpeed));
+		break;
+	default:
+		Com_sprintf(status, sizeof(status), va("%.0f", speed));
+		break;
+	}
+
+	w = CG_Text_Width_Ext(status, sizex, sizey, &cgDC.Assets.textFont) / 2;
+	BG_ParseColorCvar("white", color);
+
+	if (cg_drawSpeed.integer > 2 && speed > cg.oldSpeed + 0.001f * 100)
+	{
+		BG_ParseColorCvar("green", color);
+		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
+	}
+	else if (cg_drawSpeed.integer > 2 && speed < cg.oldSpeed - 0.001f * 100)
+	{
+		BG_ParseColorCvar("red", color);
+		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
+	}
+	else
+	{
+		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
+	}
+
+	cg.oldSpeed = speed;
 }
 
 /*
@@ -1492,6 +1576,12 @@ static void CG_DrawDisconnect( void ) {
 	if (cg.demoPlayback && cg_timescale.value != 1.0f) {
 		return;
 	}
+
+	// ydnar: don't draw if the server is respawning
+	if (cg.serverRespawning) {
+		return;
+	}
+
 
 	// draw the phone jack if we are completely past our buffers
 	cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
@@ -1895,7 +1985,7 @@ static void CG_DrawPopinString(void) {
 	}
 
 	if (cg.popinBlink)
-		color[3] = fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
+		color[3] = Q_fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
 
 	while (1) {
 		char linebuffer[1024];
@@ -2437,13 +2527,13 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 
 	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
 		s = va("[G:%i]", playerNades);
-		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
+		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
 	else {
 		s = va("[A:%i-G:%i]", playerAmmoClip + playerAmmo, playerNades);
-		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 20);
+		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
+		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
 }
 
@@ -2561,7 +2651,7 @@ static void CG_DrawCrosshairNames( void ) {
 	// -NERVE - SMF
 
 	// RtcwPro add player ammo if player class is LT
-	if (cgClass == 3)
+	if (cgClass == 3 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
 		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
@@ -2630,7 +2720,7 @@ static void CG_DrawVote( void ) {
 		}
 
 		// OSPx - Complaint popup
-		if (cg_complaintPopUp.integer)
+		if (cg_complaintPopUp.integer && cgs.gamestate != GS_WARMUP)
 		{
 			s = va(CG_TranslateString("File complaint against %s for team-killing?"), cgs.clientinfo[cgs.complaintClient].name);
 			CG_DrawStringExt(8, 200, s, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80);
@@ -3050,7 +3140,7 @@ static void CG_DrawWarmup( void ) {
 			   ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
 				s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
 				w = CG_DrawStrlen( s1 );
-				CG_DrawStringExt( 320 - w * cw / 2, 160, s1, colorWhite,
+				CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
 								  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 			}
 		}
@@ -3072,11 +3162,11 @@ static void CG_DrawWarmup( void ) {
 			s2 = CG_TranslateString( "or call a vote to start match" );
 
 			w = CG_DrawStrlen( s1 );
-			CG_DrawStringExt( 320 - w * cw / 2, 160, s1, colorWhite,
+			CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
 							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 
 			w = CG_DrawStrlen( s2 );
-			CG_DrawStringExt( 320 - w * cw / 2, 180, s2, colorWhite,
+			CG_DrawStringExt( 320 - w * cw / 2, 160, s2, colorWhite,
 							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 
 			return;
@@ -3103,7 +3193,6 @@ static void CG_DrawWarmup( void ) {
 
 	w = CG_DrawStrlen( s );
 	CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
-	// nihi added
 
     if (sec == 10 && !announced)
 	{
@@ -3232,13 +3321,14 @@ static void CG_DrawFlashFade( void ) {
 		VectorClear( col );
 		col[3] = ( fBlackout ) ? 1.0f : cgs.fadeAlphaCurrent;
 		CG_FillRect( -10, -10, 650, 490, col );
+		CG_DrawScoreboard();
 		//bani - #127 - bail out if we're a speclocked spectator with cg_draw2d = 0
 		if ( cgs.clientinfo[ cg.clientNum ].team == TEAM_SPECTATOR && !cg_draw2D.integer ) {
 			return;
 		}
 
 		// OSP - Show who is speclocked
-		if ( fBlackout ) {
+		if ( fBlackout  && !cg.showScores) {
 			int i, nOffset = 90;
 			char *str, *format = "The %s team is speclocked!";
 			char *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIED", "???" };
@@ -3325,7 +3415,7 @@ static void CG_DrawFlashDamage( void ) {
 	}
 
 	if ( cg.v_dmg_time > cg.time ) {
-		redFlash = fabs( cg.v_dmg_pitch * ( ( cg.v_dmg_time - cg.time ) / DAMAGE_TIME ) );
+		redFlash = Q_fabs( cg.v_dmg_pitch * ( ( cg.v_dmg_time - cg.time ) / DAMAGE_TIME ) );
 
 		// blend the entire screen red
 		if ( redFlash > 5 ) {
@@ -3661,10 +3751,10 @@ void CG_DrawObjectiveIcons() {
 
 	// OSPx - Print fancy warmup in corner..
 	if (cgs.gamestate != GS_PLAYING) {
-		fade = fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
+		fade = Q_fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
 		s = va("^3Warmup");
 	} else if (msec < 0) {
-		fade = fabs( sin( cg.time * 0.002 ) ) * cg_hudAlpha.value;
+		fade = Q_fabs( sin( cg.time * 0.002 ) ) * cg_hudAlpha.value;
 		s = va( "0:00" );
 	} else {
 		s = va( "%i:%i%i", mins, tens, seconds ); // float cast to line up with reinforce time
@@ -4235,6 +4325,12 @@ static void CG_Draw2D( void ) {
 
 		CG_DrawLimboMessage();
 		// -NERVE - SMF
+
+		if (cg_drawSpeed.integer)
+		{
+			CG_DrawTJSpeed();
+		}
+
 	}
 
 	// OSPx - Announcer
@@ -4264,7 +4360,7 @@ void CG_ShakeCamera() {
 
 	// JPW NERVE starts at 1, approaches 0 over time
 	x = ( cg.cameraShakeTime - cg.time ) / cg.cameraShakeLength;
-/*
+
 	// OSPx - NQ's shake cam..
 	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[2] += val;
@@ -4273,17 +4369,7 @@ void CG_ShakeCamera() {
 	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[0] += val;
 	// End
-*/   // nihi commented for shake
 
-
-	// up/down
-
-	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
-	cg.refdefViewAngles[0] += val;
-
-	// left/right
-	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
-	cg.refdefViewAngles[1] += val;
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 }
 // -NERVE - SMF

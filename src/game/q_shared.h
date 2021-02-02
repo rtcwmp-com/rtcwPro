@@ -75,6 +75,10 @@ If you have questions concerning this license or the applicable additional terms
 #define idppc 1
 #endif
 
+#ifndef DIRECTINPUT_VERSION
+#define DIRECTINPUT_VERSION 0x0800
+#endif
+
 /**********************************************************************
   VM Considerations
 
@@ -186,7 +190,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( fabs( x ) == 0.0 ) {
+	if ( Q_fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;
@@ -232,7 +236,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( fabs( x ) == 0.0 ) {
+	if ( Q_fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;
@@ -720,6 +724,8 @@ void GetPerpendicularViewVector( const vec3_t point, const vec3_t p1, const vec3
 void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj );
 // done.
 
+char* Q_CleanDirName(char* dirname);
+
 //=============================================
 
 float Com_Clamp( float min, float max, float value );
@@ -958,19 +964,18 @@ COLLISION DETECTION
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
-#define PLANE_X         0
-#define PLANE_Y         1
-#define PLANE_Z         2
-#define PLANE_NON_AXIAL 3
-
+#define PLANE_X				0
+#define PLANE_Y				1
+#define PLANE_Z				2
+#define PLANE_NON_AXIAL		3
+#define PLANE_NON_PLANAR    4
 
 /*
 =================
 PlaneTypeForNormal
 =================
 */
-
-#define PlaneTypeForNormal( x ) ( x[0] == 1.0 ? PLANE_X : ( x[1] == 1.0 ? PLANE_Y : ( x[2] == 1.0 ? PLANE_Z : PLANE_NON_AXIAL ) ) )
+#define PlaneTypeForNormal( x ) ( x[0] == 1.0 ? PLANE_X : ( x[1] == 1.0 ? PLANE_Y : ( x[2] == 1.0 ? PLANE_Z : ( x[0] == 0.f && x[1] == 0.f && x[2] == 0.f ? PLANE_NON_PLANAR : PLANE_NON_AXIAL ) ) ) )
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
@@ -1535,6 +1540,11 @@ typedef enum {
 	CA_CINEMATIC        // playing a cinematic or a static pic, not connected to a server
 } connstate_t;
 
+// L0 
+// Indicates if client is connected or not.
+// Deals with Bloom issues as well as just identifying if extra stuff should be ran..
+qboolean clientIsConnected;
+
 // font support
 
 #define GLYPH_START 0
@@ -1609,8 +1619,6 @@ typedef enum _flag_status {
 	FLAG_DROPPED
 } flagStatus_t;
 
-
-
 #define MAX_GLOBAL_SERVERS          2048
 #define MAX_OTHER_SERVERS           128
 #define MAX_PINGREQUESTS            16
@@ -1654,5 +1662,12 @@ typedef enum {
 #define VOTEFLAGS_TYPE              ( 1 << 5 )
 #define VOTEFLAGS_KICK              ( 1 << 6 )
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
+
+// L0 
+#define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
+#define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
+#define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
+#define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
+#define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 
 #endif  // __Q_SHARED_H

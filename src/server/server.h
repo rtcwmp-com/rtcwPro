@@ -103,10 +103,6 @@ typedef struct {
 	// -NERVE - SMF
 } server_t;
 
-
-
-
-
 typedef struct {
 	int areabytes;
 	byte areabits[MAX_MAP_AREA_BYTES];                  // portalarea visibility bits
@@ -190,6 +186,26 @@ typedef struct client_s {
 } client_t;
 
 //=============================================================================
+// Rate fix
+typedef struct {
+	netadr_t  adr;
+	int       time;
+} receipt_t;
+
+typedef struct {
+	netadr_t	adr;
+	int			time;
+	int			count;
+	qboolean	flood;
+} floodBan_t;
+
+// MAX_INFO_RECEIPTS is the maximum number of getstatus+getinfo responses that we send
+// in a two second time period.
+#define MAX_INFO_RECEIPTS  48
+
+#define MAX_INFO_FLOOD_BANS 36
+
+//=============================================================================
 
 
 // MAX_CHALLENGES is made large to prevent a denial
@@ -209,9 +225,7 @@ typedef struct {
 	qboolean connected;
 } challenge_t;
 
-
 #define MAX_MASTERS 8               // max recipients for heartbeat packets
-
 
 // this structure will be cleared only when the game dll changes
 typedef struct {
@@ -230,6 +244,10 @@ typedef struct {
 	netadr_t redirectAddress;               // for rcon return messages
 
 	netadr_t authorizeAddress;              // for rcon return messages
+
+	receipt_t infoReceipts[MAX_INFO_RECEIPTS];
+	floodBan_t infoFloodBans[MAX_INFO_FLOOD_BANS];
+
 } serverStatic_t;
 
 //================
@@ -290,7 +308,9 @@ extern cvar_t  *sv_floodProtect;
 extern cvar_t  *sv_allowAnonymous;
 extern cvar_t  *sv_lanForceRate;
 extern cvar_t  *sv_onlyVisibleClients;
-
+extern cvar_t  *sv_dlRate;
+extern cvar_t  *sv_minRate;
+extern cvar_t  *sv_maxRate;
 extern cvar_t  *sv_showAverageBPS;          // NERVE - SMF - net debugging
 
 // Rafael gameskill
@@ -300,13 +320,20 @@ extern cvar_t  *sv_gameskill;
 // TTimo - autodl
 extern cvar_t *sv_dl_maxRate;
 
+// Anti wallhack
+extern cvar_t* wh_active;
+extern cvar_t* wh_bbox_horz;
+extern cvar_t* wh_bbox_vert;
+extern cvar_t* wh_add_xy;
+extern cvar_t* wh_check_fov;
+
 
 //===========================================================
 
 //
 // sv_main.c
 //
-void SV_FinalMessage( char *message );
+void SV_FinalMessage( char *message, qboolean disconnect);
 void QDECL SV_SendServerCommand( client_t *cl, const char *fmt, ... );
 
 
@@ -354,7 +381,10 @@ void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
 int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
-
+#ifndef _WIN32
+int SV_SendQueuedMessages(void);
+int SV_RateMsec( client_t *client ) ;
+#endif
 //
 // sv_ccmds.c
 //
@@ -407,6 +437,15 @@ int         SV_BotGetConsoleMessage( int client, char *buf, int size );
 
 int BotImport_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void BotImport_DebugPolygonDelete( int id );
+
+//
+// sv_wallhack.c
+//
+void SV_RandomizePos(int player, int other);
+void SV_InitWallhack(void);
+void SV_RestorePos(int cli);
+int SV_CanSee(int player, int other);
+int SV_PositionChanged(int cli);
 
 //============================================================
 //
@@ -466,6 +505,11 @@ void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, con
 // sv_net_chan.c
 //
 void SV_Netchan_Transmit( client_t *client, msg_t *msg );
+#ifdef _WIN32
 void SV_Netchan_TransmitNextFragment( client_t *client );
+#else
+int SV_Netchan_TransmitNextFragment( client_t *client );
+#endif
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
 
+qboolean SV_CheckDRDoS(netadr_t from);

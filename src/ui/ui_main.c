@@ -369,10 +369,10 @@ void AssetCache() {
 	uiInfo.uiDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 
 	for ( n = 0; n < NUM_CROSSHAIRS; n++ ) {
-		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_OSPx", 'a' + n ) );  //nihi commented
+		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_rtcwpro", 'a' + n ) );  //nihi commented
 	//	uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c", 'a' + n ) );  //nihi addded
 		// OSPx - Crosshairs
-        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_OSPx", 'a' + n)); //nihi commented
+        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_rtcwpro", 'a' + n)); //nihi commented
 //		uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n)); //nihi added
 	}
 
@@ -3627,7 +3627,7 @@ static void UI_LoadDemos() {
 
 		// iterate all demo files in directory
 
-		numfiles = trap_FS_GetFileList( va("demos/%s",dirptr), demoExt, demolist, sizeof( demolist )  );
+		numfiles = trap_FS_GetFileList( va("../rtcwpro/demos/%s",dirptr), demoExt, demolist, sizeof( demolist )  );
 		demoname  = demolist;
 		for (j=0; j<numfiles &&  uiInfo.demoCount < MAX_DEMOS;j++,demoname+=len+1)
 		{
@@ -3636,7 +3636,8 @@ static void UI_LoadDemos() {
 				demoname[len - strlen( demoExt )] = '\0';
 			}
 			Com_sprintf( demoPathName, sizeof( demoPathName ), "%s/%s", dirptr, demoname );
-			uiInfo.demoList[i+j] = String_Alloc( demoPathName );
+			//uiInfo.demoList[i+j] = String_Alloc( demoPathName );
+			uiInfo.demoList[uiInfo.demoCount] = String_Alloc( demoPathName );
             //uiInfo.demoList[i+j] = String_Alloc( demoname );
 			uiInfo.demoCount++;
 		}
@@ -6226,7 +6227,9 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 						return Info_ValueForKey( info, "hostname" );
 					}
 				}
-			case SORT_MAP:
+
+			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
+			/*case SORT_MAP:
 				if (Info_ValueForKey( info, "mapname" ) != "" )
 				{
 					Q_strncpyz( mapname_clean, Q_CleanStr( Q_strlwr( Info_ValueForKey( info, "mapname" ) ) ), sizeof( mapname_clean ) );
@@ -6235,7 +6238,7 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 				else
 				{
 					return " ";
-				}
+				}*/
 			case SORT_CLIENTS:
 				Com_sprintf( clientBuff, sizeof( clientBuff ), "%s (%s)", Info_ValueForKey( info, "clients" ), Info_ValueForKey( info, "sv_maxclients" ) );
 				return clientBuff;

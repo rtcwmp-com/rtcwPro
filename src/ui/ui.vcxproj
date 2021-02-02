@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{64DCBC13-78A6-43E9-931D-B63FBB0421C7}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>ui_mp_x86</ProjectName>
+    <ProjectName>ui</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -44,14 +44,20 @@
     <_ProjectFileVersion>15.0.28127.55</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\Debug\</OutDir>
-    <IntDir>.\Debug\</IntDir>
-    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_mp_$(PlatformShortName)</TargetName>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>.\Release\</OutDir>
-    <IntDir>.\Release\</IntDir>
+    <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)_mp_$(PlatformShortName)</TargetName>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -68,10 +74,10 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
-      <PrecompiledHeaderOutputFile>.\Debug/ui.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
+      <ObjectFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ObjectFileName>
+      <ProgramDataBaseFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ProgramDataBaseFileName>
       <BrowseInformation>false</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -83,25 +89,29 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>../../output/ui_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>.\ui.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>false</GenerateMapFile>
-      <MapFileName>
-      </MapFileName>
+      <MapFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).map</MapFileName>
       <BaseAddress>
       </BaseAddress>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention />
-      <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>mkdir "..\..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "..\..\output\"</Command>
+      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
     </PostBuildEvent>
+    <Bscmake>
+      <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -120,11 +130,11 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader />
-      <PrecompiledHeaderOutputFile>.\Release/ui.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
+      <ObjectFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ObjectFileName>
+      <ProgramDataBaseFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <ResourceCompile>
@@ -133,18 +143,28 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>../Release/ui_mp_x86.dll</OutputFile>
+      <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>.\ui.def</ModuleDefinitionFile>
-      <ProgramDatabaseFile>.\Release/ui_mp_x86.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\Release/ui_mp_x86.map</MapFileName>
+      <MapFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).map</MapFileName>
       <BaseAddress>0x40000000</BaseAddress>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
-      <ImportLibrary>.\Release/ui_mp_x86.lib</ImportLibrary>
+      <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <Bscmake>
+      <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>mkdir "..\..\output/"
+copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "..\..\output\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\game\bg_misc.c">
@@ -201,14 +221,12 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="ui_util.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="makefile">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
     <None Include="ui.def" />
   </ItemGroup>
   <ItemGroup>

@@ -98,6 +98,7 @@ vmCvar_t g_swapteams;
 
 vmCvar_t g_restarted;
 vmCvar_t g_log;
+vmCvar_t g_gameStatslog; // temp cvar for event logging
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -166,6 +167,7 @@ vmCvar_t url;
 
 vmCvar_t g_dbgRevive;
 
+// rtcwpro begin
 // L0 - New cvars
 // Admins
 vmCvar_t a1_pass;		// Level 1 admin
@@ -231,7 +233,7 @@ vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
-vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
+//vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
 vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ban) can be disabled..
 vmCvar_t g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
@@ -280,7 +282,7 @@ vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
 vmCvar_t g_fixedphysics;	// So it's fair for all..
 vmCvar_t g_allowPMs;		// Allow private messages
-vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
+//vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
@@ -303,13 +305,12 @@ vmCvar_t g_maxTeamSniper;	// Max snipers per team
 vmCvar_t g_maxTeamVenom;	// Max venoms per team
 vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 
-// QCon edition cvars
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-// RTCWPro
 vmCvar_t g_customConfig;
 vmCvar_t P; // ET Port Players server info
+vmCvar_t g_hsDamage;
 vmCvar_t g_customSpawns;
 
 cvarTable_t gameCvarTable[] = {
@@ -382,7 +383,7 @@ cvarTable_t gameCvarTable[] = {
 
 	{ &g_log, "g_log", "", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
-
+	{ &g_gameStatslog, "g_gameStatslog", "0", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
 	// show_bug.cgi?id=500
@@ -394,7 +395,7 @@ cvarTable_t gameCvarTable[] = {
     { &g_disableSMGPickup, "g_disableSMGPickup", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_speed, "g_speed", "320", 0, 0, qtrue  },
 	{ &g_gravity, "g_gravity", "800", 0, 0, qtrue  },
-	{ &g_knockback, "g_knockback", "1000", 0, 0, qtrue  },
+	{ &g_knockback, "g_knockback", "100", 0, 0, qtrue  },
 	{ &g_quadfactor, "g_quadfactor", "3", 0, 0, qtrue  },
 	{ &g_weaponRespawn, "g_weaponrespawn", "5", 0, 0, qtrue  },
 	{ &g_weaponTeamRespawn, "g_weaponTeamRespawn", "30", 0, 0, qtrue },
@@ -404,7 +405,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
 	{ &g_debugBullets, "g_debugBullets", "0", 0, 0, qfalse}, //----(SA)	added
-	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "0", 0, 0, qfalse },
+	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "1", 0, 0, qfalse }, // default to 1
 	{ &g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
@@ -480,9 +481,9 @@ cvarTable_t gameCvarTable[] = {
 	{ &match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue },
 	{ &match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue },
 	{ &g_showFlags, "g_showFlags", "1", 0 },
-	{ &g_noTeamSwitching, "g_noTeamSwitching", "1", 0, 0, qfalse, qfalse },
+//	{ &g_noTeamSwitching, "g_noTeamSwitching", "1", 0, 0, qfalse, qfalse },
 	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
-	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
+	//{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
 	{ &svx_serverStreaming, "svx_serverStreaming", "", CVAR_SERVERINFO, 0, qfalse },
@@ -573,6 +574,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
+	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_customSpawns, "g_customSpawns", "0", CVAR_ARCHIVE, 0, qfalse }, // sswolf - custom spawns, source: Nobo
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
@@ -1505,7 +1507,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	we need to clear the list even if enforce maxlives is not active
 	in cas ethe g_maxlives was changed, and a map_restart happened
 	*/
-	// nihi commented below
+
 /*
 
 	ClearMaxLivesGUID();
@@ -1564,11 +1566,51 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			G_LogPrintf( "------------------------------------------------------------\n" );
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
 		}
+        if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) { // definitely needs improving but here for testing purposes
+                char newGamestatFile[MAX_QPATH];
+                char mapName[64];
+                qtime_t ct;
+                trap_RealTime(&ct);
+                trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+                char *buf;
+                time_t unixTime = time(NULL);  // come back and make globally available
+                char cs[MAX_STRING_CHARS];
+
+                // we want to save some information for the match and round
+                if (g_currentRound.integer == 1) {
+                    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+                    buf = Info_ValueForKey(cs, "matchid");
+                    trap_SetConfigstring( CS_ROUNDINFO, cs );
+                }
+                else {
+                     buf=va("%ld", unixTime);
+                }
+
+
+
+                Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
+                trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
+                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
+                //trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
+                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName);
+                //trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName ), &level.gameStatslogFile, FS_WRITE );
+                if ( !level.gameStatslogFile ) {
+                    G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
+                } else {
+                    //G_writeGameInfo();
+                    G_writeServerInfo();
+
+
+                }
+
+            }
+
 	} else {
 		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 			G_Printf( "Not logging to disk.\n" );
 		}
 	}
+
 
 	G_InitWorldSession();
 
@@ -1689,6 +1731,11 @@ void G_ShutdownGame( int restart ) {
 		G_LogPrintf( "ShutdownGame:\n" );
 		G_LogPrintf( "------------------------------------------------------------\n" );
 		trap_FS_FCloseFile( level.logFile );
+	}
+	if (level.gameStatslogFile) {
+        // we may want to put some closing information into the gamestat file...
+        trap_FS_FCloseFile( level.gameStatslogFile );
+
 	}
 
 	// Ridah, shutdown the Botlib, so weapons and things get reset upon doing a "map xxx" command
@@ -2288,7 +2335,7 @@ void ExitLevel( void ) {
 			level.clients[i].pers.connected = CON_CONNECTING;
 		}
 	}
-	// nihi added as temporary fix for stopwatch not autoswapping teams
+
 
 	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
 		G_swapTeams();
@@ -2592,7 +2639,7 @@ void CheckExitRules( void ) {
 		return;
 	}
 
-	if ( g_timelimit.value && !level.warmupTime ) {
+	if ( g_timelimit.value && !level.warmupTime && level.paused == PAUSE_NONE ) {
 		if ( level.time - level.startTime >= g_timelimit.value * 60000 ) {
 
 			// check for sudden death
@@ -2861,7 +2908,8 @@ void CheckGameState( void ) {
 				G_readyTeamLock();
 
 				if (!level.readyPrint) {
-					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "All players are now ^nready^7!" : "Ready threshold reached!") ));
+					// show all players ready for both right now - need to fix pause for noteamswitching = 1
+					AP(va("cp \"%s\n\"2", (g_noTeamSwitching.integer ? "^3All players are now ready!" : "^3All players are now ready!"))); //"Ready threshold reached!") ));
 					level.readyPrint = qtrue;
 				}
 			} else {
@@ -2941,7 +2989,7 @@ void CheckVote( void ) {
 		return;
 	}
 	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
-		trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+		trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
 		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
 	} else {
 // OSPx - Vote percent..
@@ -2957,7 +3005,7 @@ void CheckVote( void ) {
 		if ( (total == 1) || ( 100 * level.voteInfo.voteYes / total >= vCnt) ) {
 // -OSPx
 			// execute the command, then remove the vote
-			trap_SendServerCommand( -1, "print \"Vote passed.\n\"" );
+			trap_SendServerCommand( -1, "print \"^5Vote passed.\n\"" );
 			level.voteExecuteTime = level.time + 3000;
 			level.prevVoteExecuteTime = level.time + 4000;
 			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
@@ -2996,7 +3044,7 @@ void CheckVote( void ) {
 
 		} else if ( level.voteInfo.voteNo >= level.voteInfo.numVotingClients / 2 ) {
 			// same behavior as a timeout
-			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
+			trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
 		} else {
 			// still waiting for a majority
 			return;
@@ -3154,6 +3202,9 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
+	if (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP)
+		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
+
 	if (g_gamestate.integer != GS_INTERMISSION) // RtcwPro added this to avoid erroneous text at the end of the round
 	{
 		// Check now
@@ -3261,15 +3312,15 @@ void G_RunFrame( int levelTime ) {
 		level.timeCurrent = levelTime - level.timeDelta;
 	} else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		if ( ( level.time % 500 ) == 0 ) { // nihi (re)-added to avoid cmd overflow to connecting clients
+		if ( ( level.time % 500 ) == 0 ) {
 			// Respawn and time issuses
 			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
 			// Print stuff.. FIXME one day...
 			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
 		}
 	} // End
-//	level.frameTime = trap_Milliseconds();   // nihi removed
-	level.frameStartTime = trap_Milliseconds(); // nihi added
+//	level.frameTime = trap_Milliseconds();
+	level.frameStartTime = trap_Milliseconds();
 
 	level.framenum++;
 	level.previousTime = level.time;
@@ -3374,7 +3425,7 @@ void G_RunFrame( int levelTime ) {
 			 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
 			 || ent->s.eType == ET_EXPLO_PART
 			 || ent->s.eType == ET_RAMJET ) {
-// nihi
+
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
 				G_RunMissile( ent );

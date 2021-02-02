@@ -90,6 +90,10 @@ Sends a command string to a client
 ===============
 */
 void SV_GameSendServerCommand( int clientNum, const char *text ) {
+	if (strlen(text) > 1022) {
+		return;
+	} 
+
 	if ( clientNum == -1 ) {
 		SV_SendServerCommand( NULL, "%s", text );
 	} else {

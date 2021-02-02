@@ -26,6 +26,14 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "g_local.h"
+//===========================================================================
+//
+// Name:				aas_facemerging.h
+// Function:		Merging of Faces
+// Programmer:		Mr Elusive (MrElusive@demigod.demon.nl)
+// Last update:	1997-12-04
+// Tab Size:		3
+//===========================================================================
 
-// removed 3-2-2001
+void AAS_MergeAreaFaces( void );
+void AAS_MergeAreaPlaneFaces( void );
