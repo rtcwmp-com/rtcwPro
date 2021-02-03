@@ -883,6 +883,7 @@ typedef struct {
 	fileHandle_t logFile;
 
     fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+    char gameStatslogFileName[256]; // lazy work-around for testing submission of stats....so this is temporary
 
 	// store latched cvars here that we want to get at often
 	int maxclients;
@@ -1469,6 +1470,11 @@ extern vmCvar_t g_gametype;
 extern vmCvar_t g_gameskill;
 // done
 extern vmCvar_t g_gameStatslog; // temp cvar for event logging
+// there will be future modifications and additions to the stats cvars....work in progress
+extern vmCvar_t g_stats_mongodb; // temp cvar for output of stats to mongodb
+extern vmCvar_t g_stats_curl_submit;
+extern vmCvar_t g_stats_curl_submit_URL;
+extern vmCvar_t g_stats_curl_submit_headers;
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
@@ -1955,6 +1961,10 @@ void G_UnTimeShiftAllClients(gentity_t* skip);
 
 void G_ResetMarkers( gentity_t* ent );
 
+void curlTestfunc(void);
+
+
+
 ///////////////////////
 // g_main.c
 //
@@ -2144,6 +2154,12 @@ int G_teamAlive(int team ) ;  // temp addition for calculating number of alive..
 int sendToMongo(char* jsondata); // temp function to send events to mongodb
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
+
+
+// g_curl_submit_stats.c
+
+int submit_curlPost( char* jsonfile, char* matchid );
+char* encode_data_b64(char *infilename );
 
 // OSPx - New stuff below
 //

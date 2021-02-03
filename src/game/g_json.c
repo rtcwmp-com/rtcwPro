@@ -7,6 +7,7 @@
 #include "../qcommon/jansson/jansson.h"
 #endif // _WIN32
 #include <mongoc/mongoc.h>
+//#include "../libmongoc-1.0/mongoc/mongoc.h"
 #include <time.h>
 // send/receive to json server: only need to include a few additional functions
 //   although tested and works.....not necessary until we
@@ -466,6 +467,7 @@ void G_writeServerInfo (void){
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
     json_object_set_new(jdata, "serverIP",    json_string(""));
+    json_object_set_new(jdata, "server_id",    json_string(""));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
     json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i",g_gameStatslog.integer)));
@@ -514,7 +516,7 @@ void G_writeGameInfo (int winner ){
     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
 
     json_t *jdata = json_object();
-
+    json_object_set_new(jdata, "server_id",    json_string(""));
     buf = Info_ValueForKey(cs, "matchid");
     json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
     buf3 = Info_ValueForKey(cs, "round");
@@ -837,7 +839,16 @@ void G_writeClosingJson(void)
 
     if (level.gameStatslogFile) {
         trap_FS_Write( "}\n", strlen( "}\n"), level.gameStatslogFile );
+
+
+        if (g_stats_curl_submit.integer) {
+            trap_FS_FCloseFile(level.gameStatslogFile );
+            submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+
+        }
       }
+
+
 
 
 
@@ -938,6 +949,11 @@ void G_writeGameEarlyExit(void)
         json_decref(jdata);
         free(s);
         trap_FS_Write( "]\n}\n", strlen( "]\n}\n" ), level.gameStatslogFile );
+
+        if (g_stats_curl_submit.integer) {
+            trap_FS_FCloseFile(level.gameStatslogFile );
+            submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+        }
     }
 
 
@@ -969,9 +985,12 @@ int G_teamAlive(int team ) {
 
 }
 
-
+// Bad location for this....plan to move
 int sendToMongo(char* jsondata)
 {
+    if (!(g_stats_mongodb.integer)) { // make a better cvar depending on if the mongodb will be user specified or whatever
+        return 0;
+    }
    const char *uri_string = "mongodb://localhost:27017";  // temporary...will be changing
    mongoc_uri_t *uri;
    mongoc_client_t *client;
@@ -1025,3 +1044,7 @@ int sendToMongo(char* jsondata)
 
    return 1;
 }
+
+//  BAD LOCATION FOR THE STUFF BELOW TOO...BEING LAZY...WILL REARRANGE LATER
+//
+//
