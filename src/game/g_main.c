@@ -392,7 +392,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_gameStatslog, "g_gameStatslog", "0", CVAR_ARCHIVE, 0, qfalse  },
 	// there will be future modifications and additions to the stats cvars....work in progress
     { &g_stats_mongodb, "g_stats_mongodb", "0", CVAR_ARCHIVE, 0, qfalse  },
-	{ &g_stats_curl_submit, "g_stats_curl_submit", "1", CVAR_ARCHIVE, 0, qfalse  },
+	{ &g_stats_curl_submit, "g_stats_curl_submit", "0", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_URL, "g_stats_curl_submit_URL", "https://rtcwproapi.donkanator.com/submit", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_headers, "g_stats_curl_submit_headers", "0", CVAR_ARCHIVE, 0, qfalse  }, // not used at the moment, headers are currently hardcoded
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
