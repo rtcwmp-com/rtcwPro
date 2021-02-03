@@ -280,6 +280,8 @@ typedef enum {
 	CG_CHECKCENTERVIEW,
 //	qboolean CG_CheckCenterView();
 
+	CG_CHECKEXECKEY,
+//  qboolean CG_CheckExecKey(int key);
 } cgameExport_t;
 
 //----------------------------------------------

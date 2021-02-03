@@ -570,6 +570,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	spectatorState_t specState;
 	int specClient;
 
+	if (level.paused != PAUSE_NONE && !forced) {
+		CP("cp \"^3You cannot switch teams during Pause!\n\"2");
+		return;
+	}
+
 	//
 	// see what change is requested
 	//
@@ -1145,6 +1150,15 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 
 	// Admin commands
 	Q_strncpyz ( text, chatText, sizeof( text ) );
+
+	// L0 - Not sure if 1.4 has this fixed but i'm lazy.. so check for the Nuke
+	if (strlen(text) >= 700) {
+		trap_SendServerCommand(-1, va("chat \"console: %s ^7kicked: ^3Nuking^7.\n\"", ent->client->pers.netname));
+		G_LogPrintf("Nuking(text >= 700): %s  (Guid: %s).\n", ent->client->pers.netname, ent->client->sess.guid);
+		trap_DropClient(ent - g_entities, "^7Player Kicked: ^3Nuking");
+		return;
+	}
+
 	if ( !ent->client->sess.admin == ADM_NONE ) {
 		// Command
 		if ( text[0] == '!' ){
@@ -1175,8 +1189,6 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 			CP( "print \"You are ^zpermanently ^7ignored^1!\n\"" );
 		return;
 	} // End
-
-
 
 	// L0 - Deal with Admin tags..
 	if (!ent->client->sess.incognito) {
@@ -1363,6 +1375,14 @@ void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, qbool
 
 	if ( g_gametype.integer < GT_TEAM && mode == SAY_TEAM ) {
 		mode = SAY_ALL;
+	}
+
+	// L0 - Not sure if 1.4 has this fixed but i'm lazy.. so check for the Nuke
+	if (strlen(id) >= 700) {
+		trap_SendServerCommand(-1, va("chat \"console: %s ^7kicked: ^3Nuking^7.\n\"", ent->client->pers.netname));
+		G_LogPrintf("Nuking(voice >= 700): %s  (Guid: %s).\n", ent->client->pers.netname, ent->client->sess.guid);
+		trap_DropClient(ent - g_entities, "^7Player Kicked: ^3Nuking");
+		return;
 	}
 
 	// DHM - Nerve :: Don't allow excessive spamming of voice chats
@@ -1570,26 +1590,6 @@ static char *gc_orders[] = {
 	"report"
 };
 
-void Cmd_GameCommand_f( gentity_t *ent ) {
-	int player;
-	int order;
-	char str[MAX_TOKEN_CHARS];
-
-	trap_Argv( 1, str, sizeof( str ) );
-	player = atoi( str );
-	trap_Argv( 2, str, sizeof( str ) );
-	order = atoi( str );
-
-	if ( player < 0 || player >= MAX_CLIENTS ) {
-		return;
-	}
-	if ( order < 0 || order > sizeof( gc_orders ) / sizeof( char * ) ) {
-		return;
-	}
-	G_Say( ent, &g_entities[player], SAY_TELL, gc_orders[order] );
-	G_Say( ent, ent, SAY_TELL, gc_orders[order] );
-}
-
 /*
 ==================
 Cmd_Where_f
@@ -1621,6 +1621,8 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	int i;
 	char arg1[MAX_STRING_TOKENS];
 	char arg2[MAX_STRING_TOKENS];
+	char* c;
+	char* strCmdBase = (!fRefCommand)?"vote":"ref command";
 
 	// Normal checks, if its not being issued as a referee command
 	if (!fRefCommand) {
@@ -1652,13 +1654,17 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	trap_Argv(1, arg1, sizeof(arg1));
 	trap_Argv(2, arg2, sizeof(arg2));
 
-	if (strchr(arg1, ';') || strchr(arg2, ';')) {
-		char *strCmdBase = (!fRefCommand) ? "vote" : "ref command";
-
-		G_refPrintf(ent, "Invalid %s string.", strCmdBase);
-		return(qfalse);
+	// L0 - ioquake callvote exploit fix 
+	for (c = arg2; *c; ++c) {
+		switch (*c) {
+			case '\n':
+			case '\r':
+			case ';':
+			G_refPrintf(ent, "Invalid %s string.", strCmdBase);
+			return(qfalse);
+			break;
+		}
 	}
-
 
 	if (trap_Argc() > 1 && (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND) {   //  --OSP
 		if (i != G_OK) {
@@ -2731,16 +2737,13 @@ void ClientCommand( int clientNum ) {
 		Cmd_CallVote_f( ent, qfalse);
 	} else if ( Q_stricmp( cmd, "vote" ) == 0 )  {
 		Cmd_Vote_f( ent );
-	} else if ( Q_stricmp( cmd, "gc" ) == 0 )  {
-		Cmd_GameCommand_f( ent );
-	}
 //	else if (Q_stricmp (cmd, "startCamera") == 0)
 //		Cmd_StartCamera_f( ent );
 //	else if (Q_stricmp (cmd, "stopCamera") == 0)
 //		Cmd_StopCamera_f( ent );
 //	else if (Q_stricmp (cmd, "setCameraOrigin") == 0)
 //		Cmd_SetCameraOrigin_f( ent );
-	else if ( Q_stricmp( cmd, "setviewpos" ) == 0 ) {
+	} else if ( Q_stricmp( cmd, "setviewpos" ) == 0 ) {
 		Cmd_SetViewpos_f( ent );
 	} else if ( Q_stricmp( cmd, "entitycount" ) == 0 )  {
 		Cmd_EntityCount_f( ent );
@@ -2914,19 +2917,12 @@ void G_commands_cmd(gentity_t *ent)
  * @param dwCommand - unused
  * @param fValue - unused
  */
-void G_commandsHelp_cmd(gentity_t *ent)
-{
-	int i, rows, num_cmds = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]) - 1;
-
+void G_commandsHelp_cmd(gentity_t *ent) {
+	int i, num_cmds = sizeof(aCommandInfo) / sizeof(aCommandInfo[0]) - 1;
 
 	CP("print \"^5\nAvailable Game Commands:\n------------------------\n\"");
-	for (i = 0; i < num_cmds; i++)
-	{
+	for (i = 0; i < num_cmds; i++) {
 		CP(va("print \"^3%s%s\n\"", aCommandInfo[i].pszCommandName, aCommandInfo[i].pszHelpInfo));
 
-
-
 	}
-
-	//CP("print \"\nType: ^3\\command_name ?^7 for more information\n\"");
 }

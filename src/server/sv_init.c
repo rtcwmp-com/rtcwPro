@@ -261,6 +261,8 @@ void SV_Startup( void ) {
 	svs.initialized = qtrue;
 
 	Cvar_Set( "sv_running", "1" );
+
+	NET_JoinMulticast6();
 }
 
 
@@ -449,6 +451,11 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	qboolean isBot;
 	char systemInfo[MAX_INFO_STRING];
 	const char  *p;
+
+	// ydnar: broadcast a level change to all connected clients
+	if (svs.clients && !com_errorEntered) {
+		SV_FinalMessage("spawnserver", qfalse);
+	}
 
 	// shut down the existing game if it is running
 	SV_ShutdownGameProgs();
@@ -819,6 +826,15 @@ void SV_Init( void ) {
 	Cvar_Get( "sv_referencedPaks", "", CVAR_SYSTEMINFO | CVAR_ROM );
 	Cvar_Get( "sv_referencedPakNames", "", CVAR_SYSTEMINFO | CVAR_ROM );
 
+	// Wallhack
+	wh_active = Cvar_Get("wh_active", "0", CVAR_ARCHIVE);
+	// FIXME: adjust bounding box ?
+	wh_bbox_horz = Cvar_Get("wh_bbox_horz", "30", CVAR_ARCHIVE);
+	wh_bbox_vert = Cvar_Get("wh_bbox_vert", "60", CVAR_ARCHIVE);
+	wh_add_xy = Cvar_Get("wh_add_xy", "0", CVAR_ARCHIVE);
+	wh_check_fov = Cvar_Get("wh_check_fov", "0", CVAR_ARCHIVE);
+	SV_InitWallhack();
+
 	// server vars
 	sv_rconPassword = Cvar_Get( "rconPassword", "", CVAR_TEMP );
 	sv_privatePassword = Cvar_Get( "sv_privatePassword", "", CVAR_TEMP );
@@ -832,7 +848,7 @@ void SV_Init( void ) {
 	Cvar_Get( "nextmap", "", CVAR_TEMP );
 
 	sv_allowDownload = Cvar_Get( "sv_allowDownload", "1", CVAR_ARCHIVE );
-	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", 0 );      // NERVE - SMF - wolfMP master server
+	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", CVAR_ARCHIVE );      // NERVE - SMF - wolfMP master server
 	sv_master[1] = Cvar_Get( "sv_master2", "", CVAR_ARCHIVE );
 	sv_master[2] = Cvar_Get( "sv_master3", "", CVAR_ARCHIVE );
 	sv_master[3] = Cvar_Get( "sv_master4", "", CVAR_ARCHIVE );
@@ -884,11 +900,20 @@ void SV_Init( void ) {
 	sv_dl_maxRate = Cvar_Get( "sv_dl_maxRate", "60000", CVAR_ARCHIVE );
 #endif
 
+	// HTTP downloads
+	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
+	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "", CVAR_ARCHIVE);
+	sv_wwwDlDisconnected = Cvar_Get("sv_wwwDlDisconnected", "0", CVAR_ARCHIVE);
+	sv_wwwFallbackURL = Cvar_Get("sv_wwwFallbackURL", "", CVAR_ARCHIVE);
+
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
 
 	// init the botlib here because we need the pre-compiler in the UI
 	SV_BotInitBotLib();
+
+	// Load saved Bans
+	Cbuf_AddText("rehashbans\n");
 
 	SV_LoadModels();
 
@@ -926,7 +951,7 @@ not just stuck on the outgoing message list, because the server is going
 to totally exit after returning from this function.
 ==================
 */
-void SV_FinalMessage( char *message ) {
+void SV_FinalMessage( char *message, qboolean disconnect) {
 	int i, j;
 	client_t    *cl;
 
@@ -937,7 +962,9 @@ void SV_FinalMessage( char *message ) {
 				// don't send a disconnect to a local client
 				if ( cl->netchan.remoteAddress.type != NA_LOOPBACK ) {
 					SV_SendServerCommand( cl, "print \"%s\"", message );
-					SV_SendServerCommand( cl, "disconnect" );
+					if (disconnect) {
+						SV_SendServerCommand(cl, "disconnect \"%s\"", message);
+					}
 				}
 				// force a snapshot to be sent
 				cl->nextSnapshotTime = -1;
@@ -963,8 +990,10 @@ void SV_Shutdown( char *finalmsg ) {
 
 	Com_Printf( "----- Server Shutdown -----\n" );
 
+	NET_LeaveMulticast6();
+
 	if ( svs.clients && !com_errorEntered ) {
-		SV_FinalMessage( finalmsg );
+		SV_FinalMessage( finalmsg, qtrue);
 	}
 
 	SV_RemoveOperatorCommands();

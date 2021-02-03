@@ -238,6 +238,8 @@ A respawn happened this snapshot
 ================
 */
 void CG_Respawn( void ) {
+	cg.serverRespawning = qfalse;   // Arnout: just in case
+
 	// no error decay on player movement
 	cg.thisFrameTeleport = qtrue;
 

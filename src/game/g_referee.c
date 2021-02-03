@@ -181,6 +181,9 @@ void G_ref_cmd(gentity_t *ent, qboolean fValue) { //unsigned int dwCommand,
 
 		ent->client->sess.referee = 1;
 		ent->client->sess.spec_invite = TEAM_RED | TEAM_BLUE;
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_NORMAL;
+		}
 		AP(va("cp \"%s\n^3has become a referee\n\"", ent->client->pers.netname));
 		ClientUserinfoChanged(ent - g_entities);
 	}
@@ -549,6 +552,10 @@ void G_RemoveReferee() {
 	if (cnum != MAX_CLIENTS) {
 		if (level.clients[cnum].sess.referee == RL_REFEREE) {
 			level.clients[cnum].sess.referee = RL_NONE;
+
+			if (level.paused != PAUSE_NONE) {
+				level.clients[cnum].ps.pm_type = PM_FREEZE;
+			}
 			G_Printf("%s is no longer a referee.\n", cmd);
 		}
 		else {

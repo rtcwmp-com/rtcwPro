@@ -92,7 +92,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GIANT_WIDTH         32
 #define GIANT_HEIGHT        48
 
-#define NUM_CROSSHAIRS      10
+#define NUM_CROSSHAIRS      16
 
 // Ridah, trails
 #define STYPE_STRETCH   0
@@ -1206,6 +1206,8 @@ typedef struct {
 	// Time Counter
 	int timein;
 	int timeCounter;
+
+	qboolean serverRespawning;
 // -OSPx
 
 	// RTCWPro - cvar limiting
@@ -2140,6 +2142,9 @@ extern vmCvar_t cg_speedY;
 //added from et - nihi
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
+
+// added from et-legacy - crumbs
+extern vmCvar_t cg_tracers;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);

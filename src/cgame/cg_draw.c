@@ -1577,6 +1577,12 @@ static void CG_DrawDisconnect( void ) {
 		return;
 	}
 
+	// ydnar: don't draw if the server is respawning
+	if (cg.serverRespawning) {
+		return;
+	}
+
+
 	// draw the phone jack if we are completely past our buffers
 	cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
 	trap_GetUserCmd( cmdNum, &cmd );
@@ -1979,7 +1985,7 @@ static void CG_DrawPopinString(void) {
 	}
 
 	if (cg.popinBlink)
-		color[3] = fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
+		color[3] = Q_fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
 
 	while (1) {
 		char linebuffer[1024];
@@ -3315,13 +3321,14 @@ static void CG_DrawFlashFade( void ) {
 		VectorClear( col );
 		col[3] = ( fBlackout ) ? 1.0f : cgs.fadeAlphaCurrent;
 		CG_FillRect( -10, -10, 650, 490, col );
+		CG_DrawScoreboard();
 		//bani - #127 - bail out if we're a speclocked spectator with cg_draw2d = 0
 		if ( cgs.clientinfo[ cg.clientNum ].team == TEAM_SPECTATOR && !cg_draw2D.integer ) {
 			return;
 		}
 
 		// OSP - Show who is speclocked
-		if ( fBlackout ) {
+		if ( fBlackout  && !cg.showScores) {
 			int i, nOffset = 90;
 			char *str, *format = "The %s team is speclocked!";
 			char *teams[TEAM_NUM_TEAMS] = { "??", "AXIS", "ALLIED", "???" };
@@ -3408,7 +3415,7 @@ static void CG_DrawFlashDamage( void ) {
 	}
 
 	if ( cg.v_dmg_time > cg.time ) {
-		redFlash = fabs( cg.v_dmg_pitch * ( ( cg.v_dmg_time - cg.time ) / DAMAGE_TIME ) );
+		redFlash = Q_fabs( cg.v_dmg_pitch * ( ( cg.v_dmg_time - cg.time ) / DAMAGE_TIME ) );
 
 		// blend the entire screen red
 		if ( redFlash > 5 ) {
@@ -3744,10 +3751,10 @@ void CG_DrawObjectiveIcons() {
 
 	// OSPx - Print fancy warmup in corner..
 	if (cgs.gamestate != GS_PLAYING) {
-		fade = fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
+		fade = Q_fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
 		s = va("^3Warmup");
 	} else if (msec < 0) {
-		fade = fabs( sin( cg.time * 0.002 ) ) * cg_hudAlpha.value;
+		fade = Q_fabs( sin( cg.time * 0.002 ) ) * cg_hudAlpha.value;
 		s = va( "0:00" );
 	} else {
 		s = va( "%i:%i%i", mins, tens, seconds ); // float cast to line up with reinforce time
@@ -4353,7 +4360,7 @@ void CG_ShakeCamera() {
 
 	// JPW NERVE starts at 1, approaches 0 over time
 	x = ( cg.cameraShakeTime - cg.time ) / cg.cameraShakeLength;
-/*
+
 	// OSPx - NQ's shake cam..
 	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[2] += val;
@@ -4362,17 +4369,7 @@ void CG_ShakeCamera() {
 	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
 	cg.refdef.vieworg[0] += val;
 	// End
-*/   // nihi commented for shake
 
-
-	// up/down
-
-	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
-	cg.refdefViewAngles[0] += val;
-
-	// left/right
-	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
-	cg.refdefViewAngles[1] += val;
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 }
 // -NERVE - SMF

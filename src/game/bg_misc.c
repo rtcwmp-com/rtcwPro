@@ -3406,7 +3406,6 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 	int needsAmmo = qfalse;
 	int maxammo;
 	int clip;
-	int weapNumOfClips;
 
 	// Gordon: handle grenades first
 	i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS]);

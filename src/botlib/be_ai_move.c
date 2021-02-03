@@ -1213,7 +1213,7 @@ void BotCheckBlocked( bot_movestate_t *ms, vec3_t dir, int checkbottom, bot_move
 	//test for entities obstructing the bot's path
 	AAS_PresenceTypeBoundingBox( ms->presencetype, mins, maxs );
 	//
-	if ( fabs( DotProduct( dir, up ) ) < 0.7 ) {
+	if ( Q_fabs( DotProduct( dir, up ) ) < 0.7 ) {
 		mins[2] += sv_maxstep; //if the bot can step on
 		maxs[2] -= 10; //a little lower to avoid low ceiling
 	} //end if
@@ -2265,7 +2265,7 @@ bot_moveresult_t BotFinishTravel_Elevator( bot_movestate_t *ms, aas_reachability
 	//
 	VectorSubtract( reach->end, ms->origin, topdir );
 	//
-	if ( fabs( bottomdir[2] ) < fabs( topdir[2] ) ) {
+	if ( Q_fabs( bottomdir[2] ) < Q_fabs( topdir[2] ) ) {
 		VectorNormalize( bottomdir );
 		EA_Move( ms->client, bottomdir, 300 );
 	} //end if
@@ -2768,8 +2768,8 @@ bot_moveresult_t BotTravel_Grapple( bot_movestate_t *ms, aas_reachability_t *rea
 		result.flags |= MOVERESULT_MOVEMENTVIEW;
 		//
 		if ( dist < 5 &&
-			 fabs( AngleDiff( result.ideal_viewangles[0], ms->viewangles[0] ) ) < 2 &&
-			 fabs( AngleDiff( result.ideal_viewangles[1], ms->viewangles[1] ) ) < 2 ) {
+			 Q_fabs( AngleDiff( result.ideal_viewangles[0], ms->viewangles[0] ) ) < 2 &&
+			 Q_fabs( AngleDiff( result.ideal_viewangles[1], ms->viewangles[1] ) ) < 2 ) {
 #ifdef DEBUG_GRAPPLE
 			botimport.Print( PRT_MESSAGE, "BotTravel_Grapple: activating grapple\n" );
 #endif //DEBUG_GRAPPLE

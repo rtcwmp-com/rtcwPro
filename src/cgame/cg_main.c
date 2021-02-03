@@ -41,6 +41,7 @@ displayContextDef_t cgDC;
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
+qboolean CG_CheckExecKey(int key);
 
 /*
 ================
@@ -88,6 +89,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_GetTag( arg0, (char *)arg1, (orientation_t *)arg2 );
 	case CG_CHECKCENTERVIEW:
 		return CG_CheckCenterView();
+	case CG_CHECKEXECKEY:
+		return CG_CheckExecKey(arg0);
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -291,6 +294,8 @@ vmCvar_t cg_crosshairAlpha;
 vmCvar_t cg_crosshairAlphaAlt;
 vmCvar_t cg_crosshairColor;
 vmCvar_t cg_crosshairColorAlt;
+vmCvar_t cg_crosshairX;
+vmCvar_t cg_crosshairY;
 vmCvar_t cg_coloredCrosshairNames;
 vmCvar_t cg_drawWeaponIconFlash;
 vmCvar_t cg_printObjectiveInfo;
@@ -367,6 +372,9 @@ vmCvar_t int_ui_blackout;
 // added from et
 vmCvar_t cg_spawnTimer_set;         // spawntimer
 vmCvar_t cg_spawnTimer_period;      // spawntimer
+
+// added from et-legacy - crumbs
+vmCvar_t cg_tracers;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -619,6 +627,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },
 	{ &cg_speedX, "cg_speedX", "315", CVAR_ARCHIVE },
 	{ &cg_speedY, "cg_speedY", "340", CVAR_ARCHIVE },
+
+	// draw tracers
+	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -1535,8 +1546,8 @@ static void CG_RegisterGraphics( void ) {
 //----(SA)	end
 
 	for ( i = 0 ; i < NUM_CROSSHAIRS ; i++ ) {
-		cgs.media.crosshairShader[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_OSPx", 'a' + i ) );
-		cg.crosshairShaderAlt[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_alt_OSPx", 'a' + i ) );
+		cgs.media.crosshairShader[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_rtcwpro", 'a' + i ) );
+		cg.crosshairShaderAlt[i] = trap_R_RegisterShader( va( "gfx/2d/crosshair%c_alt_rtcwpro", 'a' + i ) );
 	}
 
 	// L0 - Charset
@@ -2755,3 +2766,13 @@ void CG_Shutdown( void ) {
 	cvarsLoaded = qfalse;
 }
 
+/*
+=================
+CG_CheckExecKey
+
+L0 - we'll need this later on ..
+=================
+*/
+qboolean CG_CheckExecKey(int key) {
+	return qfalse;
+}

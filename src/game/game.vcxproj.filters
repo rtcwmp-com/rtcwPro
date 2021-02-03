@@ -187,9 +187,6 @@
     <ClCompile Include="g_utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_vehicles.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_vote.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -323,5 +320,9 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{b37a064e-a701-4410-b6ee-5263e890836d}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile" />
+    <None Include="game.def" />
   </ItemGroup>
 </Project>

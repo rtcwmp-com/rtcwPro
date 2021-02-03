@@ -429,7 +429,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		}
 
 		// L0 - Pause
-		if ( level.paused != PAUSE_NONE ) {
+		if ( level.paused != PAUSE_NONE && client->sess.referee == RL_NONE) {
 			client->ps.pm_type = PM_FREEZE;
 			ucmd->buttons = 0;
 			ucmd->forwardmove = 0;
@@ -952,7 +952,7 @@ void G_SwingAngles(float destination, float swingTolerance, float clampTolerance
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract(destination, *angle);
-	scale = fabs(swing);
+	scale = Q_fabs(swing);
 	scale *= 0.05;
 	if (scale < 0.5)
 		scale = 0.5;
@@ -1056,7 +1056,7 @@ void G_PlayerAngles(gentity_t* ent, int msec) {
 		}
 		else {	// must be firing
 			torsoAngles[YAW] = headAngles[YAW];	// always face firing direction
-												//if (fabs(cent->currentState.angles2[YAW]) > 30)
+												//if (Q_fabs(cent->currentState.angles2[YAW]) > 30)
 												//	legsAngles[YAW] = headAngles[YAW];
 			clampTolerance = 60;
 		}

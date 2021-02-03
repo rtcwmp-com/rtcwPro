@@ -130,8 +130,8 @@ static const int numSortKeys = sizeof( sortKeys ) / sizeof( const char* );
 
 static char* netnames[] = {
 	"???",
-	"UDP",
-	"IPX",
+	"IPv4",
+	"IPv6",
 	NULL
 };
 
@@ -369,10 +369,10 @@ void AssetCache() {
 	uiInfo.uiDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 
 	for ( n = 0; n < NUM_CROSSHAIRS; n++ ) {
-		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_OSPx", 'a' + n ) );  //nihi commented
+		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_rtcwpro", 'a' + n ) );  //nihi commented
 	//	uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c", 'a' + n ) );  //nihi addded
 		// OSPx - Crosshairs
-        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_OSPx", 'a' + n)); //nihi commented
+        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_rtcwpro", 'a' + n)); //nihi commented
 //		uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n)); //nihi added
 	}
 
@@ -6215,19 +6215,21 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 			}
 			switch ( column ) {
 			case SORT_HOST:
-				if ( ping <= 0 ) {
-					return Info_ValueForKey( info, "addr" );
-				} else {
-					if ( ui_netSource.integer == AS_LOCAL ) {
-						Com_sprintf( hostname, sizeof( hostname ), "%s [%s]",
-									 Info_ValueForKey( info, "hostname" ),
-									 netnames[atoi( Info_ValueForKey( info, "nettype" ) )] );
-						return hostname;
-					} else {
-						return Info_ValueForKey( info, "hostname" );
-					}
+				if (ping <= 0) {
+					return Info_ValueForKey(info, "addr");
 				}
+				else {
+					int nettype = atoi(Info_ValueForKey(info, "nettype"));
 
+					if (nettype < 0 || nettype >= ARRAY_LEN(netnames)) {
+						nettype = 0;
+					}
+
+					Com_sprintf(hostname, sizeof(hostname), "^7[^n%s^7]  %s",
+						netnames[nettype],
+						Info_ValueForKey(info, "hostname"));
+					return hostname;
+				}
 			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
 			/*case SORT_MAP:
 				if (Info_ValueForKey( info, "mapname" ) != "" )
@@ -8042,7 +8044,6 @@ UI_StartServerRefresh
 =================
 */
 static void UI_StartServerRefresh( qboolean full ) {
-	int i;
 	char    *ptr;
 
 	qtime_t q;
@@ -8071,18 +8072,14 @@ static void UI_StartServerRefresh( qboolean full ) {
 	}
 
 	uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 5000;
-	if ( ui_netSource.integer == AS_GLOBAL || ui_netSource.integer == AS_MPLAYER ) {
-		if ( ui_netSource.integer == AS_GLOBAL ) {
-			i = 0;
-		} else {
-			i = 1;
-		}
+	if (ui_netSource.integer == AS_GLOBAL) {
 
-		ptr = UI_Cvar_VariableString( "debug_protocol" );
-		if ( strlen( ptr ) ) {
-			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %s full empty\n", i, ptr ) );
-		} else {
-			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %d full empty\n", i, (int)trap_Cvar_VariableValue( "protocol" ) ) );
+		ptr = UI_Cvar_VariableString("debug_protocol");
+		if (strlen(ptr)) {
+			trap_Cmd_ExecuteText(EXEC_NOW, va("globalservers 0 %s full empty\n", ptr));
+		}
+		else {
+			trap_Cmd_ExecuteText(EXEC_NOW, va("globalservers 0 %d full empty\n", (int)trap_Cvar_VariableValue("protocol")));
 		}
 	}
 }

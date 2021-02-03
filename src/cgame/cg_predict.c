@@ -710,7 +710,7 @@ void CG_PredictPlayerState( void ) {
 				}
 				cg.thisFrameTeleport = qfalse;
 			} else {
-				vec3_t adjusted, new_angles; //vec3_t adjusted;
+				vec3_t adjusted; //vec3_t adjusted;
 				CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
 				//cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, cg.predictedPlayerState.viewangles, new_angles);
 				cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles );
@@ -757,6 +757,12 @@ void CG_PredictPlayerState( void ) {
 		if ( cg_pmove.pmove_fixed ) {
 			cg_pmove.cmd.serverTime = ( ( cg_pmove.cmd.serverTime + pmove_msec.integer - 1 ) / pmove_msec.integer ) * pmove_msec.integer;
 		}
+
+		// ydnar: if server respawning, freeze the player
+		if (cg.serverRespawning) {
+			cg_pmove.ps->pm_type = PM_FREEZE;
+		}
+
 
 		// RF, if waiting for mission stats to go, ignore all input
 		if ( strlen( cg_missionStats.string ) > 1 || cg_norender.integer ) {
