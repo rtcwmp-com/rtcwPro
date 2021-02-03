@@ -1,11 +1,6 @@
 #include "g_local.h"
 #include "g_stats.h"
-//#include <jansson.h>
-#ifdef _WIN32
-#include "../qcommon/jansson_win/jansson.h"
-#else
-#include "../qcommon/jansson/jansson.h"
-#endif // _WIN32
+#include <jansson.h>
 #include <mongoc/mongoc.h>
 //#include "../libmongoc-1.0/mongoc/mongoc.h"
 #include <time.h>
