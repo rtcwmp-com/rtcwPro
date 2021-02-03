@@ -3,10 +3,10 @@ CC = gcc
 
 CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -m32 \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
--falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -I./../qcommon/jansson/  \
--I./../../libs/curl-7.29.0/include/ -I./../libmongoc-1.0
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -I./../qcommon/jansson/ -I../../libs/mongo-c-driver-1.17.4/include/libbson-1.0/ -I./../../libs/mongo-c-driver-1.17.4/include/libmongoc-1.0/ \
+-I./../../libs/curl-7.29.0/include/ 
 
-LDFLAGS = -I./../qcommon/jansson -I./../libmongoc-1.0 -lmongoc-1.0 -lcurl 
+LDFLAGS = -I./../qcommon/jansson -I./../../libs/mongo-c-driver-1.17.4/lib -lmongoc-1.0 -lcurl 
 #-I/usr/local/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0 -lmongoc-1.0 -lbson-1.0 -lcurl 
 #-ljansson
 
