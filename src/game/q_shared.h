@@ -31,8 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-// L0 - Never modify codename without knowing what and where is being used for.
-#define CODENAME		"BlazkowiczIsBack"
 #define Q3_VERSION      "Wolf 1.41b-MP"
 
 // 1.41b-MP: fix autodl sploit
@@ -1659,14 +1657,17 @@ typedef enum {
 #define VOTEFLAGS_KICK              ( 1 << 6 )
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
 
+//
 // L0 
+// New stuff bellow
+//
 #define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
 #define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
 #define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
 #define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
 #define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
+#define GUID_LEN				33
 
-// L0 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
 qboolean clientIsConnected;

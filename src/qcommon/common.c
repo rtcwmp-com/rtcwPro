@@ -30,6 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../game/q_shared.h"
 #include "qcommon.h"
+#ifndef  DEDICATED
+#include "md5.h"
+#endif // ! DEDICATED
 #include <setjmp.h>
 #ifndef  _WIN32
 #include <stdint.h>
@@ -2323,7 +2326,10 @@ void Com_ReadCDKey( const char *filename ) {
 	FS_FCloseFile( f );
 
 	if ( CL_CDKeyValidate( buffer, NULL ) ) {
-		Q_strncpyz( cl_cdkey, buffer, 17 );
+		Q_strncpyz(cl_cdkey, buffer, 17);
+#ifndef DEDICATED
+		Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+#endif // !DEDICATED
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
@@ -2404,6 +2410,10 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	FS_Printf( f, "// id Software and Activision will NOT ask you to send this file to them.\r\n" );
 #endif
 	FS_FCloseFile( f );
+
+#ifndef DEDICATED
+	Cvar_Set("cl_guid", Com_MD5(key, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+#endif // !DEDICATED
 }
 #endif
 

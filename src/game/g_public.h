@@ -28,6 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 
 
 // g_public.h -- game module information visible to server
+#ifndef __G_PUBLIC_H
+#define __G_PUBLIC_H
 
 #define GAME_API_VERSION    8
 
@@ -468,3 +470,4 @@ typedef enum {
 
 } gameExport_t;
 
+#endif // !__G_PUBLIC_H

@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "client.h"
 #include <limits.h>
+#include "../qcommon/http.h"
 
 #ifdef __linux__
 #include <sys/stat.h>
@@ -95,8 +96,16 @@ cvar_t  *cl_debugTranslation;
 cvar_t  *cl_updateavailable;
 cvar_t  *cl_updatefiles;
 // DHM - Nerve
-// L0 - HTTP Downloads ..
+
+// L0 
+//HTTP Downloads ..
 cvar_t* cl_wwwDownload;
+
+// Streaming
+cvar_t* cl_StreamingSelfSignedCert;
+cvar_t* cl_guid;
+
+// ~L0
 
 clientActive_t cl;
 clientConnection_t clc;
@@ -946,6 +955,29 @@ void CL_RequestMotd( void ) {
 
 /*
 ===================
+CL_RequestMotd
+
+L0 - Patched for HTTP
+===================
+*/
+void CL_infoRequestMotd(void) {
+	char* result;
+
+	if (!cl_motd->integer) {
+		return;
+	}
+
+	// Query it now
+	result = HTTP_ClientGetMOTD();
+
+	// Set MOTD for newsflash..
+	if (result) {
+		Cvar_Set("cl_motdString", result);
+	}
+}
+
+/*
+===================
 CL_RequestAuthorization
 
 Authorization server protocol
@@ -982,42 +1014,43 @@ If no response is received from the authorize server after two tries, the client
 in anyway.
 ===================
 */
-void CL_RequestAuthorization( void ) {
+void CL_RequestAuthorization(void) {
 	char nums[64];
 	int i, j, l;
-	cvar_t  *fs;
+	cvar_t* fs;
 
-	if ( !cls.authorizeServer.port ) {
-		Com_Printf( "Resolving %s\n", AUTHORIZE_SERVER_NAME );
-		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &cls.authorizeServer, NA_IP) ) {
-			Com_Printf( "Couldn't resolve address\n" );
+	if (!cls.authorizeServer.port) {
+		Com_Printf("Resolving %s\n", AUTHORIZE_SERVER_NAME);
+		if (!NET_StringToAdr(AUTHORIZE_SERVER_NAME, &cls.authorizeServer, NA_IP)) {
+			Com_Printf("Couldn't resolve address\n");
 			return;
 		}
 
-		cls.authorizeServer.port = BigShort( PORT_AUTHORIZE );
-		Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", AUTHORIZE_SERVER_NAME,
-					cls.authorizeServer.ip[0], cls.authorizeServer.ip[1],
-					cls.authorizeServer.ip[2], cls.authorizeServer.ip[3],
-					BigShort( cls.authorizeServer.port ) );
+		cls.authorizeServer.port = BigShort(PORT_AUTHORIZE);
+		Com_Printf("%s resolved to %i.%i.%i.%i:%i\n", AUTHORIZE_SERVER_NAME,
+			cls.authorizeServer.ip[0], cls.authorizeServer.ip[1],
+			cls.authorizeServer.ip[2], cls.authorizeServer.ip[3],
+			BigShort(cls.authorizeServer.port));
 	}
-	if ( cls.authorizeServer.type == NA_BAD ) {
+	if (cls.authorizeServer.type == NA_BAD) {
 		return;
 	}
 
-	if ( Cvar_VariableValue( "fs_restrict" ) ) {
-		Q_strncpyz( nums, "demo", sizeof( nums ) );
-	} else {
+	if (Cvar_VariableValue("fs_restrict")) {
+		Q_strncpyz(nums, "demo", sizeof(nums));
+	}
+	else {
 		// only grab the alphanumeric values from the cdkey, to avoid any dashes or spaces
 		j = 0;
-		l = strlen( cl_cdkey );
-		if ( l > 32 ) {
+		l = strlen(cl_cdkey);
+		if (l > 32) {
 			l = 32;
 		}
-		for ( i = 0 ; i < l ; i++ ) {
-			if ( ( cl_cdkey[i] >= '0' && cl_cdkey[i] <= '9' )
-				 || ( cl_cdkey[i] >= 'a' && cl_cdkey[i] <= 'z' )
-				 || ( cl_cdkey[i] >= 'A' && cl_cdkey[i] <= 'Z' )
-				 ) {
+		for (i = 0; i < l; i++) {
+			if ((cl_cdkey[i] >= '0' && cl_cdkey[i] <= '9')
+				|| (cl_cdkey[i] >= 'a' && cl_cdkey[i] <= 'z')
+				|| (cl_cdkey[i] >= 'A' && cl_cdkey[i] <= 'Z')
+				) {
 				nums[j] = cl_cdkey[i];
 				j++;
 			}
@@ -1025,8 +1058,8 @@ void CL_RequestAuthorization( void ) {
 		nums[j] = 0;
 	}
 
-	fs = Cvar_Get( "cl_anonymous", "0", CVAR_INIT | CVAR_SYSTEMINFO );
-	NET_OutOfBandPrint( NS_CLIENT, cls.authorizeServer, va( "getKeyAuthorize %i %s", fs->integer, nums ) );
+	fs = Cvar_Get("cl_anonymous", "0", CVAR_INIT | CVAR_SYSTEMINFO);
+	NET_OutOfBandPrint(NS_CLIENT, cls.authorizeServer, va("getKeyAuthorize %i %s", fs->integer, nums));
 }
 
 /*
@@ -2716,56 +2749,46 @@ void CL_StartHunkUsers( void ) {
 	}
 }
 
-// DHM - Nerve
-void CL_CheckAutoUpdate( void ) {
-	int validServerNum = 0;
-	int i = 0, rnd = 0;
-	char        *servername;
+/*
+============================
+CL_CheckAutoUpdate
 
-	if ( !cl_autoupdate->integer ) {
+L0 - This is good, we can use this for basis.
+============================
+*/
+void CL_CheckAutoUpdate(void) {
+	char* reply = NULL;
+
+	if (!cl_autoupdate->integer) {
 		return;
 	}
 
 	// Only check once per session
-	if ( autoupdateChecked ) {
+	if (autoupdateChecked) {
+		printf("Updated checked already..");
 		return;
 	}
 
-	srand( Com_Milliseconds() );
+	srand(Com_Milliseconds());
+	//if (!NET_StringToAdr(WEB_GET_UPDATE, &cls.autoupdateServer, NA_IP)) {
+	//	return;
+	//}
 
-	// L0 - We do not need more then one..	
-	if (!NET_StringToAdr(UPDATE_SERVER_NAME, &cls.autoupdateServer, NA_IP)) {
+	reply = HTTP_ClientNeedsUpdate();
+	if (!reply) {
 		return;
 	}
 
-	// Pick a random server
-	if ( validServerNum > 1 ) {
-		rnd = rand() % validServerNum;
-	} else {
-		rnd = 0;
+	Cmd_TokenizeString(reply);
+
+	// If it's not silent then bail out
+	if (!Q_stricmp(Cmd_Argv(0), "updtAvailable")) {
+		Com_Error(ERR_FATAL, Cmd_ArgsFrom(1));
+		return;
 	}
 
-	servername = cls.autoupdateServerNames[rnd];
-
-	Com_DPrintf( "Resolving AutoUpdate Server... " );
-	if ( !NET_StringToAdr( servername, &cls.autoupdateServer, NA_IP  ) ) {
-		Com_DPrintf( "Couldn't resolve first address, trying default..." );
-
-		// Fall back to the first one
-		if ( !NET_StringToAdr( cls.autoupdateServerNames[0], &cls.autoupdateServer, NA_IP  ) ) {
-			Com_DPrintf( "Failed to resolve any Auto-update servers.\n" );
-			autoupdateChecked = qtrue;
-			return;
-		}
-	}
-	cls.autoupdateServer.port = BigShort( PORT_SERVER );
-	Com_DPrintf( "%i.%i.%i.%i:%i\n", cls.autoupdateServer.ip[0], cls.autoupdateServer.ip[1],
-				 cls.autoupdateServer.ip[2], cls.autoupdateServer.ip[3],
-				 BigShort( cls.autoupdateServer.port ) );
-
-	NET_OutOfBandPrint( NS_CLIENT, cls.autoupdateServer, "getUpdateInfo \"%s\" \"%s\"\n", Q3_VERSION, CPUSTRING );
-
-	CL_RequestMotd();
+	// Fetch MOTD..
+	CL_infoRequestMotd();
 
 	autoupdateChecked = qtrue;
 }
@@ -3059,6 +3082,8 @@ void CL_Init( void ) {
 	cl_allowDownload = Cvar_Get( "cl_allowDownload", "0", CVAR_ARCHIVE );
 	cl_wwwDownload = Cvar_Get("cl_wwwDownload", "1", CVAR_USERINFO | CVAR_ARCHIVE);
 
+	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
+
 	// init autoswitch so the ui will have it correctly even
 	// if the cgame hasn't been started
 	// -NERVE - SMF - disabled autoswitch by default
@@ -3085,6 +3110,11 @@ void CL_Init( void ) {
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
+
+	cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM | CVAR_USERINFO);
+	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
+		CL_SetGuid();
+	}
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
 
@@ -3149,12 +3179,7 @@ void CL_Init( void ) {
 	// DHM - Nerve :: Auto-update
 	cl_updateavailable = Cvar_Get( "cl_updateavailable", "0", CVAR_ROM );
 	cl_updatefiles = Cvar_Get( "cl_updatefiles", "", CVAR_ROM );
-
-	Q_strncpyz( cls.autoupdateServerNames[0], AUTOUPDATE_SERVER1_NAME, MAX_QPATH );
-	Q_strncpyz( cls.autoupdateServerNames[1], AUTOUPDATE_SERVER2_NAME, MAX_QPATH );
-	Q_strncpyz( cls.autoupdateServerNames[2], AUTOUPDATE_SERVER3_NAME, MAX_QPATH );
-	Q_strncpyz( cls.autoupdateServerNames[3], AUTOUPDATE_SERVER4_NAME, MAX_QPATH );
-	Q_strncpyz( cls.autoupdateServerNames[4], AUTOUPDATE_SERVER5_NAME, MAX_QPATH );
+	cls.autoupdateServerName = UPDATE_SERVER_NAME;
 	// DHM - Nerve
 
 	//

@@ -1792,7 +1792,6 @@ void ClientUserinfoChanged( int clientNum ) {
 
 }
 
-
 /*
 ===========
 ClientConnect
@@ -1833,15 +1832,6 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 	}
 
-	// L0 - ASCII name bug crap..
-	value = Info_ValueForKey(userinfo, "name");
-	for (i = 0; i < strlen(value); i++) {
-		if (value[i] < 0) {
-			// extended ASCII chars have values between -128 and 0 (signed char)
-			return "Change your name, extended ASCII chars are ^1NOT allowed!";
-		}
-	}
-
 	// IP filtering
 	// show_bug.cgi?id=500
 	// recommanding PB based IP / GUID banning, the builtin system is pretty limited
@@ -1849,6 +1839,13 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	value = Info_ValueForKey( userinfo, "ip" );
 	if ( G_FilterIPBanPacket( value ) ) {
 		return "You are banned from this server.";
+	}
+
+	// Auth client
+	if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
+		if (!Info_ValueForKey(userinfo, "cl_guid")) {
+			return "Valid GUID is required to enter this server.";
+		}
 	}
 
 	// Xian - check for max lives enforcement ban

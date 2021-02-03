@@ -299,6 +299,11 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd ) {
 
 //==============================================
 
+/*
+====================
+FloatAsInt
+====================
+*/
 static int  FloatAsInt( float f ) {
 	int temp;
 
@@ -890,7 +895,6 @@ int SV_GameSystemCalls( int *args ) {
 
 	case TRAP_CEIL:
 		return FloatAsInt( ceil( VMF( 1 ) ) );
-
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );

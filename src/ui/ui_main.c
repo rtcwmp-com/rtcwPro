@@ -40,6 +40,7 @@ USER INTERFACE MAIN
 */
 
 #include "ui_local.h"
+#include "../qcommon/qcommon.h"
 
 // NERVE - SMF
 #define AXIS_TEAM       0
