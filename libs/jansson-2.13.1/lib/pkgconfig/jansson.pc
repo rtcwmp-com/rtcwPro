@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=/home/greg/RTCWxMod/OSPx/rtcwPro/ospx/libs/jansson-2.13.1/lib
+includedir=/home/greg/RTCWxMod/OSPx/rtcwPro/ospx/libs/jansson-2.13.1/include
+
+Name: Jansson
+Description: Library for encoding, decoding and manipulating JSON data
+Version: 2.13.1
+Libs: -L${libdir} -ljansson
+Cflags: -I${includedir}
