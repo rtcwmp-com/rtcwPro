@@ -1,0 +1,11 @@
+prefix=/home/greg/RTCWxMod/OSPx/rtcwPro/ospx/libs/mongo-c-driver-1.17.4
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${exec_prefix}/include
+
+Name: libmongoc
+Description: The libmongoc MongoDB client library.
+Version: 1.17.4
+Requires: libbson-1.0
+Libs: -L${libdir} -lmongoc-1.0
+Cflags: -I${includedir}/libmongoc-1.0
