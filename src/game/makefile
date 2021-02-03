@@ -1,13 +1,11 @@
 CC = gcc
 
 
-CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -m32 \
+CFLAGS =  -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -m32 \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
--falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -I./../qcommon/jansson/ -I../../libs/mongo-c-driver-1.17.4/include/libbson-1.0/ -I./../../libs/mongo-c-driver-1.17.4/include/libmongoc-1.0/ \
--I./../../libs/curl-7.29.0/include/ 
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -I./../qcommon/jansson/
 
-LDFLAGS = -I./../qcommon/jansson -I./../../libs/mongo-c-driver-1.17.4/lib -lmongoc-1.0 -lcurl 
-#-I/usr/local/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0 -lmongoc-1.0 -lbson-1.0 -lcurl 
+LDFLAGS = -I./../qcommon/jansson 
 #-ljansson
 
 SOURCES = $(shell ls  ../qcommon/jansson/*.c g_*.c q_*.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c  ../qcommon/crypto/sha-1/sha1.c )
