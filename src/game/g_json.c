@@ -942,7 +942,7 @@ void G_writeGameEarlyExit(void)
     //json_object_set_new(jdata, "label",    json_string("map_restart"));
     if (level.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
-        sendToMongo(s);  // mongodb
+//        sendToMongo(s);  // mongodb
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
         json_decref(jdata);
@@ -985,7 +985,7 @@ int G_teamAlive(int team ) {
 }
 
 // Bad location for this....plan to move
-#if 0
+/*
 int sendToMongo(char* jsondata)
 {
     if (!(g_stats_mongodb.integer)) { // make a better cvar depending on if the mongodb will be user specified or whatever
@@ -1044,7 +1044,8 @@ int sendToMongo(char* jsondata)
 
    return 1;
 }
-#endif
+
+*/
 //  BAD LOCATION FOR THE STUFF BELOW TOO...BEING LAZY...WILL REARRANGE LATER
 //
 //
