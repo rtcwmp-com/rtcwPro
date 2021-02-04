@@ -24,8 +24,6 @@ VERSION_RELEASED
 
 # Windows things
 *.sdf
-*.sln
-*.vcxproj*
 .vs
 Debug
 install_manifest.txt

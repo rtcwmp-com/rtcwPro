@@ -1,0 +1,338 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6158B93D-1A8E-3F1D-8186-B5B22EA44542}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>bson-validate</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bson-validate.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bson-validate</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bson-validate.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bson-validate</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">bson-validate.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">bson-validate</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">bson-validate.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">bson-validate</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>Debug\bson-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/Debug/bson-validate.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/Debug/bson-validate.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>Release\bson-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/Release/bson-validate.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/Release/bson-validate.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>MinSizeRel/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>MinSizeRel\bson-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/MinSizeRel/bson-validate.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/MinSizeRel/bson-validate.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>RelWithDebInfo/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;COMMON_PREFIX_=_bson_common;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\..\..\src\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>RelWithDebInfo\bson-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/RelWithDebInfo/bson-validate.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/RelWithDebInfo/bson-validate.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/mongo-c-driver -BE:/Pub/Projects/rtcwPro/libs/mongo-c-driver --check-stamp-file E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt;C:\Program Files\CMake\share\cmake-3.14\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakeConfigurableFile.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPack.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPackComponent.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.c;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckStructHasMember.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckSymbolExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\InstallRequiredSystemLibraries.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestBigEndian.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestEndianess.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\WriteBasicConfigVersionFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Templates\CPackConfig.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\CMakeFiles\CheckTypeSize\CMAKE_SIZEOF_UNSIGNED_SHORT.c;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\LoadVersion.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\MaintainerFlags.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\BSONPackage.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\CheckAtomics.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson-config.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-config.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-version.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-static-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/mongo-c-driver -BE:/Pub/Projects/rtcwPro/libs/mongo-c-driver --check-stamp-file E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt;C:\Program Files\CMake\share\cmake-3.14\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakeConfigurableFile.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPack.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPackComponent.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.c;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckStructHasMember.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckSymbolExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\InstallRequiredSystemLibraries.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestBigEndian.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestEndianess.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\WriteBasicConfigVersionFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Templates\CPackConfig.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\CMakeFiles\CheckTypeSize\CMAKE_SIZEOF_UNSIGNED_SHORT.c;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\LoadVersion.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\MaintainerFlags.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\BSONPackage.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\CheckAtomics.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson-config.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-config.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-version.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-static-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/mongo-c-driver -BE:/Pub/Projects/rtcwPro/libs/mongo-c-driver --check-stamp-file E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt;C:\Program Files\CMake\share\cmake-3.14\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakeConfigurableFile.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPack.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPackComponent.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.c;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckStructHasMember.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckSymbolExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\InstallRequiredSystemLibraries.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestBigEndian.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestEndianess.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\WriteBasicConfigVersionFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Templates\CPackConfig.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\CMakeFiles\CheckTypeSize\CMAKE_SIZEOF_UNSIGNED_SHORT.c;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\LoadVersion.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\MaintainerFlags.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\BSONPackage.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\CheckAtomics.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson-config.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-config.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-version.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-static-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/mongo-c-driver -BE:/Pub/Projects/rtcwPro/libs/mongo-c-driver --check-stamp-file E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:/Pub/Projects/rtcwPro/libs/mongo-c-driver/src/libbson/CMakeLists.txt;C:\Program Files\CMake\share\cmake-3.14\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakeConfigurableFile.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPack.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CPackComponent.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.c;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckFunctionExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckStructHasMember.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckSymbolExists.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\InstallRequiredSystemLibraries.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestBigEndian.cmake;C:\Program Files\CMake\share\cmake-3.14\Modules\TestEndianess.c.in;C:\Program Files\CMake\share\cmake-3.14\Modules\WriteBasicConfigVersionFile.cmake;C:\Program Files\CMake\share\cmake-3.14\Templates\CPackConfig.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\CMakeFiles\CheckTypeSize\CMAKE_SIZEOF_UNSIGNED_SHORT.c;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\LoadVersion.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\build\cmake\MaintainerFlags.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\BSONPackage.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\CheckAtomics.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config-version.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\build\cmake\libbson-static-1.0-config.cmake.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson-config.cmake;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-config.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\bson\bson-version.h.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\src\libbson-static-1.0.pc.in;E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\examples\bson-validate.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\ZERO_CHECK.vcxproj">
+      <Project>{02039255-82F7-365A-AAB8-07A39A20ABDF}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\bson_shared.vcxproj">
+      <Project>{20A16681-36F0-32AD-A7E5-2BA8C00653EF}</Project>
+      <Name>bson_shared</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
