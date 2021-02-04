@@ -2016,6 +2016,7 @@ void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
 //void Cmd_hitsounds(gentity_t *ent);
+
 ///////////////////////
 // g_vote.c
 //
@@ -2064,13 +2065,16 @@ void GeoIP_open(void);
 void GeoIP_close(void);
 extern GeoIP * gidb;
 void G_ReadIP(gclient_t *client);
+
 //
 // g_config.c
 //
 void G_CompConfigSet(int dwMode, qboolean doComp);
+
 // g_match.c
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
 void G_loadMatchGame(void);
+
 //
 // g_stats.c
 //
@@ -2228,3 +2232,16 @@ typedef enum
 
 // Admin headers
 #include "g_admin.h"
+
+// SQL
+int				trap_SQL_RunQuery(const char* query);
+void			trap_SQL_FinishQuery(int queryid);
+qboolean		trap_SQL_NextRow(int queryid);
+int				trap_SQL_RowCount(int queryid);
+void			trap_SQL_GetFieldbyID(int queryid, int fieldid, char* buffer, int len);
+void			trap_SQL_GetFieldbyName(int queryid, const char* name, char* buffer, int len);
+int				trap_SQL_GetFieldbyID_int(int queryid, int fieldid);
+int				trap_SQL_GetFieldbyName_int(int queryid, const char* name);
+int				trap_SQL_FieldCount(int queryid);
+void			trap_SQL_CleanString(const char* in, char* out, int len);
+

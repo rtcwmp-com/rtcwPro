@@ -1819,6 +1819,10 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	char userinfo[MAX_INFO_STRING];
 	gentity_t   *ent;
 	int			i;
+// L0 - MySQL example
+#ifdef USE_MYSQL
+	char query[1000];
+#endif
 
 	ent = &g_entities[clientNum];
 
@@ -1940,6 +1944,20 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	else {
 		client->sess.uci = 255;
 	} // -OSPx
+
+// L0 - MySQL example
+#ifdef USE_MYSQL
+	value = Info_ValueForKey(userinfo, "ip");
+	
+	if (sprintf(query, "INSERT INTO test(ip, username) VALUES('%s', '%s') ", value, client->pers.netname)) {
+		trap_SQL_RunQuery(query);
+		G_Printf("INSERT statement succeeded\n");
+	}
+	else {
+		G_Printf("INSERT statement failed\n");
+	}
+#endif
+
 	// get and distribute relevent paramters
 	G_LogPrintf( "ClientConnect: %i\n", clientNum );
 	ClientUserinfoChanged( clientNum );

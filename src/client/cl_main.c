@@ -25,11 +25,10 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
 // cl_main.c  -- client main loop
-
 #include "client.h"
 #include <limits.h>
+#include "../qcommon/database.h"
 
 #ifdef __linux__
 #include <sys/stat.h>
@@ -323,14 +322,14 @@ void CL_Record_f( void ) {
 	if ( Cmd_Argc() == 2 ) {
 		s = Cmd_Argv( 1 );
 		Q_strncpyz( demoName, s, sizeof( demoName ) );
-		Com_sprintf( name, sizeof( name ), "demos/%s.dm_%d", demoName, PROTOCOL_VERSION );
+		Com_sprintf( name, sizeof( name ), "demos/%s.dm_%d", demoName, GAME_PROTOCOL_VERSION );
 	} else {
 		int number;
 
 		// scan for a free demo name
 		for ( number = 0 ; number <= 9999 ; number++ ) {
 			CL_DemoFilename( number, demoName );
-			Com_sprintf( name, sizeof( name ), "demos/%s.dm_%d", demoName, PROTOCOL_VERSION );
+			Com_sprintf( name, sizeof( name ), "demos/%s.dm_%d", demoName, GAME_PROTOCOL_VERSION );
 
 			len = FS_ReadFile( name, NULL );
 			if ( len <= 0 ) {
@@ -580,11 +579,11 @@ void CL_PlayDemo_f( void ) {
 
 	// open the demo file
 	arg = Cmd_Argv( 1 );
-	Com_sprintf( extension, sizeof( extension ), ".dm_%d", PROTOCOL_VERSION );
+	Com_sprintf( extension, sizeof( extension ), ".dm_%d", GAME_PROTOCOL_VERSION );
 	if ( !Q_stricmp( arg + strlen( arg ) - strlen( extension ), extension ) ) {
 		Com_sprintf( name, sizeof( name ), "demos/%s", arg );
 	} else {
-		Com_sprintf( name, sizeof( name ), "demos/%s.dm_%d", arg, PROTOCOL_VERSION );
+		Com_sprintf( name, sizeof( name ), "demos/%s.dm_%d", arg, GAME_PROTOCOL_VERSION );
 	}
 
 	FS_FOpenFileRead( name, &clc.demofile, qtrue );
@@ -1766,7 +1765,7 @@ void CL_CheckForResend( void ) {
 		port = Cvar_VariableValue( "net_qport" );
 
 		Q_strncpyz( info, Cvar_InfoString( CVAR_USERINFO ), sizeof( info ) );
-		Info_SetValueForKey( info, "protocol", va( "%i", PROTOCOL_VERSION ) );
+		Info_SetValueForKey( info, "protocol", va( "%i", GAME_PROTOCOL_VERSION ) );
 		Info_SetValueForKey( info, "qport", va( "%i", port ) );
 		Info_SetValueForKey( info, "challenge", va( "%i", clc.challenge ) );
 
@@ -3366,7 +3365,7 @@ void CL_ServerInfoPacket( netadr_t from, msg_t *msg ) {
 
 	// if this isn't the correct protocol version, ignore it
 	prot = atoi( Info_ValueForKey( infoString, "protocol" ) );
-	if ( prot != PROTOCOL_VERSION ) {
+	if ( prot != GAME_PROTOCOL_VERSION ) {
 		Com_DPrintf( "Different protocol info packet: %s\n", infoString );
 		return;
 	}

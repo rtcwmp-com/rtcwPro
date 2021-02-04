@@ -288,11 +288,11 @@ You or the server may be running older versions of the game. Press the auto-upda
 #ifndef PRE_RELEASE_DEMO
 // 1.33 - protocol 59
 // 1.4 - protocol 60
-#define PROTOCOL_VERSION 60
+#define GAME_PROTOCOL_VERSION 60
 #define GAMENAME_STRING     "wolfmp"
 #else
 // the demo uses a different protocol version for independant browsing
-  #define   PROTOCOL_VERSION    50  // NERVE - SMF - wolfMP protocol version
+  #define   GAME_PROTOCOL_VERSION    50  // NERVE - SMF - wolfMP protocol version
 #endif
 
 // NERVE - SMF - wolf multiplayer master servers

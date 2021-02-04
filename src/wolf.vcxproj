@@ -114,7 +114,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -122,7 +122,7 @@
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -136,7 +136,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)Builds\$(Configuration)\libcurl</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\$(Configuration)\libcurl</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "..\output/"
@@ -169,14 +169,14 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <BrowseInformationFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</BrowseInformationFile>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -190,7 +190,7 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
-      <AdditionalLibraryDirectories>$(SolutionDir)Builds\$(Configuration)\libcurl</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\$(Configuration)\libcurl</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "..\output/"
@@ -222,7 +222,7 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <BrowseInformationFile>$(SolutionDir)Builds\Release\$(ProjectName)\</BrowseInformationFile>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ResourceCompile>
@@ -230,7 +230,7 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;msvcrt.lib;libcmtd.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -244,7 +244,7 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
-      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Release\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Release\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "..\output/"
@@ -275,7 +275,7 @@ copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "..\o
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -283,7 +283,7 @@ copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "..\o
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;botlib.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;botlib.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -297,7 +297,7 @@ copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "..\o
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Debug\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Debug\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "..\output/"
@@ -594,6 +594,8 @@ copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "..\out
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="qcommon\db_main.c" />
+    <ClCompile Include="qcommon\db_mysql.c" />
     <ClCompile Include="qcommon\dl_main_curl.c" />
     <ClCompile Include="qcommon\files.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
@@ -909,6 +911,7 @@ copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "..\out
     <ClInclude Include="qcommon\cm_patch.h" />
     <ClInclude Include="qcommon\cm_polylib.h" />
     <ClInclude Include="qcommon\cm_public.h" />
+    <ClInclude Include="qcommon\database.h" />
     <ClInclude Include="qcommon\dl_local.h" />
     <ClInclude Include="qcommon\dl_public.h" />
     <ClInclude Include="qcommon\jansson\hashtable.h" />

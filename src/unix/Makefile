@@ -83,7 +83,8 @@ COMMONOBJS := \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
-	../qcommon/huffman.o ../qcommon/unzip.o 
+	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
+	../qcommon/db_mysql.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -183,7 +184,7 @@ server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
 	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl
+server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -194,7 +195,7 @@ server-debug: CC := gcc
 server-debug: NASM := nasm
 server-debug: CFLAGS := \
 	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl --verbose
+server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl -lmysqlclient --verbose
 server-debug: $(SVOBJS)
 	$(CC) -o wolfded_debug.x86 $(SVOBJS) $(LDFLAGS)
 server-debug-clean:
