@@ -212,7 +212,7 @@ server-w32: CFLAGS := \
 	$(CFLAGSREL) -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY \
 	-DCPUSTRING=\"`uname -m`\" -U__i386__  -DWIN32 \
 	-DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING
-server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl
+server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl
 server-w32: $(SVWINOBJS)
 	$(CC) -o wolfded.exe $(SVWINOBJS) $(LDFLAGS)
 	strip -s wolfded.exe
@@ -227,14 +227,14 @@ CURLCONF := \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \
 	--without-ca-path --without-nss --without-polarssl \
-	--without-gnutls --without-zlib --without-ssl --with-gnu-ld \
+	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
 	--disable-nonblocking --disable-manual
 
 curl: 
-	cd ../../libs/curl-7.29.0 && ./configure $(CURLCONF)
-	cd ../../libs/curl-7.29.0 && make
+	cd ../../libs/libcurl && ./configure $(CURLCONF)
+	cd ../../libs/libcurl && make
 	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_linux.a
 	cp -R ../curl/include/curl ../curl/include/curl_linux
 
