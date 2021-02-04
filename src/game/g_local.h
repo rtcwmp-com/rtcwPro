@@ -1471,7 +1471,7 @@ extern vmCvar_t g_gameskill;
 // done
 extern vmCvar_t g_gameStatslog; // temp cvar for event logging
 // there will be future modifications and additions to the stats cvars....work in progress
-extern vmCvar_t g_stats_mongodb; // temp cvar for output of stats to mongodb
+//extern vmCvar_t g_stats_mongodb; // temp cvar for output of stats to mongodb
 extern vmCvar_t g_stats_curl_submit;
 extern vmCvar_t g_stats_curl_submit_URL;
 extern vmCvar_t g_stats_curl_submit_headers;
@@ -2151,7 +2151,7 @@ void G_writeClosingJson(void);
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
 void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
 int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
-int sendToMongo(char* jsondata); // temp function to send events to mongodb
+//int sendToMongo(char* jsondata); // temp function to send events to mongodb
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 

@@ -100,7 +100,7 @@ vmCvar_t g_restarted;
 vmCvar_t g_log;
 vmCvar_t g_gameStatslog; // temp cvar for event logging
 // there will be future modifications and additions to the stats cvars....work in progress
-vmCvar_t g_stats_mongodb; // temp cvar for output for mongodb
+//vmCvar_t g_stats_mongodb; // temp cvar for output for mongodb
 vmCvar_t g_stats_curl_submit;
 vmCvar_t g_stats_curl_submit_URL;
 vmCvar_t g_stats_curl_submit_headers;
@@ -391,7 +391,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_gameStatslog, "g_gameStatslog", "0", CVAR_ARCHIVE, 0, qfalse  },
 	// there will be future modifications and additions to the stats cvars....work in progress
-    { &g_stats_mongodb, "g_stats_mongodb", "0", CVAR_ARCHIVE, 0, qfalse  },
+//    { &g_stats_mongodb, "g_stats_mongodb", "0", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_stats_curl_submit, "g_stats_curl_submit", "0", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_URL, "g_stats_curl_submit_URL", "https://rtcwproapi.donkanator.com/submit", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_headers, "g_stats_curl_submit_headers", "0", CVAR_ARCHIVE, 0, qfalse  }, // not used at the moment, headers are currently hardcoded

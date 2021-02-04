@@ -1,7 +1,12 @@
 #include "g_local.h"
 #include "g_stats.h"
-#include <jansson.h>
-#include <mongoc/mongoc.h>
+//#include <jansson.h>
+#ifdef _WIN32
+#include "../qcommon/jansson_win/jansson.h"
+#else
+#include "../qcommon/jansson/jansson.h"
+#endif // _WIN32
+//#include <mongoc/mongoc.h>
 //#include "../libmongoc-1.0/mongoc/mongoc.h"
 #include <time.h>
 // send/receive to json server: only need to include a few additional functions
@@ -607,7 +612,7 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
 
     if (level.gameStatslogFile) {
          s = json_dumps( jdata, 0 );
-         sendToMongo(s);
+//         sendToMongo(s);
          trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
          trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
          free(s);
@@ -755,7 +760,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
 
         if (level.gameStatslogFile) {
                 s = json_dumps( jdata, 0 );
-                sendToMongo(s);
+//                sendToMongo(s);
                 trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
                 trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
 
@@ -791,7 +796,7 @@ void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
     json_object_set_new(jdata, "attack_dir",    json_string(va("%f,%f,%f",dir[1],dir[2],dir[3])));
     if (level.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
-        sendToMongo(s);  // mongodb
+//        sendToMongo(s);  // mongodb
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
         free(s);
@@ -818,7 +823,7 @@ void G_writeDisconnectEvent (gentity_t* agent){
     json_object_set_new(jdata, "context",    event);
     if (level.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
-        sendToMongo(s);  // mongodb
+//        sendToMongo(s);  // mongodb
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
         free(s);
@@ -876,7 +881,7 @@ void G_writeGameLogStart(void)
         json_object_set_new(event, "label",    json_string("round_start"));
         json_object_set_new(jdata, "context",    event);
         s = json_dumps( jdata, 0 );
-        sendToMongo(s);  // mongodb
+//        sendToMongo(s);  // mongodb
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.gameStatslogFile );
         json_decref(jdata);
@@ -908,7 +913,7 @@ void G_writeGameLogEnd(void)
 
     if (level.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
-        sendToMongo(s);  // mongodb
+      //  sendToMongo(s);  // mongodb
         trap_FS_Write( s, strlen( s ), level.gameStatslogFile );
         trap_FS_Write( "\n", strlen( "\n" ), level.gameStatslogFile );
         json_decref(jdata);
@@ -980,6 +985,7 @@ int G_teamAlive(int team ) {
 }
 
 // Bad location for this....plan to move
+#if 0
 int sendToMongo(char* jsondata)
 {
     if (!(g_stats_mongodb.integer)) { // make a better cvar depending on if the mongodb will be user specified or whatever
@@ -1038,7 +1044,7 @@ int sendToMongo(char* jsondata)
 
    return 1;
 }
-
+#endif
 //  BAD LOCATION FOR THE STUFF BELOW TOO...BEING LAZY...WILL REARRANGE LATER
 //
 //
