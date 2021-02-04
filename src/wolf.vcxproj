@@ -941,6 +941,10 @@ copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "..\out
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="win32\in_raw.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="win32\win_local.h" />
   </ItemGroup>
   <ItemGroup>

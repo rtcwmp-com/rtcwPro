@@ -2,15 +2,7 @@
 #define __IN_RAW__H__
 
 // sswolf - defines needed for the raw mouse input crap
-// rinput includes
-
-
-#define USINGRAWINPUT
-
-
-
-
-#ifdef USINGRAWINPUT
+#ifndef DEDICATED
 
 #ifndef WINUSERAPI
 #define WINUSERAPI

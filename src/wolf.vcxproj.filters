@@ -313,6 +313,9 @@
     <ClInclude Include="unix\unix_glw.h">
       <Filter>Source Files\unix</Filter>
     </ClInclude>
+    <ClInclude Include="win32\in_raw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="unix\ChangeLog" />

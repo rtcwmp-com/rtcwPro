@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 // sswolf - begin rinput - source: quake
 #include "in_raw.h"
 
-#ifdef USINGRAWINPUT
+#ifndef DEDICATED
 // defines
 #define MAX_RI_DEVICE_SIZE 128
 #define INIT_RIBUFFER_SIZE (sizeof(RAWINPUTHEADER)+sizeof(RAWMOUSE))
@@ -78,10 +78,8 @@ static int	rawmicecount;
 
 void		IN_DeRegisterRawMouse(void);
 int			IN_RegisterRawMouse(void);
-void		IN_DeInitRawMouse(void);
 
-#endif
-// rinput end
+#endif // ~!DEDICATED
 
 
 typedef struct {
@@ -151,7 +149,7 @@ void IN_JoyMove( void );
 
 static void MidiInfo_f( void );
 
-// begin rinput
+#ifndef DEDICATED
 /*
 =========================================================================
 
@@ -210,9 +208,7 @@ int IN_RawInput_IsRDPMouse(char* cDeviceString)
 	return 1; // is RDP mouse
 }
 
-int IN_RegisterRawMouse(void)
-{
-	int registrationResult;
+int IN_RegisterRawMouse(void) {
 	// This function registers to receive the WM_INPUT messages
 	RAWINPUTDEVICE Rid; // Register only for mouse messages from wm_input.  
 
@@ -271,7 +267,6 @@ void IN_ActivateRawMouse(void) {
 		}
 		IN_ShutdownRawMouse();
 		Com_Printf("Falling back to Win32 mouse support...\n");
-		//Cvar_Set("in_mouse", "-1");
 		Cvar_Set("in_mouse", "1");
 	}
 }
@@ -410,8 +405,7 @@ qboolean IN_InitRawMouse(void)
 // raw input read functions
 //================================
 
-void IN_RawInput_MouseRead(HANDLE in_device_handle)
-{
+void IN_RawInput_MouseRead(HANDLE in_device_handle) {
 	int i = 0, tbuttons, j;
 	int dwSize;
 
@@ -521,8 +515,7 @@ void IN_RawInput_MouseRead(HANDLE in_device_handle)
 	rawmice[i].buttons &= ~RI_RAWBUTTON_MASK;
 	rawmice[i].buttons |= tbuttons;
 }
-// rinput end
-
+#endif // ~!DEDICATED
 
 /*
 ============================================================
@@ -620,7 +613,6 @@ void IN_Win32Mouse( int *mx, int *my ) {
 	*my = current_pos.y - window_center_y;
 }
 
-
 /*
 ============================================================
 
@@ -628,8 +620,6 @@ DIRECT INPUT MOUSE CONTROL
 
 ============================================================
 */
-
-
 #ifndef DOOMSOUND   ///// (SA) DOOMSOUND
 #undef DEFINE_GUID
 
@@ -716,12 +706,11 @@ void IN_ActivateMouse( void ) {
 
 	s_wmv.mouseActive = qtrue;
 
-	// rinput
-	if (in_mouse->integer > 1)
-	{
+#ifndef DEDICATED
+	if (in_mouse->integer > 1) {
 		IN_ActivateRawMouse();
 	}
-	// rinput end
+#endif	
 
 	IN_ActivateWin32Mouse();
 }
@@ -743,11 +732,11 @@ void IN_DeactivateMouse( void ) {
 	}
 	s_wmv.mouseActive = qfalse;
 
-	IN_DeactivateRawMouse(); // rinput
+#ifndef DEDICATED
+	IN_DeactivateRawMouse();
+#endif
 	IN_DeactivateWin32Mouse();
 }
-
-
 
 /*
 ===========
@@ -763,19 +752,16 @@ void IN_StartupMouse( void ) {
 	}
 
 	s_wmv.mouseInitialized = qtrue;
-
-	// rinput
-	if (in_mouse->integer == 1)
-	{
+#ifndef  DEDICATED
+	if (in_mouse->integer == 1) {
 		IN_InitWin32Mouse();
-	}
-	else if (in_mouse->integer > 1)
-	{
+}
+	else if (in_mouse->integer > 1) {
 		IN_InitRawMouse();
 	}
-
-	//IN_InitWin32Mouse();
-	// rinput end
+#else
+	IN_InitWin32Mouse();
+#endif // ! DEDICATED
 }
 
 /*
@@ -807,7 +793,6 @@ void IN_MouseEvent( int mstate ) {
 	s_wmv.oldButtonState = mstate;
 }
 
-
 /*
 ===========
 IN_MouseMove
@@ -816,17 +801,16 @@ IN_MouseMove
 void IN_MouseMove( void ) {
 	int mx, my;
 
-	// rinput
-	//IN_Win32Mouse( &mx, &my );
-	if (rawmicecount > 0)
-	{
+#ifndef DEDICATED
+	if (rawmicecount > 0) {
 		IN_RawMouse(&mx, &my);
 	}
-	else
-	{
+	else {
 		IN_Win32Mouse(&mx, &my);
 	}
-	// rinput end
+#else
+	IN_Win32Mouse(&mx, &my);
+#endif
 
 	if ( !mx && !my ) {
 		return;
@@ -869,7 +853,9 @@ IN_Shutdown
 */
 void IN_Shutdown( void ) {
 	IN_DeactivateMouse();
-	IN_ShutdownRawMouse(); // rinput
+#ifndef DEDICATED
+	IN_ShutdownRawMouse(); 
+#endif
 	IN_ShutdownMIDI();
 	Cmd_RemoveCommand( "midiinfo" );
 }
