@@ -333,6 +333,9 @@
     <ClInclude Include="qcommon\database.h">
       <Filter>Source Files\database</Filter>
     </ClInclude>
+    <ClInclude Include="win32\in_raw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wolf.rc" />
