@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "server.h"
 
 #include "../game/botlib.h"
+#include "../qcommon/database.h"
 
 botlib_export_t *botlib_export;
 
@@ -891,6 +892,39 @@ int SV_GameSystemCalls( int *args ) {
 	case TRAP_CEIL:
 		return FloatAsInt( ceil( VMF( 1 ) ) );
 
+	case G_SQL_RUNQUERY:
+            return OW_RunQuery( (char*)VMA(1) );
+
+    case G_SQL_FINISHQUERY:
+            OW_FinishQuery( args[1] );
+            return 0;
+
+    case G_SQL_NEXTROW:
+            return OW_NextRow( args[1] );
+
+    case G_SQL_ROWCOUNT:
+            return OW_RowCount( args[1] );
+
+    case G_SQL_GETFIELDBYID:
+            OW_GetFieldByID( args[1], args[2], (char*)VMA(3), args[4]  );
+            return 0;
+
+    case G_SQL_GETFIELDBYNAME:
+            OW_GetFieldByName( args[1], (char*)VMA(2), (char*)VMA(3), args[4] );
+            return 0;
+
+    case G_SQL_GETFIELDBYID_INT:
+            return OW_GetFieldByID_int( args[1], args[2] );
+
+    case G_SQL_GETFIELDBYNAME_INT:
+            return OW_GetFieldByName_int( args[1], (char*)VMA(2) );
+
+    case G_SQL_FIELDCOUNT:
+            return OW_FieldCount( args[1] );
+
+    case G_SQL_CLEANSTRING:
+            OW_CleanString( (char*)VMA(1), (char*)VMA(2), args[3] );
+            return 0;
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );

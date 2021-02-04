@@ -199,6 +199,12 @@
     <ClCompile Include="qcommon\dl_main_curl.c">
       <Filter>Source Files\downloads</Filter>
     </ClCompile>
+    <ClCompile Include="qcommon\db_main.c">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\db_mysql.c">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -324,6 +330,9 @@
     <ClInclude Include="unix\linux_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcommon\database.h">
+      <Filter>Source Files\database</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wolf.rc" />
@@ -348,6 +357,9 @@
     </Filter>
     <Filter Include="Source Files\unix">
       <UniqueIdentifier>{c170c77b-2aa8-4a8c-b988-99923c3e44a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\database">
+      <UniqueIdentifier>{9e87283d-f4e8-4a7b-9a7f-dc2de076b67a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
