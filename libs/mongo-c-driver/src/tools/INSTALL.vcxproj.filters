@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\CMakeFiles\e49b98541ca6be8bf46945836749f311\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{43308CD2-1A9F-36D1-A149-E3B9AC374975}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
