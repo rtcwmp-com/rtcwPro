@@ -114,7 +114,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\curl-7.29.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -122,7 +122,7 @@
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -169,7 +169,7 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <BrowseInformationFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</BrowseInformationFile>
-      <AdditionalIncludeDirectories>..\libs\curl-7.29.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -222,7 +222,8 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <BrowseInformationFile>$(SolutionDir)Builds\Release\$(ProjectName)\</BrowseInformationFile>
-      <AdditionalIncludeDirectories>..\libs\curl-7.29.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -232,8 +233,8 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <AdditionalDependencies>winmm.lib;ws2_32.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libc;msvcrt.lib;libcmtd.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName).map</MapFileName>
@@ -274,7 +275,7 @@ copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "..\o
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\curl-7.29.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libs\libcurl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -282,7 +283,7 @@ copy $(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt) "..\o
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;botlib.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -955,8 +956,8 @@ copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "..\out
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\libs\curl-7.29.0\lib\curl.vcxproj">
-      <Project>{87ee9da4-de1e-4448-8324-183c98dca588}</Project>
+    <ProjectReference Include="..\libs\libcurl\lib\libcurl.vcxproj">
+      <Project>{dfb320df-a095-3fa7-87d3-a77507483089}</Project>
     </ProjectReference>
     <ProjectReference Include="botlib\botlib.vcxproj">
       <Project>{4e5f4e34-0e6a-4200-916f-d33805505b54}</Project>
