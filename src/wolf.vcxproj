@@ -959,6 +959,12 @@ copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "..\out
     <ProjectReference Include="..\libs\libcurl\lib\libcurl.vcxproj">
       <Project>{dfb320df-a095-3fa7-87d3-a77507483089}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\libs\mongo-c-driver\src\libbson\bson_static.vcxproj">
+      <Project>{b08ce907-7bff-3105-a110-8ec40db45e68}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\mongo-c-driver\src\libmongoc\mongoc_static.vcxproj">
+      <Project>{ce8ffcda-574d-37fb-83eb-e6510b039179}</Project>
+    </ProjectReference>
     <ProjectReference Include="botlib\botlib.vcxproj">
       <Project>{4e5f4e34-0e6a-4200-916f-d33805505b54}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
