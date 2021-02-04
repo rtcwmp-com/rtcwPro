@@ -72,18 +72,6 @@
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">libcurl</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.lib</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkIncremental>
-    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">libcurl</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.lib</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
-    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +96,7 @@
       <AdditionalIncludeDirectories>libcurl\include;libs\libcurl\lib\..\include;libs\libcurl\lib\..;libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\libs\libcurl\include;$(SolutionDir)..\libs\libcurl\lib\..\include;$(SolutionDir)..\libs\libcurl\lib\..;$(SolutionDir)..\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -121,8 +109,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/libcurl/lib/Debug/libcurl-d_imp.lib</ImportLibrary>
-      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/libcurl/lib/Debug/libcurl-d.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)../libs/libcurl/lib/Debug/libcurl-d_imp.lib</ImportLibrary>
+      <ProgramDataBaseFile>$(SolutionDir)../libs/libcurl/lib/Debug/libcurl-d.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -151,10 +139,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;CURL_EMBED_MANIFEST;_WINDOWS;NDEBUG;BUILDING_LIBCURL;CURL_HIDDEN_SYMBOLS;_WIN32_WINNT=0x0600;HAVE_CONFIG_H;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_USRDLL;CMAKE_INTDIR=\"Release\";libcurl_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\libs\libcurl\include;$(SolutionDir)..\libs\libcurl\lib\..\include;$(SolutionDir)..\libs\libcurl\lib\..;$(SolutionDir)..\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\libs\libcurl\include;$(SolutionDir)..\libs\libcurl\lib\..\include;$(SolutionDir)..\libs\libcurl\lib\..;$(SolutionDir)..\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -175,449 +163,298 @@
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>.;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
-      <CompileAs>CompileAsC</CompileAs>
-      <ExceptionHandling>
-      </ExceptionHandling>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <Optimization>MinSpace</Optimization>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <UseFullPaths>false</UseFullPaths>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;BUILDING_LIBCURL;CURL_HIDDEN_SYMBOLS;_WIN32_WINNT=0x0600;HAVE_CONFIG_H;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_USRDLL;CMAKE_INTDIR="MinSizeRel";libcurl_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>WIN32;CURL_EMBED_MANIFEST;_WINDOWS;NDEBUG;BUILDING_LIBCURL;CURL_HIDDEN_SYMBOLS;_WIN32_WINNT=0x0600;HAVE_CONFIG_H;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_USRDLL;CMAKE_INTDIR=\"MinSizeRel\";libcurl_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
-    <Link>
-      <AdditionalDependencies>wldap32.lib;winmm.lib;ws2_32.lib;advapi32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/libcurl/lib/MinSizeRel/libcurl_imp.lib</ImportLibrary>
-      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/libcurl/lib/MinSizeRel/libcurl.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
-    </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>.;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
-      <CompileAs>CompileAsC</CompileAs>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ExceptionHandling>
-      </ExceptionHandling>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <Optimization>MaxSpeed</Optimization>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <UseFullPaths>false</UseFullPaths>
-      <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;BUILDING_LIBCURL;CURL_HIDDEN_SYMBOLS;_WIN32_WINNT=0x0600;HAVE_CONFIG_H;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_USRDLL;CMAKE_INTDIR="RelWithDebInfo";libcurl_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>WIN32;CURL_EMBED_MANIFEST;_WINDOWS;NDEBUG;BUILDING_LIBCURL;CURL_HIDDEN_SYMBOLS;_WIN32_WINNT=0x0600;HAVE_CONFIG_H;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_USRDLL;CMAKE_INTDIR=\"RelWithDebInfo\";libcurl_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>E:\Pub\Projects\rtcwPro\libs\libcurl\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..\include;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\..;E:\Pub\Projects\rtcwPro\libs\libcurl\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
-    <Link>
-      <AdditionalDependencies>wldap32.lib;winmm.lib;ws2_32.lib;advapi32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>E:/Pub/Projects/rtcwPro/libs/libcurl/lib/RelWithDebInfo/libcurl_imp.lib</ImportLibrary>
-      <ProgramDataBaseFile>E:/Pub/Projects/rtcwPro/libs/libcurl/lib/RelWithDebInfo/libcurl.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
-    </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
-  </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/libcurl -BE:/Pub/Projects/rtcwPro/libs/libcurl --check-stamp-file E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeFiles/generate.stamp
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_config.h.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/libcurl -BE:/Pub/Projects/rtcwPro/libs/libcurl --check-stamp-file E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeFiles/generate.stamp
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_config.h.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/libcurl -BE:/Pub/Projects/rtcwPro/libs/libcurl --check-stamp-file E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeFiles/generate.stamp
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_config.h.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Building Custom Rule E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SE:/Pub/Projects/rtcwPro/libs/libcurl -BE:/Pub/Projects/rtcwPro/libs/libcurl --check-stamp-file E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeFiles/generate.stamp
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:/Pub/Projects/rtcwPro/libs/libcurl/lib/CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\Makefile.inc.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_config.h.cmake;E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">E:\Pub\Projects\rtcwPro\libs\libcurl\lib\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\altsvc.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\amigaos.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\arpa_telnet.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\asyn.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\c-hyper.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\conncache.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\connect.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\content_encoding.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\cookie.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_addrinfo.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_base64.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ctype.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_des.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_endian.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_fnmatch.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_get_line.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_gethostname.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_gssapi.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_hmac.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_krb5.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ldap.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_md4.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_md5.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_memory.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_memrchr.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_multibyte.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ntlm_core.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ntlm_wb.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_path.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_printf.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_range.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_rtmp.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_sasl.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_setup.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_setup_once.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_sha256.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_sspi.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_threads.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curlx.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\dict.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\doh.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\dotdot.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\dynbuf.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\easyif.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\easyoptions.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\escape.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\file.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\fileinfo.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\formdata.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\ftp.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\ftplistparser.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\getinfo.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\gopher.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hash.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostcheck.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostip.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hsts.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http2.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_chunks.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_digest.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_negotiate.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_ntlm.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_proxy.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_aws_sigv4.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\if2ip.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\imap.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\inet_ntop.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\inet_pton.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\llist.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\memdebug.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\mime.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\mqtt.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\multihandle.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\multiif.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\netrc.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\non-ascii.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\nonblock.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\parsedate.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\pingpong.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\pop3.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\progress.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\psl.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\quic.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\rand.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\rename.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\rtsp.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\select.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\sendf.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\setopt.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\setup-vms.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\share.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\sigpipe.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\slist.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\smb.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\smtp.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\sockaddr.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\socketpair.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\socks.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\speedcheck.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\splay.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strcase.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strdup.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strerror.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strtok.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strtoofft.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\system_win32.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\telnet.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\tftp.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\timeval.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\transfer.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\url.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\urlapi-int.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\urldata.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\version_win32.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\warnless.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\wildcard.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\x509asn1.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\digest.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\ntlm.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\vauth.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\bearssl.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\gskit.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\gtls.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\keylog.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\mbedtls.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\mbedtls_threadlock.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\mesalink.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\nssg.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\openssl.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\schannel.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\sectransp.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\vtls.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\wolfssl.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vquic\ngtcp2.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vquic\quiche.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vquic\vquic.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vssh\ssh.h" />
-    <ClInclude Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_config.h" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\altsvc.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\amigaos.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\asyn-ares.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\asyn-thread.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\base64.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\c-hyper.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\conncache.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\connect.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\content_encoding.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\cookie.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_addrinfo.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ctype.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_des.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_endian.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_fnmatch.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_get_line.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_gethostname.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_gssapi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_memrchr.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_multibyte.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ntlm_core.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_ntlm_wb.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_path.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_range.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_rtmp.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_sasl.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_sspi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\curl_threads.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\dict.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\doh.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\dotdot.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\dynbuf.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\easy.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\easygetopt.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\easyoptions.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\escape.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\file.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\fileinfo.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\formdata.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\ftp.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\ftplistparser.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\getenv.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\getinfo.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\gopher.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hash.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hmac.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostasyn.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostcheck.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostip.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostip4.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostip6.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hostsyn.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\hsts.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http2.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_chunks.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_digest.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_negotiate.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_ntlm.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_proxy.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\http_aws_sigv4.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\idn_win32.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\if2ip.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\imap.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\inet_ntop.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\inet_pton.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\krb5.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\ldap.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\llist.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\md4.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\md5.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\memdebug.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\mime.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\mprintf.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\mqtt.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\multi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\netrc.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\non-ascii.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\nonblock.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\openldap.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\parsedate.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\pingpong.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\pop3.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\progress.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\psl.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\rand.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\rename.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\rtsp.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\select.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\sendf.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\setopt.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\sha256.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\share.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\slist.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\smb.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\smtp.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\socketpair.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\socks.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\socks_gssapi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\socks_sspi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\speedcheck.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\splay.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strcase.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strdup.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strerror.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strtok.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\strtoofft.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\system_win32.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\telnet.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\tftp.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\timeval.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\transfer.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\url.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\urlapi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\version.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\version_win32.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\warnless.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\wildcard.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\x509asn1.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\cleartext.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\cram.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\digest.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\digest_sspi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\krb5_gssapi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\krb5_sspi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\ntlm.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\ntlm_sspi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\oauth2.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\spnego_gssapi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\spnego_sspi.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vauth\vauth.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\bearssl.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\gskit.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\gtls.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\keylog.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\mbedtls.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\mbedtls_threadlock.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\mesalink.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\nss.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\openssl.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\schannel.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\schannel_verify.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\sectransp.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\vtls.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vtls\wolfssl.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vquic\ngtcp2.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vquic\quiche.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vquic\vquic.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vssh\libssh.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vssh\libssh2.c" />
-    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\vssh\wolfssh.c" />
-    <ResourceCompile Include="E:\Pub\Projects\rtcwPro\libs\libcurl\lib\libcurl.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="E:\Pub\Projects\rtcwPro\libs\libcurl\ZERO_CHECK.vcxproj">
-      <Project>{73450A98-E595-3613-A2BB-3F90916646D1}</Project>
-      <Name>ZERO_CHECK</Name>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </ProjectReference>
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\altsvc.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\amigaos.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\arpa_telnet.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\asyn.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\c-hyper.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\conncache.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\connect.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\content_encoding.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\cookie.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_addrinfo.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_base64.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_ctype.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_des.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_endian.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_fnmatch.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_get_line.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_gethostname.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_gssapi.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_hmac.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_krb5.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_ldap.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_md4.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_md5.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_memory.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_memrchr.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_multibyte.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_ntlm_core.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_ntlm_wb.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_path.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_printf.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_range.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_rtmp.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_sasl.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_setup.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_setup_once.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_sha256.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_sspi.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_threads.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curlx.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\dict.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\doh.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\dotdot.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\dynbuf.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\easyif.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\easyoptions.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\escape.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\file.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\fileinfo.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\formdata.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\ftp.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\ftplistparser.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\getinfo.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\gopher.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\hash.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\hostcheck.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\hostip.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\hsts.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http2.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http_chunks.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http_digest.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http_negotiate.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http_ntlm.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http_proxy.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\http_aws_sigv4.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\if2ip.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\imap.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\inet_ntop.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\inet_pton.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\llist.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\memdebug.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\mime.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\mqtt.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\multihandle.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\multiif.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\netrc.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\non-ascii.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\nonblock.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\parsedate.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\pingpong.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\pop3.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\progress.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\psl.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\quic.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\rand.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\rename.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\rtsp.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\select.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\sendf.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\setopt.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\setup-vms.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\share.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\sigpipe.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\slist.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\smb.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\smtp.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\sockaddr.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\socketpair.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\socks.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\speedcheck.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\splay.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\strcase.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\strdup.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\strerror.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\strtok.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\strtoofft.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\system_win32.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\telnet.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\tftp.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\timeval.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\transfer.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\url.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\urlapi-int.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\urldata.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\version_win32.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\warnless.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\wildcard.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\x509asn1.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vauth\digest.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vauth\ntlm.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vauth\vauth.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\bearssl.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\gskit.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\gtls.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\keylog.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\mbedtls.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\mbedtls_threadlock.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\mesalink.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\nssg.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\openssl.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\schannel.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\sectransp.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\vtls.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vtls\wolfssl.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vquic\ngtcp2.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vquic\quiche.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vquic\vquic.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\vssh\ssh.h" />
+    <ClInclude Include="$(SolutionDir)..\libs\libcurl\lib\curl_config.h" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\altsvc.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\amigaos.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\asyn-ares.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\asyn-thread.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\base64.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\c-hyper.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\conncache.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\connect.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\content_encoding.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\cookie.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_addrinfo.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_ctype.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_des.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_endian.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_fnmatch.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_get_line.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_gethostname.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_gssapi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_memrchr.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_multibyte.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_ntlm_core.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_ntlm_wb.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_path.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_range.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_rtmp.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_sasl.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_sspi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\curl_threads.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\dict.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\doh.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\dotdot.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\dynbuf.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\easy.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\easygetopt.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\easyoptions.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\escape.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\file.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\fileinfo.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\formdata.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\ftp.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\ftplistparser.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\getenv.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\getinfo.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\gopher.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hash.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hmac.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hostasyn.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hostcheck.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hostip.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hostip4.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hostip6.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hostsyn.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\hsts.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http2.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http_chunks.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http_digest.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http_negotiate.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http_ntlm.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http_proxy.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\http_aws_sigv4.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\idn_win32.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\if2ip.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\imap.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\inet_ntop.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\inet_pton.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\krb5.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\ldap.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\llist.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\md4.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\md5.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\memdebug.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\mime.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\mprintf.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\mqtt.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\multi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\netrc.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\non-ascii.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\nonblock.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\openldap.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\parsedate.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\pingpong.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\pop3.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\progress.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\psl.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\rand.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\rename.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\rtsp.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\select.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\sendf.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\setopt.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\sha256.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\share.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\slist.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\smb.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\smtp.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\socketpair.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\socks.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\socks_gssapi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\socks_sspi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\speedcheck.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\splay.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\strcase.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\strdup.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\strerror.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\strtok.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\strtoofft.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\system_win32.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\telnet.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\tftp.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\timeval.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\transfer.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\url.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\urlapi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\version.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\version_win32.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\warnless.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\wildcard.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\x509asn1.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\cleartext.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\cram.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\digest.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\digest_sspi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\krb5_gssapi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\krb5_sspi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\ntlm.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\ntlm_sspi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\oauth2.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\spnego_gssapi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\spnego_sspi.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vauth\vauth.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\bearssl.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\gskit.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\gtls.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\keylog.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\mbedtls.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\mbedtls_threadlock.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\mesalink.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\nss.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\openssl.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\schannel.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\schannel_verify.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\sectransp.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\vtls.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vtls\wolfssl.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vquic\ngtcp2.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vquic\quiche.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vquic\vquic.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vssh\libssh.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vssh\libssh2.c" />
+    <ClCompile Include="$(SolutionDir)..\libs\libcurl\lib\vssh\wolfssh.c" />
+    <ResourceCompile Include="$(SolutionDir)..\libs\libcurl\lib\libcurl.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
