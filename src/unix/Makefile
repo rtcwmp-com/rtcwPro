@@ -213,7 +213,7 @@ server-w32: CFLAGS := \
 	$(CFLAGSREL) -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY \
 	-DCPUSTRING=\"`uname -m`\" -U__i386__  -DWIN32 \
 	-DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING
-server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl
+server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl -lmysqlclient 
 server-w32: $(SVWINOBJS)
 	$(CC) -o wolfded.exe $(SVWINOBJS) $(LDFLAGS)
 	strip -s wolfded.exe
@@ -231,7 +231,7 @@ CURLCONF := \
 	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual
+	--disable-nonblocking --disable-manual -m32
 
 curl: 
 	cd ../../libs/libcurl && ./configure $(CURLCONF)
@@ -241,7 +241,7 @@ curl:
 
 curl-w32:
 	cd ../curl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
-	CPPFLAGS=-DCURL_STATICLIB ./configure $(CURLCONF) --host=mingw32
+	CPPFLAGS=-DCURL_STATICLIB -m32 ./configure $(CURLCONF) --host=mingw32
 	cd ../curl && make
 	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_w32.a
 	cp -R ../curl/include/curl ../curl/include/curl_w32
