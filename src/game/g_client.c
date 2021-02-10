@@ -2672,7 +2672,7 @@ void ClientDisconnect( int clientNum ) {
 				// OSPx - Fix documents passing exploit
 				launchvel[0] = 0;
 				launchvel[1] = 0;
-				launchvel[2] = 0;
+				launchvel[2] = 40;
 
 				flag = LaunchItem( item,ent->r.currentOrigin,launchvel,ent->s.number );
 				flag->s.modelindex2 = ent->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
