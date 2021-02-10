@@ -1820,9 +1820,9 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 			if (cl_bypassMouseInput->integer == 1) {
 				bypassMenu = qtrue;
 			}
-			else if (((cls.keyCatchers & KEYCATCH_UI) && !UI_checkKeyExec(key)) || ((cls.keyCatchers & KEYCATCH_CGAME) && !CL_CGameCheckKeyExec(key))) {
-				bypassMenu = qtrue;
-			}
+		}
+		else if (((cls.keyCatchers & KEYCATCH_UI) && !UI_checkKeyExec(key)) || ((cls.keyCatchers & KEYCATCH_CGAME) && !CL_CGameCheckKeyExec(key))) {
+			bypassMenu = qtrue;
 		}
 	}
 
