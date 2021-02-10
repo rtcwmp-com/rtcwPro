@@ -315,7 +315,7 @@ void SV_DirectConnect( netadr_t from ) {
 	// DHM - Nerve :: Update Server allows any protocol to connect
 #ifndef UPDATE_SERVER
 	version = atoi( Info_ValueForKey( userinfo, "protocol" ) );
-	if ( version != PROTOCOL_VERSION ) {
+	if ( version != GAME_PROTOCOL_VERSION ) {
 		if ( version <= 59 ) {
 			// old clients, don't send them the [err_drop] tag
 			NET_OutOfBandPrint( NS_SERVER, from, "print\n" PROTOCOL_MISMATCH_ERROR );

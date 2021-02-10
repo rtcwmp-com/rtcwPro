@@ -287,7 +287,7 @@ You or the server may be running older versions of the game. Press the auto-upda
 
 // 1.33 - protocol 59
 // 1.4 - protocol 60
-#define PROTOCOL_VERSION 60
+#define GAME_PROTOCOL_VERSION 60
 #define GAMENAME_STRING	"wolfmp"
 #define CODENAME		"BlazkowiczIsBack" // L0 - Do not modify this without knowing what the point of it is.
 

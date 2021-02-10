@@ -1,0 +1,26 @@
+--- mongo-c-driver.spec.orig	2019-08-27 21:43:20.721612865 +0000
++++ mongo-c-driver.spec	2019-08-27 22:28:57.276867708 +0000
+@@ -38,7 +38,6 @@ BuildRequires: pkgconfig(libzstd)
+ BuildRequires: mongodb-server
+ BuildRequires: openssl
+ %endif
+-BuildRequires: cmake(mongocrypt)
+ BuildRequires: perl-interpreter
+ # From man pages
+ BuildRequires: python3
+@@ -68,7 +67,6 @@ Requires:   %{name}%{?_isa} = %{version}-%{release}
+ Requires:   pkgconfig
+ Requires:   cmake-filesystem
+ Requires:   pkgconfig(libzstd)
+-Requires:   cmake(mongocrypt)
+ 
+ %description devel
+ This package contains the header files and development libraries
+@@ -126,7 +124,6 @@ Documentation: http://mongoc.org/libbson/%{version}/
+ %endif
+     -DENABLE_EXAMPLES:BOOL=OFF \
+     -DENABLE_UNINSTALL:BOOL=OFF \
+-    -DENABLE_CLIENT_SIDE_ENCRYPTION:BOOL=ON \
+     .
+ 
+ make %{?_smp_mflags}

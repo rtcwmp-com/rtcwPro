@@ -83,7 +83,8 @@ COMMONOBJS := \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
-	../qcommon/huffman.o ../qcommon/unzip.o 
+	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
+	../qcommon/db_mysql.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -183,7 +184,7 @@ server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
 	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl
+server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -194,7 +195,7 @@ server-debug: CC := gcc
 server-debug: NASM := nasm
 server-debug: CFLAGS := \
 	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl --verbose
+server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl -lmysqlclient --verbose
 server-debug: $(SVOBJS)
 	$(CC) -o wolfded_debug.x86 $(SVOBJS) $(LDFLAGS)
 server-debug-clean:
@@ -212,7 +213,7 @@ server-w32: CFLAGS := \
 	$(CFLAGSREL) -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY \
 	-DCPUSTRING=\"`uname -m`\" -U__i386__  -DWIN32 \
 	-DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING
-server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl
+server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl
 server-w32: $(SVWINOBJS)
 	$(CC) -o wolfded.exe $(SVWINOBJS) $(LDFLAGS)
 	strip -s wolfded.exe
@@ -227,14 +228,14 @@ CURLCONF := \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \
 	--without-ca-path --without-nss --without-polarssl \
-	--without-gnutls --without-zlib --without-ssl --with-gnu-ld \
+	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
 	--disable-nonblocking --disable-manual
 
 curl: 
-	cd ../../libs/curl-7.29.0 && ./configure $(CURLCONF)
-	cd ../../libs/curl-7.29.0 && make
+	cd ../../libs/libcurl && ./configure $(CURLCONF)
+	cd ../../libs/libcurl && make
 	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_linux.a
 	cp -R ../curl/include/curl ../curl/include/curl_linux
 

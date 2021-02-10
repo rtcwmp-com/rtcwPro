@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 // common.c -- misc functions used in client and server
 
 #include "../game/q_shared.h"
+#include "database.h"
 #include "qcommon.h"
 #ifndef  DEDICATED
 #include "md5.h"
@@ -2634,6 +2635,9 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
+
+	OW_Init();
+
 	com_fullyInitialized = qtrue;
 	Com_Printf( "--- Common Initialization Complete ---\n" );
 }
@@ -3403,6 +3407,8 @@ void Com_Shutdown( void ) {
 		FS_FCloseFile( com_journalFile );
 		com_journalFile = 0;
 	}
+
+	OW_Shutdown();
 
 }
 
