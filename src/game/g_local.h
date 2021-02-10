@@ -1984,6 +1984,7 @@ void G_resetRoundState(void);
 void G_resetModeState(void);
 int G_checkServerToggle(vmCvar_t *cv);
 char* GetLevelTime(void);
+void G_pauseHandle(qboolean dPause, int team);
 ///////////////////////
 // g_referee.c
 //

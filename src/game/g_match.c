@@ -554,3 +554,46 @@ void G_resetModeState(void) {
 		trap_Cvar_Set("g_alliedwins", "0");
 	}*/
 }
+
+/*
+===================
+Pause/Unpause
+===================
+*/
+void G_pauseHandle(qboolean dPause, int team) {
+
+	if (dPause) {
+		gentity_t* target_ent;
+		int i;
+
+		for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i) {
+			target_ent = g_entities + i;
+
+			if (target_ent->inuse) {
+				if (target_ent->s.eType > TR_INTERPOLATE &&
+					target_ent->s.pos.trTime > 0) {
+					VectorCopy(target_ent->s.pos.trBase, target_ent->trBase_pre_pause);
+					VectorCopy(target_ent->r.currentOrigin, target_ent->s.pos.trBase);
+					target_ent->trType_pre_pause = target_ent->s.pos.trType;
+					target_ent->s.pos.trType = TR_STATIONARY;
+				}
+			}
+		}
+
+		level.paused = !PAUSE_NONE;
+		if (team == TEAM_RED) {
+			level.axisTimeouts++;
+		}
+		else if (team == TEAM_BLUE) {
+			level.alliedTimeouts++;
+		}
+		level.axisCalledTimeout = (team == TEAM_RED ? qtrue : qfalse);
+		trap_SetConfigstring(CS_PAUSED, va("%i", level.paused));
+	}
+	else {
+		level.CNstart = 0; // Resets countdown if it was aborted before
+		level.paused = PAUSE_UNPAUSING;
+		level.axisCalledTimeout = qfalse;
+	}
+	return;
+}

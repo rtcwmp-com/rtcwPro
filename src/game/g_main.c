@@ -496,7 +496,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
 
-// MOTDs
+	// MOTDs
 	{ &g_showMOTD, "g_showMOTD", "0", 0, 0, qfalse },
 	{ &g_motd1, "g_motd1", "", 0, 0, qfalse},
 	{ &g_motd2, "g_motd2", "", 0, 0, qfalse},
@@ -513,7 +513,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_motdTime, "g_motdTime", "80", 0, 0, qtrue},
 	{ &motdNum, "motdNum", "1", 0, 0, qfalse},
 
-// SAB (Server Admin Bot)
+	// SAB (Server Admin Bot)
 	{ &sab_system, "sab_system", "0", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
 	{ &sab_maxTeamKills, "sab_maxTeamKills", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
 	{ &sab_maxTeamBleed, "sab_maxTeamBleed", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
@@ -574,6 +574,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
+	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 

@@ -928,14 +928,12 @@ L0 - Pause/Unpause
 =================
 */
 void Svcmd_Pause_f(qboolean pause) {
+	G_pauseHandle(pause, TEAM_SPECTATOR);
+
 	if (pause) {
-		level.paused = !PAUSE_NONE;
-		trap_SetConfigstring( CS_PAUSED,  va( "%i", level.paused ));
 		AP(va("cp \"Match has been ^3Paused^7!\n\"2"));
 	} else {
-		level.CNstart = 0; // Resets countdown if it was aborted before
-		level.paused = PAUSE_UNPAUSING;
-		AP(va("cp \"Resuming match..\n\"2"));
+		AP(va("cp \"Resuming the match..\n\"2"));
 	}
 }
 
