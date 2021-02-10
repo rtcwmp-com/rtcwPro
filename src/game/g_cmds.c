@@ -570,7 +570,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	spectatorState_t specState;
 	int specClient;
 
-	if (level.paused != PAUSE_NONE && !forced) {
+	if (level.paused != PAUSE_NONE && !forced && !ent->client->sess.referee) {
 		CP("cp \"^3You cannot switch teams during Pause!\n\"2");
 		return;
 	}
@@ -1610,7 +1610,6 @@ static const char *gameNames[] = {
 	"Wolf Stopwatch",
 	"Wolf Checkpoint"
 };
-
 
 /*
 ==================
