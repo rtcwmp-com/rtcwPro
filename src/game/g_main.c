@@ -571,7 +571,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
-	{ &g_customConfig, "g_customConfig", "defaultpublic", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &g_customConfig, "g_customConfig", "defaultcomp", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info

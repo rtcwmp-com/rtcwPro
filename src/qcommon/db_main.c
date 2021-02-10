@@ -72,7 +72,7 @@ void OW_Init(void) {
 
 	Com_Printf("------ Initializing Database ------\n");
 
-	db_enable = Cvar_Get("db_enable", "1", CVAR_SERVERINFO | CVAR_ARCHIVE);
+	db_enable = Cvar_Get("db_enable", "0", CVAR_SERVERINFO | CVAR_ARCHIVE);
 	db_backend = Cvar_Get("db_backend", "MySQL", CVAR_ARCHIVE);
 	db_statusmaster = Cvar_Get("db_statusmaster", "0", CVAR_ARCHIVE);
 	db_statusslave = Cvar_Get("db_statusslave", "0", CVAR_ARCHIVE);
@@ -93,6 +93,7 @@ void OW_Init(void) {
 
 	if (db_enable->integer == 0) {
 		Com_Printf("Database Disabled.\n");
+		return;
 	}
 	else {
 		if (strstr(db_backend->string, "MySQL")) {

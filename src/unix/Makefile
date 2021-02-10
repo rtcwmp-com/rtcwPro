@@ -9,7 +9,6 @@ CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
-
 DCFLAGSREL := \
 	 -pipe -m32 -march=pentium4 -g -fomit-frame-pointer -ffast-math \
 	-falign-loops=2 -falign-jumps=2 \
@@ -213,7 +212,7 @@ server-w32: CFLAGS := \
 	$(CFLAGSREL) -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY \
 	-DCPUSTRING=\"`uname -m`\" -U__i386__  -DWIN32 \
 	-DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING
-server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl
+server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl -lmysqlclient 
 server-w32: $(SVWINOBJS)
 	$(CC) -o wolfded.exe $(SVWINOBJS) $(LDFLAGS)
 	strip -s wolfded.exe
@@ -236,20 +235,20 @@ CURLCONF := \
 curl: 
 	cd ../../libs/libcurl && ./configure $(CURLCONF)
 	cd ../../libs/libcurl && make
-	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_linux.a
-	cp -R ../curl/include/curl ../curl/include/curl_linux
+	mv ../../libs/libcurl/lib/.libs/libcurl.a ../../libs/libcurl/lib/.libs/libcurl_linux.a
+	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_linux
 
 curl-w32:
-	cd ../curl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
-	CPPFLAGS=-DCURL_STATICLIB ./configure $(CURLCONF) --host=mingw32
-	cd ../curl && make
-	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_w32.a
-	cp -R ../curl/include/curl ../curl/include/curl_w32
+	cd ../../libs/libcurl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
+	CPPFLAGS=-DCURL_STATICLIB -m32 ./configure $(CURLCONF) --host=mingw32
+	cd ../../libs/libcurl && make
+	mv ../../libs/libcurllib/.libs/libcurl.a ../../libs/libcurllib/.libs/libcurl_w32.a
+	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_w32
 
 curl-clean:
-	cd ../curl && make clean
-	rm -rf ../curl/include/curl_linux
-	rm -rf ../curl/include/curl_w32
+	cd ../../libs/libcurl && make clean
+	rm -rf ../../libs/libcurl/include/curl_linux
+	rm -rf ../../libs/libcurl/include/curl_w32
 
 #####################################################################
 
