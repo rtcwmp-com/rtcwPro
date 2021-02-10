@@ -9,7 +9,6 @@ CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
-
 DCFLAGSREL := \
 	 -pipe -m32 -march=pentium4 -g -fomit-frame-pointer -ffast-math \
 	-falign-loops=2 -falign-jumps=2 \
@@ -231,25 +230,25 @@ CURLCONF := \
 	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual -m32
+	--disable-nonblocking --disable-manual
 
 curl: 
 	cd ../../libs/libcurl && ./configure $(CURLCONF)
 	cd ../../libs/libcurl && make
-	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_linux.a
-	cp -R ../curl/include/curl ../curl/include/curl_linux
+	mv ../../libs/libcurl/lib/.libs/libcurl.a ../../libs/libcurl/lib/.libs/libcurl_linux.a
+	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_linux
 
 curl-w32:
-	cd ../curl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
+	cd ../../libs/libcurl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
 	CPPFLAGS=-DCURL_STATICLIB -m32 ./configure $(CURLCONF) --host=mingw32
-	cd ../curl && make
-	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_w32.a
-	cp -R ../curl/include/curl ../curl/include/curl_w32
+	cd ../../libs/libcurl && make
+	mv ../../libs/libcurllib/.libs/libcurl.a ../../libs/libcurllib/.libs/libcurl_w32.a
+	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_w32
 
 curl-clean:
-	cd ../curl && make clean
-	rm -rf ../curl/include/curl_linux
-	rm -rf ../curl/include/curl_w32
+	cd ../../libs/libcurl && make clean
+	rm -rf ../../libs/libcurl/include/curl_linux
+	rm -rf ../../libs/libcurl/include/curl_w32
 
 #####################################################################
 
