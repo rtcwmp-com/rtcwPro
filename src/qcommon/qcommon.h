@@ -743,6 +743,8 @@ void FS_CopyFile( char *fromOSPath, char *toOSPath );
 int FS_CreatePath(const char* OSPath_);
 qboolean FS_VerifyPak( const char *pak );
 
+int  submit_curlPost( char* jsonfile, char* matchid );
+char* encode_data_b64( char *infilename ) ;
 /*
 ==============================================================
 

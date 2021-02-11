@@ -249,12 +249,17 @@ int submit_curlPost( char* jsonfile, char* matchid ) {
   char* outfile = encode_data_b64(jsonfile);   // should put this in memory rather than temp file
   struct fdata fileinfo = readfile_content(outfile);
 
+  char url[256];
+
+  Cvar_VariableStringBuffer( "g_stats_curl_submit_URL", url, sizeof( url ) );
+
   slist1 = NULL;
   slist1 = curl_slist_append(slist1, va("matchid: %s", matchid));
   slist1 = curl_slist_append(slist1, "x-api-key: rtcwproapikeythatisjustforbasicauthorization");
 
   hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, "https://rtcwproapi.donkanator.com/submit");
+  //curl_easy_setopt(hnd, CURLOPT_URL, "https://rtcwproapi.donkanator.com/submit");
+  curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
   curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, fileinfo.readptr);
   curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)fileinfo.sizeline);
