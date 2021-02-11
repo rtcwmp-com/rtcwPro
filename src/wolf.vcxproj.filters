@@ -217,6 +217,12 @@
     <ClCompile Include="client\cl_control.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="unix\linux_threads.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\win_threads.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -352,6 +358,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="client\client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\threads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

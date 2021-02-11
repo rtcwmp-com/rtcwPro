@@ -83,7 +83,7 @@ COMMONOBJS := \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
-	../qcommon/db_mysql.o
+	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -104,10 +104,10 @@ UNIXCLIENTOBJS := \
 	../unix/linux_snd.o
 UNIXOBJS := \
 	../unix/linux_common.o ../unix/unix_main.o ../unix/unix_net.o \
-	../unix/unix_shared.o ../unix/linux_signals.o
+	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \
-	../win32/win_qgl.o ../win32/win_snd.o
+	../win32/win_qgl.o ../win32/win_snd.o ../win32/linux_threads.o
 WINOBJS := \
 	../win32/win_main.o ../win32/win_net.o ../win32/win_syscon.o \
 	../win32/win_wndproc.o ../win32/win_shared.o

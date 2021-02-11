@@ -25,65 +25,61 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef _S_HTTP
-#define _S_HTTP
+#include "../qcommon/threads.h"
 
-#include <curl/curl.h>
-#include <curl/easy.h>
+// tjw: handle for libpthread.so
+void* g_pthreads = NULL;
 
-#ifdef DEDICATED
-	#include "../server/server.h"
-#else
-	#include "../client/client.h"
-#endif
-
-//
-// URL Mappings
-//
-#ifdef _DEBUG
-	#define WEB_URL		"http://game.localhost"
-#else 
-	#define WEB_URL		"https://rtcwmp.com"
-#endif // ~_DEBUG
-#define WEB_GET_MOTD	WEB_URL "/api/get/motd"
-#define WEB_GET_UPDATE	WEB_URL "/api/get/update"
-#define WEB_GET_AUTH	WEB_URL "/api/get/auth"
-#define WEB_GET_MBL		WEB_URL "/api/get/mbl"
-#define WEB_UPLOAD_SS	WEB_URL "/api/post/ss"
-#define WEB_UPLOAD_DEMO	WEB_URL "/api/post/demo"
-
-// Auth Responses
-#define AUTH_NO_RESPONSE	"-1"	// sv_AuthStrictMode = 2 or 3
-#define AUTH_OK				"0"
-#define AUTH_INVALID_GUID	"1"		// sv_AuthStrictMode = 1 or 3
-#define AUTH_MAX_AGE		"2"
-#define AUTH_MIN_AGE		"3"
-#define AUTH_BAN_PERM		"4"
-#define AUTH_BAN_TEMP		"5"
+// tjw: pointer to pthread_create() from libpthread.so
+static int (*g_pthread_create)
+(pthread_t*,
+	__const pthread_attr_t*,
+	void* (*)(void*),
+	void*) = NULL;
 
 /*
 ===============
-HTTP_Reply
-
-Structure for replies.
+Threads_Init
 ===============
 */
-struct HTTP_Reply_t {
-	char* ptr;
-	size_t len;
-};
+void Threads_Init(void) {
+	Com_Printf("------ Initializing Threading ------\n");
 
-//
-// http_main.c
-//
-char* HTTP_Post(char* url, char* data);
-char* HTTP_Get(char* url, char* data);
+	if (g_pthreads != NULL) {
+		Com_Printf("pthreads already loaded\n");
+		return;
+	}
+	g_pthreads = dlopen(LIBPTHREAD_SO, RTLD_NOW);
+	if (g_pthreads == NULL) {
+		Com_Printf("could not load libpthread\n%s\n", dlerror());
+		return;
+	}
+	Com_Printf("loaded libpthread\n");
 
-//
-// http.c
-//
-char* HTTP_AuthClient(char* guid);
-char* HTTP_ClientNeedsUpdate(void);
-char* HTTP_ClientGetMOTD(void);
+	g_pthread_create = dlsym(g_pthreads, "pthread_create");
+	if (g_pthread_create == NULL) {
+		Com_Printf("could not locate pthread_create\n%s\n", dlerror());
+		return;
+	}
+	Com_Printf("found pthread_create\n");
 
-#endif // ~_S_HTTP
+	Com_Printf("Threading Initialized.\n");
+}
+
+/*
+===============
+create_thread
+===============
+*/
+int create_thread(void* (*thread_function)(void*), void* arguments) {
+	pthread_t thread_id;
+
+	if (g_pthread_create == NULL) {
+		// tjw: pthread_create() returns non 0 for failure
+		//      but I don't know what's proper here.
+		return -1;
+	}
+
+	Com_DPrintf("Thread created.\n");
+	return g_pthread_create(&thread_id, NULL, thread_function, arguments);
+}

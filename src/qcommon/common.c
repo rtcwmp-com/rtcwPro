@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../game/q_shared.h"
 #include "database.h"
+#include "threads.h"
 #include "qcommon.h"
 #ifndef  DEDICATED
 #include "md5.h"
@@ -2637,6 +2638,8 @@ void Com_Init( char *commandLine ) {
 	}
 
 	OW_Init();
+
+	Threads_Init();
 
 	com_fullyInitialized = qtrue;
 	Com_Printf( "--- Common Initialization Complete ---\n" );

@@ -1698,8 +1698,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_ConfigSet(g_customConfig.string);
 }
 
-
-
 /*
 =================
 G_ShutdownGame

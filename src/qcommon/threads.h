@@ -25,65 +25,27 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef _S_HTTP
-#define _S_HTTP
+#ifndef __THREADS_H
+#define __THREADS_H
 
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include "../game/q_shared.h"
 
-#ifdef DEDICATED
-	#include "../server/server.h"
-#else
-	#include "../client/client.h"
+#ifdef __linux__
+	#include <gnu/lib-names.h>
+	#include <pthread.h>
+	#include <dlfcn.h>
+#elif WIN32
+	#include <process.h>
+#elif defined( __MACOS__ )
+	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
+#elif defined( __APPLE__ )
+	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
 #endif
 
 //
-// URL Mappings
+// *_threads.c
 //
-#ifdef _DEBUG
-	#define WEB_URL		"http://game.localhost"
-#else 
-	#define WEB_URL		"https://rtcwmp.com"
-#endif // ~_DEBUG
-#define WEB_GET_MOTD	WEB_URL "/api/get/motd"
-#define WEB_GET_UPDATE	WEB_URL "/api/get/update"
-#define WEB_GET_AUTH	WEB_URL "/api/get/auth"
-#define WEB_GET_MBL		WEB_URL "/api/get/mbl"
-#define WEB_UPLOAD_SS	WEB_URL "/api/post/ss"
-#define WEB_UPLOAD_DEMO	WEB_URL "/api/post/demo"
+void Threads_Init(void);
+int create_thread(void* (*thread_function)(void*), void* arguments);
 
-// Auth Responses
-#define AUTH_NO_RESPONSE	"-1"	// sv_AuthStrictMode = 2 or 3
-#define AUTH_OK				"0"
-#define AUTH_INVALID_GUID	"1"		// sv_AuthStrictMode = 1 or 3
-#define AUTH_MAX_AGE		"2"
-#define AUTH_MIN_AGE		"3"
-#define AUTH_BAN_PERM		"4"
-#define AUTH_BAN_TEMP		"5"
-
-/*
-===============
-HTTP_Reply
-
-Structure for replies.
-===============
-*/
-struct HTTP_Reply_t {
-	char* ptr;
-	size_t len;
-};
-
-//
-// http_main.c
-//
-char* HTTP_Post(char* url, char* data);
-char* HTTP_Get(char* url, char* data);
-
-//
-// http.c
-//
-char* HTTP_AuthClient(char* guid);
-char* HTTP_ClientNeedsUpdate(void);
-char* HTTP_ClientGetMOTD(void);
-
-#endif // ~_S_HTTP
+#endif // ~!__THREADS_H

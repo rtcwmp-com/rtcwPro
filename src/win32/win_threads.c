@@ -25,65 +25,29 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef _S_HTTP
-#define _S_HTTP
-
-#include <curl/curl.h>
-#include <curl/easy.h>
-
-#ifdef DEDICATED
-	#include "../server/server.h"
-#else
-	#include "../client/client.h"
-#endif
-
-//
-// URL Mappings
-//
-#ifdef _DEBUG
-	#define WEB_URL		"http://game.localhost"
-#else 
-	#define WEB_URL		"https://rtcwmp.com"
-#endif // ~_DEBUG
-#define WEB_GET_MOTD	WEB_URL "/api/get/motd"
-#define WEB_GET_UPDATE	WEB_URL "/api/get/update"
-#define WEB_GET_AUTH	WEB_URL "/api/get/auth"
-#define WEB_GET_MBL		WEB_URL "/api/get/mbl"
-#define WEB_UPLOAD_SS	WEB_URL "/api/post/ss"
-#define WEB_UPLOAD_DEMO	WEB_URL "/api/post/demo"
-
-// Auth Responses
-#define AUTH_NO_RESPONSE	"-1"	// sv_AuthStrictMode = 2 or 3
-#define AUTH_OK				"0"
-#define AUTH_INVALID_GUID	"1"		// sv_AuthStrictMode = 1 or 3
-#define AUTH_MAX_AGE		"2"
-#define AUTH_MIN_AGE		"3"
-#define AUTH_BAN_PERM		"4"
-#define AUTH_BAN_TEMP		"5"
+#include "../qcommon/threads.h"
 
 /*
 ===============
-HTTP_Reply
-
-Structure for replies.
+Threads_Init
 ===============
 */
-struct HTTP_Reply_t {
-	char* ptr;
-	size_t len;
-};
+void Threads_Init(void) {
+	Com_Printf("------ Initializing Threads ------\n");
+	// forty - we can have thread support in win32 we need to link with the MT runtime and use _beginthread
+	Com_Printf("Threading Initialized.\n");
+}
 
-//
-// http_main.c
-//
-char* HTTP_Post(char* url, char* data);
-char* HTTP_Get(char* url, char* data);
+/*
+===============
+create_thread
+===============
+*/
+int create_thread(void* (*thread_function)(void*), void* arguments) {
+	void* (*func)(void*) = thread_function;
 
-//
-// http.c
-//
-char* HTTP_AuthClient(char* guid);
-char* HTTP_ClientNeedsUpdate(void);
-char* HTTP_ClientGetMOTD(void);
+	Com_DPrintf("Thread created.\n");
 
-#endif // ~_S_HTTP
+	_beginthread((void (*)(void*))func, 0, arguments);
+	return 0;
+}
