@@ -83,7 +83,7 @@ COMMONOBJS := \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
-	../qcommon/db_mysql.o
+	../qcommon/db_mysql.o ../qcommon/stats_submit_curl.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -222,7 +222,8 @@ server-w32-clean:
 #####################################################################
 
 CURLCONF := \
-	--enable-shared=no --enable-static=yes --disable-rtsp \
+	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
+        --enable-shared=no --enable-static=yes --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \
