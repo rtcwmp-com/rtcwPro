@@ -565,6 +565,8 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
 
 
     json_t *eventStats =  json_array();
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     switch ( objType ) {
@@ -625,6 +627,8 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
         return;
     }
 
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
         switch ( eventType ) {
@@ -762,6 +766,8 @@ void G_writeDisconnectEvent (gentity_t* agent){
     if ( g_gamestate.integer != GS_PLAYING || agent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         return;
     }
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     json_object_set_new(jdata, "label",    json_string("disconnect"));
@@ -782,6 +788,12 @@ void G_writeClosingJson(void)
 
     if (level.gameStatslogFile) {
         trap_FS_Write( "}\n", strlen( "}\n"), level.gameStatslogFile );
+        if (g_stats_curl_submit.integer) {
+            trap_FS_FCloseFile(level.gameStatslogFile );
+            //submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+
+        }
       }
 
 
@@ -794,8 +806,19 @@ void G_writeGameLogStart(void)
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
+    char *buf;
+    char *buf3;
+    char cs[MAX_STRING_CHARS];
+    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+
+    buf = Info_ValueForKey(cs, "matchid");
+    level.match_id = va("%s",buf);
+    buf3 = Info_ValueForKey(cs, "round");
+    level.round_id = va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2");
     if (level.gameStatslogFile) {
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
+        json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+        json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
         json_object_set_new(jdata, "group",    json_string("server"));
@@ -824,7 +847,8 @@ void G_writeGameLogEnd(void)
     time_t unixTime = time(NULL);
     json_t *eventStats =  json_array();
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
-
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(jdata, "label",    json_string("round_end"));
 
@@ -849,6 +873,8 @@ void G_writeGameEarlyExit(void)
     json_t *event = json_object();
     time_t unixTime = time(NULL);
     json_t *eventStats =  json_array();
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(jdata, "label",    json_string("map_restart"));
@@ -859,6 +885,11 @@ void G_writeGameEarlyExit(void)
         json_decref(jdata);
         free(s);
         trap_FS_Write( "]\n}\n", strlen( "]\n}\n" ), level.gameStatslogFile );
+        if (g_stats_curl_submit.integer) {
+            trap_FS_FCloseFile(level.gameStatslogFile );
+       //     submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+        }
     }
 
 

@@ -98,7 +98,12 @@ vmCvar_t g_swapteams;
 
 vmCvar_t g_restarted;
 vmCvar_t g_log;
+
+vmCvar_t g_stats_curl_submit;
+vmCvar_t g_stats_curl_submit_URL;
+vmCvar_t g_stats_curl_submit_headers;
 vmCvar_t g_gameStatslog; // temp cvar for event logging
+
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -227,6 +232,8 @@ vmCvar_t refereePassword;
 
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
+
+
 
 vmCvar_t g_spectatorInactivity;
 vmCvar_t g_showFlags;
@@ -383,6 +390,11 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_log, "g_log", "", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_gameStatslog, "g_gameStatslog", "0", CVAR_ARCHIVE, 0, qfalse  },
+	// there will be future modifications and additions to the stats cvars....work in progress
+//    { &g_stats_mongodb, "g_stats_mongodb", "0", CVAR_ARCHIVE, 0, qfalse  },
+	{ &g_stats_curl_submit, "g_stats_curl_submit", "0", CVAR_ARCHIVE, 0, qfalse  },
+    { &g_stats_curl_submit_URL, "g_stats_curl_submit_URL", "https://rtcwproapi.donkanator.com/submit", CVAR_ARCHIVE, 0, qfalse  },
+    { &g_stats_curl_submit_headers, "g_stats_curl_submit_headers", "0", CVAR_ARCHIVE, 0, qfalse  }, // not used at the moment, headers are currently hardcoded
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
 	// show_bug.cgi?id=500
@@ -1594,7 +1606,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 if ( !level.gameStatslogFile ) {
                     G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
                 } else {
-                    //G_writeGameInfo();
+
+                    char hpath[256];
+                    char game[60];
+                    trap_Cvar_VariableStringBuffer( "fs_homepath", hpath, sizeof( hpath ) );
+                    trap_Cvar_VariableStringBuffer( "fs_game", game, sizeof( game ) );
+                    Com_sprintf( level.gameStatslogFileName, sizeof( level.gameStatslogFileName ), "%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
+
                     G_writeServerInfo();
 
 

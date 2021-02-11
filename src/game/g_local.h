@@ -881,8 +881,9 @@ typedef struct {
 	int warmupTime;                 // restart match at this time
 
 	fileHandle_t logFile;
-
     fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+    char gameStatslogFileName[256]; // lazy work-around for testing submission of stats....so this is temporary
+
 
 	// store latched cvars here that we want to get at often
 	int maxclients;
@@ -1052,7 +1053,7 @@ typedef struct {
 	config_t config;
 	int eventNum;  // event counter
 	char *match_id; // for stats round matching...
-
+    char *round_id; //
 
 } level_locals_t;
 
@@ -1469,6 +1470,9 @@ extern vmCvar_t g_gametype;
 extern vmCvar_t g_gameskill;
 // done
 extern vmCvar_t g_gameStatslog; // temp cvar for event logging
+extern vmCvar_t g_stats_curl_submit;
+extern vmCvar_t g_stats_curl_submit_URL;
+extern vmCvar_t g_stats_curl_submit_headers;
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
@@ -1749,6 +1753,8 @@ qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagN
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );
+
+int     trap_submit_curlPost( char* jsonfile, char* matchid );
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );

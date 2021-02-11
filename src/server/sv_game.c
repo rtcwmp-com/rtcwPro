@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ Sends a command string to a client
 void SV_GameSendServerCommand( int clientNum, const char *text ) {
 	if (strlen(text) > 1022) {
 		return;
-	} 
+	}
 
 	if ( clientNum == -1 ) {
 		SV_SendServerCommand( NULL, "%s", text );
@@ -925,6 +925,9 @@ int SV_GameSystemCalls( int *args ) {
     case G_SQL_CLEANSTRING:
             OW_CleanString( (char*)VMA(1), (char*)VMA(2), args[3] );
             return 0;
+
+	case G_SUBMIT_STATS_CURL:
+		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );;
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );
