@@ -182,8 +182,9 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
+	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+#server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
+server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl -lm -lz -DCURL_STATICLIB  -lmysqlclient  
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
