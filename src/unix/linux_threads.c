@@ -68,10 +68,10 @@ void Threads_Init(void) {
 
 /*
 ===============
-create_thread
+Threads_Create
 ===============
 */
-int create_thread(void* (*thread_function)(void*), void* arguments) {
+int Threads_Create(void* (*thread_function)(void*), void* arguments) {
 	pthread_t thread_id;
 
 	if (g_pthread_create == NULL) {

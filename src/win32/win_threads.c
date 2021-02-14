@@ -43,11 +43,12 @@ void Threads_Init(void) {
 create_thread
 ===============
 */
-int create_thread(void* (*thread_function)(void*), void* arguments) {
+int Threads_Create(void* (*thread_function)(void*), void* arguments) {
 	void* (*func)(void*) = thread_function;
 
 	Com_DPrintf("Thread created.\n");
 
 	_beginthread((void (*)(void*))func, 0, arguments);
-	return 0;
+	return 1;
 }
+

@@ -223,6 +223,9 @@
     <ClCompile Include="win32\win_threads.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="client\cl_events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">

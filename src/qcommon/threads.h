@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __THREADS_H
 
 #include "../game/q_shared.h"
+#include "qcommon.h"
 
 #ifdef __linux__
 	#include <gnu/lib-names.h>
@@ -46,6 +47,6 @@ If you have questions concerning this license or the applicable additional terms
 // *_threads.c
 //
 void Threads_Init(void);
-int create_thread(void* (*thread_function)(void*), void* arguments);
+int Threads_Create(void* (*thread_function)(void*), void* arguments);
 
 #endif // ~!__THREADS_H

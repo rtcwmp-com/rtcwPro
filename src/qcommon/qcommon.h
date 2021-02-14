@@ -1110,6 +1110,8 @@ void    Sys_EndProfiling( void );
 qboolean Sys_LowPhysicalMemory();
 unsigned int Sys_ProcessorCount();
 
+void* GetMemory(unsigned long size);
+
 // NOTE TTimo - on win32 the cwd is prepended .. non portable behaviour
 void Sys_StartProcess( char *exeName, qboolean doexit );            // NERVE - SMF
 void Sys_OpenURL( const char *url, qboolean doexit );                       // NERVE - SMF

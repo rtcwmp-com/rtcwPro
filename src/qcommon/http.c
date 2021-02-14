@@ -35,7 +35,8 @@ Will either return Guid or error message.
 ===============
 */
 char* HTTP_AuthClient(char* guid) {
-	return HTTP_Post(WEB_GET_AUTH, guid);
+	//return HTTP_Post(WEB_GET_AUTH, guid);
+	return "";
 }
 
 /*
@@ -45,8 +46,17 @@ HTTP_ClientNeedsUpdate
 Checks if client needs a update.
 ===============
 */
-char* HTTP_ClientNeedsUpdate(void) {
-	return HTTP_Get(WEB_GET_UPDATE, CODENAME);
+void HTTP_ClientNeedsUpdate(void) {
+	HTTP_Inquiry_t* http_inquiry = (HTTP_Inquiry_t*)malloc(sizeof(HTTP_Inquiry_t));
+
+	if (http_inquiry) {
+		http_inquiry->url = va("%s", WEB_GET_UPDATE);
+		http_inquiry->param = va("%s", CODENAME);
+		http_inquiry->callback = CL_ClientNeedsUpdate;
+
+		Threads_Create(HTTP_Get, http_inquiry);
+	}
+	return;
 }
 
 /*
@@ -56,6 +66,15 @@ HTTP_ClientGetMOTD
 Sets a MOTD if there's any..
 ===============
 */
-char* HTTP_ClientGetMOTD(void) {
-	return HTTP_Get(WEB_GET_MOTD, CODENAME);
+void HTTP_ClientGetMOTD(void) {
+	HTTP_Inquiry_t* http_inquiry = (HTTP_Inquiry_t*)malloc(sizeof(HTTP_Inquiry_t));
+
+	if (http_inquiry) {
+		http_inquiry->url = va("%s", WEB_GET_MOTD);
+		http_inquiry->param = va("%s", CODENAME);
+		http_inquiry->callback = CL_SetMotd;
+
+		Threads_Create(HTTP_Get, http_inquiry);
+	}
+	return;
 }

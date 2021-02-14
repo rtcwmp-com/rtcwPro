@@ -960,19 +960,12 @@ L0 - Patched for HTTP
 ===================
 */
 void CL_infoRequestMotd(void) {
-	char* result;
 
 	if (!cl_motd->integer) {
 		return;
 	}
 
-	// Query it now
-	result = HTTP_ClientGetMOTD();
-
-	// Set MOTD for newsflash..
-	if (result) {
-		Cvar_Set("cl_motdString", result);
-	}
+	HTTP_ClientGetMOTD();
 }
 
 /*
@@ -2756,7 +2749,6 @@ L0 - This is good, we can use this for basis.
 ============================
 */
 void CL_CheckAutoUpdate(void) {
-	char* reply = NULL;
 
 	if (!cl_autoupdate->integer) {
 		return;
@@ -2769,22 +2761,13 @@ void CL_CheckAutoUpdate(void) {
 	}
 
 	srand(Com_Milliseconds());
+	// TRACEMARK - L0 
 	//if (!NET_StringToAdr(WEB_GET_UPDATE, &cls.autoupdateServer, NA_IP)) {
 	//	return;
 	//}
 
-	reply = HTTP_ClientNeedsUpdate();
-	if (!reply) {
-		return;
-	}
-
-	Cmd_TokenizeString(reply);
-
-	// If it's not silent then bail out
-	if (!Q_stricmp(Cmd_Argv(0), "updtAvailable")) {
-		Com_Error(ERR_FATAL, Cmd_ArgsFrom(1));
-		return;
-	}
+	// Check for Update
+	HTTP_ClientNeedsUpdate();
 
 	// Fetch MOTD..
 	CL_infoRequestMotd();

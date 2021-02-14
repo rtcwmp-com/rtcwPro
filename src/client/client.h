@@ -612,6 +612,12 @@ void CL_UpdateLevelHunkUsage( void );
 void CL_SetGuid(void);
 
 //
+// cl_events.c
+//
+void CL_SetMotd(char* message);
+void CL_ClientNeedsUpdate(char* response);
+
+//
 // cl_ui.c
 //
 void CL_InitUI( void );

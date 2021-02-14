@@ -120,10 +120,10 @@ HTTP_Post
 Posts a request and returns a response.
 ===============
 */
-char* HTTP_Post(char* url, char* data) {
+void* HTTP_Post(void *args) {
+	HTTP_Inquiry_t* inquiry = (HTTP_Inquiry_t *)args;
 	CURL* handle;
 	CURLcode res;
-	char* response = AUTH_NO_RESPONSE;
 
 	handle = curl_easy_init();
 	if (handle) {
@@ -142,10 +142,10 @@ char* HTTP_Post(char* url, char* data) {
 		curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, cl_StreamingSelfSignedCert->integer);
 		curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, cl_StreamingSelfSignedCert->integer);
 #endif
-		curl_easy_setopt(handle, CURLOPT_URL, url);
+		curl_easy_setopt(handle, CURLOPT_URL, inquiry->url);
 		curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 3);
 		curl_easy_setopt(handle, CURLOPT_TIMEOUT, 5);
-		curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data);
+		curl_easy_setopt(handle, CURLOPT_POSTFIELDS, inquiry->param);
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, HTTP_ParseReply);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, &s);
 		curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1);
@@ -155,14 +155,14 @@ char* HTTP_Post(char* url, char* data) {
 			Com_DPrintf("HTTP_Post[res] failed: %s\n", curl_easy_strerror(res));
 		}
 		else {
-			response = va("%s", s.ptr);
+			inquiry->callback(s.ptr);
 		}
 		free(s.ptr);
 		curl_slist_free_all(headers);
 	}
 	curl_easy_cleanup(handle);
-
-	return response;
+	free(inquiry);
+	return 0;
 }
 
 /*
@@ -172,10 +172,12 @@ HTTP_Get
 Sends a request and returns a response.
 ===============
 */
-char* HTTP_Get(char* url, char* data) {
+void* HTTP_Get(void* args) {
+	HTTP_Inquiry_t* inquiry = (HTTP_Inquiry_t*)args;
 	CURL* handle;
 	CURLcode res;
-	char* response = AUTH_NO_RESPONSE;
+	
+	Com_Printf("HTTP_Get WE ARE IN\n");
 
 	handle = curl_easy_init();
 	if (handle) {
@@ -194,14 +196,14 @@ char* HTTP_Get(char* url, char* data) {
 		curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, cl_StreamingSelfSignedCert->integer);
 		curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, cl_StreamingSelfSignedCert->integer);
 #endif
-		curl_easy_setopt(handle, CURLOPT_URL, url);
+		curl_easy_setopt(handle, CURLOPT_URL,inquiry->url);
 		curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 		curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
 		curl_easy_setopt(handle, CURLOPT_FORBID_REUSE, 1L);
 		curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
 		curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 3);
 		curl_easy_setopt(handle, CURLOPT_TIMEOUT, 5);
-		curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data);
+		curl_easy_setopt(handle, CURLOPT_POSTFIELDS, inquiry->param);
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, HTTP_ParseReply);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, &s);
 		curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1);
@@ -209,14 +211,16 @@ char* HTTP_Get(char* url, char* data) {
 		res = curl_easy_perform(handle);
 		if (res != CURLE_OK) {
 			Com_DPrintf("HTTP_Get[res] failed: %s\n", curl_easy_strerror(res));
+			inquiry->callback(s.ptr);
 		}
 		else {
-			response = va("%s", s.ptr);
+			Com_Printf("Respone: %s\n", s.ptr);
+			inquiry->callback(s.ptr);
 		}
 		free(s.ptr);
 		curl_slist_free_all(headers);
 	}
 	curl_easy_cleanup(handle);
-
-	return response;
+	free(inquiry);
+	return 0;
 }
