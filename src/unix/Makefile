@@ -83,7 +83,7 @@ COMMONOBJS := \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
-	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o
+	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -182,8 +182,9 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
-server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
+	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+#server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
+server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl -lm -lz -DCURL_STATICLIB  -lmysqlclient  
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -222,6 +223,7 @@ server-w32-clean:
 #####################################################################
 
 CURLCONF := \
+	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
 	--enable-shared=no --enable-static=yes --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
