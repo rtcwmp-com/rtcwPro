@@ -229,6 +229,9 @@
     <ClCompile Include="qcommon\stats_submit_curl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="server\sv_events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">

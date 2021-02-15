@@ -34,9 +34,18 @@ HTTP_AuthClient
 Will either return Guid or error message.
 ===============
 */
-char* HTTP_AuthClient(char* guid) {
-	//return HTTP_Post(WEB_GET_AUTH, guid);
-	return "";
+void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]) {
+	HTTP_Inquiry_t* http_inquiry = (HTTP_Inquiry_t*)malloc(sizeof(HTTP_Inquiry_t));
+
+	if (http_inquiry) {
+		http_inquiry->url = va("%s", WEB_GET_AUTH);
+		http_inquiry->param = va("%s", CODENAME);
+		http_inquiry->callback = SV_AuthorizeClient;
+		Q_strncpyz(http_inquiry->userinfo, userinfo, sizeof(http_inquiry->userinfo));
+
+		Threads_Create(HTTP_Post, http_inquiry);
+	}
+	return;
 }
 
 /*

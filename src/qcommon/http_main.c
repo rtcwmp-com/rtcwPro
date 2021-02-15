@@ -153,9 +153,20 @@ void* HTTP_Post(void *args) {
 		res = curl_easy_perform(handle);
 		if (res != CURLE_OK) {
 			Com_DPrintf("HTTP_Post[res] failed: %s\n", curl_easy_strerror(res));
+			if (inquiry->userinfo != NULL) {
+				inquiry->callback(NULL, inquiry->userinfo);
+			}
+			else {
+				inquiry->callback(NULL);
+			}
 		}
 		else {
-			inquiry->callback(s.ptr);
+			if (inquiry->userinfo != NULL) {
+				inquiry->callback(s.ptr, inquiry->userinfo);
+			}
+			else {
+				inquiry->callback(s.ptr);
+			}
 		}
 		free(s.ptr);
 		curl_slist_free_all(headers);
@@ -211,11 +222,21 @@ void* HTTP_Get(void* args) {
 		res = curl_easy_perform(handle);
 		if (res != CURLE_OK) {
 			Com_DPrintf("HTTP_Get[res] failed: %s\n", curl_easy_strerror(res));
-			inquiry->callback(s.ptr);
+			if (inquiry->userinfo != NULL) {
+				inquiry->callback(NULL, inquiry->userinfo);
+			}
+			else {
+				inquiry->callback(NULL);
+			}
 		}
 		else {
 			Com_Printf("Respone: %s\n", s.ptr);
-			inquiry->callback(s.ptr);
+			if (inquiry->userinfo != NULL) {
+				inquiry->callback(s.ptr, inquiry->userinfo);
+			}
+			else {
+				inquiry->callback(s.ptr);
+			}
 		}
 		free(s.ptr);
 		curl_slist_free_all(headers);

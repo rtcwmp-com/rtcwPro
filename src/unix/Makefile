@@ -76,7 +76,7 @@ CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \
 	../client/cl_net_chan.o ../client/cl_parse.o ../client/cl_scrn.o \
-	../client/cl_ui.o
+	../client/cl_ui.o ../client/cl_events.o
 COMMONOBJS := \
 	../qcommon/cm_load.o ../qcommon/cm_patch.o ../qcommon/cm_polylib.o \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
@@ -91,7 +91,7 @@ SERVEROBJS := \
 	../server/sv_bot.o ../server/sv_ccmds.o ../server/sv_client.o \
 	../server/sv_game.o ../server/sv_init.o ../server/sv_main.o \
 	../server/sv_net_chan.o ../server/sv_snapshot.o ../server/sv_animation.o \
-	../server/sv_world.o ../server/sv_wallhack.o 
+	../server/sv_world.o ../server/sv_wallhack.o  ../server/sv_events.o
 # ../qcommon/vm_x86.c is not used and not nice to port to mingw
 VMOBJS := \
 	../qcommon/vm.o ../qcommon/vm_interpreted.o

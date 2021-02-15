@@ -236,6 +236,8 @@ typedef struct {
 	int firstPing;                  // Used for min and max ping checks
 	qboolean wasrefused;
 	qboolean connected;
+	qboolean wasAuthorized;
+	char* authMessage;
 } challenge_t;
 
 #define MAX_MASTERS 8               // max recipients for heartbeat packets
@@ -482,6 +484,11 @@ int         SV_BotGetConsoleMessage( int client, char *buf, int size );
 
 int BotImport_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void BotImport_DebugPolygonDelete( int id );
+
+//
+// sv_events.c
+//
+void SV_AuthorizeClient(char* response, char userinfo[MAX_INFO_STRING]);
 
 //
 // sv_wallhack.c

@@ -25,75 +25,43 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-#ifndef _S_HTTP
-#define _S_HTTP
-
-#include <curl/curl.h>
-#include <curl/easy.h>
-#include "threads.h"
-#include "../server/server.h"
-#include "../client/client.h"
-
-
-//
-// URL Mappings
-//
-#ifdef _DEBUG
-	#define WEB_URL		"http://game.localhost"
-#else 
-	#define WEB_URL		"https://rtcwmp.com"
-#endif // ~_DEBUG
-#define WEB_GET_MOTD	WEB_URL "/api/get/motd"
-#define WEB_GET_UPDATE	WEB_URL "/api/get/update"
-#define WEB_GET_AUTH	WEB_URL "/api/get/auth"
-#define WEB_GET_MBL		WEB_URL "/api/get/mbl"
-#define WEB_UPLOAD_SS	WEB_URL "/api/post/ss"
-#define WEB_UPLOAD_DEMO	WEB_URL "/api/post/demo"
-
-// Auth Responses
-#define AUTH_NO_RESPONSE	"-1"	// sv_AuthStrictMode = 2 or 3
-#define AUTH_INVALID_GUID	"0"		// sv_AuthStrictMode = 1 or 3
-#define AUTH_OK				"1"
-
-
+#include "../qcommon/http.h"
 
 /*
-===============
-HTTP_Reply
-
-Structure for replies.
-===============
+====================
+SV_AuthorizeClient
+====================
 */
-struct HTTP_Reply_t {
-	char*	ptr;
-	size_t	len;
-};
+void SV_AuthorizeClient(char* response, char userinfo[MAX_INFO_STRING]) {
+	int i, challenge = atoi(userinfo);
 
-/*
-============
-HTTP_Inquiry_t
+	if (!challenge) {
+		Com_Printf("SV_AuthorizeClient: challenge not set.\n");
+		return;
+	}
 
-Structure for issuing inquiries and invoking callbacks.
-============
-*/
-typedef struct {
-	char*	url;
-	char*	param;
-	char	userinfo[MAX_INFO_STRING];
-	void (*callback)(char* fmt, ...);
-} HTTP_Inquiry_t;
+	for (i = 0; i < MAX_CHALLENGES; i++) {
+		if (svs.challenges[i].challenge == challenge) {
+			break;
+		}
+	}
+	if (i == MAX_CHALLENGES) {
+		Com_Printf("SV_AuthorizeClient: challenge not found.\n");
+		return;
+	}
 
-//
-// http_main.c
-//
-void* HTTP_Post(void* args);
-void* HTTP_Get(void* args);
-
-//
-// http.c
-//
-void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]);
-void HTTP_ClientNeedsUpdate(void);
-void HTTP_ClientGetMOTD(void);
-
-#endif // ~_S_HTTP
+	svs.challenges[i].wasAuthorized = qtrue;
+	if (response == NULL && sv_AuthStrictMode->integer) {
+		svs.challenges[i].wasAuthorized = qfalse;
+		svs.challenges[i].authMessage = "Auth server failed to respond while AuthStrictMode is enabled.";
+	}
+	else if (response != NULL) {
+		Cmd_TokenizeString(response);
+		if (!Q_stricmp(Cmd_Argv(0), AUTH_OK)) {
+			svs.challenges[i].wasAuthorized = qfalse;
+			svs.challenges[i].authMessage = Cmd_ArgsFrom(1);
+		}
+	}
+	NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "challengeResponse %i", svs.challenges[i].challenge);
+	return;
+}

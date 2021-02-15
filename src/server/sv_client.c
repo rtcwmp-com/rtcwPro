@@ -83,9 +83,11 @@ void SV_GetChallenge( netadr_t from ) {
 
 		challenge->adr = from;
 		challenge->firstTime = svs.time;
+		challenge->wasAuthorized = qfalse;
 		challenge->firstPing = 0;
 		challenge->connected = qfalse;
 		challenge->wasrefused = qfalse;
+		challenge->authMessage = "";
 		i = oldest;
 	}
 
@@ -100,6 +102,28 @@ void SV_GetChallenge( netadr_t from ) {
 			NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i %i", challenge->challenge, sv_onlyVisibleClients->integer );
 		} else {
 			NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i", challenge->challenge );
+		}
+		return;
+	}
+
+	if (!sv_AuthEnabled->integer || !Q_stricmp(sv_StreamingToken->string, "")) {
+		challenge->wasAuthorized = qtrue;
+	}
+	else {
+		HTTP_AuthClient(va("%d", challenge->challenge));
+		return;
+	}
+
+	if (challenge->wasAuthorized) {
+		Com_DPrintf("authorization completed.\n");
+
+		challenge->pingTime = svs.time;
+		if ( sv_onlyVisibleClients->integer ) {
+			NET_OutOfBandPrint( NS_SERVER, challenge->adr,
+								"challengeResponse %i %i", challenge->challenge, sv_onlyVisibleClients->integer );
+		} else {
+			NET_OutOfBandPrint( NS_SERVER, challenge->adr,
+								"challengeResponse %i", challenge->challenge );
 		}
 		return;
 	}
@@ -298,7 +322,7 @@ void SV_DirectConnect( netadr_t from ) {
 	char guid[GUID_LEN];
 	char* ip;
 
-	Com_DPrintf( "SVC_DirectConnect ()\n" );
+	Com_DPrintf( "SVC_DirectConnect ()\n");
 
 	Q_strncpyz( userinfo, Cmd_Argv( 1 ), sizeof( userinfo ) );
 
@@ -405,30 +429,19 @@ void SV_DirectConnect( netadr_t from ) {
 				challengeptr->wasrefused = qtrue;
 				return;
 			}
-		}
 
-		// Do not allow them to enter ..
-		if (sv_AuthEnabled->integer && Q_stricmp(sv_StreamingToken->string, "")) {
-			char* response;
-			char* message;
-
-			response = HTTP_AuthClient(cl->guid);
-			Com_Printf(response);
-			if (!Q_stricmp(response, "-1") && sv_AuthStrictMode->integer > 1) {
-				message = va("Auth server failed to respond and AuthStrictMode is enabled.");
-				NET_OutOfBandPrint(NS_SERVER, from, "print\n%s\n", message);
-				Com_DPrintf("Game rejected a connection: %s.\n", message);
-				challengeptr->wasrefused = qtrue;
-				return;
-			}
-
-			Cmd_TokenizeString(response);
-			if (!Q_stricmp(Cmd_Argv(0), AUTH_OK)) {
-				message = va("%s", Cmd_ArgsFrom(1));
-				NET_OutOfBandPrint(NS_SERVER, from, "print\n%s\n", message);
-				Com_DPrintf("Game rejected a connection: %s.\n", message);
-				challengeptr->wasrefused = qtrue;
-				return;
+			// Do not allow them to enter ..
+			if (sv_AuthEnabled->integer && Q_stricmp(sv_StreamingToken->string, "")) {
+				if (challengeptr->wasAuthorized == qfalse) {
+					if (!Q_stricmp(challengeptr->authMessage, "")) {
+						NET_OutOfBandPrint(NS_SERVER, from, "print\nUncaught Auth server error.\n");
+					}
+					else {
+						NET_OutOfBandPrint(NS_SERVER, from, va("print\n%s\n", challengeptr->authMessage));
+					}
+					challengeptr->wasrefused = qtrue;
+					return;
+				}
 			}
 		}
 
