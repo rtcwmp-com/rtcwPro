@@ -305,7 +305,6 @@ You or the server may be running older versions of the game. Press the auto-upda
 									// run multiple servers
 
 #define CDKEY_SALT			"]=q.0xFF^"
-#define NO_GUID				"NO_GUID"
 
 // the svc_strings[] array in cl_parse.c should mirror this
 //
@@ -759,6 +758,9 @@ MISC
 extern char cl_cdkey[34];
 void Com_AppendCDKey( const char *filename );
 void Com_ReadCDKey( const char *filename );
+#ifndef DEDICATED
+void Com_ReadAuthKey(const char* filename);
+#endif
 
 // returnbed by Sys_GetProcessorId
 #define CPUID_GENERIC           0           // any unrecognized processor

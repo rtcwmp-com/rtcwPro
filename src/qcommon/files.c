@@ -1094,7 +1094,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 
 	// make sure the q3key file is only readable by the quake3.exe at initialization
 	// any other time the key should only be accessed in memory using the provided functions
-	if ( com_fullyInitialized && strstr( filename, "rtcwkey" ) ) {
+	if ( com_fullyInitialized && strstr( filename, "rtcwkey" ) || com_fullyInitialized && strstr(filename, "authkey")) {
 		*file = 0;
 		return -1;
 	}
@@ -3040,6 +3040,9 @@ static void FS_Startup( const char *gameName ) {
 		}
 	}
 
+#ifndef DEDICATED
+	Com_ReadAuthKey(BASEGAME);
+#endif
 	Com_ReadCDKey( BASEGAME );
 	fs = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
 	if ( fs && fs->string[0] != 0 ) {

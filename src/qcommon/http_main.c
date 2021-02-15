@@ -188,8 +188,6 @@ void* HTTP_Get(void* args) {
 	CURL* handle;
 	CURLcode res;
 	
-	Com_Printf("HTTP_Get WE ARE IN\n");
-
 	handle = curl_easy_init();
 	if (handle) {
 		struct HTTP_Reply_t s;

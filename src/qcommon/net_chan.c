@@ -465,8 +465,12 @@ typedef struct {
 
 loopback_t loopbacks[2];
 
-
-qboolean    NET_GetLoopPacket( netsrc_t sock, netadr_t *net_from, msg_t *net_message ) {
+/*
+===============
+NET_GetLoopPacket
+================
+*/
+qboolean NET_GetLoopPacket( netsrc_t sock, netadr_t *net_from, msg_t *net_message ) {
 	int i;
 	loopback_t  *loop;
 
@@ -491,7 +495,11 @@ qboolean    NET_GetLoopPacket( netsrc_t sock, netadr_t *net_from, msg_t *net_mes
 
 }
 
-
+/*
+===============
+NET_SendLoopPacket
+================
+*/
 void NET_SendLoopPacket( netsrc_t sock, int length, const void *data, netadr_t to ) {
 	int i;
 	loopback_t  *loop;
@@ -505,8 +513,11 @@ void NET_SendLoopPacket( netsrc_t sock, int length, const void *data, netadr_t t
 	loop->msgs[i].datalen = length;
 }
 
-
-
+/*
+===============
+NET_SendPacket
+================
+*/
 void NET_SendPacket( netsrc_t sock, int length, const void *data, netadr_t to ) {
 
 	// sequenced packets are shown in netchan, so just show oob
@@ -552,8 +563,6 @@ void QDECL NET_OutOfBandPrint( netsrc_t sock, netadr_t adr, const char *format, 
 	// send the datagram
 	NET_SendPacket( sock, strlen( string ), string, adr );
 }
-
-
 
 /*
 ===============

@@ -2329,12 +2329,34 @@ void Com_ReadCDKey( const char *filename ) {
 
 	if ( CL_CDKeyValidate( buffer, NULL ) ) {
 		Q_strncpyz(cl_cdkey, buffer, 17);
-#ifndef DEDICATED
-		Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
-#endif // !DEDICATED
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
+}
+
+/*
+=================
+Com_ReadAuthKey
+=================
+*/
+void Com_ReadAuthKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[33];
+	char fbuffer[MAX_OSPATH];
+
+	sprintf(fbuffer, "%s/authkey", filename);
+
+	FS_SV_FOpenFileRead(fbuffer, &f);
+	if (!f) {
+		return;
+	}
+
+	Com_Memset(buffer, 0, sizeof(buffer));
+
+	FS_Read(buffer, 16, f);
+	FS_FCloseFile(f);
+
+	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
 }
 
 /*
@@ -2378,10 +2400,7 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	char fbuffer[MAX_OSPATH];
 	char key[17];
 
-
 	sprintf( fbuffer, "%s/rtcwkey", filename );
-
-
 	Q_strncpyz( key, ikey, 17 );
 
 	if ( !CL_CDKeyValidate( key, NULL ) ) {
@@ -2412,10 +2431,6 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	FS_Printf( f, "// id Software and Activision will NOT ask you to send this file to them.\r\n" );
 #endif
 	FS_FCloseFile( f );
-
-#ifndef DEDICATED
-	Cvar_Set("cl_guid", Com_MD5(key, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
-#endif // !DEDICATED
 }
 #endif
 

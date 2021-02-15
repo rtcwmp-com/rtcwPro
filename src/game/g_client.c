@@ -1563,11 +1563,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		sscanf(s, "%[^z]s:%*s", s);
 	}
 	int cGender = 0;
-	// Check for "" GUID..
-	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
-		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
-		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
-	}
+
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	sscanf(s, "%i %i %i %i",
 			&client->pers.clientFlags,
@@ -1847,7 +1843,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// Auth client
 	if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
-		if (!Info_ValueForKey(userinfo, "cl_guid")) {
+		if (!Info_ValueForKey(userinfo, "cl_guid") || !Q_strcmp(Info_ValueForKey(userinfo, "cl_guid"), NO_GUID)) {
 			return "Valid GUID is required to enter this server.";
 		}
 	}

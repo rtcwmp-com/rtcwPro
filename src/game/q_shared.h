@@ -1667,6 +1667,7 @@ typedef enum {
 #define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
 #define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 #define GUID_LEN				33
+#define NO_GUID					"NO_GUID"
 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..

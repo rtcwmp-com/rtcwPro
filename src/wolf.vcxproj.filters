@@ -214,9 +214,6 @@
     <ClCompile Include="qcommon\md5.c">
       <Filter>Source Files\encrypt</Filter>
     </ClCompile>
-    <ClCompile Include="client\cl_control.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="unix\linux_threads.c">
       <Filter>Source Files\unix</Filter>
     </ClCompile>
