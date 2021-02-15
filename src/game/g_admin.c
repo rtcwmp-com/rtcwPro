@@ -1877,10 +1877,8 @@ Pause
 ==================
 */
 void cmd_pause(gentity_t *ent, qboolean resume) {
+	char *log, *action;
 
-	char *tag, *log, *action;
-	gentity_t *target_ent;
-	int i;
 	if ( g_gamestate.integer != GS_PLAYING ) {
 		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
 		return;
@@ -1888,81 +1886,38 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 
 	if (level.numPlayingClients == 0) {
 		CP("print \"^jError: ^7You cannot use pause feature with no playing clients..\n\"");
-	return;
+		return;
 	}
 
-	tag = sortTag(ent);
-/*	if (!resume) {
-		//level.paused = !PAUSE_NONE;
-		 level.paused = 100 + ((ent) ? (1 + ent - g_entities) : 0);
-		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
-		//G_spawnPrintf(DP_PAUSEINFO, level.time, NULL);
-		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tag));
-		AAPS("sound/world/klaxon1.wav");
-	} else if (level.paused != PAUSE_UNPAUSING){
-		if (level.paused == PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-		return;
-		}
-
-		level.CNstart = 0; // Resets countdown if it was aborted before
-		level.paused = PAUSE_UNPAUSING;
-		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
-		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tag));
-	}*/
 	if (!resume) {
-		level.paused = !PAUSE_NONE;
-		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
-		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tag));
+		if (level.paused != PAUSE_NONE) {
+			CP("print \"^jError: ^7Match is already paused^j!\n\"");
+			return;
+		}
+		G_pauseHandle(qtrue, TEAM_SPECTATOR);
 		AAPS("sound/match/klaxon1.wav");
-				// nihi: added from rtcwpub for freezing grenades/dyno/airstrikes/etc
-			// NOTE(nobo): pm_type of PM_FREEZE is enough to keep clients in-place. missiles, however, need some help.
-        for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
-        {
-            target_ent = g_entities + i;
-
-            if (target_ent->inuse)
-            {
-                // NOTE(nobo): force moving entities in the world to stop in-place.
-                if (target_ent->s.eType > TR_INTERPOLATE &&
-                    target_ent->s.pos.trTime > 0)
-                {
-                    // NOTE(nobo): Store trBase so it can be restored upon unpause of game.
-                    // trBase is what's used to determine a missile's position in the world, not r.currentOrigin or s.origin
-                    VectorCopy(target_ent->s.pos.trBase, target_ent->trBase_pre_pause);
-                    VectorCopy(target_ent->r.currentOrigin, target_ent->s.pos.trBase);
-                    target_ent->trType_pre_pause = target_ent->s.pos.trType;
-                    target_ent->s.pos.trType = TR_STATIONARY;
-                }
-            }
-        }
-        // end import from rtcwpub
-
 	} else if (level.paused != PAUSE_UNPAUSING){
 		if (level.paused == PAUSE_NONE) {
 			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-		return;
+			return;
 		}
-
-		level.CNstart = 0; // Resets countdown if it was aborted before
-		level.paused = PAUSE_UNPAUSING;
-		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tag));
-
+		G_pauseHandle(qfalse, TEAM_SPECTATOR);
 	}
+
+	AP(va("chat \"^zconsole: ^7%s has ^3%s match!\n\"", (resume ? "Unpaused ^7the" : "Paused ^7a"), sortTag(ent)));
 
     if (g_gameStatslog.integer) {
-        G_writeGeneralEvent (ent , ent, " ", (resume) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
+        G_writeGeneralEvent(ent , ent, " ", (resume) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
     }
 
-	// Log it
 	action = (resume) ? "resumed the match." : "paused a match.";
 	log = va("Player %s (IP:%i.%i.%i.%i) %s",
 		ent->client->pers.netname, ent->client->sess.ip[0], ent->client->sess.ip[1], ent->client->sess.ip[2],
 		ent->client->sess.ip[3], action );
 	if (g_extendedLog.integer)
 		logEntry (ADMACT, log);
-
+	
+	return;
 }
 
 /*
@@ -2048,7 +2003,7 @@ Ready or unready all..
 ===========
 */
 void cmd_readyHandle( gentity_t *ent, qboolean unready ) {
-	char *msg = ((unready) ? "^nUNREADY^7" : "^nREADY^7");
+	char *msg = ((unready) ? "UNREADY" : "READY");
 
 	if (!g_tournament.integer) {
 		CP("print \"Tourny mode is disabled! Command ignored..\n\"");
@@ -2069,7 +2024,9 @@ void cmd_readyHandle( gentity_t *ent, qboolean unready ) {
 		G_readyReset(qtrue);
 	}
 
-	AP(va("chat \"^zconsole: ^7%s has %s ALL players..\n\"", sortTag(ent), msg));
+	AP(va("chat \"^zconsole: ^7%s has ^n%s ^7ALL players..\n\"", sortTag(ent), msg));
+	AP(va("print \"^z>> ^7%s ^z%s ALL players..\n\"", ent->client->pers.netname));
+	return;
 }
 
 /*
@@ -2438,6 +2395,3 @@ qboolean cmds_admin(char cmd[MAX_TOKEN_CHARS], gentity_t *ent) {
 
 return qfalse;
 }
-
-
-
