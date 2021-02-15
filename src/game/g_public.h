@@ -153,7 +153,6 @@ typedef enum {
 	// add commands to the console as if they were typed in
 	// for map changing, etc
 
-	G_SUBMIT_STATS_CURL,
 	//=========== server specific functionality =============
 
 	G_LOCATE_GAME_DATA,     // ( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
@@ -432,7 +431,9 @@ typedef enum {
 	G_SQL_GETFIELDBYID_INT,
 	G_SQL_GETFIELDBYNAME_INT,
 	G_SQL_FIELDCOUNT,
-	G_SQL_CLEANSTRING
+	G_SQL_CLEANSTRING,
+
+	G_SUBMIT_STATS_CURL
 
 } gameImport_t;
 
