@@ -758,9 +758,7 @@ MISC
 extern char cl_cdkey[34];
 void Com_AppendCDKey( const char *filename );
 void Com_ReadCDKey( const char *filename );
-#ifndef DEDICATED
 void Com_ReadAuthKey(const char* filename);
-#endif
 
 // returnbed by Sys_GetProcessorId
 #define CPUID_GENERIC           0           // any unrecognized processor
