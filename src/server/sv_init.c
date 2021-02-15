@@ -913,8 +913,6 @@ void SV_Init( void ) {
 	// Auth
 	sv_AuthEnabled = Cvar_Get("sv_AuthEnabled", "0", CVAR_SERVERINFO | CVAR_INIT);
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
-	sv_AuthMaxAge = Cvar_Get("sv_AuthMaxAge", "-1", CVAR_SERVERINFO | CVAR_LATCH);
-	sv_AuthMinAge = Cvar_Get("sv_AuthMinAge", "-1", CVAR_SERVERINFO | CVAR_LATCH);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

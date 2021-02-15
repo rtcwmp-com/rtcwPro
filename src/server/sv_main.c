@@ -101,8 +101,6 @@ cvar_t* sv_StreamingSelfSignedCert;
 // Auth
 cvar_t* sv_AuthEnabled;
 cvar_t* sv_AuthStrictMode;
-cvar_t* sv_AuthMaxAge;
-cvar_t* sv_AuthMinAge;
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
@@ -655,8 +653,6 @@ void SVC_Info( netadr_t from ) {
 	// Expose Auth info..
 	Info_SetValueForKey(infostring, "sv_AuthEnabled", va("%i", sv_AuthEnabled->integer));
 	Info_SetValueForKey(infostring, "sv_AuthStrictMode", va("%i", sv_AuthStrictMode->integer));
-	Info_SetValueForKey(infostring, "sv_AuthMaxAge", va("%i", sv_AuthMaxAge->integer));
-	Info_SetValueForKey(infostring, "sv_AuthMinAge", va("%i", sv_AuthMinAge->integer));
 
 	NET_OutOfBandPrint( NS_SERVER, from, "infoResponse\n%s", infostring );
 }

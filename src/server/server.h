@@ -368,8 +368,6 @@ extern cvar_t* sv_StreamingSelfSignedCert;
 // Auth
 extern cvar_t* sv_AuthEnabled;
 extern cvar_t* sv_AuthStrictMode;
-extern cvar_t* sv_AuthMaxAge;
-extern cvar_t* sv_AuthMinAge;
 
 //===========================================================
 
