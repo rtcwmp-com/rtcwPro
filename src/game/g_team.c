@@ -1917,7 +1917,7 @@ void G_readyResetOnPlayerLeave( int team ) {
 
 void G_readyStart( void ) {
 	level.ref_allready = qtrue;
-	level.CNstart = 0; // Resets countdown
+	level.cnNum = 0; // Resets countdown
 	trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 
 	// Prevents joining once countdown starts..
