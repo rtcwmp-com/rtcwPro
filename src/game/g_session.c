@@ -67,60 +67,57 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		G_WriteWeaponStatsData(client);
 	}/// End
 	//s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
-    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
-			client->sess.sessionTeam,
-			client->sess.spectatorTime,
-			client->sess.spectatorState,
-			client->sess.spectatorClient,
-			client->sess.wins,
-			client->sess.losses,
-			client->sess.playerType,        // DHM - Nerve
-			client->sess.playerWeapon,      // DHM - Nerve
-			client->sess.playerItem,        // DHM - Nerve
-			client->sess.playerSkin,        // DHM - Nerve
-			client->sess.spawnObjectiveIndex, // DHM - Nerve
-			client->sess.latchPlayerType,   // DHM - Nerve
-			client->sess.latchPlayerWeapon, // DHM - Nerve
-			client->sess.latchPlayerItem,   // DHM - Nerve
-			client->sess.latchPlayerSkin,    // DHM - Nerve
-			// L0 - New stuff
-			client->sess.admin,			// User is admin
-			client->sess.referee,			// User is ref
-			client->sess.incognito,		// Admin is hidden
-			client->sess.ignored,		// User is ignored
-			client->sess.uci,			// mcwf's GeoIP
-			client->sess.ip[0],			// L0 - IP
-			client->sess.ip[1],			// L0 - IP
-			client->sess.ip[2],			// L0 - IP
-			client->sess.ip[3],			// L0 - IP
-			client->sess.guid,			// Guid
-			client->sess.rounds,		// rounds played in stopwatch
-			client->sess.selectedWeapon,// Selected weapon
-			client->sess.specInvited,	// Can watch..
-			client->sess.specLocked,	// Spec lock
-			client->sess.deaths,
-			client->sess.kills,
-			client->sess.damage_given,
-			client->sess.damage_received,
-			client->sess.team_damage,
-			client->sess.team_kills,
-			client->sess.gibs,
-			client->sess.acc_shots,
-			client->sess.acc_hits,
-			client->sess.headshots,
-			client->sess.suicides,
-			client->sess.med_given,
-			client->sess.ammo_given,
-			client->sess.revives,
-			client->sess.knifeKills,
-            //new below
-			client->sess.dyn_planted,
-            client->sess.dyn_defused,
-            client->sess.obj_captured,
-            client->sess.obj_destroyed,
-            client->sess.obj_returned,
-            client->sess.obj_taken
-			);
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
+		client->sess.sessionTeam,
+		client->sess.spectatorTime,
+		client->sess.spectatorState,
+		client->sess.spectatorClient,
+		client->sess.wins,
+		client->sess.losses,
+		client->sess.playerType,        // DHM - Nerve
+		client->sess.playerWeapon,      // DHM - Nerve
+		client->sess.playerItem,        // DHM - Nerve
+		client->sess.playerSkin,        // DHM - Nerve
+		client->sess.spawnObjectiveIndex, // DHM - Nerve
+		client->sess.latchPlayerType,   // DHM - Nerve
+		client->sess.latchPlayerWeapon, // DHM - Nerve
+		client->sess.latchPlayerItem,   // DHM - Nerve
+		client->sess.latchPlayerSkin,    // DHM - Nerve
+		// L0 - New stuff
+		client->sess.admin,			// User is admin
+		client->sess.referee,			// User is ref
+		client->sess.incognito,		// Admin is hidden
+		client->sess.ignored,		// User is ignored
+		client->sess.uci,			// mcwf's GeoIP
+		client->sess.ip,			// L0 - IP
+		client->sess.guid,			// Guid
+		client->sess.rounds,		// rounds played in stopwatch
+		client->sess.selectedWeapon,// Selected weapon
+		client->sess.specInvited,	// Can watch..
+		client->sess.specLocked,	// Spec lock
+		client->sess.deaths,
+		client->sess.kills,
+		client->sess.damage_given,
+		client->sess.damage_received,
+		client->sess.team_damage,
+		client->sess.team_kills,
+		client->sess.gibs,
+		client->sess.acc_shots,
+		client->sess.acc_hits,
+		client->sess.headshots,
+		client->sess.suicides,
+		client->sess.med_given,
+		client->sess.ammo_given,
+		client->sess.revives,
+		client->sess.knifeKills,
+		//new below
+		client->sess.dyn_planted,
+		client->sess.dyn_defused,
+		client->sess.obj_captured,
+		client->sess.obj_destroyed,
+		client->sess.obj_returned,
+		client->sess.obj_taken
+	);
 
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_Set( var, s );
@@ -155,7 +152,6 @@ void G_ClientSwap( gclient_t *client ) {
 	client->sess.specInvited = flags;
 
 	flags = 0;
-
 	// Swap spec follows as well
 	if ( client->sess.specLocked & TEAM_RED ) {
 		flags |= TEAM_BLUE;
@@ -186,7 +182,7 @@ void G_ReadSessionData( gclient_t *client ) {
 
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
 	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
-    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
+    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -203,15 +199,12 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerItem,  // DHM - Nerve
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
-			(int*)&client->sess.admin,
-			(int*)&client->sess.referee,
+			(int *)&client->sess.admin,
+			(int *)&client->sess.referee,
 			(int *)&client->sess.incognito,
 			(int *)&client->sess.ignored,
 			&client->sess.uci,
-			(int *)&client->sess.ip[0],
-			(int *)&client->sess.ip[1],
-			(int *)&client->sess.ip[2],
-			(int *)&client->sess.ip[3],
+			(char *)&client->sess.ip,
 			(char *)&client->sess.guid,
 			&client->sess.rounds,
 			&client->sess.selectedWeapon,
@@ -353,14 +346,12 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->incognito = 0;
 	sess->ignored = 0;
 	sess->uci = 0;
-	sess->ip[0] = 0;
-	sess->ip[1] = 0;
-	sess->ip[2] = 0;
-	sess->ip[3] = 0;
+	Q_strncpyz(sess->ip, "", sizeof(sess->ip));
 	sess->selectedWeapon = 0;
 	G_deleteStats( client - level.clients ); // OSP - Stats
 	sess->specInvited = 0;
 	sess->specLocked = 0;
+	
 
 	G_WriteClientSessionData( client );
 }
@@ -393,7 +384,6 @@ void G_InitWorldSession( void ) {
 
 #define GETVAL( x ) if ( ( tmp = strchr( tmp, ' ' ) ) == NULL ) {return; \
 						   } x = atoi( ++tmp );
-
 
 		// Get team lock stuff
 		GETVAL( gt );

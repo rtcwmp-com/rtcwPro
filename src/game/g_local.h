@@ -544,7 +544,7 @@ typedef struct {
 	//int ignored;		// User is ignored
 	unsigned int uci;   // mcwf's GeoIP
 //	unsigned char ip[4];// IPs
-	unsigned int ip[4];						// IP
+	char ip[47];		// IP
 	char guid[15];		// Guid
 	adminStatus_t admin;					// Admin, ref..
 	qboolean incognito;						// Hidden admin
@@ -1280,6 +1280,7 @@ void BeginIntermission( void );
 void InitClientPersistant( gclient_t *client );
 void InitClientResp( gclient_t *client );
 void InitBodyQue( void );
+char* SanitizeClientIP(char* ip, qboolean printFull);
 void ClientSpawn( gentity_t *ent, qboolean revived );
 void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 void AddScore( gentity_t *ent, int score );

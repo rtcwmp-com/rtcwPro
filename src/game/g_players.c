@@ -254,7 +254,7 @@ void cmd_pmsg(gentity_t *ent)
 
 	msg = ConcatArgs(2);
     if( strlen(msg) >= 700 ){
-		G_LogPrintf( "NUKER(pmsg >= 700): %s IP: %i.%i.%i.%i\n", ent->client->pers.netname, ent->client->sess.ip[0], ent->client->sess.ip[1], ent->client->sess.ip[2], ent->client->sess.ip[3] );
+		G_LogPrintf( "NUKER(pmsg >= 700): %s IP: %s\n", ent->client->pers.netname, ent->client->sess.ip);
 	    trap_DropClient( ent-g_entities, "^7Player Kicked: ^3Nuking" );
 	return;
     }

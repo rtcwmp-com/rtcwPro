@@ -772,7 +772,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -786,9 +786,7 @@ void CG_setClientFlags(void) {
 		int_cl_timenudge.integer,
 		// MaxPackets
 		int_cl_maxpackets.integer
-		// Gender
-	//	setGender()
-		));
+	));
 }
 
 int CG_CrosshairPlayer( void ) {
