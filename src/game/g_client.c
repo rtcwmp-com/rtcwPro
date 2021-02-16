@@ -1843,7 +1843,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// Auth client
 	if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
-		if (!Info_ValueForKey(userinfo, "cl_guid") || !Q_strcmp(Info_ValueForKey(userinfo, "cl_guid"), NO_GUID)) {
+		if (!Info_ValueForKey(userinfo, "cl_guid") || !Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), NO_GUID)) {
 			return "Valid GUID is required to enter this server.";
 		}
 	}
