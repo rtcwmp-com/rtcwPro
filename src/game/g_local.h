@@ -1929,7 +1929,6 @@ typedef enum
 	shard_rubble
 } shards_t;
 
-
 // Pause
 #define PAUSE_NONE		0x00	// Match is not paused..
 #define PAUSE_UNPAUSING 0x02    // Pause is about to expire
@@ -2179,8 +2178,6 @@ qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 #define AAPS(x)		AAPSound(x)									// Global sound but hooked under cg_announcer..
 #define APRS(x, y)	APRSound(x, y)								// Global sound with limited (radius) range
 #define CPS(x, y)	CPSound(x, y)								// Client sound only
-#define ARRAY_LEN(x) (sizeof(x) / sizeof(*(x)))					// Saves some time..
-
 
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
@@ -2190,6 +2187,7 @@ int TeamWeaponCount(gentity_t* ent, team_t team, int weap);
 void SetDefaultWeapon(gclient_t *client, qboolean isSold);
 void PauseHandle(void);
 void resetPause(void);
+
 //
 // g_files.c
 //

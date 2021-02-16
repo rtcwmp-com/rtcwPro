@@ -30,7 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../game/q_shared.h"
 #include "database.h"
+#include "threads.h"
 #include "qcommon.h"
+#ifndef  DEDICATED
+#include "md5.h"
+#endif // ! DEDICATED
 #include <setjmp.h>
 #ifndef  _WIN32
 #include <stdint.h>
@@ -2324,10 +2328,36 @@ void Com_ReadCDKey( const char *filename ) {
 	FS_FCloseFile( f );
 
 	if ( CL_CDKeyValidate( buffer, NULL ) ) {
-		Q_strncpyz( cl_cdkey, buffer, 17 );
+		Q_strncpyz(cl_cdkey, buffer, 17);
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
+}
+
+/*
+=================
+Com_ReadAuthKey
+=================
+*/
+void Com_ReadAuthKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[33];
+	char fbuffer[MAX_OSPATH];
+
+	sprintf(fbuffer, "%s/authkey", filename);
+
+	FS_SV_FOpenFileRead(fbuffer, &f);
+	if (!f) {
+		return;
+	}
+
+	Com_Memset(buffer, 0, sizeof(buffer));
+
+	FS_Read(buffer, 16, f);
+	FS_FCloseFile(f);
+#ifndef DEDICATED
+	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+#endif
 }
 
 /*
@@ -2371,10 +2401,7 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	char fbuffer[MAX_OSPATH];
 	char key[17];
 
-
 	sprintf( fbuffer, "%s/rtcwkey", filename );
-
-
 	Q_strncpyz( key, ikey, 17 );
 
 	if ( !CL_CDKeyValidate( key, NULL ) ) {
@@ -2627,6 +2654,8 @@ void Com_Init( char *commandLine ) {
 	}
 
 	OW_Init();
+
+	Threads_Init();
 
 	com_fullyInitialized = qtrue;
 	Com_Printf( "--- Common Initialization Complete ---\n" );
@@ -3895,6 +3924,24 @@ void Field_CompleteCommand( field_t *field ) {
 	Cvar_CommandCompletion( PrintMatches );
 }
 
+/*
+===============
+GetMemory
+===============
+*/
+void* GetMemory(unsigned long size) {
+#define MEM_ID      0x12345678l
+	void* ptr;
+	unsigned long int* memid;
+
+	ptr = malloc(size + sizeof(unsigned long int));
+	if (!ptr) {
+		return NULL;
+	}
+	memid = (unsigned long int*) ptr;
+	*memid = MEM_ID;
+	return (unsigned long int*) ((char*)ptr + sizeof(unsigned long int));
+}
 
 // new stuff (but found not essential at this time) for iortcw port of server defined dl rates
 /*

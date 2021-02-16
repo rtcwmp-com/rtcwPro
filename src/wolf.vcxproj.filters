@@ -199,11 +199,35 @@
     <ClCompile Include="qcommon\dl_main_curl.c">
       <Filter>Source Files\downloads</Filter>
     </ClCompile>
+    <ClCompile Include="qcommon\http_main.c">
+      <Filter>Source Files\http</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\http.c">
+      <Filter>Source Files\http</Filter>
+    </ClCompile>
     <ClCompile Include="qcommon\db_main.c">
       <Filter>Source Files\database</Filter>
     </ClCompile>
     <ClCompile Include="qcommon\db_mysql.c">
       <Filter>Source Files\database</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\md5.c">
+      <Filter>Source Files\encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_threads.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\win_threads.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client\cl_events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\stats_submit_curl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="server\sv_events.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -318,9 +342,6 @@
     <ClInclude Include="win32\win_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="client\client.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="client\keys.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -330,10 +351,22 @@
     <ClInclude Include="unix\linux_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcommon\http.h">
+      <Filter>Source Files\http</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\md5.h">
+      <Filter>Source Files\encrypt</Filter>
+    </ClInclude>
     <ClInclude Include="qcommon\database.h">
       <Filter>Source Files\database</Filter>
     </ClInclude>
     <ClInclude Include="win32\in_raw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="client\client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\threads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -360,6 +393,12 @@
     </Filter>
     <Filter Include="Source Files\unix">
       <UniqueIdentifier>{c170c77b-2aa8-4a8c-b988-99923c3e44a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\http">
+      <UniqueIdentifier>{57523010-4dc8-4c23-8e66-f0727d1c3984}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\encrypt">
+      <UniqueIdentifier>{54c80c9f-2b10-4c1f-9748-6f28bdad962d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\database">
       <UniqueIdentifier>{9e87283d-f4e8-4a7b-9a7f-dc2de076b67a}</UniqueIdentifier>

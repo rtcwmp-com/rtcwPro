@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 // sv_client.c -- server code for dealing with clients
 
 #include "server.h"
+#include "../qcommon/http.h"
 
 static void SV_CloseDownload( client_t *cl );
 
@@ -80,14 +81,19 @@ void SV_GetChallenge( netadr_t from ) {
 		// this is the first time this client has asked for a challenge
 		challenge = &svs.challenges[oldest];
 
-		challenge->challenge = ( ( rand() << 16 ) ^ rand() ) ^ svs.time;
 		challenge->adr = from;
 		challenge->firstTime = svs.time;
+		challenge->wasAuthorized = qfalse;
 		challenge->firstPing = 0;
-		challenge->time = svs.time;
 		challenge->connected = qfalse;
+		challenge->wasrefused = qfalse;
+		challenge->authMessage = "";
 		i = oldest;
 	}
+
+	// always generate a new challenge number, so the client cannot circumvent sv_maxping
+	challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
+	challenge->time = svs.time;
 
 	// if they are on a lan address, send the challengeResponse immediately
 	if ( Sys_IsLANAddress( from ) ) {
@@ -96,6 +102,28 @@ void SV_GetChallenge( netadr_t from ) {
 			NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i %i", challenge->challenge, sv_onlyVisibleClients->integer );
 		} else {
 			NET_OutOfBandPrint( NS_SERVER, from, "challengeResponse %i", challenge->challenge );
+		}
+		return;
+	}
+
+	if (!sv_AuthEnabled->integer || !Q_stricmp(sv_StreamingToken->string, "")) {
+		challenge->wasAuthorized = qtrue;
+	}
+	else {
+		HTTP_AuthClient(va("%d", challenge->challenge));
+		return;
+	}
+
+	if (challenge->wasAuthorized) {
+		Com_DPrintf("authorization completed.\n");
+
+		challenge->pingTime = svs.time;
+		if ( sv_onlyVisibleClients->integer ) {
+			NET_OutOfBandPrint( NS_SERVER, challenge->adr,
+								"challengeResponse %i %i", challenge->challenge, sv_onlyVisibleClients->integer );
+		} else {
+			NET_OutOfBandPrint( NS_SERVER, challenge->adr,
+								"challengeResponse %i", challenge->challenge );
 		}
 		return;
 	}
@@ -278,7 +306,7 @@ A "connect" OOB command has been received
 void SV_DirectConnect( netadr_t from ) {
 	char userinfo[MAX_INFO_STRING];
 	int i;
-	client_t    *cl, *newcl;
+	client_t *cl, *newcl;
 	MAC_STATIC client_t temp;
 	sharedEntity_t *ent;
 	int clientNum;
@@ -287,12 +315,14 @@ void SV_DirectConnect( netadr_t from ) {
 #endif
 	int qport;
 	int challenge;
-	char        *password;
+	char* password;
 	int startIndex;
-	char        *denied;
+	char* denied;
 	int count;
+	char guid[GUID_LEN];
+	char* ip;
 
-	Com_DPrintf( "SVC_DirectConnect ()\n" );
+	Com_DPrintf( "SVC_DirectConnect ()\n");
 
 	Q_strncpyz( userinfo, Cmd_Argv( 1 ), sizeof( userinfo ) );
 
@@ -325,10 +355,11 @@ void SV_DirectConnect( netadr_t from ) {
 	qport = atoi( Info_ValueForKey( userinfo, "qport" ) );
 
 	// quick reject
-	for ( i = 0,cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
+	for ( i = 0, cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
 		if ( NET_CompareBaseAdr( from, cl->netchan.remoteAddress )
 			 && ( cl->netchan.qport == qport
-				  || from.port == cl->netchan.remoteAddress.port ) ) {
+				  || from.port == cl->netchan.remoteAddress.port ) ) 
+		{
 			if ( ( svs.time - cl->lastConnectTime )
 				 < ( sv_reconnectlimit->integer * 1000 ) ) {
 				Com_DPrintf( "%s:reconnect rejected : too soon\n", NET_AdrToString( from ) );
@@ -338,9 +369,20 @@ void SV_DirectConnect( netadr_t from ) {
 		}
 	}
 
+	// don't let "ip" overflow userinfo string
+	ip = NET_IsLocalAddress(from) ? "localhost" : (char*)NET_AdrToString(from);
+	if ((strlen(ip) + strlen(userinfo) + 4) >= MAX_INFO_STRING) {
+		NET_OutOfBandPrint(NS_SERVER, from,
+			"print\nUserinfo string length exceeded.  "
+			"Try removing setu cvars from your config.\n");
+		return;
+	}
+	Info_SetValueForKey(userinfo, "ip", ip);
+
 	// see if the challenge is valid (LAN clients don't need to challenge)
 	if ( !NET_IsLocalAddress( from ) ) {
 		int ping;
+		challenge_t* challengeptr;
 
 		for ( i = 0 ; i < MAX_CHALLENGES ; i++ ) {
 			if ( NET_CompareAdr( from, svs.challenges[i].adr ) ) {
@@ -353,6 +395,13 @@ void SV_DirectConnect( netadr_t from ) {
 			NET_OutOfBandPrint( NS_SERVER, from, "print\nNo or bad challenge for address.\n" );
 			return;
 		}
+
+		challengeptr = &svs.challenges[i];
+		if (challengeptr->wasrefused) {
+			// Return silently, so that error messages written by the server keep being displayed.
+			return;
+		}
+
 		// force the IP key/value pair so the game can filter based on ip
 		Info_SetValueForKey( userinfo, "ip", NET_AdrToString( from ) );
 
@@ -371,14 +420,33 @@ void SV_DirectConnect( netadr_t from ) {
 			if ( sv_minPing->value && ping < sv_minPing->value ) {
 				NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is for high pings only\n" );
 				Com_DPrintf( "Client %i rejected on a too low ping\n", i );
+				challengeptr->wasrefused = qtrue;
 				return;
 			}
 			if ( sv_maxPing->value && ping > sv_maxPing->value ) {
 				NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is for low pings only\n" );
 				Com_DPrintf( "Client %i rejected on a too high ping: %i\n", i, ping );
+				challengeptr->wasrefused = qtrue;
 				return;
 			}
+
+			// Do not allow them to enter ..
+			if (sv_AuthEnabled->integer && Q_stricmp(sv_StreamingToken->string, "")) {
+				if (challengeptr->wasAuthorized == qfalse) {
+					if (!Q_stricmp(challengeptr->authMessage, "")) {
+						NET_OutOfBandPrint(NS_SERVER, from, "print\nUncaught Auth server error.\n");
+					}
+					else {
+						NET_OutOfBandPrint(NS_SERVER, from, va("print\n%s\n", challengeptr->authMessage));
+					}
+					challengeptr->wasrefused = qtrue;
+					return;
+				}
+			}
 		}
+
+		Com_Printf("Client %i connecting with %i challenge ping\n", i, ping);
+		challengeptr->connected = qtrue;
 	} else {
 		// force the "ip" info key to "localhost"
 		Info_SetValueForKey( userinfo, "ip", "localhost" );
@@ -474,6 +542,10 @@ gotnewcl:
 	Netchan_Setup( NS_SERVER, &newcl->netchan, from, qport );
 	// init the netchan queue
 	newcl->netchan_end_queue = &newcl->netchan_start_queue;
+
+	// Save guid so game code can get it.
+	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
+	Info_SetValueForKey(userinfo, "cl_guid", guid);
 
 	// save the userinfo
 	Q_strncpyz( newcl->userinfo, userinfo, sizeof( newcl->userinfo ) );
@@ -1692,8 +1764,9 @@ into a more C friendly form.
 =================
 */
 void SV_UserinfoChanged( client_t *cl ) {
-	char    *val;
-	int i;
+	char* val;
+	char* ip;
+	int i, len;
 
 	// name for C code
 	Q_strncpyz( cl->name, Info_ValueForKey( cl->userinfo, "name" ), sizeof( cl->name ) );
@@ -1744,16 +1817,24 @@ void SV_UserinfoChanged( client_t *cl ) {
 	// maintain the IP information
 	// this is set in SV_DirectConnect (directly on the server, not transmitted), may be lost when client updates it's userinfo
 	// the banning code relies on this being consistently present
-	val = Info_ValueForKey( cl->userinfo, "ip" );
-	if ( !val[0] ) {
-		//Com_DPrintf("Maintain IP in userinfo for '%s'\n", cl->name);
-		if ( !NET_IsLocalAddress( cl->netchan.remoteAddress ) ) {
-			Info_SetValueForKey( cl->userinfo, "ip", NET_AdrToString( cl->netchan.remoteAddress ) );
-		} else {
-			// force the "ip" info key to "localhost" for local clients
-			Info_SetValueForKey( cl->userinfo, "ip", "localhost" );
-		}
-	}
+	if (NET_IsLocalAddress(cl->netchan.remoteAddress))
+		ip = "localhost";
+	else
+		ip = (char*)NET_AdrToString(cl->netchan.remoteAddress);
+
+	val = Info_ValueForKey(cl->userinfo, "ip");
+	if (val[0])
+		len = strlen(ip) - strlen(val) + strlen(cl->userinfo);
+	else
+		len = strlen(ip) + 4 + strlen(cl->userinfo);
+
+	if (len >= MAX_INFO_STRING)
+		SV_DropClient(cl, "userinfo string length exceeded");
+	else
+		Info_SetValueForKey(cl->userinfo, "ip", ip);
+
+	// etp: force auth and guid into userinfo so client cant mess with it
+	Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
 
 	// TTimo
 	// download prefs of the client

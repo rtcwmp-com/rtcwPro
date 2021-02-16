@@ -94,6 +94,14 @@ cvar_t* sv_wwwBaseURL;		// base URL for redirect
 cvar_t* sv_wwwDlDisconnected;
 cvar_t* sv_wwwFallbackURL;	// URL to send to if an http/ftp fails or is refused client side
 
+// Streaming
+cvar_t* sv_StreamingToken;
+cvar_t* sv_StreamingSelfSignedCert;
+
+// Auth
+cvar_t* sv_AuthEnabled;
+cvar_t* sv_AuthStrictMode;
+
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
 serverBan_t serverBans[SERVER_MAXBANS];
@@ -624,6 +632,7 @@ void SVC_Info( netadr_t from ) {
 	if ( *gamedir ) {
 		Info_SetValueForKey( infostring, "game", gamedir );
 	}
+	Info_SetValueForKey( infostring, "gamename", "rtcwmp" );
 	Info_SetValueForKey( infostring, "sv_allowAnonymous", va( "%i", sv_allowAnonymous->integer ) );
 
 	// Rafael gameskill
@@ -640,6 +649,10 @@ void SVC_Info( netadr_t from ) {
 	if ( antilag ) {
 		Info_SetValueForKey( infostring, "g_antilag", antilag );
 	}
+
+	// Expose Auth info..
+	Info_SetValueForKey(infostring, "sv_AuthEnabled", va("%i", sv_AuthEnabled->integer));
+	Info_SetValueForKey(infostring, "sv_AuthStrictMode", va("%i", sv_AuthStrictMode->integer));
 
 	NET_OutOfBandPrint( NS_SERVER, from, "infoResponse\n%s", infostring );
 }

@@ -27,6 +27,8 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // server.h
+#ifndef ___SERVER_H
+#define ___SERVER_H
 
 #include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
@@ -192,6 +194,7 @@ typedef struct client_s {
 	netchan_buffer_t *netchan_start_queue;
 	netchan_buffer_t **netchan_end_queue;
 	int downloadnotify; //bani
+	char guid[GUID_LEN]; // L0
 } client_t;
 
 //=============================================================================
@@ -231,7 +234,10 @@ typedef struct {
 	int pingTime;                   // time the challenge response was sent to client
 	int firstTime;                  // time the adr was first used, for authorize timeout checks
 	int firstPing;                  // Used for min and max ping checks
+	qboolean wasrefused;
 	qboolean connected;
+	qboolean wasAuthorized;
+	char* authMessage;
 } challenge_t;
 
 #define MAX_MASTERS 8               // max recipients for heartbeat packets
@@ -256,7 +262,6 @@ typedef struct {
 
 	receipt_t infoReceipts[MAX_INFO_RECEIPTS];
 	floodBan_t infoFloodBans[MAX_INFO_FLOOD_BANS];
-
 } serverStatic_t;
 
 // L0 - ioquake ipv6 banning
@@ -356,6 +361,13 @@ extern cvar_t* sv_wwwBaseURL;	// the base URL of all the files
 extern cvar_t* sv_wwwDlDisconnected;
 extern cvar_t* sv_wwwFallbackURL;
 
+// Streaming
+extern cvar_t* sv_StreamingToken;
+extern cvar_t* sv_StreamingSelfSignedCert;
+
+// Auth
+extern cvar_t* sv_AuthEnabled;
+extern cvar_t* sv_AuthStrictMode;
 
 //===========================================================
 
@@ -449,7 +461,7 @@ void        SV_InitGameProgs( void );
 void        SV_ShutdownGameProgs( void );
 void        SV_RestartGameProgs( void );
 qboolean    SV_inPVS( const vec3_t p1, const vec3_t p2 );
-qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* or );
+qboolean	SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* or );
 
 // sv_animation.c
 int SV_LerpTag(orientation_t* tag, clientAnimationInfo_t* animInfo, char* tagname);
@@ -470,6 +482,11 @@ int         SV_BotGetConsoleMessage( int client, char *buf, int size );
 
 int BotImport_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void BotImport_DebugPolygonDelete( int id );
+
+//
+// sv_events.c
+//
+void SV_AuthorizeClient(char* response, char userinfo[MAX_INFO_STRING]);
 
 //
 // sv_wallhack.c
@@ -551,3 +568,5 @@ qboolean SV_CheckDRDoS(netadr_t from);
 #define DLNOTIFY_REDIRECT   0x00000001  // "Redirecting client ..."
 #define DLNOTIFY_BEGIN      0x00000002  // "clientDownload: 4 : beginning ..."
 #define DLNOTIFY_ALL        ( DLNOTIFY_REDIRECT | DLNOTIFY_BEGIN )
+
+#endif // !___SERVER_H

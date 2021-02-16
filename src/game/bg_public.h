@@ -32,6 +32,10 @@ If you have questions concerning this license or the applicable additional terms
  * desc:		definitions shared by both the server game and client game modules
  *
 */
+#ifndef  ___BG_PUBLIC_H
+#define ___BG_PUBLIC_H
+
+
 #include "../../MAIN/ui_mp/menudef.h" // For vote options
 
 // because games can change separately from the main system version, we need a
@@ -1880,3 +1884,5 @@ qboolean PC_Vec_Parse(int handle, vec3_t* c);
 qboolean PC_Float_Parse(int handle, float* f);
 qboolean PC_Point_Parse(int handle, vec2_t* c);
 // RTCWPro
+
+#endif // ! ___BG_PUBLIC_H

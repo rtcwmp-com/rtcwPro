@@ -287,4 +287,3 @@ int submit_curlPost( char* jsonfile, char* matchid ) {
   return (int)ret;
 
 }
-

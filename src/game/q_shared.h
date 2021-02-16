@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-
 #define Q3_VERSION      "Wolf 1.41b-MP"
 
 // 1.41b-MP: fix autodl sploit
@@ -894,7 +893,7 @@ void Info_NextPair( const char **s, char *key, char *value );
 // this is only here so the functions in q_shared.c and bg_*.c can link
 void QDECL Com_Error( int level, const char *error, ... );
 void QDECL Com_Printf( const char *msg, ... );
-
+void QDECL Com_DPrintf(const char* fmt, ...);
 
 /*
 ==========================================================
@@ -1658,14 +1657,18 @@ typedef enum {
 #define VOTEFLAGS_KICK              ( 1 << 6 )
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
 
+//
 // L0 
+// New stuff bellow
+//
 #define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
 #define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
 #define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
 #define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
 #define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
+#define GUID_LEN				33
+#define NO_GUID					"NO_GUID"
 
-// L0 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
 qboolean clientIsConnected;

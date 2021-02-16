@@ -76,14 +76,14 @@ CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \
 	../client/cl_net_chan.o ../client/cl_parse.o ../client/cl_scrn.o \
-	../client/cl_ui.o
+	../client/cl_ui.o ../client/cl_events.o
 COMMONOBJS := \
 	../qcommon/cm_load.o ../qcommon/cm_patch.o ../qcommon/cm_polylib.o \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
-	../qcommon/db_mysql.o ../qcommon/stats_submit_curl.o
+	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -91,7 +91,7 @@ SERVEROBJS := \
 	../server/sv_bot.o ../server/sv_ccmds.o ../server/sv_client.o \
 	../server/sv_game.o ../server/sv_init.o ../server/sv_main.o \
 	../server/sv_net_chan.o ../server/sv_snapshot.o ../server/sv_animation.o \
-	../server/sv_world.o ../server/sv_wallhack.o 
+	../server/sv_world.o ../server/sv_wallhack.o  ../server/sv_events.o
 # ../qcommon/vm_x86.c is not used and not nice to port to mingw
 VMOBJS := \
 	../qcommon/vm.o ../qcommon/vm_interpreted.o
@@ -104,10 +104,10 @@ UNIXCLIENTOBJS := \
 	../unix/linux_snd.o
 UNIXOBJS := \
 	../unix/linux_common.o ../unix/unix_main.o ../unix/unix_net.o \
-	../unix/unix_shared.o ../unix/linux_signals.o
+	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \
-	../win32/win_qgl.o ../win32/win_snd.o
+	../win32/win_qgl.o ../win32/win_snd.o ../win32/linux_threads.o
 WINOBJS := \
 	../win32/win_main.o ../win32/win_net.o ../win32/win_syscon.o \
 	../win32/win_wndproc.o ../win32/win_shared.o
@@ -224,7 +224,7 @@ server-w32-clean:
 
 CURLCONF := \
 	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
-        --enable-shared=no --enable-static=yes --disable-rtsp \
+	--enable-shared=no --enable-static=yes --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \

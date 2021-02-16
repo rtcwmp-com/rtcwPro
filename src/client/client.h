@@ -27,6 +27,8 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // client.h -- primary header for client
+#ifndef __CLIENT_H
+#define __CLIENT_H
 
 #include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
@@ -323,7 +325,7 @@ typedef struct {
 	netadr_t authorizeServer;
 
 	// DHM - Nerve :: Auto-update Info
-	char autoupdateServerNames[MAX_AUTOUPDATE_SERVERS][MAX_QPATH];
+	char* autoupdateServerName;
 	netadr_t autoupdateServer;
 
 	// rendering info
@@ -405,6 +407,11 @@ extern cvar_t  *cl_waitForFire;
 // NERVE - SMF - localization
 extern cvar_t  *cl_language;
 // -NERVE - SMF
+
+// L0
+extern cvar_t* cl_StreamingSelfSignedCert;
+// ~L0
+
 
 //=================================================
 
@@ -503,25 +510,14 @@ typedef enum {
 	NUM_BUTTONS
 } kbuttons_t;
 
-
 void CL_ClearKeys( void );
-
 void CL_InitInput( void );
 void CL_SendCmd( void );
 void CL_ClearState( void );
-void CL_ReadPackets( void );
-
 void CL_WritePacket( void );
 void IN_CenterView( void );
 void IN_Notebook( void );
 void IN_Help( void );
-
-//----(SA) salute
-void IN_Salute( void );
-//----(SA)
-
-void CL_VerifyCode( void );
-
 float CL_KeyState( kbutton_t *key );
 char *Key_KeynumToString( int keynum, qboolean bTranslate );
 
@@ -532,9 +528,7 @@ extern int cl_connectedToPureServer;
 
 void CL_SystemInfoChanged( void );
 void CL_ParseServerMessage( msg_t *msg );
-
 //====================================================================
-
 void    CL_UpdateInfoPacket( netadr_t from );       // DHM - Nerve
 
 void    CL_ServerInfoPacket( netadr_t from, msg_t *msg );
@@ -544,12 +538,9 @@ void    CL_FavoriteServers_f( void );
 void    CL_Ping_f( void );
 qboolean CL_UpdateVisiblePings_f( int source );
 
-
 //
 // console
 //
-void Con_DrawCharacter( int cx, int line, int num );
-
 void Con_CheckResize( void );
 void Con_Init( void );
 void Con_Clear_f( void );
@@ -613,8 +604,15 @@ qboolean CL_GameCommand( void );
 void CL_CGameRendering( stereoFrame_t stereo );
 void CL_SetCGameTime( void );
 void CL_FirstSnapshot( void );
-void CL_ShaderStateChanged( void );
 void CL_UpdateLevelHunkUsage( void );
+
+//
+// cl_events.c
+//
+void CL_SetGuid(void);
+void CL_SetMotd(char* message);
+void CL_ClientNeedsUpdate(char* response);
+
 //
 // cl_ui.c
 //
@@ -632,3 +630,5 @@ void LAN_SaveServersToCache();
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ); //int length, const byte *data );
 void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
+
+#endif // !__CLIENT_H

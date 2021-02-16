@@ -154,8 +154,6 @@ void SV_SetBrushModel( sharedEntity_t *ent, const char *name ) {
 	SV_LinkEntity( ent );       // FIXME: remove
 }
 
-
-
 /*
 =================
 SV_inPVS
@@ -300,6 +298,11 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd ) {
 
 //==============================================
 
+/*
+====================
+FloatAsInt
+====================
+*/
 static int  FloatAsInt( float f ) {
 	int temp;
 
@@ -927,7 +930,7 @@ int SV_GameSystemCalls( int *args ) {
             return 0;
 
 	case G_SUBMIT_STATS_CURL:
-		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );;
+		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );
