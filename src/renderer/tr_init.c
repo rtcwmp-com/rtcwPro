@@ -1070,7 +1070,7 @@ void R_Register( void ) {
 	// done.
 
 	// Rafael - wolf fog
-	r_wolffog = ri.Cvar_Get( "r_wolffog", "1", CVAR_CHEAT ); // JPW NERVE cheat protected per id request
+	r_wolffog = ri.Cvar_Get( "r_wolffog", "1", CVAR_ARCHIVE ); // JPW NERVE cheat protected per id request, altered in rtcwpro
 	// done
 
 	r_nocurves = ri.Cvar_Get( "r_nocurves", "0", CVAR_CHEAT );
