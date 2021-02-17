@@ -240,7 +240,7 @@ vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
-//vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
+vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
 vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ban) can be disabled..
 vmCvar_t g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
@@ -289,7 +289,7 @@ vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
 vmCvar_t g_fixedphysics;	// So it's fair for all..
 vmCvar_t g_allowPMs;		// Allow private messages
-//vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
+vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
@@ -494,7 +494,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_showFlags, "g_showFlags", "1", 0 },
 //	{ &g_noTeamSwitching, "g_noTeamSwitching", "1", 0, 0, qfalse, qfalse },
 	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
-	//{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
 	{ &svx_serverStreaming, "svx_serverStreaming", "", CVAR_SERVERINFO, 0, qfalse },

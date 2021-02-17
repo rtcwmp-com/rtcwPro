@@ -2089,7 +2089,7 @@ extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
 extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_muzzleFlash;
-//extern vmCvar_t cg_hitsounds;
+extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
 extern vmCvar_t cg_reinforcementTimeColor;

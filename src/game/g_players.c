@@ -381,21 +381,6 @@ void cmd_specInvite( gentity_t *ent ) {
 
 	} else {CP( "print \"Spectators can't specinvite players!\n\"" );}
 }
-/*
-=================
-Hitsounds
-
-Do it like in shrub just permanently
-(A hack tied to color so one doesn't need to type it all the time..)
-=================
-*/
-//void Cmd_hitsounds(gentity_t *ent) {
-//	char *action = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? "^3Disable^7" : "^3Enable^7");
-//	int	flag = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? 0 : 1);
-//
-//	CP(va("print \"Bit flag to %s Hitsounds is /color %d \nType ^3/commands bitflags^7 for explanation.\n\"", action, flag));
-//	return;
-//}
 
 /*
 ===================

@@ -753,7 +753,7 @@ void G_ArmorDamage( gentity_t *targ ) {
 	// ... Ick, just discovered that the refined hit detection ("hit nearest to which tag") is clientside...
 
 	// For now, I'll randomly pick a part that hasn't been cleared.  This might end up looking okay, and we won't need the refined hits.
-	//	however, we still have control on the server-side of which parts come off, regardless of what shceme is used.
+	//	however, we still have control on the server-side of which parts come off, regardless of what scheme is used.
 
 	brokeparts = (int)( ( 1 - ( (float)( targ->health ) / (float)( targ->client->ps.stats[STAT_MAX_HEALTH] ) ) ) * numParts );
 
@@ -789,6 +789,45 @@ void G_ArmorDamage( gentity_t *targ ) {
 		}
 	}
 }
+
+/*
+==============
+Hitsounds
+==============
+*/
+void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
+	qboolean 	onSameTeam = OnSameTeam( target, attacker);
+
+	if (g_hitsounds.integer) {
+
+		// if player is hurting him self don't give any sounds
+		if (target->client == attacker->client) {
+			return;  // this happens at flaming your self... just return silence...			
+		}
+
+		// if team mate
+		if (target->client && attacker->client && onSameTeam ) {
+			attacker->client->ps.persistant[PERS_HITBODY]--;
+		}
+
+		// If enemy
+		else if ( target &&
+				target->client &&
+				attacker &&
+				attacker->client &&
+				attacker->s.number != ENTITYNUM_NONE &&
+				attacker->s.number != ENTITYNUM_WORLD &&
+				attacker != target &&
+				!onSameTeam 
+		) {   
+			if (body)
+				attacker->client->ps.persistant[PERS_HITBODY]++;
+			else
+				attacker->client->ps.persistant[PERS_HITHEAD]++;
+		}
+	}
+}
+
 /*
 ============
 T_Damage
@@ -812,7 +851,6 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t   *client;
@@ -1021,6 +1059,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
+	G_Hitsounds(targ, attacker, qtrue);
+
 	// sswolf - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 	if (targ->headshot && targ->client) {
@@ -1052,6 +1092,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_addStatsHeadShot( attacker, mod );
 		} // End
 
+		G_Hitsounds(targ, attacker, qfalse);
 	}
 
 	if ( g_debugDamage.integer ) {

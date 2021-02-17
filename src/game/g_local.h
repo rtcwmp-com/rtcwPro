@@ -1638,7 +1638,7 @@ extern vmCvar_t sab_maxPingHits;
 extern vmCvar_t sab_censorPenalty;
 extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
-//extern vmCvar_t	g_hitsounds;
+extern vmCvar_t	g_hitsounds;
 extern vmCvar_t	g_crouchRate;
 extern vmCvar_t g_drawHitboxes;
 extern vmCvar_t team_nocontrols;
@@ -2022,7 +2022,6 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp);
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
-//void Cmd_hitsounds(gentity_t *ent);
 
 ///////////////////////
 // g_vote.c
@@ -2057,6 +2056,7 @@ int G_Unreferee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 int G_AntiLag_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd); // RTCWPro - custom config
+
 //
 // g_geoip.c
 //
@@ -2070,8 +2070,7 @@ unsigned long GeoIP_addr_to_num(const char *addr);
 unsigned int GeoIP_seek_record(GeoIP *gi, unsigned long ipnum);
 void GeoIP_open(void);
 void GeoIP_close(void);
-extern GeoIP * gidb;
-void G_ReadIP(gclient_t *client);
+extern GeoIP* gidb;
 
 //
 // g_config.c
@@ -2208,7 +2207,6 @@ extern extWeaponStats_t BG_WeapStatForWeapon(weapon_t iWeaponID);
 //
 // Bit flags (for color hacks..)
 //
-#define CFLAGS_HITSOUNDS	1
 void clean_tempbans_guids(void);
 
 #define HELP_COLUMNS    4

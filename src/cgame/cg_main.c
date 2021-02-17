@@ -322,7 +322,7 @@ vmCvar_t cg_chatBackgroundColor;
 vmCvar_t cg_chatBeep;
 vmCvar_t cg_instantTapout;
 vmCvar_t cg_forceTapout;
-//vmCvar_t cg_hitsounds;
+vmCvar_t cg_hitsounds;
 vmCvar_t cg_uinfo;
 
 // draw speed
@@ -590,7 +590,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_crosshairColorAlt, "cg_crosshairColorAlt", "White", CVAR_ARCHIVE },
 	{ &ch_font, "ch_font", "0", CVAR_ARCHIVE | CVAR_LATCH },
 	{ &cg_drawWeaponIconFlash, "cg_drawWeaponIconFlash", "0", CVAR_ARCHIVE },
-	//{ &cg_hitsounds, "cg_hitsounds", "0", CVAR_ARCHIVE},
+	{ &cg_hitsounds, "cg_hitsounds", "0", CVAR_ARCHIVE},
 	{ &cg_printObjectiveInfo, "cg_printObjectiveInfo", "1", CVAR_ARCHIVE },
 	{ &cg_muzzleFlash, "cg_muzzleFlash", "1", CVAR_ARCHIVE },
 	{ &cg_complaintPopUp, "cg_complaintPopUp", "1", CVAR_ARCHIVE },
@@ -1336,9 +1336,9 @@ static void CG_RegisterSounds( void ) {
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// Hitsounds
-	/*cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
+	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
 	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
-	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );*/
+	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
 	// chats
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");
@@ -1347,7 +1347,6 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.axisWin = trap_S_RegisterSound("sound/match/winaxis.wav");
 	// End
 }
-
 
 //===================================================================================
 
