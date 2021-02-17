@@ -792,7 +792,7 @@ void G_ArmorDamage( gentity_t *targ ) {
 
 /*
 ==============
-Hitsounds
+G_Hitsounds
 ==============
 */
 void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {

@@ -1386,15 +1386,15 @@ OSPx - Store Client's IP
 */
 void SaveIP_f(gclient_t * client, char * sip) {
 	// Don't blindly save if entry already exists..
-	if (Q_stricmp(client->sess.ip, "")) {
+	if (!Q_stricmp(client->sess.ip, "")) {
 		return;
 	}
 
-	//if (!Q_stricmp(sip, "localhost") == 0 || sip == NULL) {
-	//	// Localhost, just enter 0 for all values:
-	//	Q_strncpyz(client->sess.ip, "0.0.0.0", sizeof(client->sess.ip));
-	//	return;
-	//}
+	if (!Q_stricmp(sip, "localhost") == 0 || sip == NULL) {
+		// Localhost, just enter 0 for all values:
+		Q_strncpyz(client->sess.ip, "0.0.0.0", sizeof(client->sess.ip));
+		return;
+	}
 
 	Q_strncpyz(client->sess.ip, sip, sizeof(client->sess.ip));
 	return;
@@ -1518,7 +1518,6 @@ void ClientUserinfoChanged( int clientNum ) {
 		// To solve the IP bug..
 		s =	va("%s", client->sess.ip);
 	}
-	int cGender = 0;
 
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
@@ -1859,7 +1858,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 		else {
 			unsigned long ip = GeoIP_addr_to_num(value);
-
+			
 			if (((ip & 0xFF000000) == 0x0A000000) ||
 				((ip & 0xFFF00000) == 0xAC100000) ||
 				((ip & 0xFFFF0000) == 0xC0A80000)) {

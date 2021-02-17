@@ -67,7 +67,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		G_WriteWeaponStatsData(client);
 	}/// End
 	//s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
-    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
 		client->sess.sessionTeam,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
@@ -122,7 +122,6 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_Set( var, s );
 }
-
 
 /*
 ================
@@ -250,8 +249,6 @@ void G_ReadSessionData( gclient_t *client ) {
 		test = g_currentRound.integer == 1;
 	}
 
-
-
     //if ( g_gametype.integer == GT_WOLF_STOPWATCH && level.warmupTime > 0 && test ) {
     /* nihi: I did not backtrace this very far but it seems level.warmupTime was always zero by the time this
              function is called and hence G_ClientSwap was never called below. A "quick fix" is given below
@@ -282,7 +279,6 @@ void G_ReadSessionData( gclient_t *client ) {
 		G_ClientSwap( client );
 	}
 }
-
 
 /*
 ================
@@ -352,10 +348,8 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->specInvited = 0;
 	sess->specLocked = 0;
 	
-
 	G_WriteClientSessionData( client );
 }
-
 
 /*
 ==================
