@@ -1882,7 +1882,7 @@ void cmd_pause(gentity_t *ent, qboolean fPause) {
     }
 
 	log = va("Player %s (IP:%s) %s",
-		ent->client->pers.netname, ent->client->sess.ip, action );
+		ent->client->pers.netname, ent->client->sess.ip, !fPause ? "resumed the match." : "paused a match.");
 	if (g_extendedLog.integer)
 		logEntry (ADMACT, log);
 	
