@@ -1,6 +1,5 @@
 /*
 ===========================================================================
-
 Return to Castle Wolfenstein multiplayer GPL Source Code
 Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
@@ -265,6 +264,8 @@ void SV_DirectConnect( netadr_t from ) {
 	int startIndex;
 	char        *denied;
 	int count;
+	int	len; //Elver 
+	char* ip; //Elver
 
 	Com_DPrintf( "SVC_DirectConnect ()\n" );
 
@@ -350,6 +351,21 @@ void SV_DirectConnect( netadr_t from ) {
 
 	newcl = &temp;
 	memset( newcl, 0, sizeof( client_t ) );
+	
+	// Elver
+	// Fixes the "userinfo" length exploit doing a quick validation.
+	if (NET_IsLocalAddress(from))
+		ip = "localhost"
+		;
+	else
+		ip = (char*)NET_AdrToString(from);
+	if ((strlen(ip) + strlen(userinfo) + 4) >= MAX_INFO_STRING) {
+		NET_OutOfBandPrint(NS_SERVER, from,
+			"print\nUserinfo string length too long.  "
+			"Please check your cfg vars\n"); //Let the user know the error, Don't believe it's necesary but will let the message displays anyway.
+		return;
+	}  
+
 
 	// if there is already a slot for this ip, reuse it
 	for ( i = 0,cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
@@ -1244,7 +1260,8 @@ into a more C friendly form.
 void SV_UserinfoChanged( client_t *cl ) {
 	char    *val;
 	int i;
-
+	int	len; //Elver 
+	char* ip; //Elver
 	// name for C code
 	Q_strncpyz( cl->name, Info_ValueForKey( cl->userinfo, "name" ), sizeof( cl->name ) );
 
@@ -1303,6 +1320,25 @@ void SV_UserinfoChanged( client_t *cl ) {
 			// force the "ip" info key to "localhost" for local clients
 			Info_SetValueForKey( cl->userinfo, "ip", "localhost" );
 		}
+		
+		//Elver
+		//To avoid userinfo length overflow exploit
+		// May need to tweak for rtcwPro
+		if (val[0])
+			len = strlen(ip) - strlen(val) + strlen(cl->userinfo);
+		else
+			len = strlen(ip) + 4 + strlen(cl->userinfo);
+
+		val = Info_ValueForKey(cl->userinfo, "ip");
+
+		val = Info_ValueForKey(cl->userinfo, "ip"); // may need to tweak for rtcwPro
+		if (val[0])
+			len = strlen(ip) - strlen(val) + strlen(cl->userinfo);
+		else
+			len = strlen(ip) + 4 + strlen(cl->userinfo);
+
+		if (len >= MAX_INFO_STRING)
+			SV_DropClient(cl, "userinfo string length too long"); //Message
 	}
 
 }
