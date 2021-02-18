@@ -928,11 +928,12 @@ L0 - Pause/Unpause
 =================
 */
 void Svcmd_Pause_f(qboolean pause) {
-	G_pauseHandle(pause, TEAM_SPECTATOR);
 
 	if (pause) {
+		G_handlePause(qtrue, 0);
 		AP(va("cp \"Match has been ^3Paused^7!\n\"2"));
 	} else {
+		G_handlePause(qfalse, 0);
 		AP(va("cp \"Resuming the match..\n\"2"));
 	}
 }

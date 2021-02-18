@@ -998,7 +998,8 @@ typedef struct {
 	int numOidTriggers;                 // DHM - Nerve
 
 	qboolean latchGametype;             // DHM - Nerve
-	// L0 - New stuff
+
+// L0 - New stuff
 	int axisLeft;		// For DM
 	int alliedLeft;		// For DM
 	int dwBlueReinfOffset;	// Reinforcements offset
@@ -1008,12 +1009,11 @@ typedef struct {
 	int taken;			// Flag retaking
 	int balanceTimer;	// Auto balance teams timer
 	qboolean fResetStats; // OSP Stats
-	int	HAprintnum;
-	int	HAlastPrintTime;
-	int	CNstart;		// count down
 
-	int	CNpush;			// push it forward
-	qboolean CNyes;		// We're done with all..so go to countdown
+	// Countdown	
+	qboolean	cnStarted;
+	int			cnPush;
+	int			cnNum;
 
 	// voting and referee
 	voteInfo_t voteInfo;
@@ -1024,8 +1024,10 @@ typedef struct {
 	int axisPF, alliedPF;
 	int axisVenom, alliedVenom;
 	int axisFlamer, alliedFlamer;
+
 	// Admin bot
 	int sb_maxPing;
+
 	// Pause
 	int paused;
 	int timeCurrent;	// Real game clock
@@ -1034,21 +1036,27 @@ typedef struct {
 	int alliedTimeouts;
 	qboolean axisCalledTimeout;
 	qboolean autoPaused;
+
 	// OSP Stats
 	int sortedStats[MAX_CLIENTS];	// sorted by weapon stats
+
 	// Map Achievers
 	int topAchiever;
 	char *topAchieverPlayer;
+
 	// Ready
 	qboolean ref_allready;                  // Referee forced match start
 	qboolean readyAll;
 	qboolean readyPrint;
 	qboolean readyTeam[TEAM_NUM_TEAMS];
+
 	// Forced/Instant tapout timer to cope with flood..
 	int spawnFloodTimer;
+
 	// RTCWPro - sv_cvars
 	svCvar_t svCvars[MAX_SVCVARS];
 	int svCvarsCount;
+
 	// RTCWPro - custom config
 	config_t config;
 	int eventNum;  // event counter
@@ -1979,8 +1987,9 @@ void G_ReloadConfig(void);
 // g_match.c
 //
 void G_loadMatchGame(void);
-void CountDown(qboolean restart);
+void CountDown(void);
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
+void G_handlePause(qboolean dPause, int time);
 //void G_verifyMatchState(int nTeam);
 void G_matchPrintInfo(char *msg, qboolean printTime);
 void G_printFull(char *str, gentity_t *ent); // from ET
@@ -1990,7 +1999,6 @@ void G_resetRoundState(void);
 void G_resetModeState(void);
 int G_checkServerToggle(vmCvar_t *cv);
 char* GetLevelTime(void);
-void G_pauseHandle(qboolean dPause, int team);
 ///////////////////////
 // g_referee.c
 //
@@ -2181,12 +2189,9 @@ qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
-void CountDown(qboolean restart);
 qboolean IsWeaponDisabled(gentity_t* ent, int sessionWeapon, weapon_t weapon, team_t team, qboolean quiet);
 int TeamWeaponCount(gentity_t* ent, team_t team, int weap);
 void SetDefaultWeapon(gclient_t *client, qboolean isSold);
-void PauseHandle(void);
-void resetPause(void);
 
 //
 // g_files.c

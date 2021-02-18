@@ -3062,30 +3062,49 @@ Deals with client views/prints when paused.
 =================
 */
 static void CG_PausePrint( void ) {
-	const char  *s;
+	const char* s, * s2 = "";
+	float color[4];
 	int w;
 
-	// There's no plans for SP but one never knows..
-	if ( cgs.gametype == GT_SINGLE_PLAYER )
-		return;
 	// Not in warmup...
 	if (cg.warmup)
 		return;
 
-	if (cgs.pauseState) {
-		s = va( "%s", CG_TranslateString( "Match is ^1PAUSED^7!" ));
-		// Fade it (When SDL is ported it can be changed to grayscale)
+	if (cgs.match_paused == PAUSE_ON) {
+		s = va("%s", CG_TranslateString("^nMatch is Paused!"));
+		s2 = va("%s", CG_TranslateString(va("Timeout expires in ^n%i ^7seconds", cgs.match_resumes - cgs.match_expired)));
+
+		color[3] = fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
+
 		if (cg.time > cgs.match_stepTimer) {
-			//cgs.match_expired++;
+			cgs.match_expired++;
 			cgs.match_stepTimer = cg.time + 1000;
 		}
-		cgs.fadeAlpha = .4;
-	} else {
+	}
+	else if (cgs.match_paused == PAUSE_RESUMING) {
+		s = va("%s", CG_TranslateString("^3Prepare to fight!"));
+		if (11 - cgs.match_expired < 11) {
+			s2 = va("%s", CG_TranslateString(va("Resuming Match in ^3%d", 11 - cgs.match_expired)));
+		}
+
+		color[3] = fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
+
+		if (cg.time > cgs.match_stepTimer) {
+			cgs.match_expired++;
+			cgs.match_stepTimer = cg.time + 1000;
+		}
+	}
+	else {
 		return;
 	}
 
-	w = CG_DrawStrlen( s );
-	CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
+	color[0] = color[1] = color[2] = 1.0;
+
+	w = CG_DrawStrlen(s);
+	CG_DrawStringExt(320 - w * 6, 100, s, color, qfalse, qtrue, 12, 18, 0);
+
+	w = CG_DrawStrlen(s2);
+	CG_DrawStringExt(320 - w * 6, 120, s2, colorWhite, qfalse, qtrue, 12, 18, 0);
 }
 
 /*
@@ -4302,6 +4321,7 @@ static void CG_Draw2D( void ) {
 	// don't draw center string if scoreboard is up
 	if ( !CG_DrawScoreboard() ) {
 		CG_DrawCenterString();
+
 		// Pause print
 		CG_PausePrint();
 

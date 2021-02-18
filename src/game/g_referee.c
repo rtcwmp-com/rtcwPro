@@ -259,23 +259,20 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 
 	// Trigger the auto-handling of pauses
 	if (fPause) {
-		level.paused = 100 + ((ent) ? (1 + ent - g_entities) : 0);
+		G_handlePause(qtrue, ( ent ? 1 + ent - g_entities : 0) );
 		G_globalSound("sound/match/referee.wav");
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 		AP(va("print \"^3%s ^1PAUSED^3 the match^3!\n", referee));
 		CP(va("cp \"^3Match is ^1PAUSED^3! (^7%s^3)\n\"", referee));
 		level.server_settings |= CV_SVS_PAUSE;
 		trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
 	}
 	else {
-		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match ... resuming in 10 seconds!\n\n\"", referee));
-		level.paused = PAUSE_UNPAUSING;
+		G_handlePause(qfalse, 0);
+		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match!\n\n\"", referee));
 		G_globalSound("sound/match/prepare.wav");
-		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		return;
 	}
 }
-
 
 // Puts a player on a team.
 void G_refPlayerPut_cmd(gentity_t *ent, int team_id) {

@@ -534,6 +534,7 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f( gentity_t *ent ) {
     int dmg = 0; // OSPx - Needed for Team Damage stats..
+
 	// L0 - Patched for Pause
 	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
 		 ( ent->client->ps.pm_flags & PMF_LIMBO ) ||

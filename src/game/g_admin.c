@@ -1843,8 +1843,9 @@ void cmd_revealCamper(gentity_t *ent) {
 Pause
 ==================
 */
-void cmd_pause(gentity_t *ent, qboolean resume) {
-	char *log, *action;
+void cmd_pause(gentity_t *ent, qboolean fPause) {
+	char* status[2] = {"^3UN", "^3"};
+	char *log;
 
 	if ( g_gamestate.integer != GS_PLAYING ) {
 		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
@@ -1856,28 +1857,30 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 		return;
 	}
 
-	if (!resume) {
-		if (level.paused != PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is already paused^j!\n\"");
-			return;
-		}
-		G_pauseHandle(qtrue, TEAM_SPECTATOR);
-		AAPS("sound/match/klaxon1.wav");
-	} else if (level.paused != PAUSE_UNPAUSING){
-		if (level.paused == PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-			return;
-		}
-		G_pauseHandle(qfalse, TEAM_SPECTATOR);
+	if ((!level.alliedPlayers && !level.axisPlayers) && fPause) {
+		CP("print \"^jError: ^7Pause can only be used when at least 1 team has a player!\n\"");
+		return;
 	}
 
-	AP(va("chat \"^zconsole: ^7%s has ^3%s match!\n\"", (resume ? "Unpaused ^7the" : "Paused ^7a"), sortTag(ent)));
+	if ((PAUSE_UNPAUSING >= level.paused && !fPause) || (PAUSE_NONE != level.paused && fPause)) {
+		CP(va("print \"^1Error^7: The match is already %sPAUSED!\n\"", status[fPause]));
+		return;
+	}
+
+	// Trigger the auto-handling of pauses
+	if (fPause) {
+		G_handlePause(qtrue, (ent ? 1 + ent - g_entities : 0));
+	}
+	else {
+		G_handlePause(qfalse, 0);
+	}
+
+	AP(va("chat \"^zconsole: ^7%s has ^3%sPAUSED ^7the match!\n\"", status[fPause], sortTag(ent)));
 
     if (g_gameStatslog.integer) {
-        G_writeGeneralEvent(ent , ent, " ", (resume) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
+        G_writeGeneralEvent(ent , ent, " ", (!fPause) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
     }
 
-	action = (resume) ? "resumed the match." : "paused a match.";
 	log = va("Player %s (IP:%s) %s",
 		ent->client->pers.netname, ent->client->sess.ip, action );
 	if (g_extendedLog.integer)

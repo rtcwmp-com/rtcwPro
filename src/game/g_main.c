@@ -1713,6 +1713,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
 
+	// These sometimes goes off so make sure..
+	teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
+	teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+
 	// RTCWPro - Set the game config
 	G_ConfigSet(g_customConfig.string);
 }
@@ -2965,12 +2969,10 @@ void CheckWolfMP() {
 		return;
 	}
 
-	// if the warmup time has counted down, restart
-	if ( level.time > level.warmupTime ) {
-		level.warmupTime += 10000;
-		trap_Cvar_Set( "g_restarted", "1" );
-		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-		level.restarted = qtrue;
+	// L0 - Countdown
+	if (level.time > level.warmupTime - 7100 && !level.cnStarted) {
+		level.cnStarted = qtrue;
+		CountDown();
 		return;
 	}
 }
@@ -3109,6 +3111,7 @@ Runs thinking code for this frame if necessary
 */
 void G_RunThink( gentity_t *ent ) {
 	float thinktime;
+
 	// L0 - Pause dump
 	if ( level.paused != PAUSE_NONE && ( ent - g_entities ) >= g_maxclients.integer &&
 		 ent->nextthink > level.time && strstr( ent->classname, "DPRINTF_" ) == NULL ) {
@@ -3232,19 +3235,6 @@ void TeamLockStatus(void) {
 }
 
 /*
-================
-L0 - pauseCheck
-
-Some jokers may set a pause and leave..
-================
-*/
-void pauseCheck(void) {
-	if (level.numPlayingClients == 0 && level.paused != PAUSE_NONE)
-		resetPause();
-}
-
-
-/*
 Player Info (port from ET)
 sane replacement for OSP's Players_Axis/Players_Allies
 */
@@ -3308,17 +3298,17 @@ void G_RunFrame( int levelTime ) {
 
 	// L0 - Pause
 	// OSP Handling of pause offsets
-	if ( level.paused == PAUSE_NONE ) {
+	if (level.paused == PAUSE_NONE) {
 		level.timeCurrent = levelTime - level.timeDelta;
-	} else {
+	}
+	else {
 		level.timeDelta = levelTime - level.timeCurrent;
-		if ( ( level.time % 500 ) == 0 ) {
+		if ((level.time % 500) == 0) {
 			// Respawn and time issuses
-			trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
-			// Print stuff.. FIXME one day...
-			trap_SetConfigstring( CS_PAUSED, va( "%i", level.startTime + level.timeDelta ) );
+			trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime + level.timeDelta));
 		}
 	} // End
+
 //	level.frameTime = trap_Milliseconds();
 	level.frameStartTime = trap_Milliseconds();
 
@@ -3424,12 +3414,11 @@ void G_RunFrame( int levelTime ) {
 			 || ent->s.eType == ET_FIRE_COLUMN
 			 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
 			 || ent->s.eType == ET_EXPLO_PART
-			 || ent->s.eType == ET_RAMJET ) {
-
+			 || ent->s.eType == ET_RAMJET 
+		) {
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
 				G_RunMissile( ent );
-				continue;
 			} else {
 				// During a pause, gotta keep track of stuff in the air
 				ent->s.pos.trTime += level.time - level.previousTime;
@@ -3438,10 +3427,8 @@ void G_RunFrame( int levelTime ) {
 					ent->s.effect1Time += level.time - level.previousTime;
 				}
 				G_RunThink( ent );
-				//continue;
 			}
-		//return;
-		// End
+			continue;
 		}
 
 		// DHM - Nerve :: Server-side collision for flamethrower
@@ -3524,15 +3511,10 @@ void G_RunFrame( int levelTime ) {
 
 	// for tracking changes
 	CheckCvars();
-	// L0 - countdown
-	if ((level.time > level.CNpush) && (g_gamestate.integer == GS_WARMUP_COUNTDOWN)) {
-		CountDown(qtrue);
-	} // end
 
-	// L0 - Pause countdown
-	if ((level.time > level.CNpush) && level.paused) {
-		level.CNyes = qtrue;
-		PauseHandle();
+	// L0 - countdown
+	if ((level.time > level.cnPush) && (g_gamestate.integer == GS_WARMUP_COUNTDOWN)) {
+		CountDown();
 	} // end
 
 	if ( g_listEntity.integer ) {
@@ -3556,8 +3538,6 @@ void G_RunFrame( int levelTime ) {
 		sortedActivePlayers();
 		// L0 - Check Team Lock status..
 		TeamLockStatus();
-		// L0 - Pause
-		pauseCheck();
 
 		handleEmptyTeams();
 	}
