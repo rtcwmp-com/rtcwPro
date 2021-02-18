@@ -254,7 +254,7 @@ void cmd_pmsg(gentity_t *ent)
 
 	msg = ConcatArgs(2);
     if( strlen(msg) >= 700 ){
-		G_LogPrintf( "NUKER(pmsg >= 700): %s IP: %i.%i.%i.%i\n", ent->client->pers.netname, ent->client->sess.ip[0], ent->client->sess.ip[1], ent->client->sess.ip[2], ent->client->sess.ip[3] );
+		G_LogPrintf( "NUKER(pmsg >= 700): %s IP: %s\n", ent->client->pers.netname, ent->client->sess.ip);
 	    trap_DropClient( ent-g_entities, "^7Player Kicked: ^3Nuking" );
 	return;
     }
@@ -381,21 +381,6 @@ void cmd_specInvite( gentity_t *ent ) {
 
 	} else {CP( "print \"Spectators can't specinvite players!\n\"" );}
 }
-/*
-=================
-Hitsounds
-
-Do it like in shrub just permanently
-(A hack tied to color so one doesn't need to type it all the time..)
-=================
-*/
-//void Cmd_hitsounds(gentity_t *ent) {
-//	char *action = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? "^3Disable^7" : "^3Enable^7");
-//	int	flag = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? 0 : 1);
-//
-//	CP(va("print \"Bit flag to %s Hitsounds is /color %d \nType ^3/commands bitflags^7 for explanation.\n\"", action, flag));
-//	return;
-//}
 
 /*
 ===================

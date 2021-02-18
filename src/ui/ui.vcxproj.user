@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LocalDebuggerWorkingDirectory>$(RTCWBASE)\$(RTCW_MOD_NAME)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>$(RTCWBASE)\wolfMP.exe</LocalDebuggerCommand>
+    <LocalDebuggerAttach>true</LocalDebuggerAttach>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerCommand>$(RTCWBASE)\wolfMP.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(RTCWBASE)\$(RTCW_MOD_NAME)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerAttach>true</LocalDebuggerAttach>
+  </PropertyGroup>
+</Project>
