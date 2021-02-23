@@ -941,28 +941,28 @@ void cmd_tempBanIp(gentity_t *ent) {
 	tag = sortTag(ent);
 
 	count = ClientNumberFromNameMatch(ent->client->pers.cmd2, nums);
-		if (count == 0){
-			CP("print \"Client not on server^z!\n\"");
-		return;
-		}else if (count > 1){
-			CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
-		return;
-		}
+	if (count == 0){
+		CP("print \"Client not on server^z!\n\"");
+	return;
+	}else if (count > 1){
+		CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
+	return;
+	}
 
-		for (i = 0; i < count; i++){
-			// TempBan player
-			trap_SendConsoleCommand(EXEC_APPEND, va("tempban %i %s", nums[i], ent->client->pers.cmd3 ));
+	for (i = 0; i < count; i++){
+		// TempBan player
+		trap_SendConsoleCommand(EXEC_APPEND, va("tempban %i %s", nums[i], ent->client->pers.cmd3 ));
 
-			// Kick player now
-			trap_DropClient( nums[i], va( "^3temporarily banned by ^3%s \n^7Tempban will expire in ^3%s ^7minute(s)", tag, ent->client->pers.cmd3));
-			AP(va("chat \"^zconsole:^7 %s has tempbanned player %s ^7for ^z%s ^7minute(s)^z!\n\"", tag, g_entities[nums[i]].client->pers.netname,ent->client->pers.cmd3));
+		// Kick player now
+		trap_DropClient( nums[i], va( "^3temporarily banned by ^3%s \n^7Tempban will expire in ^3%s ^7minute(s)", tag, ent->client->pers.cmd3));
+		AP(va("chat \"^zconsole:^7 %s has tempbanned player %s ^7for ^z%s ^7minute(s)^z!\n\"", tag, g_entities[nums[i]].client->pers.netname,ent->client->pers.cmd3));
 
-			// Log it
-			log =va("Player %s (IP:%s) tempbanned user %s by IP for %s minute(s).",
-				ent->client->pers.netname, ent->client->sess.ip, g_entities[nums[i]].client->pers.netname, ent->client->pers.cmd3 );
-			logEntry (ADMACT, log);
-		}
-return;
+		// Log it
+		log =va("Player %s (IP:%s) tempbanned user %s by IP for %s minute(s).",
+			ent->client->pers.netname, ent->client->sess.ip, g_entities[nums[i]].client->pers.netname, ent->client->pers.cmd3 );
+		logEntry (ADMACT, log);
+	}
+	return;
 }
 
 /*

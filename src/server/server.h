@@ -369,6 +369,9 @@ extern cvar_t* sv_StreamingSelfSignedCert;
 extern cvar_t* sv_AuthEnabled;
 extern cvar_t* sv_AuthStrictMode;
 
+// Cvar restrictions
+extern cvar_t* sv_GameConfig;
+
 //===========================================================
 
 // L0 - ioquake ipv6 banning
@@ -438,6 +441,7 @@ int SV_RateMsec( client_t *client ) ;
 // sv_ccmds.c
 //
 void SV_Heartbeat_f( void );
+void SV_SetCvarRestrictions(void);
 
 //
 // sv_snapshot.c

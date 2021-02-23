@@ -155,6 +155,9 @@ typedef struct {
 	qboolean corruptedTranslationFile;
 	char translationVersion[MAX_STRING_TOKENS];
 	// -NERVE - SMF
+
+	qboolean clientWarned;
+	int clientActionTime;
 } clientActive_t;
 
 extern clientActive_t cl;
@@ -464,6 +467,7 @@ const char* CL_TranslateStringBuf( const char *string ); // TTimo
 // -NERVE - SMF
 
 void CL_OpenURL( const char *url ); // TTimo
+void CL_ActionGenerateTime(qboolean useFixedTime);
 
 //
 // cl_input

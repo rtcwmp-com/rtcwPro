@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
 #include "server.h"
 
 /*
@@ -514,6 +512,62 @@ void    SV_LoadGame_f( void ) {
 		Cbuf_ExecuteText( EXEC_APPEND, va( "spdevmap %s", filename ) );
 	} else {    // no cheats
 		Cbuf_ExecuteText( EXEC_APPEND, va( "spmap %s", filename ) );
+	}
+}
+
+/*
+==================
+SV_CvarRestrictions
+
+Loads restrictions into memory.
+==================
+*/
+extern cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
+void SV_SetCvarRestrictions(void) {
+	FILE* f;
+	char* path;
+	int i = 0, j = 0;
+
+	Com_Printf("-----Initializing Restrictions-----\n");
+	if (!(path = Cvar_VariableString("fs_game")) || !*path)
+		path = BASEGAME;
+
+	if (!Q_stricmp(sv_GameConfig->string, "")) {
+		Com_Printf("Config file is not found..skipping.\n");
+		return;
+	}
+
+	if (FS_FileExists(va("configs/%s.config", sv_GameConfig->string))) {
+		char line[MAX_CVAR_VALUE_STRING];
+		char* filepath = va("%s/configs/%s.config", path, sv_GameConfig->string);
+
+		f = fopen(filepath, "r");
+		while (fgets(line, MAX_CVAR_VALUE_STRING, f) != NULL) {
+			Cmd_TokenizeString(line);
+
+			if (!Q_stricmp(Cmd_Argv(0), "svr_cvar")) {
+				Cvar_SetRestricted(Cmd_Argv(1), RestrictedTypeToInt(Cmd_Argv(2)), Cmd_Argv(3), Cmd_Argv(4));
+				i++;
+			}
+			else if (!Q_stricmp(Cmd_Argv(0), "set") || !Q_stricmp(Cmd_Argv(0), "seta")) {
+				Cvar_Set(Cmd_Argv(1), Cmd_Argv(2));
+				j++;
+			}
+			else {
+				Com_DPrintf("Invalid rest cvar: %s %s %s %s %s (%s)\n", 
+					Cmd_Argv(0), Cmd_Argv(1), Cmd_Argv(2), Cmd_Argv(3), Cmd_Argv(4), line
+				);
+			}
+		}
+		fclose(f);
+
+		Com_Printf("Registered %d restricted cvars.\n", i);
+		if (j > 0) {
+			Com_Printf("Registered %d regular cvars.\n", j);
+		}
+	}
+	else {
+		Com_Printf("Config file is not found..skipping.\n");
 	}
 }
 
@@ -1166,7 +1220,6 @@ static void SV_ConSay_f( void ) {
 	SV_SendServerCommand( NULL, "chat \"%s\n\"", text );
 }
 
-
 /*
 ==================
 SV_Heartbeat_f
@@ -1177,7 +1230,6 @@ Also called by SV_DropClient, SV_DirectConnect, and SV_SpawnServer
 void SV_Heartbeat_f( void ) {
 	svs.nextHeartbeatTime = -9999999;
 }
-
 
 /*
 ===========
@@ -1191,7 +1243,6 @@ static void SV_Serverinfo_f( void ) {
 	Info_Print( Cvar_InfoString( CVAR_SERVERINFO ) );
 }
 
-
 /*
 ===========
 SV_Systeminfo_f
@@ -1203,7 +1254,6 @@ static void SV_Systeminfo_f( void ) {
 	Com_Printf( "System info settings:\n" );
 	Info_Print( Cvar_InfoString( CVAR_SYSTEMINFO ) );
 }
-
 
 /*
 ===========
@@ -1235,7 +1285,6 @@ static void SV_DumpUser_f( void ) {
 	Com_Printf( "--------\n" );
 	Info_Print( cl->userinfo );
 }
-
 
 /*
 =================
@@ -1326,4 +1375,3 @@ void SV_RemoveOperatorCommands( void ) {
 	Cmd_RemoveCommand( "say" );
 #endif
 }
-

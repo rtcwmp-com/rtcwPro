@@ -315,8 +315,6 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-vmCvar_t g_customConfig;
-vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
 
 cvarTable_t gameCvarTable[] = {
@@ -583,16 +581,13 @@ cvarTable_t gameCvarTable[] = {
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
-	{ &g_customConfig, "g_customConfig", "defaultcomp", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
-	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
 // bk001129 - made static to avoid aliasing
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
-
 
 void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
@@ -1716,9 +1711,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// These sometimes goes off so make sure..
 	teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
 	teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
-
-	// RTCWPro - Set the game config
-	G_ConfigSet(g_customConfig.string);
 }
 
 /*
@@ -2093,9 +2085,6 @@ void CalculateRanks( void ) {
 			trap_SetConfigstring( CS_SCORES2, va( "%i", level.clients[ level.sortedClients[1] ].ps.persistant[PERS_SCORE] ) );
 		}
 	}
-
-	//RtcwPro player info
-	ServerPlayerInfo();
 
 	// see if it is time to end the level
 	CheckExitRules();
@@ -3235,51 +3224,7 @@ void TeamLockStatus(void) {
 }
 
 /*
-Player Info (port from ET)
-sane replacement for OSP's Players_Axis/Players_Allies
-*/
-void ServerPlayerInfo(void) {
-	//128 bits
-	char playerinfo[MAX_CLIENTS + 1];
-	gentity_t* e;
-	team_t playerteam;
-	int i;
-	int lastclient;
-
-	memset(playerinfo, 0, sizeof(playerinfo));
-
-	lastclient = -1;
-	e = &g_entities[0];
-	for (i = 0; i < MAX_CLIENTS; i++, e++) {
-		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED) {
-			playerinfo[i] = '-';
-			continue;
-		}
-
-		//keep track of highest connected/connecting client
-		lastclient = i;
-
-		if (e->inuse == qfalse) {
-			playerteam = 0;
-		}
-		else {
-			playerteam = e->client->sess.sessionTeam;
-		}
-		playerinfo[i] = (char)'0' + playerteam;
-	}
-	//terminate the string, if we have any non-0 clients
-	if (lastclient != -1) {
-		playerinfo[lastclient + 1] = (char)0;
-	}
-	else {
-		playerinfo[0] = (char)0;
-	}
-
-	trap_Cvar_Set("P", playerinfo);
-}
-
-
-/*
+================
 G_RunFrame
 
 Advances the non-player objects in the world

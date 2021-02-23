@@ -502,6 +502,9 @@ void    Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaul
 void    Cvar_Update( vmCvar_t *vmCvar );
 // updates an interpreted modules' version of a cvar
 
+cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
+// registers cvars for validation list
+
 void    Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
@@ -545,6 +548,8 @@ char    *Cvar_InfoString_Big( int bit );
 void    Cvar_InfoStringBuffer( int bit, char *buff, int buffsize );
 
 void    Cvar_Restart_f( void );
+
+unsigned int RestrictedTypeToInt(char* str);
 
 extern int cvar_modifiedFlags;
 // whenever a cvar is modifed, its flags will be OR'd into this, so

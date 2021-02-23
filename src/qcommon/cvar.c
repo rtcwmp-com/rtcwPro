@@ -35,12 +35,17 @@ cvar_t      *cvar_vars;
 cvar_t      *cvar_cheats;
 int cvar_modifiedFlags;
 
-#define MAX_CVARS   1024
+cvar_rest_t* cvar_rest_vars;
+
 cvar_t cvar_indexes[MAX_CVARS];
 int cvar_numIndexes;
 
+cvar_rest_t cvar_rest_indexes[MAX_CVARS];
+int cvar_rest_numIndexes;
+
 #define FILE_HASH_SIZE      256
 static cvar_t*     hashTable[FILE_HASH_SIZE];
+static cvar_rest_t* restHashTable[FILE_HASH_SIZE];
 
 cvar_t *Cvar_Set2( const char *var_name, const char *value, qboolean force );
 
@@ -91,6 +96,21 @@ static qboolean Cvar_ValidateString( const char *s ) {
 
 /*
 ============
+Cvar_Rest_ValidateString
+============
+*/
+static qboolean Cvar_Rest_ValidateString(const char* s) {
+	if (!s) {
+		return qfalse;
+	}
+	if (strchr(s, '//')) {
+		return qfalse;
+	}
+	return Cvar_ValidateString(s);
+}
+
+/*
+============
 Cvar_FindVar
 ============
 */
@@ -102,6 +122,26 @@ static cvar_t *Cvar_FindVar( const char *var_name ) {
 
 	for ( var = hashTable[hash] ; var ; var = var->hashNext ) {
 		if ( !Q_stricmp( var_name, var->name ) ) {
+			return var;
+		}
+	}
+
+	return NULL;
+}
+
+/*
+============
+CvarRest_FindVar
+============
+*/
+static cvar_rest_t* Cvar_Rest_FindVar(const char* var_name) {
+	cvar_rest_t* var;
+	long hash;
+
+	hash = generateHashValue(var_name);
+
+	for (var = restHashTable[hash]; var; var = var->hashNext) {
+		if (!Q_stricmp(var_name, var->name)) {
 			return var;
 		}
 	}
@@ -324,6 +364,62 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 
 /*
 ============
+Cvar_Rest_Get
+
+If the variable already exists, the value will not be set 
+============
+*/
+cvar_rest_t* Cvar_Rest_Get(const char* var_name, int type, const char* value1, const char* value2) {
+	cvar_rest_t* var;
+	long hash;
+
+	if (!var_name) {
+		Com_Error(ERR_FATAL, "Cvar_Get: NULL parameter");
+	}
+
+	if (!Cvar_Rest_ValidateString(var_name)) {
+		Com_Printf("invalid cvar name string: %s\n", var_name);
+		var_name = "BADNAME";
+		return NULL;
+	}
+
+	var = Cvar_Rest_FindVar(var_name);
+	if (var) {
+		return var;
+	}
+
+	//
+	// allocate a new cvar
+	//
+	if (cvar_rest_numIndexes >= MAX_CVARS) {
+		Com_Error(ERR_FATAL, "MAX_REST_CVARS");
+		return var;
+	}
+
+	var = &cvar_rest_indexes[cvar_rest_numIndexes];
+	cvar_rest_numIndexes++;
+	var->name = CopyString(var_name);
+	var->type = type;
+	var->sVal1 = CopyString(value1);
+	var->sVal2 = (value2 == NULL ? NULL : CopyString(value2));
+	var->fVal1 = atof(var->sVal1);
+	var->fVal2 = (value2 == NULL ? 0.00 : atof(var->sVal2));
+	var->iVal1 = atoi(var->sVal1);
+	var->iVal2 = (value2 == NULL ? 0 : atoi(var->sVal2));
+
+	// link the variable in
+	var->next = cvar_rest_vars;
+	cvar_rest_vars = var;
+
+	hash = generateHashValue(var_name);
+	var->hashNext = restHashTable[hash];
+	restHashTable[hash] = var;
+
+	return var;
+}
+
+/*
+============
 Cvar_Set2
 ============
 */
@@ -439,6 +535,43 @@ cvar_t *Cvar_Set2( const char *var_name, const char *value, qboolean force ) {
 
 /*
 ============
+Cvar_SetRestricted
+
+Sets restricted cvar flags.
+============
+*/
+cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value1, const char* value2) {
+	cvar_rest_t* var;
+
+	Com_DPrintf("Cvar_SetRestricted: %s %d %s %s\n", var_name, type, value1, value2);
+
+	if (!Cvar_Rest_ValidateString(var_name)) {
+		Com_Printf("invalid cvar name string: %s\n", var_name);
+		return NULL;
+	}
+
+	var = Cvar_Rest_FindVar(var_name);
+	if (!var) {
+		return Cvar_Rest_Get(var_name, type, value1, value2);
+	}
+
+	if (!value1) {
+		return var;
+	}
+
+	var->type = type;
+	var->sVal1 = CopyString(value1);
+	var->sVal2 = (value2 == NULL ? NULL : CopyString(value2));
+	var->fVal1 = atof(var->sVal1);
+	var->fVal2 = (value2 == NULL ? 0.00 : atof(var->sVal2));
+	var->iVal1 = atoi(var->sVal1);
+	var->iVal2 = (value2 == NULL ? 0 : atoi(var->sVal2));
+
+	return var;
+}
+
+/*
+============
 Cvar_Set
 ============
 */
@@ -471,7 +604,6 @@ void Cvar_SetValue( const char *var_name, float value ) {
 	Cvar_Set( var_name, val );
 }
 
-
 /*
 ============
 Cvar_Reset
@@ -480,7 +612,6 @@ Cvar_Reset
 void Cvar_Reset( const char *var_name ) {
 	Cvar_Set2( var_name, NULL, qfalse );
 }
-
 
 /*
 ============
@@ -531,7 +662,6 @@ qboolean Cvar_Command( void ) {
 	Cvar_Set2( v->name, Cmd_Argv( 1 ), qfalse );
 	return qtrue;
 }
-
 
 /*
 ============
@@ -763,6 +893,57 @@ void Cvar_List_f( void ) {
 
 /*
 ============
+Cvar_RestrictedList_f
+
+Prints the list of all the restricted/controlled cvars on a server.
+============
+*/
+void Cvar_RestrictedList_f(void) {
+	cvar_rest_t* var;
+	int i, j = 0, k = 0;
+	char* match;
+
+	if (Cmd_Argc() > 1) {
+		match = Cmd_Argv(1);
+	}
+	else {
+		match = NULL;
+	}
+
+	i = 0;
+	Com_Printf("\nActive restricted cvars:\n");
+	for (var = cvar_rest_vars; var; var = var->next, i++) {
+
+		if (match && !Com_Filter(match, var->name, qfalse)) {
+			continue;
+		}
+		if (var->type == SVC_NONE) {
+			continue;
+		}
+		Com_Printf("%-32s %s %s %s\n", var->name, Cvar_Restriction_Flags[var->type].longDesc, var->sVal1, (var->sVal2 == NULL ? NULL : var->sVal2));
+		j++;
+	}
+
+	if (i != j) {
+		Com_Printf("\nIgnored cvars due wrong values:\n");
+
+		for (var = cvar_rest_vars; var; var = var->next, k++) {
+			if (match && !Com_Filter(match, var->name, qfalse)) {
+				continue;
+			}
+			if (var->type != SVC_NONE) {
+				continue;
+			}
+			Com_Printf("%-32s %s %s %s\n", var->name, Cvar_Restriction_Flags[var->type].longDesc, var->sVal1, (var->sVal2 == NULL ? NULL : var->sVal2));
+		}
+	}
+
+	Com_Printf("\n%i total registerd cvars\n", i);
+	Com_Printf("%i restricted cvars\n", j);
+}
+
+/*
+============
 Cvar_Restart_f
 
 Resets all cvars to their hardcoded values
@@ -946,8 +1127,90 @@ void Cvar_Init( void ) {
 	Cmd_AddCommand( "seta", Cvar_SetA_f );
 	Cmd_AddCommand( "reset", Cvar_Reset_f );
 	Cmd_AddCommand( "cvarlist", Cvar_List_f );
+	Cmd_AddCommand( "restrictedlist", Cvar_RestrictedList_f);
 	Cmd_AddCommand( "cvar_restart", Cvar_Restart_f );
 
 	// NERVE - SMF - can't rely on autoexec to do this
 	Cvar_Get( "devdll", "1", CVAR_ROM );
+}
+
+/*
+============
+Cvar_Validate
+
+Check if setting is valid.
+============
+*/
+qboolean Cvar_IsValid(cvar_rest_t* cv) {
+
+	if (cv == NULL) {
+		return qtrue;
+	}
+
+	if (cv->type != SVC_NONE) {
+		switch (cv->type) {
+			case SVC_EQUAL:
+			if (cv->type == SVC_TYPE_STRING) {
+				
+			}
+			else if (cv->type == SVC_TYPE_INT) {
+				
+			}
+			else if (cv->type == SVC_TYPE_FLOAT) {
+				
+			}
+			break;
+			case SVC_NOTEQUAL:
+
+			break;
+			case SVC_GREATER:
+
+			break;
+			case SVC_GREATEREQUAL:
+
+			break;
+			case SVC_LOWER:
+
+			break;
+			case SVC_LOWEREQUAL:
+
+			break;
+			case SVC_INSIDE:
+
+			break;
+			case SVC_OUTSIDE:
+
+			break;
+			case SVC_INCLUDE:
+
+			break;
+			case SVC_EXCLUDE:
+
+			break;
+			case SVC_WITHBITS:
+
+			break;
+			case SVC_WITHOUTBITS:
+
+			break;
+		}
+	}
+	return qtrue;
+}
+
+/*
+============
+RestrictedTypeToInt
+
+Remaps string to type;
+============
+*/
+unsigned int RestrictedTypeToInt(char* str) {
+	int i;
+
+	for (i = 0; i < SVC_MAX; i++) {
+		if (!Q_stricmp(str, Cvar_Restriction_Flags[i].operator))
+			return Cvar_Restriction_Flags[i].type;
+	}
+	return SVC_NONE;
 }

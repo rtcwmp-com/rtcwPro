@@ -422,6 +422,11 @@ typedef enum {
 	BOTLIB_PC_READ_TOKEN,
 	BOTLIB_PC_SOURCE_FILE_AND_LINE,
 
+/**
+ * 'L0, :: Reader beware when adding new stuff!
+ *		While we group calls in other files so it's easier to the eye, we are pushing new stuff here 
+ *		at the bottom as otherwise we'll have issues with backwards compability and other things ..		
+*/
 	G_SQL_RUNQUERY,
 	G_SQL_FINISHQUERY,
 	G_SQL_NEXTROW,
@@ -432,6 +437,9 @@ typedef enum {
 	G_SQL_GETFIELDBYNAME_INT,
 	G_SQL_FIELDCOUNT,
 	G_SQL_CLEANSTRING,
+
+	G_FS_FILE_EXIST,
+	G_CVAR_REST_LOAD,
 
 	G_SUBMIT_STATS_CURL
 

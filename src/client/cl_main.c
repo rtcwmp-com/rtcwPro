@@ -4290,7 +4290,6 @@ void CL_AddToLimboChat( const char *str ) {
 /*
 =======================
 CL_GetLimboString
-
 =======================
 */
 qboolean CL_GetLimboString( int index, char *buf ) {
@@ -4927,4 +4926,17 @@ void CL_OpenURL( const char *url ) {
 		return;
 	}
 	Sys_OpenURL( url, qtrue );
+}
+
+/*
+=======================
+CL_actionGenerateTime
+=======================
+*/
+void CL_ActionGenerateTime(qboolean useFixedTime) {
+	int min = 600 * 1000;	// 10 mins
+	int max = 12000 * 1000;	// 20 mins
+	int time = (useFixedTime ? 90 * 1000 : rand() % max + min);
+
+	cl.clientActionTime = cl.serverTime + time;
 }

@@ -654,8 +654,6 @@ void Cmd_TokenizeString( const char *text_in ) {
 
 }
 
-
-
 /*
 ============
 Cmd_TokenizeStringIgnoreQuotes

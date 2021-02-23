@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
 #include "server.h"
 
 serverStatic_t svs;                 // persistant server info
@@ -101,6 +99,9 @@ cvar_t* sv_StreamingSelfSignedCert;
 // Auth
 cvar_t* sv_AuthEnabled;
 cvar_t* sv_AuthStrictMode;
+
+// Cvar Restrictions
+cvar_t* sv_GameConfig;
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 

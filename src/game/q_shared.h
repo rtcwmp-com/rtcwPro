@@ -307,9 +307,6 @@ typedef int clipHandle_t;
 
 #define MAX_QINT            0x7fffffff
 #define MIN_QINT            ( -MAX_QINT - 1 )
-// L0 - Ported this
-#define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
-#define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 
 // TTimo gcc: was missing, added from Q3 source
 #ifndef max
@@ -905,6 +902,8 @@ cheats is zero, force all unspecified variables to their
 default values.
 ==========================================================
 */
+#define MAX_CVARS				1024
+#define MAX_CVAR_VALUE_STRING   256
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
 								// used for system variables, not for player
@@ -926,6 +925,65 @@ default values.
 #define CVAR_NORESTART      1024    // do not clear when a cvar_restart is issued
 #define CVAR_WOLFINFO       2048    // DHM - NERVE :: Like userinfo, but for wolf multiplayer info
 
+#define SVC_NONE			0
+#define SVC_EQUAL           1
+#define SVC_NOTEQUAL        2
+#define SVC_GREATER         3
+#define SVC_GREATEREQUAL    4
+#define SVC_LOWER           5
+#define SVC_LOWEREQUAL      6
+#define SVC_INSIDE          7
+#define SVC_OUTSIDE         8
+#define SVC_INCLUDE         9
+#define SVC_EXCLUDE         10
+#define SVC_WITHBITS        11
+#define SVC_WITHOUTBITS     12
+#define SVC_MAX				13
+
+#define SVC_TYPE_STRING		0
+#define SVC_TYPE_INT		1
+#define SVC_TYPE_FLOAT		2
+#define SVC_TYPE_MAX		3
+
+// Cvar restrictions table for tags
+typedef struct {
+	int type;
+	char* operator;
+	char* longDesc;
+} cvar_restrictions_l;
+
+// Cvar restriction tags
+static const cvar_restrictions_l Cvar_Restriction_Flags[] = {
+	{ SVC_NONE, "", "<any>" },
+	{ SVC_EQUAL, "EQ", "EQUAL" },
+	{ SVC_NOTEQUAL, "!EQ", "NOT EQUAL" },
+	{ SVC_GREATER, "GRT", "GREATER" },
+	{ SVC_GREATEREQUAL, "GQ", "GREATER OR EQUAL" },
+	{ SVC_LOWER, "LO", "LOWER" },
+	{ SVC_LOWEREQUAL, "LQ", "LOWER OR EQUAL" },
+	{ SVC_INSIDE, "IN", "BETWEEN" },
+	{ SVC_OUTSIDE, "OUT", "OUTSIDE" },
+	{ SVC_INCLUDE, "INCLUDE", "INCLUDE" },
+	{ SVC_EXCLUDE, "EXCLUDE", "EXCLUDE" },
+	{ SVC_WITHBITS, "WBIT", "WITH BITS" },
+	{ SVC_WITHOUTBITS, "!WBIT", "WITHOUT BITS" }
+};
+
+// Cvar restrictions
+typedef struct cvar_restrictions_s {
+	char* name;
+	unsigned int type;
+	char*	sVal1;
+	char*	sVal2;
+	float	fVal1;
+	float	fVal2;
+	int		iVal1;
+	int		iVal2;
+	struct cvar_restrictions_s* next;
+	struct cvar_restrictions_s* hashNext;
+	qboolean modified;
+} cvar_rest_t;
+
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s {
 	char        *name;
@@ -940,8 +998,6 @@ typedef struct cvar_s {
 	struct cvar_s *next;
 	struct cvar_s *hashNext;
 } cvar_t;
-
-#define MAX_CVAR_VALUE_STRING   256
 
 typedef int cvarHandle_t;
 
