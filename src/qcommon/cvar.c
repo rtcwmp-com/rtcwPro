@@ -938,7 +938,7 @@ void Cvar_RestrictedList_f(void) {
 		}
 	}
 
-	Com_Printf("\n%i total registerd cvars\n", i);
+	Com_Printf("\n%i total registered cvars\n", i);
 	Com_Printf("%i restricted cvars\n", j);
 }
 
