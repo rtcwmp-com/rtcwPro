@@ -801,6 +801,7 @@ Sends a disconnect message to the server
 This is also called on Com_Error and Com_Quit, so it shouldn't cause any errors
 =====================
 */
+extern cvar_rest_t* cvar_rest_vars;
 void CL_Disconnect( qboolean showMainMenu ) {
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
@@ -851,6 +852,9 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	// wipe the client connection
 	memset( &clc, 0, sizeof( clc ) );
+
+	// wipe any restricted cvars
+	memset(&cvar_rest_vars, 0, sizeof(cvar_rest_vars));
 
 	if (!cls.bWWWDlDisconnected) {
 		CL_ClearStaticDownload();
@@ -2033,6 +2037,29 @@ void CL_ServersResponsePacket(const netadr_t* from, msg_t* msg, qboolean extende
 
 /*
 =================
+CL_BuildRestrictedList
+
+Server responded with list .. 
+=================
+*/
+void CL_BuildRestrictedList(msg_t* msg) {
+	char* s = "";
+
+	s = MSG_ReadBigString(msg);
+	if (s) {
+		char* ptr = strtok(s, "\n");
+
+		while (ptr != NULL) {
+			Cmd_TokenizeString(ptr);
+			Cvar_SetRestricted(Cmd_Argv(0), atoi(Cmd_Argv(1)), Cmd_Argv(2), !Q_stricmp(Cmd_Argv(3), "''") ? "" : Cmd_Argv(3));
+
+			ptr = strtok(NULL, "\n");
+		}
+	}
+}
+
+/*
+=================
 CL_ConnectionlessPacket
 
 Responses to broadcasts, etc
@@ -2170,6 +2197,23 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	// list of servers sent back by a master server (extended)
 	if (!Q_strncmp(c, "getserversExtResponse", 21)) {
 		CL_ServersResponsePacket(&from, msg, qtrue);
+		return;
+	}
+
+	if (!Q_stricmp(c, "getRestrictedList")) {
+		if (cls.state < CA_CONNECTED) {
+			Com_DPrintf("Not connected. Restrict check Ignored.\n");
+			return;
+		}
+
+		if (!NET_CompareBaseAdr(from, clc.serverAddress)) {
+			Com_DPrintf("getRestrictedList connectResponse from a different address.  Ignored.\n");
+			Com_DPrintf("%s should have been %s\n", NET_AdrToString(from),
+				NET_AdrToStringwPort(clc.serverAddress));
+
+			return;
+		}
+		CL_BuildRestrictedList(msg);
 		return;
 	}
 

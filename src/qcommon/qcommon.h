@@ -505,6 +505,9 @@ void    Cvar_Update( vmCvar_t *vmCvar );
 cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
 // registers cvars for validation list
 
+char* Cvar_GetRestrictedList(void);
+// returns list of restricted cvars
+
 void    Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
@@ -992,6 +995,7 @@ int SV_SendQueuedPackets(void);
 
 void		Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf);
 void	Cmd_TokenizeStringIgnoreQuotes( const char *text_in );
+
 //
 // UI interface
 //

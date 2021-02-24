@@ -321,6 +321,7 @@ void SV_DirectConnect( netadr_t from ) {
 	int count;
 	char guid[GUID_LEN];
 	char* ip;
+	char restricted_cvars[BIG_INFO_STRING];
 
 	Com_DPrintf( "SVC_DirectConnect ()\n");
 
@@ -592,8 +593,14 @@ gotnewcl:
 	if ( count == 1 || count == sv_maxclients->integer ) {
 		SV_Heartbeat_f();
 	}
-}
 
+	// Sent list of restricted cvars out ..
+	if (Q_stricmp(sv_GameConfig->string, "")) {
+		Q_strncpyz(restricted_cvars, Cvar_GetRestrictedList(), sizeof(restricted_cvars));
+		NET_OutOfBandPrint(NS_SERVER, from, "getRestrictedList %s", restricted_cvars);
+		Com_DPrintf("   SENT:  getRestrictedLis %s\n", restricted_cvars);
+	}
+}
 
 /*
 =====================

@@ -1349,6 +1349,27 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 
 /*
 ==================
+Info_SetValueForCvar_Big
+==================
+*/
+void Info_SetValueForCvar_Big(cvar_rest_t* cvar, char* s) {
+	char newi[BIG_INFO_STRING];
+
+	if (strlen(s) >= BIG_INFO_STRING) {
+		Com_Error(ERR_DROP, "Info_SetValueForKey: oversize infostring");
+	}
+
+	Com_sprintf(newi, sizeof(newi), "%s %d %s %s\n", cvar->name, cvar->type, cvar->sVal1, (!Q_stricmp(cvar->sVal2, "") ? "''" : cvar->sVal2));
+	if (strlen(newi) + strlen(s) > BIG_INFO_STRING) {
+		Com_Printf("BIG Info string length exceeded\n");
+		return;
+	}
+
+	strcat(s, newi);
+}
+
+/*
+==================
 Q_CountChar
 ==================
 */

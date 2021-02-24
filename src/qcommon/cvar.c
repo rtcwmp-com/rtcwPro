@@ -902,6 +902,14 @@ void Cvar_RestrictedList_f(void) {
 	cvar_rest_t* var;
 	int i, j = 0, k = 0;
 	char* match;
+	char* color = (com_dedicated->integer ? "" : "^5");
+
+#ifndef _DEBUG
+	if (!com_dedicated->integer && !clientIsConnected) {
+		Com_Printf("Restricted list is not available in offline mode.\n");
+		return;
+}
+#endif // !_DEBUG
 
 	if (Cmd_Argc() > 1) {
 		match = Cmd_Argv(1);
@@ -911,7 +919,7 @@ void Cvar_RestrictedList_f(void) {
 	}
 
 	i = 0;
-	Com_Printf("\nActive restricted cvars:\n");
+	Com_Printf("\n%sActive restricted cvars:\n^7-----------------------------------------\n", color);
 	for (var = cvar_rest_vars; var; var = var->next, i++) {
 
 		if (match && !Com_Filter(match, var->name, qfalse)) {
@@ -920,12 +928,12 @@ void Cvar_RestrictedList_f(void) {
 		if (var->type == SVC_NONE) {
 			continue;
 		}
-		Com_Printf("%-32s %s %s %s\n", var->name, Cvar_Restriction_Flags[var->type].longDesc, var->sVal1, (var->sVal2 == NULL ? NULL : var->sVal2));
+		Com_Printf("%s%-32s %s %s %s\n", color, var->name, Cvar_Restriction_Flags[var->type].longDesc, var->sVal1, (var->sVal2 == NULL ? NULL : var->sVal2));
 		j++;
 	}
 
 	if (i != j) {
-		Com_Printf("\nIgnored cvars due wrong values:\n");
+		Com_Printf("\nIgnored cvars due wrong values:\n^7-----------------------------------------\n");
 
 		for (var = cvar_rest_vars; var; var = var->next, k++) {
 			if (match && !Com_Filter(match, var->name, qfalse)) {
@@ -934,12 +942,31 @@ void Cvar_RestrictedList_f(void) {
 			if (var->type != SVC_NONE) {
 				continue;
 			}
-			Com_Printf("%-32s %s %s %s\n", var->name, Cvar_Restriction_Flags[var->type].longDesc, var->sVal1, (var->sVal2 == NULL ? NULL : var->sVal2));
+			Com_Printf("%s%-32s %s %s %s\n", color, var->name, Cvar_Restriction_Flags[var->type].longDesc, var->sVal1, (var->sVal2 == NULL ? NULL : var->sVal2));
 		}
 	}
+	Com_Printf("\n-----------------------------------------\n");
+	Com_Printf("%s%i restricted cvars [Total %d]\n\n", color, j, i);
+}
 
-	Com_Printf("\n%i total registered cvars\n", i);
-	Com_Printf("%i restricted cvars\n", j);
+/*
+============
+Cvar_GetRestrictedList
+
+Builds restricted list that is send to a client
+============
+*/
+char* Cvar_GetRestrictedList(void) {
+	cvar_rest_t* var;
+	static char out[BIG_INFO_STRING] = "";
+
+	for (var = cvar_rest_vars; var; var = var->next) {
+		if (var->type == SVC_NONE) {
+			continue;
+		}
+		Info_SetValueForCvar_Big(var, out);
+	}
+	return out;
 }
 
 /*

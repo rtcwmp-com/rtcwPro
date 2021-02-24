@@ -1011,6 +1011,7 @@ typedef struct {
 	char string[MAX_CVAR_VALUE_STRING];
 } vmCvar_t;
 
+void Info_SetValueForCvar_Big(cvar_rest_t* cvar, char* s);
 /*
 ==============================================================
 
