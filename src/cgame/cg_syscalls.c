@@ -542,3 +542,7 @@ char* trap_TranslateString( const char *string ) {
 	return buf;
 }
 // -NERVE - SMF
+
+void trap_Rest_Validate(void) {
+	syscall(CG_R_VALIDATE);
+}

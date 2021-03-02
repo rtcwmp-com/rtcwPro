@@ -911,7 +911,7 @@ void SV_Init( void ) {
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
 
 	// Cvar Restrictions
-	sv_GameConfig = Cvar_Get( "sv_GameConfig", "pub", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_LATCH );
+	sv_GameConfig = Cvar_Get( "sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_LATCH );
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

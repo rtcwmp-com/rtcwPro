@@ -1917,6 +1917,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
+	// Trigger rest lookup
+	trap_SendServerCommand(clientNum, "revalidate");
+
 	return NULL;
 }
 

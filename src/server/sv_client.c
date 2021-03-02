@@ -576,6 +576,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
+	newcl->clientRestValidated = newcl->lastConnectTime + 80000;
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -598,7 +599,7 @@ gotnewcl:
 	if (Q_stricmp(sv_GameConfig->string, "")) {
 		Q_strncpyz(restricted_cvars, Cvar_GetRestrictedList(), sizeof(restricted_cvars));
 		NET_OutOfBandPrint(NS_SERVER, from, "getRestrictedList %s", restricted_cvars);
-		Com_DPrintf("   SENT:  getRestrictedLis %s\n", restricted_cvars);
+		Com_DPrintf("   SENT:  getRestrictedList %s\n", restricted_cvars);
 	}
 }
 
@@ -634,9 +635,6 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 	// Kill any download
 	SV_CloseDownload( drop );
 
-	// tell everyone why they got dropped
-	SV_SendServerCommand( NULL, "print \"[lof]%s" S_COLOR_WHITE " [lon]%s\n\"", drop->name, reason );
-
 	Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
 	drop->state = CS_ZOMBIE;        // become free in a few seconds
 
@@ -644,6 +642,9 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 		FS_FCloseFile( drop->download );
 		drop->download = 0;
 	}
+
+	// tell everyone why they got dropped
+	SV_SendServerCommand(NULL, "@print \"%s" S_COLOR_WHITE " %s\n\"", drop->name, reason);
 
 	// call the prog function for removing a client
 	// this will remove the body, among other things
@@ -658,7 +659,6 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 
 	// nuke user info
 	SV_SetUserinfo( drop - svs.clients, "" );
-
 
 	// if this was the last client on the server, send a heartbeat
 	// to the master so it is known the server is empty
@@ -751,7 +751,6 @@ void SV_SendClientGameState( client_t *client ) {
 	// deliver this to the client
 	SV_SendMessageToClient( &msg, client );
 }
-
 
 /*
 ==================
@@ -2219,5 +2218,9 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //	if ( msg->readcount != msg->cursize ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
-}
 
+	if (Q_stricmp(sv_GameConfig->string, ""), cl->clientRestValidated < svs.time) {
+		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+		return;
+	}
+}

@@ -156,7 +156,8 @@ typedef struct {
 	char translationVersion[MAX_STRING_TOKENS];
 	// -NERVE - SMF
 
-	qboolean clientWarned;
+	int clientRestStarted;
+	qboolean clientRestWarned;
 	int clientActionTime;
 } clientActive_t;
 

@@ -2675,6 +2675,7 @@ void        trap_Cvar_Register( vmCvar_t *vmCvar, const char *varName, const cha
 void        trap_Cvar_Update( vmCvar_t *vmCvar );
 void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+void		trap_Rest_Validate(void);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );
@@ -2894,6 +2895,7 @@ void        CG_StartCamera( const char *name, qboolean startBlack );
 int         CG_LoadCamera( const char *name );
 void        CG_FreeCamera( int camNum );
 //----(SA)	end
+
 // Text
 int CG_Text_Width_Ext( const char *text, float scale, int limit, fontInfo_t* font );
 int CG_Text_Height_Ext( const char *text, float scale, int limit, fontInfo_t* font );

@@ -567,6 +567,7 @@ void SV_SetCvarRestrictions(void) {
 		}
 	}
 	else {
+		Cvar_Set("sv_GameConfig", "");
 		Com_Printf("Config file is not found..skipping.\n");
 	}
 }

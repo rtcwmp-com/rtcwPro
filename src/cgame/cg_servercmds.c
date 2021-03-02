@@ -2284,6 +2284,11 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "revalidate")) {
+		trap_Rest_Validate();
+		return;
+	}
+
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
 

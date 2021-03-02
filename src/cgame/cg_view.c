@@ -1571,7 +1571,6 @@ void CG_DrawSkyBoxPortal( void ) {
 		fov_x = 90;
 	}
 
-
 	// setup fog the first time, ignore this part of the configstring after that
 	token = COM_ParseExt( &cstr, qfalse );
 	if ( !token || !token[0] ) {
@@ -1626,7 +1625,6 @@ void CG_DrawSkyBoxPortal( void ) {
 	}
 
 //----(SA)	end
-
 
 	if ( cg.predictedPlayerState.pm_type == PM_INTERMISSION ) {
 		// if in intermission, use a fixed value
@@ -1701,9 +1699,6 @@ void CG_DrawSkyBoxPortal( void ) {
 	if ( cg.snap->ps.persistant[PERS_HWEAPON_USE] ) {
 		fov_x = 55;
 	}
-
-
-
 
 	cg.refdef.time = cg.time;
 
