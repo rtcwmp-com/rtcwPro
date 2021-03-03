@@ -195,6 +195,7 @@ typedef struct client_s {
 	netchan_buffer_t **netchan_end_queue;
 	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
+	int clientRestValidated;
 } client_t;
 
 //=============================================================================
@@ -393,8 +394,6 @@ void SV_MasterHeartbeat( const char *hbname );
 void SV_MasterShutdown( void );
 
 void SV_MasterGameCompleteStatus();     // NERVE - SMF
-
-
 
 //
 // sv_init.c

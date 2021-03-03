@@ -1314,7 +1314,7 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 	char newi[BIG_INFO_STRING];
 
 	if ( strlen( s ) >= BIG_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_SetValueForKey: oversize infostring" );
+		Com_Error( ERR_DROP, "Info_SetValueForKey_Big: oversize infostring" );
 	}
 
 	if ( strchr( key, '\\' ) || strchr( value, '\\' ) ) {
@@ -1353,19 +1353,19 @@ Info_SetValueForCvar_Big
 ==================
 */
 void Info_SetValueForCvar_Big(cvar_rest_t* cvar, char* s) {
-	char newi[BIG_INFO_STRING];
+	char newi[MAX_CVAR_LIST_STRING];
 
-	if (strlen(s) >= BIG_INFO_STRING) {
-		Com_Error(ERR_DROP, "Info_SetValueForKey: oversize infostring");
+	if (strlen(s) >= MAX_CVAR_LIST_STRING) {
+		Com_Error(ERR_DROP, "Info_SetValueForCvar_Big: oversize infostring");
 	}
 
 	Com_sprintf(newi, sizeof(newi), "%s %d %s %s\n", cvar->name, cvar->type, cvar->sVal1, (!Q_stricmp(cvar->sVal2, "") ? "''" : cvar->sVal2));
-	if (strlen(newi) + strlen(s) > BIG_INFO_STRING) {
-		Com_Printf("BIG Info string length exceeded\n");
+	if (strlen(newi) + strlen(s) > MAX_CVAR_LIST_STRING) {
+		Com_Printf("BIG Cvar Info string length exceeded\n");
 		return;
 	}
 
-	strcat(s, newi);
+	strncat(s, newi, MAX_CVAR_LIST_STRING);
 }
 
 /*
@@ -1383,9 +1383,13 @@ int Q_CountChar(const char* string, char tocount) {
 	return count;
 }
 
-// L0 - ET port
+/*
+==================
+Q_isBadDirChar
 
-// strips whitespaces and bad characters
+Strips whitespaces and bad characters
+==================
+*/
 qboolean Q_isBadDirChar(char c) {
 	char badchars[] = {';', '&', '(', ')', '|', '<', '>', '*', '?', '[', ']', '~', '+', '@', '!', '\\', '/', ' ', '\'', '\"', '\0'};
 	int i;
@@ -1399,6 +1403,11 @@ qboolean Q_isBadDirChar(char c) {
 	return qfalse;
 }
 
+/*
+==================
+Q_CleanDirName
+==================
+*/
 char* Q_CleanDirName(char* dirname) {
 	char* d;
 	char* s;
@@ -1420,6 +1429,31 @@ char* Q_CleanDirName(char* dirname) {
 	*d = '\0';
 
 	return dirname;
+}
+
+/*
+==================
+Q_IsNumeric
+
+Float and Int will be considered valid.
+==================
+*/
+qboolean Q_IsNumeric(const char* s) {
+
+	if (!s || strlen(s) < 1) {
+		return qfalse;
+	}
+
+	while (*s) {
+		if (*s == '.') {
+			*s++;
+
+			continue;
+		}
+		else if ((isdigit(*s++) == 0))
+			return qfalse;
+	}
+	return qtrue;
 }
 
 //====================================================================

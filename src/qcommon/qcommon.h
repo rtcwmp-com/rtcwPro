@@ -496,10 +496,10 @@ cvar_t *Cvar_Get( const char *var_name, const char *value, int flags );
 // that allows variables to be unarchived without needing bitflags
 // if value is "", the value will not override a previously set value.
 
-void    Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
+void Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
 // basically a slightly modified Cvar_Get for the interpreted modules
 
-void    Cvar_Update( vmCvar_t *vmCvar );
+void Cvar_Update( vmCvar_t *vmCvar );
 // updates an interpreted modules' version of a cvar
 
 cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
@@ -508,14 +508,29 @@ cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const c
 char* Cvar_GetRestrictedList(void);
 // returns list of restricted cvars
 
-void    Cvar_Set( const char *var_name, const char *value );
+void Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
 void Cvar_SetLatched( const char *var_name, const char *value );
 // don't set the cvar immediately
 
-void    Cvar_SetValue( const char *var_name, float value );
+void Cvar_SetValue( const char *var_name, float value );
 // expands value to a string and calls Cvar_Set
+
+cvar_t* Cvar_FindVar(const char* var_name);
+// find cvar in a local table
+
+cvar_rest_t* Cvar_Rest_FindVar(const char* var_name);
+// find restricted cvar in a local table
+
+qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value);
+// checks if value is valid
+
+int Cvar_ValidateRest(qboolean flagOnly);
+// checks if any cvar is violating server restrictions
+
+char* Cvar_RestAcceptedValues(const char* var_name);
+// returns requires values for specific cvar
 
 float   Cvar_VariableValue( const char *var_name );
 int     Cvar_VariableIntegerValue( const char *var_name );

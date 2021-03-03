@@ -723,8 +723,9 @@ void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vP
 //
 // q_shared_c
 //
-char* Q_CleanDirName(char* dirname);
 int Q_CountChar(const char* string, char tocount);
+char* Q_CleanDirName(char* dirname);
+qboolean Q_IsNumeric(const char* s);
 
 //=============================================
 
@@ -904,6 +905,7 @@ default values.
 */
 #define MAX_CVARS				1024
 #define MAX_CVAR_VALUE_STRING   256
+#define MAX_CVAR_LIST_STRING	2048
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
 								// used for system variables, not for player
@@ -964,7 +966,7 @@ static const cvar_restrictions_l Cvar_Restriction_Flags[] = {
 	{ SVC_INSIDE, "IN", "BETWEEN" },
 	{ SVC_OUTSIDE, "OUT", "OUTSIDE" },
 	{ SVC_INCLUDE, "INCLUDE", "INCLUDE" },
-	{ SVC_EXCLUDE, "EXCLUDE", "EXCLUDE" },
+	{ SVC_EXCLUDE, "EXCLUDE", "NOT INCLUDE" },
 	{ SVC_WITHBITS, "WBIT", "WITH BITS" },
 	{ SVC_WITHOUTBITS, "!WBIT", "WITHOUT BITS" }
 };
@@ -981,7 +983,7 @@ typedef struct cvar_restrictions_s {
 	int		iVal2;
 	struct cvar_restrictions_s* next;
 	struct cvar_restrictions_s* hashNext;
-	qboolean modified;
+	qboolean flagged;
 } cvar_rest_t;
 
 // nothing outside the Cvar_*() functions should modify these fields!
