@@ -508,6 +508,9 @@ cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const c
 char* Cvar_GetRestrictedList(void);
 // returns list of restricted cvars
 
+void Cvar_Rest_Reset(void);
+// Wipes the restricted list
+
 void Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
@@ -525,6 +528,9 @@ cvar_rest_t* Cvar_Rest_FindVar(const char* var_name);
 
 qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value);
 // checks if value is valid
+
+void Cvar_RestBuildList(char* data);
+// Builds the list
 
 int Cvar_ValidateRest(qboolean flagOnly);
 // checks if any cvar is violating server restrictions

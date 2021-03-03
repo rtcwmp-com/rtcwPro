@@ -546,3 +546,7 @@ char* trap_TranslateString( const char *string ) {
 void trap_Rest_Validate(void) {
 	syscall(CG_R_VALIDATE);
 }
+
+void trap_Rest_Build(const char *data) {
+	syscall(CG_R_BUILD, data);
+}

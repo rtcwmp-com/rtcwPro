@@ -393,7 +393,9 @@ void SV_RemoveOperatorCommands( void );
 void SV_MasterHeartbeat( const char *hbname );
 void SV_MasterShutdown( void );
 
-void SV_MasterGameCompleteStatus();     // NERVE - SMF
+void SV_MasterGameCompleteStatus(void);     // NERVE - SMF
+
+void SV_ReloadRest(qboolean disableTime);
 
 //
 // sv_init.c

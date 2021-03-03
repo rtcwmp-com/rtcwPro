@@ -528,12 +528,20 @@ void SV_SetCvarRestrictions(void) {
 	char* path;
 	int i = 0, j = 0;
 
+	Cvar_Rest_Reset();
 	Com_Printf("-----Initializing Restrictions-----\n");
 	if (!(path = Cvar_VariableString("fs_game")) || !*path)
 		path = BASEGAME;
 
 	if (!Q_stricmp(sv_GameConfig->string, "")) {
-		Com_Printf("Config file is not found..skipping.\n");
+		Com_Printf("Game config file is not found..skipping.\n");
+		return;
+	}
+
+	if (!Q_stricmp(sv_GameConfig->string, "none")) {
+		Cvar_Set("sv_GameConfig", "");
+		SV_ReloadRest(qtrue);
+		Com_Printf("Disabling game config..\n");
 		return;
 	}
 
@@ -563,12 +571,14 @@ void SV_SetCvarRestrictions(void) {
 
 		Com_Printf("Registered %d restricted cvars.\n", i);
 		if (j > 0) {
-			Com_Printf("Registered %d regular cvars.\n", j);
+			Com_Printf("Executed %d regular cvars.\n", j);
 		}
+		SV_ReloadRest(qfalse);
 	}
 	else {
 		Cvar_Set("sv_GameConfig", "");
-		Com_Printf("Config file is not found..skipping.\n");
+		SV_ReloadRest(qtrue);
+		Com_Printf("Game config file is not found..skipping.\n");
 	}
 }
 
@@ -1314,7 +1324,7 @@ SV_LoadGameConfig_f
 NERVE - SMF
 =================
 */
-void SV_LoadGameConfig_f( void ) {
+static void SV_LoadGameConfig_f( void ) {
 	char* path;
 	char* config;
 
@@ -1332,6 +1342,13 @@ void SV_LoadGameConfig_f( void ) {
 	config = Cmd_Args();
 	if (!(path = Cvar_VariableString("fs_game")) || !*path)
 		path = BASEGAME;
+
+	if (!Q_stricmp(config, "none")) {
+		Com_Printf("Disabling game config..\n", config);
+		Cvar_Set("sv_GameConfig", "none");
+		SV_SetCvarRestrictions();
+		return;
+	}
 
 	if (FS_FileExists(va("configs/%s.config", config))) {
 		Com_Printf("Loading %s config..\n", config);

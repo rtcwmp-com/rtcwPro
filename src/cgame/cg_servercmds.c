@@ -2289,6 +2289,13 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	if (!Q_stricmp(cmd, "rereload")) {
+		const char* data;
+		data = CG_Argv(1);
+		trap_Rest_Build(data); 
+		return;
+	}
+
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
 

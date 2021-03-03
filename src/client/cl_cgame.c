@@ -532,11 +532,11 @@ void CL_GetRestStatus(void) {
 	int violations = Cvar_ValidateRest(qfalse);
 
 	if (violations > 0) {
-		Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
+		Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" :""));
 		Com_Printf(">> ^jPlease use /violations and correct them.\n");
 
 		cl.clientRestStarted = cls.realtime;
-		cl.clientRestWarned = qfalse;
+		cl.clientRestShowWarning = qtrue;
 	}
 	else {
 		if (violations != -1) {
@@ -551,14 +551,17 @@ CL_CheckRestStatus
 ====================
 */
 void CL_CheckRestStatus(void) {
-	if (!cl.clientRestWarned && cl.clientRestStarted > 0) {
+
+	if (cl.clientRestShowWarning && cl.clientRestStarted > 0) {
 		if (cls.realtime > cl.clientRestStarted + 15000) {
 			int violations = Cvar_ValidateRest(qtrue);
 
-			Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
-			Com_Printf(">> ^jPlease use /violations and correct them.\n");
+			if (violations > 0) {
+				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1?"s":""));
+				Com_Printf(">> ^jPlease use /violations and correct them.\n");
+			}
 
-			cl.clientRestWarned = qtrue;
+			cl.clientRestShowWarning = qfalse;
 		}
 	}
 }
@@ -966,6 +969,9 @@ int CL_CgameSystemCalls( int *args ) {
 		// - NERVE - SMF
 	case CG_R_VALIDATE:
 		CL_GetRestStatus();
+		return 0;
+	case CG_R_BUILD:
+		Cvar_RestBuildList(VMA(1));
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );

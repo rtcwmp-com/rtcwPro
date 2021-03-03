@@ -345,7 +345,7 @@ SV_MasterGameCompleteStatus
 NERVE - SMF - Sends gameCompleteStatus messages to all master servers
 =================
 */
-void SV_MasterGameCompleteStatus() {
+void SV_MasterGameCompleteStatus(void) {
 	static netadr_t adr[MAX_MASTER_SERVERS];
 	int i;
 
@@ -1470,3 +1470,39 @@ int SV_SendQueuedPackets(void)
 }
 #endif
 //============================================================================
+
+/*
+=================
+SV_ReloadRest_f
+=================
+*/
+void SV_ReloadRest(qboolean disableTime) {
+	int i;
+	client_t* client;
+
+	// make sure server is running
+	if (!com_sv_running->integer) {
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	if (sv.restartTime) {
+		return;
+	}
+
+	// connect and begin all the clients
+	for (i = 0; i < sv_maxclients->integer; i++) {
+		client = &svs.clients[i];
+
+		// send the new gamestate to all connected clients
+		if (client->state < CS_CONNECTED) {
+			continue;
+		}
+
+		if (client->netchan.remoteAddress.type != NA_BOT) {
+			// Give players time to adjust stuff if needed
+			client->clientRestValidated = (disableTime ? -1 : svs.time + 80000);
+			SV_SendServerCommand(NULL, "rereload %s\n", Cvar_GetRestrictedList());
+		}
+	}
+}

@@ -854,7 +854,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	memset( &clc, 0, sizeof( clc ) );
 
 	// wipe any restricted cvars
-	memset(&cvar_rest_vars, 0, sizeof(cvar_rest_vars));
+	Cvar_Rest_Reset();
 
 	if (!cls.bWWWDlDisconnected) {
 		CL_ClearStaticDownload();
@@ -2037,25 +2037,16 @@ void CL_ServersResponsePacket(const netadr_t* from, msg_t* msg, qboolean extende
 
 /*
 =================
-CL_BuildRestrictedList
+CL_SetRestrictedList
 
-Server responded with list .. 
+Data arrived from server.
 =================
 */
-void CL_BuildRestrictedList(msg_t* msg) {
-	char* s = "";
-
-	s = MSG_ReadBigString(msg);
-	if (s) {
-		char* ptr = strtok(s, "\n");
-
-		while (ptr != NULL) {
-			Cmd_TokenizeString(ptr);
-			Cvar_SetRestricted(Cmd_Argv(0), atoi(Cmd_Argv(1)), Cmd_Argv(2), !Q_stricmp(Cmd_Argv(3), "''") ? "" : Cmd_Argv(3));
-
-			ptr = strtok(NULL, "\n");
-		}
-	}
+void CL_SetRestrictedList(msg_t* msg) {
+	char* data = "";
+	
+	data = MSG_ReadBigString(msg);
+	Cvar_RestBuildList(data);
 }
 
 /*
@@ -2201,11 +2192,11 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	}
 
 	if (!Q_stricmp(c, "getRestrictedList")) {
+
 		if (cls.state < CA_CONNECTED) {
 			Com_DPrintf("Not connected. Restrict check Ignored.\n");
 			return;
 		}
-
 		if (!NET_CompareBaseAdr(from, clc.serverAddress)) {
 			Com_DPrintf("getRestrictedList connectResponse from a different address.  Ignored.\n");
 			Com_DPrintf("%s should have been %s\n", NET_AdrToString(from),
@@ -2213,7 +2204,7 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 
 			return;
 		}
-		CL_BuildRestrictedList(msg);
+		CL_SetRestrictedList(msg);
 		return;
 	}
 

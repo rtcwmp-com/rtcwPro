@@ -223,7 +223,8 @@ typedef enum {
 
 	CG_TRANSLATE_STRING,
 
-	CG_R_VALIDATE
+	CG_R_VALIDATE,
+	CG_R_BUILD
 	// -NERVE - SMF
 } cgameImport_t;
 

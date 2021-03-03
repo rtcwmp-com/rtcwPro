@@ -1010,6 +1010,47 @@ void Cvar_RestrictedList_f(void) {
 
 /*
 ============
+Cvar_Rest_Reset_Single
+
+Wipes the cvar completely ..
+============
+*/
+void Cvar_Rest_Reset_Single(cvar_rest_t* var) {
+	if (var->sVal1 && var->sVal1 != NULL) {
+		Z_Free(var->sVal1);
+	}
+	if (var->sVal2 && var->sVal2 != NULL) {
+		Z_Free(var->sVal2);
+	}
+
+	memset(var, 0, sizeof(var));
+}
+
+/*
+============
+Cvar_Rest_Reset
+
+Wipes the list completely ..
+============
+*/
+void Cvar_Rest_Reset(void) {
+	cvar_rest_t* var;
+	cvar_rest_t** prev;
+
+	prev = &cvar_rest_vars;
+	while (1) {
+		var = *prev;
+		if (!var) {
+			break;
+		}
+
+		*prev = var->next;
+		Cvar_Rest_Reset_Single(var);
+	}
+}
+
+/*
+============
 Cvar_GetRestrictedList
 
 Builds restricted list that is send to a client
@@ -1017,13 +1058,14 @@ Builds restricted list that is send to a client
 */
 char* Cvar_GetRestrictedList(void) {
 	cvar_rest_t* var;
-	static char out[MAX_CVAR_LIST_STRING] = "";
+	char* out = "";
 
 	for (var = cvar_rest_vars; var; var = var->next) {
 		if (var->type == SVC_NONE) {
 			continue;
 		}
-		Info_SetValueForCvar_Big(var, out);
+
+		out = va("%s%s %d %s %s\n", out, var->name, var->type, var->sVal1, (!Q_stricmp(var->sVal2, "") ? "''" : var->sVal2));
 	}
 	return out;
 }
@@ -1300,6 +1342,29 @@ int Cvar_ValidateRest(qboolean flagOnly) {
 		}
 	}
 	return (i > 0 ? violations : -1);
+}
+
+/*
+=================
+Cvar_RestBuildList
+
+Builds actual data
+=================
+*/
+void Cvar_RestBuildList(char* data) {
+	Cvar_Rest_Reset();
+
+	if (data) {
+		char* ptr = strtok(data, "\n");
+
+		while (ptr != NULL) {
+			Cmd_TokenizeString(ptr);
+			if (Cmd_Argv(0)) {
+				Cvar_SetRestricted(Cmd_Argv(0), atoi(Cmd_Argv(1)), Cmd_Argv(2), !Q_stricmp(Cmd_Argv(3), "''") ? "" : Cmd_Argv(3));
+			}
+			ptr = strtok(NULL, "\n");
+		}
+	}
 }
 
 /*

@@ -905,7 +905,6 @@ default values.
 */
 #define MAX_CVARS				1024
 #define MAX_CVAR_VALUE_STRING   256
-#define MAX_CVAR_LIST_STRING	2048
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
 								// used for system variables, not for player
@@ -1013,7 +1012,6 @@ typedef struct {
 	char string[MAX_CVAR_VALUE_STRING];
 } vmCvar_t;
 
-void Info_SetValueForCvar_Big(cvar_rest_t* cvar, char* s);
 /*
 ==============================================================
 

@@ -157,7 +157,7 @@ typedef struct {
 	// -NERVE - SMF
 
 	int clientRestStarted;
-	qboolean clientRestWarned;
+	qboolean clientRestShowWarning;
 	int clientActionTime;
 } clientActive_t;
 

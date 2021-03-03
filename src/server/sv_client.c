@@ -576,7 +576,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	newcl->clientRestValidated = newcl->lastConnectTime + 80000;
+	newcl->clientRestValidated = svs.time + 80000;
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -2219,7 +2219,11 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
 
-	if (Q_stricmp(sv_GameConfig->string, ""), cl->clientRestValidated < svs.time) {
+	if (Q_stricmp(sv_GameConfig->string, "") && 
+		cl->clientRestValidated != -1 && 
+		cl->clientRestValidated < svs.time && 
+		cl->netchan.remoteAddress.type != NA_BOT
+	) {
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
 		return;
 	}
