@@ -2644,5 +2644,4 @@ void misc_firetrails_think( gentity_t *ent ) {
 void SP_misc_firetrails( gentity_t *ent ) {
 	ent->think = misc_firetrails_think;
 	ent->nextthink = level.time + 100;
-
 }

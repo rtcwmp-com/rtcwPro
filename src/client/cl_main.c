@@ -2037,20 +2037,6 @@ void CL_ServersResponsePacket(const netadr_t* from, msg_t* msg, qboolean extende
 
 /*
 =================
-CL_SetRestrictedList
-
-Data arrived from server.
-=================
-*/
-void CL_SetRestrictedList(msg_t* msg) {
-	char* data = "";
-	
-	data = MSG_ReadBigString(msg);
-	Cvar_RestBuildList(data);
-}
-
-/*
-=================
 CL_ConnectionlessPacket
 
 Responses to broadcasts, etc
@@ -2197,14 +2183,14 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 			Com_DPrintf("Not connected. Restrict check Ignored.\n");
 			return;
 		}
+
 		if (!NET_CompareBaseAdr(from, clc.serverAddress)) {
 			Com_DPrintf("getRestrictedList connectResponse from a different address.  Ignored.\n");
 			Com_DPrintf("%s should have been %s\n", NET_AdrToString(from),
 				NET_AdrToStringwPort(clc.serverAddress));
-
 			return;
 		}
-		CL_SetRestrictedList(msg);
+		Cvar_RestBuildList(va("%s", Cmd_Args()));
 		return;
 	}
 

@@ -1235,11 +1235,7 @@ void Info_RemoveKey_Big( char *s, const char *key ) {
 			return;
 		}
 	}
-
 }
-
-
-
 
 /*
 ==================
