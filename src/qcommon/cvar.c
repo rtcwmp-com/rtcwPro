@@ -1066,7 +1066,7 @@ char* Cvar_GetRestrictedList(void) {
 		}
 
 		if (Q_stricmp(var->name, "")) {
-			out = va("%s%s\\%d\\%s\\%s|", out, var->name, var->type, var->sVal1, (!Q_stricmp(var->sVal2, "") ? " " : var->sVal2));
+			out = va("%s%s\\%d\\%s\\%s|", out, var->name, var->type, var->sVal1, (!Q_stricmp(var->sVal2, "") ? "@" : var->sVal2));
 		}
 	}
 	return out;
@@ -1365,7 +1365,7 @@ void Cvar_RestBuildList(char* data) {
 
 			Cmd_TokenizeLine(first, "\\", posn);
 			if (Cmd_Argv(0)) {
-				Cvar_SetRestricted(Cmd_Argv(0), atoi(Cmd_Argv(1)), Cmd_Argv(2), !Q_stricmp(Cmd_Argv(3), " ") ? "" : Cmd_Argv(3));
+				Cvar_SetRestricted(Cmd_Argv(0), atoi(Cmd_Argv(1)), Cmd_Argv(2), !Q_stricmp(Cmd_Argv(3), "@") ? "" : Cmd_Argv(3));
 			}
 		} while ((first = strtok_s(NULL, "|", &next)) != NULL);
 	}
