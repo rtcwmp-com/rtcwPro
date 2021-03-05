@@ -2300,7 +2300,6 @@ static void CG_ServerCommand( void ) {
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
 
-
 /*
 ====================
 CG_ExecuteNewServerCommands

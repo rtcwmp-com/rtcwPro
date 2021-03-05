@@ -1420,7 +1420,7 @@ qboolean Q_IsNumeric(const char* s) {
 	}
 
 	while (*s) {
-		if (*s == '.') {
+		if (*s == '.'|| *s == '-') {
 			*s++;
 
 			continue;

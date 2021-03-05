@@ -2224,7 +2224,12 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		cl->clientRestValidated < svs.time && 
 		cl->netchan.remoteAddress.type != NA_BOT
 	) {
+#ifndef _DEBUG
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+#else
+		Com_Printf("^3Skipping SV_DropClient due failure to comply with restriction rules. ^z[only in DEBUG mode]\n");
+		cl->clientRestValidated = -1;
+#endif
 		return;
 	}
 }

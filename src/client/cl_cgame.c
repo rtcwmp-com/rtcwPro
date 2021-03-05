@@ -972,6 +972,7 @@ int CL_CgameSystemCalls( int *args ) {
 		return 0;
 	case CG_R_BUILD:
 		Cvar_RestBuildList(VMA(1));
+		Com_Printf("\n>> ^zRestriction list has been updated.\n");
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );

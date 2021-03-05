@@ -1202,6 +1202,7 @@ updates an interpreted modules' version of a cvar
 */
 void Cvar_Update( vmCvar_t *vmCvar ) {
 	cvar_t  *cv = NULL; // bk001129
+	cvar_rest_t* cr = NULL;
 	assert( vmCvar ); // bk
 
 	if ( (unsigned)vmCvar->handle >= cvar_numIndexes ) {
@@ -1209,7 +1210,6 @@ void Cvar_Update( vmCvar_t *vmCvar ) {
 	}
 
 	cv = cvar_indexes + vmCvar->handle;
-
 	if ( cv->modificationCount == vmCvar->modificationCount ) {
 		return;
 	}
@@ -1253,7 +1253,7 @@ qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value) {
 		}
 
 		if (Q_IsNumeric(value)) {
-			fValue = Q_fabs(atof(value));
+			fValue = atof(value);
 		}
 
 		switch (var->type) {
@@ -1288,16 +1288,16 @@ qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value) {
 				return (fValue <= var->fVal1);
 			break;
 			case SVC_INSIDE:
-				return (fValue >= var->fVal1 || var->fVal2 && fValue <= var->fVal2);
+				return (fValue >= var->fVal1 && fValue <= var->fVal2);
 			break;
 			case SVC_OUTSIDE:
-				return (fValue > Q_fabs(var->fVal1) || var->fVal2 && fValue > Q_fabs(var->fVal2));
+				return !(fValue >= var->fVal1 && fValue <= var->fVal2);
 			break;
 			case SVC_INCLUDE:
-				return (strstr(var->sVal1, value) ? qtrue : qfalse);
+				return (strstr(value, var->sVal1) ? qtrue : qfalse);
 			break;
 			case SVC_EXCLUDE:
-				return (!strstr(var->sVal1, value) ? qtrue : qfalse);
+				return (!strstr(value, var->sVal1) ? qtrue : qfalse);
 			break;
 			case SVC_WITHBITS:
 				return !(var->iVal1 & atoi(value));
