@@ -947,6 +947,10 @@ void Cvar_RestrictedList_f(void) {
 	i = 0;
 	for (var = cvar_rest_vars; var; var = var->next, i++) {
 
+		if (!var) {
+			continue;
+		}
+
 		if (var->type == SVC_NONE) {
 			continue;
 		}
@@ -1000,12 +1004,17 @@ void Cvar_RestrictedList_f(void) {
 	}
 #endif
 
-	Com_Printf("-----------------------------------------\n");
+	if (j < 1) {
+		Com_Printf("<none set>\n");
+	}
+	else {
+		Com_Printf("-----------------------------------------\n");
 #ifdef DEDICATED
-	Com_Printf("Active %i restricted cvars [Total %d]\n\n", j, i);
+		Com_Printf("Active %i restricted cvars [Total %d]\n\n", j, i);
 #else
-	Com_Printf("^5Total: %i restricted cvar%s ^n[Violations: %i]\n\n", i, (i == 1 ? "" : "s"), v);
+		Com_Printf("^5Total: %i restricted cvar%s ^n[Violations: %i]\n\n", j, (i == 1?"":"s"), v);
 #endif
+	}
 }
 
 /*
@@ -1369,6 +1378,7 @@ void Cvar_RestBuildList(char* data) {
 			}
 		} while ((first = strtok_s(NULL, "|", &next)) != NULL);
 	}
+	Com_DPrintf("\nRestriction list has been updated.\n");
 }
 
 /*

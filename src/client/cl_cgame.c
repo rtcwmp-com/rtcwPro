@@ -531,7 +531,7 @@ CL_GetRestStatus
 void CL_GetRestStatus(void) {
 	int violations = Cvar_ValidateRest(qfalse);
 
-	if (violations > 0) {
+	if (violations > 0 && !cl.clientRestShowWarning) {
 		Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" :""));
 		Com_Printf(">> ^jPlease use /violations and correct them.\n");
 
@@ -557,7 +557,7 @@ void CL_CheckRestStatus(void) {
 			int violations = Cvar_ValidateRest(qtrue);
 
 			if (violations > 0) {
-				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1?"s":""));
+				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
 				Com_Printf(">> ^jPlease use /violations and correct them.\n");
 			}
 
@@ -972,7 +972,6 @@ int CL_CgameSystemCalls( int *args ) {
 		return 0;
 	case CG_R_BUILD:
 		Cvar_RestBuildList(VMA(1));
-		Com_Printf("\n>> ^zRestriction list has been updated.\n");
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
