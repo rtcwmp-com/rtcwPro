@@ -754,8 +754,6 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 		G_resetModeState();
 	}
 
-
-
 	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
 		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 		return;
@@ -796,6 +794,7 @@ void Svcmd_SwapTeams_f() {
 		G_swapTeams();
 		return;
 	}
+
 	if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
 		trap_Cvar_Set( "g_currentRound", "0" );
 		trap_Cvar_Set( "g_nextTimeLimit", "0" );
@@ -1025,14 +1024,13 @@ qboolean    ConsoleCommand( void ) {
 	// RTCWPro
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {
-			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 1 ) ) );
+			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 1 ) ) );
 			return qtrue;
 		}
 		// everything else will also be printed as a say command
-		trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 0 ) ) );
+		trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 0 ) ) );
 		return qtrue;
 	}
 
 	return qfalse;
 }
-

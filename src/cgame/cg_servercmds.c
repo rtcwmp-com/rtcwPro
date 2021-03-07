@@ -192,7 +192,7 @@ void CG_ParseWolfinfo( void ) {
 	cgs.nextTimeLimit = atof( Info_ValueForKey( info, "g_nextTimeLimit" ) );
 	cgs.gamestate = atoi( Info_ValueForKey( info, "gamestate" ) );
 
-		// Announce game in progress if we are really playing
+	// Announce game in progress if we are really playing
 	if (old_gs != GS_PLAYING && cgs.gamestate == GS_PLAYING)
 	{
 		trap_S_StartLocalSound(cgs.media.announceFight, CHAN_ANNOUNCER);

@@ -120,7 +120,7 @@ vmCvar_t g_enforcemaxlives;         // Xian
 
 vmCvar_t g_needpass;
 vmCvar_t g_weaponTeamRespawn;
-//vmCvar_t g_doWarmup;
+vmCvar_t g_doWarmup;
 vmCvar_t g_teamAutoJoin;
 vmCvar_t g_teamForceBalance;
 vmCvar_t g_listEntity;
@@ -179,11 +179,11 @@ vmCvar_t a1_pass;		// Level 1 admin
 vmCvar_t a2_pass;		// Level 2 admin
 vmCvar_t a3_pass;		// Level 3 admin
 vmCvar_t a4_pass;		// Level 4 admin
-vmCvar_t a5_pass;		// Level 4 admin
+vmCvar_t a5_pass;		// Level 5 admin
 vmCvar_t a1_tag;		// Level 1 admin tag
 vmCvar_t a2_tag;		// Level 2 admin tag
 vmCvar_t a3_tag;		// Level 3 admin tag
-vmCvar_t a4_tag;		// Level 3 admin tag
+vmCvar_t a4_tag;		// Level 4 admin tag
 vmCvar_t a5_tag;		// Level 5 admin tag
 vmCvar_t a1_cmds;		// Level 1 admin commands
 vmCvar_t a2_cmds;		// Level 2 admin commands
@@ -232,8 +232,6 @@ vmCvar_t refereePassword;
 
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
-
-
 
 vmCvar_t g_spectatorInactivity;
 vmCvar_t g_showFlags;
@@ -362,7 +360,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE  },                            // NERVE - SMF - merge from team arena
 
 	{ &g_warmup, "g_warmup", "20", CVAR_ARCHIVE, 0, qtrue  },
-//	{ &g_doWarmup, "g_doWarmup", "0", 0, CVAR_ARCHIVE, qtrue  },
+	{ &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
 
 	//S4NDM4NN - need to get sv_fps
 	{ &sv_fps, "sv_fps", "20", 0, 0,qfalse},
@@ -411,9 +409,9 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue },
 	{ &g_inactivity, "g_inactivity", "0", 0, 0, qtrue },
 	{ &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
-	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
+	{ &g_debugDamage, "g_debugDamage", "0", CVAR_CHEAT, 0, qfalse },
 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
-	{ &g_debugBullets, "g_debugBullets", "0", 0, 0, qfalse}, //----(SA)	added
+	{ &g_debugBullets, "g_debugBullets", "0", CVAR_CHEAT, 0, qfalse}, //----(SA)	added
 	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "1", 0, 0, qfalse }, // default to 1
 	{ &g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse },
 
@@ -1434,27 +1432,6 @@ void G_UpdateCvars( void ) {
 }
 
 /*
-=================
-OSPx - G_wipeCvars
-
-Reset particular server variables back to defaults if a config is voted in.
-=================
-*/
-void G_wipeCvars(void) {
-	int i;
-	cvarTable_t *pCvars;
-
-	for (i = 0, pCvars = gameCvarTable; i < gameCvarTableSize; i++, pCvars++) {
-		if (pCvars->vmCvar && pCvars->fConfigReset) {
-			G_Printf("set %s %s\n", pCvars->cvarName, pCvars->defaultString);
-			trap_Cvar_Set(pCvars->cvarName, pCvars->defaultString);
-		}
-	}
-
-	G_UpdateCvars();
-}
-
-/*
 ==============
 G_SpawnScriptCamera
 	create the game entity that's used for camera<->script communication and portal location for camera view
@@ -1686,9 +1663,11 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "-----------------------------------\n" );
 	}
+
     G_loadMatchGame();
-	// OSPx - Country Flags
+
 	GeoIP_open();
+
 	// L0 - auto cfg for each map
 	if (g_mapConfigs.integer){
 		char mapName[64];
@@ -1703,14 +1682,47 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	G_RemapTeamShaders();
+
 	// L0 - Pause
 	// Start with off! As if map_restart occur while paused screen fade is stuck..
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
 
-	// These sometimes goes off so make sure..
-	teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
-	teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+	// L0 - Clamp stuff if needed
+	// TODO: Move this if into it's own function if more is introduced (i.e. Duel mode..)
+	{
+		char* info = NULL;
+
+		if (g_medicClips.integer > 18) {
+			trap_Cvar_Set("g_medicClips", "18");
+			info = "g_medicClips - Clamping to 18\n";
+		}
+
+		if (g_engineerClips.integer > 18) {
+			trap_Cvar_Set("g_engineerClips", "18");
+			info = va("%sg_engineerClips - Clamping to 18\n", info);
+		}
+
+		if (g_soldierClips.integer > 18) {
+			trap_Cvar_Set("g_soldierClips", "18");
+			info = va("%sg_soldierClips - Clamping to 18\n", info);
+		}
+
+		if (g_leutClips.integer > 18) {
+			trap_Cvar_Set("g_leutClips", "18");
+			info = va("%sg_leutClips - Clamping to 18\n", info);
+		}
+
+		if (info) {
+			G_Printf(
+				"Following Cvars are set too high:\n%s-----------------------------------\n", info
+			);
+		}
+
+		// These sometimes goes off so make sure..
+		teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
+		teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+	}
 }
 
 /*
@@ -2329,11 +2341,6 @@ void ExitLevel( void ) {
 		}
 	}
 
-
-	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
-		G_swapTeams();
-	 }
-	 //  end
 	G_LogPrintf( "ExitLevel: executed\n" );
 }
 
@@ -2448,7 +2455,7 @@ void LogExit( const char *string ) {
 				trap_Cvar_Set( "g_nextTimeLimit", va( "%f", g_timelimit.value ) );
 			} else {
 				// use remaining time as next timer
-				trap_Cvar_Set( "g_nextTimeLimit", va( "%f", ( level.time - level.startTime ) / 60000.f ) );
+				trap_Cvar_Set( "g_nextTimeLimit", va( "%f", ( level.timeCurrent - level.startTime ) / 60000.f ) );
 			}
 		} else {
 			// reset timer
@@ -2459,7 +2466,6 @@ void LogExit( const char *string ) {
 	}
 	// -NERVE - SMF
 }
-
 
 /*
 =================
@@ -2619,7 +2625,6 @@ void CheckExitRules( void ) {
 	// if at the intermission, wait for all non-bots to
 	// signal ready, then go to next level
 	if ( level.intermissiontime ) {
-    //  if (g_altStopwatchMode.integer == 1 ) { G_swapTeams(); }
 		CheckIntermissionExit();
 		return;
 	}
@@ -2820,11 +2825,7 @@ void CheckTournement( void ) {
 	if ( level.warmupTime < 0 ) {
 		if ( level.numPlayingClients == 2 ) {
 			// fudge by -1 to account for extra delays
-			if ( g_warmup.integer > 1 ) {
-					level.warmupTime = level.time + ( g_warmup.integer - 1 ) * 1000;
-				} else {
-					level.warmupTime = 0;
-				}
+			level.warmupTime = level.time + (g_warmup.integer - 1) * 1000;
 			trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
 		}
 		return;
@@ -3160,32 +3161,6 @@ void sortedActivePlayers(void) {
 
 /*
 ================
-OSPx - check for team stuff..
-================
-*/
-void handleEmptyTeams(void) {
-
-	if (!level.axisPlayers && g_gamestate.integer != GS_INTERMISSION) {
-		G_teamReset(TEAM_RED, qtrue);
-
-		// Reset match if NOT paused with an empty team
-		if (level.paused == PAUSE_NONE) {
-			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
-			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
-	else if (!level.alliedPlayers && g_gamestate.integer != GS_INTERMISSION) {
-		G_teamReset(TEAM_BLUE, qtrue);
-
-		// Reset match if NOT paused with an empty team
-		if (level.paused == PAUSE_NONE) {
-			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
-			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
-}
-/*
-================
 L0 - TeamLockStatus
 
 Sometimes people lock the teams and leave with callvotes off..as result game becomes unplayable..
@@ -3484,7 +3459,5 @@ void G_RunFrame( int levelTime ) {
 		sortedActivePlayers();
 		// L0 - Check Team Lock status..
 		TeamLockStatus();
-
-		handleEmptyTeams();
 	}
 }

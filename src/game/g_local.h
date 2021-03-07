@@ -1371,7 +1371,6 @@ void G_readyTeamLock( void );
 //
 qboolean G_CanAlloc(unsigned int size);
 void *G_Alloc(unsigned int size);
-//void *G_Alloc( int size );
 void G_Free(void *ptr);
 void G_InitMemory( void );
 void Svcmd_GameMem_f( void );
@@ -1502,7 +1501,7 @@ extern vmCvar_t g_enforcemaxlives;          // Xian - Temp ban with maxlives bet
 
 extern vmCvar_t g_needpass;
 extern vmCvar_t g_weaponTeamRespawn;
-//extern vmCvar_t g_doWarmup;
+extern vmCvar_t g_doWarmup;
 extern vmCvar_t g_teamAutoJoin;
 extern vmCvar_t g_teamForceBalance;
 extern vmCvar_t g_banIPs;
@@ -1948,7 +1947,6 @@ void G_ResetMarkers( gentity_t* ent );
 // g_main.c
 //
 void G_UpdateCvars(void);
-void G_wipeCvars(void);
 void G_teamReset(int, qboolean);
 //
 // g_match.c

@@ -954,6 +954,7 @@ void CG_InitConsoleCommands( void ) {
 	// Ready
 	trap_AddCommand("readyteam");
 	trap_AddCommand("ready");
+	trap_AddCommand("notready");
 	// Misc
 	trap_AddCommand("players");
 	trap_AddCommand("say_teamnl");

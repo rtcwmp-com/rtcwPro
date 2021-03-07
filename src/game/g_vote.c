@@ -303,7 +303,7 @@ int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, 
 			AP(va("cpm \"%s Settings Loaded!\n\"", level.voteInfo.vote_value));
 		}
 
-		if (g_tournament.value == 1 && g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
+		if (g_tournament.integer == 1 && g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
 			level.lastRestartTime = level.time;
 			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 		}

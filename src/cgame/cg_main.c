@@ -430,7 +430,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_cycleAllWeaps,    "cg_cycleAllWeaps", "1", CVAR_ARCHIVE },
 	{ &cg_drawAllWeaps,     "cg_drawAllWeaps",   "1", CVAR_ARCHIVE },
 	{ &cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE },
-	{ &cg_crosshairHealth, "cg_crosshairHealth", "1", CVAR_ARCHIVE },
+	{ &cg_crosshairHealth, "cg_crosshairHealth", "0", CVAR_ARCHIVE },
 	{ &cg_crosshairX, "cg_crosshairX", "0", CVAR_ARCHIVE },
 	{ &cg_crosshairY, "cg_crosshairY", "0", CVAR_ARCHIVE },
 	{ &cg_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE }, // JPW NERVE
