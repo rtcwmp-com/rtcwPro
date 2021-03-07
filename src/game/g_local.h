@@ -1652,7 +1652,6 @@ extern vmCvar_t g_maxTeamFlamer;
 extern vmCvar_t g_pauseLimit;
 extern vmCvar_t	g_fastStabSound;
 extern vmCvar_t g_duelAutoPause;
-extern vmCvar_t team_commands;
 extern vmCvar_t g_tournament;
 
 //

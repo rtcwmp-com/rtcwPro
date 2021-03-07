@@ -294,7 +294,6 @@ vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
 vmCvar_t team_nocontrols;
 // Match specific
-vmCvar_t team_commands; // Team commands (captain..)
 vmCvar_t g_tournament;	// Ready-unready system
 vmCvar_t g_ltNades;			// Number of nades a lt starts with
 vmCvar_t g_medicNades;		// Number of nades a med starts with
@@ -575,7 +574,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamVenom, "g_maxTeamVenom", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &team_commands, "team_commands", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },

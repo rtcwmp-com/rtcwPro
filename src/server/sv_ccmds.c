@@ -553,7 +553,7 @@ void SV_SetCvarRestrictions(void) {
 		while (fgets(line, MAX_CVAR_VALUE_STRING, f) != NULL) {
 			Cmd_TokenizeString(line);
 
-			if (!Q_stricmp(Cmd_Argv(0), "svr_cvar")) {
+			if (!Q_stricmp(Cmd_Argv(0), "sv_cvar")) {
 				Cvar_SetRestricted(Cmd_Argv(1), RestrictedTypeToInt(Cmd_Argv(2)), Cmd_Argv(3), Cmd_Argv(4));
 				i++;
 			}
