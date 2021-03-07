@@ -281,10 +281,13 @@ typedef enum {
 //	qboolean CG_GetTag( int clientNum, char *tagname, orientation_t *or );
 
 	CG_CHECKCENTERVIEW,
-//	qboolean CG_CheckCenterView();
+//	qboolean CG_CheckCenterView(void);
 
 	CG_CHECKEXECKEY,
 //  qboolean CG_CheckExecKey(int key);
+
+	CG_RELAY_COMMAND,
+//	qboolean(*CG_RelayCommand)(const char type, int value);
 } cgameExport_t;
 
 //----------------------------------------------

@@ -234,7 +234,6 @@ void CL_CgameError( const char *string ) {
 	Com_Error( ERR_DROP, "%s", string );
 }
 
-
 /*
 =====================
 CL_ConfigstringModified
@@ -528,21 +527,10 @@ static int FloatAsInt( float f ) {
 CL_GetRestStatus
 ====================
 */
-void CL_GetRestStatus(void) {
-	int violations = Cvar_ValidateRest(qfalse);
-
-	if (violations > 0 && !cl.clientRestShowWarning) {
-		Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" :""));
-		Com_Printf(">> ^jPlease use /violations and correct them.\n");
-
-		cl.clientRestStarted = cls.realtime;
-		cl.clientRestShowWarning = qtrue;
-	}
-	else {
-		if (violations != -1) {
-			Com_Printf(">> ^5No violations found.");
-		}
-	}
+void CL_SetRestStatus(void) {
+	Cvar_ValidateRest();
+	cl.handle.warnedTime = cls.realtime + 10000;
+	cl.handle.isAuthed = qfalse;
 }
 
 /*
@@ -552,16 +540,25 @@ CL_CheckRestStatus
 */
 void CL_CheckRestStatus(void) {
 
-	if (cl.clientRestShowWarning && cl.clientRestStarted > 0) {
-		if (cls.realtime > cl.clientRestStarted + 15000) {
-			int violations = Cvar_ValidateRest(qtrue);
+	if (!cl.handle.isAuthed) {
+		if (cls.realtime > cl.handle.warnedTime) {
+			int violations = Cvar_ValidateRest();
 
 			if (violations > 0) {
 				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
 				Com_Printf(">> ^jPlease use /violations and correct them.\n");
-			}
 
-			cl.clientRestShowWarning = qfalse;
+				
+			}
+			else if (violations != -1) {
+				Com_Printf(">> ^5No violations found.");
+
+				// Call home
+				//cl.handle.isAuthed = qtrue;
+				//cl.handle.warnedTime = 0;
+			}
+			cl.handle.warnedTime = cls.realtime + 20000;
+			VM_Call(cgvm, CG_RELAY_COMMAND, RELAY_RKVALD, cl.handle.isAuthed ? 1 : 0);
 		}
 	}
 }
@@ -968,10 +965,11 @@ int CL_CgameSystemCalls( int *args ) {
 		return 0;
 		// - NERVE - SMF
 	case CG_R_VALIDATE:
-		CL_GetRestStatus();
+		CL_SetRestStatus();
 		return 0;
 	case CG_R_BUILD:
 		Cvar_RestBuildList(VMA(1));
+		CL_SetRestStatus();
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );

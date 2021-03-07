@@ -1326,7 +1326,7 @@ Cvar_ValidateRest
 Validates cvars and returns violations count
 ============
 */
-int Cvar_ValidateRest(qboolean flagOnly) {
+int Cvar_ValidateRest(void) {
 	cvar_t* var;
 	cvar_rest_t* cv;
 	int i = 0, violations = 0;
@@ -1339,17 +1339,13 @@ int Cvar_ValidateRest(qboolean flagOnly) {
 			if (cv->type == SVC_INCLUDE || cv->type == SVC_WITHBITS) {
 				violations++;
 
-				if (!flagOnly) {
-					cv->flagged = qtrue;
-				}
+				cv->flagged = qtrue;
 			}
 		}
 		else if (!Cvar_RestValueIsValid(cv, var->string)) {
 			violations++;
 
-			if (!flagOnly) {
-				cv->flagged = qtrue;
-			}
+			cv->flagged = qtrue;
 		}
 	}
 	return (i > 0 ? violations : -1);

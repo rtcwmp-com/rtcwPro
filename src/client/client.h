@@ -91,6 +91,12 @@ typedef struct {
 extern int g_console_field_width;
 
 typedef struct {
+	int actionTime;
+	int warnedTime;
+	qboolean isAuthed;
+} clientHandle_t;
+
+typedef struct {
 	int timeoutcount;               // it requres several frames in a timeout condition
 									// to disconnect, preventing debugging breaks from
 									// causing immediate disconnects on continue
@@ -156,9 +162,7 @@ typedef struct {
 	char translationVersion[MAX_STRING_TOKENS];
 	// -NERVE - SMF
 
-	int clientRestStarted;
-	qboolean clientRestShowWarning;
-	int clientActionTime;
+	clientHandle_t handle;
 } clientActive_t;
 
 extern clientActive_t cl;

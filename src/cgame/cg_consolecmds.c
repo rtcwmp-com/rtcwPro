@@ -829,7 +829,6 @@ static consoleCommand_t commands[] = {
 	{ "dumploc", CG_DumpLocation_f },
 };
 
-
 /*
 =================
 CG_ConsoleCommand
@@ -858,7 +857,6 @@ qboolean CG_ConsoleCommand( void ) {
 
 	return qfalse;
 }
-
 
 /*
 =================
@@ -973,6 +971,26 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand("timerReset");
 	// End
 }
+
+/*
+=================
+CG_RelayCommand
+
+Relies any client command to server.
+=================
+*/
+qboolean CG_RelayCommand(char* type, int value) {
+	
+	if (!cg.snap) {
+		return qfalse;
+	}
+
+	if (!Q_stricmp(type, RELAY_RKVALD)) {
+		trap_SendClientCommand(va("say_team rkvald %d", value));
+	}
+	return qfalse;
+}
+
 /**
  * @brief ETPro style enemy spawntimer
  */

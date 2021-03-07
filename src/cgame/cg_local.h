@@ -2606,6 +2606,7 @@ void CG_DrawTourneyScoreboard( void );
 //
 qboolean CG_ConsoleCommand( void );
 void CG_InitConsoleCommands( void );
+qboolean CG_RelayCommand(char* type, int value);
 // OSPx
 void CG_autoRecord_f( void );
 void CG_autoScreenShot_f( void );

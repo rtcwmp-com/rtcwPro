@@ -91,6 +91,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_CheckCenterView();
 	case CG_CHECKEXECKEY:
 		return CG_CheckExecKey(arg0);
+	case CG_RELAY_COMMAND:
+		return CG_RelayCommand((char*)arg0, arg1);
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;

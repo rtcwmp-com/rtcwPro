@@ -4988,5 +4988,5 @@ void CL_ActionGenerateTime(qboolean useFixedTime) {
 	int max = 12000 * 1000;	// 20 mins
 	int time = (useFixedTime ? 90 * 1000 : rand() % max + min);
 
-	cl.clientActionTime = cl.serverTime + time;
+	cl.handle.actionTime = cl.serverTime + time;
 }

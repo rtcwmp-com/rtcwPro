@@ -536,7 +536,7 @@ qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value);
 void Cvar_RestBuildList(char* data);
 // Builds the list
 
-int Cvar_ValidateRest(qboolean flagOnly);
+int Cvar_ValidateRest(void);
 // checks if any cvar is violating server restrictions
 
 char* Cvar_RestAcceptedValues(const char* var_name);
