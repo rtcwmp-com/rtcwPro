@@ -174,22 +174,6 @@ void CountDown(void) {
 		return;
 	}
 
-	// Countdown...
-	if (level.cnNum == 0)
-		{ index = "prepare.wav"; AP( "cp \"Prepare to fight^2!\n\"2" );}	
-	if (level.cnNum == 1) 
-		{ index = "cn_5.wav"; /*AP( "cp \"Match starts in: ^25\n\"2" );*/}
-	if (level.cnNum == 2) 
-		{ index = "cn_4.wav"; /*AP( "cp \"Match starts in: ^24\n\"2" );*/}	
-	if (level.cnNum == 3) 
-		{ index = "cn_3.wav"; /*AP( "cp \"Match starts in: ^23\n\"2" );*/}	
-	if (level.cnNum == 4)
-		{ index = "cn_2.wav"; /*AP( "cp \"Match starts in: ^22\n\"2" );*/}
-	if (level.cnNum == 5) 
-		{ index = "cn_1.wav"; /*AP( "cp \"Match starts in: ^21\n\"2" );*/}
-	if (level.cnNum == 6 ) 
-		{ index = "fight.wav"; AP( "print \"^1FIGHT!\n\"2"); }	
-
 	// Prepare to fight takes 2 seconds..
 	if(level.cnNum == 0) {
 		level.cnPush = level.time+2000;

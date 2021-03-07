@@ -2275,12 +2275,7 @@ static void CG_ServerCommand( void ) {
 
 	// ydnar: bug 267: server sends this command when it's about to kill the current server, before the client can reconnect
 	if (!Q_stricmp(cmd, "spawnserver")) {
-		// print message informing player the server is restarting with a new map
-		CG_PriorityCenterPrint(va("%s", CG_TranslateString("^nServer Restarting")), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH, 999999);
-
-		// hack here
 		cg.serverRespawning = qtrue;
-
 		return;
 	}
 
