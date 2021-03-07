@@ -470,9 +470,9 @@ void cmd_speclock( gentity_t *ent, qboolean lock ) {
 	int team = ent->client->sess.sessionTeam;
 
 
-	if (!team_commands.integer ) {
+	if (team_nocontrols.integer ) {
 		CP("print \"Team commands are disabled!\n\"");
-	return;
+		return;
 	}
 
 	if ( team == TEAM_RED || team == TEAM_BLUE ) {
