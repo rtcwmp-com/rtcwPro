@@ -860,6 +860,7 @@ typedef struct {
 	int num_entities;               // current number, <= MAX_GENTITIES
 
 	int warmupTime;                 // restart match at this time
+	qboolean warmupSwap;			// Swaps teams in SW with g_tournament enabled
 
 	fileHandle_t logFile;
     fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi

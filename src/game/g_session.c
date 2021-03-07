@@ -206,12 +206,16 @@ void G_ReadSessionData( gclient_t *client ) {
 		test = g_currentRound.integer == 1;
 	}
 
-	if (g_gametype.integer == GT_WOLF_STOPWATCH && level.warmupTime > 0 && test) {
-		if (client->sess.sessionTeam == TEAM_RED) {
-			client->sess.sessionTeam = TEAM_BLUE;
-		}
-		else if (client->sess.sessionTeam == TEAM_BLUE) {
-			client->sess.sessionTeam = TEAM_RED;
+	if (g_gametype.integer == GT_WOLF_STOPWATCH && test) {
+		if (g_tournament.integer && level.warmupSwap ||
+			!g_tournament.integer && level.warmupTime > 0
+		) {
+			if (client->sess.sessionTeam == TEAM_RED) {
+				client->sess.sessionTeam = TEAM_BLUE;
+			}
+			else if (client->sess.sessionTeam == TEAM_BLUE) {
+				client->sess.sessionTeam = TEAM_RED;
+			}
 		}
 	}
 

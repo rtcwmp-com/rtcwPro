@@ -2893,6 +2893,7 @@ void CheckGameState( void ) {
 		if (g_tournament.integer) {
 
 			if (G_playersReady() || level.readyAll) {
+				level.warmupSwap = qfalse;
 				level.warmupTime = level.time + 11000;
 				trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 				trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
@@ -2907,6 +2908,7 @@ void CheckGameState( void ) {
 					level.readyPrint = qtrue;
 				}
 			} else {
+				level.warmupSwap = qtrue;
 				trap_SetConfigstring( CS_READY, va( "%i", (g_noTeamSwitching.integer ? READY_PENDING : READY_AWAITING) ));
 			}
 
