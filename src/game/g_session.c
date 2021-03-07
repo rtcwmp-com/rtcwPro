@@ -288,7 +288,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->admin = ADM_NONE;
 	sess->incognito = 0;
 	sess->ignored = 0;
-	sess->uci = 255;
+	sess->uci = 0;
 	Q_strncpyz(sess->ip, "", sizeof(sess->ip));
 	sess->selectedWeapon = 0;
 	G_deleteStats( client - level.clients ); // OSP - Stats
