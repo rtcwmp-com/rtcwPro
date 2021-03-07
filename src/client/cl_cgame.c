@@ -1354,7 +1354,7 @@ void CL_SetCGameTime( void ) {
 		CL_AdjustTimeDelta();
 	}
 
-	// See if we need to print any waarnings..
+	// See if we need to print any warnings..
 	CL_CheckRestStatus();
 
 	if ( !clc.demoplaying ) {

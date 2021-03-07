@@ -926,7 +926,7 @@ default values.
 #define CVAR_NORESTART      1024    // do not clear when a cvar_restart is issued
 #define CVAR_WOLFINFO       2048    // DHM - NERVE :: Like userinfo, but for wolf multiplayer info
 
-#define SVC_NONE			0
+#define SVC_NONE            0
 #define SVC_EQUAL           1
 #define SVC_NOTEQUAL        2
 #define SVC_GREATER         3
@@ -939,12 +939,12 @@ default values.
 #define SVC_EXCLUDE         10
 #define SVC_WITHBITS        11
 #define SVC_WITHOUTBITS     12
-#define SVC_MAX				13
+#define SVC_MAX             13
 
-#define SVC_TYPE_STRING		0
-#define SVC_TYPE_INT		1
-#define SVC_TYPE_FLOAT		2
-#define SVC_TYPE_MAX		3
+#define SVC_TYPE_STRING     0
+#define SVC_TYPE_INT        1
+#define SVC_TYPE_FLOAT      2
+#define SVC_TYPE_MAX        3
 
 // Cvar restrictions table for tags
 typedef struct {
@@ -974,12 +974,12 @@ static const cvar_restrictions_l Cvar_Restriction_Flags[] = {
 typedef struct cvar_restrictions_s {
 	char* name;
 	unsigned int type;
-	char*	sVal1;
-	char*	sVal2;
-	float	fVal1;
-	float	fVal2;
-	int		iVal1;
-	int		iVal2;
+	char*   sVal1;
+	char*   sVal2;
+	float   fVal1;
+	float   fVal2;
+	int     iVal1;
+	int     iVal2;
 	struct cvar_restrictions_s* next;
 	struct cvar_restrictions_s* hashNext;
 	qboolean flagged;

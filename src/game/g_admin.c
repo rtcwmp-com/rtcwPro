@@ -599,13 +599,14 @@ void cmd_unignore(gentity_t *ent) {
 	tag = sortTag(ent);
 
 	count = ClientNumberFromNameMatch(ent->client->pers.cmd2, nums);
-		if (count == 0){
+		if (count == 0) {
 			CP("print \"Client not on server^z!\n\"");
-		return;
-	}else if (count > 1){
-		CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
-	return;
-	}
+			return;
+		}
+		else if (count > 1) {
+			CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
+			return;
+		}
 
 		for (i = 0; i < count; i++){
 			if (!g_entities[nums[i]].client->sess.ignored){

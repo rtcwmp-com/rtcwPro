@@ -438,8 +438,8 @@ Output server related information
 ===========
 */
 void G_writeServerInfo(void){
-	char* s;
-	char mapName[MAX_QPATH];
+    char* s;
+    char mapName[MAX_QPATH];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
     char cs[MAX_STRING_CHARS];
