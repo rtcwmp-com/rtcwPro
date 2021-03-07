@@ -529,8 +529,8 @@ CL_GetRestStatus
 */
 void CL_SetRestStatus(void) {
 	Cvar_ValidateRest();
-	cl.handle.warnedTime = cls.realtime + 10000;
-	cl.handle.isAuthed = qfalse;
+	cl.handle.warnedTime = cls.realtime + RKVALD_TIME_PING;
+	cl.handle.doPrint = qtrue;
 }
 
 /*
@@ -540,25 +540,16 @@ CL_CheckRestStatus
 */
 void CL_CheckRestStatus(void) {
 
-	if (!cl.handle.isAuthed) {
+	if (cl.handle.doPrint) {
 		if (cls.realtime > cl.handle.warnedTime) {
 			int violations = Cvar_ValidateRest();
 
 			if (violations > 0) {
 				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
 				Com_Printf(">> ^jPlease use /violations and correct them.\n");
-
-				
 			}
-			else if (violations != -1) {
-				Com_Printf(">> ^5No violations found.");
-
-				// Call home
-				//cl.handle.isAuthed = qtrue;
-				//cl.handle.warnedTime = 0;
-			}
-			cl.handle.warnedTime = cls.realtime + 20000;
-			VM_Call(cgvm, CG_RELAY_COMMAND, RELAY_RKVALD, cl.handle.isAuthed ? 1 : 0);
+			cl.handle.warnedTime = cls.realtime + (violations < 1 ? RKVALD_TIME_PING_L : RKVALD_TIME_PING_S);
+			CL_AddReliableCommand(va("%s %s", CTL_RKVALD, violations < 1 ? RKVALD_OK : RKVALD_NOT_OK));
 		}
 	}
 }

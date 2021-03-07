@@ -1501,7 +1501,7 @@ void SV_ReloadRest(qboolean disableTime) {
 
 		if (client->netchan.remoteAddress.type != NA_BOT) {
 			// Give players time to adjust stuff if needed
-			client->clientRestValidated = (disableTime ? -1 : svs.time + 80000);
+			client->clientRestValidated = (disableTime ? -1 : svs.time + 65000);
 			SV_SendServerCommand(NULL, "rereload %s\n", Cvar_GetRestrictedList());
 		}
 	}

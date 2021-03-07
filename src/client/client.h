@@ -93,7 +93,7 @@ extern int g_console_field_width;
 typedef struct {
 	int actionTime;
 	int warnedTime;
-	qboolean isAuthed;
+	qboolean doPrint;
 } clientHandle_t;
 
 typedef struct {

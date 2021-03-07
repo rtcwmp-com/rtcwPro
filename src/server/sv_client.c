@@ -576,7 +576,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	newcl->clientRestValidated = svs.time + 80000;
+	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -1975,7 +1975,20 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 		cl->nextReliableTime = svs.time + 800;
 	}
 
-	SV_ExecuteClientCommand( cl, s, clientOk );
+	if (!Q_strncmp(CTL_RKVALD, s, strlen(CTL_RKVALD))) {
+		if (!Q_stricmp(sv_GameConfig->string, "")) {
+			cl->clientRestValidated = RKVALD_TIME_OFF;
+		}
+		else {
+			Cmd_TokenizeString(s);
+			if (Cmd_Argv(1) && !Q_stricmp(Cmd_Argv(1), RKVALD_OK)) {
+				cl->clientRestValidated = svs.time + RKVALD_TIME_FULL;
+			}
+		}
+	}
+	else {
+		SV_ExecuteClientCommand(cl, s, clientOk);
+	}
 
 	cl->lastClientCommand = seq;
 	Com_sprintf( cl->lastClientCommandString, sizeof( cl->lastClientCommandString ), "%s", s );
@@ -1983,9 +1996,7 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	return qtrue;       // continue procesing
 }
 
-
 //==================================================================================
-
 
 /*
 ==================
@@ -2220,16 +2231,11 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //	}
 
 	if (Q_stricmp(sv_GameConfig->string, "") && 
-		cl->clientRestValidated != -1 && 
+		cl->clientRestValidated != RKVALD_TIME_OFF && 
 		cl->clientRestValidated < svs.time && 
 		cl->netchan.remoteAddress.type != NA_BOT
 	) {
-#ifndef _DEBUG
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
-#else
-		Com_Printf("^3Skipping SV_DropClient due failure to comply with restriction rules. ^z[only in DEBUG mode]\n");
-		cl->clientRestValidated = -1;
-#endif
 		return;
 	}
 }

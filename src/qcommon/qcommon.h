@@ -1282,5 +1282,14 @@ extern huffman_t clientHuffTables;
 #error unknown OS
 #endif
 
+#define CTL_RKVALD			"rkvald"
+#define RKVALD_OK			"1"
+#define RKVALD_NOT_OK		"0"
+#define RKVALD_TIME_FULL	65000
+#define RKVALD_TIME_PING	10000
+#define RKVALD_TIME_PING_L	40000
+#define RKVALD_TIME_PING_S	20000
+#define RKVALD_TIME_OFF		-1
+
 #endif // _QCOMMON_H_
 

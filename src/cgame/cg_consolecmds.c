@@ -976,7 +976,7 @@ void CG_InitConsoleCommands( void ) {
 =================
 CG_RelayCommand
 
-Relies any client command to server.
+Relays any client command to server.
 =================
 */
 qboolean CG_RelayCommand(char* type, int value) {
@@ -985,9 +985,9 @@ qboolean CG_RelayCommand(char* type, int value) {
 		return qfalse;
 	}
 
-	if (!Q_stricmp(type, RELAY_RKVALD)) {
-		trap_SendClientCommand(va("say_team rkvald %d", value));
-	}
+	//if (!Q_stricmp(type, RELAY_RKVALD)) {
+	//	trap_SendClientCommand(va("say_team rkvald %d", value));
+	//}
 	return qfalse;
 }
 
