@@ -93,7 +93,9 @@ void* HTTP_Get(void* args);
 // http.c
 //
 void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]);
+#ifndef DEDICATED
 void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
+#endif
 
 #endif // ~_S_HTTP

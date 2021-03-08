@@ -48,6 +48,7 @@ void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]) {
 	return;
 }
 
+#ifndef DEDICATED
 /*
 ===============
 HTTP_ClientNeedsUpdate
@@ -87,3 +88,4 @@ void HTTP_ClientGetMOTD(void) {
 	}
 	return;
 }
+#endif // ~DEDICATED
