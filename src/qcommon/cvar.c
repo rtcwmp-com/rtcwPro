@@ -1363,7 +1363,7 @@ void Cvar_RestBuildList(char* data) {
 
 	if (data) {
 		char* next = NULL;
-		char* first = strtok_s(data, "|", &next);
+		char* first = strtok_r(data, "|", &next);
 
 		do {
 			char* posn = NULL;
@@ -1372,7 +1372,7 @@ void Cvar_RestBuildList(char* data) {
 			if (Cmd_Argv(0)) {
 				Cvar_SetRestricted(Cmd_Argv(0), atoi(Cmd_Argv(1)), Cmd_Argv(2), !Q_stricmp(Cmd_Argv(3), "@") ? "" : Cmd_Argv(3));
 			}
-		} while ((first = strtok_s(NULL, "|", &next)) != NULL);
+		} while ((first = strtok_r(NULL, "|", &next)) != NULL);
 	}
 	Com_DPrintf("\nRestriction list has been updated.\n");
 }

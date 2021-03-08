@@ -580,11 +580,11 @@ void Cmd_TokenizeLine(const char* text_in, const char* delim, char *pos) {
 		return;
 	}
 
-	token = strtok_s((char *)text_in, delim, &pos);
+	token = strtok_r((char *)text_in, delim, &pos);
 	while (token != NULL) {
 		cmd_argv[cmd_argc] = token;
 		cmd_argc++;
-		token = strtok_s(NULL, delim, &pos);
+		token = strtok_r(NULL, delim, &pos);
 	}
 }
 

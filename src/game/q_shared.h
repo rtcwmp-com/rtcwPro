@@ -1730,4 +1730,9 @@ typedef enum {
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
 qboolean clientIsConnected;
 
+#if defined(_WIN32) || defined(_WIN64)
+/* We are on Windows */
+# define strtok_r strtok_s
+#endif
+
 #endif  // __Q_SHARED_H
