@@ -195,6 +195,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
                 }
+    return 1;
 }
 /*
  Read in stats from json to client session
@@ -212,7 +213,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 */
 int G_read_round_jstats( char *jfilename )
 {
-     json_t *data;
+     json_t *data = NULL;
     json_t *json,*object,*jstattype, *jstats;
     json_error_t error;
     gclient_t *cl;
@@ -309,8 +310,7 @@ int G_read_round_jstats( char *jfilename )
 
     }
 
-
-
+    return 0;
 }
 
 /*
