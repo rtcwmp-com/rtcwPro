@@ -34,6 +34,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "bg_public.h"
 #include "g_public.h"
 #include "../../MAIN/ui_mp/menudef.h"
+#ifdef _WIN32
+#include "../qcommon/jansson_win/jansson.h"
+#else
+#include "../qcommon/jansson/jansson.h"
+#endif // _WIN32
 
 //==================================================================
 
@@ -2104,6 +2109,8 @@ enum eventList {
 #define JSON_KILLDATA 16  // include additional data on "kill event"
 
 // g_json.c
+int getPstats(json_t *jsonData, char *id, gclient_t *client);
+int G_read_round_jstats( char *jfilename );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
 void G_jWeaponStats(void);
