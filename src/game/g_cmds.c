@@ -1737,7 +1737,7 @@ Cmd_Vote_f
 void Cmd_Vote_f( gentity_t *ent ) {
 	char msg[64];
 	int num;
-
+	
 	// DHM - Nerve :: Complaints supercede voting (and share command)
 	if ( ent->client->pers.complaintEndTime > level.time ) {
 
@@ -1827,9 +1827,11 @@ void Cmd_Vote_f( gentity_t *ent ) {
 	if ( msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1' ) {
 		level.voteInfo.voteYes++;
 		trap_SetConfigstring( CS_VOTE_YES, va( "%i", level.voteInfo.voteYes ) );
+		G_globalSound("sound/match/vote-yes.wav");
 	} else {
 		level.voteInfo.voteNo++;
 		trap_SetConfigstring( CS_VOTE_NO, va( "%i", level.voteInfo.voteNo ) );
+		G_globalSound("sound/match/vote-no.wav");
 	}
 
 	// a majority will be determined in G_CheckVote, which will also account

@@ -901,8 +901,8 @@ void SV_Init( void ) {
 #endif
 
 	// HTTP downloads
-	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
-	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "", CVAR_ARCHIVE);
+	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "1", CVAR_ARCHIVE);
+	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "http://rtcw.life/files/mapdb/", CVAR_ARCHIVE);
 	sv_wwwDlDisconnected = Cvar_Get("sv_wwwDlDisconnected", "0", CVAR_ARCHIVE);
 	sv_wwwFallbackURL = Cvar_Get("sv_wwwFallbackURL", "", CVAR_ARCHIVE);
 

@@ -10,7 +10,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
     <LocalDebuggerCommand>$(RTCWBASE)\$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+set fs_game $(RTCW_MOD_NAME) +map mp_base</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+set fs_game $(RTCW_MOD_NAME) +map mp_base +exec server.cfg</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(RTCWBASE)\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
