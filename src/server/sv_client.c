@@ -321,6 +321,7 @@ void SV_DirectConnect( netadr_t from ) {
 	int count;
 	char guid[GUID_LEN];
 	char* ip;
+	char restricted_cvars[BIG_INFO_STRING];
 
 	Com_DPrintf( "SVC_DirectConnect ()\n");
 
@@ -575,6 +576,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
+	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -592,8 +594,14 @@ gotnewcl:
 	if ( count == 1 || count == sv_maxclients->integer ) {
 		SV_Heartbeat_f();
 	}
-}
 
+	// Sent list of restricted cvars out ..
+	if (Q_stricmp(sv_GameConfig->string, "")) {
+		Q_strncpyz(restricted_cvars, Cvar_GetRestrictedList(), sizeof(restricted_cvars));
+		NET_OutOfBandPrint(NS_SERVER, from, "getRestrictedList %s", restricted_cvars);
+		Com_DPrintf("   SENT:  getRestrictedList %s\n", restricted_cvars);
+	}
+}
 
 /*
 =====================
@@ -627,9 +635,6 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 	// Kill any download
 	SV_CloseDownload( drop );
 
-	// tell everyone why they got dropped
-	SV_SendServerCommand( NULL, "print \"[lof]%s" S_COLOR_WHITE " [lon]%s\n\"", drop->name, reason );
-
 	Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
 	drop->state = CS_ZOMBIE;        // become free in a few seconds
 
@@ -637,6 +642,9 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 		FS_FCloseFile( drop->download );
 		drop->download = 0;
 	}
+
+	// tell everyone why they got dropped
+	SV_SendServerCommand(NULL, "@print \"%s" S_COLOR_WHITE " %s\n\"", drop->name, reason);
 
 	// call the prog function for removing a client
 	// this will remove the body, among other things
@@ -651,7 +659,6 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 
 	// nuke user info
 	SV_SetUserinfo( drop - svs.clients, "" );
-
 
 	// if this was the last client on the server, send a heartbeat
 	// to the master so it is known the server is empty
@@ -744,7 +751,6 @@ void SV_SendClientGameState( client_t *client ) {
 	// deliver this to the client
 	SV_SendMessageToClient( &msg, client );
 }
-
 
 /*
 ==================
@@ -1969,7 +1975,20 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 		cl->nextReliableTime = svs.time + 800;
 	}
 
-	SV_ExecuteClientCommand( cl, s, clientOk );
+	if (!Q_strncmp(CTL_RKVALD, s, strlen(CTL_RKVALD))) {
+		if (!Q_stricmp(sv_GameConfig->string, "")) {
+			cl->clientRestValidated = RKVALD_TIME_OFF;
+		}
+		else {
+			Cmd_TokenizeString(s);
+			if (Cmd_Argv(1) && !Q_stricmp(Cmd_Argv(1), RKVALD_OK)) {
+				cl->clientRestValidated = svs.time + RKVALD_TIME_FULL;
+			}
+		}
+	}
+	else {
+		SV_ExecuteClientCommand(cl, s, clientOk);
+	}
 
 	cl->lastClientCommand = seq;
 	Com_sprintf( cl->lastClientCommandString, sizeof( cl->lastClientCommandString ), "%s", s );
@@ -1977,9 +1996,7 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	return qtrue;       // continue procesing
 }
 
-
 //==================================================================================
-
 
 /*
 ==================
@@ -2212,5 +2229,13 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //	if ( msg->readcount != msg->cursize ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
-}
 
+	if (Q_stricmp(sv_GameConfig->string, "") && 
+		cl->clientRestValidated != RKVALD_TIME_OFF && 
+		cl->clientRestValidated < svs.time && 
+		cl->netchan.remoteAddress.type != NA_BOT
+	) {
+		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+		return;
+	}
+}

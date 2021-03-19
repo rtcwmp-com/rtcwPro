@@ -1873,7 +1873,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 				}
 				else {
 					client->sess.uci = 246;
-					G_LogPrintf("GeoIP: This IP:%s cannot be located\n", value);
+					G_LogPrintf("GeoIP: This IP: %s cannot be located\n", value);
 				}
 			}
 		}
@@ -1916,6 +1916,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
+
+	// Trigger rest lookup
+	trap_SendServerCommand(clientNum, "revalidate");
 
 	return NULL;
 }
@@ -2005,7 +2008,6 @@ void ClientBegin( int clientNum ) {
 			ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = -1;
 		}
 	}
-
 
 	// DHM - Nerve :: Start players in limbo mode if they change teams during the match
 	if ( g_gametype.integer >= GT_WOLF && client->sess.sessionTeam != TEAM_SPECTATOR
@@ -2528,6 +2530,30 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	AddHeadEntity(ent);
 }
 
+/*
+================
+OSPx - check for team stuff..
+================
+*/
+void handleEmptyTeams(void) {
+
+	if (g_gamestate.integer != GS_INTERMISSION) {
+		if (!level.axisPlayers) {
+			G_teamReset(TEAM_RED, qtrue);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+		else if (!level.alliedPlayers) {
+			G_teamReset(TEAM_BLUE, qtrue);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+	}
+}
 
 /*
 ===========
@@ -2640,7 +2666,6 @@ void ClientDisconnect( int clientNum ) {
 
     if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
         G_writeDisconnectEvent(ent);
-
     }
 
 	trap_UnlinkEntity( ent );
@@ -2665,12 +2690,12 @@ void ClientDisconnect( int clientNum ) {
 
 	CalculateRanks();
 
+	handleEmptyTeams();
+
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
-
 }
-
 
 /*
 ==================

@@ -956,7 +956,7 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 		tot_rev = 0;
 		CP(va("sc \"%s ^7Team\n"
 			     "^7--------------------------------------------------------------------------"
-				 "\nPlayer          ^eKll ^7Dth Sui TK ^cEff ^7Gib Accrcy HS   ^2DG   ^1DR   ^4TD  ^5Rev ^3Score\n"
+				 "\nPlayer          Kll Dth Sui TK Eff ^7Gib Accrcy HS   ^2DG   ^1DR   ^4TD  ^5Rev ^3Score\n"
 				 "^7--------------------------------------------------------------------------\n\"", (i == TEAM_RED) ? "^1Axis" : "^4Allied"  ));
 
 		for ( j = 0; j < level.numPlayingClients; j++ ) {
@@ -1000,23 +1000,23 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 			}
 
 			cnt++;
-			CP(va("sc \"%s%-15s^e%4d^7%4d%4d%3d%s^c%4d^7%3d %6.2f%4d^2%5d^1%5d^4%5d^5%5d^7%5d\n\"",
+			CP(va("sc \"%s%-15s^7%4d^7%4d%4d%3d%s%4d%3d %6.2f%4d^2%5d^1%5d^4%5d^5%5d^7^3%5d\n\"",
 				ref,
-					n2,
-					cl->sess.kills,
-					cl->sess.deaths,
-					cl->sess.suicides,
-					cl->sess.team_kills,
-					ref,
-					eff,
-					cl->sess.gibs,
-					((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f),
-					cl->sess.headshots,
-					cl->sess.damage_given,
-					cl->sess.damage_received,
-					cl->sess.team_damage,
-					cl->sess.revives,
-					cl->ps.persistant[PERS_SCORE] ) );
+				n2,
+				cl->sess.kills,
+				cl->sess.deaths,
+				cl->sess.suicides,
+				cl->sess.team_kills,
+				ref,
+				eff,
+				cl->sess.gibs,
+				((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f),
+				cl->sess.headshots,
+				cl->sess.damage_given,
+				cl->sess.damage_received,
+				cl->sess.team_damage,
+				cl->sess.revives,
+				cl->ps.persistant[PERS_SCORE] ) );
 			eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
 			if (eff < 0) {
 				eff = 0;
@@ -1037,8 +1037,8 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 		tot_acc = ( (tot_shots == 0) ? 0.00 : ((float)tot_hits / (float)tot_shots ) * 100.00f );
 
 		CP( va( "sc \"^7--------------------------------------------------------------------------\n"
-				"%-19s^e%4d^7%4d%4d%3d%4d%3d ^7%6.2f%4d^2%5d^1%5d^4%5d^5%5d^7%5d\n\n\n\"",
-				"^eTotals^7",
+				"%-15s%4d^7%4d%4d%3d%4d%3d ^7%6.2f%4d^2%5d^1%5d^4%5d^5%5d^3%5d\n\n\n\"",
+				"Totals",
 				tot_kills,
 				tot_deaths,
 				tot_sui,

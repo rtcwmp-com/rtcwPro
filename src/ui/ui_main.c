@@ -27,10 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-
-
-
-
 /*
 =======================================================================
 
@@ -3559,7 +3555,6 @@ static void UI_LoadSavegames() {
 	}
 }
 
-
 /*
 ===============
 UI_LoadMovies
@@ -3589,8 +3584,6 @@ static void UI_LoadMovies() {
 	}
 
 }
-
-
 
 /*
 ===============
@@ -6961,8 +6954,6 @@ static void UI_DrawCinematic( int handle, float x, float y, float w, float h ) {
 static void UI_RunCinematicFrame( int handle ) {
 	trap_CIN_RunCinematic( handle );
 }
-
-
 
 /*
 =================

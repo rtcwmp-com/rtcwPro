@@ -91,6 +91,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_CheckCenterView();
 	case CG_CHECKEXECKEY:
 		return CG_CheckExecKey(arg0);
+	case CG_RELAY_COMMAND:
+		return CG_RelayCommand((char*)arg0, arg1);
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -428,7 +430,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_cycleAllWeaps,    "cg_cycleAllWeaps", "1", CVAR_ARCHIVE },
 	{ &cg_drawAllWeaps,     "cg_drawAllWeaps",   "1", CVAR_ARCHIVE },
 	{ &cg_crosshairSize, "cg_crosshairSize", "48", CVAR_ARCHIVE },
-	{ &cg_crosshairHealth, "cg_crosshairHealth", "1", CVAR_ARCHIVE },
+	{ &cg_crosshairHealth, "cg_crosshairHealth", "0", CVAR_ARCHIVE },
 	{ &cg_crosshairX, "cg_crosshairX", "0", CVAR_ARCHIVE },
 	{ &cg_crosshairY, "cg_crosshairY", "0", CVAR_ARCHIVE },
 	{ &cg_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE }, // JPW NERVE
@@ -608,7 +610,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_uinfo, "cg_uinfo", "0", CVAR_ROM | CVAR_USERINFO },
 	{ &cf_wstats, "cf_wstats", "1.2", CVAR_ARCHIVE },
 	{ &cf_wtopshots, "cf_wtopshots", "1.0", CVAR_ARCHIVE },
-	{ &int_cl_maxpackets, "cl_maxpackets", "30", CVAR_ARCHIVE },
+	{ &int_cl_maxpackets, "cl_maxpackets", "125", CVAR_ARCHIVE },
 	{ &cg_noAmmoAutoSwitch, "cg_noAmmoAutoSwitch", "0", CVAR_ARCHIVE },
     { &cg_forceTapout, "cg_forceTapout", "0", CVAR_ARCHIVE },
 	{ &int_cl_timenudge, "cl_timenudge", "0", CVAR_ARCHIVE|CVAR_LATCH },
@@ -643,9 +645,6 @@ int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 // OSPx - Client Flags
 void CG_setClientFlags(void);
 
-// RTCWPro - cvars loaded flag
-qboolean cvarsLoaded = qfalse;
-
 /*
 =================
 CG_RegisterCvars
@@ -679,9 +678,6 @@ void CG_RegisterCvars( void ) {
 	BG_setCrosshair(cg_crosshairColorAlt.string, cg.xhairColorAlt, cg_crosshairAlphaAlt.value, "cg_crosshairColorAlt");
 
 // -OSPx
-
-	// RTCWPro - mark cvars as loaded
-	cvarsLoaded = qtrue;
 }
 
 /*
@@ -712,11 +708,6 @@ void CG_UpdateCvars( void ) {
 	int i;
 	cvarTable_t *cv;
 	qboolean fSetFlags = qfalse;	// OSPx - Auto Actions
-
-	// RTCWPro - don't update the cvars if they haven't been registered
-	if (!cvarsLoaded) {
-		return;
-	}
 
 	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) {
 		trap_Cvar_Update( cv->vmCvar );
@@ -2743,9 +2734,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// L0 - OSP stats
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
-
-	// RTCWPro - update sv cvars from the config string
-	CG_UpdateSvCvars();
 }
 
 /*
@@ -2758,9 +2746,6 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
-
-	// RTCWPro - mark cvars as unloaded
-	cvarsLoaded = qfalse;
 }
 
 /*

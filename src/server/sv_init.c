@@ -115,12 +115,9 @@ void SV_SetConfigstring( int index, const char *val ) {
 	}
 }
 
-
-
 /*
 ===============
 SV_GetConfigstring
-
 ===============
 */
 void SV_GetConfigstring( int index, char *buffer, int bufferSize ) {
@@ -251,7 +248,6 @@ void SV_Startup( void ) {
 		Com_Error( ERR_FATAL, "SV_Startup: unable to allocate svs.clients" );
 	}
 	//svs.clients = Z_Malloc (sizeof(client_t) * sv_maxclients->integer );
-
 	if ( com_dedicated->integer ) {
 		svs.numSnapshotEntities = sv_maxclients->integer * PACKET_BACKUP * 64;
 	} else {
@@ -914,6 +910,9 @@ void SV_Init( void ) {
 	sv_AuthEnabled = Cvar_Get("sv_AuthEnabled", "0", CVAR_SERVERINFO | CVAR_INIT);
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
 
+	// Cvar Restrictions
+	sv_GameConfig = Cvar_Get( "sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_LATCH );
+
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
 
@@ -946,6 +945,10 @@ void SV_Init( void ) {
 		}
 	}
 #endif
+
+	if (com_dedicated->integer) {
+		SV_SetCvarRestrictions();
+	}
 }
 
 

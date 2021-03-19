@@ -3200,14 +3200,14 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
-		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^7" ), sec + 1 );
 		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
 		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
 		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
 		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
 		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
-		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^7" ), sec + 1 );
 	}
 
 	w = CG_DrawStrlen( s );

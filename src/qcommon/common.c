@@ -885,7 +885,6 @@ void Z_Free( void *ptr ) {
 	}
 }
 
-
 /*
 ================
 Z_FreeTags
@@ -3922,25 +3921,6 @@ void Field_CompleteCommand( field_t *field ) {
 	// run through again, printing matches
 	Cmd_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion( PrintMatches );
-}
-
-/*
-===============
-GetMemory
-===============
-*/
-void* GetMemory(unsigned long size) {
-#define MEM_ID      0x12345678l
-	void* ptr;
-	unsigned long int* memid;
-
-	ptr = malloc(size + sizeof(unsigned long int));
-	if (!ptr) {
-		return NULL;
-	}
-	memid = (unsigned long int*) ptr;
-	*memid = MEM_ID;
-	return (unsigned long int*) ((char*)ptr + sizeof(unsigned long int));
 }
 
 // new stuff (but found not essential at this time) for iortcw port of server defined dl rates

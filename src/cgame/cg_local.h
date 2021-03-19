@@ -1210,14 +1210,6 @@ typedef struct {
 	qboolean serverRespawning;
 // -OSPx
 
-	// RTCWPro - cvar limiting
-	svCvar_t svCvars[MAX_SVCVARS];
-	int svCvarCount;
-
-	// backuping, forceCvar_t is good format, it holds name and value only
-	forceCvar_t cvarBackups[MAX_SVCVARS];
-	int cvarBackupsCount;
-
 	// sswolf - tj stuff
 	qboolean resetmaxspeed;
 	float topSpeed;
@@ -2614,6 +2606,7 @@ void CG_DrawTourneyScoreboard( void );
 //
 qboolean CG_ConsoleCommand( void );
 void CG_InitConsoleCommands( void );
+qboolean CG_RelayCommand(char* type, int value);
 // OSPx
 void CG_autoRecord_f( void );
 void CG_autoScreenShot_f( void );
@@ -2636,7 +2629,6 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
-void CG_UpdateSvCvars(void); // RTCWPro - cvar limiting
 
 //
 // cg_playerstate.c
@@ -2684,6 +2676,8 @@ void        trap_Cvar_Register( vmCvar_t *vmCvar, const char *varName, const cha
 void        trap_Cvar_Update( vmCvar_t *vmCvar );
 void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+void		trap_Rest_Validate(void);
+void		trap_Rest_Build(const char *data);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );
@@ -2903,6 +2897,7 @@ void        CG_StartCamera( const char *name, qboolean startBlack );
 int         CG_LoadCamera( const char *name );
 void        CG_FreeCamera( int camNum );
 //----(SA)	end
+
 // Text
 int CG_Text_Width_Ext( const char *text, float scale, int limit, fontInfo_t* font );
 int CG_Text_Height_Ext( const char *text, float scale, int limit, fontInfo_t* font );
