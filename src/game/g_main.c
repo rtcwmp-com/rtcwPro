@@ -120,7 +120,7 @@ vmCvar_t g_enforcemaxlives;         // Xian
 
 vmCvar_t g_needpass;
 vmCvar_t g_weaponTeamRespawn;
-//vmCvar_t g_doWarmup;
+vmCvar_t g_doWarmup;
 vmCvar_t g_teamAutoJoin;
 vmCvar_t g_teamForceBalance;
 vmCvar_t g_listEntity;
@@ -179,11 +179,11 @@ vmCvar_t a1_pass;		// Level 1 admin
 vmCvar_t a2_pass;		// Level 2 admin
 vmCvar_t a3_pass;		// Level 3 admin
 vmCvar_t a4_pass;		// Level 4 admin
-vmCvar_t a5_pass;		// Level 4 admin
+vmCvar_t a5_pass;		// Level 5 admin
 vmCvar_t a1_tag;		// Level 1 admin tag
 vmCvar_t a2_tag;		// Level 2 admin tag
 vmCvar_t a3_tag;		// Level 3 admin tag
-vmCvar_t a4_tag;		// Level 3 admin tag
+vmCvar_t a4_tag;		// Level 4 admin tag
 vmCvar_t a5_tag;		// Level 5 admin tag
 vmCvar_t a1_cmds;		// Level 1 admin commands
 vmCvar_t a2_cmds;		// Level 2 admin commands
@@ -232,8 +232,6 @@ vmCvar_t refereePassword;
 
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
-
-
 
 vmCvar_t g_spectatorInactivity;
 vmCvar_t g_showFlags;
@@ -296,7 +294,6 @@ vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
 vmCvar_t team_nocontrols;
 // Match specific
-vmCvar_t team_commands; // Team commands (captain..)
 vmCvar_t g_tournament;	// Ready-unready system
 vmCvar_t g_ltNades;			// Number of nades a lt starts with
 vmCvar_t g_medicNades;		// Number of nades a med starts with
@@ -315,8 +312,6 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
-vmCvar_t g_customConfig;
-vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
 
 cvarTable_t gameCvarTable[] = {
@@ -364,7 +359,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE  },                            // NERVE - SMF - merge from team arena
 
 	{ &g_warmup, "g_warmup", "20", CVAR_ARCHIVE, 0, qtrue  },
-//	{ &g_doWarmup, "g_doWarmup", "0", 0, CVAR_ARCHIVE, qtrue  },
+	{ &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
 
 	//S4NDM4NN - need to get sv_fps
 	{ &sv_fps, "sv_fps", "20", 0, 0,qfalse},
@@ -413,9 +408,9 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue },
 	{ &g_inactivity, "g_inactivity", "0", 0, 0, qtrue },
 	{ &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
-	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
+	{ &g_debugDamage, "g_debugDamage", "0", CVAR_CHEAT, 0, qfalse },
 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
-	{ &g_debugBullets, "g_debugBullets", "0", 0, 0, qfalse}, //----(SA)	added
+	{ &g_debugBullets, "g_debugBullets", "0", CVAR_CHEAT, 0, qfalse}, //----(SA)	added
 	{ &g_preciseHeadHitBox, "g_preciseHeadHitBox", "1", 0, 0, qfalse }, // default to 1
 	{ &g_motd, "g_motd", "", CVAR_ARCHIVE, 0, qfalse },
 
@@ -579,20 +574,16 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamVenom, "g_maxTeamVenom", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &team_commands, "team_commands", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
-	{ &g_customConfig, "g_customConfig", "defaultcomp", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
-	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
 // bk001129 - made static to avoid aliasing
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
-
 
 void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
@@ -1439,27 +1430,6 @@ void G_UpdateCvars( void ) {
 }
 
 /*
-=================
-OSPx - G_wipeCvars
-
-Reset particular server variables back to defaults if a config is voted in.
-=================
-*/
-void G_wipeCvars(void) {
-	int i;
-	cvarTable_t *pCvars;
-
-	for (i = 0, pCvars = gameCvarTable; i < gameCvarTableSize; i++, pCvars++) {
-		if (pCvars->vmCvar && pCvars->fConfigReset) {
-			G_Printf("set %s %s\n", pCvars->cvarName, pCvars->defaultString);
-			trap_Cvar_Set(pCvars->cvarName, pCvars->defaultString);
-		}
-	}
-
-	G_UpdateCvars();
-}
-
-/*
 ==============
 G_SpawnScriptCamera
 	create the game entity that's used for camera<->script communication and portal location for camera view
@@ -1691,9 +1661,11 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
 		G_Printf( "-----------------------------------\n" );
 	}
+
     G_loadMatchGame();
-	// OSPx - Country Flags
+
 	GeoIP_open();
+
 	// L0 - auto cfg for each map
 	if (g_mapConfigs.integer){
 		char mapName[64];
@@ -1708,17 +1680,47 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	G_RemapTeamShaders();
+
 	// L0 - Pause
 	// Start with off! As if map_restart occur while paused screen fade is stuck..
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
 
-	// These sometimes goes off so make sure..
-	teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
-	teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+	// L0 - Clamp stuff if needed
+	// TODO: Move this if into it's own function if more is introduced (i.e. Duel mode..)
+	{
+		char* info = NULL;
 
-	// RTCWPro - Set the game config
-	G_ConfigSet(g_customConfig.string);
+		if (g_medicClips.integer > 18) {
+			trap_Cvar_Set("g_medicClips", "18");
+			info = "g_medicClips - Clamping to 18\n";
+		}
+
+		if (g_engineerClips.integer > 18) {
+			trap_Cvar_Set("g_engineerClips", "18");
+			info = va("%sg_engineerClips - Clamping to 18\n", info);
+		}
+
+		if (g_soldierClips.integer > 18) {
+			trap_Cvar_Set("g_soldierClips", "18");
+			info = va("%sg_soldierClips - Clamping to 18\n", info);
+		}
+
+		if (g_leutClips.integer > 18) {
+			trap_Cvar_Set("g_leutClips", "18");
+			info = va("%sg_leutClips - Clamping to 18\n", info);
+		}
+
+		if (info) {
+			G_Printf(
+				"Following Cvars are set too high:\n%s-----------------------------------\n", info
+			);
+		}
+
+		// These sometimes goes off so make sure..
+		teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
+		teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+	}
 }
 
 /*
@@ -2094,9 +2096,6 @@ void CalculateRanks( void ) {
 		}
 	}
 
-	//RtcwPro player info
-	ServerPlayerInfo();
-
 	// see if it is time to end the level
 	CheckExitRules();
 
@@ -2340,11 +2339,6 @@ void ExitLevel( void ) {
 		}
 	}
 
-
-	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
-		G_swapTeams();
-	 }
-	 //  end
 	G_LogPrintf( "ExitLevel: executed\n" );
 }
 
@@ -2459,7 +2453,7 @@ void LogExit( const char *string ) {
 				trap_Cvar_Set( "g_nextTimeLimit", va( "%f", g_timelimit.value ) );
 			} else {
 				// use remaining time as next timer
-				trap_Cvar_Set( "g_nextTimeLimit", va( "%f", ( level.time - level.startTime ) / 60000.f ) );
+				trap_Cvar_Set( "g_nextTimeLimit", va( "%f", ( level.timeCurrent - level.startTime ) / 60000.f ) );
 			}
 		} else {
 			// reset timer
@@ -2470,7 +2464,6 @@ void LogExit( const char *string ) {
 	}
 	// -NERVE - SMF
 }
-
 
 /*
 =================
@@ -2630,7 +2623,6 @@ void CheckExitRules( void ) {
 	// if at the intermission, wait for all non-bots to
 	// signal ready, then go to next level
 	if ( level.intermissiontime ) {
-    //  if (g_altStopwatchMode.integer == 1 ) { G_swapTeams(); }
 		CheckIntermissionExit();
 		return;
 	}
@@ -2831,11 +2823,7 @@ void CheckTournement( void ) {
 	if ( level.warmupTime < 0 ) {
 		if ( level.numPlayingClients == 2 ) {
 			// fudge by -1 to account for extra delays
-			if ( g_warmup.integer > 1 ) {
-					level.warmupTime = level.time + ( g_warmup.integer - 1 ) * 1000;
-				} else {
-					level.warmupTime = 0;
-				}
+			level.warmupTime = level.time + (g_warmup.integer - 1) * 1000;
 			trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
 		}
 		return;
@@ -2903,6 +2891,7 @@ void CheckGameState( void ) {
 		if (g_tournament.integer) {
 
 			if (G_playersReady() || level.readyAll) {
+				level.warmupSwap = qfalse;
 				level.warmupTime = level.time + 11000;
 				trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 				trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
@@ -2917,6 +2906,7 @@ void CheckGameState( void ) {
 					level.readyPrint = qtrue;
 				}
 			} else {
+				level.warmupSwap = qtrue;
 				trap_SetConfigstring( CS_READY, va( "%i", (g_noTeamSwitching.integer ? READY_PENDING : READY_AWAITING) ));
 			}
 
@@ -3171,32 +3161,6 @@ void sortedActivePlayers(void) {
 
 /*
 ================
-OSPx - check for team stuff..
-================
-*/
-void handleEmptyTeams(void) {
-
-	if (!level.axisPlayers && g_gamestate.integer != GS_INTERMISSION) {
-		G_teamReset(TEAM_RED, qtrue);
-
-		// Reset match if NOT paused with an empty team
-		if (level.paused == PAUSE_NONE) {
-			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
-			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
-	else if (!level.alliedPlayers && g_gamestate.integer != GS_INTERMISSION) {
-		G_teamReset(TEAM_BLUE, qtrue);
-
-		// Reset match if NOT paused with an empty team
-		if (level.paused == PAUSE_NONE) {
-			//trap_SendConsoleCommand(EXEC_APPEND, va("resetmatch"));
-			if (g_gamestate.integer == GS_PLAYING) Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
-}
-/*
-================
 L0 - TeamLockStatus
 
 Sometimes people lock the teams and leave with callvotes off..as result game becomes unplayable..
@@ -3205,11 +3169,12 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
-	if (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP)
+	if (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP && g_gamelocked.integer != 0) {
 		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
+	}
 
-	if (g_gamestate.integer != GS_INTERMISSION) // RtcwPro added this to avoid erroneous text at the end of the round
-	{
+	// RtcwPro added this to avoid erroneous text at the end of the round
+	if (g_gamestate.integer != GS_INTERMISSION && g_gamelocked.integer > 0) {
 		// Check now
 		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
 			trap_Cvar_Set("g_gamelocked", "0");
@@ -3235,51 +3200,7 @@ void TeamLockStatus(void) {
 }
 
 /*
-Player Info (port from ET)
-sane replacement for OSP's Players_Axis/Players_Allies
-*/
-void ServerPlayerInfo(void) {
-	//128 bits
-	char playerinfo[MAX_CLIENTS + 1];
-	gentity_t* e;
-	team_t playerteam;
-	int i;
-	int lastclient;
-
-	memset(playerinfo, 0, sizeof(playerinfo));
-
-	lastclient = -1;
-	e = &g_entities[0];
-	for (i = 0; i < MAX_CLIENTS; i++, e++) {
-		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED) {
-			playerinfo[i] = '-';
-			continue;
-		}
-
-		//keep track of highest connected/connecting client
-		lastclient = i;
-
-		if (e->inuse == qfalse) {
-			playerteam = 0;
-		}
-		else {
-			playerteam = e->client->sess.sessionTeam;
-		}
-		playerinfo[i] = (char)'0' + playerteam;
-	}
-	//terminate the string, if we have any non-0 clients
-	if (lastclient != -1) {
-		playerinfo[lastclient + 1] = (char)0;
-	}
-	else {
-		playerinfo[0] = (char)0;
-	}
-
-	trap_Cvar_Set("P", playerinfo);
-}
-
-
-/*
+================
 G_RunFrame
 
 Advances the non-player objects in the world
@@ -3538,7 +3459,5 @@ void G_RunFrame( int levelTime ) {
 		sortedActivePlayers();
 		// L0 - Check Team Lock status..
 		TeamLockStatus();
-
-		handleEmptyTeams();
 	}
 }

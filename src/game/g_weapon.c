@@ -1008,7 +1008,7 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->splashRadius  = 400;
 			}
 			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
-			bomb->splashMethodOfDeath   = MOD_ARTILLERY;; // RtcwPro changed from MOD_AIRSTRIKE
+			bomb->splashMethodOfDeath   = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->clipmask = MASK_MISSILESHOT;
 			bomb->s.pos.trType = TR_STATIONARY; // was TR_GRAVITY,  might wanna go back to this and drop from height
 			bomb->s.pos.trTime = level.time;        // move a bit on the very first frame

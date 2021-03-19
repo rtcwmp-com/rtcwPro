@@ -839,7 +839,6 @@ struct gclient_s {
 	// End
 };
 
-
 //
 // this structure is cleared as each map is entered
 //
@@ -858,24 +857,6 @@ typedef struct voteInfo_s {
 	char vote_value[VOTE_MAXSTRING];        // Desired vote item setting.
 } voteInfo_t;
 
-// RTCWPro - custom config
-typedef struct cfgCvar_s
-{
-	char name[256];
-	char value[256];
-} cfgCvar_t;
-
-typedef struct config_s
-{
-	char name[256];
-	char version[256];
-	char signature[256];
-	char mapscripthash[256];
-	cfgCvar_t setl[256];
-	int numSetl;
-	qboolean loaded;
-	qboolean publicConfig;
-} config_t;
 typedef struct {
 	struct gclient_s    *clients;       // [maxclients]
 
@@ -884,6 +865,7 @@ typedef struct {
 	int num_entities;               // current number, <= MAX_GENTITIES
 
 	int warmupTime;                 // restart match at this time
+	qboolean warmupSwap;			// Swaps teams in SW with g_tournament enabled
 
 	fileHandle_t logFile;
     fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
@@ -1057,17 +1039,11 @@ typedef struct {
 
 	// Forced/Instant tapout timer to cope with flood..
 	int spawnFloodTimer;
-
-	// RTCWPro - sv_cvars
-	svCvar_t svCvars[MAX_SVCVARS];
 	int svCvarsCount;
 
-	// RTCWPro - custom config
-	config_t config;
 	int eventNum;  // event counter
-	char *match_id; // for stats round matching...
-    char *round_id; //
-
+	char* match_id; // for stats round matching...
+    char* round_id; //
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1401,7 +1377,6 @@ void G_readyTeamLock( void );
 //
 qboolean G_CanAlloc(unsigned int size);
 void *G_Alloc(unsigned int size);
-//void *G_Alloc( int size );
 void G_Free(void *ptr);
 void G_InitMemory( void );
 void Svcmd_GameMem_f( void );
@@ -1532,7 +1507,7 @@ extern vmCvar_t g_enforcemaxlives;          // Xian - Temp ban with maxlives bet
 
 extern vmCvar_t g_needpass;
 extern vmCvar_t g_weaponTeamRespawn;
-//extern vmCvar_t g_doWarmup;
+extern vmCvar_t g_doWarmup;
 extern vmCvar_t g_teamAutoJoin;
 extern vmCvar_t g_teamForceBalance;
 extern vmCvar_t g_banIPs;
@@ -1597,7 +1572,6 @@ extern vmCvar_t team_maxplayers;
 extern vmCvar_t team_nocontrols;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
-
 
 extern vmCvar_t match_warmupDamage;
 extern vmCvar_t match_mutespecs;
@@ -1683,7 +1657,6 @@ extern vmCvar_t g_maxTeamFlamer;
 extern vmCvar_t g_pauseLimit;
 extern vmCvar_t	g_fastStabSound;
 extern vmCvar_t g_duelAutoPause;
-extern vmCvar_t team_commands;
 extern vmCvar_t g_tournament;
 
 //
@@ -1713,7 +1686,6 @@ extern vmCvar_t vote_percent;
 #define REFEREE	"^3Ref^7"
 
 extern vmCvar_t	g_antiWarp; // antiwarp port
-extern vmCvar_t g_customConfig; // ET config port
 extern vmCvar_t P; // player teams in server info
 extern vmCvar_t	g_hsDamage;
 
@@ -1724,6 +1696,7 @@ int		trap_RealTime( qtime_t *qtime );  // added from wolfX
 int     trap_Argc( void );
 void    trap_Argv( int n, char *buffer, int bufferLength );
 void    trap_Args( char *buffer, int bufferLength );
+int		trap_FS_FileExists(const char* filename);
 int     trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
 void    trap_FS_Read( void *buffer, int len, fileHandle_t f );
 int     trap_FS_Write( const void *buffer, int len, fileHandle_t f );
@@ -1735,6 +1708,7 @@ void    trap_SendConsoleCommand( int exec_when, const char *text );
 void    trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );
 void    trap_Cvar_Update( vmCvar_t *cvar );
 void    trap_Cvar_Set( const char *var_name, const char *value );
+void	trap_Cvar_Restrictions_Load(void);
 int     trap_Cvar_VariableIntegerValue( const char *var_name );
 float   trap_Cvar_VariableValue( const char *var_name );
 void    trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
@@ -1978,16 +1952,7 @@ void G_ResetMarkers( gentity_t* ent );
 // g_main.c
 //
 void G_UpdateCvars(void);
-void G_wipeCvars(void);
 void G_teamReset(int, qboolean);
-void ServerPlayerInfo(void);
-///////////////////////
-// RTCWPro - g_config.c
-qboolean G_ConfigSet(const char* configname);
-void G_ConfigCheckLocked(void);
-void G_PrintConfigs(gentity_t* ent);
-qboolean G_isValidConfig(gentity_t* ent, const char* configname);
-void G_ReloadConfig(void);
 //
 // g_match.c
 //
@@ -2046,8 +2011,11 @@ int  G_voteCmdCheck( gentity_t *ent, char *arg, char *arg2, qboolean fRefereeCmd
 void G_voteFlags(void);
 void G_voteHelp( gentity_t *ent, qboolean fShowVote );
 void G_playersMessage( gentity_t *ent );
+void G_PrintConfigs(gentity_t* ent);
+qboolean G_isValidConfig(gentity_t* ent, const char* configname);
+qboolean G_ConfigSet(const char* configName);
 // Actual voting commands
-int G_Comp_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
+int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd);
 int G_Gametype_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Kick_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Mute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
@@ -2057,7 +2025,6 @@ int G_MapRestart_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 int G_MatchReset_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Mutespecs_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Nextmap_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
-int G_Pub_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Referee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_ShuffleTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_StartMatch_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
@@ -2068,7 +2035,6 @@ int G_Warmupfire_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 int G_Unreferee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_AntiLag_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
-int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd); // RTCWPro - custom config
 
 //
 // g_geoip.c
@@ -2084,11 +2050,6 @@ unsigned int GeoIP_seek_record(GeoIP *gi, unsigned long ipnum);
 void GeoIP_open(void);
 void GeoIP_close(void);
 extern GeoIP* gidb;
-
-//
-// g_config.c
-//
-void G_CompConfigSet(int dwMode, qboolean doComp);
 
 // g_match.c
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
@@ -2260,4 +2221,3 @@ int				trap_SQL_GetFieldbyID_int(int queryid, int fieldid);
 int				trap_SQL_GetFieldbyName_int(int queryid, const char* name);
 int				trap_SQL_FieldCount(int queryid);
 void			trap_SQL_CleanString(const char* in, char* out, int len);
-

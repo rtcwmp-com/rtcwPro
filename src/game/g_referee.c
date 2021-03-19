@@ -242,7 +242,6 @@ void G_refLockTeams_cmd(gentity_t *ent, qboolean fLock) {
 	trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
 }
 
-
 // Pause/unpause a match.
 void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	char *status[2] = { "^5UN", "^1" };
@@ -269,7 +268,6 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	else {
 		G_handlePause(qfalse, 0);
 		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match!\n\n\"", referee));
-		G_globalSound("sound/match/prepare.wav");
 		return;
 	}
 }

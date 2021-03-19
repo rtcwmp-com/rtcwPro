@@ -738,18 +738,20 @@ writeServerInfo
 Output server related information
 ===========
 */
-
-void G_writeServerInfo (void){
-	char* s;
-	char mapName[64];
+void G_writeServerInfo(void){
+    char* s;
+    char mapName[MAX_QPATH];
+    char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
-    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     char cs[MAX_STRING_CHARS];
 
 	qtime_t ct;
 	trap_RealTime(&ct);
+
 	// we want to save some information for the match and round
     trap_GetConfigstring( CS_ROUNDINFO, cs, sizeof( cs ) );
+    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+    trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
 
     Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
     Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
@@ -765,8 +767,8 @@ void G_writeServerInfo (void){
     json_object_set_new(jdata, "serverIP",    json_string(""));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
-    json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i",g_gameStatslog.integer)));
-    json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig.string)));
+    json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i", g_gameStatslog.integer)));
+    json_object_set_new(jdata, "g_customConfig",    json_string(va("%s", gameConfig)));
     json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 

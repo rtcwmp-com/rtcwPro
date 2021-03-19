@@ -195,6 +195,7 @@ typedef struct client_s {
 	netchan_buffer_t **netchan_end_queue;
 	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
+	int clientRestValidated;
 } client_t;
 
 //=============================================================================
@@ -369,6 +370,9 @@ extern cvar_t* sv_StreamingSelfSignedCert;
 extern cvar_t* sv_AuthEnabled;
 extern cvar_t* sv_AuthStrictMode;
 
+// Cvar restrictions
+extern cvar_t* sv_GameConfig;
+
 //===========================================================
 
 // L0 - ioquake ipv6 banning
@@ -389,9 +393,9 @@ void SV_RemoveOperatorCommands( void );
 void SV_MasterHeartbeat( const char *hbname );
 void SV_MasterShutdown( void );
 
-void SV_MasterGameCompleteStatus();     // NERVE - SMF
+void SV_MasterGameCompleteStatus(void);     // NERVE - SMF
 
-
+void SV_ReloadRest(qboolean disableTime);
 
 //
 // sv_init.c
@@ -438,6 +442,7 @@ int SV_RateMsec( client_t *client ) ;
 // sv_ccmds.c
 //
 void SV_Heartbeat_f( void );
+void SV_SetCvarRestrictions(void);
 
 //
 // sv_snapshot.c

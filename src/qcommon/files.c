@@ -776,8 +776,6 @@ void FS_SV_Rename( const char *from, const char *to ) {
 	}
 }
 
-
-
 /*
 ===========
 FS_Rename
@@ -1420,7 +1418,6 @@ int FS_Delete( char *filename ) {
 	return 0;
 }
 
-
 /*
 =================
 FS_Read
@@ -1615,7 +1612,6 @@ int FS_Seek( fileHandle_t f, long offset, int origin ) {
 	}
 }
 
-
 /*
 ======================================================================================
 
@@ -1623,7 +1619,6 @@ CONVENIENCE FUNCTIONS FOR ENTIRE FILES
 
 ======================================================================================
 */
-
 int FS_FileIsInPAK( const char *filename, int *pChecksum ) {
 	searchpath_t    *search;
 	pack_t          *pak;
@@ -1653,7 +1648,6 @@ int FS_FileIsInPAK( const char *filename, int *pChecksum ) {
 	//
 	// search through the path, one element at a time
 	//
-
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		//
 		if ( search->pack ) {
@@ -1853,8 +1847,6 @@ void FS_WriteFile( const char *qpath, const void *buffer, int size ) {
 
 	FS_FCloseFile( f );
 }
-
-
 
 /*
 ==========================================================================
@@ -2427,9 +2419,6 @@ int FS_GetModList( char *listbuf, int bufsize ) {
 
 	return nMods;
 }
-
-
-
 
 //============================================================================
 

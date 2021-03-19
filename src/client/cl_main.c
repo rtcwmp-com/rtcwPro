@@ -157,7 +157,6 @@ void CL_CDDialog( void ) {
 	cls.cddialog = qtrue;   // start it next frame
 }
 
-
 /*
 =======================================================================
 
@@ -565,7 +564,6 @@ void CL_WriteWaveFilePacket() {
 CL_PlayDemo_f
 
 demo <demoname>
-
 ====================
 */
 void CL_PlayDemo_f( void ) {
@@ -631,7 +629,6 @@ void CL_PlayDemo_f( void ) {
 	}
 }
 
-
 /*
 ====================
 CL_StartDemoLoop
@@ -668,7 +665,6 @@ void CL_NextDemo( void ) {
 	Cbuf_AddText( "\n" );
 	Cbuf_Execute();
 }
-
 
 //======================================================================
 
@@ -805,6 +801,7 @@ Sends a disconnect message to the server
 This is also called on Com_Error and Com_Quit, so it shouldn't cause any errors
 =====================
 */
+extern cvar_rest_t* cvar_rest_vars;
 void CL_Disconnect( qboolean showMainMenu ) {
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
@@ -855,6 +852,9 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	// wipe the client connection
 	memset( &clc, 0, sizeof( clc ) );
+
+	// wipe any restricted cvars
+	Cvar_Rest_Reset();
 
 	if (!cls.bWWWDlDisconnected) {
 		CL_ClearStaticDownload();
@@ -920,7 +920,6 @@ void CL_ForwardCommandToServer( const char *string ) {
 /*
 ===================
 CL_RequestMotd
-
 ===================
 */
 void CL_RequestMotd( void ) {
@@ -1117,7 +1116,6 @@ void CL_Setenv_f( void ) {
 	}
 }
 
-
 /*
 ==================
 CL_Disconnect_f
@@ -1130,11 +1128,9 @@ void CL_Disconnect_f( void ) {
 	}
 }
 
-
 /*
 ================
 CL_Reconnect_f
-
 ================
 */
 void CL_Reconnect_f( void ) {
@@ -1148,7 +1144,6 @@ void CL_Reconnect_f( void ) {
 /*
 ================
 CL_Connect_f
-
 ================
 */
 void CL_Connect_f( void ) {
@@ -1259,7 +1254,6 @@ void CL_Connect_f( void ) {
 	Cvar_Set( "ui_limboObjective", "0" );
 	// -NERVE - SMF
 }
-
 
 /*
 =====================
@@ -1442,7 +1436,6 @@ void CL_Snd_Restart_f( void ) {
 	CL_Vid_Restart_f();
 }
 
-
 /*
 ==================
 CL_PK3List_f
@@ -1497,7 +1490,6 @@ void CL_Clientinfo_f( void ) {
 	Info_Print( Cvar_InfoString( CVAR_USERINFO ) );
 	Com_Printf( "--------------------------------------\n" );
 }
-
 
 //====================================================================
 
@@ -1742,8 +1734,6 @@ void CL_InitDownloads( void ) {
 	}
 
 #endif
-
-
 	CL_DownloadsComplete();
 }
 
@@ -1867,7 +1857,6 @@ void CL_DisconnectPacket( netadr_t from ) {
 /*
 ===================
 CL_MotdPacket
-
 ===================
 */
 void CL_MotdPacket( netadr_t from ) {
@@ -2188,6 +2177,23 @@ void CL_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 		return;
 	}
 
+	if (!Q_stricmp(c, "getRestrictedList")) {
+
+		if (cls.state < CA_CONNECTED) {
+			Com_DPrintf("Not connected. Restrict check Ignored.\n");
+			return;
+		}
+
+		if (!NET_CompareBaseAdr(from, clc.serverAddress)) {
+			Com_DPrintf("getRestrictedList connectResponse from a different address.  Ignored.\n");
+			Com_DPrintf("%s should have been %s\n", NET_AdrToString(from),
+				NET_AdrToStringwPort(clc.serverAddress));
+			return;
+		}
+		Cvar_RestBuildList(va("%s", Cmd_Args()));
+		return;
+	}
+
 	Com_DPrintf( "Unknown connectionless packet command.\n" );
 }
 
@@ -2254,7 +2260,6 @@ void CL_PacketEvent( netadr_t from, msg_t *msg ) {
 /*
 ==================
 CL_CheckTimeout
-
 ==================
 */
 void CL_CheckTimeout( void ) {
@@ -2279,7 +2284,6 @@ void CL_CheckTimeout( void ) {
 /*
 ==================
 CL_CheckUserinfo
-
 ==================
 */
 void CL_CheckUserinfo( void ) {
@@ -2409,7 +2413,6 @@ qboolean CL_WWWBadChecksum(const char* pakname) {
 /*
 ==================
 CL_Frame
-
 ==================
 */
 void CL_Frame( int msec ) {
@@ -2640,8 +2643,6 @@ void CL_SetRecommended_f( void ) {
 	Com_SetRecommended();
 }
 
-
-
 /*
 ================
 CL_RefPrintf
@@ -2665,8 +2666,6 @@ void QDECL CL_RefPrintf( int print_level, const char *fmt, ... ) {
 		Com_DPrintf( S_COLOR_RED "%s", msg );     // red
 	}
 }
-
-
 
 /*
 ============
@@ -2775,6 +2774,11 @@ void CL_CheckAutoUpdate(void) {
 	autoupdateChecked = qtrue;
 }
 
+/*
+============================
+CL_GetAutoUpdate
+============================
+*/
 void CL_GetAutoUpdate( void ) {
 
 	// Don't try and get an update if we haven't checked for one
@@ -2866,6 +2870,11 @@ void CL_RefTagFree( void ) {
 	return;
 }
 
+/*
+============
+CL_ScaledMilliseconds
+============
+*/
 int CL_ScaledMilliseconds( void ) {
 	return Sys_Milliseconds() * com_timescale->value;
 }
@@ -2939,12 +2948,24 @@ void CL_InitRef( void ) {
 	Cvar_Set( "cl_paused", "0" );
 }
 
-// RF, trap manual client damage commands so users can't issue them manually
+/*
+==============
+CL_ClientDamageCommand
+
+RF, trap manual client damage commands so users can't issue them manually
+==============
+*/
 void CL_ClientDamageCommand( void ) {
 	// do nothing
 }
 
-// NERVE - SMF
+/*
+==============
+CL_startSingleplayer_f
+
+NERVE - SMF
+==============
+*/
 void CL_startSingleplayer_f( void ) {
 #if defined( __linux__ )
 	Sys_StartProcess( "./wolfsp.x86", qtrue );
@@ -2953,21 +2974,44 @@ void CL_startSingleplayer_f( void ) {
 #endif
 }
 
-// NERVE - SMF
+/*
+==============
+CL_buyNow_f
+
+NERVE - SMF
+==============
+*/
 void CL_buyNow_f( void ) {
 	Sys_OpenURL( "http://www.activision.com/games/wolfenstein/purchase.html", qtrue );
 }
 
-// NERVE - SMF
+/*
+==============
+CL_singlePlayLink_f
+
+NERVE - SMF
+==============
+*/
 void CL_singlePlayLink_f( void ) {
 	Sys_OpenURL( "http://www.activision.com/games/wolfenstein/home.html", qtrue );
 }
 
 #if !defined( __MACOS__ )
+
+/*
+==============
+CL_SaveTranslations_f
+==============
+*/
 void CL_SaveTranslations_f( void ) {
 	CL_SaveTransTable( "scripts/translation.cfg", qfalse );
 }
 
+/*
+==============
+CL_SaveNewTranslations_f
+==============
+*/
 void CL_SaveNewTranslations_f( void ) {
 	char fileName[512];
 
@@ -2981,17 +3025,21 @@ void CL_SaveNewTranslations_f( void ) {
 	CL_SaveTransTable( fileName, qtrue );
 }
 
+/*
+==============
+CL_LoadTranslations_f
+==============
+*/
 void CL_LoadTranslations_f( void ) {
 	CL_ReloadTranslation();
 }
-// -NERVE - SMF
-#endif
+
+#endif // -NERVE - SMF
 
 /*
 ==============
-L0 - Porting this from ET
-
 CL_EatMe_f
+
 Eat misc console commands to prevent exploits
 ==============
 */
@@ -3237,11 +3285,9 @@ void CL_Init( void ) {
 	Com_Printf( "----- Client Initialization Complete -----\n" );
 }
 
-
 /*
 ===============
 CL_Shutdown
-
 ===============
 */
 void CL_Shutdown( void ) {
@@ -3301,7 +3347,11 @@ void CL_Shutdown( void ) {
 	Com_Printf( "-----------------------\n" );
 }
 
-
+/*
+===============
+CL_SetServerInfo
+===============
+*/
 static void CL_SetServerInfo( serverInfo_t *server, const char *info, int ping ) {
 	if ( server ) {
 		if ( info ) {
@@ -3326,6 +3376,11 @@ static void CL_SetServerInfo( serverInfo_t *server, const char *info, int ping )
 	}
 }
 
+/*
+===============
+CL_SetServerInfoByAddress
+===============
+*/
 static void CL_SetServerInfoByAddress( netadr_t from, const char *info, int ping ) {
 	int i;
 
@@ -3802,7 +3857,6 @@ void CL_GlobalServers_f( void ) {
 	NET_OutOfBandPrint(NS_SERVER, to, "%s", command);
 }
 
-
 /*
 ==================
 CL_GetPing
@@ -4223,9 +4277,7 @@ qboolean CL_CDKeyValidate( const char *key, const char *checksum ) {
 		}
 	}
 
-
 	sprintf( chs, "%02x", sum );
-
 	if ( checksum && !Q_stricmp( chs, checksum ) ) {
 		return qtrue;
 	}
@@ -4241,7 +4293,6 @@ qboolean CL_CDKeyValidate( const char *key, const char *checksum ) {
 /*
 =======================
 CL_AddToLimboChat
-
 =======================
 */
 void CL_AddToLimboChat( const char *str ) {
@@ -4290,7 +4341,6 @@ void CL_AddToLimboChat( const char *str ) {
 /*
 =======================
 CL_GetLimboString
-
 =======================
 */
 qboolean CL_GetLimboString( int index, char *buf ) {
@@ -4302,7 +4352,6 @@ qboolean CL_GetLimboString( int index, char *buf ) {
 	return qtrue;
 }
 // -NERVE - SMF
-
 
 
 // NERVE - SMF - Localization code
@@ -4927,4 +4976,17 @@ void CL_OpenURL( const char *url ) {
 		return;
 	}
 	Sys_OpenURL( url, qtrue );
+}
+
+/*
+=======================
+CL_actionGenerateTime
+=======================
+*/
+void CL_ActionGenerateTime(qboolean useFixedTime) {
+	int min = 600 * 1000;	// 10 mins
+	int max = 12000 * 1000;	// 20 mins
+	int time = (useFixedTime ? 90 * 1000 : rand() % max + min);
+
+	cl.handle.actionTime = cl.serverTime + time;
 }
