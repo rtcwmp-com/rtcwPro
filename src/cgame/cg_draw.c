@@ -738,7 +738,7 @@ static float CG_DrawTeamOverlay( float y ) {
 
 	// max player name width
 	pwidth = 0;
-	for ( i = 0; i < numSortedTeamPlayers; i++ ) {
+	for ( i = 0; i < numSortedTeamPlayers && i <= TEAM_MAXOVERLAY; i++ ) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
 		if ( ci->infoValid && ci->team == cg.snap->ps.persistant[PERS_TEAM] ) {
 			plyrs++;
@@ -761,7 +761,7 @@ static float CG_DrawTeamOverlay( float y ) {
 	// max location name width
 	lwidth = 0;
 	if ( cg_drawTeamOverlay.integer > 1 ) {
-		for ( i = 0; i < numSortedTeamPlayers; i++ ) {
+		for ( i = 0; i < numSortedTeamPlayers && i <= TEAM_MAXOVERLAY; i++ ) {
 			ci = cgs.clientinfo + sortedTeamPlayers[i];
 			if ( ci->infoValid &&
 				 ci->team == cg.snap->ps.persistant[PERS_TEAM] &&
@@ -821,7 +821,7 @@ static float CG_DrawTeamOverlay( float y ) {
 	CG_DrawRect( x - 1, y, w + 2, h + 2, 1, hcolor );
 
 
-	for ( i = 0; i < numSortedTeamPlayers; i++ ) {
+	for ( i = 0; i < numSortedTeamPlayers && i <= TEAM_MAXOVERLAY; i++ ) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
 		if ( ci->infoValid && ci->team == cg.snap->ps.persistant[PERS_TEAM] ) {
 			// RtcwPro - Add * in front or revivable players..
@@ -2526,12 +2526,12 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 	float w;
 
 	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
-		s = va("[G:%i]", playerNades);
+		s = va("G:%i", playerNades);
 		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
 	else {
-		s = va("[A:%i-G:%i]", playerAmmoClip + playerAmmo, playerNades);
+		s = va("AMMO:%i-%i", playerAmmoClip + playerAmmo, playerNades);
 		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
@@ -2650,8 +2650,8 @@ static void CG_DrawCrosshairNames( void ) {
 	}
 	// -NERVE - SMF
 
-	// RtcwPro add player ammo if player class is LT
-	if (cgClass == 3 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
+	// RtcwPro add player ammo if cg_drawCrosshairNames is 1
+	if (cg_drawCrosshairNames.integer == 1 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
 		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
