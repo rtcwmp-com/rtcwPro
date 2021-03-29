@@ -239,6 +239,7 @@ void G_delayPrint(gentity_t *dpent) {
 			else {
 				level.paused = PAUSE_NONE;
 				AP("print \"^1FIGHT!\n\"");
+				AAPS("sound/match/fight.wav");
 				trap_SetConfigstring(CS_PAUSED, "0");
 				trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime + level.timeDelta));
 			}
