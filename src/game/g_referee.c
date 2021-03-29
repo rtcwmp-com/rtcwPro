@@ -259,7 +259,7 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	// Trigger the auto-handling of pauses
 	if (fPause) {
 		G_handlePause(qtrue, ( ent ? 1 + ent - g_entities : 0) );
-		G_globalSound("sound/match/referee.wav");
+		G_globalSound("sound/match/klaxon1.wav");
 		AP(va("print \"^3%s ^1PAUSED^3 the match^3!\n", referee));
 		CP(va("cp \"^3Match is ^1PAUSED^3! (^7%s^3)\n\"", referee));
 		level.server_settings |= CV_SVS_PAUSE;
@@ -268,6 +268,7 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	else {
 		G_handlePause(qfalse, 0);
 		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match!\n\n\"", referee));
+		G_globalSound("sound/match/prepare.wav");
 		return;
 	}
 }

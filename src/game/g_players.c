@@ -665,6 +665,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		return;	
 	}
 	else {
+		AAPS("sound/match/prepare.wav");
 		level.paused = PAUSE_UNPAUSING;
 		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));

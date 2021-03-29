@@ -69,6 +69,27 @@ void AddScore( gentity_t *ent, int score ) {
 
 /*
 =================
+Droppable weapons and FindIndex for TossClientItems
+=================
+*/
+int droppableWeapons[] = {
+	WP_MP40, WP_THOMPSON, WP_STEN, WP_MAUSER, WP_PANZERFAUST, WP_FLAMETHROWER, WP_COLT, WP_LUGER
+};
+int FindIndex(int a[], int num_elements, int value)
+{
+	int i;
+	for (i = 0; i < num_elements; i++)
+	{
+		if (a[i] == value)
+		{
+			return(value);
+		}
+	}
+	return(-1);
+}
+
+/*
+=================
 TossClientItems
 
 Toss the weapon and powerups for the killed player
@@ -103,7 +124,7 @@ void TossClientItems( gentity_t *self ) {
 	}
 	// jpw
 
-	if ( weapon > WP_NONE && weapon < WP_MONSTER_ATTACK1 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) {
+	if ( weapon > WP_NONE && FindIndex(droppableWeapons, ARRAY_LEN(droppableWeapons), weapon) >= 0 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) { // < WP_MONSTER_ATTACK1 replaced
 		// find the item type for this weapon
 		item = BG_FindItemForWeapon( weapon );
 		// spawn the item
