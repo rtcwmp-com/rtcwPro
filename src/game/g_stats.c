@@ -355,8 +355,8 @@ static const weap_ws_convert_t aWeapMOD[MOD_NUM_MODS] = {
 	{ MOD_VENOM,				WS_VENOM },
 	{ MOD_VENOM_FULL,			WS_VENOM }, // RtcwPro added venom full
 	{ MOD_GRENADE_PINEAPPLE,    WS_GRENADE },
-
 	{ MOD_DYNAMITE,             WS_DYNAMITE },
+	{ MOD_DYNAMITE_SPLASH,      WS_DYNAMITE }, // RtcwPro added dynamite splash
 	{ MOD_AIRSTRIKE,            WS_AIRSTRIKE },
 	{ MOD_SYRINGE,              WS_SYRINGE },
 //	{ MOD_POISONEDMED,           WS_POISON },
