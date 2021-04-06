@@ -353,9 +353,9 @@ void G_refRemove_cmd(gentity_t *ent) {
 
 	SetTeam(player, "s", qtrue); // , -1, -1, qfalse);
 
-	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
-		G_readyStart(); // ET had G_readyMatchState
-	}
+	//if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
+	//	G_readyStart(); // ET had G_readyMatchState
+	//}
 }
 
 
@@ -442,20 +442,20 @@ void G_refMute_cmd(gentity_t *ent, qboolean mute) {
 		return;
 	}
 
-	if (player->client->sess.muted == mute) {
+	if (player->client->sess.ignored == mute) {
 		G_refPrintf(ent, "\"%s^*\" %s\n", player->client->pers.netname, mute ? "is already muted!" : "is not muted!");
 		return;
 	}
 
 	if (mute) {
 		CPx(pid, "print \"^5You've been muted\n\"");
-		player->client->sess.muted = qtrue;
+		player->client->sess.ignored = qtrue;
 		G_Printf("\"%s^*\" has been muted\n", player->client->pers.netname);
 		ClientUserinfoChanged(pid);
 	}
 	else {
 		CPx(pid, "print \"^5You've been unmuted\n\"");
-		player->client->sess.muted = qfalse;
+		player->client->sess.ignored = qfalse;
 		G_Printf("\"%s^*\" has been unmuted\n", player->client->pers.netname);
 		ClientUserinfoChanged(pid);
 	}
@@ -576,7 +576,7 @@ void G_MuteClient() {
 	if (cnum != MAX_CLIENTS) {
 		if (level.clients[cnum].sess.referee != RL_RCON) {
 			trap_SendServerCommand(cnum, va("cpm \"^3You have been muted\""));
-			level.clients[cnum].sess.muted = qtrue;
+			level.clients[cnum].sess.ignored = qtrue;
 			G_Printf("%s^* has been muted\n", cmd);
 			ClientUserinfoChanged(cnum);
 		}
@@ -600,9 +600,9 @@ void G_UnMuteClient() {
 	cnum = G_refClientnumForName(NULL, cmd);
 
 	if (cnum != MAX_CLIENTS) {
-		if (level.clients[cnum].sess.muted) {
+		if (level.clients[cnum].sess.ignored) {
 			trap_SendServerCommand(cnum, va("cpm \"^2You have been un-muted\""));
-			level.clients[cnum].sess.muted = qfalse;
+			level.clients[cnum].sess.ignored = qfalse;
 			G_Printf("%s has been un-muted\n", cmd);
 			ClientUserinfoChanged(cnum);
 		}

@@ -436,7 +436,7 @@ int G_Mute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 			return( G_INVALID );
 		}
 
-		if ( level.clients[pid].sess.muted ) {
+		if ( level.clients[pid].sess.ignored ) {
 			G_refPrintf( ent, "Player is already muted!" );
 			return( G_INVALID );
 		}
@@ -451,7 +451,7 @@ int G_Mute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 		// Mute a player
 		if ( level.clients[pid].sess.referee != RL_RCON ) {
 			trap_SendServerCommand( pid, va( "cpm \"^3You have been muted\"" ) );
-			level.clients[pid].sess.muted = qtrue;
+			level.clients[pid].sess.ignored = qtrue;
 			AP( va( "cp \"%s\n^3has been muted!\n\"", level.clients[pid].pers.netname ) );
 			ClientUserinfoChanged( pid );
 		} else {
@@ -487,7 +487,7 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 			return( G_INVALID );
 		}
 
-		if ( !level.clients[pid].sess.muted ) {
+		if ( !level.clients[pid].sess.ignored ) {
 			G_refPrintf( ent, "Player is not muted!" );
 			return( G_INVALID );
 		}
@@ -502,7 +502,7 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 		// Mute a player
 		if ( level.clients[pid].sess.referee != RL_RCON ) {
 			trap_SendServerCommand( pid, va( "cpm \"^3You have been un-muted\"" ) );
-			level.clients[pid].sess.muted = qfalse;
+			level.clients[pid].sess.ignored = qfalse;
 			AP( va( "cp \"%s\n^3has been un-muted!\n\"", level.clients[pid].pers.netname ) );
 			ClientUserinfoChanged( pid );
 		} else {

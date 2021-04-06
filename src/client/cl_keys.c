@@ -1736,7 +1736,7 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	}
 
 	// console key is hardcoded, so the user can never unbind it
-	if (key == (unsigned char)'`' || key == (unsigned char)'~' || key == (unsigned char)'\xAC') {
+	if (key == (unsigned char)'`' || key == (unsigned char)'~') { // || key == (unsigned char)'\xAC') {
 		if ( !down ) {
 			return;
 
