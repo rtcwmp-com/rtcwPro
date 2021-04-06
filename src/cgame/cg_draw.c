@@ -3116,13 +3116,16 @@ static void CG_DrawWarmup( void ) {
 	int w;
 	int sec;
 	int cw;
-	const char  *s, *s1, *s2;
+	const char  *s, *s1, *s2, *configString;
     static qboolean announced = qfalse;
 
 	if ( cgs.gametype == GT_SINGLE_PLAYER ) {
 		return;     // (SA) don't bother with this stuff in sp
 	}
 
+	const char* info = CG_ConfigString(CS_SERVERINFO);
+	char* configName = Info_ValueForKey(info, "sv_GameConfig");
+	if (configName != NULL) configString = va("^3%s Config Loaded", configName);
 
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
@@ -3131,10 +3134,12 @@ static void CG_DrawWarmup( void ) {
 		// Account for g_minGameClients if it's present
 		if (cgs.readyState == CREADY_PENDING) {
 
-			/*s = CG_TranslateString( "^nGame Stopped ^7- Waiting for players to ready up" );
-			w = CG_DrawStrlen( s );
-			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 ); KK commented this out*/
-
+			if (configString != NULL)
+			{
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
 
 			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );
 
@@ -3150,6 +3155,13 @@ static void CG_DrawWarmup( void ) {
 
 		} else {
 
+			if (configString != NULL)
+			{
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
+
 			// No need to bother with count..scoreboard gives info..
 			s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), cgs.minclients, cgs.minclients == 1 ? "player" : "players");
 			w = CG_DrawStrlen( s );
@@ -3164,11 +3176,19 @@ static void CG_DrawWarmup( void ) {
 			}
 		}
 
-	return;
+		return;
 	}
 	sec = cg.warmup;
 	if ( !sec ) {
 		if ( cgs.gamestate == GS_WAITING_FOR_PLAYERS ) {
+
+			if (configString != NULL)
+			{
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
+
 			cw = 10;
 
 			s = CG_TranslateString( "^3WARMUP:^7 Waiting for more players" );
