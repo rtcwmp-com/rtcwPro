@@ -972,10 +972,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// L0 - Now by default knockback is set to 100 (was 1000) so if it's not touched
 	// multiply nade and AS to 1000 so it acts and feels like default
 	if (dflags & DAMAGE_RADIUS) {
-		if (g_knockback.integer <= 100) {
-			knockback = 1000;
-		}
-	} 
+		if (g_knockback.integer <= 100)
+			knockback *= 10;
+	} // End
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
