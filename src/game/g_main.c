@@ -2636,7 +2636,7 @@ void CheckExitRules( void ) {
 	}
 
 	if ( g_timelimit.value && !level.warmupTime && level.paused == PAUSE_NONE ) {
-		if ( level.time - level.startTime >= g_timelimit.value * 60000 ) {
+		if ( level.timeCurrent - level.startTime >= g_timelimit.value * 60000 ) {
 
 			// check for sudden death
 			if ( g_gametype.integer != GT_CTF && ScoreIsTied() ) {
