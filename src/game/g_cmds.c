@@ -1743,7 +1743,10 @@ void Cmd_Vote_f( gentity_t *ent ) {
 
 		// exit out for comp settings
 		if (g_tournament.integer == 1 || g_complaintlimit.integer == 0)
+		{
+			trap_SendServerCommand(ent - g_entities, "complaint -2");
 			return;
+		}
 
 		gclient_t *cl = g_entities[ ent->client->pers.complaintClient ].client;
 		if ( !cl ) {
