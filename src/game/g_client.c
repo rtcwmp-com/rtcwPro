@@ -2468,7 +2468,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		}
 
 		// End Xian
-		SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
+		if (!revived) // RtcwPro #315 only call this if player is spawning (not getting revived)
+			SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
 	}
 	// dhm - end
 
