@@ -1797,13 +1797,13 @@ void SV_UserinfoChanged( client_t *cl ) {
 			cl->rate = 5000;
 		}
 	}
-	val = Info_ValueForKey( cl->userinfo, "handicap" );
+	/*val = Info_ValueForKey( cl->userinfo, "handicap" );
 	if ( strlen( val ) ) {
 		i = atoi( val );
-		if ( i <= 0 || i > 100 || strlen( val ) > 4 ) {
-			Info_SetValueForKey( cl->userinfo, "handicap", "100" );
-		}
-	}
+		if ( i <= 0 || i > 100 || strlen( val ) > 4 ) {*/
+			Info_SetValueForKey( cl->userinfo, "handicap", "100" ); // rtcwpro always set to 100 to avoid pickup ammo/health bug
+	/*	}
+	}*/
 
 	// snaps command
 	val = Info_ValueForKey( cl->userinfo, "snaps" );

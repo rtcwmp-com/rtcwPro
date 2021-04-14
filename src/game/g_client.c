@@ -1587,11 +1587,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	// set max health
-	client->pers.maxHealth = atoi( Info_ValueForKey( userinfo, "handicap" ) );
-	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	// set max health // rtcwpro always set to 100 to avoid pickup ammo/health bug
+	client->pers.maxHealth = 100; // atoi(Info_ValueForKey(userinfo, "handicap"));
+	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
-	}
+	}*/
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 
 	// set model
@@ -1697,7 +1697,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
 			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
-				client->pers.maxHealth, client->sess.wins, client->sess.losses,
+				100, client->sess.wins, client->sess.losses, // rtcwpro changed HC to always be set to 100 for non-bot players
 				client->sess.uci, (client->sess.ignored ? 1 : 0),
 				client->sess.referee
 			);
