@@ -2689,6 +2689,12 @@ static void CG_DrawVote( void ) {
 
 	if ( cgs.complaintEndTime > cg.time ) {
 
+		// RtcwPro exit complaint dialog if g_tournament is 1
+		const char* info = CG_ConfigString(CS_SERVERINFO);
+		char* isTournament = Info_ValueForKey(info, "g_tournament");
+		if (isTournament != NULL && strcmp(isTournament, "1") == 0)
+			return;
+
 		if ( cgs.complaintClient == -1 ) {
 			s = "Your complaint has been filed";
 			CG_DrawStringExt( 8, 200, CG_TranslateString( s ), color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 80 );

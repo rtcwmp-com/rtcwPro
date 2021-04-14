@@ -575,7 +575,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
+	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
