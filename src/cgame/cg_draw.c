@@ -3115,7 +3115,7 @@ CG_DrawWarmup
 static void CG_DrawWarmup( void ) {
 	int w;
 	int sec;
-	int cw;
+	int cw = 10;
 	const char  *s, *s1, *s2, *configString;
     static qboolean announced = qfalse;
 
@@ -3129,7 +3129,6 @@ static void CG_DrawWarmup( void ) {
 
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
-		cw = 10;
 
 		// Account for g_minGameClients if it's present
 		if (cgs.readyState == CREADY_PENDING) {
@@ -3188,8 +3187,6 @@ static void CG_DrawWarmup( void ) {
 				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
 					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 			}
-
-			cw = 10;
 
 			s = CG_TranslateString( "^3WARMUP:^7 Waiting for more players" );
 
@@ -3298,8 +3295,6 @@ static void CG_DrawWarmup( void ) {
 		if ( strlen( s2 ) ) {
 			s2 = CG_TranslateString( s2 );
 		}
-
-		cw = 10;
 
 		w = CG_DrawStrlen( s ); // OSPx - Pushed all lower for 20
 		CG_DrawStringExt( 320 - w * cw / 2, 160, s, colorWhite,
@@ -4401,14 +4396,14 @@ void CG_ShakeCamera() {
 	// JPW NERVE starts at 1, approaches 0 over time
 	x = ( cg.cameraShakeTime - cg.time ) / cg.cameraShakeLength;
 
-	// OSPx - NQ's shake cam..
-	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
-	cg.refdef.vieworg[2] += val;
-	val = sin(M_PI * 13 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
-	cg.refdef.vieworg[1] += val;
-	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
-	cg.refdef.vieworg[0] += val;
-	// End
+	// up/down
+
+	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
+	cg.refdefViewAngles[0] += val;
+
+	// left/right
+	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
+	cg.refdefViewAngles[1] += val;
 
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 }
