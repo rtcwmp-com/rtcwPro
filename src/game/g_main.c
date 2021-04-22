@@ -312,6 +312,7 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
+vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
 
 cvarTable_t gameCvarTable[] = {
@@ -580,6 +581,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
 // bk001129 - made static to avoid aliasing
@@ -2096,6 +2098,9 @@ void CalculateRanks( void ) {
 		}
 	}
 
+	//RtcwPro player info
+	ServerPlayerInfo();
+
 	// see if it is time to end the level
 	CheckExitRules();
 
@@ -3197,6 +3202,50 @@ void TeamLockStatus(void) {
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
 		}
 	}
+}
+
+/*
+Player Info (port from ET)
+sane replacement for OSP's Players_Axis/Players_Allies
+*/
+void ServerPlayerInfo(void) {
+	//128 bits
+	char playerinfo[MAX_CLIENTS + 1];
+	gentity_t* e;
+	team_t playerteam;
+	int i;
+	int lastclient;
+
+	memset(playerinfo, 0, sizeof(playerinfo));
+
+	lastclient = -1;
+	e = &g_entities[0];
+	for (i = 0; i < MAX_CLIENTS; i++, e++) {
+		if (e->client == NULL || e->client->pers.connected == CON_DISCONNECTED) {
+			playerinfo[i] = '-';
+			continue;
+		}
+
+		//keep track of highest connected/connecting client
+		lastclient = i;
+
+		if (e->inuse == qfalse) {
+			playerteam = 0;
+		}
+		else {
+			playerteam = e->client->sess.sessionTeam;
+		}
+		playerinfo[i] = (char)'0' + playerteam;
+	}
+	//terminate the string, if we have any non-0 clients
+	if (lastclient != -1) {
+		playerinfo[lastclient + 1] = (char)0;
+	}
+	else {
+		playerinfo[0] = (char)0;
+	}
+
+	trap_Cvar_Set("P", playerinfo);
 }
 
 /*
