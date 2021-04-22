@@ -1385,17 +1385,6 @@ OSPx - Store Client's IP
 ============
 */
 void SaveIP_f(gclient_t * client, char * sip) {
-	// Don't blindly save if entry already exists..
-	if (!Q_stricmp(client->sess.ip, "")) {
-		return;
-	}
-
-	if (!Q_stricmp(sip, "localhost") == 0 || sip == NULL) {
-		// Localhost, just enter 0 for all values:
-		Q_strncpyz(client->sess.ip, "0.0.0.0", sizeof(client->sess.ip));
-		return;
-	}
-
 	Q_strncpyz(client->sess.ip, sip, sizeof(client->sess.ip));
 	return;
 }
