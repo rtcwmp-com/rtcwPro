@@ -3329,6 +3329,8 @@ static void CG_DrawFlashFade( void ) {
 	vec4_t col;
 	qboolean fBlackout = ( int_ui_blackout.integer > 0 );
 
+	if (cg.demoPlayback) return;
+
 	if ( cgs.fadeStartTime + cgs.fadeDuration < cg.time ) {
 		cgs.fadeAlphaCurrent = cgs.fadeAlpha;
 	} else if ( cgs.fadeAlphaCurrent != cgs.fadeAlpha ) {
