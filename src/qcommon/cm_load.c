@@ -458,7 +458,11 @@ CMod_LoadEntityString
 =================
 */
 void CMod_LoadEntityString( lump_t *l ) {
-	cm.entityString = Hunk_Alloc( l->filelen, h_high );
+
+	// sswolf - custom spawns
+	//cm.entityString = Hunk_Alloc( l->filelen, h_high );
+	cm.entityString = Z_Malloc(l->filelen);
+	// custom spawns end
 	cm.numEntityChars = l->filelen;
 	memcpy( cm.entityString, cmod_base + l->fileofs, l->filelen );
 }
@@ -749,6 +753,28 @@ int     CM_NumInlineModels( void ) {
 
 char    *CM_EntityString( void ) {
 	return cm.entityString;
+}
+
+/*
+=============
+sswolf - custom spawns
+
+CM_AppendToEntityString
+=============
+*/
+void	CM_AppendToEntityString(char* data, int dataLength) {
+	int newSize = cm.numEntityChars + dataLength;
+	char* newEntityString = Z_Malloc(newSize);
+
+	if (cm.entityString)
+	{
+		Q_strncpyz(newEntityString, cm.entityString, newSize);
+		Z_Free(cm.entityString);
+	}
+
+	Q_strcat(newEntityString, newSize, data);
+	cm.entityString = newEntityString;
+	cm.numEntityChars = newSize;
 }
 
 int     CM_LeafCluster( int leafnum ) {
