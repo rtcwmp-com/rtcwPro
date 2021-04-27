@@ -1337,7 +1337,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {
 		if ( ucmd->wbuttons & WBUTTON_DROP ) {
-			if ( !client->dropWeaponTime  ) {
+			if ( !client->dropWeaponTime  && level.paused == PAUSE_NONE ) {
 				client->dropWeaponTime = 1; // just latch it for now
 
 				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
@@ -1401,7 +1401,6 @@ void ClientThink_real( gentity_t *ent ) {
 		}
 	}
 
-
 // jpw
 
 	// check for inactivity timer, but never drop the local client of a non-dedicated server
@@ -1409,7 +1408,7 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	if ( reloading || client->cameraPortal ) { // TODO check this against OSPx
+	if ( reloading || client->cameraPortal || level.paused != PAUSE_NONE) { // TODO check this against OSPx
 		ucmd->buttons = 0;
 		ucmd->forwardmove = 0;
 		ucmd->rightmove = 0;
@@ -2147,7 +2146,7 @@ void ClientEndFrame( gentity_t *ent ) {
 		ent->client->pers.teamState.lasthurtcarrier += time_delta;
 		ent->client->pers.teamState.lastfraggedcarrier += time_delta;
 		ent->client->ps.classWeaponTime += time_delta;
-	//	ent->client->respawnTime += time_delta;
+		ent->client->respawnTime += time_delta;
 		ent->client->sniperRifleFiredTime += time_delta;
 		ent->lastHintCheckTime += time_delta;
 		ent->pain_debounce_time += time_delta;

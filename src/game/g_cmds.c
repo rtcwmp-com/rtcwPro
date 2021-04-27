@@ -534,6 +534,7 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f( gentity_t *ent ) {
     int dmg = 0; // OSPx - Needed for Team Damage stats..
+
 	// L0 - Patched for Pause
 	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
 		 ( ent->client->ps.pm_flags & PMF_LIMBO ) ||
@@ -570,7 +571,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	spectatorState_t specState;
 	int specClient;
 
-	if (level.paused != PAUSE_NONE && !forced) {
+	if (level.paused != PAUSE_NONE && !forced && !ent->client->sess.referee) {
 		CP("cp \"^3You cannot switch teams during Pause!\n\"2");
 		return;
 	}
@@ -1611,7 +1612,6 @@ static const char *gameNames[] = {
 	"Wolf Checkpoint"
 };
 
-
 /*
 ==================
 Cmd_CallVote_f
@@ -1698,7 +1698,7 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 		// Gordon: just call the stupid thing.... don't bother with the voting faff
 		level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
 
-		G_globalSound("sound/match/referee.wav");
+		G_globalSound("sound/match/klaxon2.wav");
 	}
 	else {
 		level.voteInfo.voteYes = 1;
@@ -1737,13 +1737,16 @@ Cmd_Vote_f
 void Cmd_Vote_f( gentity_t *ent ) {
 	char msg[64];
 	int num;
-
+	
 	// DHM - Nerve :: Complaints supercede voting (and share command)
 	if ( ent->client->pers.complaintEndTime > level.time ) {
 
 		// exit out for comp settings
 		if (g_tournament.integer == 1 || g_complaintlimit.integer == 0)
+		{
+			trap_SendServerCommand(ent - g_entities, "complaint -2");
 			return;
+		}
 
 		gclient_t *cl = g_entities[ ent->client->pers.complaintClient ].client;
 		if ( !cl ) {
@@ -1827,9 +1830,11 @@ void Cmd_Vote_f( gentity_t *ent ) {
 	if ( msg[0] == 'y' || msg[1] == 'Y' || msg[1] == '1' ) {
 		level.voteInfo.voteYes++;
 		trap_SetConfigstring( CS_VOTE_YES, va( "%i", level.voteInfo.voteYes ) );
+		G_globalSound("sound/match/vote-yes.wav");
 	} else {
 		level.voteInfo.voteNo++;
 		trap_SetConfigstring( CS_VOTE_NO, va( "%i", level.voteInfo.voteNo ) );
+		G_globalSound("sound/match/vote-no.wav");
 	}
 
 	// a majority will be determined in G_CheckVote, which will also account
@@ -2706,20 +2711,8 @@ void ClientCommand( int clientNum ) {
 		Cmd_Noclip_f( ent );
 	} else if ( Q_stricmp( cmd, "kill" ) == 0 )  {
 		Cmd_Kill_f( ent );
-	// Instant tapout
-	/*} else if (!Q_stricmp(cmd, "forcetapout")) {
-		if (ent->client->ps.stats[STAT_HEALTH] <= 0 &&
-			(ent->client->sess.sessionTeam == TEAM_RED || ent->client->sess.sessionTeam == TEAM_BLUE) )
-		{
-			limbo(ent, qtrue);
-		}
-		return;*/
-// -OSPx
 	} else if ( Q_stricmp( cmd, "gib" ) == 0 )  {
 		Cmd_Gib_f( ent );
-	/*} else if (Q_stricmp(cmd, "hitsound") == 0) {
-		Cmd_hitsounds(ent);*/
-	// End
 	} else if ( Q_stricmp( cmd, "levelshot" ) == 0 )  {
 		Cmd_LevelShot_f( ent );
 	} else if ( Q_stricmp( cmd, "follow" ) == 0 )  {
@@ -2750,7 +2743,7 @@ void ClientCommand( int clientNum ) {
 	} else if ( Q_stricmp( cmd, "setspawnpt" ) == 0 )  {
 		Cmd_SetSpawnPoint_f( ent );
 	} else if (!Q_stricmp(cmd, "forcetapout")) {
-		 if (!ent || !ent->client) {
+		 if (!ent || !ent->client || level.paused != PAUSE_NONE) { // Do not allow forcetapout during pause
 			 return;
 		 }
 

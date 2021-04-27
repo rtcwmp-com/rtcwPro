@@ -29,7 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 // common.c -- misc functions used in client and server
 
 #include "../game/q_shared.h"
+#include "database.h"
+#include "threads.h"
 #include "qcommon.h"
+#ifndef  DEDICATED
+#include "md5.h"
+#endif // ! DEDICATED
 #include <setjmp.h>
 #ifndef  _WIN32
 #include <stdint.h>
@@ -879,7 +884,6 @@ void Z_Free( void *ptr ) {
 		}
 	}
 }
-
 
 /*
 ================
@@ -2323,10 +2327,36 @@ void Com_ReadCDKey( const char *filename ) {
 	FS_FCloseFile( f );
 
 	if ( CL_CDKeyValidate( buffer, NULL ) ) {
-		Q_strncpyz( cl_cdkey, buffer, 17 );
+		Q_strncpyz(cl_cdkey, buffer, 17);
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
+}
+
+/*
+=================
+Com_ReadAuthKey
+=================
+*/
+void Com_ReadAuthKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[33];
+	char fbuffer[MAX_OSPATH];
+
+	sprintf(fbuffer, "%s/authkey", filename);
+
+	FS_SV_FOpenFileRead(fbuffer, &f);
+	if (!f) {
+		return;
+	}
+
+	Com_Memset(buffer, 0, sizeof(buffer));
+
+	FS_Read(buffer, 16, f);
+	FS_FCloseFile(f);
+#ifndef DEDICATED
+	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+#endif
 }
 
 /*
@@ -2370,10 +2400,7 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	char fbuffer[MAX_OSPATH];
 	char key[17];
 
-
 	sprintf( fbuffer, "%s/rtcwkey", filename );
-
-
 	Q_strncpyz( key, ikey, 17 );
 
 	if ( !CL_CDKeyValidate( key, NULL ) ) {
@@ -2624,6 +2651,11 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
+
+	OW_Init();
+
+	Threads_Init();
+
 	com_fullyInitialized = qtrue;
 	Com_Printf( "--- Common Initialization Complete ---\n" );
 }
@@ -3394,6 +3426,8 @@ void Com_Shutdown( void ) {
 		com_journalFile = 0;
 	}
 
+	OW_Shutdown();
+
 }
 
 #if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD
@@ -3888,7 +3922,6 @@ void Field_CompleteCommand( field_t *field ) {
 	Cmd_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion( PrintMatches );
 }
-
 
 // new stuff (but found not essential at this time) for iortcw port of server defined dl rates
 /*

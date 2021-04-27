@@ -1007,6 +1007,21 @@ static void PrintMatches( const char *s ) {
 	}
 }
 
+/*
+===============
+// sswolf - tab value expansion ala ET
+
+PrintMatches
+===============
+*/
+static void PrintCvarMatches(const char* s)
+{
+	if (!Q_stricmpn(s, shortestMatch, strlen(shortestMatch)))
+	{
+		Com_Printf("  %s = ^5%s^0\n", s, Cvar_VariableString(s));
+	}
+}
+
 static void keyConcatArgs( void ) {
 	int i;
 	char    *arg;
@@ -1099,7 +1114,9 @@ static void CompleteCommand( void ) {
 
 	// run through again, printing matches
 	Cmd_CommandCompletion( PrintMatches );
-	Cvar_CommandCompletion( PrintMatches );
+	// sswolf - tab value expansion ala ET
+	//Cvar_CommandCompletion( PrintMatches );
+	Cvar_CommandCompletion(PrintCvarMatches);
 }
 
 
@@ -1736,7 +1753,7 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	}
 
 	// console key is hardcoded, so the user can never unbind it
-	if (key == (unsigned char)'`' || key == (unsigned char)'~' || key == (unsigned char)'\xAC') {
+	if (key == (unsigned char)'`' || key == (unsigned char)'~') { // || key == (unsigned char)'\xAC') {
 		if ( !down ) {
 			return;
 
@@ -1820,9 +1837,9 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 			if (cl_bypassMouseInput->integer == 1) {
 				bypassMenu = qtrue;
 			}
-			else if (((cls.keyCatchers & KEYCATCH_UI) && !UI_checkKeyExec(key)) || ((cls.keyCatchers & KEYCATCH_CGAME) && !CL_CGameCheckKeyExec(key))) {
-				bypassMenu = qtrue;
-			}
+		}
+		else if (((cls.keyCatchers & KEYCATCH_UI) && !UI_checkKeyExec(key)) || ((cls.keyCatchers & KEYCATCH_CGAME) && !CL_CGameCheckKeyExec(key))) {
+			bypassMenu = qtrue;
 		}
 	}
 

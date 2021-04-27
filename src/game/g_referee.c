@@ -242,7 +242,6 @@ void G_refLockTeams_cmd(gentity_t *ent, qboolean fLock) {
 	trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
 }
 
-
 // Pause/unpause a match.
 void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 	char *status[2] = { "^5UN", "^1" };
@@ -259,23 +258,20 @@ void G_refPause_cmd(gentity_t *ent, qboolean fPause) {
 
 	// Trigger the auto-handling of pauses
 	if (fPause) {
-		level.paused = 100 + ((ent) ? (1 + ent - g_entities) : 0);
-		G_globalSound("sound/match/referee.wav");
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
+		G_handlePause(qtrue, ( ent ? 1 + ent - g_entities : 0) );
+		G_globalSound("sound/match/klaxon1.wav");
 		AP(va("print \"^3%s ^1PAUSED^3 the match^3!\n", referee));
 		CP(va("cp \"^3Match is ^1PAUSED^3! (^7%s^3)\n\"", referee));
 		level.server_settings |= CV_SVS_PAUSE;
 		trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
 	}
 	else {
-		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match ... resuming in 10 seconds!\n\n\"", referee));
-		level.paused = PAUSE_UNPAUSING;
+		G_handlePause(qfalse, 0);
+		AP(va("print \"\n^3%s ^5UNPAUSED^3 the match!\n\n\"", referee));
 		G_globalSound("sound/match/prepare.wav");
-		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		return;
 	}
 }
-
 
 // Puts a player on a team.
 void G_refPlayerPut_cmd(gentity_t *ent, int team_id) {
@@ -357,9 +353,9 @@ void G_refRemove_cmd(gentity_t *ent) {
 
 	SetTeam(player, "s", qtrue); // , -1, -1, qfalse);
 
-	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
-		G_readyStart(); // ET had G_readyMatchState
-	}
+	//if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN) {
+	//	G_readyStart(); // ET had G_readyMatchState
+	//}
 }
 
 
@@ -446,20 +442,20 @@ void G_refMute_cmd(gentity_t *ent, qboolean mute) {
 		return;
 	}
 
-	if (player->client->sess.muted == mute) {
+	if (player->client->sess.ignored == mute) {
 		G_refPrintf(ent, "\"%s^*\" %s\n", player->client->pers.netname, mute ? "is already muted!" : "is not muted!");
 		return;
 	}
 
 	if (mute) {
 		CPx(pid, "print \"^5You've been muted\n\"");
-		player->client->sess.muted = qtrue;
+		player->client->sess.ignored = qtrue;
 		G_Printf("\"%s^*\" has been muted\n", player->client->pers.netname);
 		ClientUserinfoChanged(pid);
 	}
 	else {
 		CPx(pid, "print \"^5You've been unmuted\n\"");
-		player->client->sess.muted = qfalse;
+		player->client->sess.ignored = qfalse;
 		G_Printf("\"%s^*\" has been unmuted\n", player->client->pers.netname);
 		ClientUserinfoChanged(pid);
 	}
@@ -580,7 +576,7 @@ void G_MuteClient() {
 	if (cnum != MAX_CLIENTS) {
 		if (level.clients[cnum].sess.referee != RL_RCON) {
 			trap_SendServerCommand(cnum, va("cpm \"^3You have been muted\""));
-			level.clients[cnum].sess.muted = qtrue;
+			level.clients[cnum].sess.ignored = qtrue;
 			G_Printf("%s^* has been muted\n", cmd);
 			ClientUserinfoChanged(cnum);
 		}
@@ -604,9 +600,9 @@ void G_UnMuteClient() {
 	cnum = G_refClientnumForName(NULL, cmd);
 
 	if (cnum != MAX_CLIENTS) {
-		if (level.clients[cnum].sess.muted) {
+		if (level.clients[cnum].sess.ignored) {
 			trap_SendServerCommand(cnum, va("cpm \"^2You have been un-muted\""));
-			level.clients[cnum].sess.muted = qfalse;
+			level.clients[cnum].sess.ignored = qfalse;
 			G_Printf("%s has been un-muted\n", cmd);
 			ClientUserinfoChanged(cnum);
 		}

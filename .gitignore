@@ -349,3 +349,4 @@ ASALocalRun/
 .localhistory/
 *.pk3
 /src/servercache.dat
+/src/main/authkey

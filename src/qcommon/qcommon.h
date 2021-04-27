@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
+#include "dl_public.h" // L0 - HTTP downloads
+
 //Ignore __attribute__ on non-gcc platforms
 #ifndef __GNUC__
 #ifndef __attribute__
@@ -151,14 +153,20 @@ NET
 //#define	MAX_RELIABLE_COMMANDS	128			// max string commands buffered for restransmit
 #define MAX_RELIABLE_COMMANDS   256 // bigger!
 #define NET_ENABLEV4            0x01
+#define NET_ENABLEV6            0x02
+// if this flag is set, always attempt ipv6 connections instead of ipv4 if a v6 address is found.
+#define NET_PRIOV6              0x04
+// disables ipv6 multicast support if set.
+#define NET_DISABLEMCAST        0x08
 typedef enum {
 	NA_BOT,
 	NA_BAD,                 // an address lookup failed
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP,
-	NA_IPX,
-	NA_BROADCAST_IPX
+	NA_IP6,
+	NA_MULTICAST6,
+	NA_UNSPEC
 } netadrtype_t;
 
 typedef enum {
@@ -173,12 +181,13 @@ typedef struct {
 
 	byte ip[4];
 	byte ipx[10];
+	byte ip6[16];
 
 	unsigned short port;
-	unsigned long	scope_id;	// Needed for IPv6 link-local addresses
+	unsigned long scope_id;       // Needed for IPv6 link-local addresses
 } netadr_t;
 
-void		NET_Restart(void);
+void        NET_Restart_f(void);
 void        NET_Init( void );
 void        NET_Shutdown( void );
 void		NET_Restart_f( void );
@@ -199,8 +208,11 @@ qboolean    NET_CompareBaseAdr( netadr_t a, netadr_t b );
 qboolean    NET_IsLocalAddress( netadr_t adr );
 const char  *NET_AdrToString( netadr_t a );
 const char	*NET_AdrToStringwPort (netadr_t a);
-//int		NET_StringToAdr ( const char *s, netadr_t *a, netadrtype_t family);
-qboolean    NET_StringToAdr( const char *s, netadr_t *a );
+qboolean	NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask);
+const char* NET_AdrToString(netadr_t a);
+void        NET_JoinMulticast6(void);
+void        NET_LeaveMulticast6(void);
+int			NET_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
 qboolean    NET_GetLoopPacket( netsrc_t sock, netadr_t *net_from, msg_t *net_message );
 void		NET_JoinMulticast6(void);
 void		NET_LeaveMulticast6(void);
@@ -273,36 +285,16 @@ The server you attempted to join is running an incompatible version of the game.
 You or the server may be running older versions of the game. Press the auto-update\
  button if it appears on the Main Menu screen."
 
-#ifndef PRE_RELEASE_DEMO
 // 1.33 - protocol 59
 // 1.4 - protocol 60
-#define PROTOCOL_VERSION 60
-#define GAMENAME_STRING     "wolfmp"
-#else
-// the demo uses a different protocol version for independant browsing
-  #define   PROTOCOL_VERSION    50  // NERVE - SMF - wolfMP protocol version
-#endif
+#define GAME_PROTOCOL_VERSION 60
+#define GAMENAME_STRING	"wolfmp"
+#define CODENAME		"BlazkowiczIsBack" // L0 - Do not modify this without knowing what the point of it is.
 
 // NERVE - SMF - wolf multiplayer master servers
 #define UPDATE_SERVER_NAME      "wolfmotd.idsoftware.com"            // 192.246.40.65
 #define MASTER_SERVER_NAME      "wolfmaster.idsoftware.com"
 #define AUTHORIZE_SERVER_NAME   "wolfauthorize.idsoftware.com"
-
-// TTimo: allow override for easy dev/testing..
-// see cons -- update_server=myhost
-#if !defined( AUTOUPDATE_SERVER_NAME )
-  #define AUTOUPDATE_SERVER1_NAME   "au2rtcw1.activision.com"            // DHM - Nerve
-  #define AUTOUPDATE_SERVER2_NAME   "au2rtcw2.activision.com"            // DHM - Nerve
-  #define AUTOUPDATE_SERVER3_NAME   "au2rtcw3.activision.com"            // DHM - Nerve
-  #define AUTOUPDATE_SERVER4_NAME   "au2rtcw4.activision.com"            // DHM - Nerve
-  #define AUTOUPDATE_SERVER5_NAME   "au2rtcw5.activision.com"            // DHM - Nerve
-#else
-  #define AUTOUPDATE_SERVER1_NAME   AUTOUPDATE_SERVER_NAME
-  #define AUTOUPDATE_SERVER2_NAME   AUTOUPDATE_SERVER_NAME
-  #define AUTOUPDATE_SERVER3_NAME   AUTOUPDATE_SERVER_NAME
-  #define AUTOUPDATE_SERVER4_NAME   AUTOUPDATE_SERVER_NAME
-  #define AUTOUPDATE_SERVER5_NAME   AUTOUPDATE_SERVER_NAME
-#endif
 
 #define PORT_MASTER         27950
 #define PORT_UPDATE         27951
@@ -312,6 +304,7 @@ You or the server may be running older versions of the game. Press the auto-upda
 									// PORT_SERVER so a single machine can
 									// run multiple servers
 
+#define CDKEY_SALT			"]=q.0xFF^"
 
 // the svc_strings[] array in cl_parse.c should mirror this
 //
@@ -465,6 +458,10 @@ void    Cmd_TokenizeString( const char *text );
 // Takes a null terminated string.  Does not need to be /n terminated.
 // breaks the string up into arg tokens.
 
+void	Cmd_TokenizeLine(const char* text_in, const char* delim, char* pos);
+// Takes a null terminated string.  Does not need to be /n terminated.
+// breaks the string up into arg tokens.
+
 void    Cmd_ExecuteString( const char *text );
 // Parses a single line of text into arguments and tries to execute it
 // as if it was typed at the console
@@ -503,20 +500,47 @@ cvar_t *Cvar_Get( const char *var_name, const char *value, int flags );
 // that allows variables to be unarchived without needing bitflags
 // if value is "", the value will not override a previously set value.
 
-void    Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
+void Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
 // basically a slightly modified Cvar_Get for the interpreted modules
 
-void    Cvar_Update( vmCvar_t *vmCvar );
+void Cvar_Update( vmCvar_t *vmCvar );
 // updates an interpreted modules' version of a cvar
 
-void    Cvar_Set( const char *var_name, const char *value );
+cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
+// registers cvars for validation list
+
+char* Cvar_GetRestrictedList(void);
+// returns list of restricted cvars
+
+void Cvar_Rest_Reset(void);
+// Wipes the restricted list
+
+void Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
 void Cvar_SetLatched( const char *var_name, const char *value );
 // don't set the cvar immediately
 
-void    Cvar_SetValue( const char *var_name, float value );
+void Cvar_SetValue( const char *var_name, float value );
 // expands value to a string and calls Cvar_Set
+
+cvar_t* Cvar_FindVar(const char* var_name);
+// find cvar in a local table
+
+cvar_rest_t* Cvar_Rest_FindVar(const char* var_name);
+// find restricted cvar in a local table
+
+qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value);
+// checks if value is valid
+
+void Cvar_RestBuildList(char* data);
+// Builds the list
+
+int Cvar_ValidateRest(void);
+// checks if any cvar is violating server restrictions
+
+char* Cvar_RestAcceptedValues(const char* var_name);
+// returns requires values for specific cvar
 
 float   Cvar_VariableValue( const char *var_name );
 int     Cvar_VariableIntegerValue( const char *var_name );
@@ -552,6 +576,8 @@ char    *Cvar_InfoString_Big( int bit );
 void    Cvar_InfoStringBuffer( int bit, char *buff, int buffsize );
 
 void    Cvar_Restart_f( void );
+
+unsigned int RestrictedTypeToInt(char* str);
 
 extern int cvar_modifiedFlags;
 // whenever a cvar is modifed, its flags will be OR'd into this, so
@@ -607,6 +633,7 @@ int     FS_GetFileList(  const char *path, const char *extension, char *listbuf,
 int     FS_GetModList(  char *listbuf, int bufsize );
 
 fileHandle_t    FS_FOpenFileWrite( const char *qpath );
+fileHandle_t	FS_FOpenFileAppend(const char* filename);
 // will properly create any needed paths and deal with seperater character issues
 
 int     FS_filelength( fileHandle_t f );
@@ -727,9 +754,11 @@ char *FS_ShiftedStrStr( const char *string, const char *substring, int shift );
 char *FS_ShiftStr( const char *string, int shift );
 
 void FS_CopyFile( char *fromOSPath, char *toOSPath );
-
 int FS_CreatePath(const char* OSPath_);
+qboolean FS_VerifyPak( const char *pak );
 
+int  submit_curlPost( char* jsonfile, char* matchid );
+char* encode_data_b64( char *infilename ) ;
 /*
 ==============================================================
 
@@ -762,6 +791,7 @@ MISC
 extern char cl_cdkey[34];
 void Com_AppendCDKey( const char *filename );
 void Com_ReadCDKey( const char *filename );
+void Com_ReadAuthKey(const char* filename);
 
 // returnbed by Sys_GetProcessorId
 #define CPUID_GENERIC           0           // any unrecognized processor
@@ -920,6 +950,7 @@ void CL_InitKeyCommands( void );
 // config files, but the rest of client startup will happen later
 
 void CL_Init( void );
+void CL_ClearStaticDownload(void);
 void CL_Disconnect( qboolean showMainMenu );
 void CL_Shutdown( void );
 void CL_Frame( int msec );
@@ -989,6 +1020,7 @@ int SV_SendQueuedPackets(void);
 
 void		Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf);
 void	Cmd_TokenizeStringIgnoreQuotes( const char *text_in );
+
 //
 // UI interface
 //
@@ -1090,7 +1122,7 @@ void    Sys_SetErrorText( const char *text );
 
 void    Sys_SendPacket( int length, const void *data, netadr_t to );
 
-qboolean    Sys_StringToAdr( const char *s, netadr_t *a );
+qboolean    Sys_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
 //Does NOT parse port numbers, only base addresses.
 
 qboolean    Sys_IsLANAddress( netadr_t adr );
@@ -1113,6 +1145,8 @@ void    Sys_EndProfiling( void );
 
 qboolean Sys_LowPhysicalMemory();
 unsigned int Sys_ProcessorCount();
+
+void* GetMemory(unsigned long size);
 
 // NOTE TTimo - on win32 the cwd is prepended .. non portable behaviour
 void Sys_StartProcess( char *exeName, qboolean doexit );            // NERVE - SMF
@@ -1247,6 +1281,15 @@ extern huffman_t clientHuffTables;
 #else
 #error unknown OS
 #endif
+
+#define CTL_RKVALD          "rkvald"
+#define RKVALD_OK           "1"
+#define RKVALD_NOT_OK       "0"
+#define RKVALD_TIME_FULL    65000
+#define RKVALD_TIME_PING    10000
+#define RKVALD_TIME_PING_L  40000
+#define RKVALD_TIME_PING_S  20000
+#define RKVALD_TIME_OFF     -1
 
 #endif // _QCOMMON_H_
 

@@ -738,7 +738,7 @@ static float CG_DrawTeamOverlay( float y ) {
 
 	// max player name width
 	pwidth = 0;
-	for ( i = 0; i < numSortedTeamPlayers; i++ ) {
+	for ( i = 0; i < numSortedTeamPlayers && i <= TEAM_MAXOVERLAY; i++ ) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
 		if ( ci->infoValid && ci->team == cg.snap->ps.persistant[PERS_TEAM] ) {
 			plyrs++;
@@ -761,7 +761,7 @@ static float CG_DrawTeamOverlay( float y ) {
 	// max location name width
 	lwidth = 0;
 	if ( cg_drawTeamOverlay.integer > 1 ) {
-		for ( i = 0; i < numSortedTeamPlayers; i++ ) {
+		for ( i = 0; i < numSortedTeamPlayers && i <= TEAM_MAXOVERLAY; i++ ) {
 			ci = cgs.clientinfo + sortedTeamPlayers[i];
 			if ( ci->infoValid &&
 				 ci->team == cg.snap->ps.persistant[PERS_TEAM] &&
@@ -821,7 +821,7 @@ static float CG_DrawTeamOverlay( float y ) {
 	CG_DrawRect( x - 1, y, w + 2, h + 2, 1, hcolor );
 
 
-	for ( i = 0; i < numSortedTeamPlayers; i++ ) {
+	for ( i = 0; i < numSortedTeamPlayers && i <= TEAM_MAXOVERLAY; i++ ) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
 		if ( ci->infoValid && ci->team == cg.snap->ps.persistant[PERS_TEAM] ) {
 			// RtcwPro - Add * in front or revivable players..
@@ -2526,12 +2526,12 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 	float w;
 
 	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
-		s = va("[G:%i]", playerNades);
+		s = va("G:%i", playerNades);
 		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
 	else {
-		s = va("[A:%i-G:%i]", playerAmmoClip + playerAmmo, playerNades);
+		s = va("AMMO:%i-%i", playerAmmoClip + playerAmmo, playerNades);
 		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
 	}
@@ -2650,8 +2650,8 @@ static void CG_DrawCrosshairNames( void ) {
 	}
 	// -NERVE - SMF
 
-	// RtcwPro add player ammo if player class is LT
-	if (cgClass == 3 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
+	// RtcwPro add player ammo if cg_drawCrosshairNames is 1
+	if (cg_drawCrosshairNames.integer == 1 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
 		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
 
 	trap_R_SetColor( NULL );
@@ -2688,6 +2688,12 @@ static void CG_DrawVote( void ) {
 	int sec;
 
 	if ( cgs.complaintEndTime > cg.time ) {
+
+		// RtcwPro exit complaint dialog if g_tournament is 1
+		const char* info = CG_ConfigString(CS_SERVERINFO);
+		char* isTournament = Info_ValueForKey(info, "g_tournament");
+		if (isTournament != NULL && strcmp(isTournament, "1") == 0)
+			return;
 
 		if ( cgs.complaintClient == -1 ) {
 			s = "Your complaint has been filed";
@@ -3062,30 +3068,49 @@ Deals with client views/prints when paused.
 =================
 */
 static void CG_PausePrint( void ) {
-	const char  *s;
+	const char* s, * s2 = "";
+	float color[4];
 	int w;
 
-	// There's no plans for SP but one never knows..
-	if ( cgs.gametype == GT_SINGLE_PLAYER )
-		return;
 	// Not in warmup...
 	if (cg.warmup)
 		return;
 
-	if (cgs.pauseState) {
-		s = va( "%s", CG_TranslateString( "Match is ^1PAUSED^7!" ));
-		// Fade it (When SDL is ported it can be changed to grayscale)
+	if (cgs.match_paused == PAUSE_ON) {
+		s = va("%s", CG_TranslateString("^nMatch is Paused!"));
+		s2 = va("%s", CG_TranslateString(va("Timeout expires in ^n%i ^7seconds", cgs.match_resumes - cgs.match_expired)));
+
+		color[3] = fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
+
 		if (cg.time > cgs.match_stepTimer) {
-			//cgs.match_expired++;
+			cgs.match_expired++;
 			cgs.match_stepTimer = cg.time + 1000;
 		}
-		cgs.fadeAlpha = .4;
-	} else {
+	}
+	else if (cgs.match_paused == PAUSE_RESUMING) {
+		s = va("%s", CG_TranslateString("^3Prepare to fight!"));
+		if (11 - cgs.match_expired < 11) {
+			s2 = va("%s", CG_TranslateString(va("Resuming Match in ^3%d", 11 - cgs.match_expired)));
+		}
+
+		color[3] = fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
+
+		if (cg.time > cgs.match_stepTimer) {
+			cgs.match_expired++;
+			cgs.match_stepTimer = cg.time + 1000;
+		}
+	}
+	else {
 		return;
 	}
 
-	w = CG_DrawStrlen( s );
-	CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
+	color[0] = color[1] = color[2] = 1.0;
+
+	w = CG_DrawStrlen(s);
+	CG_DrawStringExt(320 - w * 6, 100, s, color, qfalse, qtrue, 12, 18, 0);
+
+	w = CG_DrawStrlen(s2);
+	CG_DrawStringExt(320 - w * 6, 120, s2, colorWhite, qfalse, qtrue, 12, 18, 0);
 }
 
 /*
@@ -3096,26 +3121,30 @@ CG_DrawWarmup
 static void CG_DrawWarmup( void ) {
 	int w;
 	int sec;
-	int cw;
-	const char  *s, *s1, *s2;
+	int cw = 10;
+	const char  *s, *s1, *s2, *configString;
     static qboolean announced = qfalse;
 
 	if ( cgs.gametype == GT_SINGLE_PLAYER ) {
 		return;     // (SA) don't bother with this stuff in sp
 	}
 
+	const char* info = CG_ConfigString(CS_SERVERINFO);
+	char* configName = Info_ValueForKey(info, "sv_GameConfig");
+	if (configName != NULL) configString = va("^3%s Config Loaded", configName);
 
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
-		cw = 10;
 
 		// Account for g_minGameClients if it's present
 		if (cgs.readyState == CREADY_PENDING) {
 
-			/*s = CG_TranslateString( "^nGame Stopped ^7- Waiting for players to ready up" );
-			w = CG_DrawStrlen( s );
-			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 ); KK commented this out*/
-
+			if (configString != NULL)
+			{
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
 
 			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );
 
@@ -3131,6 +3160,13 @@ static void CG_DrawWarmup( void ) {
 
 		} else {
 
+			if (configString != NULL)
+			{
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
+
 			// No need to bother with count..scoreboard gives info..
 			s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), cgs.minclients, cgs.minclients == 1 ? "player" : "players");
 			w = CG_DrawStrlen( s );
@@ -3145,12 +3181,18 @@ static void CG_DrawWarmup( void ) {
 			}
 		}
 
-	return;
+		return;
 	}
 	sec = cg.warmup;
 	if ( !sec ) {
 		if ( cgs.gamestate == GS_WAITING_FOR_PLAYERS ) {
-			cw = 10;
+
+			if (configString != NULL)
+			{
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
 
 			s = CG_TranslateString( "^3WARMUP:^7 Waiting for more players" );
 
@@ -3181,14 +3223,14 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
-		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^7" ), sec + 1 );
 		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
 		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
 		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
 		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
 		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
-		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in:^1" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^7" ), sec + 1 );
 	}
 
 	w = CG_DrawStrlen( s );
@@ -3260,8 +3302,6 @@ static void CG_DrawWarmup( void ) {
 			s2 = CG_TranslateString( s2 );
 		}
 
-		cw = 10;
-
 		w = CG_DrawStrlen( s ); // OSPx - Pushed all lower for 20
 		CG_DrawStringExt( 320 - w * cw / 2, 160, s, colorWhite,
 						  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
@@ -3288,6 +3328,8 @@ static void CG_DrawFlashFade( void ) {
 	int elapsed, time;
 	vec4_t col;
 	qboolean fBlackout = ( int_ui_blackout.integer > 0 );
+
+	if (cg.demoPlayback) return;
 
 	if ( cgs.fadeStartTime + cgs.fadeDuration < cg.time ) {
 		cgs.fadeAlphaCurrent = cgs.fadeAlpha;
@@ -4302,6 +4344,7 @@ static void CG_Draw2D( void ) {
 	// don't draw center string if scoreboard is up
 	if ( !CG_DrawScoreboard() ) {
 		CG_DrawCenterString();
+
 		// Pause print
 		CG_PausePrint();
 
@@ -4361,14 +4404,14 @@ void CG_ShakeCamera() {
 	// JPW NERVE starts at 1, approaches 0 over time
 	x = ( cg.cameraShakeTime - cg.time ) / cg.cameraShakeLength;
 
-	// OSPx - NQ's shake cam..
-	val = sin(M_PI * 7 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
-	cg.refdef.vieworg[2] += val;
-	val = sin(M_PI * 13 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
-	cg.refdef.vieworg[1] += val;
-	val = cos(M_PI * 17 * x + cg.cameraShakePhase) * x * 4.0f * cg.cameraShakeScale;
-	cg.refdef.vieworg[0] += val;
-	// End
+	// up/down
+
+	val = sin(M_PI * 8 * x + cg.cameraShakePhase) * x * 18.0f * cg.cameraShakeScale;
+	cg.refdefViewAngles[0] += val;
+
+	// left/right
+	val = sin(M_PI * 15 * x + cg.cameraShakePhase) * x * 16.0f * cg.cameraShakeScale;
+	cg.refdefViewAngles[1] += val;
 
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
 }

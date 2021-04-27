@@ -25,14 +25,8 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
-
-
 // this file holds commands that can be executed by the server console, but not remote clients
-
 #include "g_local.h"
-
 
 /*
 ==============================================================================
@@ -760,8 +754,6 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 		G_resetModeState();
 	}
 
-
-
 	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
 		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 		return;
@@ -802,6 +794,7 @@ void Svcmd_SwapTeams_f() {
 		G_swapTeams();
 		return;
 	}
+
 	if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
 		trap_Cvar_Set( "g_currentRound", "0" );
 		trap_Cvar_Set( "g_nextTimeLimit", "0" );
@@ -928,209 +921,14 @@ L0 - Pause/Unpause
 =================
 */
 void Svcmd_Pause_f(qboolean pause) {
+
 	if (pause) {
-		level.paused = !PAUSE_NONE;
-		trap_SetConfigstring( CS_PAUSED,  va( "%i", level.paused ));
+		G_handlePause(qtrue, 0);
 		AP(va("cp \"Match has been ^3Paused^7!\n\"2"));
 	} else {
-		level.CNstart = 0; // Resets countdown if it was aborted before
-		level.paused = PAUSE_UNPAUSING;
-		AP(va("cp \"Resuming match..\n\"2"));
+		G_handlePause(qfalse, 0);
+		AP(va("cp \"Resuming the match..\n\"2"));
 	}
-}
-
-/*
-=================
-CC_loadconfig
-=================
-*/
-void CC_loadconfig(void)
-{
-	char scriptName[MAX_QPATH];
-
-	if (trap_Argc() != 2)
-	{
-		G_Printf("usage: loadConfig <config name>\n");
-		return;
-	}
-
-	trap_Argv(1, scriptName, sizeof(scriptName));
-
-	memset(&level.config, 0, sizeof(config_t));
-	G_ConfigSet(scriptName);
-}
-
-/*
-=================
-G_UpdateSvCvars
-=================
-*/
-void G_UpdateSvCvars(void)
-{
-	char cs[MAX_INFO_STRING];
-	//char cs[BIG_INFO_STRING];
-	int  i;
-
-	cs[0] = '\0';
-	for (i = 0; i < level.svCvarsCount; i++)
-	{
-		if (level.svCvars[i].Val2[0] == 0) // don't send a space char when not set
-		{
-			Info_SetValueForKey(cs, va("V%i", i),
-				va("%i %s %s", level.svCvars[i].mode, level.svCvars[i].cvarName, level.svCvars[i].Val1));
-		}
-		else
-		{
-			Info_SetValueForKey(cs, va("V%i", i),
-				va("%i %s %s %s", level.svCvars[i].mode, level.svCvars[i].cvarName, level.svCvars[i].Val1, level.svCvars[i].Val2));
-		}
-	}
-
-	Info_SetValueForKey(cs, "N", va("%i", level.svCvarsCount));
-
-	// FIXME: print a warning when this configstring has nearly reached MAX_INFO_STRING size and don't set it if greater
-	trap_SetConfigstring(CS_SVCVAR, cs);
-
-}
-
-/*
-=================
-CC_cvarempty
-=================
-*/
-void CC_cvarempty(void)
-{
-	memset(level.svCvars, 0, sizeof(level.svCvars));
-	level.svCvarsCount = 0;
-	G_UpdateSvCvars();
-}
-
-/*
-=================
-CC_svcvar
-
-brief Forces client cvar to a specific value
-=================
-*/
-void CC_svcvar(void)
-{
-	char cvarName[MAX_CVAR_VALUE_STRING];
-	char mode[16];
-	char cvarValue1[MAX_CVAR_VALUE_STRING];
-	char cvarValue2[MAX_CVAR_VALUE_STRING];
-	int  i;
-	int  index = level.svCvarsCount;
-	char* p;
-
-	if (trap_Argc() <= 3)
-	{
-		G_Printf("usage: sv_cvar <cvar name> <mode> <value1> <value2>\nexamples: sv_cvar r_rmse EQ 0\n          sv_cvar cl_maxpackets IN 60 125\n");
-		return;
-	}
-
-	trap_Argv(1, cvarName, sizeof(cvarName));
-	trap_Argv(2, mode, sizeof(mode));
-	trap_Argv(3, cvarValue1, sizeof(cvarValue1));
-
-	for (p = cvarName; *p != '\0'; ++p)
-	{
-		*p = tolower(*p);
-	}
-
-	if (trap_Argc() == 5)
-	{
-		trap_Argv(4, cvarValue2, sizeof(cvarValue2));
-
-	}
-	else
-	{
-		cvarValue2[0] = '\0';
-	}
-
-	// is this cvar already in the array?.. (maybe they have a double entry)
-	for (i = 0; i < level.svCvarsCount; i++)
-	{
-		if (!Q_stricmp(cvarName, level.svCvars[i].cvarName))
-		{
-			index = i;
-		}
-	}
-
-	if (index >= MAX_SVCVARS)
-	{
-		G_Printf("sv_cvar: MAX_SVCVARS hit\n");
-		return;
-	}
-
-	if (!Q_stricmp(mode, "EQ") || !Q_stricmp(mode, "EQUAL"))
-	{
-		level.svCvars[index].mode = SVC_EQUAL;
-	}
-	else if (!Q_stricmp(mode, "G") || !Q_stricmp(mode, "GREATER"))
-	{
-		level.svCvars[index].mode = SVC_GREATER;
-	}
-	else if (!Q_stricmp(mode, "GE") || !Q_stricmp(mode, "GREATEREQUAL"))
-	{
-		level.svCvars[index].mode = SVC_GREATEREQUAL;
-	}
-	else if (!Q_stricmp(mode, "L") || !Q_stricmp(mode, "LOWER"))
-	{
-		level.svCvars[index].mode = SVC_LOWER;
-	}
-	else if (!Q_stricmp(mode, "LE") || !Q_stricmp(mode, "LOWEREQUAL"))
-	{
-		level.svCvars[index].mode = SVC_LOWEREQUAL;
-	}
-	else if (!Q_stricmp(mode, "IN") || !Q_stricmp(mode, "INSIDE"))
-	{
-		level.svCvars[index].mode = SVC_INSIDE;
-	}
-	else if (!Q_stricmp(mode, "OUT") || !Q_stricmp(mode, "OUTSIDE"))
-	{
-		level.svCvars[index].mode = SVC_OUTSIDE;
-	}
-	else if (!Q_stricmp(mode, "INC") || !Q_stricmp(mode, "INCLUDE"))
-	{
-		level.svCvars[index].mode = SVC_INCLUDE;
-	}
-	else if (!Q_stricmp(mode, "EXC") || !Q_stricmp(mode, "EXCLUDE"))
-	{
-		level.svCvars[index].mode = SVC_EXCLUDE;
-	}
-	else if (!Q_stricmp(mode, "WB") || !Q_stricmp(mode, "WITHBITS"))
-	{
-		level.svCvars[index].mode = SVC_WITHBITS;
-	}
-	else if (!Q_stricmp(mode, "WOB") || !Q_stricmp(mode, "WITHOUTBITS"))
-	{
-		level.svCvars[index].mode = SVC_WITHOUTBITS;
-	}
-	else
-	{
-		G_Printf("sv_cvar: invalid mode\n");
-		return;
-	}
-
-	if (trap_Argc() == 5)
-	{
-		Q_strncpyz(level.svCvars[index].Val2, cvarValue2, sizeof(level.svCvars[0].Val2));
-	}
-	else
-	{
-		Q_strncpyz(level.svCvars[index].Val2, "", sizeof(level.svCvars[0].Val2));
-	}
-
-	Q_strncpyz(level.svCvars[index].cvarName, cvarName, sizeof(level.svCvars[0].cvarName));
-	Q_strncpyz(level.svCvars[index].Val1, cvarValue1, sizeof(level.svCvars[0].Val1));
-
-	// cvar wasn't yet in the array?
-	if (index >= level.svCvarsCount)
-	{
-		level.svCvarsCount++;
-	}
-
-//	G_UpdateSvCvars();   // cause of lag on map_restart...moved call after all cvars are loaded
 }
 
 /*
@@ -1223,43 +1021,16 @@ qboolean    ConsoleCommand( void ) {
 		Svcmd_Pause_f(qfalse);
 		return qtrue;
 	}
-
-	// RTCWPro - cvar limiting
-	if (Q_stricmp(cmd, "sv_cvarempty") == 0) {
-		CC_cvarempty();
-		return qtrue;
-	}
-	if (Q_stricmp(cmd, "sv_cvarload") == 0) {
-		G_UpdateSvCvars();
-
-		return qtrue;
-	}
-	if (Q_stricmp(cmd, "sv_cvar") == 0) {
-		CC_svcvar();
-		return qtrue;
-	}
-	// RTCWPro
-
-	// RTCWPro - custom config
-	if (Q_stricmp(cmd, "reloadConfig") == 0) {
-		G_ReloadConfig();
-		return qtrue;
-	}
-	if (Q_stricmp(cmd, "loadConfig") == 0) {
-		CC_loadconfig();
-		return qtrue;
-	}
 	// RTCWPro
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {
-			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 1 ) ) );
+			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 1 ) ) );
 			return qtrue;
 		}
 		// everything else will also be printed as a say command
-		trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 0 ) ) );
+		trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 0 ) ) );
 		return qtrue;
 	}
 
 	return qfalse;
 }
-

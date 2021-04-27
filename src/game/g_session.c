@@ -66,106 +66,61 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		// write wstats
 		G_WriteWeaponStatsData(client);
 	}/// End
-	//s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // DHM - Nerve
-    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
-			client->sess.sessionTeam,
-			client->sess.spectatorTime,
-			client->sess.spectatorState,
-			client->sess.spectatorClient,
-			client->sess.wins,
-			client->sess.losses,
-			client->sess.playerType,        // DHM - Nerve
-			client->sess.playerWeapon,      // DHM - Nerve
-			client->sess.playerItem,        // DHM - Nerve
-			client->sess.playerSkin,        // DHM - Nerve
-			client->sess.spawnObjectiveIndex, // DHM - Nerve
-			client->sess.latchPlayerType,   // DHM - Nerve
-			client->sess.latchPlayerWeapon, // DHM - Nerve
-			client->sess.latchPlayerItem,   // DHM - Nerve
-			client->sess.latchPlayerSkin,    // DHM - Nerve
-			// L0 - New stuff
-			client->sess.admin,			// User is admin
-			client->sess.referee,			// User is ref
-			client->sess.incognito,		// Admin is hidden
-			client->sess.ignored,		// User is ignored
-			client->sess.uci,			// mcwf's GeoIP
-			client->sess.ip[0],			// L0 - IP
-			client->sess.ip[1],			// L0 - IP
-			client->sess.ip[2],			// L0 - IP
-			client->sess.ip[3],			// L0 - IP
-			client->sess.guid,			// Guid
-			client->sess.rounds,		// rounds played in stopwatch
-			client->sess.selectedWeapon,// Selected weapon
-			client->sess.specInvited,	// Can watch..
-			client->sess.specLocked,	// Spec lock
-			client->sess.deaths,
-			client->sess.kills,
-			client->sess.damage_given,
-			client->sess.damage_received,
-			client->sess.team_damage,
-			client->sess.team_kills,
-			client->sess.gibs,
-			client->sess.acc_shots,
-			client->sess.acc_hits,
-			client->sess.headshots,
-			client->sess.suicides,
-			client->sess.med_given,
-			client->sess.ammo_given,
-			client->sess.revives,
-			client->sess.knifeKills,
-            //new below
-			client->sess.dyn_planted,
-            client->sess.dyn_defused,
-            client->sess.obj_captured,
-            client->sess.obj_destroyed,
-            client->sess.obj_returned,
-            client->sess.obj_taken
-			);
+
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
+		client->sess.sessionTeam,
+		client->sess.spectatorTime,
+		client->sess.spectatorState,
+		client->sess.spectatorClient,
+		client->sess.wins,
+		client->sess.losses,
+		client->sess.playerType,        // DHM - Nerve
+		client->sess.playerWeapon,      // DHM - Nerve
+		client->sess.playerItem,        // DHM - Nerve
+		client->sess.playerSkin,        // DHM - Nerve
+		client->sess.spawnObjectiveIndex, // DHM - Nerve
+		client->sess.latchPlayerType,   // DHM - Nerve
+		client->sess.latchPlayerWeapon, // DHM - Nerve
+		client->sess.latchPlayerItem,   // DHM - Nerve
+		client->sess.latchPlayerSkin,    // DHM - Nerve
+		// L0 - New stuff
+		client->sess.admin,			// User is admin
+		client->sess.referee,			// User is ref
+		client->sess.incognito,		// Admin is hidden
+		client->sess.ignored,		// User is ignored
+		client->sess.uci,			// mcwf's GeoIP
+		client->sess.ip,			// L0 - IP
+		client->sess.guid,			// Guid
+		client->sess.rounds,		// rounds played in stopwatch
+		client->sess.selectedWeapon,// Selected weapon
+		client->sess.specInvited,	// Can watch..
+		client->sess.specLocked,	// Spec lock
+		client->sess.deaths,
+		client->sess.kills,
+		client->sess.damage_given,
+		client->sess.damage_received,
+		client->sess.team_damage,
+		client->sess.team_kills,
+		client->sess.gibs,
+		client->sess.acc_shots,
+		client->sess.acc_hits,
+		client->sess.headshots,
+		client->sess.suicides,
+		client->sess.med_given,
+		client->sess.ammo_given,
+		client->sess.revives,
+		client->sess.knifeKills,
+		//new below
+		client->sess.dyn_planted,
+		client->sess.dyn_defused,
+		client->sess.obj_captured,
+		client->sess.obj_destroyed,
+		client->sess.obj_returned,
+		client->sess.obj_taken
+	);
 
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_Set( var, s );
-}
-
-
-/*
-================
-G_ClientSwap
-
-Client swap handling
-================
-*/
-void G_ClientSwap( gclient_t *client ) {
-	int flags = 0;
-
-	if ( client->sess.sessionTeam == TEAM_RED ) {
-		client->sess.sessionTeam = TEAM_BLUE;
-	} else if ( client->sess.sessionTeam == TEAM_BLUE )   {
-		client->sess.sessionTeam = TEAM_RED;
-	}
-	// Swap spec invites as well
-	if ( client->sess.specInvited & TEAM_RED ) {
-		flags |= TEAM_BLUE;
-
-	}
-	if ( client->sess.specInvited & TEAM_BLUE ) {
-		flags |= TEAM_RED;
-
-	}
-
-	client->sess.specInvited = flags;
-
-	flags = 0;
-
-	// Swap spec follows as well
-	if ( client->sess.specLocked & TEAM_RED ) {
-		flags |= TEAM_BLUE;
-	}
-	if ( client->sess.specLocked & TEAM_BLUE ) {
-		flags |= TEAM_RED;
-	}
-
-	client->sess.specLocked = flags;
-
 }
 
 /*
@@ -179,14 +134,11 @@ void G_ReadSessionData( gclient_t *client ) {
 	char s[MAX_STRING_CHARS];
 	const char  *var;
 	qboolean test;
-    gamestate_t current_gs;
 
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
-	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i ",       // DHM - Nerve
-	//sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
-    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
+    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -203,15 +155,12 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerItem,  // DHM - Nerve
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
-			(int*)&client->sess.admin,
-			(int*)&client->sess.referee,
+			(int *)&client->sess.admin,
+			(int *)&client->sess.referee,
 			(int *)&client->sess.incognito,
 			(int *)&client->sess.ignored,
 			&client->sess.uci,
-			(int *)&client->sess.ip[0],
-			(int *)&client->sess.ip[1],
-			(int *)&client->sess.ip[2],
-			(int *)&client->sess.ip[3],
+			(char *)&client->sess.ip,
 			(char *)&client->sess.guid,
 			&client->sess.rounds,
 			&client->sess.selectedWeapon,
@@ -257,39 +206,30 @@ void G_ReadSessionData( gclient_t *client ) {
 		test = g_currentRound.integer == 1;
 	}
 
-
-
-    //if ( g_gametype.integer == GT_WOLF_STOPWATCH && level.warmupTime > 0 && test ) {
-    /* nihi: I did not backtrace this very far but it seems level.warmupTime was always zero by the time this
-             function is called and hence G_ClientSwap was never called below. A "quick fix" is given below
-             but this does require g_altStopwatchMode = 0 (which is a good thing)
-    */
-    current_gs = trap_Cvar_VariableIntegerValue( "gamestate" );
-	if ( g_gametype.integer == GT_WOLF_STOPWATCH && current_gs == GS_WARMUP  && test ) {
-
-
-	/*	if ( client->sess.sessionTeam == TEAM_RED ) {
-			client->sess.sessionTeam = TEAM_BLUE;
-		} else if ( client->sess.sessionTeam == TEAM_BLUE )   {
-			client->sess.sessionTeam = TEAM_RED;
+	if (g_gametype.integer == GT_WOLF_STOPWATCH && test) {
+		if (g_tournament.integer && level.warmupSwap ||
+			!g_tournament.integer && level.warmupTime > 0
+		) {
+			if (client->sess.sessionTeam == TEAM_RED) {
+				client->sess.sessionTeam = TEAM_BLUE;
+			}
+			else if (client->sess.sessionTeam == TEAM_BLUE) {
+				client->sess.sessionTeam = TEAM_RED;
+			}
 		}
-		*/
-		G_ClientSwap( client );
 	}
 
-	if ( g_swapteams.integer ) {
-		trap_Cvar_Set( "g_swapteams", "0" );
-/*
-		if ( client->sess.sessionTeam == TEAM_RED ) {
+	if (g_swapteams.integer) {
+		trap_Cvar_Set("g_swapteams", "0");
+
+		if (client->sess.sessionTeam == TEAM_RED) {
 			client->sess.sessionTeam = TEAM_BLUE;
-		} else if ( client->sess.sessionTeam == TEAM_BLUE )   {
+		}
+		else if (client->sess.sessionTeam == TEAM_BLUE) {
 			client->sess.sessionTeam = TEAM_RED;
 		}
-		*/
-		G_ClientSwap( client );
 	}
 }
-
 
 /*
 ================
@@ -353,18 +293,14 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->incognito = 0;
 	sess->ignored = 0;
 	sess->uci = 0;
-	sess->ip[0] = 0;
-	sess->ip[1] = 0;
-	sess->ip[2] = 0;
-	sess->ip[3] = 0;
+	Q_strncpyz(sess->ip, "", sizeof(sess->ip));
 	sess->selectedWeapon = 0;
 	G_deleteStats( client - level.clients ); // OSP - Stats
 	sess->specInvited = 0;
 	sess->specLocked = 0;
-
+	
 	G_WriteClientSessionData( client );
 }
-
 
 /*
 ==================
@@ -387,35 +323,32 @@ void G_InitWorldSession( void ) {
 		G_Printf( "Gametype changed, clearing session data.\n" );
 	// L0 - OSP speclock port
 	} else {
-		char *tmp = s;
-		qboolean test = ( g_altStopwatchMode.integer != 0 || g_currentRound.integer == 1 );
-
+		char* tmp = s;
+		qboolean test = (g_altStopwatchMode.integer != 0 || g_currentRound.integer == 1);
 
 #define GETVAL( x ) if ( ( tmp = strchr( tmp, ' ' ) ) == NULL ) {return; \
 						   } x = atoi( ++tmp );
 
-
 		// Get team lock stuff
-		GETVAL( gt );
-		teamInfo[TEAM_RED].spec_lock = ( gt & TEAM_RED ) ? qtrue : qfalse;
-		teamInfo[TEAM_BLUE].spec_lock = ( gt & TEAM_BLUE ) ? qtrue : qfalse;
+		GETVAL(gt);
+		teamInfo[TEAM_RED].spec_lock = (gt & TEAM_RED) ? qtrue : qfalse;
+		teamInfo[TEAM_BLUE].spec_lock = (gt & TEAM_BLUE) ? qtrue : qfalse;
 
-		if ( ( tmp = strchr( va( "%s", tmp ), ' ' ) ) != NULL ) {
+		if ((tmp = strchr(va("%s", tmp), ' ')) != NULL) {
 			tmp++;
-			trap_GetServerinfo( s, sizeof( s ) );
-			if ( Q_stricmp( tmp, Info_ValueForKey( s, "mapname" ) ) ) {
+			trap_GetServerinfo(s, sizeof(s));
+			if (Q_stricmp(tmp, Info_ValueForKey(s, "mapname"))) {
 				level.fResetStats = qtrue;
-				G_Printf( "Map changed, clearing player stats.\n" );
+				G_Printf("Map changed, clearing player stats.\n");
 			}
 		}
 
 		// OSP - have to make sure spec locks follow the right teams
-		if ( g_gametype.integer == GT_WOLF_STOPWATCH && g_gamestate.integer != GS_PLAYING && test ) {
+		if (g_gametype.integer == GT_WOLF_STOPWATCH && g_gamestate.integer != GS_PLAYING && test) {
 			G_swapTeamLocks();
-			G_swapTeams();
 		}
 
-		if ( g_swapteams.integer ) {
+		if (g_swapteams.integer) {
 			G_swapTeamLocks();
 		}
 	}

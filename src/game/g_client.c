@@ -1385,26 +1385,7 @@ OSPx - Store Client's IP
 ============
 */
 void SaveIP_f(gclient_t * client, char * sip) {
-	// Don't blindly save if entry already exists..
-	if (client->sess.ip[0] &&
-		client->sess.ip[1] &&
-		client->sess.ip[2] &&
-		client->sess.ip[3])
-	{
-		return;
-	}
-	if (strcmp(sip, "localhost") == 0 || sip == NULL) {
-		// Localhost, just enter 0 for all values:
-		client->sess.ip[0] = 0;
-		client->sess.ip[1] = 0;
-		client->sess.ip[2] = 0;
-		client->sess.ip[3] = 0;
-		return;
-	}
-
-	sscanf(sip, "%3i.%3i.%3i.%3i",
-		(int *)&client->sess.ip[0], (int *)&client->sess.ip[1],
-		(int *)&client->sess.ip[2], (int *)&client->sess.ip[3]);
+	Q_strncpyz(client->sess.ip, sip, sizeof(client->sess.ip));
 	return;
 }
 
@@ -1413,44 +1394,19 @@ void SaveIP_f(gclient_t * client, char * sip) {
 OSPx - To save some time..
 ============
 */
-char *clientIP(gentity_t *ent, qboolean full)
-{
-	if (full) {
-		return va("%d.%d.%d.%d",
-			ent->client->sess.ip[0], ent->client->sess.ip[1], ent->client->sess.ip[2], ent->client->sess.ip[3]);
+char *SanitizeClientIP(char *ip, qboolean printFull) {
+
+	if (!printFull) {
+		char* token;
+
+		if (strlen(ip) > 15) {
+			token = strtok(ip, "::");
+			return va("%s.*.*.*", ip);
+		}		
+		token = strtok(ip, ".");
+		return va("%s.*.*.*", token);
 	}
-	else {
-		return va("%d.*.*.*", ent->client->sess.ip[0]);
-	}
-}
-
-/*
-===========
-L0 - Sort IP for spoof check (strips port)
-
-ETpub Port
-============
-*/
-char *GetParsedIP(const char *ipadd)
-{
-	// code by Dan Pop, http://bytes.com/forum/thread212174.html
-	unsigned b1, b2, b3, b4, port = 0;
-	unsigned char c;
-	int rc;
-	static char ipge[20];
-
-	if(!Q_strncmp(ipadd,"localhost",strlen("localhost")))
-		return "localhost";
-
-	rc = sscanf(ipadd, "%3u.%3u.%3u.%3u:%u%c", &b1, &b2, &b3, &b4, &port, &c);
-	if (rc < 4 || rc > 5)
-		return NULL;
-	if ( (b1 | b2 | b3 | b4) > 255 || port > 65535)
-		return NULL;
-	if (strspn(ipadd, "0123456789.:") < strlen(ipadd))
-		return NULL;
-	sprintf(ipge, "%u.%u.%u.%u", b1, b2, b3, b4);
-	return ipge;
+	return va("%s", ip);
 }
 
 /*
@@ -1483,7 +1439,7 @@ char *spoofcheck( gclient_t *client, char *guid, char *ip ){
 		}
 	}
 
-	cIP = va("%i.%i.%i.%i", client->sess.ip[0], client->sess.ip[1], client->sess.ip[2], client->sess.ip[3] );
+	cIP = va("%s", client->sess.ip );
 	if(Q_stricmp(cIP, ip) != 0) {
 		G_LogPrintf(
 			"IP SPOOF: client %i Original ip %s \n"
@@ -1511,7 +1467,6 @@ if desired.
 ============
 */
 void ClientUserinfoChanged( int clientNum ) {
-
 	gentity_t *ent;
 	char    *s;
 	char model[MAX_QPATH], modelname[MAX_QPATH];
@@ -1538,10 +1493,6 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	// check for local client
 	s = Info_ValueForKey( userinfo, "ip" );
-	// OSPx - save IP
-	//if (s[0] != 0) {
-	//	SaveIP_f(client, s);
-	//}
 	if ( s && !strcmp( s, "localhost" ) ) {
 		client->pers.localClient = qtrue;
 	//	client->sess.referee = RL_REFEREE;
@@ -1554,26 +1505,11 @@ void ClientUserinfoChanged( int clientNum ) {
 	} // OSPx - Country Flags
 	else if (!(ent->r.svFlags & SVF_BOT) && !strlen(s)) {
 		// To solve the IP bug..
-		s =	va("%i.%i.%i.%i",
-			client->sess.ip[0],
-			client->sess.ip[1],
-			client->sess.ip[2],
-			client->sess.ip[3]
-		);
-		sscanf(s, "%[^z]s:%*s", s);
+		s =	va("%s", client->sess.ip);
 	}
-	int cGender = 0;
-	// Check for "" GUID..
-	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
-		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
-		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
-	}
+
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
-	sscanf(s, "%i %i %i %i",
-			&client->pers.clientFlags,
-			&client->pers.clientTimeNudge,
-			&client->pers.clientMaxPackets,
-			&cGender);
+	sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	// check the item prediction
 	s = Info_ValueForKey( userinfo, "cg_predictItems" );
 	if ( !atoi( s ) ) {
@@ -1640,11 +1576,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	// set max health
-	client->pers.maxHealth = atoi( Info_ValueForKey( userinfo, "handicap" ) );
-	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	// set max health // rtcwpro always set to 100 to avoid pickup ammo/health bug
+	client->pers.maxHealth = 100; // atoi(Info_ValueForKey(userinfo, "handicap"));
+	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
-	}
+	}*/
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 
 	// set model
@@ -1661,10 +1597,6 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	// DHM - Nerve :: Forcibly set both model and skin for multiplayer.
 	if ( g_gametype.integer >= GT_WOLF ) {
-
-
-
-
 
 		// To communicate it to cgame
 		client->ps.stats[ STAT_PLAYER_CLASS ] = client->sess.playerType;
@@ -1754,10 +1686,10 @@ void ClientUserinfoChanged( int clientNum ) {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
 			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
-				client->pers.maxHealth, client->sess.wins, client->sess.losses,
+				100, client->sess.wins, client->sess.losses, // rtcwpro changed HC to always be set to 100 for non-bot players
 				client->sess.uci, (client->sess.ignored ? 1 : 0),
 				client->sess.referee
-				);
+			);
 	}
 
 //----(SA) end
@@ -1773,9 +1705,8 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%d.%d.%d.%d\\country\\%i\\ignored\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
-			client->pers.netname, team, client->sess.ip[0], client->sess.ip[1], client->sess.ip[2],
-			client->sess.ip[3], client->sess.uci, (client->sess.ignored ? "yes" : "no"), client->sess.admin,
+		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\ignored\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.ignored ? "yes" : "no"), client->sess.admin,
 			client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
 	// Account for bots..
@@ -1788,10 +1719,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		s = va("Bot: name\\%s\\team\\%s", client->pers.netname, team);
 	}
 	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
-	G_DPrintf( "ClientUserinfoChanged: %i :: %s\n", clientNum, s );
-
 }
-
 
 /*
 ===========
@@ -1819,19 +1747,14 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	char userinfo[MAX_INFO_STRING];
 	gentity_t   *ent;
 	int			i;
+// L0 - MySQL example
+#ifdef USE_MYSQL
+	char query[1000];
+#endif
 
 	ent = &g_entities[clientNum];
 
 	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
-
-	// L0 - ASCII name bug crap..
-	value = Info_ValueForKey(userinfo, "name");
-	for (i = 0; i < strlen(value); i++) {
-		if (value[i] < 0) {
-			// extended ASCII chars have values between -128 and 0 (signed char)
-			return "Change your name, extended ASCII chars are ^1NOT allowed!";
-		}
-	}
 
 	// L0 - ASCII name bug crap..
 	value = Info_ValueForKey(userinfo, "name");
@@ -1849,6 +1772,13 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	value = Info_ValueForKey( userinfo, "ip" );
 	if ( G_FilterIPBanPacket( value ) ) {
 		return "You are banned from this server.";
+	}
+
+	// Auth client
+	if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
+		if (!Info_ValueForKey(userinfo, "cl_guid") || !Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), NO_GUID)) {
+			return "Valid GUID is required to enter this server.";
+		}
 	}
 
 	// Xian - check for max lives enforcement ban
@@ -1917,7 +1847,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 		else {
 			unsigned long ip = GeoIP_addr_to_num(value);
-
+			
 			if (((ip & 0xFF000000) == 0x0A000000) ||
 				((ip & 0xFFF00000) == 0xAC100000) ||
 				((ip & 0xFFFF0000) == 0xC0A80000)) {
@@ -1932,7 +1862,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 				}
 				else {
 					client->sess.uci = 246;
-					G_LogPrintf("GeoIP: This IP:%s cannot be located\n", value);
+					G_LogPrintf("GeoIP: This IP: %s cannot be located\n", value);
 				}
 			}
 		}
@@ -1940,6 +1870,20 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	else {
 		client->sess.uci = 255;
 	} // -OSPx
+
+// L0 - MySQL example
+#ifdef USE_MYSQL
+	value = Info_ValueForKey(userinfo, "ip");
+	
+	if (sprintf(query, "INSERT INTO test(ip, username) VALUES('%s', '%s') ", value, client->pers.netname)) {
+		trap_SQL_RunQuery(query);
+		G_Printf("INSERT statement succeeded\n");
+	}
+	else {
+		G_Printf("INSERT statement failed\n");
+	}
+#endif
+
 	// get and distribute relevent paramters
 	G_LogPrintf( "ClientConnect: %i\n", clientNum );
 	ClientUserinfoChanged( clientNum );
@@ -1961,6 +1905,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
+
+	// Trigger rest lookup
+	trap_SendServerCommand(clientNum, "revalidate");
 
 	return NULL;
 }
@@ -2050,7 +1997,6 @@ void ClientBegin( int clientNum ) {
 			ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = -1;
 		}
 	}
-
 
 	// DHM - Nerve :: Start players in limbo mode if they change teams during the match
 	if ( g_gametype.integer >= GT_WOLF && client->sess.sessionTeam != TEAM_SPECTATOR
@@ -2511,7 +2457,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		}
 
 		// End Xian
-		SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
+		if (!revived) // RtcwPro #315 only call this if player is spawning (not getting revived)
+			SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
 	}
 	// dhm - end
 
@@ -2573,6 +2520,30 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	AddHeadEntity(ent);
 }
 
+/*
+================
+OSPx - check for team stuff..
+================
+*/
+void handleEmptyTeams(void) {
+
+	if (g_gamestate.integer != GS_INTERMISSION) {
+		if (!level.axisPlayers) {
+			G_teamReset(TEAM_RED, qtrue);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+		else if (!level.alliedPlayers) {
+			G_teamReset(TEAM_BLUE, qtrue);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+	}
+}
 
 /*
 ===========
@@ -2654,7 +2625,7 @@ void ClientDisconnect( int clientNum ) {
 				// OSPx - Fix documents passing exploit
 				launchvel[0] = 0;
 				launchvel[1] = 0;
-				launchvel[2] = 0;
+				launchvel[2] = 40;
 
 				flag = LaunchItem( item,ent->r.currentOrigin,launchvel,ent->s.number );
 				flag->s.modelindex2 = ent->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
@@ -2685,7 +2656,6 @@ void ClientDisconnect( int clientNum ) {
 
     if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
         G_writeDisconnectEvent(ent);
-
     }
 
 	trap_UnlinkEntity( ent );
@@ -2710,12 +2680,12 @@ void ClientDisconnect( int clientNum ) {
 
 	CalculateRanks();
 
+	handleEmptyTeams();
+
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
-
 }
-
 
 /*
 ==================

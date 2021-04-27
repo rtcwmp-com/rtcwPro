@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="qcommon\huffman.c">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="client\cl_cgame.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,10 +52,16 @@
     <ClCompile Include="qcommon\common.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="unix\const-arg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="qcommon\cvar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qcommon\files.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\huffman.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qcommon\md4.c">
@@ -68,6 +71,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qcommon\net_chan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\net_ip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="null\null_client.c">
@@ -151,9 +157,6 @@
     <ClCompile Include="win32\win_main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="win32\win_net.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="win32\win_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -165,9 +168,6 @@
     </ClCompile>
     <ClCompile Include="win32\win_wndproc.c">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="unix\const-arg.c">
-      <Filter>Source Files\unix</Filter>
     </ClCompile>
     <ClCompile Include="unix\linux_common.c">
       <Filter>Source Files\unix</Filter>
@@ -196,6 +196,39 @@
     <ClCompile Include="unix\unix_shared.c">
       <Filter>Source Files\unix</Filter>
     </ClCompile>
+    <ClCompile Include="qcommon\dl_main_curl.c">
+      <Filter>Source Files\downloads</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\http_main.c">
+      <Filter>Source Files\http</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\http.c">
+      <Filter>Source Files\http</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\db_main.c">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\db_mysql.c">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\md5.c">
+      <Filter>Source Files\encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_threads.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\win_threads.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client\cl_events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\stats_submit_curl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="server\sv_events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -213,9 +246,6 @@
     <ClInclude Include="cgame\cg_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="client\client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="qcommon\cm_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -228,6 +258,12 @@
     <ClInclude Include="qcommon\cm_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcommon\dl_local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\dl_public.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="game\g_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -237,16 +273,10 @@
     <ClInclude Include="A3D\ia3dapi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="qcommon\jansson\jansson.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="qcommon\jansson\jansson_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\keycodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="client\keys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\ui\menudef.h">
@@ -258,19 +288,25 @@
     <ClInclude Include="qcommon\qcommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="unix\qasm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="qcommon\qfiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\qgl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="server\server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="A3D\snd_a3dg.h">
+    <ClInclude Include="A3D\snd_A3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="A3D\snd_A3D.h">
+    <ClInclude Include="A3D\snd_a3dg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="client\snd_local.h">
@@ -294,25 +330,51 @@
     <ClInclude Include="ui\ui_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="unix\unix_glw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\unzip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="qcommon\vm_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="win32\win_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="qcommon\unzip.h">
+    <ClInclude Include="client\keys.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\jansson\jansson.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
     <ClInclude Include="unix\linux_local.h">
-      <Filter>Source Files\unix</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unix\qasm.h">
-      <Filter>Source Files\unix</Filter>
+    <ClInclude Include="qcommon\http.h">
+      <Filter>Source Files\http</Filter>
     </ClInclude>
-    <ClInclude Include="unix\unix_glw.h">
-      <Filter>Source Files\unix</Filter>
+    <ClInclude Include="qcommon\md5.h">
+      <Filter>Source Files\encrypt</Filter>
     </ClInclude>
+    <ClInclude Include="qcommon\database.h">
+      <Filter>Source Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\in_raw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="client\client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\threads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="wolf.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="win32\wolf.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="unix\ChangeLog" />
@@ -321,19 +383,25 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{cae317d6-9b68-4e69-af82-459f32c7ea06}</UniqueIdentifier>
+      <UniqueIdentifier>{6e98183b-0c22-4c3f-9920-9b42d333d822}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{860a9ba0-0afb-446a-9ded-2f41646731ac}</UniqueIdentifier>
+      <UniqueIdentifier>{c944c97e-579c-47ab-b3fb-0750a8fb1e68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\downloads">
+      <UniqueIdentifier>{68b5f4ac-0b1e-46df-8daf-203e6d532fa1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\unix">
-      <UniqueIdentifier>{f435585b-7cbe-4ffd-bb0e-1b1370ea62d4}</UniqueIdentifier>
+      <UniqueIdentifier>{c170c77b-2aa8-4a8c-b988-99923c3e44a0}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="wolf.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="win32\wolf.ico" />
+    <Filter Include="Source Files\http">
+      <UniqueIdentifier>{57523010-4dc8-4c23-8e66-f0727d1c3984}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\encrypt">
+      <UniqueIdentifier>{54c80c9f-2b10-4c1f-9748-6f28bdad962d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\database">
+      <UniqueIdentifier>{9e87283d-f4e8-4a7b-9a7f-dc2de076b67a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

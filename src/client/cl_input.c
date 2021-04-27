@@ -748,7 +748,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	}
 
 	// If we are downloading, we send no less than 50ms between packets
-	if ( *clc.downloadTempName &&
+	if ( *cls.downloadTempName &&
 		 cls.realtime - clc.lastPacketSentTime < 50 ) {
 		return qfalse;
 	}
@@ -757,7 +757,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	// one packet a second
 	if ( cls.state != CA_ACTIVE &&
 		 cls.state != CA_PRIMED &&
-		 !*clc.downloadTempName &&
+		 !*cls.downloadTempName &&
 		 cls.realtime - clc.lastPacketSentTime < 1000 ) {
 		return qfalse;
 	}
@@ -775,8 +775,8 @@ qboolean CL_ReadyToSendPacket( void ) {
 	// check for exceeding cl_maxpackets
 	if ( cl_maxpackets->integer < 15 ) {
 		Cvar_Set( "cl_maxpackets", "15" );
-	} else if ( cl_maxpackets->integer > 100 ) {
-		Cvar_Set( "cl_maxpackets", "100" );
+	} else if ( cl_maxpackets->integer > 125 ) {
+		Cvar_Set( "cl_maxpackets", "125" );
 	}
 	oldPacketNum = ( clc.netchan.outgoingSequence - 1 ) & PACKET_MASK;
 	delta = cls.realtime -  cl.outPackets[ oldPacketNum ].p_realtime;

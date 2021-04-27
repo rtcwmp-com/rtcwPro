@@ -115,12 +115,9 @@ void SV_SetConfigstring( int index, const char *val ) {
 	}
 }
 
-
-
 /*
 ===============
 SV_GetConfigstring
-
 ===============
 */
 void SV_GetConfigstring( int index, char *buffer, int bufferSize ) {
@@ -251,7 +248,6 @@ void SV_Startup( void ) {
 		Com_Error( ERR_FATAL, "SV_Startup: unable to allocate svs.clients" );
 	}
 	//svs.clients = Z_Malloc (sizeof(client_t) * sv_maxclients->integer );
-
 	if ( com_dedicated->integer ) {
 		svs.numSnapshotEntities = sv_maxclients->integer * PACKET_BACKUP * 64;
 	} else {
@@ -261,6 +257,8 @@ void SV_Startup( void ) {
 	svs.initialized = qtrue;
 
 	Cvar_Set( "sv_running", "1" );
+
+	NET_JoinMulticast6();
 }
 
 
@@ -793,7 +791,7 @@ void SV_Init( void ) {
 	// done
 
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
-	Cvar_Get( "protocol", va( "%i", PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
+	Cvar_Get( "protocol", va( "%i", GAME_PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
 	sv_mapname = Cvar_Get( "mapname", "nomap", CVAR_SERVERINFO | CVAR_ROM );
 	sv_privateClients = Cvar_Get( "sv_privateClients", "0", CVAR_SERVERINFO );
 	sv_hostname = Cvar_Get( "sv_hostname", "WolfHost", CVAR_SERVERINFO | CVAR_ARCHIVE );
@@ -898,11 +896,31 @@ void SV_Init( void ) {
 	sv_dl_maxRate = Cvar_Get( "sv_dl_maxRate", "60000", CVAR_ARCHIVE );
 #endif
 
+	// HTTP downloads
+	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "1", CVAR_ARCHIVE);
+	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "https://maps.rtcwmp.com/", CVAR_ARCHIVE);
+	sv_wwwDlDisconnected = Cvar_Get("sv_wwwDlDisconnected", "0", CVAR_ARCHIVE);
+	sv_wwwFallbackURL = Cvar_Get("sv_wwwFallbackURL", "", CVAR_ARCHIVE);
+
+	// Streaming
+	sv_StreamingToken = Cvar_Get("sv_StreamingToken", "0", CVAR_ARCHIVE);
+	sv_StreamingSelfSignedCert = Cvar_Get("sv_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
+
+	// Auth
+	sv_AuthEnabled = Cvar_Get("sv_AuthEnabled", "0", CVAR_SERVERINFO | CVAR_INIT);
+	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
+
+	// Cvar Restrictions
+	sv_GameConfig = Cvar_Get( "sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_LATCH );
+
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
 
 	// init the botlib here because we need the pre-compiler in the UI
 	SV_BotInitBotLib();
+
+	// Load saved Bans
+	Cbuf_AddText("rehashbans\n");
 
 	SV_LoadModels();
 
@@ -927,6 +945,10 @@ void SV_Init( void ) {
 		}
 	}
 #endif
+
+	if (com_dedicated->integer) {
+		SV_SetCvarRestrictions();
+	}
 }
 
 
@@ -978,6 +1000,8 @@ void SV_Shutdown( char *finalmsg ) {
 	}
 
 	Com_Printf( "----- Server Shutdown -----\n" );
+
+	NET_LeaveMulticast6();
 
 	if ( svs.clients && !com_errorEntered ) {
 		SV_FinalMessage( finalmsg, qtrue);
