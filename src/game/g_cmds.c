@@ -2711,15 +2711,6 @@ void ClientCommand( int clientNum ) {
 		Cmd_Noclip_f( ent );
 	} else if ( Q_stricmp( cmd, "kill" ) == 0 )  {
 		Cmd_Kill_f( ent );
-	// Instant tapout
-	/*} else if (!Q_stricmp(cmd, "forcetapout")) {
-		if (ent->client->ps.stats[STAT_HEALTH] <= 0 &&
-			(ent->client->sess.sessionTeam == TEAM_RED || ent->client->sess.sessionTeam == TEAM_BLUE) )
-		{
-			limbo(ent, qtrue);
-		}
-		return;*/
-// -OSPx
 	} else if ( Q_stricmp( cmd, "gib" ) == 0 )  {
 		Cmd_Gib_f( ent );
 	} else if ( Q_stricmp( cmd, "levelshot" ) == 0 )  {
@@ -2752,7 +2743,7 @@ void ClientCommand( int clientNum ) {
 	} else if ( Q_stricmp( cmd, "setspawnpt" ) == 0 )  {
 		Cmd_SetSpawnPoint_f( ent );
 	} else if (!Q_stricmp(cmd, "forcetapout")) {
-		 if (!ent || !ent->client) {
+		 if (!ent || !ent->client || level.paused != PAUSE_NONE) { // Do not allow forcetapout during pause
 			 return;
 		 }
 
