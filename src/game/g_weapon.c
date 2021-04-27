@@ -326,7 +326,7 @@ void Weapon_Syringe( gentity_t *ent ) {
 				memcpy( weapons,traceEnt->client->ps.weapons,sizeof( int ) * ( MAX_WEAPONS / ( sizeof( int ) * 8 ) ) );
 
 				ClientSpawn( traceEnt, qtrue );
-				// nihi added below
+
 				// L0 - Antilag
 				G_ResetTrail(traceEnt);
 				traceEnt->client->saved.leveltime = 0;
@@ -581,7 +581,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 ( ( hit->spawnflags & ALLIED_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_RED ) ) ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
-								G_matchPrintInfo(va("Dynamite planted near %s!", hit->track), qfalse);
+								G_matchPrintInfo(va("^5Dynamite planted near %s!", hit->track), qfalse);
 								ent->client->sess.dyn_planted++;
 								if (g_gameStatslog.integer) {
                                     //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
@@ -590,7 +590,7 @@ void Weapon_Engineer( gentity_t *ent ) {
 								}
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
-								G_matchPrintInfo(va("Dynamite planted near objective #%d!", hit->count), qfalse);
+								G_matchPrintInfo(va("^5Dynamite planted near objective #%d!", hit->count), qfalse);
 								ent->client->sess.dyn_planted++;
 								if (g_gameStatslog.integer) {
                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
@@ -663,34 +663,40 @@ void Weapon_Engineer( gentity_t *ent ) {
 									AddScore( ent,WOLF_DYNAMITE_DIFFUSE ); // FIXME add team info to *dynamite* so we don't get points for diffusing own team dynamite
 									scored++;
 									hit->spawnflags &= ~OBJECTIVE_DESTROYED; // "re-activate" objective since it wasn't destroyed.  kludgy, I know; see G_ExplodeMissile for the other half
+
+									trap_SendServerCommand(-1, "cp \"Axis engineer disarmed the Dynamite!\n\"");
+									G_matchPrintInfo(va("^5Axis defused dynamite near %s!", hit->track), qfalse);
+
+									ent->client->sess.dyn_defused++;
+
+									if (g_gameStatslog.integer) {
+										G_writeObjectiveEvent(ent, objDynDefuse);
+										//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+									}
+
+									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/axis/g-dynamite_defused.wav");
+									traceEnt->s.teamNum = TEAM_RED;
 								}
-								trap_SendServerCommand( -1, "cp \"Axis engineer disarmed the Dynamite!\n\"" );
-								G_matchPrintInfo(va("Axis defused dynamite near %s!", hit->track), qfalse);
 
-                                ent->client->sess.dyn_defused++;
-
-								if (g_gameStatslog.integer) {
-                                    G_writeObjectiveEvent(ent, objDynDefuse  );
-                                    //G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
-								}
-
-								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_defused.wav" );
-								traceEnt->s.teamNum = TEAM_RED;
 							} else { // TEAM_BLUE
 								if ( ( hit->spawnflags & ALLIED_OBJECTIVE ) && ( !scored ) ) {
 									AddScore( ent,WOLF_DYNAMITE_DIFFUSE );
 									scored++;
 									hit->spawnflags &= ~OBJECTIVE_DESTROYED; // "re-activate" objective since it wasn't destroyed
+
+									trap_SendServerCommand(-1, "cp \"Allied engineer disarmed the Dynamite!\n\"");
+									G_matchPrintInfo(va("^5Allies defused dynamite near %s!", hit->track), qfalse);
+
+									ent->client->sess.dyn_defused++;
+
+									if (g_gameStatslog.integer) {
+										G_writeObjectiveEvent(ent, objDynDefuse);
+										// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+									}
+
+									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/allies/a-dynamite_defused.wav");
+									traceEnt->s.teamNum = TEAM_BLUE;
 								}
-								trap_SendServerCommand( -1, "cp \"Allied engineer disarmed the Dynamite!\n\"" );
-								G_matchPrintInfo(va("Allies defused dynamite near %s!", hit->track), qfalse);
-								ent->client->sess.dyn_defused++;
-								if (g_gameStatslog.integer) {
-                                    G_writeObjectiveEvent(ent, objDynDefuse  );
-                                   // G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
-								}
-								traceEnt->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_defused.wav" );
-								traceEnt->s.teamNum = TEAM_BLUE;
 							}
 						}
 					}
@@ -1008,7 +1014,7 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->splashRadius  = 400;
 			}
 			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
-			bomb->splashMethodOfDeath   = MOD_ARTILLERY;; // RtcwPro changed from MOD_AIRSTRIKE
+			bomb->splashMethodOfDeath   = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->clipmask = MASK_MISSILESHOT;
 			bomb->s.pos.trType = TR_STATIONARY; // was TR_GRAVITY,  might wanna go back to this and drop from height
 			bomb->s.pos.trTime = level.time;        // move a bit on the very first frame
@@ -1877,10 +1883,10 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		ent->client->ps.powerups[PW_INVULNERABLE] = 0;
 	}
 
-	if (ent->client) 
+	if (ent->client)
 	{
 		// antilag lerp if enough delay between client and server.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT)) 
+		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
 		}
@@ -1892,10 +1898,10 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	Bullet_Endpos(ent, spread, &end);
 	Bullet_Fire_Extended(ent, ent, muzzleTrace, end, spread, damage);
 
-	if (ent->client) 
+	if (ent->client)
 	{
 		// restore all client positions to before the antilag lerp.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT)) 
+		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_UnTimeShiftAllClients(ent);
 		}
@@ -1906,21 +1912,21 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 }
 
 qboolean LogAccuracyShot(gentity_t* target, gentity_t* attacker) {
-	if (attacker && attacker->client) 
+	if (attacker && attacker->client)
 	{
-		if (target && target->client) 
+		if (target && target->client)
 		{
 			if (target->client->ps.stats[STAT_HEALTH] > 0 || (OnSameTeam(attacker, target)))
 			{
-				if ((target->client->ps.powerups[PW_INVULNERABLE] <= level.time)) 
+				if ((target->client->ps.powerups[PW_INVULNERABLE] <= level.time))
 				{
 					return qtrue;
 				}
 			}
 		}
-		else 
+		else
 		{
-			if (!target || !target->takedamage) 
+			if (!target || !target->takedamage)
 			{
 				return qtrue;
 			}
@@ -1963,7 +1969,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		traceEnt = head->parent;
 	}
 
-	if (LogAccuracyShot(traceEnt, source)) 
+	if (LogAccuracyShot(traceEnt, source))
 	{
 		source->client->pers.life_acc_shots++;
 		source->client->sess.acc_shots++;
@@ -2322,9 +2328,9 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	VectorNormalize2( origin2, forward );
 	PerpendicularVector( right, forward );
 	CrossProduct( forward, right, up );
-	
+
 	// sswolf - leaving this intact
-	// nihi added below
+
 	// L0 Antilag
     if ( g_antilag.integer && ent->client &&
         !(ent->r.svFlags & SVF_BOT) ) {
@@ -2352,7 +2358,7 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 
 	}
 
-	// nihi added below
+
 	// L0 - Antilag
     if ( g_antilag.integer && ent->client &&
         !(ent->r.svFlags & SVF_BOT) ) {
@@ -2579,12 +2585,12 @@ LogAccuracyHit
 ===============
 */
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
-	
+
 	// sswolf - patched
 	if (!LogAccuracyShot(target, attacker)) {
 		return qfalse;
 	}
-	
+
 	if ( !target->takedamage ) {
 		return qfalse;
 	}

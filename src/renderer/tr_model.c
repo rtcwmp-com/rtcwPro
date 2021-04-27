@@ -332,7 +332,7 @@ unsigned char R_MDC_GetAnorm( const vec3_t dir ) {
 			this_val = r_anormals[i][2];
 		}
 
-		if ( ( diff = fabs( dir[2] - r_anormals[i][2] ) ) < best_diff ) {
+		if ( ( diff = Q_fabs( dir[2] - r_anormals[i][2] ) ) < best_diff ) {
 			best_diff = diff;
 			best_start_i[2] = i;
 
@@ -392,7 +392,7 @@ qboolean R_MDC_EncodeXyzCompressed( const vec3_t vec, const vec3_t normal, mdcXy
 
 	retval.ofsVec = 0;
 	for ( i = 0; i < 3; i++ ) {
-		if ( fabs( vec[i] ) >= MDC_MAX_DIST ) {
+		if ( Q_fabs( vec[i] ) >= MDC_MAX_DIST ) {
 			return qfalse;
 		}
 		retval.ofsVec += ( ( (int)fabs( ( vec[i] + MDC_DIST_SCALE * 0.5 ) * ( 1.0 / MDC_DIST_SCALE ) + MDC_MAX_OFS ) ) << ( i * MDC_BITS_PER_AXIS ) );

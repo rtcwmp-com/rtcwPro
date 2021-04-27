@@ -425,7 +425,7 @@ static void ProjectDlightTexture( void ) {
 	float   *texCoords;
 	byte    *colors;
 	byte clipBits[SHADER_MAX_VERTEXES];
-	MAC_STATIC float texCoordsArray[SHADER_MAX_VERTEXES][2];
+	float texCoordsArray[SHADER_MAX_VERTEXES][2];
 	byte colorArray[SHADER_MAX_VERTEXES][4];
 	unsigned hitIndexes[SHADER_MAX_INDEXES];
 	int numIndexes;
@@ -676,7 +676,13 @@ static void RB_FogPass( void ) {
 	fog_t       *fog;
 	int i;
 
-	if ( tr.refdef.rdflags & RDF_SNOOPERVIEW ) { // no fog pass in snooper
+	// no fog pass in snooper
+	if (tr.refdef.rdflags & RDF_SNOOPERVIEW || tess.shader->noFog || !r_wolffog->integer) {
+		return;
+	}
+
+	// ydnar: no world, no fogging
+	if (backEnd.refdef.rdflags & RDF_NOWORLDMODEL) {
 		return;
 	}
 
@@ -1152,11 +1158,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input ) {
 			//
 			// set state
 			//
-			if ( pStage->bundle[0].vertexLightmap && ( ( r_vertexLight->integer && !r_uiFullScreen->integer ) || glConfig.hardwareType == GLHW_PERMEDIA2 ) && r_lightmap->integer ) {
-				GL_Bind( tr.whiteImage );
-			} else {
-				R_BindAnimatedImage( &pStage->bundle[0] );
-			}
+			R_BindAnimatedImage(&pStage->bundle[0]);
 
 			// Ridah, per stage fogging (detail textures)
 			if ( tess.shader->noFog && pStage->isFogged ) {
@@ -1202,10 +1204,20 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input ) {
 						tess.svars.colors[i][3] *= alphaval;
 					}
 				}
-			} else {
-				GL_State( pStage->stateBits );
 			}
 			//----(SA)	end
+			// ydnar: lightmap stages should be GL_ONE GL_ZERO so they can be seen
+			else if (r_lightmap->integer && (pStage->bundle[0].isLightmap || pStage->bundle[1].isLightmap)) {
+				unsigned int stateBits;
+
+
+				stateBits = (pStage->stateBits & ~(GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS)) |
+					(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO);
+				GL_State(stateBits);
+			}
+			else {
+				GL_State( pStage->stateBits );
+			}
 
 			//
 			// draw

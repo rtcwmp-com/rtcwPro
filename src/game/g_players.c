@@ -167,7 +167,7 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 Get client number from name
 ===========
 */
-/* // nihi commented out below
+/*
 int ClientNumberFromNameMatch(char *name, int *matches){
 	int i, textLen;
 	char nm[32];
@@ -254,7 +254,7 @@ void cmd_pmsg(gentity_t *ent)
 
 	msg = ConcatArgs(2);
     if( strlen(msg) >= 700 ){
-		G_LogPrintf( "NUKER(pmsg >= 700): %s IP: %i.%i.%i.%i\n", ent->client->pers.netname, ent->client->sess.ip[0], ent->client->sess.ip[1], ent->client->sess.ip[2], ent->client->sess.ip[3] );
+		G_LogPrintf( "NUKER(pmsg >= 700): %s IP: %s\n", ent->client->pers.netname, ent->client->sess.ip);
 	    trap_DropClient( ent-g_entities, "^7Player Kicked: ^3Nuking" );
 	return;
     }
@@ -381,21 +381,6 @@ void cmd_specInvite( gentity_t *ent ) {
 
 	} else {CP( "print \"Spectators can't specinvite players!\n\"" );}
 }
-/*
-=================
-Hitsounds
-
-Do it like in shrub just permanently
-(A hack tied to color so one doesn't need to type it all the time..)
-=================
-*/
-//void Cmd_hitsounds(gentity_t *ent) {
-//	char *action = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? "^3Disable^7" : "^3Enable^7");
-//	int	flag = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? 0 : 1);
-//
-//	CP(va("print \"Bit flag to %s Hitsounds is /color %d \nType ^3/commands bitflags^7 for explanation.\n\"", action, flag));
-//	return;
-//}
 
 /*
 ===================
@@ -484,10 +469,9 @@ Spec lock/unlock team
 void cmd_speclock( gentity_t *ent, qboolean lock ) {
 	int team = ent->client->sess.sessionTeam;
 
-
-	if (!team_commands.integer ) {
+	if (team_nocontrols.integer ) {
 		CP("print \"Team commands are disabled!\n\"");
-	return;
+		return;
 	}
 
 	if ( team == TEAM_RED || team == TEAM_BLUE ) {
@@ -625,10 +609,8 @@ Pause/Unpause
 */
 void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
     int team = ent->client->sess.sessionTeam;
+	char* status[2] = {"^3UN", "^3"};
     char tName[MAX_NETNAME];
-	//char *tag, *log, *action;
-	gentity_t *target_ent;
-	int i;
 
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
@@ -641,7 +623,7 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 	}
 
 	if ( g_gamestate.integer != GS_PLAYING ) {
-		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
+		CP("print \"^jError: ^7Pause feature can only be issued during a match!\n\"");
 		return;
 	}
 
@@ -649,84 +631,51 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		CP("print \"^jError: ^7You cannot use pause feature with no playing clients..\n\"");
 		return;
 	}
-	DecolorString(aTeams[team], tName);
 
-	if (!dPause) {
-/*	//	level.paused = !PAUSE_NONE;  // nihi commented
-		level.paused = team + 128; // nihi added
-		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL); // nihi added
-
-		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
-		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7a match!\n\"", tName));
-		AAPS("sound/match/klaxon1.wav");
-	}
-   // else if (level.paused != PAUSE_UNPAUSING){
-    else if (team + 128 != level.paused) {// nihi added
-		if (level.paused == PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is not paused^j!\n\"");
+	if ((!level.alliedPlayers || !level.axisPlayers) && dPause) {
+		CP("print \"^jError: ^7Pause can only be used when both teams have players!\n\"");
 		return;
-		}
-        CP("cpm \"^3Your team didn't call the timeout!\n\"");
-        return;
-    }
-    else {
-		level.CNstart = 0; // Resets countdown if it was aborted before
-		level.paused = PAUSE_UNPAUSING;
-		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
-		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL); // nihi added
 	}
-	*/
-		level.paused = !PAUSE_NONE;
-		trap_SetConfigstring( CS_PAUSED, va( "%i", level.paused ));
+
+	if ((PAUSE_UNPAUSING >= level.paused && !dPause) || (PAUSE_NONE != level.paused && dPause)) {
+		CP(va("print \"^jError: ^7The match is already %sPAUSED^7!\n\"", status[dPause]));
+		return;
+	}
+
+	DecolorString(aTeams[team], tName);
+	if (dPause) {
+		if (!teamInfo[team].timeouts) {
+			CP("print \"^jError: ^7Your team has no more timeouts remaining!\n\"");
+			CPS(ent, "sound/misc/denied.wav");
+			return;
+		}
+
+		teamInfo[team].timeouts--;
+		level.paused = team + 128;
+		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
+
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7the match!\n\"", tName));
-		level.axisCalledTimeout = (team == TEAM_RED ? qtrue : qfalse);
+		AP(va("cp \"[%s^7] %d Timeouts Remaining\n\"3", aTeams[team], teamInfo[team].timeouts));
+		AP(va("@print \"^z>> ^7%s ^zPaused the match.\n\"", ent->client->pers.netname));
 		AAPS("sound/match/klaxon1.wav");
 
-		// nihi: added from rtcwpub for freezing grenades/dyno/airstrikes/etc
-			// NOTE(nobo): pm_type of PM_FREEZE is enough to keep clients in-place. missiles, however, need some help.
-        for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
-        {
-            target_ent = g_entities + i;
-
-            if (target_ent->inuse)
-            {
-                // NOTE(nobo): force moving entities in the world to stop in-place.
-                if (target_ent->s.eType > TR_INTERPOLATE &&
-                    target_ent->s.pos.trTime > 0)
-                {
-                    // NOTE(nobo): Store trBase so it can be restored upon unpause of game.
-                    // trBase is what's used to determine a missile's position in the world, not r.currentOrigin or s.origin
-                    VectorCopy(target_ent->s.pos.trBase, target_ent->trBase_pre_pause);
-                    VectorCopy(target_ent->r.currentOrigin, target_ent->s.pos.trBase);
-                    target_ent->trType_pre_pause = target_ent->s.pos.trType;
-                    target_ent->s.pos.trType = TR_STATIONARY;
-                }
-            }
-        }
-        // end import from rtcwpub
-
-
-
-	} else if (level.paused != PAUSE_UNPAUSING){
-		if (level.paused == PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-			return;
-		}
-
-		if (level.axisCalledTimeout && team != TEAM_RED) {
-			CP("print \"^jError: ^7Only the team that paused the match may unpause the match^j.\n\"");
-			return;
-		}
-
-		level.CNstart = 0; // Resets countdown if it was aborted before
+	} 
+	else if (team + 128 != level.paused) {
+		CP("print \"^jError: ^7Your team did not call the Pause^j.\n\"");
+		return;	
+	}
+	else {
+		AAPS("sound/match/prepare.wav");
 		level.paused = PAUSE_UNPAUSING;
+		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
+		AP(va("print \"^z>> ^7%s ^zUnpaused the match.\n\"", ent->client->pers.netname));
 	}
 
     if (g_gameStatslog.integer) {
         G_writeGeneralEvent (ent , ent, " ", (dPause) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
     }
-
+	return;
 }
 
 /*
@@ -881,8 +830,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	//Tardo Ready/Unready
 	else if (!strcmp(cmd,"lock"))			        { pCmd_gamelocked(ent, qfalse); return qtrue;}
 	else if (!strcmp(cmd,"unlock"))		        	{ pCmd_gamelocked(ent, qtrue);  return qtrue;}
-    else if(!Q_stricmp(cmd, "pause"))				{ pCmd_pauseHandle( ent, qfalse ); return qtrue;}
-    else if(!Q_stricmp(cmd, "unpause"))				{ pCmd_pauseHandle( ent, qtrue ); return qtrue;}
+    else if(!Q_stricmp(cmd, "pause"))				{ pCmd_pauseHandle( ent, qtrue); return qtrue;}
+    else if(!Q_stricmp(cmd, "unpause"))				{ pCmd_pauseHandle( ent, qfalse); return qtrue;}
 	else if(!Q_stricmp(cmd, "ready"))				{ G_ready_cmd( ent, qtrue ); return qtrue;}
 	else if(!Q_stricmp(cmd, "unready") ||
 			!Q_stricmp(cmd, "notready"))			{ G_ready_cmd( ent, qfalse ); return qtrue;}
@@ -891,4 +840,3 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else
 		return qfalse;
 }
-

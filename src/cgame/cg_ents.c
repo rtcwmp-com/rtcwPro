@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -309,7 +309,7 @@ static void CG_EntityEffects( centity_t *cent ) {
 	// Ridah, flaming sounds
 	if ( CG_EntOnFire( cent ) ) {
 		// play a flame blow sound when moving
-		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flameBlowSound, (int)( 255.0 * ( 1.0 - fabs( cent->fireRiseDir[2] ) ) ) );
+		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flameBlowSound, (int)( 255.0 * ( 1.0 - Q_fabs( cent->fireRiseDir[2] ) ) ) );
 		// play a burning sound when not moving
 		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flameSound, (int)( 0.3 * 255.0 * ( pow( cent->fireRiseDir[2],2 ) ) ) );
 	}
@@ -1893,7 +1893,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent ) {
 		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum,
 							cg.snap->serverTime, cg.time, cent->lerpOrigin, NULL );
 							//							cg.snap->serverTime, cg.time, cent->lerpOrigin, cent->lerpAngles, cent->lerpAngles);
-	} // nihi 
+	}
 
 }
 

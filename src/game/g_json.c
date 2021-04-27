@@ -1,17 +1,318 @@
 #include "g_local.h"
 #include "g_stats.h"
-//#include <jansson.h>
+/*#include <jansson.h>
 #ifdef _WIN32
 #include "../qcommon/jansson_win/jansson.h"
 #else
 #include "../qcommon/jansson/jansson.h"
 #endif // _WIN32
-
+*/
 #include <time.h>
-// send/receive to json server: only need to include a few additional functions
-//   although tested and works.....not necessary until we
-//#define URL_FORMAT   "https://192.168.1.2:3000/gameStats"
-//#define URL_SIZE     256
+
+/*
+  Retrieve player stats from json data and use it to set player session data
+*/
+
+int getPstats(json_t *jsonData, char *id, gclient_t *client) {
+    json_t *pcat, *pitem, *pstats;
+    int i=0;
+    pstats = json_object();
+    pcat = json_object();
+    pstats = json_object_get(jsonData, id);
+                pcat = json_object_get(pstats, "categories");
+
+                pitem = json_object_get(pcat, "kills");
+                if(!(json_is_object(pstats)))
+                {
+                    G_Printf("error reading player data\n");
+                    json_decref(jsonData);
+                    return 0;
+                }
+                /*
+                  - Use switch or iterate over categories...new struct with data type need tho
+                  - Put an else clause that resets stats to zero if error
+                */
+
+                if(json_is_integer(pitem)) {
+                    client->sess.kills=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "deaths");
+                if(json_is_integer(pitem)) {
+                    client->sess.deaths=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "gibs");
+                if(json_is_integer(pitem)) {
+                    client->sess.gibs=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "suicides");
+                if(json_is_integer(pitem)) {
+                    client->sess.suicides=json_integer_value(pitem);
+
+                }
+
+                pitem = json_object_get(pcat, "teamkills");
+                if(json_is_integer(pitem)) {
+                    client->sess.team_kills=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "damagegiven");
+                if(json_is_integer(pitem)) {
+                    client->sess.damage_given=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "damagereceived");
+                if(json_is_integer(pitem)) {
+                    client->sess.damage_received=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "damageteam");
+                if(json_is_integer(pitem)) {
+                    client->sess.team_damage=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "hits");
+                if(json_is_integer(pitem)) {
+                    client->sess.acc_hits=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "shots");
+                if(json_is_integer(pitem)) {
+                    client->sess.acc_shots=json_integer_value(pitem);
+
+
+                }
+                /*
+                pitem = json_object_get(pcat, "accuracy");
+                if(json_is_number(pitem)) {
+                    // calculate this elsewhere...
+
+
+                }
+                */
+                pitem = json_object_get(pcat, "revives");
+                if(json_is_integer(pitem)) {
+                        client->sess.revives=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "ammogiven");
+                if(json_is_integer(pitem)) {
+                    client->sess.ammo_given=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "healthgiven");
+                if(json_is_integer(pitem)) {
+                    client->sess.med_given=json_integer_value(pitem);
+
+
+                }
+
+
+                pitem = json_object_get(pcat, "poisoned");
+                if(json_is_integer(pitem)) {
+                    client->sess.poisoned=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "knifekills");
+                if(json_is_integer(pitem)) {
+                    client->sess.knifeKills=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "killpeak");
+                if(json_is_integer(pitem)) {
+                    client->sess.killPeak=json_integer_value(pitem);
+
+
+                }
+
+/*
+                pitem = json_object_get(pcat, "efficiency");
+                if(json_is_number(pitem)) {  // might want to simply calculate this outside of here
+
+
+                }
+                */
+                /*
+                pitem = json_object_get(pcat, "score");
+                if(json_is_integer(pitem)) {
+                    client->sess.score=json_integer_value(pitem);
+                    G_Printf("score: %llu\n",json_integer_value(pitem));
+
+                }
+                */
+
+
+                pitem = json_object_get(pcat, "dyn_planted");
+                if(json_is_integer(pitem)) {
+                    client->sess.dyn_planted=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "dyn_defused");
+                if(json_is_integer(pitem)) {
+                    client->sess.dyn_defused=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "obj_captured");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_captured=json_integer_value(pitem);
+
+
+                }
+
+
+                pitem = json_object_get(pcat, "obj_destroyed");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_captured=json_integer_value(pitem);
+
+
+                }
+                pitem = json_object_get(pcat, "obj_returned");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_returned=json_integer_value(pitem);
+
+
+                }
+
+                pitem = json_object_get(pcat, "obj_taken");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_taken=json_integer_value(pitem);
+
+
+                }
+    return 1;
+}
+/*
+ Read in stats from json to client session
+
+ Currently reads in stats from round 1 but the idea is to have it reload
+ stats from previous round upon a map_restart and g_currentround > 1...
+
+ The idea is easy to implement but just need to do it...also dont forget to reset g_currentround (since it gets incremented with map_restart)
+
+ To see that it works....simply make a function call
+		G_read_round_jstats("dummyarg");
+ in g_svccmds.c or where ever you like for testing
+
+
+*/
+int G_read_round_jstats( char *jfilename )
+{
+     json_t *data = NULL;
+    json_t *json,*object,*jstattype, *jstats;
+    json_error_t error;
+    gclient_t *cl;
+    int j, i;
+    char pGUID[64];
+    char hpath[256];
+    char game[60];
+    char mapName[64];
+    qtime_t ct;
+    trap_RealTime(&ct);
+    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+    char *buf;
+    char cs[MAX_STRING_CHARS];
+
+    // we want to save some information for the match and round
+    // TODO: Change to currentRound >= 1 and set g_currentRound -= 1
+    if (g_currentRound.integer == 1) {
+        trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+        buf = Info_ValueForKey(cs, "matchid");
+        trap_SetConfigstring( CS_ROUNDINFO, cs );
+    }
+    else {
+        G_Printf("Incorrect round, not going to touch stats\n");
+        return 0;
+    }
+
+
+    trap_Cvar_VariableStringBuffer( "fs_homepath", hpath, sizeof( hpath ) );
+    trap_Cvar_VariableStringBuffer( "fs_game", game, sizeof( game ) );
+// for filename we use g_currentRound+1 and so g_currentRound for filename is the previous round
+
+    char* jfile = va("%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer,mapName);
+    json = json_load_file(jfile, 0, &error);
+    if (error.line != -1) {
+        G_Printf("error: unable to read json round stat file\n");
+        return 0;
+    }
+
+    object = json_object();
+    if (json)
+    {
+        object = json_object_get(json, "serverinfo");
+        jstattype = json_object_get(object, "g_gameStatslog");
+        /* TODO:
+            Parse stats depending on output type...
+            currently only for g_gameStatslog 16
+        */
+        G_Printf("gamestatstype: %s\n",json_string_value(jstattype));
+
+
+        object = json_object_get(json, "gameinfo");
+        jstattype = json_object_get(object, "round");
+        // double check that this is round 1 stats
+        if (!json_string_value(jstattype)) {
+
+            return 0;
+        }
+
+        jstats = json_array();
+        jstats = json_object_get(json, "stats");
+
+// dont forget to put in checks to make sure objects and arrays are true array/objs
+        for(i = 0; i < json_array_size(jstats); i++)
+        {
+            json_t *data,*pstats;
+
+            data = json_array_get(jstats, i);
+            if(!json_is_object(data))
+            {
+                fprintf(stderr, "error with reading round 1 stats..not an object\n");
+                json_decref(data);
+                return 0;
+            }
+            pstats = json_object();
+            // loop over clients and see if we find a match for guid
+        // TODO: Adjust for new GUID/player key
+            for ( j = 0; j < level.numPlayingClients; j++ ) {
+                cl = level.clients + level.sortedClients[j];
+                sprintf(pGUID,"%s",cl->sess.guid);
+
+                if (json_is_object(json_object_get(data, pGUID)))
+                {
+                    getPstats(data,pGUID,cl);
+
+                }
+
+            } // j
+
+
+        } //  i
+
+        json_decref(data);
+        return 1;
+
+    }
+
+    return 0;
+}
+
 /*
 ===========
 G_jstatsByPlayers
@@ -28,7 +329,6 @@ void G_jstatsByPlayers(qboolean wstats) {
 	gclient_t *cl;
 	char n1[MAX_NETNAME];
 	char n2[MAX_NETNAME];
-	char teamname[10];
 	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
@@ -438,18 +738,20 @@ writeServerInfo
 Output server related information
 ===========
 */
-
-void G_writeServerInfo (void){
-	char* s;
-	char mapName[64];
+void G_writeServerInfo(void){
+    char* s;
+    char mapName[MAX_QPATH];
+    char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
-    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     char cs[MAX_STRING_CHARS];
 
 	qtime_t ct;
 	trap_RealTime(&ct);
+
 	// we want to save some information for the match and round
     trap_GetConfigstring( CS_ROUNDINFO, cs, sizeof( cs ) );
+    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+    trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
 
     Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
     Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
@@ -465,8 +767,8 @@ void G_writeServerInfo (void){
     json_object_set_new(jdata, "serverIP",    json_string(""));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
-    json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i",g_gameStatslog.integer)));
-    json_object_set_new(jdata, "g_customConfig",    json_string(va("%s",g_customConfig.string)));
+    json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i", g_gameStatslog.integer)));
+    json_object_set_new(jdata, "g_customConfig",    json_string(va("%s", gameConfig)));
     json_object_set_new(jdata, "g_gametype",    json_string(va("%i",g_gametype.integer)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
@@ -566,6 +868,8 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
 
 
     json_t *eventStats =  json_array();
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     switch ( objType ) {
@@ -626,6 +930,8 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
         return;
     }
 
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
         switch ( eventType ) {
@@ -763,6 +1069,8 @@ void G_writeDisconnectEvent (gentity_t* agent){
     if ( g_gamestate.integer != GS_PLAYING || agent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         return;
     }
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     json_object_set_new(jdata, "label",    json_string("disconnect"));
@@ -783,6 +1091,12 @@ void G_writeClosingJson(void)
 
     if (level.gameStatslogFile) {
         trap_FS_Write( "}\n", strlen( "}\n"), level.gameStatslogFile );
+        if (g_stats_curl_submit.integer) {
+            trap_FS_FCloseFile(level.gameStatslogFile );
+            //submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+
+        }
       }
 
 
@@ -795,8 +1109,19 @@ void G_writeGameLogStart(void)
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
+    char *buf;
+    char *buf3;
+    char cs[MAX_STRING_CHARS];
+    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+
+    buf = Info_ValueForKey(cs, "matchid");
+    level.match_id = va("%s",buf);
+    buf3 = Info_ValueForKey(cs, "round");
+    level.round_id = va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2");
     if (level.gameStatslogFile) {
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.gameStatslogFile );
+        json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+        json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
         json_object_set_new(jdata, "group",    json_string("server"));
@@ -825,7 +1150,8 @@ void G_writeGameLogEnd(void)
     time_t unixTime = time(NULL);
     json_t *eventStats =  json_array();
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
-
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(jdata, "label",    json_string("round_end"));
 
@@ -850,6 +1176,8 @@ void G_writeGameEarlyExit(void)
     json_t *event = json_object();
     time_t unixTime = time(NULL);
     json_t *eventStats =  json_array();
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(jdata, "label",    json_string("map_restart"));
@@ -860,6 +1188,11 @@ void G_writeGameEarlyExit(void)
         json_decref(jdata);
         free(s);
         trap_FS_Write( "]\n}\n", strlen( "]\n}\n" ), level.gameStatslogFile );
+        if (g_stats_curl_submit.integer) {
+            trap_FS_FCloseFile(level.gameStatslogFile );
+       //     submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
+        }
     }
 
 
@@ -890,7 +1223,5 @@ int G_teamAlive(int team ) {
     return numAlive;
 
 }
-
-
 
 

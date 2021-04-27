@@ -146,8 +146,8 @@
     </Link>
     <ProjectReference />
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
-      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
+      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
@@ -173,8 +173,8 @@
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
-      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
+      <Command>copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
@@ -222,8 +222,8 @@
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
-      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
+      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
@@ -280,7 +280,6 @@
     <ClCompile Include="g_client.c" />
     <ClCompile Include="g_cmds.c" />
     <ClCompile Include="g_combat.c" />
-    <ClCompile Include="g_config.c" />
     <ClCompile Include="g_geoip.c" />
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_json.c" />
@@ -308,7 +307,6 @@
     <ClCompile Include="g_tramcar.c" />
     <ClCompile Include="g_trigger.c" />
     <ClCompile Include="g_utils.c" />
-    <ClCompile Include="g_vehicles.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
     <ClCompile Include="q_math.c" />
@@ -350,6 +348,14 @@
     <ClInclude Include="g_team.h" />
     <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="game.def" />
+    <None Include="makefile">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

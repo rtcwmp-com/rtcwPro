@@ -495,8 +495,10 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-static qboolean FS_CreatePath( char *OSPath ) {
-	char    *ofs;
+int FS_CreatePath(const char* OSPath_) {
+	// use va() to have a clean const char* prototype
+	char* OSPath = va("%s", OSPath_);
+	char* ofs;
 
 	// make absolutely sure that it can't back up the path
 	// FIXME: is c: allowed???
@@ -739,9 +741,8 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 	if ( f ) {
 		return FS_filelength( f );
 	}
-	return 0;
+	return -1;
 }
-
 
 /*
 ===========
@@ -774,8 +775,6 @@ void FS_SV_Rename( const char *from, const char *to ) {
 		FS_Remove( from_ospath );
 	}
 }
-
-
 
 /*
 ===========
@@ -1075,7 +1074,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 		Com_Error( ERR_FATAL, "FS_FOpenFileRead: NULL 'filename' parameter passed\n" );
 	}
 
-	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d",PROTOCOL_VERSION );
+	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d",GAME_PROTOCOL_VERSION );
 	// qpaths are not supposed to have a leading slash
 	if ( filename[0] == '/' || filename[0] == '\\' ) {
 		filename++;
@@ -1085,13 +1084,15 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	// The searchpaths do guarantee that something will always
 	// be prepended, so we don't need to worry about "c:" or "//limbo"
 	if ( strstr( filename, ".." ) || strstr( filename, "::" ) ) {
+		if (file == NULL)
+			return -1;
 		*file = 0;
 		return -1;
 	}
 
 	// make sure the q3key file is only readable by the quake3.exe at initialization
 	// any other time the key should only be accessed in memory using the provided functions
-	if ( com_fullyInitialized && strstr( filename, "rtcwkey" ) ) {
+	if ( com_fullyInitialized && strstr( filename, "rtcwkey" ) || com_fullyInitialized && strstr(filename, "authkey")) {
 		*file = 0;
 		return -1;
 	}
@@ -1231,8 +1232,9 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 				 && Q_stricmp( filename + l - 5, ".menu" )  // menu files
 				 && Q_stricmp( filename + l - 5, ".game" )  // menu files
 				 && Q_stricmp( filename + l - strlen( demoExt ), demoExt ) // menu files
-				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files
-				fs_fakeChkSum = random();
+				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files	
+				if (!(fs_fakeChkSum = random())) 
+					fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
 			}
 
 			Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
@@ -1415,7 +1417,6 @@ int FS_Delete( char *filename ) {
 
 	return 0;
 }
-
 
 /*
 =================
@@ -1611,7 +1612,6 @@ int FS_Seek( fileHandle_t f, long offset, int origin ) {
 	}
 }
 
-
 /*
 ======================================================================================
 
@@ -1619,7 +1619,6 @@ CONVENIENCE FUNCTIONS FOR ENTIRE FILES
 
 ======================================================================================
 */
-
 int FS_FileIsInPAK( const char *filename, int *pChecksum ) {
 	searchpath_t    *search;
 	pack_t          *pak;
@@ -1649,7 +1648,6 @@ int FS_FileIsInPAK( const char *filename, int *pChecksum ) {
 	//
 	// search through the path, one element at a time
 	//
-
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		//
 		if ( search->pack ) {
@@ -1849,8 +1847,6 @@ void FS_WriteFile( const char *qpath, const void *buffer, int size ) {
 
 	FS_FCloseFile( f );
 }
-
-
 
 /*
 ==========================================================================
@@ -2424,9 +2420,6 @@ int FS_GetModList( char *listbuf, int bufsize ) {
 	return nMods;
 }
 
-
-
-
 //============================================================================
 
 /*
@@ -2800,6 +2793,7 @@ we are not interested in a download string format, we want something human-reada
 
 ================
 */
+qboolean CL_WWWBadChecksum(const char* pakname); 
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 	searchpath_t    *sp;
 	qboolean havepak, badchecksum;
@@ -2817,7 +2811,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 		havepak = qfalse;
 
 		// never autodownload any of the id paks
-		if ( FS_idPak( fs_serverReferencedPakNames[i], "main" ) ) {
+		if ( FS_idPak( fs_serverReferencedPakNames[i], BASEGAME) ) {
 			continue;
 		}
 
@@ -2828,38 +2822,51 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 			}
 		}
 
-		if ( !havepak && fs_serverReferencedPakNames[i] && *fs_serverReferencedPakNames[i] ) {
+		if (!havepak && fs_serverReferencedPakNames[i] && *fs_serverReferencedPakNames[i]) {
 			// Don't got it
 
-			if ( dlstring ) {
+			if (dlstring) {
 				// Remote name
-				Q_strcat( neededpaks, len, "@" );
-				Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
-				Q_strcat( neededpaks, len, ".pk3" );
+				Q_strcat(neededpaks, len, "@");
+				Q_strcat(neededpaks, len, fs_serverReferencedPakNames[i]);
+				Q_strcat(neededpaks, len, ".pk3");
 
 				// Local name
-				Q_strcat( neededpaks, len, "@" );
+				Q_strcat(neededpaks, len, "@");
 				// Do we have one with the same name?
-				if ( FS_SV_FileExists( va( "%s.pk3", fs_serverReferencedPakNames[i] ) ) ) {
+				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
 					char st[MAX_ZPATH];
 					// We already have one called this, we need to download it to another name
 					// Make something up with the checksum in it
-					Com_sprintf( st, sizeof( st ), "%s.%08x.pk3", fs_serverReferencedPakNames[i], fs_serverReferencedPaks[i] );
-					Q_strcat( neededpaks, len, st );
-				} else
-				{
-					Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
-					Q_strcat( neededpaks, len, ".pk3" );
+					Com_sprintf(st, sizeof(st), "%s.%08x.pk3", fs_serverReferencedPakNames[i], fs_serverReferencedPaks[i]);
+					Q_strcat(neededpaks, len, st);
 				}
-			} else
-			{
-				Q_strcat( neededpaks, len, fs_serverReferencedPakNames[i] );
-				Q_strcat( neededpaks, len, ".pk3" );
+				else {
+					Q_strcat(neededpaks, len, fs_serverReferencedPakNames[i]);
+					Q_strcat(neededpaks, len, ".pk3");
+				}
+			}
+			else {
+				Q_strcat(neededpaks, len, fs_serverReferencedPakNames[i]);
+				Q_strcat(neededpaks, len, ".pk3");
 				// Do we have one with the same name?
-				if ( FS_SV_FileExists( va( "%s.pk3", fs_serverReferencedPakNames[i] ) ) ) {
-					Q_strcat( neededpaks, len, " (local file exists with wrong checksum)" );
+				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
+					Q_strcat(neededpaks, len, " (local file exists with wrong checksum)");
+					// L0 - HTTP downloads
+#ifndef DEDICATED
+					// let the client subsystem track bad download redirects (dl file with wrong checksums)
+					// this is a bit ugly but the only other solution would have been callback passing..
+					if (CL_WWWBadChecksum(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
+						// remove a potentially malicious download file
+						// (this is also intended to avoid expansion of the pk3 into a file with different checksum .. messes up wwwdl chkfail)
+						char* rmv = FS_BuildOSPath(fs_homepath->string, va("%s.pk3", fs_serverReferencedPakNames[i]), "");
+						rmv[strlen(rmv) - 1] = '\0';
+						FS_Remove(rmv);
+					}
+#endif
+					// End
 				}
-				Q_strcat( neededpaks, len, "\n" );
+				Q_strcat(neededpaks, len, "\n");
 			}
 		}
 	}
@@ -3022,6 +3029,9 @@ static void FS_Startup( const char *gameName ) {
 		}
 	}
 
+#ifndef DEDICATED
+	Com_ReadAuthKey(BASEGAME);
+#endif
 	Com_ReadCDKey( BASEGAME );
 	fs = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
 	if ( fs && fs->string[0] != 0 ) {

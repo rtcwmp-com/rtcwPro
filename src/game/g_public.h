@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 
 
 // g_public.h -- game module information visible to server
+#ifndef __G_PUBLIC_H
+#define __G_PUBLIC_H
 
 #define GAME_API_VERSION    8
 
@@ -150,7 +152,6 @@ typedef enum {
 	G_SEND_CONSOLE_COMMAND, // ( const char *text );
 	// add commands to the console as if they were typed in
 	// for map changing, etc
-
 
 	//=========== server specific functionality =============
 
@@ -419,7 +420,28 @@ typedef enum {
 	BOTLIB_PC_LOAD_SOURCE,
 	BOTLIB_PC_FREE_SOURCE,
 	BOTLIB_PC_READ_TOKEN,
-	BOTLIB_PC_SOURCE_FILE_AND_LINE
+	BOTLIB_PC_SOURCE_FILE_AND_LINE,
+
+/**
+ * 'L0, :: Reader beware when adding new stuff!
+ *		While we group calls in other files so it's easier to the eye, we are pushing new stuff here 
+ *		at the bottom as otherwise we'll have issues with backwards compability and other things ..		
+ */
+	G_SQL_RUNQUERY,
+	G_SQL_FINISHQUERY,
+	G_SQL_NEXTROW,
+	G_SQL_ROWCOUNT,
+	G_SQL_GETFIELDBYID,
+	G_SQL_GETFIELDBYNAME,
+	G_SQL_GETFIELDBYID_INT,
+	G_SQL_GETFIELDBYNAME_INT,
+	G_SQL_FIELDCOUNT,
+	G_SQL_CLEANSTRING,
+
+	G_FS_FILE_EXIST,
+	G_CVAR_REST_LOAD,
+
+	G_SUBMIT_STATS_CURL
 
 } gameImport_t;
 
@@ -468,3 +490,4 @@ typedef enum {
 
 } gameExport_t;
 
+#endif // !__G_PUBLIC_H

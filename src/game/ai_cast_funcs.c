@@ -856,7 +856,7 @@ char *AIFunc_InspectBulletImpact( cast_state_t *cs ) {
 		vectoangles( v1, cs->bs->ideal_viewangles );
 		//
 		// if we are facing that direction, we've looked at the impact point
-		if ( fabs( cs->bs->ideal_viewangles[YAW] - cs->bs->viewangles[YAW] ) < 1 ) {
+		if ( Q_fabs( cs->bs->ideal_viewangles[YAW] - cs->bs->viewangles[YAW] ) < 1 ) {
 			cs->aiFlags &= ~AIFL_MISCFLAG2;
 		}
 		return NULL;
@@ -2578,8 +2578,8 @@ char *AIFunc_BattleChase( cast_state_t *cs ) {
 	// Flaming Zombie? Shoot flames while running
 	if ( ( cs->aiCharacter == AICHAR_ZOMBIE ) &&
 		 ( IS_FLAMING_ZOMBIE( ent->s ) ) &&
-		 ( fabs( cs->bs->ideal_viewangles[YAW] - cs->bs->viewangles[YAW] ) < 5 ) ) {
-		if ( fabs( sin( ( level.time + cs->entityNum * 314 ) / 1000 ) * cos( ( level.time + cs->entityNum * 267 ) / 979 ) ) < 0.5 ) {
+		 ( Q_fabs( cs->bs->ideal_viewangles[YAW] - cs->bs->viewangles[YAW] ) < 5 ) ) {
+		if ( Q_fabs( sin( ( level.time + cs->entityNum * 314 ) / 1000 ) * cos( ( level.time + cs->entityNum * 267 ) / 979 ) ) < 0.5 ) {
 			ent->s.time = level.time + 800;
 		}
 	}
@@ -3728,7 +3728,7 @@ char *AIFunc_BattleMG42( cast_state_t *cs ) {
 
 	if (    bs->enemy < 0 ||
 			!AICast_CheckAttack( cs, bs->enemy, qfalse ) ||
-			( fabs( AngleDifference( angles[YAW], mg42->s.angles[YAW] ) ) > mg42->harc ) ||
+			( Q_fabs( AngleDifference( angles[YAW], mg42->s.angles[YAW] ) ) > mg42->harc ) ||
 			( angles[PITCH] < 0 && angles[PITCH] + 5 < -mg42->varc ) ||
 			( angles[PITCH] > 0 && angles[PITCH] - 5 > 5.0 ) ) {
 		qboolean shouldAttack;
@@ -3767,7 +3767,7 @@ char *AIFunc_BattleMG42( cast_state_t *cs ) {
 				VectorNormalize( vec );
 				vectoangles( vec, angles );
 				angles[PITCH] = AngleNormalize180( angles[PITCH] );
-				if ( !(  ( fabs( AngleDifference( angles[YAW], mg42->s.angles[YAW] ) ) > mg42->harc ) ||
+				if ( !(  ( Q_fabs( AngleDifference( angles[YAW], mg42->s.angles[YAW] ) ) > mg42->harc ) ||
 						 ( angles[YAW] < 0 && angles[YAW] + 2 < -mg42->varc ) ||
 						 ( angles[YAW] > 0 && angles[YAW] - 2 > 5.0 ) ) ) {
 					if ( AICast_CheckAttack( cs, enemies[i], qfalse ) ) {
@@ -4643,7 +4643,7 @@ char *AIFunc_BattleStart( cast_state_t *cs ) {
 recheck:
 	rval = NULL;
 	// ignore special attacks until we are facing our enemy
-	if ( fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) < 10 ) {
+	if ( Q_fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) < 10 ) {
 		// select a weapon
 		AICast_ChooseWeapon( cs, qtrue );
 		//

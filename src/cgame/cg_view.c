@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -410,7 +410,7 @@ void CG_KickAngles( void ) {
 					cg.kickAngles[i] += kickChange;
 					if ( !cg.kickAngles[i] && frametime ) {
 						cg.kickAVel[i] = 0;
-					} else if ( fabs( cg.kickAngles[i] ) > maxKickAngles[i] ) {
+					} else if ( Q_fabs( cg.kickAngles[i] ) > maxKickAngles[i] ) {
 						cg.kickAngles[i] = maxKickAngles[i] * ( ( 2 * ( cg.kickAngles[i] > 0 ) ) - 1 );
 						cg.kickAVel[i] = 0; // force Avel to return us to center rather than keep going outside range
 					}
@@ -424,7 +424,7 @@ void CG_KickAngles( void ) {
 		// recoil is added to input viewangles per frame
 		if ( cg.recoilPitch ) {
 			// apply max recoil
-			if ( fabs( cg.recoilPitch ) > recoilMaxSpeed ) {
+			if ( Q_fabs( cg.recoilPitch ) > recoilMaxSpeed ) {
 				if ( cg.recoilPitch > 0 ) {
 					cg.recoilPitch = recoilMaxSpeed;
 				} else {
@@ -435,7 +435,7 @@ void CG_KickAngles( void ) {
 			if ( frametime ) {
 				idealCenterSpeed = -( 2.0 * ( cg.recoilPitch > 0 ) - 1.0 ) * recoilCenterSpeed * ft;
 				if ( idealCenterSpeed ) {
-					if ( fabs( idealCenterSpeed ) < fabs( cg.recoilPitch ) ) {
+					if ( Q_fabs( idealCenterSpeed ) < Q_fabs( cg.recoilPitch ) ) {
 						cg.recoilPitch += idealCenterSpeed;
 					} else {    // back zero out
 						cg.recoilPitch = 0;
@@ -443,7 +443,7 @@ void CG_KickAngles( void ) {
 				}
 			}
 		}
-		if ( fabs( cg.recoilPitch ) > recoilIgnoreCutoff ) {
+		if ( Q_fabs( cg.recoilPitch ) > recoilIgnoreCutoff ) {
 			cg.recoilPitchAngle += cg.recoilPitch * ft;
 		}
 	}
@@ -578,7 +578,7 @@ static void CG_OffsetFirstPersonView( void ) {
 	}
 
 	// add angles based on weapon kick
-	VectorAdd( angles, cg.kick_angles, angles );  //nihi comment
+	VectorAdd( angles, cg.kick_angles, angles );
 
 	// RF, add new weapon kick angles
 	CG_KickAngles();
@@ -715,7 +715,6 @@ static void CG_OffsetFirstPersonView( void ) {
 // Zoom controls
 //
 
-
 // probably move to server variables
 float zoomTable[ZOOM_MAX_ZOOMS][2] = {
 // max {out,in}
@@ -728,6 +727,11 @@ float zoomTable[ZOOM_MAX_ZOOMS][2] = {
 	{55, 55}    //	mg42
 };
 
+/*
+==============
+CG_AdjustZoomVal
+==============
+*/
 void CG_AdjustZoomVal( float val, int type ) {
 	cg.zoomval += val;
 	if ( cg.zoomval > zoomTable[type][ZOOM_OUT] ) {
@@ -738,6 +742,11 @@ void CG_AdjustZoomVal( float val, int type ) {
 	}
 }
 
+/*
+==============
+CG_ZoomIn_f
+==============
+*/
 void CG_ZoomIn_f( void ) {
 	if ( cg_entities[cg.snap->ps.clientNum].currentState.weapon == WP_SNIPERRIFLE ) {
 		CG_AdjustZoomVal( -( cg_zoomStepSniper.value ), ZOOM_SNIPER );
@@ -748,6 +757,11 @@ void CG_ZoomIn_f( void ) {
 	}
 }
 
+/*
+==============
+CG_ZoomOut_f
+==============
+*/
 void CG_ZoomOut_f( void ) {
 	if ( cg_entities[cg.snap->ps.clientNum].currentState.weapon == WP_SNIPERRIFLE ) {
 		CG_AdjustZoomVal( cg_zoomStepSniper.value, ZOOM_SNIPER );
@@ -757,7 +771,6 @@ void CG_ZoomOut_f( void ) {
 		CG_AdjustZoomVal( cg_zoomStepSniper.value, ZOOM_SNIPER ); // JPW NERVE per atvi request BINOC);
 	}
 }
-
 
 /*
 ==============
@@ -968,7 +981,7 @@ static int CG_CalcZoomedFov(void) {
 	else
 		value = cg_zoomedSens.value;
 
-	
+
 //	if (cg.snap->ps.pm_type == PM_FREEZE || (cg.snap->ps.pm_type == PM_DEAD && (cg.snap->ps.pm_flags & PMF_LIMBO)) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER) {
 if (cg.snap->ps.pm_type == PM_FREEZE) {
 		// No movement for pauses
@@ -1108,7 +1121,7 @@ static int CG_CalcFov( void ) {
 	} else {
 		cg.refdef.rdflags &= ~RDF_UNDERWATER;
 	}
-/* nihi commented out due to no poison
+/*
 	// L0 - Poison										// Pause handling
 	if (  cg.predictedPlayerState.eFlags & EF_POISONED && !cg.snap->ps.pm_type == PM_FREEZE )
 	{
@@ -1125,9 +1138,9 @@ static int CG_CalcFov( void ) {
 	cg.refdef.fov_x = fov_x;
 	cg.refdef.fov_y = fov_y;
 
-	// L0 - Freezed 
+	// L0 - Freezed
 //	if ( cg.snap->ps.pm_type == PM_FREEZE || ( cg.snap->ps.pm_type == PM_DEAD && ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER ) {
-	if ( cg.snap->ps.pm_type == PM_FREEZE ) { // nihi changed
+	if ( cg.snap->ps.pm_type == PM_FREEZE ) {
 		// No movement for pauses
 		cg.zoomSensitivity = 0;
 	} else if ( !cg.zoomedBinoc ) {
@@ -1217,7 +1230,7 @@ static void CG_DamageBlendBlob( void ) {
 		VectorMA( ent.origin, vd->damageX * -8, cg.refdef.viewaxis[1], ent.origin );
 		VectorMA( ent.origin, vd->damageY * 8, cg.refdef.viewaxis[2], ent.origin );
 
-		ent.radius = vd->damageValue * 0.4 * ( 0.5 + 0.5 * (float)t / maxTime ) * ( 0.75 + 0.5 * fabs( sin( vd->damageTime ) ) );
+		ent.radius = vd->damageValue * 0.4 * ( 0.5 + 0.5 * (float)t / maxTime ) * ( 0.75 + 0.5 * Q_fabs( sin( vd->damageTime ) ) );
 
 		ent.customShader = cgs.media.viewBloodAni[(int)( floor( ( (float)t / maxTime ) * 4.9 ) )]; //cgs.media.viewBloodShader;
 		ent.shaderRGBA[0] = 255;
@@ -1233,7 +1246,7 @@ static void CG_DamageBlendBlob( void ) {
 
 	/* moved over to cg_draw.c
 	if (cg.v_dmg_time > cg.time) {
-		redFlash = fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
+		redFlash = Q_fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
 
 		// blend the entire screen red
 		if (redFlash > 5)
@@ -1356,7 +1369,7 @@ static int CG_CalcViewValues( void ) {
 	}
 
 	cg.bobcycle = ( ps->bobCycle & 128 ) >> 7;
-	cg.bobfracsin = fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
+	cg.bobfracsin = Q_fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
 	cg.xyspeed = sqrt( ps->velocity[0] * ps->velocity[0] +
 					   ps->velocity[1] * ps->velocity[1] );
 
@@ -1558,7 +1571,6 @@ void CG_DrawSkyBoxPortal( void ) {
 		fov_x = 90;
 	}
 
-
 	// setup fog the first time, ignore this part of the configstring after that
 	token = COM_ParseExt( &cstr, qfalse );
 	if ( !token || !token[0] ) {
@@ -1613,7 +1625,6 @@ void CG_DrawSkyBoxPortal( void ) {
 	}
 
 //----(SA)	end
-
 
 	if ( cg.predictedPlayerState.pm_type == PM_INTERMISSION ) {
 		// if in intermission, use a fixed value
@@ -1688,9 +1699,6 @@ void CG_DrawSkyBoxPortal( void ) {
 	if ( cg.snap->ps.persistant[PERS_HWEAPON_USE] ) {
 		fov_x = 55;
 	}
-
-
-
 
 	cg.refdef.time = cg.time;
 
@@ -1793,165 +1801,6 @@ void CG_DrawNotebook( void ) {
 
 //=========================================================================
 
-/*
-=================
-CG_ProcessCvars
-=================
-*/
-void CG_ProcessCvars()
-{
-	char currentVal[256];
-	float cvalF, val1F, val2F;
-	int i, cvalI, val1I, val2I;
-	qboolean cvalIsF, val1IsF, val2IsF;
-
-	for (i = 0; i < cg.svCvarCount; ++i)
-	{
-		trap_Cvar_VariableStringBuffer(cg.svCvars[i].cvarName, currentVal, sizeof(currentVal));
-
-		cvalF = (float)atof(currentVal);
-		val1F = (float)atof(cg.svCvars[i].Val1);
-		val2F = (float)atof(cg.svCvars[i].Val2);
-		cvalI = atoi(currentVal);
-		val1I = atoi(cg.svCvars[i].Val1);
-		val2I = atoi(cg.svCvars[i].Val2);
-		cvalIsF = (strstr(currentVal, ".")) ? qtrue : qfalse;
-		val1IsF = (strstr(cg.svCvars[i].Val1, ".")) ? qtrue : qfalse;
-		val2IsF = (strstr(cg.svCvars[i].Val2, ".")) ? qtrue : qfalse;
-
-		switch (cg.svCvars[i].mode)
-		{
-		case SVC_EQUAL:
-			if (Q_stricmp(cg.svCvars[i].Val1, currentVal))
-			{
-				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val1);
-			}
-			break;
-		case SVC_GREATER:
-			if (cvalF <= val1F)
-			{
-				if (cvalIsF || val1IsF)
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F + 0.0001f));
-				}
-				else
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I + 1));
-				}
-			}
-			break;
-		case SVC_GREATEREQUAL:
-			if (cvalF < val1F)
-			{
-				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val1);
-			}
-			break;
-		case SVC_LOWER:
-			if (cvalF >= val1F)
-			{
-				if (cvalIsF || val1IsF)
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F - 0.0001f));
-				}
-				else
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I - 1));
-				}
-			}
-			break;
-		case SVC_LOWEREQUAL:
-			if (cvalF > val1F)
-			{
-				if (cvalIsF || val1IsF)
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F));
-				}
-				else
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I));
-				}
-			}
-			break;
-		case SVC_INSIDE:
-			if (val1F != 0.f || val1I)
-			{
-				if (cvalF < val1F)
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val1);
-				}
-			}
-			if (val2F != 0.f || val2I)
-			{
-				if (cvalF > val2F)
-				{
-					trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val2);
-				}
-			}
-			break;
-		case SVC_OUTSIDE:
-			if (val1F != 0.f || val1I)
-			{
-				if (cvalF >= val1F)
-				{
-					if (val2F == 0.f || cvalF < val2F)
-					{
-						if (cvalIsF || val1IsF)
-						{
-							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val1F - 0.0001f));
-						}
-						else
-						{
-							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val1I - 1));
-						}
-					}
-				}
-			}
-			if (val2F != 0.f || val2I)
-			{
-				if (cvalF <= val2F)
-				{
-					if (cvalF > val1F)
-					{
-						if (cvalIsF || val2IsF)
-						{
-							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%8.4f", val2F + 0.0001f));
-						}
-						else
-						{
-							trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", val2I + 1));
-						}
-					}
-				}
-			}
-			break;
-		case SVC_INCLUDE:
-			if (!strstr(currentVal, cg.svCvars[i].Val1))
-			{
-				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val2);
-			}
-			break;
-		case SVC_EXCLUDE:
-			if (strstr(currentVal, cg.svCvars[i].Val1))
-			{
-				trap_Cvar_Set(cg.svCvars[i].cvarName, cg.svCvars[i].Val2);
-			}
-			break;
-		case SVC_WITHBITS:
-			if (!(cvalI & val1I))
-			{
-				trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", cvalI + val1I));
-			}
-			break;
-		case SVC_WITHOUTBITS:
-			if (cvalI & val1I)
-			{
-				trap_Cvar_Set(cg.svCvars[i].cvarName, va("%i", cvalI - val1I));
-			}
-			break;
-		}
-	}
-}
-
 extern void CG_SetupDlightstyles(void);
 
 //#define DEBUGTIME_ENABLED
@@ -1982,9 +1831,6 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// update cvars
 	CG_UpdateCvars();
-
-	// RTCWPro - cvar limiting
-	CG_ProcessCvars();
 
 #ifdef DEBUGTIME_ENABLED
 	CG_Printf( "\n" );

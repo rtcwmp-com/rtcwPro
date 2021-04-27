@@ -163,6 +163,7 @@ textures/alpha/fence_m03
 
 textures/alpha/fence_c01
 {
+	nopicmip
     surfaceparm metalsteps
     cull disable
     {
@@ -175,6 +176,7 @@ textures/alpha/fence_c01
 
 textures/alpha/fence_c02
 {
+	nopicmip
     surfaceparm metalsteps
     cull disable
     {
@@ -189,7 +191,7 @@ textures/alpha/truss_m06
 {
     surfaceparm alphashadow
 //  nomipmaps
-//  nopicmip
+    nopicmip
     cull disable
     {
         map textures/alpha/truss_m06.tga
@@ -581,6 +583,7 @@ textures/alpha/mesh_c03
 textures/alpha/tree_c01
 {
     surfaceparm metalsteps
+	nopicmip
     cull disable
     {
         map textures/alpha/tree_c01.tga
@@ -593,6 +596,7 @@ textures/alpha/tree_c01
 textures/alpha/tree_c02
 {
     surfaceparm metalsteps
+	nopicmip
     cull disable
     {
         map textures/alpha/tree_c02.tga
@@ -605,6 +609,7 @@ textures/alpha/tree_c02
 textures/alpha/tree_c03
 {
     surfaceparm metalsteps
+	nopicmip
     cull disable
     {
         map textures/alpha/tree_c03.tga
@@ -617,6 +622,7 @@ textures/alpha/tree_c03
 textures/alpha/tree_test
 {
     surfaceparm metalsteps
+	nopicmip
     cull disable
     {
         map textures/alpha/tree_test.tga
@@ -643,6 +649,7 @@ textures/alpha/bars_m01
 
 textures/alpha/ladder
 {
+	nopicmip
     surfaceparm alphashadow
     surfaceparm metalsteps
     cull disable
@@ -656,6 +663,7 @@ textures/alpha/ladder
 
 textures/alpha/ladder_snow
 {
+	nopicmip
     surfaceparm alphashadow
     surfaceparm metalsteps
     cull disable
@@ -669,6 +677,7 @@ textures/alpha/ladder_snow
 
 textures/alpha/ladder2 //CHAD ADDED THIS!!!
 {
+	nopicmip
     surfaceparm alphashadow
     surfaceparm metalsteps
     cull disable
@@ -862,6 +871,7 @@ textures/snow/s_fence_c08
 
 textures/snow/s_bars_m01
 {
+	nopicmip
     surfaceparm metalsteps
     cull disable
     {
@@ -1366,6 +1376,7 @@ textures/doors/door_m04
 textures/tree/tree_pine1m
 {
 	surfaceparm metalsteps		
+	nopicmip
 	cull none
 	{
 		map textures/tree/tree_pine1m.tga
@@ -1377,7 +1388,7 @@ textures/tree/tree_pine1m
 
 textures/tree/tree_m01
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/tree_m01.tga
@@ -1392,7 +1403,7 @@ textures/tree/tree_m01
 
 textures/tree/tree_m03
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/tree_m03.tga
@@ -1409,7 +1420,7 @@ textures/tree/tree_m03
 
 textures/tree/tree_m04
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/tree_m04.tga
@@ -1426,7 +1437,7 @@ textures/tree/tree_m04
 
 textures/tree/tree_m05
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/tree_m05.tga
@@ -1443,7 +1454,7 @@ textures/tree/tree_m05
 
 textures/tree/tree_m06
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/tree_m06.tga
@@ -1460,6 +1471,7 @@ textures/tree/tree_m06
 
 textures/tree/tree_m07
 {
+	nopicmip
 	//sort 10		
 // invalid JPW FIXME SP merge	cull front
 	surfaceparm alphashadow
@@ -1478,6 +1490,7 @@ textures/tree/tree_m07
 
 textures/tree/tree_m08
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	surfaceparm alphashadow
@@ -1501,6 +1514,7 @@ textures/tree/tree_m08
 
 textures/tree/tree_m09
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	surfaceparm alphashadow
@@ -1519,6 +1533,7 @@ textures/tree/tree_m09
 
 textures/tree/tree_m01s
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1536,6 +1551,7 @@ textures/tree/tree_m01s
 
 textures/tree/tree_m02s
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1553,6 +1569,7 @@ textures/tree/tree_m02s
 
 textures/tree/tree_m01t
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1570,6 +1587,7 @@ textures/tree/tree_m01t
 
 textures/tree/tree_m02dm
 {
+	nopicmip
 	//sort 10		
 //	cull twosided
 	{
@@ -1587,6 +1605,7 @@ textures/tree/tree_m02dm
 
 textures/tree/tree_m02s_snow
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1604,6 +1623,7 @@ textures/tree/tree_m02s_snow
 
 textures/tree/branch_pine2
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1616,6 +1636,7 @@ textures/tree/branch_pine2
 }
 textures/tree/branch_pine1
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1629,6 +1650,7 @@ textures/tree/branch_pine1
 
 textures/tree/branch_pine5
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1642,6 +1664,7 @@ textures/tree/branch_pine5
 
 textures/tree/branch_pine5a
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1654,6 +1677,7 @@ textures/tree/branch_pine5a
 }
 textures/tree/branch_pine6
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -1667,6 +1691,7 @@ textures/tree/branch_pine6
 
 textures/tree/branch_pine7
 {
+	nopicmip
 	//sort 10
 	deformVertexes autosprite2		
 	cull twosided
@@ -1683,7 +1708,7 @@ textures/tree/branch_pine7
 
 textures/tree/trunck3
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/trunck3.tga
@@ -1699,7 +1724,7 @@ textures/tree/trunck3
 
 textures/tree/trunck3a
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/trunck3a.tga
@@ -1715,7 +1740,7 @@ textures/tree/trunck3a
 
 textures/tree/alpha_back
 {
-			
+	nopicmip
 	cull twosided
 	{
 		map textures/tree/alpha_back.tga
@@ -1733,8 +1758,8 @@ textures/tree/tree_m08_lod
 {
 	// sort 10		
 	cull twosided
-	// nopicmip
-	// nomipmap
+	nopicmip
+	//nomipmap
 	// deformVertexes autoSprite2
 	{
 
@@ -1754,7 +1779,7 @@ textures/tree/tree_m07_lod
 {
 	// sort 10		
 	cull twosided
-	// nopicmip
+	nopicmip
 	// nomipmap
 	//deformVertexes autoSprite2
 
@@ -1774,7 +1799,7 @@ textures/tree/tree_m07_lod
 
 textures/tree/weed_c01
 {
-		
+	nopicmip
 	cull twosided
 
 
@@ -1794,7 +1819,7 @@ textures/tree/weed_c01
 
 textures/tree/weed_c05
 {
-		
+	nopicmip
 	cull twosided
 
 
@@ -1818,7 +1843,7 @@ textures/tree/tree_m08snow
 	surfaceparm alphashadow
 	//sort 10		
 	cull twosided
-	// nopicmip
+	nopicmip
 	// nomipmap
 	{
 
@@ -1868,6 +1893,7 @@ textures/props/fwindow1
 }
 textures/tree/pine_m01
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -2005,6 +2031,7 @@ textures/alpha/fastfan
 
 textures/tree/branch1
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -2019,6 +2046,7 @@ textures/tree/branch1
 
 textures/tree/branch2
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -2033,6 +2061,7 @@ textures/tree/branch2
 
 textures/tree/branch3
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -2045,6 +2074,7 @@ textures/tree/branch3
 }
 textures/tree/branch3a
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 
@@ -2063,6 +2093,7 @@ textures/tree/branch3a
 }
 textures/tree/branch3b
 {
+	nopicmip
 	//sort 10		
 	cull twosided
 	{
@@ -2372,6 +2403,7 @@ textures/alpha/flor_glow
 }
 textures/sleepy/tree_c01
 {
+	nopicmip
     surfaceparm metalsteps
     cull disable
     {
@@ -2383,6 +2415,7 @@ textures/sleepy/tree_c01
 }
 textures/sleepy/grouptree_c01
 {
+	nopicmip
     surfaceparm metalsteps
     cull disable
     {
@@ -2394,7 +2427,7 @@ textures/sleepy/grouptree_c01
 }
 textures/tree/snowtree_c01
 {
-		
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2406,7 +2439,7 @@ textures/tree/snowtree_c01
 }
 textures/tree/snowtree_c01a
 {
-			
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2418,7 +2451,7 @@ textures/tree/snowtree_c01a
 }
 textures/tree/snowtree_c02
 {
-			
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2430,7 +2463,7 @@ textures/tree/snowtree_c02
 }
 textures/tree/snowtree_c02a
 {
-		
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2442,7 +2475,7 @@ textures/tree/snowtree_c02a
 }
 textures/tree/snowtree_c03
 {
-		
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2454,7 +2487,7 @@ textures/tree/snowtree_c03
 }
 textures/tree/snowtree_c03a
 {
-		
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2466,7 +2499,7 @@ textures/tree/snowtree_c03a
 }
 textures/tree/snowtree_c04
 {
-			
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2478,7 +2511,7 @@ textures/tree/snowtree_c04
 }
 textures/tree/snowtree_c04a
 {
-			
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2490,7 +2523,7 @@ textures/tree/snowtree_c04a
 }
 textures/tree/tree_c01
 {
-			
+	nopicmip
 	cull twosided
     surfaceparm alphashadow
 	{
@@ -2504,6 +2537,7 @@ textures/tree/tree_c01
 }
 textures/tree/ivy_c01
 {
+	nopicmip
 	surfaceparm alphashadow
 	cull twosided
 	{
@@ -2517,7 +2551,8 @@ textures/tree/ivy_c01
 }
 textures/tree/ivy_c01a
 {
-	    surfaceparm alphashadow		
+	nopicmip
+	surfaceparm alphashadow		
 	cull twosided
 	{
 		map textures/tree/ivy_c01a.tga
@@ -2530,7 +2565,8 @@ textures/tree/ivy_c01a
 }
 textures/tree/ivy_c01b
 {
-	    surfaceparm alphashadow		
+	nopicmip
+	surfaceparm alphashadow		
 	cull twosided
 	{
 		map textures/tree/ivy_c01b.tga
@@ -2543,7 +2579,8 @@ textures/tree/ivy_c01b
 }
 textures/tree/ivy_c02
 {
-	    surfaceparm alphashadow		
+	nopicmip
+	surfaceparm alphashadow		
 	cull twosided
 	{
 		map textures/tree/ivy_c02.tga
@@ -2556,7 +2593,8 @@ textures/tree/ivy_c02
 }
 textures/tree/ivy_c02a
 {
-	    surfaceparm alphashadow		
+	nopicmip
+	surfaceparm alphashadow		
 	cull twosided
 	{
 		map textures/tree/ivy_c02a.tga
@@ -2569,7 +2607,8 @@ textures/tree/ivy_c02a
 }
 textures/tree/ivy_c02b
 {
-	    surfaceparm alphashadow		
+	nopicmip
+	surfaceparm alphashadow		
 	cull twosided
 	{
 		map textures/tree/ivy_c02b.tga
@@ -2583,6 +2622,7 @@ textures/tree/ivy_c02b
 
 textures/tree/ivy_c03
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2596,6 +2636,7 @@ textures/tree/ivy_c03
 }
 textures/tree/ivy_c03a
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2609,6 +2650,7 @@ textures/tree/ivy_c03a
 }
 textures/tree/ivy_c03b
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2623,6 +2665,7 @@ textures/tree/ivy_c03b
 
 textures/tree/ivy_c04
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2636,6 +2679,7 @@ textures/tree/ivy_c04
 }
 textures/tree/ivy_c04a
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2649,6 +2693,7 @@ textures/tree/ivy_c04a
 }
 textures/tree/ivy_c04b
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2662,6 +2707,7 @@ textures/tree/ivy_c04b
 }
 textures/tree/ivy_c05
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2677,6 +2723,7 @@ textures/tree/ivy_c05
 
 textures/tree/ivy_c05a
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2690,6 +2737,7 @@ textures/tree/ivy_c05a
 }
 textures/tree/ivy_c05b
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2703,6 +2751,7 @@ textures/tree/ivy_c05b
 }
 textures/tree/ivy_c06
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2716,6 +2765,7 @@ textures/tree/ivy_c06
 }
 textures/tree/ivy_c07
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2729,6 +2779,7 @@ textures/tree/ivy_c07
 }
 textures/tree/ivy_c08
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{
@@ -2742,6 +2793,7 @@ textures/tree/ivy_c08
 }
 textures/tree/ivy_c09
 {
+	nopicmip
     surfaceparm alphashadow			
 	cull twosided
 	{

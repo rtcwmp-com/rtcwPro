@@ -12,12 +12,12 @@
 *.ipch
 src/Backup/*.*
 src/.vs/*.*
+src/rtcwpro/
 # we should not put dll / so / object files in the repo
 *.dll
 *.so
 *.o
 *.pk3
-src/rtcwpro/wolfconfig_mp.cfg
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 website/
@@ -348,3 +348,5 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 *.pk3
+/src/servercache.dat
+/src/main/authkey

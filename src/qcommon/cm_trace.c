@@ -110,7 +110,7 @@ float CM_DistanceFromLineSquared( vec3_t p, vec3_t lp1, vec3_t lp2, vec3_t dir )
 			break;
 		}
 	if ( j < 3 ) {
-		if ( fabs( proj[j] - lp1[j] ) < fabs( proj[j] - lp2[j] ) ) {
+		if ( Q_fabs( proj[j] - lp1[j] ) < Q_fabs( proj[j] - lp2[j] ) ) {
 			VectorSubtract( p, lp1, t );
 		} else {
 			VectorSubtract( p, lp2, t );
@@ -139,15 +139,17 @@ SquareRootFloat
 ================
 */
 float SquareRootFloat( float number ) {
-	long i;
+	union {
+		float f;
+		int i;
+	} t;
 	float x, y;
 	const float f = 1.5F;
 
 	x = number * 0.5F;
-	y  = number;
-	i  = *( long * ) &y;
-	i  = 0x5f3759df - ( i >> 1 );
-	y  = *( float * ) &i;
+	t.f = number;
+	t.i = 0x5f3759df - (t.i >> 1);
+	y = t.f;
 	y  = y * ( f - ( x * y * y ) );
 	y  = y * ( f - ( x * y * y ) );
 	return number * y;
@@ -1063,7 +1065,7 @@ void CM_TraceThroughTree( traceWork_t *tw, int num, float p1f, float p2f, vec3_t
 			// an axial brush right behind a slanted bsp plane
 			// will poke through when expanded, so adjust
 			// by sqrt(3)
-			offset = fabs(tw->extents[0]*plane->normal[0]) +
+			offset = Q_fabs(tw->extents[0]*plane->normal[0]) +
 				fabs(tw->extents[1]*plane->normal[1]) +
 				fabs(tw->extents[2]*plane->normal[2]);
 
@@ -1243,11 +1245,11 @@ void CM_Trace( trace_t *results, const vec3_t start, const vec3_t end,
 	if ( tw.sphere.use ) {
 		for ( i = 0 ; i < 3 ; i++ ) {
 			if ( tw.start[i] < tw.end[i] ) {
-				tw.bounds[0][i] = tw.start[i] - fabs( tw.sphere.offset[i] ) - tw.sphere.radius;
-				tw.bounds[1][i] = tw.end[i] + fabs( tw.sphere.offset[i] ) + tw.sphere.radius;
+				tw.bounds[0][i] = tw.start[i] - Q_fabs( tw.sphere.offset[i] ) - tw.sphere.radius;
+				tw.bounds[1][i] = tw.end[i] + Q_fabs( tw.sphere.offset[i] ) + tw.sphere.radius;
 			} else {
-				tw.bounds[0][i] = tw.end[i] - fabs( tw.sphere.offset[i] ) - tw.sphere.radius;
-				tw.bounds[1][i] = tw.start[i] + fabs( tw.sphere.offset[i] ) + tw.sphere.radius;
+				tw.bounds[0][i] = tw.end[i] - Q_fabs( tw.sphere.offset[i] ) - tw.sphere.radius;
+				tw.bounds[1][i] = tw.start[i] + Q_fabs( tw.sphere.offset[i] ) + tw.sphere.radius;
 			}
 		}
 	} else {

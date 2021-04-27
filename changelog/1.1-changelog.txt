@@ -1,3 +1,5 @@
+Release 1.1
+
 Issue Fixes
 
 #119 instant respawn bug

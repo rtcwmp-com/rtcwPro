@@ -483,6 +483,10 @@ void RB_BeginDrawingView( void ) {
 
 				qglClearColor( glfogsettings[FOG_CURRENT].color[0], glfogsettings[FOG_CURRENT].color[1], glfogsettings[FOG_CURRENT].color[2], glfogsettings[FOG_CURRENT].color[3] );
 			}
+			else if (!(r_portalsky->integer)) {      // ydnar: portal skies have been manually turned off, clear bg color
+				clearBits |= GL_COLOR_BUFFER_BIT;
+				qglClearColor(0.5, 0.5, 0.5, 1.0);
+			}
 		}
 	} else {                                              // world scene with no portal sky
 		clearBits |= GL_DEPTH_BUFFER_BIT;
@@ -513,6 +517,10 @@ void RB_BeginDrawingView( void ) {
 		}
 	}
 
+	// ydnar: don't clear the color buffer when no world model is specified
+	if (backEnd.refdef.rdflags & RDF_NOWORLDMODEL) {
+		clearBits &= ~GL_COLOR_BUFFER_BIT;
+	}
 
 	if ( clearBits ) {
 		qglClear( clearBits );
@@ -1140,6 +1148,7 @@ const void  *RB_DrawSurfs( const void *data ) {
 
 	backEnd.refdef = cmd->refdef;
 	backEnd.viewParms = cmd->viewParms;
+	backEnd.doneSurfaces = qtrue;
 
 	RB_RenderDrawSurfList( cmd->drawSurfs, cmd->numDrawSurfs );
 
@@ -1281,6 +1290,8 @@ const void  *RB_SwapBuffers( const void *data ) {
 	GLimp_EndFrame();
 
 	backEnd.projection2D = qfalse;
+	backEnd.doneBloom = qfalse;
+	backEnd.doneSurfaces = qfalse;
 
 	return (const void *)( cmd + 1 );
 }
@@ -1310,6 +1321,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 			data = RB_SetColor( data );
 			break;
 		case RC_STRETCH_PIC:
+			R_BloomScreen();
 			data = RB_StretchPic( data );
 			break;
 		case RC_ROTATED_PIC:
@@ -1325,6 +1337,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 			data = RB_DrawBuffer( data );
 			break;
 		case RC_SWAP_BUFFERS:
+			R_BloomScreen();
 			data = RB_SwapBuffers( data );
 			break;
 

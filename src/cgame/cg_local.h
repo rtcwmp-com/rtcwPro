@@ -92,7 +92,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GIANT_WIDTH         32
 #define GIANT_HEIGHT        48
 
-#define NUM_CROSSHAIRS      10
+#define NUM_CROSSHAIRS      16
 
 // Ridah, trails
 #define STYPE_STRETCH   0
@@ -112,7 +112,6 @@ If you have questions concerning this license or the applicable additional terms
 #define LIMBO_3D_W  420
 #define LIMBO_3D_H  312
 // -NERVE - SMF
-/* NIHI ADDED BELOW */
 // L0 - OSP's window's dump
 #define MAX_WINDOW_COUNT        10
 #define MAX_WINDOW_LINES        64
@@ -248,7 +247,7 @@ typedef struct {
 	int requestTime;
 } topshotStats_t;
 // End OSP's dump
-/* END NIHI ADDITION */
+
 //=================================================
 
 // player entities need to track more information
@@ -1207,15 +1206,9 @@ typedef struct {
 	// Time Counter
 	int timein;
 	int timeCounter;
+
+	qboolean serverRespawning;
 // -OSPx
-
-	// RTCWPro - cvar limiting
-	svCvar_t svCvars[MAX_SVCVARS];
-	int svCvarCount;
-
-	// backuping, forceCvar_t is good format, it holds name and value only
-	forceCvar_t cvarBackups[MAX_SVCVARS];
-	int cvarBackupsCount;
 
 	// sswolf - tj stuff
 	qboolean resetmaxspeed;
@@ -1868,11 +1861,11 @@ typedef struct {
 	int ccSelectedTeam;					// Reinforcements offset
 	int fixedphysics;	// Fixed pshysics
 	int pauseState;		// Pause
-	int pauseTime;   // pause time nihi added
+	int pauseTime;
 	int readyState;		// Ready
 	int playersReady;   // number of players ready so far
 	int playerCount;	// number of players
-// nihi added below
+
 	// Pause
 	cPauseSts_t match_paused;
 	int match_resumes;
@@ -2088,13 +2081,13 @@ extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
 extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_muzzleFlash;
-//extern vmCvar_t cg_hitsounds;
+extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
 extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
-// nihi added
+
 extern vmCvar_t	vp_drawnames;
 extern vmCvar_t	cg_drawNames;
 extern vmCvar_t cg_announcer;
@@ -2142,6 +2135,9 @@ extern vmCvar_t cg_speedY;
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
 
+// added from et-legacy - crumbs
+extern vmCvar_t cg_tracers;
+
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
 
@@ -2171,7 +2167,7 @@ qboolean CG_GetTag( int clientNum, char *tagname, orientation_t * or );
 qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t * or );
 
 qboolean CG_CheckCenterView();
-// nihi added lines below
+
 char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
@@ -2610,6 +2606,7 @@ void CG_DrawTourneyScoreboard( void );
 //
 qboolean CG_ConsoleCommand( void );
 void CG_InitConsoleCommands( void );
+qboolean CG_RelayCommand(char* type, int value);
 // OSPx
 void CG_autoRecord_f( void );
 void CG_autoScreenShot_f( void );
@@ -2632,7 +2629,6 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
-void CG_UpdateSvCvars(void); // RTCWPro - cvar limiting
 
 //
 // cg_playerstate.c
@@ -2680,6 +2676,8 @@ void        trap_Cvar_Register( vmCvar_t *vmCvar, const char *varName, const cha
 void        trap_Cvar_Update( vmCvar_t *vmCvar );
 void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+void		trap_Rest_Validate(void);
+void		trap_Rest_Build(const char *data);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );
@@ -2899,6 +2897,7 @@ void        CG_StartCamera( const char *name, qboolean startBlack );
 int         CG_LoadCamera( const char *name );
 void        CG_FreeCamera( int camNum );
 //----(SA)	end
+
 // Text
 int CG_Text_Width_Ext( const char *text, float scale, int limit, fontInfo_t* font );
 int CG_Text_Height_Ext( const char *text, float scale, int limit, fontInfo_t* font );

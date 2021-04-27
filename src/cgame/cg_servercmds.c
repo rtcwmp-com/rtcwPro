@@ -177,72 +177,6 @@ void CG_ParseServerinfo( void ) {
 }
 
 /*
-=================
-CG_inSVCVARBackupList
-=================
-*/
-static qboolean CG_inSVCVARBackupList(const char* cvar1)
-{
-	int j;
-
-	for (j = 0; j < cg.cvarBackupsCount; ++j)
-	{
-		if (!Q_stricmp(cg.cvarBackups[j].cvarName, cvar1))
-		{
-			return qtrue;
-		}
-	}
-	return qfalse;
-}
-
-/*
-=================
-CG_UpdateSvCvars
-=================
-*/
-void CG_UpdateSvCvars(void)
-{
-	const char* info;
-	int        i;
-	char* token;
-	char* buffer;
-
-	info = CG_ConfigString(CS_SVCVAR);
-
-	cg.svCvarCount = atoi(Info_ValueForKey(info, "N"));
-
-	for (i = 0; i < cg.svCvarCount; i++)
-	{
-		// get what is it
-		buffer = Info_ValueForKey(info, va("V%i", i));
-		// get a mode pf ot
-		token = strtok(buffer, " ");
-		cg.svCvars[i].mode = atoi(token);
-
-		token = strtok(NULL, " ");
-		Q_strncpyz(cg.svCvars[i].cvarName, token, sizeof(cg.svCvars[0].cvarName));
-
-		token = strtok(NULL, " ");
-		Q_strncpyz(cg.svCvars[i].Val1, token, sizeof(cg.svCvars[0].Val1));
-
-		token = strtok(NULL, " ");
-		if (token)
-		{
-			Q_strncpyz(cg.svCvars[i].Val2, token, sizeof(cg.svCvars[0].Val2));
-		}
-
-		// FIFO! - only put into backup list if not already in
-		if (!CG_inSVCVARBackupList(cg.svCvars[i].cvarName))
-		{
-			// do a backup
-			Q_strncpyz(cg.cvarBackups[cg.cvarBackupsCount].cvarName, cg.svCvars[i].cvarName, sizeof(cg.cvarBackups[0].cvarName));
-			trap_Cvar_VariableStringBuffer(cg.svCvars[i].cvarName, cg.cvarBackups[cg.cvarBackupsCount].cvarValue, sizeof(cg.cvarBackups[0].cvarValue));
-			cg.cvarBackupsCount++;
-		}
-	}
-}
-
-/*
 ==================
 CG_ParseWolfinfo
 
@@ -258,7 +192,7 @@ void CG_ParseWolfinfo( void ) {
 	cgs.nextTimeLimit = atof( Info_ValueForKey( info, "g_nextTimeLimit" ) );
 	cgs.gamestate = atoi( Info_ValueForKey( info, "gamestate" ) );
 
-		// Announce game in progress if we are really playing
+	// Announce game in progress if we are really playing
 	if (old_gs != GS_PLAYING && cgs.gamestate == GS_PLAYING)
 	{
 		trap_S_StartLocalSound(cgs.media.announceFight, CHAN_ANNOUNCER);
@@ -394,9 +328,25 @@ L0 - Pause
 Parse Pause state
 ================
 */
-void CG_ParsePause( const char *pState ) {
-	cgs.pauseState = atoi( pState );
+void CG_ParsePause( const char *pTime ) {
+
+	if (atoi(pTime) == 10000) {
+		cgs.match_paused = PAUSE_RESUMING;
+		cgs.match_resumes = 0;
+		cgs.match_expired = 0;
+	}
+	else if (atoi(pTime) > 0) {
+		cgs.match_paused = PAUSE_ON;
+		cgs.match_resumes = atoi(pTime);
+		cgs.match_expired = 0;
+	}
+	else {
+		cgs.match_paused = PAUSE_NONE;
+		cgs.match_resumes = 0;
+		cgs.match_expired = 0;
+	}
 }
+
 /*
 ================
 L0 - Ready
@@ -416,29 +366,22 @@ Called on load to set the initial values from configure strings
 ================
 */
 void CG_SetConfigValues( void ) {
-#ifdef MISSIONPACK
-	const char *s;
-#endif
+	int pState = atoi(CG_ConfigString(CS_PAUSED));
+	cgs.match_resumes = (pState > 0 ? pState : 0);
+
+	if (pState && pState == 10000)
+		cgs.match_paused = PAUSE_RESUMING;
+	else if (pState && (pState > 0 && pState < 10000))
+		cgs.match_paused = PAUSE_ON;
+	else if (!pState || pState == 0)
+		cgs.match_paused = PAUSE_NONE;
 
 	cgs.scores1 = atoi( CG_ConfigString( CS_SCORES1 ) );
 	cgs.scores2 = atoi( CG_ConfigString( CS_SCORES2 ) );
 	cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
-#ifdef MISSIONPACK
-	if ( cgs.gametype == GT_CTF ) {
-		s = CG_ConfigString( CS_FLAGSTATUS );
-		cgs.redflag = s[0] - '0';
-		cgs.blueflag = s[1] - '0';
-	} else if ( cgs.gametype == GT_1FCTF )    {
-		s = CG_ConfigString( CS_FLAGSTATUS );
-		cgs.flagStatus = s[0] - '0';
-	}
-#endif
 	cg.warmup = atoi( CG_ConfigString( CS_WARMUP ) );
-	// L0 - Reinforcements offset
+
 	CG_ParseReinforcementTimes( CG_ConfigString( CS_REINFSEEDS ) );
-	// L0 - Pause
-	CG_ParsePause( CG_ConfigString( CS_PAUSED ) );
-	// L0 - Ready
 	CG_ParseReady(CG_ConfigString(CS_READY) );
 }
 
@@ -548,8 +491,6 @@ static void CG_ConfigStringModified( void ) {
 		CG_ParseScreenFade();
 	} else if ( num == CS_FOGVARS ) {
 		CG_ParseFog();
-	} else if ( num == CS_SVCVAR ) {
-		CG_UpdateSvCvars();
 	} else if ( num >= CS_MODELS && num < CS_MODELS + MAX_MODELS ) {
 		cgs.gameModels[ num - CS_MODELS ] = trap_R_RegisterModel( str );
 	} else if ( num >= CS_SOUNDS && num < CS_SOUNDS + MAX_MODELS ) {
@@ -1569,7 +1510,7 @@ const char* CG_LocalizeServerCommand( const char *buf ) {
 }
 // -NERVE - SMF
 
-// nihi added below
+
 /*
 =================
 L0
@@ -1587,7 +1528,7 @@ NOTE: My changes aren't commented really.
 void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
 	qboolean fFull = ( txt_dump != CG_printWindow );
-//	qboolean fFull = qfalse;  // nihi added
+//	qboolean fFull = qfalse;
 	qboolean fHasStats = qfalse;
 	char strName[MAX_STRING_CHARS];
 	int atts, deaths, dmg_given, dmg_rcvd, hits, kills, team_dmg, headshots, gibs;
@@ -1662,7 +1603,7 @@ void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
 	qboolean fFull = ( txt_dump != CG_printWindow );
 
-//	qboolean fFull = qtrue;  // nihi added
+//	qboolean fFull = qtrue;
 	char strName[MAX_STRING_CHARS];
 	int kills, headshots, deaths, team_kills, suicides, acc_shots, acc_hits, damage_giv, damage_rec;
 	int bleed, ammo_giv, med_giv, revived, gibs, kill_peak;
@@ -1738,8 +1679,7 @@ void CG_parseBestShotsStats_cmd( qboolean doTop, void( txt_dump ) ( char * ) ) {
 
 	int iArg = 1;
 	qboolean fFull = ( txt_dump != CG_printWindow );
-//	qboolean fFull = qtrue;  // nihi added
-
+//	qboolean fFull = qtrue;
 
 	int iWeap = atoi( CG_Argv( iArg++ ) );
 	if ( !iWeap ) {
@@ -2028,7 +1968,7 @@ static void CG_ServerCommand( void ) {
 			}
 
 			// OSPx - Client logging
-			if (cg_printObjectiveInfo.integer > 0 && (args == 4 || atoi(CG_Argv(2)) > 1)) {
+			if (cg_printObjectiveInfo.integer > 0 && (args == 4 || atoi(CG_Argv(2)) > 1) && cgs.gamestate == GS_PLAYING && cgs.match_paused == PAUSE_NONE) {
 				CG_Printf("[cgnotify]*** ^3INFO: ^5%s\n", Q_CleanStr((char *)CG_LocalizeServerCommand(CG_Argv(1))));
 			}
 
@@ -2333,9 +2273,24 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// ydnar: bug 267: server sends this command when it's about to kill the current server, before the client can reconnect
+	if (!Q_stricmp(cmd, "spawnserver")) {
+		cg.serverRespawning = qtrue;
+		return;
+	}
+
+	if (!Q_stricmp(cmd, "revalidate")) {
+		trap_Rest_Validate();
+		return;
+	}
+
+	if (!Q_stricmp(cmd, "rereload")) {
+		trap_Rest_Build(CG_Argv(1));
+		return;
+	}
+
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
-
 
 /*
 ====================

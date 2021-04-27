@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
 #include "server.h"
 
 serverStatic_t svs;                 // persistant server info
@@ -86,7 +84,29 @@ cvar_t* wh_bbox_vert;
 cvar_t* wh_add_xy;
 cvar_t* wh_check_fov;
 
+// -> HTTP downloads
+cvar_t* sv_wwwDownload;	// server does a www dl redirect
+cvar_t* sv_wwwBaseURL;		// base URL for redirect
+							// tell clients to perform their downloads while disconnected from the server
+							// this gets you a better throughput, but you loose the ability to control the download usage
+cvar_t* sv_wwwDlDisconnected;
+cvar_t* sv_wwwFallbackURL;	// URL to send to if an http/ftp fails or is refused client side
+
+// Streaming
+cvar_t* sv_StreamingToken;
+cvar_t* sv_StreamingSelfSignedCert;
+
+// Auth
+cvar_t* sv_AuthEnabled;
+cvar_t* sv_AuthStrictMode;
+
+// Cvar Restrictions
+cvar_t* sv_GameConfig;
+
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
+
+serverBan_t serverBans[SERVER_MAXBANS];
+int serverBansCount = 0;
 
 /*
 =============================================================================
@@ -232,8 +252,12 @@ but not on every player enter or exit.
 #define HEARTBEAT_DEAD  "WolfFlatline-1"         // NERVE - SMF
 
 void SV_MasterHeartbeat( const char *hbname ) {
-	static netadr_t adr[MAX_MASTER_SERVERS];
+	static netadr_t	adr[MAX_MASTER_SERVERS][2];
 	int i;
+	int	res;
+	int	netenabled;
+
+	netenabled = Cvar_VariableIntegerValue("net_enabled");
 
 	// DHM - Nerve :: Update Server doesn't send heartbeat
 #ifdef UPDATE_SERVER
@@ -241,7 +265,7 @@ void SV_MasterHeartbeat( const char *hbname ) {
 #endif
 
 	// "dedicated 1" is for lan play, "dedicated 2" is for inet public play
-	if ( !com_dedicated || com_dedicated->integer != 2 ) {
+	if (!com_dedicated || com_dedicated->integer != 2 || !(netenabled & (NET_ENABLEV4 | NET_ENABLEV6))) {
 		return;     // only dedicated servers send heartbeats
 	}
 
@@ -251,41 +275,66 @@ void SV_MasterHeartbeat( const char *hbname ) {
 	}
 	svs.nextHeartbeatTime = svs.time + HEARTBEAT_MSEC;
 
-
 	// send to group masters
-	for ( i = 0 ; i < MAX_MASTER_SERVERS ; i++ ) {
-		if ( !sv_master[i]->string[0] ) {
+	for (i = 0; i < MAX_MASTER_SERVERS; i++) {
+		if (!sv_master[i]->string[0])
 			continue;
-		}
 
 		// see if we haven't already resolved the name
 		// resolving usually causes hitches on win95, so only
 		// do it when needed
-		if ( sv_master[i]->modified ) {
+		if (sv_master[i]->modified || (adr[i][0].type == NA_BAD && adr[i][1].type == NA_BAD)) {
 			sv_master[i]->modified = qfalse;
 
-			Com_Printf( "Resolving %s\n", sv_master[i]->string );
-			if ( !NET_StringToAdr( sv_master[i]->string, &adr[i] ) ) {
+			if (netenabled & NET_ENABLEV4) {
+				Com_Printf("Resolving %s (IPv4)\n", sv_master[i]->string);
+				res = NET_StringToAdr(sv_master[i]->string, &adr[i][0], NA_IP);
+
+				if (res == 2) {
+					// if no port was specified, use the default master port
+					adr[i][0].port = BigShort(PORT_MASTER);
+				}
+
+				if (res)
+					Com_Printf("%s resolved to %s\n", sv_master[i]->string, NET_AdrToStringwPort(adr[i][0]));
+				else
+					Com_Printf("%s has no IPv4 address.\n", sv_master[i]->string);
+			}
+
+			if (netenabled & NET_ENABLEV6) {
+				Com_Printf("Resolving %s (IPv6)\n", sv_master[i]->string);
+				res = NET_StringToAdr(sv_master[i]->string, &adr[i][1], NA_IP6);
+
+				if (res == 2) {
+					// if no port was specified, use the default master port
+					adr[i][1].port = BigShort(PORT_MASTER);
+				}
+
+				if (res)
+					Com_Printf("%s resolved to %s\n", sv_master[i]->string, NET_AdrToStringwPort(adr[i][1]));
+				else
+					Com_Printf("%s has no IPv6 address.\n", sv_master[i]->string);
+			}
+
+			if (adr[i][0].type == NA_BAD && adr[i][1].type == NA_BAD) {
 				// if the address failed to resolve, clear it
 				// so we don't take repeated dns hits
-				Com_Printf( "Couldn't resolve address: %s\n", sv_master[i]->string );
-				Cvar_Set( sv_master[i]->name, "" );
+				Com_Printf("Couldn't resolve address: %s\n", sv_master[i]->string);
+				Cvar_Set(sv_master[i]->name, "");
 				sv_master[i]->modified = qfalse;
 				continue;
 			}
-			if ( !strstr( ":", sv_master[i]->string ) ) {
-				adr[i].port = BigShort( PORT_MASTER );
-			}
-			Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", sv_master[i]->string,
-						adr[i].ip[0], adr[i].ip[1], adr[i].ip[2], adr[i].ip[3],
-						BigShort( adr[i].port ) );
 		}
 
+		Com_Printf("Sending heartbeat to %s\n", sv_master[i]->string);
 
-		Com_Printf( "Sending heartbeat to %s\n", sv_master[i]->string );
 		// this command should be changed if the server info / status format
 		// ever incompatably changes
-		NET_OutOfBandPrint( NS_SERVER, adr[i], "heartbeat %s\n", hbname );
+
+		if (adr[i][0].type != NA_BAD)
+			NET_OutOfBandPrint(NS_SERVER, adr[i][0], "heartbeat %s\n", HEARTBEAT_GAME);
+		if (adr[i][1].type != NA_BAD)
+			NET_OutOfBandPrint(NS_SERVER, adr[i][1], "heartbeat %s\n", HEARTBEAT_GAME);
 	}
 }
 
@@ -296,7 +345,7 @@ SV_MasterGameCompleteStatus
 NERVE - SMF - Sends gameCompleteStatus messages to all master servers
 =================
 */
-void SV_MasterGameCompleteStatus() {
+void SV_MasterGameCompleteStatus(void) {
 	static netadr_t adr[MAX_MASTER_SERVERS];
 	int i;
 
@@ -318,7 +367,7 @@ void SV_MasterGameCompleteStatus() {
 			sv_master[i]->modified = qfalse;
 
 			Com_Printf( "Resolving %s\n", sv_master[i]->string );
-			if ( !NET_StringToAdr( sv_master[i]->string, &adr[i] ) ) {
+			if ( !NET_StringToAdr( sv_master[i]->string, &adr[i], NA_IP) ) {
 				// if the address failed to resolve, clear it
 				// so we don't take repeated dns hits
 				Com_Printf( "Couldn't resolve address: %s\n", sv_master[i]->string );
@@ -565,7 +614,7 @@ void SVC_Info( netadr_t from ) {
 	// to prevent timed spoofed reply packets that add ghost servers
 	Info_SetValueForKey( infostring, "challenge", Cmd_Argv( 1 ) );
 
-	Info_SetValueForKey( infostring, "protocol", va( "%i", PROTOCOL_VERSION ) );
+	Info_SetValueForKey( infostring, "protocol", va( "%i", GAME_PROTOCOL_VERSION ) );
 	Info_SetValueForKey( infostring, "hostname", sv_hostname->string );
 	Info_SetValueForKey( infostring, "mapname", sv_mapname->string );
 	Info_SetValueForKey( infostring, "clients", va( "%i", count ) );
@@ -584,6 +633,7 @@ void SVC_Info( netadr_t from ) {
 	if ( *gamedir ) {
 		Info_SetValueForKey( infostring, "game", gamedir );
 	}
+	Info_SetValueForKey( infostring, "gamename", "rtcwmp" );
 	Info_SetValueForKey( infostring, "sv_allowAnonymous", va( "%i", sv_allowAnonymous->integer ) );
 
 	// Rafael gameskill
@@ -600,6 +650,10 @@ void SVC_Info( netadr_t from ) {
 	if ( antilag ) {
 		Info_SetValueForKey( infostring, "g_antilag", antilag );
 	}
+
+	// Expose Auth info..
+	Info_SetValueForKey(infostring, "sv_AuthEnabled", va("%i", sv_AuthEnabled->integer));
+	Info_SetValueForKey(infostring, "sv_AuthStrictMode", va("%i", sv_AuthStrictMode->integer));
 
 	NET_OutOfBandPrint( NS_SERVER, from, "infoResponse\n%s", infostring );
 }
@@ -688,12 +742,9 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	if (from.type == NA_IP) {
 		from.ip[3] = 0; // xx.xx.xx.0
 	}
-	// L0 - FIXME - commented out since there's no ipv6 atm..
-	/*
 	else {
 		from.ip6[15] = 0;
 	}
-	*/
 
 	// This quick exit strategy while we're being bombarded by getinfo/getstatus requests
 	// directed at a specific IP address doesn't really impact server performance.
@@ -1419,3 +1470,39 @@ int SV_SendQueuedPackets(void)
 }
 #endif
 //============================================================================
+
+/*
+=================
+SV_ReloadRest_f
+=================
+*/
+void SV_ReloadRest(qboolean disableTime) {
+	int i;
+	client_t* client;
+
+	// make sure server is running
+	if (!com_sv_running->integer) {
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	if (sv.restartTime) {
+		return;
+	}
+
+	// connect and begin all the clients
+	for (i = 0; i < sv_maxclients->integer; i++) {
+		client = &svs.clients[i];
+
+		// send the new gamestate to all connected clients
+		if (client->state < CS_CONNECTED) {
+			continue;
+		}
+
+		if (client->netchan.remoteAddress.type != NA_BOT) {
+			// Give players time to adjust stuff if needed
+			client->clientRestValidated = (disableTime ? -1 : svs.time + 65000);
+			SV_SendServerCommand(NULL, "rereload %s\n", Cvar_GetRestrictedList());
+		}
+	}
+}

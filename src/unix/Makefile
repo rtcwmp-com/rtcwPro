@@ -9,8 +9,6 @@ CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
-
-
 DCFLAGSREL := \
 	 -pipe -m32 -march=pentium4 -g -fomit-frame-pointer -ffast-math \
 	-falign-loops=2 -falign-jumps=2 \
@@ -72,18 +70,20 @@ RENDEROBJS := \
 	../renderer/tr_scene.o ../renderer/tr_shade.o \
 	../renderer/tr_shade_calc.o ../renderer/tr_shader.o \
 	../renderer/tr_shadows.o ../renderer/tr_sky.o \
-	../renderer/tr_surface.o ../renderer/tr_world.o
+	../renderer/tr_surface.o ../renderer/tr_world.o \
+	../renderer/tr_bloom.o
 CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \
 	../client/cl_net_chan.o ../client/cl_parse.o ../client/cl_scrn.o \
-	../client/cl_ui.o
+	../client/cl_ui.o ../client/cl_events.o
 COMMONOBJS := \
 	../qcommon/cm_load.o ../qcommon/cm_patch.o ../qcommon/cm_polylib.o \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
-	../qcommon/huffman.o ../qcommon/unzip.o 
+	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
+	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -91,7 +91,7 @@ SERVEROBJS := \
 	../server/sv_bot.o ../server/sv_ccmds.o ../server/sv_client.o \
 	../server/sv_game.o ../server/sv_init.o ../server/sv_main.o \
 	../server/sv_net_chan.o ../server/sv_snapshot.o ../server/sv_animation.o \
-	../server/sv_world.o ../server/sv_wallhack.o 
+	../server/sv_world.o ../server/sv_wallhack.o  ../server/sv_events.o
 # ../qcommon/vm_x86.c is not used and not nice to port to mingw
 VMOBJS := \
 	../qcommon/vm.o ../qcommon/vm_interpreted.o
@@ -104,10 +104,10 @@ UNIXCLIENTOBJS := \
 	../unix/linux_snd.o
 UNIXOBJS := \
 	../unix/linux_common.o ../unix/unix_main.o ../unix/unix_net.o \
-	../unix/unix_shared.o ../unix/linux_signals.o
+	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \
-	../win32/win_qgl.o ../win32/win_snd.o
+	../win32/win_qgl.o ../win32/win_snd.o ../win32/linux_threads.o
 WINOBJS := \
 	../win32/win_main.o ../win32/win_net.o ../win32/win_syscon.o \
 	../win32/win_wndproc.o ../win32/win_shared.o
@@ -136,10 +136,10 @@ client: NASM := nasm
 client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
-	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++
+	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -lcurl
 client: $(CLOBJS)
-	$(CC) -o wolfX.x86 $(CLOBJS) $(LDFLAGS)
-	strip -s wolfX.x86
+	$(CC) -o wolfMP.x86 $(CLOBJS) $(LDFLAGS)
+	strip -s wolfMP.x86
 client-clean:
 	rm $(CLOBJS) 2> /dev/null ; exit 0
 	
@@ -172,18 +172,19 @@ client-w32: LDFLAGS := \
 	 -lwinmm -lopengl32 -lgdi32 -lws2_32 -static-libgcc `$(CXX) \
 	-print-file-name=libstdc++.a`
 client-w32: $(CLWINOBJS)
-	$(CXX) -o wolfX.exe $(CLWINOBJS) $(LDFLAGS)
-	strip -s wolfX.exe
+	$(CXX) -o wolfMP.exe $(CLWINOBJS) $(LDFLAGS)
+	strip -s wolfMP.exe
 client-w32-clean:
 	rm $(CLWINOBJS) 2> /dev/null ; exit 0
 
 #####################################################################
 
 server: CC := gcc
-server: NASM := nasm
+server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY # -DFEATURE_ANTICHEAT
-server: LDFLAGS := -m32 -ldl -lm
+	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+#server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
+server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl -lm -lz -DCURL_STATICLIB  -lmysqlclient  
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -193,8 +194,8 @@ server-clean:
 server-debug: CC := gcc
 server-debug: NASM := nasm
 server-debug: CFLAGS := \
-	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -DFEATURE_ANTICHEAT
-server-debug: LDFLAGS := -m32 -ldl -lm
+	$(DCFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY
+server-debug: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurld -lcurl -lmysqlclient --verbose
 server-debug: $(SVOBJS)
 	$(CC) -o wolfded_debug.x86 $(SVOBJS) $(LDFLAGS)
 server-debug-clean:
@@ -212,7 +213,7 @@ server-w32: CFLAGS := \
 	$(CFLAGSREL) -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY \
 	-DCPUSTRING=\"`uname -m`\" -U__i386__  -DWIN32 \
 	-DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING
-server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32
+server-w32: LDFLAGS := -m32 -lwinmm -lgdi32 -lws2_32 -L..\..\libs\libcurl\lib\libcurld -lcurl -lmysqlclient 
 server-w32: $(SVWINOBJS)
 	$(CC) -o wolfded.exe $(SVWINOBJS) $(LDFLAGS)
 	strip -s wolfded.exe
@@ -222,33 +223,34 @@ server-w32-clean:
 #####################################################################
 
 CURLCONF := \
+	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
 	--enable-shared=no --enable-static=yes --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \
 	--without-ca-path --without-nss --without-polarssl \
-	--without-gnutls --without-zlib --without-ssl --with-gnu-ld \
+	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual --disable-ipv6
+	--disable-nonblocking --disable-manual
 
 curl: 
-	cd ../curl && ./configure $(CURLCONF)
-	cd ../curl && make
-	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_linux.a
-	cp -R ../curl/include/curl ../curl/include/curl_linux
+	cd ../../libs/libcurl && ./configure $(CURLCONF)
+	cd ../../libs/libcurl && make
+	mv ../../libs/libcurl/lib/.libs/libcurl.a ../../libs/libcurl/lib/.libs/libcurl_linux.a
+	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_linux
 
 curl-w32:
-	cd ../curl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
-	CPPFLAGS=-DCURL_STATICLIB ./configure $(CURLCONF) --host=mingw32
-	cd ../curl && make
-	mv ../curl/lib/.libs/libcurl.a ../curl/lib/.libs/libcurl_w32.a
-	cp -R ../curl/include/curl ../curl/include/curl_w32
+	cd ../../libs/libcurl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
+	CPPFLAGS=-DCURL_STATICLIB -m32 ./configure $(CURLCONF) --host=mingw32
+	cd ../../libs/libcurl && make
+	mv ../../libs/libcurllib/.libs/libcurl.a ../../libs/libcurllib/.libs/libcurl_w32.a
+	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_w32
 
 curl-clean:
-	cd ../curl && make clean
-	rm -rf ../curl/include/curl_linux
-	rm -rf ../curl/include/curl_w32
+	cd ../../libs/libcurl && make clean
+	rm -rf ../../libs/libcurl/include/curl_linux
+	rm -rf ../../libs/libcurl/include/curl_w32
 
 #####################################################################
 

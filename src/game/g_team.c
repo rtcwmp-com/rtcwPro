@@ -1660,7 +1660,9 @@ void G_teamReset(int team_num, qboolean fClearSpecLock) {
 		teamInfo[team_num].spec_lock = qfalse;
 	}
 
-	trap_Cvar_Set("g_gamelocked", "0"); // unlock both teams
+	if (g_gamelocked.integer > 0) {
+		trap_Cvar_Set("g_gamelocked", "0");
+	}
 }
 
 // Shuffle active players onto teams
@@ -1917,7 +1919,7 @@ void G_readyResetOnPlayerLeave( int team ) {
 
 void G_readyStart( void ) {
 	level.ref_allready = qtrue;
-	level.CNstart = 0; // Resets countdown
+	level.cnNum = 0; // Resets countdown
 	trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 
 	// Prevents joining once countdown starts..

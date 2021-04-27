@@ -6,7 +6,7 @@ Return to Castle Wolfenstein Mod - based on OSPx/xMod (created by Nate) with add
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
 
-New features added that are not in OSP:
+[b]New features[/b] added that are not in OSP:
  - 1.0/1.0.1
    - corrected head hitboxes (RtcwPub port)
    - faster PK3 downloads (ioRtcw port)
@@ -28,10 +28,13 @@ New features added that are not in OSP:
  - 1.1.1 [changelog](changelog/1.1.1-changelog.txt)
    - UPS meter (cg_drawSpeed)
    - Added headshot damage cvar to help with antilag/hitbox changes (g_hsDamage)
+   
+ - 1.1.2 [changelog](changelog/1.1.2-changelog.txt)
+   - added nopicmip to tree/ivy/truss shaders so high values of picmip will not remove them
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/6PHHEWr
 
-RtcwPro Devs
--nihilist, KrazyKaze, Tarator
+RtcwPro Dev Team
+-nihilist, KrazyKaze, Tarator, Nate
 
-Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, and Spaztik
+Contributions from Dutchmeat, Nobo, S4NDM4NN, and Spaztik

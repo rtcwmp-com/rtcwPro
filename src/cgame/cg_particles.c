@@ -778,13 +778,6 @@ void CG_AddParticleToScene( cparticle_t *p, vec3_t org, float alpha ) {
 		j = (int)floor( ratio * shaderAnimCounts[p->shaderAnim] );
 		p->pshader = shaderAnims[i][j];
 
-// JPW NERVE more particle testing
-		if ( cg_fxflags & 1 ) {
-			p->roll = 0;
-			p->pshader = getTestShader();
-			rotate_ang[ROLL] = 90;
-		}
-// jpw
 		if ( p->roll ) {
 			vectoangles( cg.refdef.viewaxis[0], rotate_ang );
 			rotate_ang[ROLL] += p->roll;

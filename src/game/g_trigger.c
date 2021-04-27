@@ -285,7 +285,7 @@ void AimAtTarget( gentity_t *self ) {
 
 	height = ent->s.origin[2] - origin[2];
 	gravity = g_gravity.value;
-	time = sqrt( fabs( height / ( 0.5f * gravity ) ) );
+	time = sqrt( Q_fabs( height / ( 0.5f * gravity ) ) );
 	if ( !time ) {
 		G_FreeEntity( self );
 		return;
@@ -471,6 +471,12 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		return;
 	}
 
+	// L0 - if game is paused don't hurt at all.
+	// Would be kinda lame to be paused on barbwire with damage on :D
+	if ( level.paused ) {
+		return;
+	}
+	// L0 - end
 	if ( self->spawnflags & 16 ) {
 		self->timestamp = level.time + 1000;
 	} else {

@@ -103,8 +103,8 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
-      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
+      <Command>..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\mp_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" </Command>
+      <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
@@ -157,8 +157,8 @@
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(SolutionDir)../output/"</Command>
-      <Message> Copying $(TargetName)$(TargetExt) to ../output/ ..</Message>
+      <Command>..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\mp_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" </Command>
+      <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -338,6 +338,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />
+    <None Include="makefile">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

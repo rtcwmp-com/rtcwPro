@@ -141,19 +141,32 @@ static qboolean R_CullSurface( surfaceType_t *surface, shader_t *shader ) {
 	}
 
 	sface = ( srfSurfaceFace_t * ) surface;
-	d = DotProduct( tr.or.viewOrigin, sface->plane.normal );
+	// L0 - ET Port
+	// plane cull
+	if (sface->plane.type != PLANE_NON_PLANAR && r_facePlaneCull->integer) {
+		d = DotProduct(tr. or .viewOrigin, sface->plane.normal) - sface->plane.dist;
+		/*
+		if (d > 0.0f) {
+			*frontFace = 1;
+		} */
 
-	// don't cull exactly on the plane, because there are levels of rounding
-	// through the BSP, ICD, and hardware that may cause pixel gaps if an
-	// epsilon isn't allowed here
-	if ( shader->cullType == CT_FRONT_SIDED ) {
-		if ( d < sface->plane.dist - 8 ) {
-			return qtrue;
+		// don't cull exactly on the plane, because there are levels of rounding
+		// through the BSP, ICD, and hardware that may cause pixel gaps if an
+		// epsilon isn't allowed here
+		if (shader->cullType == CT_FRONT_SIDED) {
+			if (d < -8.0f) {
+				//tr.pc.c_plane_cull_out++;
+				return qtrue;
+			}
 		}
-	} else {
-		if ( d > sface->plane.dist + 8 ) {
-			return qtrue;
+		else if (shader->cullType == CT_BACK_SIDED) {
+			if (d > 8.0f) {
+				//tr.pc.c_plane_cull_out++;
+				return qtrue;
+			}
 		}
+
+		//tr.pc.c_plane_cull_in++;
 	}
 
 	return qfalse;
@@ -378,6 +391,7 @@ void R_AddBrushModelSurfaces( trRefEntity_t *ent ) {
 		return;
 	}
 
+	R_SetupEntityLighting(&tr.refdef, ent);
 	R_DlightBmodel( bmodel );
 
 //----(SA) modified
