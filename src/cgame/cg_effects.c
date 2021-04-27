@@ -443,7 +443,8 @@ void CG_LaunchGib( centity_t *cent, vec3_t origin, vec3_t angles, vec3_t velocit
 	re->fadeStartTime       = le->endTime - 1000;
 	re->fadeEndTime         = le->endTime;
 
-	switch ( cent->currentState.aiChar ) {
+	// RtcwPro - took out AI stuff - causing issues watching a demo
+	/*switch ( cent->currentState.aiChar ) {
 	case AICHAR_ZOMBIE:
 		le->pos.trType = TR_GRAVITY_LOW;
 		le->angles.trDelta[0] = 400 * crandom();
@@ -454,7 +455,7 @@ void CG_LaunchGib( centity_t *cent, vec3_t origin, vec3_t angles, vec3_t velocit
 
 		le->bounceFactor = 0.5;
 		break;
-	default:
+	default:*/
 		le->leBounceSoundType = LEBS_BLOOD;
 		le->leMarkType = LEMT_BLOOD;
 		le->pos.trType = TR_GRAVITY;
@@ -466,8 +467,8 @@ void CG_LaunchGib( centity_t *cent, vec3_t origin, vec3_t angles, vec3_t velocit
 		//	le->angles.trDelta[2] = (100 + (rand()&500)) - 300;	// roll
 
 		le->bounceFactor = 0.3;
-		break;
-	}
+	/*	break;
+	}*/
 	VectorCopy( origin, le->pos.trBase );
 	VectorCopy( velocity, le->pos.trDelta );
 	le->pos.trTime = cg.time;
@@ -477,15 +478,18 @@ void CG_LaunchGib( centity_t *cent, vec3_t origin, vec3_t angles, vec3_t velocit
 
 	le->angles.trTime = cg.time;
 
-	le->ownerNum = cent->currentState.number;
+	if (cent != NULL) // added this to allow OSP demos to work
+	{
+		le->ownerNum = cent->currentState.number;
 
-	// Ridah, if the player is on fire, then spawn some flaming gibs
-	if ( cent && CG_EntOnFire( cent ) ) {
-		le->onFireStart = cent->currentState.onFireStart;
-		le->onFireEnd = re->fadeEndTime + 1000;
-	} else if ( ( cent->currentState.aiChar == AICHAR_ZOMBIE ) && IS_FLAMING_ZOMBIE( cent->currentState ) ) {
-		le->onFireStart = cg.time - 1000;
-		le->onFireEnd = re->fadeEndTime + 1000;
+		// Ridah, if the player is on fire, then spawn some flaming gibs
+		if (cent && CG_EntOnFire(cent)) {
+			le->onFireStart = cent->currentState.onFireStart;
+			le->onFireEnd = re->fadeEndTime + 1000;
+			/*} else if ( ( cent->currentState.aiChar == AICHAR_ZOMBIE ) && IS_FLAMING_ZOMBIE( cent->currentState ) ) {
+				le->onFireStart = cg.time - 1000;
+				le->onFireEnd = re->fadeEndTime + 1000;*/
+		}
 	}
 }
 

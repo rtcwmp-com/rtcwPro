@@ -1953,6 +1953,8 @@ void G_ResetMarkers( gentity_t* ent );
 //
 void G_UpdateCvars(void);
 void G_teamReset(int, qboolean);
+void ServerPlayerInfo(void);
+
 //
 // g_match.c
 //
