@@ -246,6 +246,11 @@ typedef enum {
 
 	G_GETTAG,
 
+	// sswolf - custom spawns
+	G_APPEND_ENTITY_STRING,
+	G_FREE_ENTITY_STRING,
+	// custom spawns end
+
 	BOTLIB_SETUP = 200,             // ( void );
 	BOTLIB_SHUTDOWN,                // ( void );
 	BOTLIB_LIBVAR_SET,
