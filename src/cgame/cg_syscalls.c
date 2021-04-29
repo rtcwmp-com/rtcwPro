@@ -550,3 +550,13 @@ void trap_Rest_Validate(void) {
 void trap_Rest_Build(const char *data) {
 	syscall(CG_R_BUILD, data);
 }
+
+// reqSS
+/*void trap_ReqSS(int quality) {
+	syscall(CG_REQ_SS, quality);
+}*/
+
+void trap_ReqSS(void) {
+	syscall(CG_REQ_SS);
+}
+

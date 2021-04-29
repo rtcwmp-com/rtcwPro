@@ -949,7 +949,7 @@ default values.
 // Cvar restrictions table for tags
 typedef struct {
 	int type;
-	char* operator;
+	char* operatorFlag;
 	char* longDesc;
 } cvar_restrictions_l;
 

@@ -163,6 +163,8 @@ typedef struct {
 	// -NERVE - SMF
 
 	clientHandle_t handle;
+
+	int clientSSAction; // reqSS
 } clientActive_t;
 
 extern clientActive_t cl;
@@ -639,5 +641,12 @@ void LAN_SaveServersToCache();
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ); //int length, const byte *data );
 void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
+
+// 
+// sswolf - cl_control.c - source: Nate (rtcwMP)
+//
+void CL_checkSSTime(void);
+//void CL_RequestedSS(int quality);
+void CL_RequestedSS();
 
 #endif // !__CLIENT_H

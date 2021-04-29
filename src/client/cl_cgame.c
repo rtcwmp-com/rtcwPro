@@ -962,6 +962,11 @@ int CL_CgameSystemCalls( int *args ) {
 		Cvar_RestBuildList(VMA(1));
 		CL_SetRestStatus();
 		return 0;
+		// reqSS
+	case CG_REQ_SS:
+		//CL_RequestedSS(args[1]);
+		CL_RequestedSS();
+		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
 	}

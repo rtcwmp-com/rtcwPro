@@ -103,6 +103,12 @@ cvar_t* sv_AuthStrictMode;
 // Cvar Restrictions
 cvar_t* sv_GameConfig;
 
+// reqSS
+cvar_t* sv_ssEnable;
+cvar_t* sv_ssMinTime;
+cvar_t* sv_ssMaxTime;
+//cvar_t* sv_ssQuality;
+
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
 serverBan_t serverBans[SERVER_MAXBANS];
@@ -1317,6 +1323,9 @@ void SV_Frame( int msec ) {
 
 	// send a heartbeat to the master if needed
 	SV_MasterHeartbeat( HEARTBEAT_GAME );
+
+	// reqSS
+	autoSSTime();
 }
 /*
 ==================

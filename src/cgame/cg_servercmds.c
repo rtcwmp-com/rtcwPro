@@ -2289,6 +2289,14 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// reqSS
+	if (!strcmp(cmd, "ssreq")) 
+	{
+		CG_Printf("^nServer requested screenshot..sending.\n");
+		trap_ReqSS(atoi(CG_Argv(1)));
+		return;
+	}
+
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
 
