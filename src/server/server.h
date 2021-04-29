@@ -594,3 +594,4 @@ void SV_SendSSRequest(int clientNum);
 void autoSSTime(void);
 
 #endif // !___SERVER_H
+
