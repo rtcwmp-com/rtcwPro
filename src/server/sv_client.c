@@ -319,7 +319,8 @@ void SV_DirectConnect( netadr_t from ) {
 	int startIndex;
 	char* denied;
 	int count;
-	char guid[GUID_LEN];
+	//char guid[GUID_LEN];
+	char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
 
@@ -545,8 +546,11 @@ gotnewcl:
 	newcl->netchan_end_queue = &newcl->netchan_start_queue;
 
 	// Save guid so game code can get it.
+	//Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
+	//Info_SetValueForKey(userinfo, "cl_guid", guid);
+
+	guid = Info_ValueForKey(userinfo, "cl_guid");
 	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
-	Info_SetValueForKey(userinfo, "cl_guid", guid);
 
 	// save the userinfo
 	Q_strncpyz( newcl->userinfo, userinfo, sizeof( newcl->userinfo ) );
