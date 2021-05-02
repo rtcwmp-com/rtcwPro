@@ -88,6 +88,7 @@ typedef struct {
 //
 void* HTTP_Post(void* args);
 void* HTTP_Get(void* args);
+char* getCurrentPath(char* file); // reqSS
 
 //
 // http.c
@@ -99,6 +100,5 @@ void HTTP_ClientGetMOTD(void);
 #endif
 
 qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker); // reqSS
-char* getCurrentPath(char* file); // reqSS
 
 #endif // ~_S_HTTP
