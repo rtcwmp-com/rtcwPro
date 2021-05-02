@@ -98,4 +98,7 @@ void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
 #endif
 
+qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker); // reqSS
+char* getCurrentPath(char* file); // reqSS
+
 #endif // ~_S_HTTP

@@ -26,6 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 #include "http.h"
+#include <sys/stat.h> // reqSS
 
 /*
 ===============
@@ -89,3 +90,94 @@ void HTTP_ClientGetMOTD(void) {
 	return;
 }
 #endif // ~DEDICATED
+
+/*
+===============
+reqSS
+
+Upload screenshot
+Source: Nate (rtcwMP)
+===============
+*/
+qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
+	CURL* curl;
+	CURLcode res;
+	struct stat file_info;
+	double speed_upload, total_time;
+	struct curl_httppost* formpost = NULL;
+	struct curl_httppost* lastptr = NULL;
+	struct curl_slist* headerlist = NULL;
+	FILE* fd;
+	static const char buf[] = "Expect:";
+
+	// Sort File path
+	file = getCurrentPath(file);
+
+	fd = fopen(file, "rb");
+
+	if (!fd) 
+	{
+		Com_DPrintf("HTTP[fu]: cannot o/r\n");
+		return qfalse;
+	}
+
+	if (fstat(fileno(fd), &file_info) != 0) 
+	{
+		Com_DPrintf("HTTP[fs]: cannot o/r\n");
+		return qfalse;
+	}
+
+	/* Fill in the file upload field */
+	curl_formadd(&formpost,
+		&lastptr,
+		CURLFORM_COPYNAME, "file",
+		CURLFORM_FILE, file,
+		CURLFORM_END);
+
+	/* Fill in the filename field */
+	curl_formadd(&formpost,
+		&lastptr,
+		CURLFORM_COPYNAME, "mark",
+		CURLFORM_COPYCONTENTS, marker,
+		CURLFORM_END);
+
+	curl = curl_easy_init();
+	headerlist = curl_slist_append(headerlist, buf);
+
+	if (curl) 
+	{
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+
+		res = curl_easy_perform(curl);
+
+		if (res != CURLE_OK) 
+		{
+			Com_DPrintf("HTTP[res] failed: %s\n", curl_easy_strerror(res));
+		}
+		else 
+		{
+			curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
+			curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
+
+			Com_Printf("^nSpeed: ^7%.3f bytes/sec during %.3f seconds\n", speed_upload, total_time);
+
+		}
+
+		curl_easy_cleanup(curl);
+
+		/* then cleanup the formpost chain */
+		curl_formfree(formpost);
+		/* free slist */
+		curl_slist_free_all(headerlist);
+	}
+
+	fclose(fd);
+	remove(file);
+
+	return qtrue;
+}
+

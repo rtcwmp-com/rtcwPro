@@ -4,7 +4,7 @@ Source: Nate (rtcwMP)
 */
 
 #include "client.h"
-#include "http.h"
+#include "../qcommon/http.h"
 
 
 /*
@@ -68,7 +68,7 @@ void CL_RequestedSS() {
 	CL_actionGenerateTime();
 
 	// Try once more if it fails..
-	/*if (!CL_HTTP_SSUpload(WEB_SS_UPLOAD, filename, Cvar_VariableString("cl_guid")))
-		CL_HTTP_SSUpload(WEB_SS_UPLOAD, filename, Cvar_VariableString("cl_guid"));*/
+	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid")))
+		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"));
 }
 
