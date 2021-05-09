@@ -1769,6 +1769,7 @@ typedef struct {
 	float timelimit;                        // NERVE - SMF - made this a float
 	int maxclients;
 	char mapname[MAX_QPATH];
+	char rawmapname[MAX_QPATH];
 	char redTeam[MAX_QPATH];                // A team
 	char blueTeam[MAX_QPATH];               // B team
 
