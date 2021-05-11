@@ -88,7 +88,8 @@ typedef struct {
 //
 void* HTTP_Post(void* args);
 void* HTTP_Get(void* args);
-char* getCurrentPath(char* file); // reqSS
+char* getCurrentPath(char* file);
+char* getFilePath(char* file); // reqSS
 
 //
 // http.c

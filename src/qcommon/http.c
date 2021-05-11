@@ -91,6 +91,18 @@ void HTTP_ClientGetMOTD(void) {
 }
 #endif // ~DEDICATED
 
+static size_t read_callback(char* ptr, size_t size, size_t nmemb, void* stream)
+{
+	curl_off_t nread;
+
+	size_t retcode = fread(ptr, size, nmemb, stream);
+
+	nread = (curl_off_t)retcode;
+
+	fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
+		" bytes from file\n", nread);
+	return retcode;
+}
 /*
 ===============
 reqSS
@@ -109,56 +121,76 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 	struct curl_slist* headerlist = NULL;
 	FILE* fd;
 	static const char buf[] = "Expect:";
+	char* filename;
 
 	// Sort File path
-	file = getCurrentPath(file);
+	//filename = file;
+	file = getFilePath(file);
+
+	//Com_Printf("filename: %s file: %s\n", filename, file);
 
 	fd = fopen(file, "rb");
 
-	if (!fd) 
+	if (!fd)
 	{
 		Com_DPrintf("HTTP[fu]: cannot o/r\n");
 		return qfalse;
 	}
 
-	if (fstat(fileno(fd), &file_info) != 0) 
+	if (fstat(fileno(fd), &file_info) != 0)
 	{
 		Com_DPrintf("HTTP[fs]: cannot o/r\n");
 		return qfalse;
 	}
 
 	/* Fill in the file upload field */
+	/*
 	curl_formadd(&formpost,
 		&lastptr,
 		CURLFORM_COPYNAME, "file",
 		CURLFORM_FILE, file,
 		CURLFORM_END);
+	*/
 
 	/* Fill in the filename field */
+	/*
 	curl_formadd(&formpost,
 		&lastptr,
 		CURLFORM_COPYNAME, "mark",
 		CURLFORM_COPYCONTENTS, marker,
 		CURLFORM_END);
+	*/
 
 	curl = curl_easy_init();
-	headerlist = curl_slist_append(headerlist, buf);
 
-	if (curl) 
+	//headerlist = curl_slist_append(headerlist, buf);
+	headerlist = curl_slist_append(headerlist, "");   //TEMPORARY!!!!!
+
+	if (curl)
 	{
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3);
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+
+		// curl_easy_setopt(curl, CURLOPT_URL, url);
+		// curl_easy_setopt(curl, CURLOPT_URL, va("http://rtcwpro.com:8118//files/%s",filename));
+		curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
+		//curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3);
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+
+		//curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost); // temp comment
+
+		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+		curl_easy_setopt(curl, CURLOPT_READDATA, fd);
+		//curl_easy_setopt(curl, CURLOPT_PORT, 8118L);
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
 		res = curl_easy_perform(curl);
 
-		if (res != CURLE_OK) 
+		if (res != CURLE_OK)
 		{
 			Com_DPrintf("HTTP[res] failed: %s\n", curl_easy_strerror(res));
 		}
-		else 
+		else
 		{
 			curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
 			curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
@@ -170,7 +202,7 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 		curl_easy_cleanup(curl);
 
 		/* then cleanup the formpost chain */
-		curl_formfree(formpost);
+		//curl_formfree(formpost);
 		/* free slist */
 		curl_slist_free_all(headerlist);
 	}
@@ -180,4 +212,6 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 
 	return qtrue;
 }
+
+
 

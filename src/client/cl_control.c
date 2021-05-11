@@ -61,7 +61,7 @@ ScreenShot request from server
 */
 //void CL_RequestedSS(int quality) {
 void CL_RequestedSS() {
-	char* filename = va("screenshots/%d", cl.clientSSAction);
+	char* filename = va("%d", cl.clientSSAction);
 
 	//CL_takeSS(filename, quality);
 	CL_takeSS(filename);
