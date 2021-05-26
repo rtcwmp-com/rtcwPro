@@ -451,20 +451,39 @@ void CMod_LoadBrushSides( lump_t *l ) {
 	}
 }
 
-
 /*
 =================
 CMod_LoadEntityString
 =================
 */
-void CMod_LoadEntityString( lump_t *l ) {
+static void CMod_LoadEntityString(const lump_t* l, const char* name) {
+	fileHandle_t h;
+	char entName[MAX_QPATH];
+	size_t entNameLen = 0;
+	int entFileLen = 0;
 
-	// sswolf - custom spawns
-	//cm.entityString = Hunk_Alloc( l->filelen, h_high );
-	cm.entityString = Z_Malloc(l->filelen);
-	// custom spawns end
+	// sswolf - load entities from an .ent file if such exists, source: openjk
+	Q_strncpyz(entName, name, sizeof(entName));
+	entNameLen = strlen(entName);
+	entName[entNameLen - 3] = 'e';
+	entName[entNameLen - 2] = 'n';
+	entName[entNameLen - 1] = 't';
+	entFileLen = FS_FOpenFileRead(entName, &h, qtrue);
+
+	if (h && entFileLen > 0)
+	{
+		cm.entityString = (char*)Hunk_Alloc(entFileLen + 1, h_high);
+		cm.numEntityChars = entFileLen + 1;
+		FS_Read(cm.entityString, entFileLen, h);
+		FS_FCloseFile(h);
+		cm.entityString[entFileLen] = '\0';
+		Com_Printf("Loaded entities from %s\n", entName);
+		return;
+	}
+
+	cm.entityString = Hunk_Alloc(l->filelen, h_high);
 	cm.numEntityChars = l->filelen;
-	memcpy( cm.entityString, cmod_base + l->fileofs, l->filelen );
+	memcpy(cm.entityString, cmod_base + l->fileofs, l->filelen);
 }
 
 /*
@@ -679,7 +698,8 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum ) {
 	CMod_LoadBrushes( &header.lumps[LUMP_BRUSHES] );
 	CMod_LoadSubmodels( &header.lumps[LUMP_MODELS] );
 	CMod_LoadNodes( &header.lumps[LUMP_NODES] );
-	CMod_LoadEntityString( &header.lumps[LUMP_ENTITIES] );
+	//CMod_LoadEntityString( &header.lumps[LUMP_ENTITIES] );
+	CMod_LoadEntityString(&header.lumps[LUMP_ENTITIES], name); // sswolf
 	CMod_LoadVisibility( &header.lumps[LUMP_VISIBILITY] );
 	CMod_LoadPatches( &header.lumps[LUMP_SURFACES], &header.lumps[LUMP_DRAWVERTS] );
 
@@ -753,28 +773,6 @@ int     CM_NumInlineModels( void ) {
 
 char    *CM_EntityString( void ) {
 	return cm.entityString;
-}
-
-/*
-=============
-sswolf - custom spawns
-
-CM_AppendToEntityString
-=============
-*/
-void	CM_AppendToEntityString(char* data, int dataLength) {
-	int newSize = cm.numEntityChars + dataLength;
-	char* newEntityString = Z_Malloc(newSize);
-
-	if (cm.entityString)
-	{
-		Q_strncpyz(newEntityString, cm.entityString, newSize);
-		Z_Free(cm.entityString);
-	}
-
-	Q_strcat(newEntityString, newSize, data);
-	cm.entityString = newEntityString;
-	cm.numEntityChars = newSize;
 }
 
 int     CM_LeafCluster( int leafnum ) {

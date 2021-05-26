@@ -314,7 +314,6 @@ vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 
 
 vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
-vmCvar_t g_customSpawns;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -581,7 +580,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
-	{ &g_customSpawns, "g_customSpawns", "0", CVAR_ARCHIVE, 0, qfalse }, // sswolf - custom spawns, source: Nobo
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
@@ -1646,20 +1644,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	InitBodyQue();
 
 	ClearRegisteredItems();
-
-	if (g_customSpawns.integer)
-	{
-		trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
-	}
-
-	if (!restart)
-	{
-		// NOTE(nobo): Append to entity string before it's parsed by G_SpawnEntitiesFromString
-		if (g_customSpawns.integer)
-		{
-			trap_AppendEntityString(va("maps/%s.spawns", mapName));
-		}
-	}
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
