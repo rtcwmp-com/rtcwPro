@@ -429,11 +429,13 @@ void SV_DropClient( client_t *drop, const char *reason );
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
-#ifdef DEDICATED
-int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
-#else
+//#ifdef DEDICATED
+//int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+//#else
+int SV_WriteDownloadToClientOrig( client_t *cl, msg_t *msg );
 void SV_WriteDownloadToClient(client_t* cl, msg_t* msg);
-#endif
+//#endif
+
 #ifndef _WIN32
 int SV_SendQueuedMessages(void);
 int SV_RateMsec( client_t *client ) ;
