@@ -1261,10 +1261,10 @@ static void CG_DrawUpperRight( void ) {
 	}
 
 	// enemy respawn timer (do not include yet)
-//	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
-//        y = CG_DrawEnemyTimer(y);
+	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
+        y = CG_DrawEnemyTimer(y);
 
-//	}
+	}
 
 	// sswolf - complete OSP demo features
 	// OSPx - Time Counter
