@@ -62,14 +62,14 @@ ScreenShot request from server
 //void CL_RequestedSS(int quality) {
 void CL_RequestedSS() {
 	char* filename = va("%d", cl.clientSSAction);
-
+    char* ip;
 	//CL_takeSS(filename, quality);
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
 	// Try once more if it fails..
-
-	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),Info_ValueForKey( cl.userinfo, "ip" ))
-		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),Info_ValueForKey( cl.userinfo, "ip" ));
+    ip = (char*)NET_AdrToString(clc.netchan.remoteAddress);
+	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),ip)
+		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),ip);
         //CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
 
