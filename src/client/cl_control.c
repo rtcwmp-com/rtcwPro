@@ -68,8 +68,10 @@ void CL_RequestedSS() {
 	CL_actionGenerateTime();
 	// Try once more if it fails..
     ip = (char*)NET_AdrToString(clc.netchan.remoteAddress);
-	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),ip)
-		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),ip);
+	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip))
+	{
+		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
+	}
         //CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
 
