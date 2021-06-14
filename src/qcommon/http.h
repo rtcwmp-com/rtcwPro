@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 #ifdef _DEBUG
 	#define WEB_URL		"http://game.localhost"
-#else 
+#else
 	#define WEB_URL		"https://rtcwmp.com"
 #endif // ~_DEBUG
 #define WEB_GET_MOTD	WEB_URL "/api/get/motd"
@@ -100,6 +100,6 @@ void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
 #endif
 
-qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker); // reqSS
+qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2); // reqSS
 
 #endif // ~_S_HTTP

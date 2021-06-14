@@ -111,7 +111,7 @@ Upload screenshot
 Source: Nate (rtcwMP)
 ===============
 */
-qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
+qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2) {
 	CURL* curl;
 	CURLcode res;
 	struct stat file_info;
@@ -123,11 +123,11 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 	static const char buf[] = "Expect:";
 	char* filename;
 
-	// Sort File path
-	//filename = file;
-	file = getFilePath(file);
+    char *bufGUID;
+    char *bufIP;
 
-	//Com_Printf("filename: %s file: %s\n", filename, file);
+    bufGUID=va("GUID: %s", marker);
+    bufIP=va("IP: %s", marker2);
 
 	fd = fopen(file, "rb");
 
@@ -143,45 +143,24 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 		return qfalse;
 	}
 
-	/* Fill in the file upload field */
-	/*
-	curl_formadd(&formpost,
-		&lastptr,
-		CURLFORM_COPYNAME, "file",
-		CURLFORM_FILE, file,
-		CURLFORM_END);
-	*/
-
-	/* Fill in the filename field */
-	/*
-	curl_formadd(&formpost,
-		&lastptr,
-		CURLFORM_COPYNAME, "mark",
-		CURLFORM_COPYCONTENTS, marker,
-		CURLFORM_END);
-	*/
-
 	curl = curl_easy_init();
 
-	//headerlist = curl_slist_append(headerlist, buf);
-	headerlist = curl_slist_append(headerlist, "");   //TEMPORARY!!!!!
+    headerlist = curl_slist_append(headerlist, bufGUID);
+    headerlist = curl_slist_append(headerlist, bufIP);
+	headerlist = curl_slist_append(headerlist, va("IND: %s", GAMESTR));
 
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
 
-		// curl_easy_setopt(curl, CURLOPT_URL, url);
-		// curl_easy_setopt(curl, CURLOPT_URL, va("http://rtcwpro.com:8118//files/%s",filename));
 		curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
-		//curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3);
+
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 
-		//curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost); // temp comment
 
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 		curl_easy_setopt(curl, CURLOPT_READDATA, fd);
-		//curl_easy_setopt(curl, CURLOPT_PORT, 8118L);
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 		res = curl_easy_perform(curl);
@@ -201,9 +180,6 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 
 		curl_easy_cleanup(curl);
 
-		/* then cleanup the formpost chain */
-		//curl_formfree(formpost);
-		/* free slist */
 		curl_slist_free_all(headerlist);
 	}
 
@@ -212,6 +188,7 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker) {
 
 	return qtrue;
 }
+
 
 
 

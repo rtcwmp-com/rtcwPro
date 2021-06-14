@@ -1,5 +1,5 @@
 /*
-sswolf - req SS functions. 
+sswolf - req SS functions.
 Source: Nate (rtcwMP)
 */
 
@@ -40,13 +40,13 @@ Check if it's time to take the screenshot..
 */
 void CL_checkSSTime(void) {
 
-	if (!cl.clientSSAction) 
+	if (!cl.clientSSAction)
 	{
 		CL_actionGenerateTime();
 	}
-	else 
+	else
 	{
-		if (cl.serverTime >= cl.clientSSAction) 
+		if (cl.serverTime >= cl.clientSSAction)
 		{
 			//CL_RequestedSS(45);
 			CL_RequestedSS();
@@ -66,9 +66,10 @@ void CL_RequestedSS() {
 	//CL_takeSS(filename, quality);
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
-
 	// Try once more if it fails..
-	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid")))
-		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"));
+
+	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),Info_ValueForKey( cl.userinfo, "ip" ))
+		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),Info_ValueForKey( cl.userinfo, "ip" ));
+        //CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
 
