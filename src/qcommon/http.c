@@ -129,6 +129,7 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2) {
     bufGUID=va("GUID: %s", marker);
     bufIP=va("IP: %s", marker2);
 
+	file = getFilePath(file);
 	fd = fopen(file, "rb");
 
 	if (!fd)
