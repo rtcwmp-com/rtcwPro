@@ -954,7 +954,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	client = targ->client;
 
 	if ( client ) {
-		if ( client->noclip || client->ps.powerups[PW_INVULNERABLE]  ) {
+		if ( client->noclip) { // KK commenting this out during our alpha test || client->ps.powerups[PW_INVULNERABLE]  ) {
 			return;
 		}
 	}
