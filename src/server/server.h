@@ -429,11 +429,13 @@ void SV_DropClient( client_t *drop, const char *reason );
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
-#ifdef DEDICATED
-int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
-#else
+//#ifdef DEDICATED
+//int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+//#else
+int SV_WriteDownloadToClientOrig( client_t *cl, msg_t *msg );
 void SV_WriteDownloadToClient(client_t* cl, msg_t* msg);
-#endif
+//#endif
+
 #ifndef _WIN32
 int SV_SendQueuedMessages(void);
 int SV_RateMsec( client_t *client ) ;
@@ -467,10 +469,6 @@ void        SV_ShutdownGameProgs( void );
 void        SV_RestartGameProgs( void );
 qboolean    SV_inPVS( const vec3_t p1, const vec3_t p2 );
 qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* or );
-// sswolf - custom spawns
-void SV_AppendEntityString(char* fileName);
-void SV_FreeEntityString();
-// custom spawns end
 
 // sv_animation.c
 int SV_LerpTag(orientation_t* tag, clientAnimationInfo_t* animInfo, char* tagname);

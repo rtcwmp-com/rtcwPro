@@ -2579,6 +2579,14 @@ void CG_AssetCache() {
 	cgDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 }
 
+// sswolf - autoexec for specific maps from et
+void CG_AutoExec_f()
+{
+	char buffer[MAX_QPATH] = "exec \"autoexec_";
+	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
+	Q_strcat(buffer, sizeof(buffer), "\"");
+	trap_SendConsoleCommand(buffer);
+}
 
 extern qboolean initTrails;
 void CG_ClearTrails( void );
@@ -2734,6 +2742,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// L0 - OSP stats
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
+
+	CG_AutoExec_f();
 }
 
 /*

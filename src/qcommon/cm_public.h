@@ -43,7 +43,6 @@ void        CM_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs );
 int         CM_NumClusters( void );
 int         CM_NumInlineModels( void );
 char        *CM_EntityString( void );
-void		CM_AppendToEntityString(char* data, int dataLength); // sswolf - custom spawns
 
 // returns an ORed contents mask
 int         CM_PointContents( const vec3_t p, clipHandle_t model );

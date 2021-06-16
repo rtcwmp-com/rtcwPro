@@ -1014,8 +1014,9 @@ Check to see if the client wants a file, open it if needed and start pumping the
 Fill up msg with data, return number of download blocks added
 ==================
 */
-#ifdef DEDICATED
-int SV_WriteDownloadToClient(client_t *cl, msg_t *msg) {
+//#ifdef DEDICATED
+int SV_WriteDownloadToClientOrig(client_t *cl, msg_t *msg) {
+
 	int curindex;
 	int unreferenced = 1;
 	char errorMessage[1024];
@@ -1230,7 +1231,16 @@ int SV_SendDownloadMessages(void) {
 				MSG_Init(&msg, msgBuffer, sizeof(msgBuffer));
 				MSG_WriteLong(&msg, cl->lastClientCommand);
 
-				retval = SV_WriteDownloadToClient(cl, &msg);
+                if (sv_wwwDownload->integer) {
+                    SV_WriteDownloadToClient(cl, &msg);
+                    retval=1;
+
+                    }
+                else {
+                    retval = SV_WriteDownloadToClientOrig(cl, &msg);
+
+				}
+
 
 				if (retval) {
 					MSG_WriteByte(&msg, svc_EOF);
@@ -1244,7 +1254,7 @@ int SV_SendDownloadMessages(void) {
 	return numDLs;
 }
 
-#else
+//#else
 
 void SV_WriteDownloadToClient(client_t* cl, msg_t* msg) {
 	int curindex;
@@ -1542,7 +1552,7 @@ void SV_WriteDownloadToClient(client_t* cl, msg_t* msg) {
 		cl->downloadSendTime = svs.time;
 	}
 }
-#endif
+//#endif
 
 /*
 ==================
