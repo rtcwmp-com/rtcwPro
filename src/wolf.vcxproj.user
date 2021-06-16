@@ -16,13 +16,12 @@
     <LocalDebuggerCommand>$(RTCWBASE)\$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(RTCWBASE)\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+set fs_game rtcwpro</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">
     <LocalDebuggerCommand>$(RTCWBASE)\$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+set fs_game $(RTCW_MOD_NAME) +map mp_base +set sv_AuthEnabled 1 +set sv_AuthStrictMode 3 +set sv_StreamingToken 1234567890</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+exec server.cfg +set fs_game $(RTCW_MOD_NAME) +map mp_base +set sv_AuthEnabled 0 +set sv_AuthStrictMode 0 +set sv_StreamingToken 1234567890</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(RTCWBASE)\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>
