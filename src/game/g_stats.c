@@ -552,10 +552,10 @@ void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod ) {
 
 		// RtcwPro do not give more damage the user's full health - in OSP panzer awarded 400 damage on a kill/gib - let's try to even out the damange efficiency
 		if (dmg_ref >= abs(FORCE_LIMBO_HEALTH) && dmg_ref < abs(GIB_HEALTH)) {
-			dmg = targ->health + abs(FORCE_LIMBO_HEALTH);
+			dmg = 100 + abs(FORCE_LIMBO_HEALTH); // 250
 		}
 		else if (dmg_ref >= abs(GIB_HEALTH)) {
-			dmg = targ->health + abs(GIB_HEALTH);
+			dmg = 100 + abs(GIB_HEALTH); // 275
 		}
 		else
 			dmg = dmg_ref;
