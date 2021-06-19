@@ -16,7 +16,7 @@ Takes ScreenShot
 void CL_takeSS(char* name) {
 
 	//Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG sys %s %d\n", name, quality));
-	Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG %s\n", name));
+	Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG silent %s\n", name));
 }
 
 /*
@@ -72,6 +72,6 @@ void CL_RequestedSS() {
 	{
 		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
 	}
-        //CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
+	//CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
 

@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "client.h"
 
 #include "../game/botlib.h"
+#include "../qcommon/threads.h"
 
 extern botlib_export_t *botlib_export;
 
@@ -965,7 +966,8 @@ int CL_CgameSystemCalls( int *args ) {
 		// reqSS
 	case CG_REQ_SS:
 		//CL_RequestedSS(args[1]);
-		CL_RequestedSS();
+		//CL_RequestedSS();
+		Threads_Create(CL_RequestedSS, NULL);
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
