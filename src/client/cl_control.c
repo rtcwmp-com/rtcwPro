@@ -73,7 +73,7 @@ void CL_RequestedSS(char* ip) {
 	
 	//if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip))
 	//{
-		Threads_Create(CL_HTTP_SSUpload,WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
+		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
 	//}
 	//CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
