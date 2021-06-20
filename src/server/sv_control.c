@@ -11,16 +11,25 @@ Sends request to client for screenshot
 NOTE: It will be uploaded to default web server..
 ================
 */
-//void SV_SendSSRequest(int clientNum, int quality) 
+//void SV_SendSSRequest(int clientNum, int quality)
 void SV_SendSSRequest(int clientNum)
 {
-	if (clientNum == -1 || clientNum < 0 || clientNum >= sv_maxclients->integer) 
+    char        *value;
+    client_t    *cl;
+	if (clientNum == -1 || clientNum < 0 || clientNum >= sv_maxclients->integer)
 	{
 		return;
 	}
 
+	cl = &svs.clients[clientNum];
+	if ( !cl ) {
+		return;
+	}
+	value = Info_ValueForKey( cl->userinfo, "ip" );
+
+
 	//SV_SendServerCommand(svs.clients + clientNum, "ssreq %d", quality);
-	SV_SendServerCommand(svs.clients + clientNum, "ssreq %d");
+	SV_SendServerCommand(svs.clients + clientNum, "ssreq %s", value);
 }
 
 /*
@@ -38,7 +47,7 @@ void autoSSTime(void) {
 	if (svs.time < svs.ssTime)
 		return;
 
-	for (i = 0; i < sv_maxclients->integer; i++) 
+	for (i = 0; i < sv_maxclients->integer; i++)
 	{
 		cl = &svs.clients[i];
 

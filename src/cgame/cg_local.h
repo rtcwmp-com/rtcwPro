@@ -2928,5 +2928,7 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 
 // reqSS
 //void trap_ReqSS(int quality);
-void trap_ReqSS(void);
+void trap_ReqSS(char *ip);
+
+//void trap_ReqSS(void);
 

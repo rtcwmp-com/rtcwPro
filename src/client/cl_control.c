@@ -49,7 +49,9 @@ void CL_checkSSTime(void) {
 		if (cl.serverTime >= cl.clientSSAction)
 		{
 			//CL_RequestedSS(45);
-			CL_RequestedSS();
+	//		CL_RequestedSS();
+			CL_RequestedSS(" ");  // temp change 
+
 		}
 	}
 }
@@ -60,18 +62,19 @@ ScreenShot request from server
 ================
 */
 //void CL_RequestedSS(int quality) {
-void CL_RequestedSS() {
+void CL_RequestedSS(char* ip) {
 	char* filename = va("%d", cl.clientSSAction);
-    char* ip;
+   // char* ip;
 	//CL_takeSS(filename, quality);
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
 	// Try once more if it fails..
-    ip = (char*)NET_AdrToString(clc.netchan.remoteAddress);
-	if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip))
-	{
-		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
-	}
+    //ip = (char*)NET_AdrToString(clc.netchan.remoteAddress);
+	
+	//if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip))
+	//{
+		Threads_Create(CL_HTTP_SSUpload,WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
+	//}
 	//CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
 

@@ -647,7 +647,7 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 //
 void CL_checkSSTime(void);
 //void CL_RequestedSS(int quality);
-void CL_RequestedSS();
-
+//void CL_RequestedSS();
+void CL_RequestedSS(char* ip);
 #endif // !__CLIENT_H
 

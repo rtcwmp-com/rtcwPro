@@ -2290,10 +2290,10 @@ static void CG_ServerCommand( void ) {
 	}
 
 	// reqSS
-	if (!strcmp(cmd, "ssreq")) 
+	if (!strcmp(cmd, "ssreq"))
 	{
 		CG_Printf("^nServer requested screenshot..sending.\n");
-		trap_ReqSS(atoi(CG_Argv(1)));
+		trap_ReqSS(CG_Argv(1));
 		return;
 	}
 

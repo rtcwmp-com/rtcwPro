@@ -967,7 +967,7 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_REQ_SS:
 		//CL_RequestedSS(args[1]);
 		//CL_RequestedSS();
-		Threads_Create(CL_RequestedSS, NULL);
+		CL_RequestedSS( VMA(1));
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
