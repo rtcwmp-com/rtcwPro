@@ -101,6 +101,12 @@ typedef struct {
 } SS_info_t;
 
 
+typedef struct {
+    char* url;
+	char* filename;
+    char* matchid;
+	void (*callback)(char* fmt, ...);
+} http_stats_t;
 
 //
 // http_main.c
