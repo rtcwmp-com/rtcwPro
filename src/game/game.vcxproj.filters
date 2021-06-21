@@ -106,9 +106,6 @@
     <ClCompile Include="g_combat.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_config.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_geoip.c">
       <Filter>Source Files</Filter>
     </ClCompile>

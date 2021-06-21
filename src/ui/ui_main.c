@@ -27,10 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-
-
-
-
 /*
 =======================================================================
 
@@ -3559,7 +3555,6 @@ static void UI_LoadSavegames() {
 	}
 }
 
-
 /*
 ===============
 UI_LoadMovies
@@ -3589,8 +3584,6 @@ static void UI_LoadMovies() {
 	}
 
 }
-
-
 
 /*
 ===============
@@ -4879,15 +4872,15 @@ static void UI_RunMenuScript( char **args ) {
 			}
 
 		} else if ( Q_stricmp( name, "voteGame" ) == 0 ) {
-			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
-			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
-				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", ui_voteGameType ) );
+			int ui_netGameType = trap_Cvar_VariableValue( "ui_netGameType" );
+			if (ui_netGameType >= 0 && ui_netGameType < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", uiInfo.gameTypes[ui_netGameType].gtEnum) );
 			}
 
 		} else if ( Q_stricmp( name, "refGame" ) == 0 ) {
-			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
-			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
-				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", ui_voteGameType ) );
+			int ui_netGameType = trap_Cvar_VariableValue( "ui_netGameType" );
+			if (ui_netGameType >= 0 && ui_netGameType < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", uiInfo.gameTypes[ui_netGameType].gtEnum) );
 			}
 
 		} else if ( Q_stricmp( name, "voteTimelimit" ) == 0 ) {
@@ -6961,8 +6954,6 @@ static void UI_DrawCinematic( int handle, float x, float y, float w, float h ) {
 static void UI_RunCinematicFrame( int handle ) {
 	trap_CIN_RunCinematic( handle );
 }
-
-
 
 /*
 =================

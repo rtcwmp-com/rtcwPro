@@ -89,7 +89,7 @@ SOUNDOBJS := \
 	../client/snd_mix.o ../client/snd_wavelet.o
 SERVEROBJS := \
 	../server/sv_bot.o ../server/sv_ccmds.o ../server/sv_client.o \
-	../server/sv_game.o ../server/sv_init.o ../server/sv_main.o \
+	../server/sv_game.o ../server/sv_init.o ../server/sv_main.o ../server/sv_control.o \
 	../server/sv_net_chan.o ../server/sv_snapshot.o ../server/sv_animation.o \
 	../server/sv_world.o ../server/sv_wallhack.o  ../server/sv_events.o
 # ../qcommon/vm_x86.c is not used and not nice to port to mingw
@@ -133,10 +133,10 @@ SVWINOBJS := \
 
 client: CC := gcc
 client: NASM := nasm
-client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY
+client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
-	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -lcurl
+	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl  -lmysqlclient 
 client: $(CLOBJS)
 	$(CC) -o wolfMP.x86 $(CLOBJS) $(LDFLAGS)
 	strip -s wolfMP.x86

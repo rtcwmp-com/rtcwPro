@@ -677,7 +677,7 @@ void Con_DrawSolidConsole( float frac ) {
 			re.SetColor( color );
 
 			// draw the logo
-			SCR_DrawPic( 192, 70, 256, 128, cls.consoleShader2 );
+			SCR_DrawPic( 362, 70, 256, 128, cls.consoleShader2 );
 			re.SetColor( NULL );
 		}
 		// -NERVE - SMF

@@ -599,13 +599,14 @@ void cmd_unignore(gentity_t *ent) {
 	tag = sortTag(ent);
 
 	count = ClientNumberFromNameMatch(ent->client->pers.cmd2, nums);
-		if (count == 0){
+		if (count == 0) {
 			CP("print \"Client not on server^z!\n\"");
-		return;
-	}else if (count > 1){
-		CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
-	return;
-	}
+			return;
+		}
+		else if (count > 1) {
+			CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
+			return;
+		}
 
 		for (i = 0; i < count; i++){
 			if (!g_entities[nums[i]].client->sess.ignored){
@@ -941,28 +942,28 @@ void cmd_tempBanIp(gentity_t *ent) {
 	tag = sortTag(ent);
 
 	count = ClientNumberFromNameMatch(ent->client->pers.cmd2, nums);
-		if (count == 0){
-			CP("print \"Client not on server^z!\n\"");
-		return;
-		}else if (count > 1){
-			CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
-		return;
-		}
+	if (count == 0){
+		CP("print \"Client not on server^z!\n\"");
+	return;
+	}else if (count > 1){
+		CP(va("print \"To many people with %s in their name^z!\n\"", ent->client->pers.cmd2));
+	return;
+	}
 
-		for (i = 0; i < count; i++){
-			// TempBan player
-			trap_SendConsoleCommand(EXEC_APPEND, va("tempban %i %s", nums[i], ent->client->pers.cmd3 ));
+	for (i = 0; i < count; i++){
+		// TempBan player
+		trap_SendConsoleCommand(EXEC_APPEND, va("tempban %i %s", nums[i], ent->client->pers.cmd3 ));
 
-			// Kick player now
-			trap_DropClient( nums[i], va( "^3temporarily banned by ^3%s \n^7Tempban will expire in ^3%s ^7minute(s)", tag, ent->client->pers.cmd3));
-			AP(va("chat \"^zconsole:^7 %s has tempbanned player %s ^7for ^z%s ^7minute(s)^z!\n\"", tag, g_entities[nums[i]].client->pers.netname,ent->client->pers.cmd3));
+		// Kick player now
+		trap_DropClient( nums[i], va( "^3temporarily banned by ^3%s \n^7Tempban will expire in ^3%s ^7minute(s)", tag, ent->client->pers.cmd3));
+		AP(va("chat \"^zconsole:^7 %s has tempbanned player %s ^7for ^z%s ^7minute(s)^z!\n\"", tag, g_entities[nums[i]].client->pers.netname,ent->client->pers.cmd3));
 
-			// Log it
-			log =va("Player %s (IP:%s) tempbanned user %s by IP for %s minute(s).",
-				ent->client->pers.netname, ent->client->sess.ip, g_entities[nums[i]].client->pers.netname, ent->client->pers.cmd3 );
-			logEntry (ADMACT, log);
-		}
-return;
+		// Log it
+		log =va("Player %s (IP:%s) tempbanned user %s by IP for %s minute(s).",
+			ent->client->pers.netname, ent->client->sess.ip, g_entities[nums[i]].client->pers.netname, ent->client->pers.cmd3 );
+		logEntry (ADMACT, log);
+	}
+	return;
 }
 
 /*
@@ -1843,8 +1844,9 @@ void cmd_revealCamper(gentity_t *ent) {
 Pause
 ==================
 */
-void cmd_pause(gentity_t *ent, qboolean resume) {
-	char *log, *action;
+void cmd_pause(gentity_t *ent, qboolean fPause) {
+	char* status[2] = {"^3UN", "^3"};
+	char *log;
 
 	if ( g_gamestate.integer != GS_PLAYING ) {
 		CP("print \"^jError: ^7Pause can only be issued during a match!\n\"");
@@ -1856,30 +1858,32 @@ void cmd_pause(gentity_t *ent, qboolean resume) {
 		return;
 	}
 
-	if (!resume) {
-		if (level.paused != PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is already paused^j!\n\"");
-			return;
-		}
-		G_pauseHandle(qtrue, TEAM_SPECTATOR);
-		AAPS("sound/match/klaxon1.wav");
-	} else if (level.paused != PAUSE_UNPAUSING){
-		if (level.paused == PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-			return;
-		}
-		G_pauseHandle(qfalse, TEAM_SPECTATOR);
+	if ((!level.alliedPlayers && !level.axisPlayers) && fPause) {
+		CP("print \"^jError: ^7Pause can only be used when at least 1 team has a player!\n\"");
+		return;
 	}
 
-	AP(va("chat \"^zconsole: ^7%s has ^3%s match!\n\"", (resume ? "Unpaused ^7the" : "Paused ^7a"), sortTag(ent)));
+	if ((PAUSE_UNPAUSING >= level.paused && !fPause) || (PAUSE_NONE != level.paused && fPause)) {
+		CP(va("print \"^1Error^7: The match is already %sPAUSED!\n\"", status[fPause]));
+		return;
+	}
+
+	// Trigger the auto-handling of pauses
+	if (fPause) {
+		G_handlePause(qtrue, (ent ? 1 + ent - g_entities : 0));
+	}
+	else {
+		G_handlePause(qfalse, 0);
+	}
+
+	AP(va("chat \"^zconsole: ^7%s has ^3%sPAUSED ^7the match!\n\"", status[fPause], sortTag(ent)));
 
     if (g_gameStatslog.integer) {
-        G_writeGeneralEvent(ent , ent, " ", (resume) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
+        G_writeGeneralEvent(ent , ent, " ", (!fPause) ? eventUnpause : eventPause);  // might want to distinguish between player and admin here?
     }
 
-	action = (resume) ? "resumed the match." : "paused a match.";
 	log = va("Player %s (IP:%s) %s",
-		ent->client->pers.netname, ent->client->sess.ip, action );
+		ent->client->pers.netname, ent->client->sess.ip, !fPause ? "resumed the match." : "paused a match.");
 	if (g_extendedLog.integer)
 		logEntry (ADMACT, log);
 	

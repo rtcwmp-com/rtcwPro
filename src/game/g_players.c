@@ -381,21 +381,6 @@ void cmd_specInvite( gentity_t *ent ) {
 
 	} else {CP( "print \"Spectators can't specinvite players!\n\"" );}
 }
-/*
-=================
-Hitsounds
-
-Do it like in shrub just permanently
-(A hack tied to color so one doesn't need to type it all the time..)
-=================
-*/
-//void Cmd_hitsounds(gentity_t *ent) {
-//	char *action = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? "^3Disable^7" : "^3Enable^7");
-//	int	flag = (ent->client->sess.clientFlags & CFLAGS_HITSOUNDS ? 0 : 1);
-//
-//	CP(va("print \"Bit flag to %s Hitsounds is /color %d \nType ^3/commands bitflags^7 for explanation.\n\"", action, flag));
-//	return;
-//}
 
 /*
 ===================
@@ -484,10 +469,9 @@ Spec lock/unlock team
 void cmd_speclock( gentity_t *ent, qboolean lock ) {
 	int team = ent->client->sess.sessionTeam;
 
-
-	if (!team_commands.integer ) {
+	if (team_nocontrols.integer ) {
 		CP("print \"Team commands are disabled!\n\"");
-	return;
+		return;
 	}
 
 	if ( team == TEAM_RED || team == TEAM_BLUE ) {
@@ -625,6 +609,7 @@ Pause/Unpause
 */
 void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
     int team = ent->client->sess.sessionTeam;
+	char* status[2] = {"^3UN", "^3"};
     char tName[MAX_NETNAME];
 
 	if (team_nocontrols.integer) {
@@ -647,41 +632,44 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		return;
 	}
 
+	if ((!level.alliedPlayers || !level.axisPlayers) && dPause) {
+		CP("print \"^jError: ^7Pause can only be used when both teams have players!\n\"");
+		return;
+	}
+
+	if ((PAUSE_UNPAUSING >= level.paused && !dPause) || (PAUSE_NONE != level.paused && dPause)) {
+		CP(va("print \"^jError: ^7The match is already %sPAUSED^7!\n\"", status[dPause]));
+		return;
+	}
+
 	DecolorString(aTeams[team], tName);
-	if (!dPause) {
-
-		if (level.paused != PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is already paused^j!\n\"");
+	if (dPause) {
+		if (!teamInfo[team].timeouts) {
+			CP("print \"^jError: ^7Your team has no more timeouts remaining!\n\"");
+			CPS(ent, "sound/misc/denied.wav");
 			return;
 		}
 
-		if ((team == TEAM_RED && g_pauseLimit.integer - level.axisTimeouts <= 0) || 
-			(team == TEAM_BLUE && g_pauseLimit.integer - level.alliedTimeouts <= 0))
-		{
-			CP("print \"^jError: ^7Your team used all the timeouts for this round^j.\n\"");
-			return;
-		}
+		teamInfo[team].timeouts--;
+		level.paused = team + 128;
+		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 
 		AP(va("chat \"^zconsole: ^7%s has ^3Paused ^7the match!\n\"", tName));
-		AP(va("print \"^z>> ^7%s ^zPaused the match.\n\"", ent->client->pers.netname));
+		AP(va("cp \"[%s^7] %d Timeouts Remaining\n\"3", aTeams[team], teamInfo[team].timeouts));
+		AP(va("@print \"^z>> ^7%s ^zPaused the match.\n\"", ent->client->pers.netname));
 		AAPS("sound/match/klaxon1.wav");
 
-		G_pauseHandle(qtrue, team);
-	} else if (level.paused != PAUSE_UNPAUSING){
-
-		if (level.paused == PAUSE_NONE) {
-			CP("print \"^jError: ^7Match is not paused^j!\n\"");
-			return;
-		}
-
-		if (level.axisCalledTimeout && team != TEAM_RED || !level.axisCalledTimeout && team == TEAM_RED) {
-			CP("print \"^jError: ^7Your team did not call the Pause^j.\n\"");
-			return;
-		}
-
+	} 
+	else if (team + 128 != level.paused) {
+		CP("print \"^jError: ^7Your team did not call the Pause^j.\n\"");
+		return;	
+	}
+	else {
+		AAPS("sound/match/prepare.wav");
+		level.paused = PAUSE_UNPAUSING;
+		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
 		AP(va("print \"^z>> ^7%s ^zUnpaused the match.\n\"", ent->client->pers.netname));
-		G_pauseHandle(qfalse, team);
 	}
 
     if (g_gameStatslog.integer) {
@@ -842,8 +830,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	//Tardo Ready/Unready
 	else if (!strcmp(cmd,"lock"))			        { pCmd_gamelocked(ent, qfalse); return qtrue;}
 	else if (!strcmp(cmd,"unlock"))		        	{ pCmd_gamelocked(ent, qtrue);  return qtrue;}
-    else if(!Q_stricmp(cmd, "pause"))				{ pCmd_pauseHandle( ent, qfalse); return qtrue;}
-    else if(!Q_stricmp(cmd, "unpause"))				{ pCmd_pauseHandle( ent, qtrue); return qtrue;}
+    else if(!Q_stricmp(cmd, "pause"))				{ pCmd_pauseHandle( ent, qtrue); return qtrue;}
+    else if(!Q_stricmp(cmd, "unpause"))				{ pCmd_pauseHandle( ent, qfalse); return qtrue;}
 	else if(!Q_stricmp(cmd, "ready"))				{ G_ready_cmd( ent, qtrue ); return qtrue;}
 	else if(!Q_stricmp(cmd, "unready") ||
 			!Q_stricmp(cmd, "notready"))			{ G_ready_cmd( ent, qfalse ); return qtrue;}

@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
 #include "server.h"
 
 /*
@@ -514,6 +512,73 @@ void    SV_LoadGame_f( void ) {
 		Cbuf_ExecuteText( EXEC_APPEND, va( "spdevmap %s", filename ) );
 	} else {    // no cheats
 		Cbuf_ExecuteText( EXEC_APPEND, va( "spmap %s", filename ) );
+	}
+}
+
+/*
+==================
+SV_CvarRestrictions
+
+Loads restrictions into memory.
+==================
+*/
+extern cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
+void SV_SetCvarRestrictions(void) {
+	FILE* f;
+	char* path;
+	int i = 0, j = 0;
+
+	Cvar_Rest_Reset();
+	Com_Printf("-----Initializing Restrictions-----\n");
+	if (!(path = Cvar_VariableString("fs_game")) || !*path)
+		path = BASEGAME;
+
+	if (!Q_stricmp(sv_GameConfig->string, "")) {
+		Com_Printf("Game config file is not found..skipping.\n");
+		return;
+	}
+
+	if (!Q_stricmp(sv_GameConfig->string, "none")) {
+		Cvar_Set("sv_GameConfig", "");
+		SV_ReloadRest(qtrue);
+		Com_Printf("Disabling game config..\n");
+		return;
+	}
+
+	if (FS_FileExists(va("configs/%s.config", sv_GameConfig->string))) {
+		char line[MAX_CVAR_VALUE_STRING];
+		char* filepath = va("%s/configs/%s.config", path, sv_GameConfig->string);
+
+		f = fopen(filepath, "r");
+		while (fgets(line, MAX_CVAR_VALUE_STRING, f) != NULL) {
+			Cmd_TokenizeString(line);
+
+			if (!Q_stricmp(Cmd_Argv(0), "sv_cvar")) {
+				Cvar_SetRestricted(Cmd_Argv(1), RestrictedTypeToInt(Cmd_Argv(2)), Cmd_Argv(3), Cmd_Argv(4));
+				i++;
+			}
+			else if (!Q_stricmp(Cmd_Argv(0), "set") || !Q_stricmp(Cmd_Argv(0), "seta")) {
+				Cvar_Set(Cmd_Argv(1), Cmd_Argv(2));
+				j++;
+			}
+			else {
+				Com_DPrintf("Invalid rest cvar: %s %s %s %s %s (%s)\n", 
+					Cmd_Argv(0), Cmd_Argv(1), Cmd_Argv(2), Cmd_Argv(3), Cmd_Argv(4), line
+				);
+			}
+		}
+		fclose(f);
+
+		Com_Printf("Registered %d restricted cvars.\n", i);
+		if (j > 0) {
+			Com_Printf("Executed %d regular cvars.\n", j);
+		}
+		SV_ReloadRest(qfalse);
+	}
+	else {
+		Cvar_Set("sv_GameConfig", "");
+		SV_ReloadRest(qtrue);
+		Com_Printf("Game config file is not found..skipping.\n");
 	}
 }
 
@@ -1166,7 +1231,6 @@ static void SV_ConSay_f( void ) {
 	SV_SendServerCommand( NULL, "chat \"%s\n\"", text );
 }
 
-
 /*
 ==================
 SV_Heartbeat_f
@@ -1177,7 +1241,6 @@ Also called by SV_DropClient, SV_DirectConnect, and SV_SpawnServer
 void SV_Heartbeat_f( void ) {
 	svs.nextHeartbeatTime = -9999999;
 }
-
 
 /*
 ===========
@@ -1191,7 +1254,6 @@ static void SV_Serverinfo_f( void ) {
 	Info_Print( Cvar_InfoString( CVAR_SERVERINFO ) );
 }
 
-
 /*
 ===========
 SV_Systeminfo_f
@@ -1203,7 +1265,6 @@ static void SV_Systeminfo_f( void ) {
 	Com_Printf( "System info settings:\n" );
 	Info_Print( Cvar_InfoString( CVAR_SYSTEMINFO ) );
 }
-
 
 /*
 ===========
@@ -1236,6 +1297,62 @@ static void SV_DumpUser_f( void ) {
 	Info_Print( cl->userinfo );
 }
 
+/* sswolf - reqSS
+===========
+L0 - SV_RequestSS
+
+Requests ScreenShot from client
+===========
+*/
+static void SV_RequestSS_f(void) {
+	client_t* cl;
+	//int quality = 45;
+
+	if (!com_sv_running->integer) 
+	{
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	/*
+	if (!sv_pure->integer) {
+		Com_Printf("SS can only be requested when server is running as pure.\n");
+		return;
+	}
+	*/
+
+	/*if (Cmd_Argc() < 2) 
+	{
+		Com_Printf("Usage: reqss <slot> <optional: jpeg quality[30-100]>\n");
+		return;
+	}*/
+
+	if (Cmd_Argc() < 1)
+	{
+		Com_Printf("Usage: reqss <slot>\n");
+		return;
+	}
+
+	/*if (Cmd_Argv(2)) 
+	{
+		quality = atoi(Cmd_Argv(2));
+
+		if (quality > 100)
+			quality = 100;
+		else if (quality < 30)
+			quality = 30;
+	}*/
+
+	cl = SV_GetPlayerByNum();
+
+	if (!cl) 
+	{
+		return;
+	}
+
+	//SV_SendSSRequest(cl->gentity->s.clientNum, quality);
+	SV_SendSSRequest(cl->gentity->s.clientNum);
+}
 
 /*
 =================
@@ -1255,6 +1372,49 @@ NERVE - SMF
 */
 void SV_GameCompleteStatus_f( void ) {
 	SV_MasterGameCompleteStatus();
+}
+
+/*
+=================
+SV_LoadGameConfig_f
+
+NERVE - SMF
+=================
+*/
+static void SV_LoadGameConfig_f( void ) {
+	char* path;
+	char* config;
+
+	// make sure server is running
+	if (!com_sv_running->integer) {
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	if (Cmd_Argc() < 2) {
+		Com_Printf("Usage: config <config-name>\n");
+		return;
+	}
+
+	config = Cmd_Args();
+	if (!(path = Cvar_VariableString("fs_game")) || !*path)
+		path = BASEGAME;
+
+	if (!Q_stricmp(config, "none")) {
+		Com_Printf("Disabling game config..\n", config);
+		Cvar_Set("sv_GameConfig", "none");
+		SV_SetCvarRestrictions();
+		return;
+	}
+
+	if (FS_FileExists(va("configs/%s.config", config))) {
+		Com_Printf("Loading %s config..\n", config);
+		Cvar_Set("sv_GameConfig", config);
+		SV_SetCvarRestrictions();
+	}
+	else {
+		Com_Printf("Could not found config named '%s'.\n", config);
+	}
 }
 
 //===========================================================
@@ -1284,6 +1444,7 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand( "map_restart", SV_MapRestart_f );
 	Cmd_AddCommand( "sectorlist", SV_SectorList_f );
 	Cmd_AddCommand( "map", SV_Map_f );
+	Cmd_AddCommand("config", SV_LoadGameConfig_f);
 	Cmd_AddCommand( "gameCompleteStatus", SV_GameCompleteStatus_f );      // NERVE - SMF
 #ifndef PRE_RELEASE_DEMO
 	Cmd_AddCommand( "devmap", SV_Map_f );
@@ -1303,6 +1464,9 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand("bandel", SV_BanDel_f);
 	Cmd_AddCommand("exceptdel", SV_ExceptDel_f);
 	Cmd_AddCommand("flushbans", SV_FlushBans_f);
+
+	// reqSS
+	Cmd_AddCommand("reqss", SV_RequestSS_f);
 }
 
 /*
@@ -1326,4 +1490,3 @@ void SV_RemoveOperatorCommands( void ) {
 	Cmd_RemoveCommand( "say" );
 #endif
 }
-

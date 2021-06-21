@@ -115,12 +115,9 @@ void SV_SetConfigstring( int index, const char *val ) {
 	}
 }
 
-
-
 /*
 ===============
 SV_GetConfigstring
-
 ===============
 */
 void SV_GetConfigstring( int index, char *buffer, int bufferSize ) {
@@ -251,7 +248,6 @@ void SV_Startup( void ) {
 		Com_Error( ERR_FATAL, "SV_Startup: unable to allocate svs.clients" );
 	}
 	//svs.clients = Z_Malloc (sizeof(client_t) * sv_maxclients->integer );
-
 	if ( com_dedicated->integer ) {
 		svs.numSnapshotEntities = sv_maxclients->integer * PACKET_BACKUP * 64;
 	} else {
@@ -681,6 +677,9 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	Hunk_SetMark();
 
+	// reqSS
+	svs.ssTime = svs.time + sv_ssMinTime->integer;
+
 	Cvar_Set( "sv_serverRestarting", "0" );
 
 	Com_Printf( "-----------------------------------\n" );
@@ -901,8 +900,8 @@ void SV_Init( void ) {
 #endif
 
 	// HTTP downloads
-	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
-	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "", CVAR_ARCHIVE);
+	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "1", CVAR_ARCHIVE);
+	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "https://maps.rtcwmp.com/", CVAR_ARCHIVE);
 	sv_wwwDlDisconnected = Cvar_Get("sv_wwwDlDisconnected", "0", CVAR_ARCHIVE);
 	sv_wwwFallbackURL = Cvar_Get("sv_wwwFallbackURL", "", CVAR_ARCHIVE);
 
@@ -913,6 +912,15 @@ void SV_Init( void ) {
 	// Auth
 	sv_AuthEnabled = Cvar_Get("sv_AuthEnabled", "0", CVAR_SERVERINFO | CVAR_INIT);
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
+
+	// Cvar Restrictions
+	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE); // | CVAR_LATCH );
+
+	// reqSS
+	sv_ssEnable = Cvar_Get("sv_ssEnable", "0", CVAR_ARCHIVE);
+	sv_ssMinTime = Cvar_Get("sv_ssMinTime", "600", CVAR_ARCHIVE);
+	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
+	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
@@ -946,6 +954,10 @@ void SV_Init( void ) {
 		}
 	}
 #endif
+
+	if (com_dedicated->integer) {
+		SV_SetCvarRestrictions();
+	}
 }
 
 

@@ -280,7 +280,6 @@
     <ClCompile Include="g_client.c" />
     <ClCompile Include="g_cmds.c" />
     <ClCompile Include="g_combat.c" />
-    <ClCompile Include="g_config.c" />
     <ClCompile Include="g_geoip.c" />
     <ClCompile Include="g_items.c" />
     <ClCompile Include="g_json.c" />

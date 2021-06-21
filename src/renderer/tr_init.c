@@ -710,10 +710,19 @@ void R_ScreenShotJPEG_f( void ) {
 		silent = qfalse;
 	}
 
-	if ( ri.Cmd_Argc() == 2 && !silent ) {
+	// sswolf - edited to make reqSS silent and work correctly
+	if ( ri.Cmd_Argc() == 2 && !silent ) 
+	{
 		// explicit filename
 		Com_sprintf( checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv( 1 ) );
-	} else {
+	}
+	else if (ri.Cmd_Argc() == 3 && silent)
+	{
+		// explicit filename
+		Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(2));
+	}
+	else 
+	{
 		// scan for a free filename
 
 		// if we have saved a previous screenshot, don't scan

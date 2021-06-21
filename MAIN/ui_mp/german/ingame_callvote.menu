@@ -286,7 +286,7 @@ menuDef {
 	itemDef {
 		name misc
 		group grpCallVote
-		text "Karte neu starten
+		text "Karte neu starten"
 		tooltip "Karte neu starten"
 		textscale .25
 		style	WINDOW_STYLE_FILLED

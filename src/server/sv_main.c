@@ -25,8 +25,6 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-
-
 #include "server.h"
 
 serverStatic_t svs;                 // persistant server info
@@ -101,6 +99,15 @@ cvar_t* sv_StreamingSelfSignedCert;
 // Auth
 cvar_t* sv_AuthEnabled;
 cvar_t* sv_AuthStrictMode;
+
+// Cvar Restrictions
+cvar_t* sv_GameConfig;
+
+// reqSS
+cvar_t* sv_ssEnable;
+cvar_t* sv_ssMinTime;
+cvar_t* sv_ssMaxTime;
+//cvar_t* sv_ssQuality;
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
@@ -344,7 +351,7 @@ SV_MasterGameCompleteStatus
 NERVE - SMF - Sends gameCompleteStatus messages to all master servers
 =================
 */
-void SV_MasterGameCompleteStatus() {
+void SV_MasterGameCompleteStatus(void) {
 	static netadr_t adr[MAX_MASTER_SERVERS];
 	int i;
 
@@ -1316,6 +1323,9 @@ void SV_Frame( int msec ) {
 
 	// send a heartbeat to the master if needed
 	SV_MasterHeartbeat( HEARTBEAT_GAME );
+
+	// reqSS
+	autoSSTime();
 }
 /*
 ==================
@@ -1469,3 +1479,39 @@ int SV_SendQueuedPackets(void)
 }
 #endif
 //============================================================================
+
+/*
+=================
+SV_ReloadRest_f
+=================
+*/
+void SV_ReloadRest(qboolean disableTime) {
+	int i;
+	client_t* client;
+
+	// make sure server is running
+	if (!com_sv_running->integer) {
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	if (sv.restartTime) {
+		return;
+	}
+
+	// connect and begin all the clients
+	for (i = 0; i < sv_maxclients->integer; i++) {
+		client = &svs.clients[i];
+
+		// send the new gamestate to all connected clients
+		if (client->state < CS_CONNECTED) {
+			continue;
+		}
+
+		if (client->netchan.remoteAddress.type != NA_BOT) {
+			// Give players time to adjust stuff if needed
+			client->clientRestValidated = (disableTime ? -1 : svs.time + 65000);
+			SV_SendServerCommand(NULL, "rereload %s\n", Cvar_GetRestrictedList());
+		}
+	}
+}

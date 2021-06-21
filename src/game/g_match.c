@@ -68,7 +68,8 @@ void G_loadMatchGame(void)
 
 	for (i = 0; i < MAX_REINFSEEDS; i++)
 	{
-		aRandomValues[i] = (rand() % REINF_RANGE) * aReinfSeeds[i];
+		//aRandomValues[i] = (rand() % REINF_RANGE) * aReinfSeeds[i];
+		aRandomValues[i] = (rand() % g_spawnOffset.integer) * aReinfSeeds[i];
 		Q_strcat(strReinfSeeds, MAX_STRING_CHARS, va(" %d", aRandomValues[i]));
 	}
 
@@ -83,46 +84,6 @@ void G_loadMatchGame(void)
         G_writeGeneralEvent(dummy,dummy,"",teamFirstSpawn);
     }
 }
-/*
-=================
-Pause countdown
-=================
-*/
-void PauseHandle( void ) {
-
-	if (level.paused == !PAUSE_NONE) {
-		// TODO: Add auto timeout..
-		if (level.paused != PAUSE_UNPAUSING) {
-            if ( ( level.time % 500 ) == 0 ) {
-                    if (!g_duelAutoPause.integer){
-                        AP( va("cp \"Call a vote to resume the match.\n Timeouts remaining: ^1A^7(%i)/^4A^7(%i)\n\"",
-                            g_pauseLimit.integer - level.axisTimeouts, g_pauseLimit.integer - level.alliedTimeouts));
-                }
-                    else
-                        AP("cp \"Match will resume once teams are even!\n\"");
-
-                    }
-                }
-
-		} else {
-			level.paused = PAUSE_UNPAUSING;
-			//AP( "print \"Prepare to fight!\n\"" );
-		}
-
-
-	if (level.paused == PAUSE_UNPAUSING) {
-		CountDown(qfalse);
-	}
-}
-
-// So it can be called from elsewhere..
-void resetPause( void ) {
-	trap_SetConfigstring( CS_SCREENFADE, va( "0 %i 150", level.time + 250 ) );
-	trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime + level.timeDelta ) );
-	trap_SetConfigstring( CS_PAUSED, va( "%i", PAUSE_NONE ));
-	level.paused = PAUSE_NONE;
-}
-
 
 /*
 ================
@@ -199,10 +160,7 @@ void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 		}
 	}
 }
-/**
- * @brief G_delayPrint
- * @param[in,out] dpent
- */
+
 /*
 =================
 Countdown
@@ -210,176 +168,90 @@ Countdown
 Causes some troubles on client side so done it here.
 =================
 */
-void CountDown(qboolean restart) {
-	gentity_t *other;
-	char *index="";
-	int i;
-    gentity_t *target_ent;
+void CountDown(void) {
 
-	if (level.CNyes == qfalse) {
+	if (level.cnStarted == qfalse) {
 		return;
 	}
-		// Countdown...
-	if (level.CNstart == 0) { //index = "prepare.wav";
-		if (level.clients->pers.connected == CON_CONNECTED)
-            AAPS("sound/match/prepare.wav");
-		if (!restart) AP(va("cp \"Prepare to fight^1!\n\"2"));
-	}
-	if (level.CNstart == 1) {
-		index = "cn_5.wav";
-		if (!restart) AP(va("cp \"Match resumes in: ^15\n\"2"));
-	}
-	if (level.CNstart == 2) {
-		index = "cn_4.wav";
-		if (!restart) AP(va("cp \"Match resumes in: ^14\n\"2"));
-	}
-	if (level.CNstart == 3) {
-		index = "cn_3.wav";
-		if (!restart) AP(va("cp \"Match resumes in: ^13\n\"2"));
-	}
-	if (level.CNstart == 4) {
-		index = "cn_2.wav";
-		if (!restart) AP(va("cp \"Match resumes in: ^12\n\"2"));
-	}
-	if (level.CNstart == 5) {
-		index = "cn_1.wav";
-		if (!restart) AP(va("cp \"Match resumes in: ^11\n\"2"));
-	}
-
-	// Pushes forward. Could be done in 5 but then there's a sound bug ..
-	if (level.CNstart == 6 ) { level.HAprintnum++;	 }
 
 	// Prepare to fight takes 2 seconds..
-	if(level.CNstart == 0){
-		level.CNpush = level.time+2000;
+	if(level.cnNum == 0) {
+		level.cnPush = level.time + 2000;
 	// Just enough to fix the bug and skip to action..
-	} else if (level.CNstart == 6) {
-		level.CNpush = level.time+200;
+	} else if (level.cnNum == 6) {
+		level.cnPush = level.time + 200;
 	// Otherwise, 1 second.
 	} else {
-		level.CNpush = level.time+1000;
-	}
-
+		level.cnPush = level.time + 1000;  
+	} 
+	
 	// We're done.. restart the game
-	if (level.CNstart == 7) {
-		if (restart) {
-			level.warmupTime += 10000;
-			trap_Cvar_Set( "g_restarted", "1" );
-			trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-			level.restarted = qtrue;
-		} else {
-			// Resume the match..
-			resetPause();
-			AAPS("sound/match/fight.wav");
-			AP(va("cp \"^1FIGHT\n\"2"));
-
-            // nihi: added from rtcwpub for restoring grenades/dyno/airstrikes/etc but
-            //   note that slight modifications were made since pause is handled differently for rtcwpro
-            for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i)
-            {
-                target_ent = g_entities + i;
-
-                if (target_ent->inuse)
-                {
-                    // NOTE(nobo): same goes for other time-sensitive functionality; nextthink on entities and trTime on trajectory interoplation.
-                    if (target_ent->think &&
-                        target_ent->nextthink > 0)
-                    {
-                        if (target_ent->s.eType != ET_ITEM) {   // do not adjust for med/ammo packs
-                            target_ent->nextthink -= level.timeDelta;
-                        }
-
-                    }
-
-                    if (target_ent->s.eType > TR_INTERPOLATE &&
-                        target_ent->s.pos.trTime > 0)
-                    {
-                        VectorCopy(target_ent->trBase_pre_pause, target_ent->s.pos.trBase);
-                        target_ent->s.pos.trTime -= level.timeDelta;
-                        target_ent->s.pos.trType = target_ent->trType_pre_pause;
-                        target_ent->trType_pre_pause = 0;
-                    }
-                }
-            }
-             // end import from rtcwpub
-            // nihi added to fix the pause timer issue
-            level.startTime += level.timeDelta;  // Add the amount of time while paused to game timer
-            level.timeDelta = 0;  // Reset the "pause timer"
-            trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
-
-		}
-
+	if (level.cnNum == 7) {
+		level.warmupTime += 10000;
+		trap_Cvar_Set( "g_restarted", "1" );
+		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
+		level.restarted = qtrue;			
+		
 		return;
 	}
-
-	other = g_entities;
-
-//	if (level.clients->pers.connected == CON_CONNECTED)
-//		doSound(other, EV_ANNOUNCER_SOUND, "sound/scenaric/", va("%s", index));
-
-	if ((level.clients->pers.connected == CON_CONNECTED)  && (Q_stricmpn(index,"cn",2) ==0))
-		AAPS(va("sound/match/%s", index));
-
-	level.CNstart++;  // push forward each frame.. :)
+		
+	level.cnNum++; 
 }
-void G_delayPrint(gentity_t *dpent)
-{
-	int      think_next = 0;
-	qboolean fFree      = qtrue;
 
-	switch (dpent->spawnflags)
-	{
+/*
+=================
+G_delayPrint
+
+Deals with pause related functionality
+=================
+*/
+void G_delayPrint(gentity_t *dpent) {
+	int think_next = 0;
+	qboolean fFree = qtrue;
+
+	switch (dpent->spawnflags){
 	case DP_PAUSEINFO:
-		if (level.paused > PAUSE_UNPAUSING)
-		{
+		if (level.paused > PAUSE_UNPAUSING) {
 			int cSeconds = match_timeoutlength.integer * 1000 - (level.time - dpent->timestamp);
 
-			if (cSeconds > 1000)
-			{
-				AP(va("cp \"^3Match resuming in ^1%d^3 seconds!\n\"", cSeconds / 1000));
-			//	think_next = level.time + 15000;
-				think_next = level.time;
-				fFree      = qfalse;
+			if (cSeconds > 1000) {
+				think_next = level.time + 1000;
+				fFree = qfalse;
+
+				if (cSeconds > 30000) {
+					AP(va("popin \"Timeouts Available: [^1Axis^7] %d - [^4Allies^7] %d\n\"y",
+						teamInfo[TEAM_RED].timeouts, teamInfo[TEAM_BLUE].timeouts));
+				}
 			}
-			else
-			{
+			else {
 				level.paused = PAUSE_UNPAUSING;
-				AP("print \"^3Match resuming in 10 seconds!\n\"");
-				//AAPS("sound/osp/prepare.wav");
-				G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
+				G_spawnPrintf(DP_UNPAUSING, level.time + 7.2, NULL);
 			}
 		}
 		break;
 	case DP_UNPAUSING:
-		if (level.paused == PAUSE_UNPAUSING)
-		{
+		if (level.paused == PAUSE_UNPAUSING) {
 			int cSeconds = 11 * 1000 - (level.time - dpent->timestamp);
 
-			if (cSeconds > 1000)
-			{
-				AP(va("cp \"^3Match resuming in ^1%d^3 seconds!\n\"", cSeconds / 1000));
+			if (cSeconds > 1000) {
 				think_next = level.time + 1000;
 				fFree      = qfalse;
 			}
-			else
-			{
+			else {
 				level.paused = PAUSE_NONE;
-				//AAPS("sound/osp/fight.wav");
-				//G_printFull("^1FIGHT!", NULL);
-                level.startTime += level.timeDelta;
-                level.timeDelta = 0;
-                trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime));
+				AP("print \"^1FIGHT!\n\"");
+				AAPS("sound/match/fight.wav");
+				trap_SetConfigstring(CS_PAUSED, "0");
+				trap_SetConfigstring(CS_LEVEL_START_TIME, va("%i", level.startTime + level.timeDelta));
 			}
 		}
 		break;
-
 	default:
 		break;
 	}
 
 	dpent->nextthink = think_next;
-	if (fFree)
-	{
+	if (fFree) {
 		dpent->think = 0;
 		G_FreeEntity(dpent);
 	}
@@ -404,11 +276,8 @@ static char *pszDPInfo[] =
  * @param[in] print_time
  * @param[in] owner
  */
-void G_spawnPrintf(int print_type, int print_time, gentity_t *owner)
-{
-	gentity_t *ent;
-
-	ent = G_Spawn();
+void G_spawnPrintf(int print_type, int print_time, gentity_t *owner) {
+	gentity_t* ent = G_Spawn();
 
 	ent->classname  = pszDPInfo[print_type];
 	ent->clipmask   = 0;
@@ -422,7 +291,32 @@ void G_spawnPrintf(int print_type, int print_time, gentity_t *owner)
 
 	ent->nextthink = print_time;
 	ent->think     = G_delayPrint;
+
+	// Set it here so client can do it's own magic..
+	if (print_type == DP_PAUSEINFO)
+		trap_SetConfigstring(CS_PAUSED, va("%d", match_timeoutlength.integer));
+	else if (print_type == DP_UNPAUSING)
+		trap_SetConfigstring(CS_PAUSED, "10000");
 }
+
+/*
+=================
+G_handlePause
+
+Central function for (un)pausing the game.
+=================
+*/
+void G_handlePause(qboolean dPause, int time) {
+	if (dPause) {
+		level.paused = 100 + time;
+		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
+	}
+	else {
+		level.paused = PAUSE_UNPAUSING;
+		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
+	}
+}
+
 /**
  * @brief Update configstring for vote info
  * @param[in] cv
@@ -553,47 +447,4 @@ void G_resetModeState(void) {
 		trap_Cvar_Set("g_axiswins", "0");
 		trap_Cvar_Set("g_alliedwins", "0");
 	}*/
-}
-
-/*
-===================
-Pause/Unpause
-===================
-*/
-void G_pauseHandle(qboolean dPause, int team) {
-
-	if (dPause) {
-		gentity_t* target_ent;
-		int i;
-
-		for (i = MAX_CLIENTS; i < MAX_GENTITIES; ++i) {
-			target_ent = g_entities + i;
-
-			if (target_ent->inuse) {
-				if (target_ent->s.eType > TR_INTERPOLATE &&
-					target_ent->s.pos.trTime > 0) {
-					VectorCopy(target_ent->s.pos.trBase, target_ent->trBase_pre_pause);
-					VectorCopy(target_ent->r.currentOrigin, target_ent->s.pos.trBase);
-					target_ent->trType_pre_pause = target_ent->s.pos.trType;
-					target_ent->s.pos.trType = TR_STATIONARY;
-				}
-			}
-		}
-
-		level.paused = !PAUSE_NONE;
-		if (team == TEAM_RED) {
-			level.axisTimeouts++;
-		}
-		else if (team == TEAM_BLUE) {
-			level.alliedTimeouts++;
-		}
-		level.axisCalledTimeout = (team == TEAM_RED ? qtrue : qfalse);
-		trap_SetConfigstring(CS_PAUSED, va("%i", level.paused));
-	}
-	else {
-		level.CNstart = 0; // Resets countdown if it was aborted before
-		level.paused = PAUSE_UNPAUSING;
-		level.axisCalledTimeout = qfalse;
-	}
-	return;
 }

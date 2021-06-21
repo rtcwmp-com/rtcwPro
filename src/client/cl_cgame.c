@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "client.h"
 
 #include "../game/botlib.h"
+#include "../qcommon/threads.h"
 
 extern botlib_export_t *botlib_export;
 
@@ -234,7 +235,6 @@ void CL_CgameError( const char *string ) {
 	Com_Error( ERR_DROP, "%s", string );
 }
 
-
 /*
 =====================
 CL_ConfigstringModified
@@ -342,9 +342,9 @@ rescan:
 	if ( !strcmp( cmd, "disconnect" ) ) {
 		// NERVE - SMF - allow server to indicate why they were disconnected
 		if ( argc >= 2 ) {
-			Com_Error( ERR_SERVERDISCONNECT, va( "Server Disconnected - %s", Cmd_Argv( 1 ) ) );
+			Com_Error( ERR_SERVERDISCONNECT, va( "^zServer Disconnected\n\n%s", Cmd_Argv( 1 ) ) );
 		} else {
-			Com_Error( ERR_SERVERDISCONNECT,"Server disconnected\n" );
+			Com_Error( ERR_SERVERDISCONNECT,"^nServer disconnected\n" );
 		}
 	}
 
@@ -497,7 +497,6 @@ void CL_CM_LoadMap( const char *mapname ) {
 /*
 ====================
 CL_ShutdonwCGame
-
 ====================
 */
 void CL_ShutdownCGame( void ) {
@@ -511,12 +510,49 @@ void CL_ShutdownCGame( void ) {
 	cgvm = NULL;
 }
 
-static int  FloatAsInt( float f ) {
+/*
+====================
+FloatAsInt
+====================
+*/
+static int FloatAsInt( float f ) {
 	int temp;
 
 	*(float *)&temp = f;
 
 	return temp;
+}
+
+/*
+====================
+CL_GetRestStatus
+====================
+*/
+void CL_SetRestStatus(void) {
+	Cvar_ValidateRest();
+	cl.handle.warnedTime = cls.realtime + RKVALD_TIME_PING;
+	cl.handle.doPrint = qtrue;
+}
+
+/*
+====================
+CL_CheckRestStatus
+====================
+*/
+void CL_CheckRestStatus(void) {
+
+	if (cl.handle.doPrint) {
+		if (cls.realtime > cl.handle.warnedTime) {
+			int violations = Cvar_ValidateRest();
+
+			if (violations > 0) {
+				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
+				Com_Printf(">> ^jPlease use /violations and correct them.\n");
+			}
+			cl.handle.warnedTime = cls.realtime + (violations < 1 ? RKVALD_TIME_PING_L : RKVALD_TIME_PING_S);
+			CL_AddReliableCommand(va("%s %s", CTL_RKVALD, violations < 1 ? RKVALD_OK : RKVALD_NOT_OK));
+		}
+	}
 }
 
 /*
@@ -920,6 +956,19 @@ int CL_CgameSystemCalls( int *args ) {
 		CL_TranslateString( VMA( 1 ), VMA( 2 ) );
 		return 0;
 		// - NERVE - SMF
+	case CG_R_VALIDATE:
+		CL_SetRestStatus();
+		return 0;
+	case CG_R_BUILD:
+		Cvar_RestBuildList(VMA(1));
+		CL_SetRestStatus();
+		return 0;
+		// reqSS
+	case CG_REQ_SS:
+		//CL_RequestedSS(args[1]);
+		//CL_RequestedSS();
+		CL_RequestedSS( VMA(1));
+		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
 	}
@@ -1084,7 +1133,6 @@ void CL_InitCGame( void ) {
 	CL_UpdateLevelHunkUsage();
 }
 
-
 /*
 ====================
 CL_GameCommand
@@ -1100,8 +1148,6 @@ qboolean CL_GameCommand( void ) {
 	return VM_Call( cgvm, CG_CONSOLE_COMMAND );
 }
 
-
-
 /*
 =====================
 CL_CGameRendering
@@ -1111,7 +1157,6 @@ void CL_CGameRendering( stereoFrame_t stereo ) {
 	VM_Call( cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying );
 	VM_Debug( 0 );
 }
-
 
 /*
 =================
@@ -1316,6 +1361,9 @@ void CL_SetCGameTime( void ) {
 		CL_AdjustTimeDelta();
 	}
 
+	// See if we need to print any warnings..
+	CL_CheckRestStatus();
+
 	if ( !clc.demoplaying ) {
 		return;
 	}
@@ -1344,7 +1392,6 @@ void CL_SetCGameTime( void ) {
 			return;     // end of demo
 		}
 	}
-
 }
 
 /*

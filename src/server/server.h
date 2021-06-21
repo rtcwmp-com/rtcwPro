@@ -195,6 +195,7 @@ typedef struct client_s {
 	netchan_buffer_t **netchan_end_queue;
 	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
+	int clientRestValidated;
 } client_t;
 
 //=============================================================================
@@ -262,6 +263,8 @@ typedef struct {
 
 	receipt_t infoReceipts[MAX_INFO_RECEIPTS];
 	floodBan_t infoFloodBans[MAX_INFO_FLOOD_BANS];
+
+	int ssTime; // reqSS
 } serverStatic_t;
 
 // L0 - ioquake ipv6 banning
@@ -369,6 +372,15 @@ extern cvar_t* sv_StreamingSelfSignedCert;
 extern cvar_t* sv_AuthEnabled;
 extern cvar_t* sv_AuthStrictMode;
 
+// Cvar restrictions
+extern cvar_t* sv_GameConfig;
+
+// reqSS
+extern cvar_t* sv_ssEnable;
+extern cvar_t* sv_ssMinTime;
+extern cvar_t* sv_ssMaxTime;
+//extern cvar_t* sv_ssQuality;
+
 //===========================================================
 
 // L0 - ioquake ipv6 banning
@@ -389,9 +401,9 @@ void SV_RemoveOperatorCommands( void );
 void SV_MasterHeartbeat( const char *hbname );
 void SV_MasterShutdown( void );
 
-void SV_MasterGameCompleteStatus();     // NERVE - SMF
+void SV_MasterGameCompleteStatus(void);     // NERVE - SMF
 
-
+void SV_ReloadRest(qboolean disableTime);
 
 //
 // sv_init.c
@@ -425,11 +437,13 @@ void SV_DropClient( client_t *drop, const char *reason );
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
-#ifdef DEDICATED
-int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
-#else
+//#ifdef DEDICATED
+//int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+//#else
+int SV_WriteDownloadToClientOrig( client_t *cl, msg_t *msg );
 void SV_WriteDownloadToClient(client_t* cl, msg_t* msg);
-#endif
+//#endif
+
 #ifndef _WIN32
 int SV_SendQueuedMessages(void);
 int SV_RateMsec( client_t *client ) ;
@@ -438,6 +452,7 @@ int SV_RateMsec( client_t *client ) ;
 // sv_ccmds.c
 //
 void SV_Heartbeat_f( void );
+void SV_SetCvarRestrictions(void);
 
 //
 // sv_snapshot.c
@@ -461,7 +476,7 @@ void        SV_InitGameProgs( void );
 void        SV_ShutdownGameProgs( void );
 void        SV_RestartGameProgs( void );
 qboolean    SV_inPVS( const vec3_t p1, const vec3_t p2 );
-qboolean	SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* or );
+qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* or );
 
 // sv_animation.c
 int SV_LerpTag(orientation_t* tag, clientAnimationInfo_t* animInfo, char* tagname);
@@ -569,4 +584,12 @@ qboolean SV_CheckDRDoS(netadr_t from);
 #define DLNOTIFY_BEGIN      0x00000002  // "clientDownload: 4 : beginning ..."
 #define DLNOTIFY_ALL        ( DLNOTIFY_REDIRECT | DLNOTIFY_BEGIN )
 
+//
+// sswolf - sv_controls.c - source: Nate (rtcwMP)
+//
+//void SV_SendSSRequest(int clientNum, int quality);
+void SV_SendSSRequest(int clientNum);
+void autoSSTime(void);
+
 #endif // !___SERVER_H
+

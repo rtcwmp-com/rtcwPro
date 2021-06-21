@@ -91,6 +91,12 @@ typedef struct {
 extern int g_console_field_width;
 
 typedef struct {
+	int actionTime;
+	int warnedTime;
+	qboolean doPrint;
+} clientHandle_t;
+
+typedef struct {
 	int timeoutcount;               // it requres several frames in a timeout condition
 									// to disconnect, preventing debugging breaks from
 									// causing immediate disconnects on continue
@@ -155,6 +161,10 @@ typedef struct {
 	qboolean corruptedTranslationFile;
 	char translationVersion[MAX_STRING_TOKENS];
 	// -NERVE - SMF
+
+	clientHandle_t handle;
+
+	int clientSSAction; // reqSS
 } clientActive_t;
 
 extern clientActive_t cl;
@@ -464,6 +474,7 @@ const char* CL_TranslateStringBuf( const char *string ); // TTimo
 // -NERVE - SMF
 
 void CL_OpenURL( const char *url ); // TTimo
+void CL_ActionGenerateTime(qboolean useFixedTime);
 
 //
 // cl_input
@@ -631,4 +642,12 @@ void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ); //int length, const byt
 void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 
+// 
+// sswolf - cl_control.c - source: Nate (rtcwMP)
+//
+void CL_checkSSTime(void);
+//void CL_RequestedSS(int quality);
+//void CL_RequestedSS();
+void CL_RequestedSS(char* ip);
 #endif // !__CLIENT_H
+

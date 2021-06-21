@@ -110,7 +110,22 @@ Because we're not going through Game we need to sort stuff ourself.
 char* getCurrentPath(char* file) {
 	char* path = Cvar_VariableString("fs_game");
 
-	return (strlen(path) < 2?va("%s/%s", BASEGAME, file):va("%s/%s", path, file));
+	return (strlen(path) < 2 ? va("%s/%s", BASEGAME, file) : va("%s/%s", path, file));
+}
+
+/*
+===============
+sswolf - new (lazy) way
+to get path to ss
+
+getFilePath
+===============
+*/
+char* getFilePath(char* file) {
+	char* basepath = Cvar_VariableString("fs_basepath");
+	char* fs = Cvar_VariableString("fs_game");
+
+	return va("%s/%s/screenshots/%s.jpg", basepath, fs, file);
 }
 
 /*

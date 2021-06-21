@@ -69,6 +69,27 @@ void AddScore( gentity_t *ent, int score ) {
 
 /*
 =================
+Droppable weapons and FindIndex for TossClientItems
+=================
+*/
+int droppableWeapons[] = {
+	WP_MP40, WP_THOMPSON, WP_STEN, WP_MAUSER, WP_PANZERFAUST, WP_FLAMETHROWER, WP_COLT, WP_LUGER
+};
+int FindIndex(int a[], int num_elements, int value)
+{
+	int i;
+	for (i = 0; i < num_elements; i++)
+	{
+		if (a[i] == value)
+		{
+			return(value);
+		}
+	}
+	return(-1);
+}
+
+/*
+=================
 TossClientItems
 
 Toss the weapon and powerups for the killed player
@@ -103,7 +124,7 @@ void TossClientItems( gentity_t *self ) {
 	}
 	// jpw
 
-	if ( weapon > WP_NONE && weapon < WP_MONSTER_ATTACK1 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) {
+	if ( weapon > WP_NONE && FindIndex(droppableWeapons, ARRAY_LEN(droppableWeapons), weapon) >= 0 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) { // < WP_MONSTER_ATTACK1 replaced
 		// find the item type for this weapon
 		item = BG_FindItemForWeapon( weapon );
 		// spawn the item
@@ -396,8 +417,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
                     int weapID;
                     weapID = G_weapStatIndex_MOD( meansOfDeath );
                     //G_writeGeneralEvent(attacker,self,obit,eventKill);
-                    G_writeGeneralEvent(attacker,self,va("%s",aWeaponInfo[weapID].pszName),eventKill);
-
+					G_writeGeneralEvent(attacker, self, va("%s", aWeaponInfo[weapID].pszName), eventKill);
                 }
             }
 
@@ -753,7 +773,7 @@ void G_ArmorDamage( gentity_t *targ ) {
 	// ... Ick, just discovered that the refined hit detection ("hit nearest to which tag") is clientside...
 
 	// For now, I'll randomly pick a part that hasn't been cleared.  This might end up looking okay, and we won't need the refined hits.
-	//	however, we still have control on the server-side of which parts come off, regardless of what shceme is used.
+	//	however, we still have control on the server-side of which parts come off, regardless of what scheme is used.
 
 	brokeparts = (int)( ( 1 - ( (float)( targ->health ) / (float)( targ->client->ps.stats[STAT_MAX_HEALTH] ) ) ) * numParts );
 
@@ -789,6 +809,45 @@ void G_ArmorDamage( gentity_t *targ ) {
 		}
 	}
 }
+
+/*
+==============
+G_Hitsounds
+==============
+*/
+void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
+	qboolean 	onSameTeam = OnSameTeam( target, attacker);
+
+	if (g_hitsounds.integer) {
+
+		// if player is hurting him self don't give any sounds
+		if (target->client == attacker->client) {
+			return;  // this happens at flaming your self... just return silence...			
+		}
+
+		// if team mate
+		if (target->client && attacker->client && onSameTeam ) {
+			attacker->client->ps.persistant[PERS_HITBODY]--;
+		}
+
+		// If enemy
+		else if ( target &&
+				target->client &&
+				attacker &&
+				attacker->client &&
+				attacker->s.number != ENTITYNUM_NONE &&
+				attacker->s.number != ENTITYNUM_WORLD &&
+				attacker != target &&
+				!onSameTeam 
+		) {   
+			if (body)
+				attacker->client->ps.persistant[PERS_HITBODY]++;
+			else
+				attacker->client->ps.persistant[PERS_HITHEAD]++;
+		}
+	}
+}
+
 /*
 ============
 T_Damage
@@ -812,7 +871,6 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t   *client;
@@ -896,7 +954,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	client = targ->client;
 
 	if ( client ) {
-		if ( client->noclip || client->ps.powerups[PW_INVULNERABLE]  ) {
+		if ( client->noclip) { // KK commenting this out during our alpha test || client->ps.powerups[PW_INVULNERABLE]  ) {
 			return;
 		}
 	}
@@ -914,10 +972,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// L0 - Now by default knockback is set to 100 (was 1000) so if it's not touched
 	// multiply nade and AS to 1000 so it acts and feels like default
 	if (dflags & DAMAGE_RADIUS) {
-		if (g_knockback.integer <= 100) {
-			knockback = 1000;
-		}
-	} 
+		if (g_knockback.integer <= 100)
+			knockback *= 10;
+	} // End
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
@@ -1021,6 +1078,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
+	G_Hitsounds(targ, attacker, qtrue);
+
 	// sswolf - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 	if (targ->headshot && targ->client) {
@@ -1052,6 +1111,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_addStatsHeadShot( attacker, mod );
 		} // End
 
+		G_Hitsounds(targ, attacker, qfalse);
 	}
 
 	if ( g_debugDamage.integer ) {

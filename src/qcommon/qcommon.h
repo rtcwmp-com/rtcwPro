@@ -458,6 +458,10 @@ void    Cmd_TokenizeString( const char *text );
 // Takes a null terminated string.  Does not need to be /n terminated.
 // breaks the string up into arg tokens.
 
+void	Cmd_TokenizeLine(const char* text_in, const char* delim, char* pos);
+// Takes a null terminated string.  Does not need to be /n terminated.
+// breaks the string up into arg tokens.
+
 void    Cmd_ExecuteString( const char *text );
 // Parses a single line of text into arguments and tries to execute it
 // as if it was typed at the console
@@ -496,20 +500,47 @@ cvar_t *Cvar_Get( const char *var_name, const char *value, int flags );
 // that allows variables to be unarchived without needing bitflags
 // if value is "", the value will not override a previously set value.
 
-void    Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
+void Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
 // basically a slightly modified Cvar_Get for the interpreted modules
 
-void    Cvar_Update( vmCvar_t *vmCvar );
+void Cvar_Update( vmCvar_t *vmCvar );
 // updates an interpreted modules' version of a cvar
 
-void    Cvar_Set( const char *var_name, const char *value );
+cvar_rest_t* Cvar_SetRestricted(const char* var_name, unsigned int type, const char* value, const char* value2);
+// registers cvars for validation list
+
+char* Cvar_GetRestrictedList(void);
+// returns list of restricted cvars
+
+void Cvar_Rest_Reset(void);
+// Wipes the restricted list
+
+void Cvar_Set( const char *var_name, const char *value );
 // will create the variable with no flags if it doesn't exist
 
 void Cvar_SetLatched( const char *var_name, const char *value );
 // don't set the cvar immediately
 
-void    Cvar_SetValue( const char *var_name, float value );
+void Cvar_SetValue( const char *var_name, float value );
 // expands value to a string and calls Cvar_Set
+
+cvar_t* Cvar_FindVar(const char* var_name);
+// find cvar in a local table
+
+cvar_rest_t* Cvar_Rest_FindVar(const char* var_name);
+// find restricted cvar in a local table
+
+qboolean Cvar_RestValueIsValid(cvar_rest_t* var, const char* value);
+// checks if value is valid
+
+void Cvar_RestBuildList(char* data);
+// Builds the list
+
+int Cvar_ValidateRest(void);
+// checks if any cvar is violating server restrictions
+
+char* Cvar_RestAcceptedValues(const char* var_name);
+// returns requires values for specific cvar
 
 float   Cvar_VariableValue( const char *var_name );
 int     Cvar_VariableIntegerValue( const char *var_name );
@@ -545,6 +576,8 @@ char    *Cvar_InfoString_Big( int bit );
 void    Cvar_InfoStringBuffer( int bit, char *buff, int buffsize );
 
 void    Cvar_Restart_f( void );
+
+unsigned int RestrictedTypeToInt(char* str);
 
 extern int cvar_modifiedFlags;
 // whenever a cvar is modifed, its flags will be OR'd into this, so
@@ -725,6 +758,7 @@ int FS_CreatePath(const char* OSPath_);
 qboolean FS_VerifyPak( const char *pak );
 
 int  submit_curlPost( char* jsonfile, char* matchid );
+void* submit_HTTP_curlPost(void* args) ;
 char* encode_data_b64( char *infilename ) ;
 /*
 ==============================================================
@@ -987,6 +1021,7 @@ int SV_SendQueuedPackets(void);
 
 void		Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf);
 void	Cmd_TokenizeStringIgnoreQuotes( const char *text_in );
+
 //
 // UI interface
 //
@@ -1247,6 +1282,15 @@ extern huffman_t clientHuffTables;
 #else
 #error unknown OS
 #endif
+
+#define CTL_RKVALD          "rkvald"
+#define RKVALD_OK           "1"
+#define RKVALD_NOT_OK       "0"
+#define RKVALD_TIME_FULL    65000
+#define RKVALD_TIME_PING    10000
+#define RKVALD_TIME_PING_L  40000
+#define RKVALD_TIME_PING_S  20000
+#define RKVALD_TIME_OFF     -1
 
 #endif // _QCOMMON_H_
 

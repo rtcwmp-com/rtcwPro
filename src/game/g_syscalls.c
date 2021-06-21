@@ -68,6 +68,10 @@ void    trap_Argv( int n, char *buffer, int bufferLength ) {
 	syscall( G_ARGV, n, buffer, bufferLength );
 }
 
+int		trap_FS_FileExists(const char* filename) {
+	return syscall(G_FS_FILE_EXIST, filename);
+}
+
 int     trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode ) {
 	return syscall( G_FS_FOPEN_FILE, qpath, f, mode );
 }
@@ -108,6 +112,10 @@ void trap_Cvar_Set( const char *var_name, const char *value ) {
 	syscall( G_CVAR_SET, var_name, value );
 }
 
+void trap_Cvar_Restrictions_Load(void) {
+	syscall(G_CVAR_REST_LOAD);
+}
+
 int trap_Cvar_VariableIntegerValue( const char *var_name ) {
 	return syscall( G_CVAR_VARIABLE_INTEGER_VALUE, var_name );
 }
@@ -116,11 +124,9 @@ int trap_submit_curlPost( char* jsonfile, char* matchid ) {
 	return syscall( G_SUBMIT_STATS_CURL, jsonfile, matchid );
 }
 
-
 void trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize ) {
 	syscall( G_CVAR_VARIABLE_STRING_BUFFER, var_name, buffer, bufsize );
 }
-
 
 void trap_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
 						  playerState_t *clients, int sizeofGClient ) {
@@ -176,7 +182,6 @@ int trap_PointContents( const vec3_t point, int passEntityNum ) {
 	return syscall( G_POINT_CONTENTS, point, passEntityNum );
 }
 
-
 qboolean trap_InPVS( const vec3_t p1, const vec3_t p2 ) {
 	return syscall( G_IN_PVS, p1, p2 );
 }
@@ -200,7 +205,6 @@ void trap_LinkEntity( gentity_t *ent ) {
 void trap_UnlinkEntity( gentity_t *ent ) {
 	syscall( G_UNLINKENTITY, ent );
 }
-
 
 int trap_EntitiesInBox( const vec3_t mins, const vec3_t maxs, int *list, int maxcount ) {
 	return syscall( G_ENTITIES_IN_BOX, mins, maxs, list, maxcount );

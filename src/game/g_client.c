@@ -1385,17 +1385,6 @@ OSPx - Store Client's IP
 ============
 */
 void SaveIP_f(gclient_t * client, char * sip) {
-	// Don't blindly save if entry already exists..
-	if (Q_stricmp(client->sess.ip, "")) {
-		return;
-	}
-
-	//if (!Q_stricmp(sip, "localhost") == 0 || sip == NULL) {
-	//	// Localhost, just enter 0 for all values:
-	//	Q_strncpyz(client->sess.ip, "0.0.0.0", sizeof(client->sess.ip));
-	//	return;
-	//}
-
 	Q_strncpyz(client->sess.ip, sip, sizeof(client->sess.ip));
 	return;
 }
@@ -1518,7 +1507,6 @@ void ClientUserinfoChanged( int clientNum ) {
 		// To solve the IP bug..
 		s =	va("%s", client->sess.ip);
 	}
-	int cGender = 0;
 
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
@@ -1588,11 +1576,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	// set max health
-	client->pers.maxHealth = atoi( Info_ValueForKey( userinfo, "handicap" ) );
-	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	// set max health // rtcwpro always set to 100 to avoid pickup ammo/health bug
+	client->pers.maxHealth = 100; // atoi(Info_ValueForKey(userinfo, "handicap"));
+	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
-	}
+	}*/
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 
 	// set model
@@ -1698,7 +1686,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
 			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
-				client->pers.maxHealth, client->sess.wins, client->sess.losses,
+				100, client->sess.wins, client->sess.losses, // rtcwpro changed HC to always be set to 100 for non-bot players
 				client->sess.uci, (client->sess.ignored ? 1 : 0),
 				client->sess.referee
 			);
@@ -1859,7 +1847,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 		else {
 			unsigned long ip = GeoIP_addr_to_num(value);
-
+			
 			if (((ip & 0xFF000000) == 0x0A000000) ||
 				((ip & 0xFFF00000) == 0xAC100000) ||
 				((ip & 0xFFFF0000) == 0xC0A80000)) {
@@ -1874,7 +1862,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 				}
 				else {
 					client->sess.uci = 246;
-					G_LogPrintf("GeoIP: This IP:%s cannot be located\n", value);
+					G_LogPrintf("GeoIP: This IP: %s cannot be located\n", value);
 				}
 			}
 		}
@@ -1917,6 +1905,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// count current clients and rank for scoreboard
 	CalculateRanks();
+
+	// Trigger rest lookup
+	trap_SendServerCommand(clientNum, "revalidate");
 
 	return NULL;
 }
@@ -2006,7 +1997,6 @@ void ClientBegin( int clientNum ) {
 			ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = -1;
 		}
 	}
-
 
 	// DHM - Nerve :: Start players in limbo mode if they change teams during the match
 	if ( g_gametype.integer >= GT_WOLF && client->sess.sessionTeam != TEAM_SPECTATOR
@@ -2467,7 +2457,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		}
 
 		// End Xian
-		SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
+		if (!revived) // RtcwPro #315 only call this if player is spawning (not getting revived)
+			SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
 	}
 	// dhm - end
 
@@ -2529,6 +2520,30 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	AddHeadEntity(ent);
 }
 
+/*
+================
+OSPx - check for team stuff..
+================
+*/
+void handleEmptyTeams(void) {
+
+	if (g_gamestate.integer != GS_INTERMISSION) {
+		if (!level.axisPlayers) {
+			G_teamReset(TEAM_RED, qtrue);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+		else if (!level.alliedPlayers) {
+			G_teamReset(TEAM_BLUE, qtrue);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+	}
+}
 
 /*
 ===========
@@ -2641,7 +2656,6 @@ void ClientDisconnect( int clientNum ) {
 
     if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
         G_writeDisconnectEvent(ent);
-
     }
 
 	trap_UnlinkEntity( ent );
@@ -2666,12 +2680,12 @@ void ClientDisconnect( int clientNum ) {
 
 	CalculateRanks();
 
+	handleEmptyTeams();
+
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
-
 }
-
 
 /*
 ==================
