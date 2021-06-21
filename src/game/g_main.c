@@ -314,6 +314,7 @@ vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 
 
 vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
+vmCvar_t g_spawnOffset;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -581,6 +582,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &g_spawnOffset, "g_spawnOffset", "8", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 

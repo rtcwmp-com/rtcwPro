@@ -1688,6 +1688,7 @@ extern vmCvar_t vote_percent;
 extern vmCvar_t	g_antiWarp; // antiwarp port
 extern vmCvar_t P; // player teams in server info
 extern vmCvar_t	g_hsDamage;
+extern vmCvar_t g_spawnOffset; // random spawn offset for both teams, between 0 and cvar integer
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

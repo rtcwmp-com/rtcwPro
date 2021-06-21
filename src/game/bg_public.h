@@ -1829,7 +1829,7 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 // -OSPx
 // L0 - Reinforcements offset
 #define MAX_REINFSEEDS  8
-#define REINF_RANGE     16      // (0 to n-1 second offset)
+//#define REINF_RANGE     16      // (0 to n-1 second offset)
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
