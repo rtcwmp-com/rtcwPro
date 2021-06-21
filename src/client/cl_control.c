@@ -50,7 +50,7 @@ void CL_checkSSTime(void) {
 		{
 			//CL_RequestedSS(45);
 	//		CL_RequestedSS();
-			CL_RequestedSS(" ");  // temp change 
+			CL_RequestedSS(" ");  // temp change
 
 		}
 	}
@@ -63,19 +63,11 @@ ScreenShot request from server
 */
 void CL_RequestedSS(char* ip) {
 	char* filename = va("%d", cl.clientSSAction);
-
-	//FILE* fd;
 	char* file;
-	//struct stat file_info;
-
-
-	char* bufGUID;
-	char* bufIP;
 	SS_info_t* SS_info = (SS_info_t*)malloc(sizeof(SS_info_t));
 	char* guid;
 	guid = Cvar_VariableString("cl_guid");
-	bufGUID = va("GUID: %s", guid);
-	bufIP = va("IP: %s", ip);
+
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
 
@@ -87,6 +79,6 @@ void CL_RequestedSS(char* ip) {
 
 		Threads_Create(CL_HTTP_SSUpload, SS_info);
 	}
-	
+
 }
 

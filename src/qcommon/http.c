@@ -118,11 +118,9 @@ void* CL_HTTP_SSUpload(void* args) {
 	struct curl_httppost* lastptr = NULL;
 	struct curl_slist* headerlist = NULL;
 	FILE* fd;
-	char* file;
 	static const char buf[] = "Expect:";
 
 	fd = fopen(SS_info->filename, "rb");
-
 
 	if (!fd)
 	{
@@ -144,16 +142,9 @@ void* CL_HTTP_SSUpload(void* args) {
 
 	if (curl)
 	{
-      
-
-		
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-
 		curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
-
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-
-
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 		curl_easy_setopt(curl, CURLOPT_READDATA, fd);
@@ -169,18 +160,16 @@ void* CL_HTTP_SSUpload(void* args) {
 		{
 			curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
 			curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
-
 			Com_Printf("^nSpeed: ^7%.3f bytes/sec during %.3f seconds\n", speed_upload, total_time);
 
 		}
-
 		curl_easy_cleanup(curl);
-
 		curl_slist_free_all(headerlist);
 	}
+
 	fclose(fd);
 	remove(SS_info->filename);
-		return;
+    return;
 
 }
 
