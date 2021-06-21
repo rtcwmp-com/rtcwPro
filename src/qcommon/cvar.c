@@ -1462,7 +1462,7 @@ unsigned int RestrictedTypeToInt(char* str) {
 	int i;
 
 	for (i = 0; i < SVC_MAX; i++) {
-		if (!Q_stricmp(str, Cvar_Restriction_Flags[i].operator))
+		if (!Q_stricmp(str, Cvar_Restriction_Flags[i].operatorFlag))
 			return Cvar_Restriction_Flags[i].type;
 	}
 	return SVC_NONE;

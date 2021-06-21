@@ -43,7 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define GAME_VERSION        "RTCW-MP"
 #define GAMEVERSION			"RtcwPro 1.2 Alpha" // this will print on the server and show up as the RtcwPro version
-
+#define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
 #define GIB_HEALTH          -175 // JPW NERVE

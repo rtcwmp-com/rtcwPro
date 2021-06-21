@@ -1,7 +1,8 @@
-#include "../game/g_local.h"
+//#include "../game/g_local.h"
 #include "../game/q_shared.h"
 #include "../game/g_shared.h"
 #include "qcommon.h"
+#include "http.h"
 #include <curl/curl.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -240,26 +241,40 @@ static size_t printcurlresponse(void *ptr, size_t size, size_t nmemb, void *stre
     Com_Printf("%s\n", ptr);
 }
 
-// post the data to specified server (currently it is fixed but will make customizable via cvar)
+
 int submit_curlPost( char* jsonfile, char* matchid ) {
+  char* outfile = encode_data_b64(jsonfile);   // should put this in memory rather than temp file
+  http_stats_t* stats_info = (http_stats_t*)malloc(sizeof(http_stats_t));
+    char url[256];
+
+  Cvar_VariableStringBuffer( "g_stats_curl_submit_URL", url, sizeof( url ) );
+  if (stats_info) {
+        stats_info->url = url;
+		stats_info->matchid = va("matchid: %s", matchid);
+		stats_info->filename = outfile;
+
+		Threads_Create(submit_HTTP_curlPost, stats_info);
+	}
+}
+// post the data to specified server (currently it is fixed but will make customizable via cvar)
+void* submit_HTTP_curlPost(void* args) {
+  http_stats_t* stats_info = (http_stats_t*)args;
   CURLcode ret;
   CURL *hnd;
   struct curl_slist *slist1;
 
-  char* outfile = encode_data_b64(jsonfile);   // should put this in memory rather than temp file
-  struct fdata fileinfo = readfile_content(outfile);
 
-  char url[256];
+  struct fdata fileinfo = readfile_content(stats_info->filename);
 
-  Cvar_VariableStringBuffer( "g_stats_curl_submit_URL", url, sizeof( url ) );
+
 
   slist1 = NULL;
-  slist1 = curl_slist_append(slist1, va("matchid: %s", matchid));
+  slist1 = curl_slist_append(slist1, stats_info->matchid );
   slist1 = curl_slist_append(slist1, "x-api-key: rtcwproapikeythatisjustforbasicauthorization");
 
   hnd = curl_easy_init();
   //curl_easy_setopt(hnd, CURLOPT_URL, "https://rtcwproapi.donkanator.com/submit");
-  curl_easy_setopt(hnd, CURLOPT_URL, url);
+  curl_easy_setopt(hnd, CURLOPT_URL, stats_info->url);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
   curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, fileinfo.readptr);
   curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)fileinfo.sizeline);
@@ -283,7 +298,7 @@ int submit_curlPost( char* jsonfile, char* matchid ) {
   curl_slist_free_all(slist1);
   slist1 = NULL;
 
-  remove(outfile);
+  remove(stats_info->filename);
   return (int)ret;
 
 }

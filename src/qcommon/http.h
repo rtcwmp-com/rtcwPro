@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 #ifdef _DEBUG
 	#define WEB_URL		"http://game.localhost"
-#else 
+#else
 	#define WEB_URL		"https://rtcwmp.com"
 #endif // ~_DEBUG
 #define WEB_GET_MOTD	WEB_URL "/api/get/motd"
@@ -80,14 +80,41 @@ typedef struct {
 	char*	url;
 	char*	param;
 	char	userinfo[MAX_INFO_STRING];
+
 	void (*callback)(char* fmt, ...);
 } HTTP_Inquiry_t;
+
+
+
+/*
+============
+Lazy way for submitting SS...
+eventually use struct above
+============
+*/
+typedef struct {
+	char*	ip;
+	char* filename;
+	char*	guid;
+	FILE* fd;
+	void (*callback)(char* fmt, ...);
+} SS_info_t;
+
+
+typedef struct {
+    char* url;
+	char* filename;
+    char* matchid;
+	void (*callback)(char* fmt, ...);
+} http_stats_t;
 
 //
 // http_main.c
 //
 void* HTTP_Post(void* args);
 void* HTTP_Get(void* args);
+char* getCurrentPath(char* file);
+char* getFilePath(char* file); // reqSS
 
 //
 // http.c
@@ -97,5 +124,7 @@ void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]);
 void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
 #endif
+void* CL_HTTP_SSUpload(void* args);
+//qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2); // reqSS
 
 #endif // ~_S_HTTP
