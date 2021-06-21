@@ -46,6 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 //----(SA) Wolfenstein
 //#define GAMEVERSION "RtcwPro 1.0 beta"
 #define JSONGAMESTATVERSION "0.1.3"
+#define ANTILAG_REFACTOR
 
 // done.
 
@@ -677,7 +678,11 @@ typedef struct {
 } clientPersistant_t;
 
 // L0 - antilag port
+#ifdef ANTILAG_REFACTOR
+#define NUM_CLIENT_TRAILS 64
+#else
 #define NUM_CLIENT_TRAILS 10
+#endif
 typedef struct {
     vec3_t    mins, maxs;
     vec3_t    currentOrigin;
@@ -817,10 +822,14 @@ struct gclient_s {
 
 	// g_antilag.c
 	// L0 - antilag port
-    int              trailHead;
-    clientTrail_t    trail[NUM_CLIENT_TRAILS];
-    clientTrail_t    saved;    // used to restore after time shift
-	// end
+    int trailHead;
+    clientTrail_t trail[NUM_CLIENT_TRAILS];
+    clientTrail_t saved;    // used to restore after time shift
+	// refactor
+	int last_trail_node_store_time;
+	int accum_trail_node_store_time;
+	clientTrail_t saved_trail_node;
+	// antilag end
 
 	gentity_t		*tempHead;	// Gordon: storing a temporary head for bullet head shot detection
 

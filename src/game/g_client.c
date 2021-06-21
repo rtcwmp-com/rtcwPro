@@ -609,7 +609,9 @@ void respawn( gentity_t *ent ) {
 
 	// L0 - antilag
 	G_ResetTrail( ent );
+#ifndef ANTILAG_REFACTOR
     ent->client->saved.leveltime = 0;
+#endif
 	// L0 - end
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
@@ -1591,9 +1593,10 @@ void ClientUserinfoChanged( int clientNum ) {
 		Q_strncpyz( model, Info_ValueForKey( userinfo, "model" ), sizeof( model ) );
 	}
 
+	// sswolf - revive anim bug fix, credits: Nobo
 	// RF, reset anims so client's dont freak out
-	client->ps.legsAnim = 0;
-	client->ps.torsoAnim = 0;
+	//client->ps.legsAnim = 0;
+	//client->ps.torsoAnim = 0;
 
 	// DHM - Nerve :: Forcibly set both model and skin for multiplayer.
 	if ( g_gametype.integer >= GT_WOLF ) {
@@ -1978,7 +1981,9 @@ void ClientBegin( int clientNum ) {
 
 	// L0 - antilag
 	G_ResetTrail( ent );
+#ifndef ANTILAG_REFACTOR
     ent->client->saved.leveltime = 0;
+#endif
 	// L0 - end
 	// Xian -- Changed below for team independant maxlives
 

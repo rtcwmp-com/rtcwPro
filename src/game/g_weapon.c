@@ -329,7 +329,9 @@ void Weapon_Syringe( gentity_t *ent ) {
 
 				// L0 - Antilag
 				G_ResetTrail(traceEnt);
+#ifndef ANTILAG_REFACTOR
 				traceEnt->client->saved.leveltime = 0;
+#endif
 				// end
 				memcpy( traceEnt->client->ps.ammo,ammo,sizeof( int ) * MAX_WEAPONS );
 				memcpy( traceEnt->client->ps.ammoclip,ammoclip,sizeof( int ) * MAX_WEAPONS );
