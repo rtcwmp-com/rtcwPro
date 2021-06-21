@@ -106,12 +106,10 @@ static size_t read_callback(char* ptr, size_t size, size_t nmemb, void* stream)
 /*
 ===============
 reqSS
-
-Upload screenshot
-Source: Nate (rtcwMP)
 ===============
 */
-qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2) {
+void* CL_HTTP_SSUpload(void* args) {
+	SS_info_t* SS_info = (SS_info_t*)args;
 	CURL* curl;
 	CURLcode res;
 	struct stat file_info;
@@ -120,17 +118,11 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2) {
 	struct curl_httppost* lastptr = NULL;
 	struct curl_slist* headerlist = NULL;
 	FILE* fd;
+	char* file;
 	static const char buf[] = "Expect:";
-	char* filename;
 
-    char *bufGUID;
-    char *bufIP;
+	fd = fopen(SS_info->filename, "rb");
 
-    bufGUID=va("GUID: %s", marker);
-    bufIP=va("IP: %s", marker2);
-
-	file = getFilePath(file);
-	fd = fopen(file, "rb");
 
 	if (!fd)
 	{
@@ -146,12 +138,15 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2) {
 
 	curl = curl_easy_init();
 
-    headerlist = curl_slist_append(headerlist, bufGUID);
-    headerlist = curl_slist_append(headerlist, bufIP);
+    headerlist = curl_slist_append(headerlist, SS_info->guid);
+    headerlist = curl_slist_append(headerlist, SS_info->ip);
 	headerlist = curl_slist_append(headerlist, va("IND: %s", GAMESTR));
 
 	if (curl)
 	{
+      
+
+		
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
 
 		curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
@@ -183,11 +178,10 @@ qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2) {
 
 		curl_slist_free_all(headerlist);
 	}
-
 	fclose(fd);
-	remove(file);
+	remove(SS_info->filename);
+		return;
 
-	return qtrue;
 }
 
 

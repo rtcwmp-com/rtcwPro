@@ -5,7 +5,7 @@ Source: Nate (rtcwMP)
 
 #include "client.h"
 #include "../qcommon/http.h"
-
+#include <sys/stat.h> // reqSS
 
 /*
 ================
@@ -61,20 +61,32 @@ void CL_checkSSTime(void) {
 ScreenShot request from server
 ================
 */
-//void CL_RequestedSS(int quality) {
 void CL_RequestedSS(char* ip) {
 	char* filename = va("%d", cl.clientSSAction);
-   // char* ip;
-	//CL_takeSS(filename, quality);
+
+	//FILE* fd;
+	char* file;
+	//struct stat file_info;
+
+
+	char* bufGUID;
+	char* bufIP;
+	SS_info_t* SS_info = (SS_info_t*)malloc(sizeof(SS_info_t));
+	char* guid;
+	guid = Cvar_VariableString("cl_guid");
+	bufGUID = va("GUID: %s", guid);
+	bufIP = va("IP: %s", ip);
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
-	// Try once more if it fails..
-    //ip = (char*)NET_AdrToString(clc.netchan.remoteAddress);
+
+	file = getFilePath(filename);
+	if (SS_info) {
+		SS_info->guid = va("GUID: %s", guid);
+		SS_info->ip = va("IP: %s", ip);
+		SS_info->filename = file;
+
+		Threads_Create(CL_HTTP_SSUpload, SS_info);
+	}
 	
-	//if (!CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip))
-	//{
-		CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"), ip);
-	//}
-	//CL_HTTP_SSUpload(WEB_UPLOAD_SS, filename, Cvar_VariableString("cl_guid"),cl.snap.ps.clientNum);
 }
 
