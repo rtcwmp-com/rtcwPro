@@ -1270,19 +1270,6 @@ void G_RemapTeamShaders() {
 
 /*
 =================
-G_ForceCvars
-=================
-*/
-void G_ForceCvars(void)
-{
-	if (g_antiWarp.integer)
-	{
-		trap_Cvar_Set("g_syncronousClients", "0");
-	}
-}
-
-/*
-=================
 G_RegisterCvars
 =================
 */
@@ -1330,7 +1317,6 @@ void G_RegisterCvars( void ) {
 
 	trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
 
-	G_ForceCvars();
 	// OSPx
 	// Ready percents
 	if (match_readypercent.integer < 1) {
@@ -1413,6 +1399,17 @@ void G_UpdateCvars( void ) {
 				else
 				{
 					fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles);
+				}
+
+				if (g_antiWarp.integer)
+				{
+					trap_Cvar_Set("g_syncronousClients", "0");
+				}
+
+				if (g_spawnOffset.integer < 1)
+				{
+					G_Printf("g_spawnOffset %i is out of range, defaulting to 8\n", g_spawnOffset.integer);
+					trap_Cvar_Set("g_spawnOffset", "8");
 				}
 			}
 		}
