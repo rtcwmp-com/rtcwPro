@@ -1437,7 +1437,7 @@ void Com_InitZoneMemory( void ) {
 
 #ifndef __MACOS__   //DAJ HOG
 	if ( cv->integer < 32 ) {
-		s_zoneTotal = 1024 * 1024 * 16;
+		s_zoneTotal = 1024 * 1024 * 32;
 	} else
 #endif
 	{
