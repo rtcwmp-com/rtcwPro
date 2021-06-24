@@ -535,6 +535,11 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 	} else {
 		char s[MAX_STRING_CHARS];
 
+		if (level.paused != PAUSE_NONE)
+		{
+			level.paused = PAUSE_NONE;
+		}
+
 		Svcmd_ResetMatch_f( qtrue, qfalse );
 		trap_Cvar_VariableStringBuffer( "nextmap", s, sizeof( s ) );
 		trap_SendConsoleCommand( EXEC_APPEND, va( "map %s%s\n", level.voteInfo.vote_value, ( ( *s ) ? va( "; set nextmap \"%s\"", s ) : "" ) ) );
