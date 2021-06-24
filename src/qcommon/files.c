@@ -495,9 +495,10 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-int FS_CreatePath(const char* OSPath_) {
+//int FS_CreatePath(const char* OSPath_) {
+qboolean FS_CreatePath( char *OSPath ) {
 	// use va() to have a clean const char* prototype
-	char* OSPath = va("%s", OSPath_);
+//	char* OSPath = va("%s", OSPath_);
 	char* ofs;
 
 	// make absolutely sure that it can't back up the path
@@ -741,7 +742,8 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 	if ( f ) {
 		return FS_filelength( f );
 	}
-	return -1;
+//	return -1;
+	return 0;
 }
 
 /*
@@ -1084,8 +1086,8 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	// The searchpaths do guarantee that something will always
 	// be prepended, so we don't need to worry about "c:" or "//limbo"
 	if ( strstr( filename, ".." ) || strstr( filename, "::" ) ) {
-		if (file == NULL)
-			return -1;
+	//	if (file == NULL)
+	//		return -1;
 		*file = 0;
 		return -1;
 	}
@@ -1233,8 +1235,9 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 				 && Q_stricmp( filename + l - 5, ".game" )  // menu files
 				 && Q_stricmp( filename + l - strlen( demoExt ), demoExt ) // menu files
 				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files	
-				if (!(fs_fakeChkSum = random())) 
-					fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
+				 fs_fakeChkSum = random();
+			//	if (!(fs_fakeChkSum = random())) 
+			//		fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
 			}
 
 			Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
@@ -2853,6 +2856,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
 					Q_strcat(neededpaks, len, " (local file exists with wrong checksum)");
 					// L0 - HTTP downloads
+					/*
 #ifndef DEDICATED
 					// let the client subsystem track bad download redirects (dl file with wrong checksums)
 					// this is a bit ugly but the only other solution would have been callback passing..
@@ -2864,6 +2868,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 						FS_Remove(rmv);
 					}
 #endif
+*/
 					// End
 				}
 				Q_strcat(neededpaks, len, "\n");

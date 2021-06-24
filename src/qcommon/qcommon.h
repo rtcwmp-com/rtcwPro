@@ -754,7 +754,8 @@ char *FS_ShiftedStrStr( const char *string, const char *substring, int shift );
 char *FS_ShiftStr( const char *string, int shift );
 
 void FS_CopyFile( char *fromOSPath, char *toOSPath );
-int FS_CreatePath(const char* OSPath_);
+//int FS_CreatePath(const char* OSPath_);
+qboolean FS_CreatePath( char *OSPath ) ;
 qboolean FS_VerifyPak( const char *pak );
 
 int  submit_curlPost( char* jsonfile, char* matchid );
