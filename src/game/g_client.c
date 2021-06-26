@@ -1578,11 +1578,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	// set max health // rtcwpro always set to 100 to avoid pickup ammo/health bug
-	client->pers.maxHealth = 100; // atoi(Info_ValueForKey(userinfo, "handicap"));
-	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	// don't use handicap here
+	//client->pers.maxHealth = 100; atoi(Info_ValueForKey(userinfo, "handicap"));
+	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
-	}*/
+	}
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 
 	// set model
