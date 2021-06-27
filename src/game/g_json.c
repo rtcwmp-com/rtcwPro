@@ -13,6 +13,296 @@
 //   although tested and works.....not necessary until we
 //#define URL_FORMAT   "https://192.168.1.2:3000/gameStats"
 //#define URL_SIZE     256
+int getPstats(json_t *jsonData, char *id, gclient_t *client) {
+    json_t *pcat, *pitem, *pstats;
+    int i=0;
+    pstats = json_object();
+    pcat = json_object();
+    pstats = json_object_get(jsonData, id);
+                pcat = json_object_get(pstats, "categories");
+
+                pitem = json_object_get(pcat, "kills");
+                if(!(json_is_object(pstats)))
+                {
+                    G_Printf("error reading player data\n");
+                    json_decref(jsonData);
+                    return 0;
+                }
+                /*
+                  - Use switch or iterate over categories...new struct with data type need tho
+                  - Put an else clause that resets stats to zero if error
+                */
+
+                if(json_is_integer(pitem)) {
+                    client->sess.kills=json_integer_value(pitem);
+                    G_Printf("kills: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "deaths");
+                if(json_is_integer(pitem)) {
+                    client->sess.deaths=json_integer_value(pitem);
+                    G_Printf("deaths: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "gibs");
+                if(json_is_integer(pitem)) {
+                    client->sess.gibs=json_integer_value(pitem);
+                    G_Printf("gibs: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "suicides");
+                if(json_is_integer(pitem)) {
+                    client->sess.suicides=json_integer_value(pitem);
+                    G_Printf("suicides: %llu\n",json_integer_value(pitem));
+                }
+
+                pitem = json_object_get(pcat, "teamkills");
+                if(json_is_integer(pitem)) {
+                    client->sess.team_kills=json_integer_value(pitem);
+                    G_Printf("teamkils: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "damagegiven");
+                if(json_is_integer(pitem)) {
+                    client->sess.damage_given=json_integer_value(pitem);
+                    G_Printf("damagegiven: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "damagereceived");
+                if(json_is_integer(pitem)) {
+                    client->sess.damage_received=json_integer_value(pitem);
+                    G_Printf("damagereceived: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "damageteam");
+                if(json_is_integer(pitem)) {
+                    client->sess.team_damage=json_integer_value(pitem);
+                    G_Printf("damageteam: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "hits");
+                if(json_is_integer(pitem)) {
+                    client->sess.acc_hits=json_integer_value(pitem);
+                    G_Printf("hits: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "shots");
+                if(json_is_integer(pitem)) {
+                    client->sess.acc_shots=json_integer_value(pitem);
+                    G_Printf("shots: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "accuracy");
+                if(json_is_number(pitem)) {
+                    // calculate this elsewhere...
+                    G_Printf("accuracy: %f\n",json_number_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "revives");
+                if(json_is_integer(pitem)) {
+                        client->sess.revives=json_integer_value(pitem);
+                    G_Printf("revives: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "ammogiven");
+                if(json_is_integer(pitem)) {
+                    client->sess.ammo_given=json_integer_value(pitem);
+                    G_Printf("ammogiven: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "healthgiven");
+                if(json_is_integer(pitem)) {
+                    client->sess.med_given=json_integer_value(pitem);
+                    G_Printf("healthgiven: %llu\n",json_integer_value(pitem));
+
+                }
+
+
+                pitem = json_object_get(pcat, "poisoned");
+                if(json_is_integer(pitem)) {
+                    client->sess.poisoned=json_integer_value(pitem);
+                    G_Printf("poisoned: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "knifekills");
+                if(json_is_integer(pitem)) {
+                    client->sess.knifeKills=json_integer_value(pitem);
+                    G_Printf("knifekills: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "killpeak");
+                if(json_is_integer(pitem)) {
+                    client->sess.killPeak=json_integer_value(pitem);
+                    G_Printf("killpeak: %llu\n",json_integer_value(pitem));
+
+                }
+
+
+                pitem = json_object_get(pcat, "efficiency");
+                if(json_is_number(pitem)) {  // might want to simply calculate this outside of here
+                    G_Printf("efficiency: %f\n",json_number_value(pitem));
+
+                }
+                /*
+                pitem = json_object_get(pcat, "score");
+                if(json_is_integer(pitem)) {
+                    client->sess.score=json_integer_value(pitem);
+                    G_Printf("score: %llu\n",json_integer_value(pitem));
+
+                }
+                */
+
+
+                pitem = json_object_get(pcat, "dyn_planted");
+                if(json_is_integer(pitem)) {
+                    client->sess.dyn_planted=json_integer_value(pitem);
+                    G_Printf("dyn_planted: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "dyn_defused");
+                if(json_is_integer(pitem)) {
+                    client->sess.dyn_defused=json_integer_value(pitem);
+                    G_Printf("dyn_defused: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "obj_captured");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_captured=json_integer_value(pitem);
+                    G_Printf("obj_captured: %llu\n",json_integer_value(pitem));
+
+                }
+
+
+                pitem = json_object_get(pcat, "obj_destroyed");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_captured=json_integer_value(pitem);
+                    G_Printf("obj_destroyed: %llu\n",json_integer_value(pitem));
+
+                }
+                pitem = json_object_get(pcat, "obj_returned");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_returned=json_integer_value(pitem);
+                    G_Printf("obj_returned: %llu\n",json_integer_value(pitem));
+
+                }
+
+                pitem = json_object_get(pcat, "obj_taken");
+                if(json_is_integer(pitem)) {
+                    client->sess.obj_taken=json_integer_value(pitem);
+                    G_Printf("obj_taken: %llu\n",json_integer_value(pitem));
+
+                }
+}
+
+
+
+int G_read_round1_jstats( void )
+{
+     json_t *data;
+    json_t *json,*object,*jstattype, *jstats;
+    json_error_t error;
+    gclient_t *cl;
+    int j, i;
+    char pGUID[64];
+    char hpath[256];
+    char game[60];
+    char mapName[64];
+    qtime_t ct;
+    trap_RealTime(&ct);
+    trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+    char *buf;
+    char cs[MAX_STRING_CHARS];
+
+    // we want to save some information for the match and round
+    if (g_currentRound.integer == 1) {
+        trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+        buf = Info_ValueForKey(cs, "matchid");
+        trap_SetConfigstring( CS_ROUNDINFO, cs );
+    }
+    else {
+        G_Printf("Incorrect round, not going to touch stats\n");
+        //return 0;   //  put the return back after testing
+    }
+
+
+    trap_Cvar_VariableStringBuffer( "fs_homepath", hpath, sizeof( hpath ) );
+    trap_Cvar_VariableStringBuffer( "fs_game", game, sizeof( game ) );
+// for filename we use g_currentRound+1 and so g_currentRound for filename is the previous round
+
+    char* jfile = va("%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer,mapName);
+    json = json_load_file(jfile, 0, &error);
+    //json = json_load_file("/home/toak/rtcwServers/rtcw1_4/rtcwpro/stats/27_2_2021/gameStats_match_1614464239_round_1_mp_beach.json", 0, &error);
+    if (error.line != -1) {
+        G_Printf("error: unable to read json round stat file\n");
+        //return 0;
+    }
+
+    object = json_object();
+    if (json)
+    {
+        object = json_object_get(json, "serverinfo");
+        jstattype = json_object_get(object, "g_gameStatslog");
+        /* TODO:
+            Parse stats depending on output type...
+            currently only for g_gameStatslog 16
+        */
+        G_Printf("gamestatstype: %s\n",json_string_value(jstattype));
+
+
+        object = json_object_get(json, "gameinfo");
+        jstattype = json_object_get(object, "round");
+        // double check that this is round 1 stats
+        if (!json_string_value(jstattype)) {
+
+            return 0;
+        }
+        G_Printf("round: %s\n",json_string_value(jstattype));
+
+        jstats = json_array();
+        jstats = json_object_get(json, "stats");
+
+// dont forget to put in checks to make sure objects and arrays are true array/objs
+        for(i = 0; i < json_array_size(jstats); i++)
+        {
+            json_t *data,*pstats;
+
+            data = json_array_get(jstats, i);
+            if(!json_is_object(data))
+            {
+                fprintf(stderr, "error with reading round 1 stats..not an object\n");
+                json_decref(data);
+                return 0;
+            }
+            pstats = json_object();
+            // loop over clients and see if we find a match for guid
+
+            for ( j = 0; j < level.numPlayingClients; j++ ) {
+                cl = level.clients + level.sortedClients[j];
+                sprintf(pGUID,"%s",cl->sess.guid);
+                G_Printf("guid: %s",pGUID);
+                if (json_is_object(json_object_get(data, pGUID)))
+                {
+                    getPstats(data,pGUID,cl);
+                    G_Printf("--------------------\n");
+                }
+
+            } // j
+
+
+        } //  i
+
+        json_decref(data);
+        return 1;
+
+    }
+
+
+
+}
+
+
+
+
 /*
 ===========
 G_jstatsByPlayers
@@ -984,68 +1274,3 @@ int G_teamAlive(int team ) {
 
 }
 
-// Bad location for this....plan to move
-/*
-int sendToMongo(char* jsondata)
-{
-    if (!(g_stats_mongodb.integer)) { // make a better cvar depending on if the mongodb will be user specified or whatever
-        return 0;
-    }
-   const char *uri_string = "mongodb://localhost:27017";  // temporary...will be changing
-   mongoc_uri_t *uri;
-   mongoc_client_t *client;
-   mongoc_database_t *database;
-   mongoc_collection_t *collection;
-   bson_t *command, reply, *insert;
-   bson_error_t error;
-   char *str;
-   bool retval;
-   bson_t      *bson;
-   char        *string;
-
-   mongoc_init ();
-
-   uri = mongoc_uri_new_with_error (uri_string, &error);
-   if (!uri) {
-      fprintf (stderr,
-               "failed to parse URI: %s\n"
-               "error message:       %s\n",
-               uri_string,
-               error.message);
-      return 0;
-   }
-
-   client = mongoc_client_new_from_uri (uri);
-   if (!client) {
-      return 0;
-   }
-
-   mongoc_client_set_appname (client, "rtcwprostat");
-
-   database = mongoc_client_get_database (client, "wolfstats");
-   collection = mongoc_client_get_collection (client, "wolfstats", "events");
-
-   bson = bson_new_from_json ((const uint8_t *)jsondata, -1, &error);
-
-   if (!bson) {
-      fprintf (stderr, "%s\n", error.message);
-      return 0;
-   }
-
-    if (!mongoc_collection_insert_one (collection, bson, NULL, NULL, &error)) {
-      fprintf (stderr, "%s\n", error.message);
-   }
-
-   mongoc_collection_destroy (collection);
-   mongoc_database_destroy (database);
-   mongoc_uri_destroy (uri);
-   mongoc_client_destroy (client);
-   mongoc_cleanup ();
-
-   return 1;
-}
-
-*/
-//  BAD LOCATION FOR THE STUFF BELOW TOO...BEING LAZY...WILL REARRANGE LATER
-//
-//
