@@ -20,7 +20,6 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
     pcat = json_object();
     pstats = json_object_get(jsonData, id);
                 pcat = json_object_get(pstats, "categories");
-
                 pitem = json_object_get(pcat, "kills");
                 if(!(json_is_object(pstats)))
                 {
@@ -1218,6 +1217,8 @@ void G_writeGameLogEnd(void)
 
 void G_writeGameEarlyExit(void)
 {
+    int  j;
+	gclient_t *cl;
     char* s;
     json_t *jdata = json_object();
     json_t *event = json_object();
@@ -1229,6 +1230,21 @@ void G_writeGameEarlyExit(void)
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(event, "label",    json_string("map_restart"));
     json_object_set_new(jdata, "context",    event);
+
+// we dont want to count this as a round....so....
+    for ( j = 0; j < level.numPlayingClients; j++ ) {
+			cl = level.clients + level.sortedClients[j];
+
+			if ( cl->pers.connected != CON_CONNECTED) {
+				continue;
+			}
+
+			cl->sess.rounds--;
+
+        }
+
+
+
     //json_object_set_new(jdata, "label",    json_string("map_restart"));
     if (level.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
@@ -1241,6 +1257,9 @@ void G_writeGameEarlyExit(void)
 
         if (g_stats_curl_submit.integer) {
             trap_FS_FCloseFile(level.gameStatslogFile );
+            // RENAME FILE AS WE WANT TO USE SAME NAME FOR ROUND 2
+
+
             submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
         }
     }
@@ -1273,4 +1292,6 @@ int G_teamAlive(int team ) {
     return numAlive;
 
 }
+
+
 

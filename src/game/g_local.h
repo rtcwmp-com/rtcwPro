@@ -1060,6 +1060,7 @@ typedef struct {
 	int eventNum;  // event counter
 	char *match_id; // for stats round matching...
     char *round_id; //
+    qboolean exitEarly;
 } level_locals_t;
 
 // OSPx - Team extras

@@ -751,8 +751,11 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 	level.alliedPF = level.axisPF = 0;
 	level.alliedVenom = level.axisVenom = 0;
 
+	if (g_currentRound.integer == 1 && !fDoReset && fDoRestart && g_gameStatslog.integer) level.exitEarly = qtrue;  // planned something different and still might use it
+
     if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
         G_writeGameEarlyExit();  // properly close current stats output
+
     }
 
 	if (fDoReset) {
@@ -763,6 +766,9 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 
 
 	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
+
+
+
 		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
 		return;
 	}
@@ -1249,6 +1255,7 @@ qboolean    ConsoleCommand( void ) {
 		CC_loadconfig();
 		return qtrue;
 	}
+
 	// RTCWPro
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {

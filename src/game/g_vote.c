@@ -584,6 +584,10 @@ int G_MapRestart_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 	} else {
 		// Restart the map back to warmup
 		Svcmd_ResetMatch_f( qfalse, qtrue );
+		// unused at the moment since exitEarly never works
+        if ((level.exitEarly) && (g_currentRound.integer == 1)) {
+                G_read_round1_jstats();
+        }
 		AP( "cp \"^1*** Level Restarted! ***\n\"" );
 	}
 

@@ -452,6 +452,8 @@ void G_WriteSessionData( void ) {
 			// For slow connecters and a short warmup
 		} else if ( level.fResetStats ) {
 			G_deleteStats( level.sortedClients[i] );
+			if (g_currentRound.integer == 1 && g_gameStatslog.integer) G_read_round1_jstats();  //just in case things go crazy
+
 		}
 	}
 
