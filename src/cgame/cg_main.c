@@ -344,7 +344,6 @@ vmCvar_t authLevel;
 vmCvar_t cg_noAmmoAutoSwitch;
 vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_specHelp;
-vmCvar_t cg_uinfo;
 vmCvar_t cg_useScreenshotJPEG;
 
 vmCvar_t ch_font;
