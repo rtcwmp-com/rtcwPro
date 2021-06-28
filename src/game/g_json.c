@@ -211,7 +211,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
 */
-int G_read_round_jstats( char *jfilename )
+int G_read_round_jstats( void )
 {
      json_t *data = NULL;
     json_t *json,*object,*jstattype, *jstats;
@@ -1171,6 +1171,7 @@ void G_writeGameLogEnd(void)
 
 void G_writeGameEarlyExit(void)
 {
+
     char* s;
     json_t *jdata = json_object();
     json_t *event = json_object();

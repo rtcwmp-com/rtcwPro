@@ -733,7 +733,9 @@ NERVE - SMF - this has three behaviors
 */
 void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 	int i;
-
+	gclient_t *cl;
+    char *buf;
+    char cs[MAX_STRING_CHARS];
 	for (i = 0; i < level.numConnectedClients; i++) {
 		g_entities[level.sortedClients[i]].client->pers.ready = qfalse;
 		//g_entities[level.sortedClients[i]].client->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on restart
@@ -747,12 +749,33 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 
     if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
         G_writeGameEarlyExit();  // properly close current stats output
+        // fix stats for when map restarts occur
+        if (!fDoReset && fDoRestart  && g_gametype.integer == GT_WOLF_STOPWATCH) {
+            if (g_currentRound.integer == 1) {
+			    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
+        		buf = Info_ValueForKey(cs, "matchid");		
+		        trap_SetConfigstring( CS_ROUNDINFO, cs );
+			
+                for ( i = 0; i < level.numPlayingClients; i++ ) {
+                    cl = level.clients + level.sortedClients[i];
+                    if ( cl->pers.connected != CON_CONNECTED) {
+                        continue;
+                    }
+                    cl->sess.rounds--; // don't count the half played game as a round...
+                }
+            }
+            else {
+                level.fResetStats = qtrue;
+            }
+        }
     }
 
 	if (fDoReset) {
 		G_resetRoundState();
 		G_resetModeState();
 	}
+
+
 
 	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
 		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));

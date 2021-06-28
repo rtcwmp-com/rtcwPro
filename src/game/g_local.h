@@ -1006,7 +1006,7 @@ typedef struct {
 	int balanceTimer;	// Auto balance teams timer
 	qboolean fResetStats; // OSP Stats
 
-	// Countdown	
+	// Countdown
 	qboolean	cnStarted;
 	int			cnPush;
 	int			cnNum;
@@ -2122,7 +2122,7 @@ enum eventList {
 
 // g_json.c
 int getPstats(json_t *jsonData, char *id, gclient_t *client);
-int G_read_round_jstats( char *jfilename );
+int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
 void G_jWeaponStats(void);
