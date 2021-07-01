@@ -3099,7 +3099,7 @@ void CL_Init( void ) {
 	cl_pitchspeed = Cvar_Get( "cl_pitchspeed", "140", CVAR_ARCHIVE );
 	cl_anglespeedkey = Cvar_Get( "cl_anglespeedkey", "1.5", 0 );
 
-	cl_maxpackets = Cvar_Get( "cl_maxpackets", "30", CVAR_ARCHIVE );
+	cl_maxpackets = Cvar_Get( "cl_maxpackets", "125", CVAR_ARCHIVE );
 	cl_packetdup = Cvar_Get( "cl_packetdup", "1", CVAR_ARCHIVE );
 
 	cl_run = Cvar_Get( "cl_run", "1", CVAR_ARCHIVE );
@@ -3109,7 +3109,7 @@ void CL_Init( void ) {
 
 	cl_showMouseRate = Cvar_Get( "cl_showmouserate", "0", 0 );
 
-	cl_allowDownload = Cvar_Get( "cl_allowDownload", "0", CVAR_ARCHIVE );
+	cl_allowDownload = Cvar_Get( "cl_allowDownload", "1", CVAR_ARCHIVE );
 	cl_wwwDownload = Cvar_Get("cl_wwwDownload", "1", CVAR_USERINFO | CVAR_ARCHIVE);
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
@@ -3176,8 +3176,8 @@ void CL_Init( void ) {
 
 	// userinfo
 	Cvar_Get( "name", "WolfPlayer", CVAR_USERINFO | CVAR_ARCHIVE );
-	Cvar_Get( "rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE );     // NERVE - SMF - changed from 3000
-	Cvar_Get( "snaps", "20", CVAR_USERINFO | CVAR_ARCHIVE );
+	Cvar_Get( "rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE );     // NERVE - SMF - changed from 3000
+	Cvar_Get( "snaps", "40", CVAR_USERINFO | CVAR_ARCHIVE );
 //	Cvar_Get ("model", "american", CVAR_USERINFO | CVAR_ARCHIVE );	// temp until we have an skeletal american model
 	Cvar_Get( "model", "multi", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "head", "default", CVAR_USERINFO | CVAR_ARCHIVE );
