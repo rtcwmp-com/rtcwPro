@@ -2345,6 +2345,9 @@ void ExitLevel( void ) {
 		}
 	}
 
+	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
+		G_swapTeams();
+	 }
 	G_LogPrintf( "ExitLevel: executed\n" );
 }
 
