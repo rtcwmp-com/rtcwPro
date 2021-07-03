@@ -475,33 +475,11 @@ typedef struct {
 	float lastfraggedcarrier;
 } playerTeamState_t;
 
-// L0 - Admins
-typedef enum {
-	ADM_NONE, // Normal players
-	ADM_1,    // Level 1 Admin
-	ADM_2,    // Level 2 Admin
-	ADM_3,    // Level 3 Admin
-	ADM_4,	  // Level 4 Admin
-	ADM_5	  // Level 5 Admin
-} admLvls_t;
-// End
-
-
 // the auto following clients don't follow a specific client
 // number, but instead follow the first two active players
 #define FOLLOW_ACTIVE1  -1
 #define FOLLOW_ACTIVE2  -2
-// OSPx
-// - Admin/Ref..
-typedef enum {
-	USER_REGULAR,
-	USER_REFEREE,	// Temporary, voted in (limited functionality mainly restricted to votes) players..
-	ADMIN_1,		// ADMIN_* can only be obtained by logging in.
-	ADMIN_2,
-	ADMIN_3,
-	ADMIN_4,
-	ADMIN_5
-} adminStatus_t;
+
 // L0 - OSP stats port - weapon stat counters
 typedef struct {
 	unsigned int atts;
@@ -545,16 +523,10 @@ typedef struct {
 	int latchPlayerSkin;            // DHM - Nerve :: for GT_WOLF not archived
 
 	// L0 - New sessions
-	//admLvls_t admin;	// Admins
-	//int incognito;		// Admin is hidden
-	//int ignored;		// User is ignored
 	unsigned int uci;   // mcwf's GeoIP
 //	unsigned char ip[4];// IPs
 	char ip[47];		// IP
 	char guid[15];		// Guid
-	adminStatus_t admin;					// Admin, ref..
-	qboolean incognito;						// Hidden admin
-	qboolean ignored;						// Ignored..
 	int ignoreClients[MAX_CLIENTS / ( sizeof( int ) * 8 )];
 	qboolean muted;
 	int selectedWeapon; // If enabled allows mp40, sten, thompson..
@@ -641,19 +613,8 @@ typedef struct {
 	unsigned int clientTimeNudge;       // Client cl_timenudge settings
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
-	// Admins
-	char cmd1[128];	// !command
-	char cmd2[128]; // !command attribute
-	char cmd3[128];	// !command attribute extra
-	qboolean nameLocked; // Takes ability to rename from client..it's cleared next round, map load..
-
-	// Server Bot
-	int sb_teamBleed;
-	int sb_ping;
-	int sb_chatWarned;
-	int sb_ignored;
-	int	sb_teamKills;
 	int throwingKnives;
+
 	// Shortcuts
 	int lastkilled_client;
 	int	lastrevive_client;
@@ -1021,9 +982,6 @@ typedef struct {
 	int axisVenom, alliedVenom;
 	int axisFlamer, alliedFlamer;
 
-	// Admin bot
-	int sb_maxPing;
-
 	// Pause
 	int paused;
 	int timeCurrent;	// Real game clock
@@ -1166,6 +1124,13 @@ void G_ProcessTagConnect( gentity_t *ent );
 
 qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // sswolf - allowteams ET - port
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // sswolf - drop weapon stuff
+gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
+char* getDateTime(void);
+char* getDate(void);
+const char* getMonthString(int monthIndex);
+int getYearFromCYear(int cYear);
+int getDaysInMonth(int monthIndex);
+char* TablePrintableColorName(const char* name, int maxlength);
 
 //
 // g_combat.c
@@ -1328,6 +1293,7 @@ void DeathmatchScoreboardMessage( gentity_t *client );
 //
 void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message, qboolean localize ); // JPW NERVE removed static declaration so it would link
 qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand);
+void SanitizeString(char* in, char* out);
 
 //
 // g_pweapon.c
@@ -1344,6 +1310,8 @@ void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... );
 void QDECL G_DPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
+void CheckVote(void);
+void sortedActivePlayers(void);
 
 //
 // g_client.c
@@ -1591,25 +1559,6 @@ extern vmCvar_t match_timeoutlength;
 extern vmCvar_t	g_spectatorAllowDemo;
 extern vmCvar_t match_timeoutcount;
 
-// Admins
-extern vmCvar_t	a1_pass;
-extern vmCvar_t	a2_pass;
-extern vmCvar_t	a3_pass;
-extern vmCvar_t	a4_pass;
-extern vmCvar_t	a5_pass;
-extern vmCvar_t	a1_tag;
-extern vmCvar_t	a2_tag;
-extern vmCvar_t	a3_tag;
-extern vmCvar_t	a4_tag;
-extern vmCvar_t	a5_tag;
-extern vmCvar_t	a1_cmds;
-extern vmCvar_t	a2_cmds;
-extern vmCvar_t	a3_cmds;
-extern vmCvar_t	a4_cmds;
-extern vmCvar_t	a5_cmds;
-extern vmCvar_t	a5_allowAll;
-extern vmCvar_t	adm_help;
-
 // Server stuff
 extern vmCvar_t	g_dropReload;
 extern vmCvar_t	g_unlockWeapons;
@@ -1617,22 +1566,12 @@ extern vmCvar_t	g_disableSMGPickup;
 extern vmCvar_t g_gamelocked;
 extern vmCvar_t	sv_hostname;
 extern vmCvar_t svx_serverStreaming;
-extern vmCvar_t g_extendedLog;
 extern vmCvar_t g_bannedMSG;
 extern vmCvar_t g_privateServer;
 extern vmCvar_t TXThandle;
 extern vmCvar_t g_serverMessage;
 extern vmCvar_t g_maxVotes;
 extern vmCvar_t g_showFlags;
-// SAB
-extern vmCvar_t sab_system;
-extern vmCvar_t sab_maxTeamKills;
-extern vmCvar_t sab_maxTeamBleed;
-extern vmCvar_t sab_minLowScore;
-extern vmCvar_t sab_MaxPingFlux;
-extern vmCvar_t sab_maxPingHits;
-extern vmCvar_t sab_censorPenalty;
-extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
 extern vmCvar_t	g_hitsounds;
 extern vmCvar_t	g_crouchRate;
@@ -2004,6 +1943,10 @@ void G_MakeReferee(void);
 void G_RemoveReferee(void);
 void G_MuteClient(void);
 void G_UnMuteClient(void);
+void G_RenameClient(gentity_t* ent);
+void G_CancelVote(gentity_t* ent);
+void G_PassVote(gentity_t* ent);
+void Cmd_getStatus(gentity_t* ent);
 void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
 
@@ -2174,25 +2117,9 @@ int TeamWeaponCount(gentity_t* ent, team_t team, int weap);
 void SetDefaultWeapon(gclient_t *client, qboolean isSold);
 
 //
-// g_files.c
-//
-#define ADMLOG "./logs/adminLogins.log"
-#define PASSLOG "./logs/adminLoginAttempts.log"
-#define ADMACT "./logs/adminActions.log"
-#define BYPASSLOG "./logs/banBypass.log"
-#define STSPTH "./logs/stats/"
-void logEntry (char *filename, char *info);
-void TEMPBAN_CLIENT(gentity_t *ent, const int minsbanned);
-void clean_tempbans(void);
-extern char *TempBannedMessage;
-int checkBanned(char *data, char * password, qboolean guid);
-void TEMPBAN_GUID_CLIENT(char *guid, const int minsbanned);
 // g_weapon.c
+//
 extern extWeaponStats_t BG_WeapStatForWeapon(weapon_t iWeaponID);
-//
-// Bit flags (for color hacks..)
-//
-void clean_tempbans_guids(void);
 
 #define HELP_COLUMNS    4
 
@@ -2200,6 +2127,7 @@ void clean_tempbans_guids(void);
 // - Config
 #define ZSF_COMP        0x01    // Have comp settings loaded for current gametype?
 
+//
 // g_antiwarp.c
 //
 qboolean G_DoAntiwarp(gentity_t* ent);
@@ -2218,9 +2146,6 @@ typedef enum
 	DP_CONNECTINFO,     ///< Display info on connect
 	DP_MVSPAWN          ///< Set up MV views for clients who need them
 } enum_t_dp;
-
-// Admin headers
-#include "g_admin.h"
 
 // SQL
 int				trap_SQL_RunQuery(const char* query);

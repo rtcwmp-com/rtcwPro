@@ -99,11 +99,6 @@ vmCvar_t g_swapteams;
 vmCvar_t g_restarted;
 vmCvar_t g_log;
 
-vmCvar_t g_stats_curl_submit;
-vmCvar_t g_stats_curl_submit_URL;
-vmCvar_t g_stats_curl_submit_headers;
-vmCvar_t g_gameStatslog; // temp cvar for event logging
-
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
 vmCvar_t g_podiumDrop;
@@ -161,9 +156,6 @@ vmCvar_t g_soldierChargeTime;
 vmCvar_t sv_screenshake;
 // jpw
 
-//S4NDM4NN - fix errors when sv_fps is adjusted
-vmCvar_t sv_fps;
-
 // Gordon
 vmCvar_t g_antilag;
 
@@ -173,30 +165,18 @@ vmCvar_t url;
 vmCvar_t g_dbgRevive;
 
 // rtcwpro begin
-// L0 - New cvars
-// Admins
-vmCvar_t a1_pass;		// Level 1 admin
-vmCvar_t a2_pass;		// Level 2 admin
-vmCvar_t a3_pass;		// Level 3 admin
-vmCvar_t a4_pass;		// Level 4 admin
-vmCvar_t a5_pass;		// Level 5 admin
-vmCvar_t a1_tag;		// Level 1 admin tag
-vmCvar_t a2_tag;		// Level 2 admin tag
-vmCvar_t a3_tag;		// Level 3 admin tag
-vmCvar_t a4_tag;		// Level 4 admin tag
-vmCvar_t a5_tag;		// Level 5 admin tag
-vmCvar_t a1_cmds;		// Level 1 admin commands
-vmCvar_t a2_cmds;		// Level 2 admin commands
-vmCvar_t a3_cmds;		// Level 3 admin commands
-vmCvar_t a4_cmds;		// Level 4 admin commands
-vmCvar_t a5_cmds;		// Level 5 admin commands
-vmCvar_t a5_allowAll;	// Allows level 5 to execute all admin commands + any other that's set in a5_cmds ->
-						// In this case, use a5_cmds for server specific cvars like g_allowVote that would otherwise require rcon etc..
-vmCvar_t adm_help;		// If enabled users can use !list_cmds to get list of commands for their level..
-vmCvar_t g_gamelocked;	// Controls if Admin locked the game so players can't join
+//S4NDM4NN - fix errors when sv_fps is adjusted
+vmCvar_t sv_fps;
+vmCvar_t g_gamelocked;	// Controls if referee locked the game so players can't join
 vmCvar_t sv_hostname;	// So it's more accesible
 vmCvar_t svx_serverStreaming; // So it's more accessible
-vmCvar_t g_extendedLog;	// Logs various admin actions in a seperate logs
+
+// stats
+vmCvar_t g_stats_curl_submit;
+vmCvar_t g_stats_curl_submit_URL;
+vmCvar_t g_stats_curl_submit_headers;
+vmCvar_t g_gameStatslog; // temp cvar for event logging
+
 // Match
 vmCvar_t team_maxplayers;
 vmCvar_t team_nocontrols;
@@ -249,39 +229,15 @@ vmCvar_t g_disableSMGPickup;		// If enabled, client can't pickup SMG if they alr
 vmCvar_t g_fastStabSound;		// 0 = off, 1 = (OSP's) goat sound, 2 = humiliation sound, 3 = random between 1 or 2
 vmCvar_t g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
 vmCvar_t g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
+
 // MOTD's
 vmCvar_t g_serverMessage;	// Shows a center print each time when player switches teams.
-vmCvar_t g_showMOTD;		// Enable MOTD's (message of the day)
-vmCvar_t motdNum;			// To track motds..
-vmCvar_t g_motd1;			// MESSAGE 1
-vmCvar_t g_motd2;			// MESSAGE 2
-vmCvar_t g_motd3;			// MESSAGE 3
-vmCvar_t g_motd4;			// MESSAGE 4
-vmCvar_t g_motd5;			// MESSAGE 5
-vmCvar_t g_motd6;			// MESSAGE 6
-vmCvar_t g_motd7;			// MESSAGE 7
-vmCvar_t g_motd8;			// MESSAGE 8
-vmCvar_t g_motd9;			// MESSAGE 9
-vmCvar_t g_motd10;			// MESSAGE 10
-vmCvar_t g_motd11;			// MESSAGE 11
-vmCvar_t g_motd12;			// MESSAGE 12
-vmCvar_t g_motdTime;		// Time between each message
-// Server Admin Bot
-vmCvar_t sab_system;		// Controls all sab_ settings (NOTE: To disable any sab_ setting set -1 ->
-							// with exception for low score kick..0 = off rest will be transformed in negative value..)
-vmCvar_t sab_maxTeamKills;	// Max team kills before client gets kicked
-vmCvar_t sab_maxTeamBleed;	// Max bleed points before client gets kicked (NOTE: one hit = 1 point)
-vmCvar_t sab_minLowScore;	// Min low score before client gets kicked
-vmCvar_t sab_MaxPingFlux;	// Max ping limit client can hit
-vmCvar_t sab_maxPingHits;	// How many times can hit it before client gets kicked ->
-							// (1hit = each time it's hitted otherwise counts as 1 per second if constantly above)
-vmCvar_t sab_censorPenalty;	// 1 = Auto ignore client after 3 strikes, 2 = kick client after 3 strikes.
-vmCvar_t sab_autoIgnore;	// If enabled it will auto ignore player (for a round) after 3 spam warnings.
+
 // General
 vmCvar_t g_maxVotes;	// Max votes per user
 vmCvar_t g_showFlags;	// mcwf GeoIP
 vmCvar_t g_inactivityToSpecs;	// Puts inactive players in spectators instead of dropping them.
-vmCvar_t g_ignoreSpecs;	// Ignores spectators - Admins can still bypass the ignore..
+vmCvar_t g_ignoreSpecs;	// Ignores spectators - referees can still bypass the ignore..
 vmCvar_t g_allowVote;	// Replaced voteFlags as i hate it and see it to complicated for new users..
 vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
@@ -293,6 +249,7 @@ vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
 vmCvar_t team_nocontrols;
+
 // Match specific
 vmCvar_t g_tournament;	// Ready-unready system
 vmCvar_t g_ltNades;			// Number of nades a lt starts with
@@ -456,26 +413,7 @@ cvarTable_t gameCvarTable[] = {
 	// configured by the server admin, points to the web pages for the server
 	{&url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
 
-	{&g_antilag, "g_antilag", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
-
-// Admins
-	{ &a1_pass, "a1_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a2_pass, "a2_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a3_pass, "a3_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a4_pass, "a4_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_pass, "a5_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a1_tag, "a1_tag", "^1Referee", CVAR_ARCHIVE, 0, qfalse },
-	{ &a2_tag, "a2_tag", "^jMember", CVAR_ARCHIVE, 0, qfalse },
-	{ &a3_tag, "a3_tag", "^2Adm!n", CVAR_ARCHIVE, 0, qfalse },
-	{ &a4_tag, "a4_tag", "^3Adm!n", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_tag, "a5_tag", "^dAdm!n", CVAR_ARCHIVE, 0, qfalse },
-	{ &a1_cmds, "a1_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a2_cmds, "a2_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a3_cmds, "a3_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a4_cmds, "a4_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_cmds, "a5_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_allowAll, "a5_allowAll", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &adm_help, "adm_help", "1", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_antilag, "g_antilag", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse },
 	{ &g_maxVotes, "g_maxVotes", "2", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 
 // match
@@ -495,7 +433,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
 	{ &svx_serverStreaming, "svx_serverStreaming", "", CVAR_SERVERINFO, 0, qfalse },
-	{ &g_extendedLog, "g_extendedLog", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_bannedMSG, "g_bannedMSG", "You are ^3Banned ^7from this server!", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_privateServer, "g_privateServer", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &TXThandle, "TXThandle", "1", CVAR_ARCHIVE, 0, qfalse },
@@ -504,33 +441,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_serverMessage, "g_serverMessage", "^1Server running RtcwPro", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
-
-	// MOTDs
-	{ &g_showMOTD, "g_showMOTD", "0", 0, 0, qfalse },
-	{ &g_motd1, "g_motd1", "", 0, 0, qfalse},
-	{ &g_motd2, "g_motd2", "", 0, 0, qfalse},
-	{ &g_motd3, "g_motd3", "", 0, 0, qfalse},
-	{ &g_motd4, "g_motd4", "", 0, 0, qfalse},
-	{ &g_motd5, "g_motd5", "", 0, 0, qfalse},
-	{ &g_motd6, "g_motd6", "", 0, 0, qfalse},
-	{ &g_motd7, "g_motd7", "", 0, 0, qfalse},
-	{ &g_motd8, "g_motd8", "", 0, 0, qfalse},
-	{ &g_motd9, "g_motd9", "", 0, 0, qfalse},
-	{ &g_motd10, "g_motd10", "", 0, 0, qfalse},
-	{ &g_motd11, "g_motd11", "", 0, 0, qfalse},
-	{ &g_motd12, "g_motd12", "", 0, 0, qfalse},
-	{ &g_motdTime, "g_motdTime", "80", 0, 0, qtrue},
-	{ &motdNum, "motdNum", "1", 0, 0, qfalse},
-
-	// SAB (Server Admin Bot)
-	{ &sab_system, "sab_system", "0", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_maxTeamKills, "sab_maxTeamKills", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_maxTeamBleed, "sab_maxTeamBleed", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_minLowScore, "sab_minLowScore", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_MaxPingFlux, "sab_MaxPingFlux", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_maxPingHits, "sab_maxPingHits", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_censorPenalty, "sab_censorPenalty", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &sab_autoIgnore, "sab_autoIgnore", "0", CVAR_ARCHIVE, 0, qfalse },
 
 	// voting
 	{ &vote_limit, "vote_limit", "3", CVAR_ARCHIVE, qfalse, qfalse },
@@ -3461,13 +3371,6 @@ void G_RunFrame( int levelTime ) {
 
 	// cancel vote if timed out
 	CheckVote();
-
-
-	// L0 - MOTDs
-//	if (g_showMOTD.integer > 0 && level.startTime > 2000){
-//		if (level.time >= (level.motdTime + g_motdTime.integer*1000))
-//			MOTD();
-//	} // end
 
 	// L0 sync team
 //	if (g_needBalance.integer){

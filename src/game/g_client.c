@@ -1684,13 +1684,13 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
 				Info_ValueForKey( userinfo, "skill" ),
-				client->sess.uci, (client->sess.ignored ? 1 : 0));
+				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
 			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				100, client->sess.wins, client->sess.losses, // rtcwpro changed HC to always be set to 100 for non-bot players
-				client->sess.uci, (client->sess.ignored ? 1 : 0),
+				client->sess.uci, (client->sess.muted ? 1 : 0),
 				client->sess.referee
 			);
 	}
@@ -1708,8 +1708,8 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\ignored\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
-			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.ignored ? "yes" : "no"), client->sess.admin,
+		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.muted ? "yes" : "no"), client->sess.referee,
 			client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
 	// Account for bots..
@@ -1892,13 +1892,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	ClientUserinfoChanged( clientNum );
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
-	if ( firstTime ) {
+	if ( firstTime && !isBot ) {
 
-		// Ridah
-		if ( !ent->r.svFlags & SVF_CASTAI ) {
-			// done.
-			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]connected\n\"", client->pers.netname ) );
-		}
+		AP(va("print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname));
 
 		// sswolf - move here from SetTeam
 		CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));

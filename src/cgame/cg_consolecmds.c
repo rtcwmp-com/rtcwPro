@@ -923,13 +923,9 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "swap_teams" );
 	// -NERVE - SMF
 	// L0 - Make it more available..
-	trap_AddCommand( "getstatus" );		// Prints user info (IP, GUID, STATUS..)
+	trap_AddCommand( "players" );		// Prints user info (IP, GUID, STATUS..)
 	trap_AddCommand( "ref" );
 	trap_AddCommand( "?" );
-	trap_AddCommand( "login" );			// Logs user as admin
-	trap_AddCommand( "@login" );		// Silently logs user as admin
-	trap_AddCommand( "logout" );		// Logs out user and revokes admin/ref status
-	trap_AddCommand( "incognito" );		// Toggles admin visibilite status to players
 	trap_AddCommand( "gib" );			// Kills player and sends him/her straight to limbo
 	trap_AddCommand( "pm" );			// Private message
 	trap_AddCommand( "msg" );			// Private message (alternative)

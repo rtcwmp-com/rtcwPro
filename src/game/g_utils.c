@@ -853,3 +853,190 @@ qboolean AllowDropForClass(gentity_t* ent, int pclass)
 	}
 	return (varval);
 }
+
+/*
+===========
+Global sound
+===========
+*/
+void APSound(char* sound) {
+	gentity_t* ent;
+	gentity_t* te;
+
+	ent = g_entities;
+
+	te = G_TempEntity(ent->s.pos.trBase, EV_GLOBAL_SOUND);
+	te->s.eventParm = G_SoundIndex(sound);
+	te->r.svFlags |= SVF_BROADCAST;
+}
+
+/*
+===========
+Client sound
+===========
+*/
+void CPSound(gentity_t* ent, char* sound) {
+	gentity_t* te;
+
+	te = G_TempEntity(ent->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND);
+	te->s.eventParm = G_SoundIndex(sound);
+	te->s.teamNum = ent->s.clientNum;
+}
+
+/*
+===========
+Global sound with limited range
+===========
+*/
+void APRSound(gentity_t* ent, char* sound) {
+	gentity_t* te;
+
+	te = G_TempEntity(ent->r.currentOrigin, EV_GENERAL_SOUND);
+	te->s.eventParm = G_SoundIndex(sound);
+}
+
+/*
+===========
+GetClientEntity
+===========
+*/
+gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found)
+{
+	int clientNum, i;
+	qboolean allZeroes = qtrue;
+	gentity_t* match;
+	*found = NULL;
+
+	for (i = 0; i < strlen(cNum); ++i)
+	{
+		if (cNum[i] != '0')
+		{
+			allZeroes = qfalse;
+			break;
+		}
+	}
+
+	if (allZeroes)
+	{
+		clientNum = 0;
+	}
+	else
+	{
+		clientNum = atoi(cNum);
+		if (clientNum <= 0 || clientNum >= level.maxclients)
+		{
+			CP(va("print \"Invalid client number provided: ^3%s\n\"", cNum));
+			return *found;
+		}
+	}
+
+	match = g_entities + clientNum;
+	if (!match->inuse || match->client->pers.connected != CON_CONNECTED)
+	{
+		CP(va("print \"No connected client with client number: ^3%i\n\"", clientNum));
+		return *found;
+	}
+
+	*found = match;
+	return *found;
+}
+
+/*
+==================
+Time
+
+Returns current time.
+==================
+*/
+const char* months[12] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+// Returns current time % date
+char* getDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s %02d %d %02d:%02d:%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+// Returns current date
+char* getDate(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%02d/%s/%d", ct.tm_mday, months[ct.tm_mon], getYearFromCYear(ct.tm_year));
+}
+
+// returns month string abbreviation (i.e. Jun)
+const char* getMonthString(int monthIndex) {
+	if (monthIndex < 0 || monthIndex >= ArrayLength(months)) {
+		return "InvalidMonth";
+	}
+
+	return months[monthIndex];
+}
+
+// returns current year
+int getYearFromCYear(int cYear) {
+	return 1900 + cYear;
+}
+
+// returns the last day for that month.
+int getDaysInMonth(int monthIndex) {
+	switch (monthIndex) {
+	case 1:  // Feb
+		return 28;
+	case 3:  // Apr
+	case 5:  // Jun
+	case 8:  // Sep
+	case 10: // Nov
+		return 30;
+	default: // Jan, Mar, May, Jul, Aug, Oct, Dec
+		return 31;
+	}
+}
+// end time stuff
+
+/*
+==================
+Print colored name
+==================
+*/
+char* TablePrintableColorName(const char* name, int maxlength)
+{
+	char dirty[MAX_NETNAME];
+	char clean[MAX_NETNAME];
+	char spaces[MAX_NETNAME] = "";
+	int cleanlen;
+
+	Q_strncpyz(dirty, name, sizeof(dirty));
+
+	DecolorString(dirty, clean);
+
+	cleanlen = strlen(clean);
+
+	if (cleanlen > maxlength) {
+		int remove = cleanlen - maxlength;
+		char* end = dirty + strlen(dirty) - 1;
+
+		while (*end && *(end - 1) && remove) {
+			if (*(end - 1) == Q_COLOR_ESCAPE)
+				end--;
+			else
+				remove--;
+
+			end--;
+		}
+
+		*++end = 0;
+	}
+	else if (cleanlen < maxlength) {
+		for (; cleanlen < maxlength; cleanlen++)
+			strcat(spaces, " ");
+	}
+
+	return va("%s%s", dirty, spaces);
+}
+

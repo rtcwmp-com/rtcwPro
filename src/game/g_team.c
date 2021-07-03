@@ -1786,7 +1786,7 @@ void G_updateSpecLock( int nTeam, qboolean fLock ) {
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		ent = g_entities + level.sortedClients[i];
 
-		if ( ent->client->sess.admin || ent->client->sess.referee ) {
+		if (ent->client->sess.referee ) {
 			continue;
 		}
 
@@ -1819,7 +1819,7 @@ void G_removeSpecInvite( int team ) {
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = g_entities + level.sortedClients[i];
-		if ( !cl->inuse || cl->client->sess.admin || cl->client->sess.referee ) {
+		if ( !cl->inuse || cl->client->sess.referee ) {
 			continue;
 		}
 

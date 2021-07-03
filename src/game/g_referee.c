@@ -88,11 +88,22 @@ qboolean G_refCommandCheck(gentity_t *ent, char *cmd) {
 	else if (!Q_stricmp(cmd, "unmute")) {
 		G_refMute_cmd(ent, qfalse);
 	}
+	else if (!Q_stricmp(cmd, "rename")) {
+		G_RenameClient(ent);
+	}
+	else if (!Q_stricmp(cmd, "cancelvote")) {
+		G_CancelVote(ent);
+	}
+	else if (!Q_stricmp(cmd, "passvote")) {
+		G_PassVote(ent);
+	}
+	else if (!Q_stricmp(cmd, "getstatus")) {
+		Cmd_getStatus(ent);
+	}
 	else { return(qfalse); }
 
 	return(qtrue);
 }
-
 
 // Lists ref commands.
 void G_refHelp_cmd(gentity_t *ent) {
@@ -124,7 +135,8 @@ void G_refHelp_cmd(gentity_t *ent) {
 		G_Printf("lock        putaxis <pid>       unpause\n");
 		G_Printf("help        restart             warmup [value]\n");
 		G_Printf("pause       speclock            warn <pid>\n");
-		G_Printf("remove      specunlock\n\n");
+		G_Printf("remove      specunlock		  rename\n");
+		G_Printf("cancelvote  passvote\n\n");
 
 		G_Printf("Usage: <cmd> [params]\n\n");
 	}
@@ -320,7 +332,6 @@ void G_refPlayerPut_cmd(gentity_t *ent, int team_id) {
 	//}
 }
 
-
 // Removes a player from a team.
 void G_refRemove_cmd(gentity_t *ent) {
 	int pid;
@@ -442,20 +453,20 @@ void G_refMute_cmd(gentity_t *ent, qboolean mute) {
 		return;
 	}
 
-	if (player->client->sess.ignored == mute) {
+	if (player->client->sess.muted == mute) {
 		G_refPrintf(ent, "\"%s^*\" %s\n", player->client->pers.netname, mute ? "is already muted!" : "is not muted!");
 		return;
 	}
 
 	if (mute) {
 		CPx(pid, "print \"^5You've been muted\n\"");
-		player->client->sess.ignored = qtrue;
+		player->client->sess.muted = qtrue;
 		G_Printf("\"%s^*\" has been muted\n", player->client->pers.netname);
 		ClientUserinfoChanged(pid);
 	}
 	else {
 		CPx(pid, "print \"^5You've been unmuted\n\"");
-		player->client->sess.ignored = qfalse;
+		player->client->sess.muted = qfalse;
 		G_Printf("\"%s^*\" has been unmuted\n", player->client->pers.netname);
 		ClientUserinfoChanged(pid);
 	}
@@ -576,7 +587,7 @@ void G_MuteClient() {
 	if (cnum != MAX_CLIENTS) {
 		if (level.clients[cnum].sess.referee != RL_RCON) {
 			trap_SendServerCommand(cnum, va("cpm \"^3You have been muted\""));
-			level.clients[cnum].sess.ignored = qtrue;
+			level.clients[cnum].sess.muted = qtrue;
 			G_Printf("%s^* has been muted\n", cmd);
 			ClientUserinfoChanged(cnum);
 		}
@@ -600,9 +611,9 @@ void G_UnMuteClient() {
 	cnum = G_refClientnumForName(NULL, cmd);
 
 	if (cnum != MAX_CLIENTS) {
-		if (level.clients[cnum].sess.ignored) {
+		if (level.clients[cnum].sess.muted) {
 			trap_SendServerCommand(cnum, va("cpm \"^2You have been un-muted\""));
-			level.clients[cnum].sess.ignored = qfalse;
+			level.clients[cnum].sess.muted = qfalse;
 			G_Printf("%s has been un-muted\n", cmd);
 			ClientUserinfoChanged(cnum);
 		}
@@ -612,10 +623,178 @@ void G_UnMuteClient() {
 	}
 }
 
+/*
+===========
+Rename player
+===========
+*/
+void G_RenameClient(gentity_t* ent) {
+	char client_num[MAX_TOKEN_CHARS];
+	gentity_t* targetent;
+	char* newname;
+	char userinfo[MAX_INFO_STRING];
+	char cmd[MAX_TOKEN_CHARS];
 
-/////////////////
-//   Utility
-//
+	trap_Argv(1, cmd, sizeof(cmd));
+
+	if (!*cmd) {
+		G_Printf("usage: Rename <client id>.\n");
+		return;
+	}
+
+	trap_Argv(2, client_num, sizeof(client_num));
+	if (GetClientEntity(ent, client_num, &targetent) == NULL)
+	{
+		return;
+	}
+
+	newname = ConcatArgs(3);
+
+	AP(va("chat \"console: %s ^7renamed %s ^7to %s^7!\n\"", ent->client->pers.netname, targetent->client->pers.netname, newname));
+
+	// Rename..
+	trap_GetUserinfo(targetent->s.clientNum, userinfo, sizeof(userinfo));
+	Info_SetValueForKey(userinfo, "name", newname);
+	trap_SetUserinfo(targetent->s.clientNum, userinfo);
+	ClientUserinfoChanged(targetent->s.clientNum);
+}
+
+/*
+===========
+Cancels any vote in progress
+===========
+*/
+void G_CancelVote(gentity_t* ent) {
+
+	if (level.voteTime) 
+	{
+		level.voteNo = level.numConnectedClients;
+		CheckVote();
+		AP(va("chat \"%s cancelled the vote.\n\"2", ent->client->pers.netname));
+	}
+}
+
+/*
+===========
+Passes any vote in progress
+===========
+*/
+void G_PassVote(gentity_t* ent) {
+
+	if (level.voteTime) 
+	{
+		level.voteYes = level.numConnectedClients;
+		CheckVote();
+		AP(va("chat \"%s passed the vote.\n\"2", ent->client->pers.netname));
+	}
+}
+
+/*
+===========
+Getstatus
+
+Prints IP's and some match info..
+===========
+*/
+void Cmd_getStatus(gentity_t* ent) {
+	gclient_t* cl;
+	int	j;
+	// uptime
+	int secs = level.time / 1000;
+	int mins = (secs / 60) % 60;
+	int hours = (secs / 3600) % 24;
+	int days = (secs / (3600 * 24));
+	// sswolf - new stuff
+	char mapName[64];
+
+	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
+
+	CP(va("print \"\n^3Mod: ^7%s \n^3Server: ^7%s\n\"", GAMEVERSION, sv_hostname.string));
+	CP(va("print \"^3Map: ^7%s\n\"", mapName));
+	if (g_gamelocked.integer == 3) { CP("print \n\"^3Teams are locked^1!\n\""); }
+	CP("print \"^3--------------------------------------------------------------------------\n\"");
+	CP("print \"^7CN : Team : Name            : ^3IP              ^7: Ping ^7: Status\n\"");
+	CP("print \"^3--------------------------------------------------------------------------\n\"");
+
+	for (j = 0; j <= (MAX_CLIENTS - 1); j++) {
+
+		if (g_entities[j].client && !(ent->r.svFlags & SVF_BOT)) {
+			char* team, * slot, * ip, * status, * adminTag, * ignoreStatus;
+			int ping, fps;
+			cl = g_entities[j].client;
+
+			// player is connecting
+			if (cl->pers.connected == CON_CONNECTING) {
+				CP(va("print \"%2i : >><< :                 : ^3>>Connecting<<  ^7:      : \n\"", j));
+				continue;
+			}
+
+			// player is connected
+			if (cl->pers.connected == CON_CONNECTED) {
+				status = "";
+				ignoreStatus = "";
+				slot = va("%2d", j);
+				adminTag = "Ref";
+
+				team = (cl->sess.sessionTeam == TEAM_SPECTATOR) ? "^3Spec^7" :
+					(cl->sess.sessionTeam == TEAM_RED ? "^1Axis^7" : "^4Ally^7");
+
+				ip = ent->client->sess.ip;
+
+				ping = cl->ps.ping;
+				if (ping > 999) ping = 999;
+
+				if (cl->sess.referee)
+				{
+					status = "^3Referee";
+				}
+
+				if (cl->sess.muted)
+				{
+					status = "^3Muted";
+				}
+
+				if (cl->sess.sessionTeam != TEAM_SPECTATOR)
+				{
+					if (cl->pers.ready == qtrue)
+					{
+						status = "^3Ready";
+					}
+					else
+					{
+						status = "^3Not Ready";
+					}
+				}
+
+				if (cl->sess.specLocked && cl->sess.sessionTeam != TEAM_SPECTATOR)
+				{
+					status = "^3SpecLocked";
+				}
+
+				// Print it now
+				CP(va("print \"%-2s : %s : %s ^7: ^3%-15s ^7: %-4d ^7: %-11s \n\"",
+					slot,
+					team,
+					TablePrintableColorName(cl->pers.netname, 15),
+					ip,
+					ping,
+					status
+				));
+			}
+		}
+	}
+	CP("print \"^3--------------------------------------------------------------------------\n\"");
+	CP(va("print \"Time  : ^3%s \n^7Uptime: ^3%d ^7day%s ^3%d ^7hours ^3%d ^7minutes\n\"", getDateTime(), days, (days != 1 ? "s" : ""), hours, mins));
+	CP("print \"\n\"");
+
+	return;
+}
+
+/*
+===========
+Utility
+===========
+*/
 int G_refClientnumForName(gentity_t *ent, const char *name) {
 	char cleanName[MAX_TOKEN_CHARS];
 	int i;

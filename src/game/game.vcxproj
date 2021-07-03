@@ -271,8 +271,6 @@
     <ClCompile Include="bg_slidemove.c" />
     <ClCompile Include="bg_stats.c" />
     <ClCompile Include="g_active.c" />
-    <ClCompile Include="g_admin.c" />
-    <ClCompile Include="g_admin_bot.c" />
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
     <ClCompile Include="g_antiwarp.c" />
@@ -340,7 +338,6 @@
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="bg_public.h" />
     <ClInclude Include="botlib.h" />
-    <ClInclude Include="g_admin.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_public.h" />
     <ClInclude Include="g_shared.h" />
