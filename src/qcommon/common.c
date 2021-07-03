@@ -48,7 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 //#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
 
 // sswolf - increase those
-#define MIN_COMHUNKMEGS 128 
+#define MIN_COMHUNKMEGS 128
 #define DEF_COMHUNKMEGS "256"
 #define DEF_COMZONEMEGS "32"
 
@@ -2359,9 +2359,12 @@ void Com_ReadAuthKey(const char* filename) {
 
 	FS_Read(buffer, 16, f);
 	FS_FCloseFile(f);
+/*
 #ifndef DEDICATED
 	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
 #endif
+*/
+
 }
 
 /*
