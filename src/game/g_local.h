@@ -2099,6 +2099,13 @@ void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
 qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
+// now residing in g_utils.c  (previous declaration in g_admin.h)
+//
+void CPSound(gentity_t *ent, char *sound);
+void APSound(char *sound);
+void APRSound(gentity_t *ent, char *sound);
+
+
 // Macros
 //
 #define AP( x ) trap_SendServerCommand( -1, x )                 // Print to all
