@@ -1403,7 +1403,7 @@ void G_UpdateCvars( void ) {
 
 				if (g_antiWarp.integer)
 				{
-					trap_Cvar_Set("g_syncronousClients", "0");
+					trap_Cvar_Set("g_synchronousClients", "0");
 				}
 
 				if (g_spawnOffset.integer < 1)
@@ -3388,7 +3388,7 @@ void G_RunFrame( int levelTime ) {
 			 || ent->s.eType == ET_FIRE_COLUMN
 			 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
 			 || ent->s.eType == ET_EXPLO_PART
-			 || ent->s.eType == ET_RAMJET 
+			 || ent->s.eType == ET_RAMJET
 		) {
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
