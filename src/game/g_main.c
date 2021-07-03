@@ -1563,6 +1563,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
                     buf = Info_ValueForKey(cs, "matchid");
                     trap_SetConfigstring( CS_ROUNDINFO, cs );
+					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
                 }
                 else {
                      buf=va("%ld", unixTime);
