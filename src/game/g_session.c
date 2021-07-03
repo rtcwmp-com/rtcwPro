@@ -67,7 +67,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		G_WriteWeaponStatsData(client);
 	}/// End
 
-    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
 		client->sess.sessionTeam,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
@@ -84,10 +84,8 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		client->sess.latchPlayerItem,   // DHM - Nerve
 		client->sess.latchPlayerSkin,    // DHM - Nerve
 		// L0 - New stuff
-		client->sess.admin,			// User is admin
 		client->sess.referee,			// User is ref
-		client->sess.incognito,		// Admin is hidden
-		client->sess.ignored,		// User is ignored
+		client->sess.muted,		// User is ignored
 		client->sess.uci,			// mcwf's GeoIP
 		client->sess.ip,			// L0 - IP
 		client->sess.guid,			// Guid
@@ -138,7 +136,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
-    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
+    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -155,10 +153,8 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerItem,  // DHM - Nerve
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
-			(int *)&client->sess.admin,
 			(int *)&client->sess.referee,
-			(int *)&client->sess.incognito,
-			(int *)&client->sess.ignored,
+			(int *)&client->sess.muted,
 			&client->sess.uci,
 			(char *)&client->sess.ip,
 			(char *)&client->sess.guid,
@@ -289,9 +285,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->spawnObjectiveIndex = 0;
 	// dhm - end
 	// L0 - New stuff
-	sess->admin = ADM_NONE;
-	sess->incognito = 0;
-	sess->ignored = 0;
+	sess->muted = 0;
 	sess->uci = 0;
 	Q_strncpyz(sess->ip, "", sizeof(sess->ip));
 	sess->selectedWeapon = 0;

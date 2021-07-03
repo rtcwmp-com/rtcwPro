@@ -426,22 +426,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
-		if (!OnSameTeam(attacker, self)) {
-
+		if (!OnSameTeam(attacker, self))
+		{
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
 			attacker->client->pers.life_kills++;		// life kills
-
-		// Count teamkill
-		} else {
-			// Don't count self kills..
-			if (attacker != self) {
-				// Admin bot - teamKills
-				sb_maxTeamKill(attacker);
-
-
-			}
-		}
-	} // End
+		} // End
+	}
 
 	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
 

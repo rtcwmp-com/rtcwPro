@@ -1089,7 +1089,6 @@ G_Say
 #define SAY_TELL    2
 #define SAY_LIMBO   3           // NERVE - SMF
 #define SAY_TEAMNL	4	// OSPx
-#define SAY_ADMIN	5	// OSPx
 
 void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message, qboolean localize ) { // removed static so it would link
 	if ( !other ) {
@@ -1112,7 +1111,7 @@ void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char 
 	}
 
 	// NERVE - SMF - if spectator, no chatting to players in WolfMP
-	if (match_mutespecs.integer && !(ent->client->sess.admin || ent->client->sess.referee) // OSPx
+	if (match_mutespecs.integer && (!ent->client->sess.referee) // OSPx
 		 && ( ( ent->client->sess.sessionTeam == TEAM_FREE && other->client->sess.sessionTeam != TEAM_FREE ) ||
 			  ( ent->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != TEAM_SPECTATOR ) ) ) {
 		return;
@@ -1142,73 +1141,15 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 	char location[64];
 	qboolean localize = qfalse;
 
-	// L0 - Admin stuff
-	char *tag;
-	char arg[MAX_SAY_TEXT]; // ! & ?
-	char cmd1[128];
-	char cmd2[128];
-	char cmd3[128];
-
-	// Admin commands
-	Q_strncpyz ( text, chatText, sizeof( text ) );
-
-	// L0 - Not sure if 1.4 has this fixed but i'm lazy.. so check for the Nuke
-	if (strlen(text) >= 700) {
-		trap_SendServerCommand(-1, va("chat \"console: %s ^7kicked: ^3Nuking^7.\n\"", ent->client->pers.netname));
-		G_LogPrintf("Nuking(text >= 700): %s  (Guid: %s).\n", ent->client->pers.netname, ent->client->sess.guid);
-		trap_DropClient(ent - g_entities, "^7Player Kicked: ^3Nuking");
-		return;
-	}
-
-	if ( !ent->client->sess.admin == ADM_NONE ) {
-		// Command
-		if ( text[0] == '!' ){
-			ParseAdmStr(text, cmd1, arg);
-			ParseAdmStr(arg, cmd2, cmd3);
-			Q_strncpyz ( ent->client->pers.cmd1, cmd1, sizeof( ent->client->pers.cmd1 ) );
-			Q_strncpyz ( ent->client->pers.cmd2, cmd2, sizeof( ent->client->pers.cmd2 ) );
-			Q_strncpyz ( ent->client->pers.cmd3, cmd3, sizeof( ent->client->pers.cmd3 ) );
-			cmds_admin("!", ent);
-			return;
-		// Help
-		} else if ( text[0] == '?' ){
-			ParseAdmStr(text, cmd1, arg);
-			ParseAdmStr(arg, cmd2, cmd3);
-			Q_strncpyz ( ent->client->pers.cmd1, cmd1, sizeof( ent->client->pers.cmd1 ) );
-			Q_strncpyz ( ent->client->pers.cmd2, cmd2, sizeof( ent->client->pers.cmd2 ) );
-			Q_strncpyz ( ent->client->pers.cmd3, cmd3, sizeof( ent->client->pers.cmd3 ) );
-			cmds_admin("?", ent);
-			return;
-		}
-	}  // end
-
 	// L0 - Ignored
-	if ( ent->client->sess.ignored ) {
-		if (ent->client->sess.ignored == 1)
-			CP( "cp \"You are ignored^1!\n\"2" );
+	if ( ent->client->sess.muted ) {
+		if (ent->client->sess.muted)
+			CP( "cp \"You are muted^1!\n\"2" );
 		else
-			CP( "print \"You are ^zpermanently ^7ignored^1!\n\"" );
+			CP( "print \"You are ^zpermanently ^7muted^1!\n\"" );
 		return;
 	} // End
 
-	// L0 - Deal with Admin tags..
-	if (!ent->client->sess.incognito) {
-		if (ent->client->sess.admin == ADM_1)
-			tag = va("^7(%s^7)", a1_tag.string);
-		else if (ent->client->sess.admin == ADM_2)
-			tag = va("^7(%s^7)", a2_tag.string);
-		else if (ent->client->sess.admin == ADM_3)
-			tag = va("^7(%s^7)", a3_tag.string);
-		else if (ent->client->sess.admin == ADM_4)
-			tag = va("^7(%s^7)", a4_tag.string);
-		else if (ent->client->sess.admin == ADM_5)
-			tag = va("^7(%s^7)", a5_tag.string);
-		else
-			tag = "";
-	// If Admin is hidden or not an admin at all..no tag.
-	} else {
-		tag = "";
-	} // End
 	if ( g_gametype.integer < GT_TEAM && mode == SAY_TEAM ) {
 		mode = SAY_ALL;
 	}
@@ -2614,24 +2555,24 @@ void ClientCommand( int clientNum ) {
 	}
 	if ( Q_stricmp( cmd, "say" ) == 0 ) {
 		// OSPx - Ignored
-		if (!ent->client->sess.ignored) {
+		if (!ent->client->sess.muted) {
 			Cmd_Say_f(ent, SAY_ALL, qfalse);
 			return;
 		}
 		else {
-			CP("print \"You are ^1ignored^7!\n\"");
+			CP("print \"You are ^1muted^7!\n\"");
 			return;
 		}
 	}
 
 	if ( Q_stricmp( cmd, "say_team" ) == 0 ) {
 		// OSPx - Ignored
-		if (!ent->client->sess.ignored) {
+		if (!ent->client->sess.muted) {
 			Cmd_Say_f(ent, SAY_TEAM, qfalse);
 			return;
 		}
 		else {
-			CP("print \"You are ^1ignored^7!\n\"");
+			CP("print \"You are ^1muted^7!\n\"");
 			return;
 		}
 	}
@@ -2639,12 +2580,12 @@ void ClientCommand( int clientNum ) {
 	// Team chat with no location..
 	if (Q_stricmp(cmd, "say_teamnl") == 0) {
 		// Ignored
-		if (!ent->client->sess.ignored) {
+		if (!ent->client->sess.muted) {
 			Cmd_Say_f(ent, SAY_TEAMNL, qfalse);
 			return;
 		}
 		else {
-			CP("print \"You are ^1ignored^7!\n\"");
+			CP("print \"You are ^1muted^7!\n\"");
 			return;
 		}
 	}
@@ -2678,18 +2619,7 @@ void ClientCommand( int clientNum ) {
 		Cmd_Team_f( ent );
 		return;
 	}
-	if ( Q_stricmp( cmd, "login" ) == 0 ) {
-		cmd_do_login( ent, qfalse );
-	return;
-	}
-	if ( Q_stricmp( cmd, "@login" ) == 0 ) {
-		cmd_do_login( ent, qtrue );
-	return;
-	}
-	if ( Q_stricmp( cmd, "logout" ) == 0 ) {
-		cmd_do_logout( ent );
-	return;
-	}
+
 	// L0 - Player commands
 	if(playerCmds(ent, cmd)) return;
 

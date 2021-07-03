@@ -1735,4 +1735,6 @@ qboolean clientIsConnected;
 # define strtok_r strtok_s
 #endif
 
+#define ArrayLength(x)	(sizeof(x) / sizeof(*(x)))
+
 #endif  // __Q_SHARED_H
