@@ -77,7 +77,6 @@ vmCvar_t g_debugMove;
 vmCvar_t g_debugDamage;
 vmCvar_t g_debugAlloc;
 vmCvar_t g_debugBullets;    //----(SA)	added
-vmCvar_t g_preciseHeadHitBox;
 vmCvar_t g_weaponRespawn;
 vmCvar_t g_motd;
 vmCvar_t g_synchronousClients;
@@ -140,7 +139,6 @@ vmCvar_t g_developer;
 vmCvar_t g_userAim;
 
 vmCvar_t g_forceModel;
-vmCvar_t match_timeoutlength;
 vmCvar_t g_mg42arc;
 
 vmCvar_t g_footstepAudibleRange;
@@ -152,8 +150,7 @@ vmCvar_t g_medicChargeTime;
 vmCvar_t g_engineerChargeTime;
 vmCvar_t g_LTChargeTime;
 vmCvar_t g_soldierChargeTime;
-// screen shakey magnitude multiplier
-vmCvar_t sv_screenshake;
+
 // jpw
 
 // Gordon
@@ -166,6 +163,9 @@ vmCvar_t g_dbgRevive;
 
 // rtcwpro begin
 //S4NDM4NN - fix errors when sv_fps is adjusted
+vmCvar_t sv_screenshake;
+vmCvar_t g_screenShake;
+vmCvar_t g_preciseHeadHitBox;
 vmCvar_t sv_fps;
 vmCvar_t g_gamelocked;	// Controls if referee locked the game so players can't join
 vmCvar_t sv_hostname;	// So it's more accesible
@@ -210,11 +210,7 @@ vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t refereePassword;
 
-vmCvar_t vote_limit;
-vmCvar_t vote_percent;
-
 vmCvar_t g_spectatorInactivity;
-vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
@@ -222,7 +218,6 @@ vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
 vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ban) can be disabled..
 vmCvar_t g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
-vmCvar_t g_dropReload;			// Enable / Disable Drop reload
 vmCvar_t g_unlockWeapons;		// Gives ability to drop weapon to all classes..
 vmCvar_t g_crouchRate;			// If enabled it recharges stamina faster when player is crouching..
 vmCvar_t g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
@@ -234,21 +229,18 @@ vmCvar_t g_alliedSpawnProtectionTime;	// How long Allied player is invulrable wh
 vmCvar_t g_serverMessage;	// Shows a center print each time when player switches teams.
 
 // General
-vmCvar_t g_maxVotes;	// Max votes per user
 vmCvar_t g_showFlags;	// mcwf GeoIP
 vmCvar_t g_inactivityToSpecs;	// Puts inactive players in spectators instead of dropping them.
 vmCvar_t g_ignoreSpecs;	// Ignores spectators - referees can still bypass the ignore..
 vmCvar_t g_allowVote;	// Replaced voteFlags as i hate it and see it to complicated for new users..
 vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
-vmCvar_t g_fixedphysics;	// So it's fair for all..
 vmCvar_t g_allowPMs;		// Allow private messages
 vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
-vmCvar_t team_nocontrols;
 
 // Match specific
 vmCvar_t g_tournament;	// Ready-unready system
@@ -355,7 +347,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_filterBan, "g_filterBan", "1", CVAR_ARCHIVE, 0, qfalse  },
 
 	{ &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
-	{ &g_dropReload, "g_dropReload", "0", CVAR_ARCHIVE, 0, qfalse },
     { &g_unlockWeapons, "g_unlockWeapons", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
     { &g_disableSMGPickup, "g_disableSMGPickup", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_speed, "g_speed", "320", 0, 0, qtrue  },
@@ -388,7 +379,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_fastres, "g_fastres", "0", CVAR_ARCHIVE, 0, qtrue},                                  // Xian - Fast Medic Resing
 	{ &g_fastResMsec, "g_fastResMsec", "1000", CVAR_ARCHIVE, 0, qtrue},                                   // Xian - Fast Medic Resing
 	{ &g_knifeonly, "g_knifeonly", "0", 0, 0, qtrue},                                         // Xian - Fast Medic Resing
-	{ &g_enforcemaxlives, "g_enforcemaxlives", "1", CVAR_ARCHIVE, 0, qtrue},                              // Xian - Gestapo enforce maxlives stuff by temp banning
+	{ &g_enforcemaxlives, "g_enforcemaxlives", "0", CVAR_ARCHIVE, 0, qtrue},                              // Xian - Gestapo enforce maxlives stuff by temp banning
 
 	{ &g_enableBreath, "g_enableBreath", "1", CVAR_SERVERINFO, 0, qtrue},
 	{ &g_testPain, "g_testPain", "0", CVAR_CHEAT, 0, qfalse },
@@ -414,7 +405,7 @@ cvarTable_t gameCvarTable[] = {
 	{&url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
 
 	{ &g_antilag, "g_antilag", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse },
-	{ &g_maxVotes, "g_maxVotes", "2", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	//{ &g_maxVotes, "g_maxVotes", "2", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 
 // match
 	{ &team_maxplayers, "team_maxplayers", "0", 0, 0, qfalse, qfalse },
@@ -466,6 +457,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
 
 	// RTCWPro
+	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
@@ -486,13 +478,12 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamVenom, "g_maxTeamVenom", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
-	{ &g_spawnOffset, "g_spawnOffset", "8", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &g_spawnOffset, "g_spawnOffset", "9", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
