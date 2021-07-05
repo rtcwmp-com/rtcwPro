@@ -162,9 +162,10 @@ void* CL_HTTP_SSUpload(void* args) {
 		{
 			curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
 			curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
-			Com_Printf("^nSpeed: ^7%.3f bytes/sec during %.3f seconds\n", speed_upload, total_time);
+//			Com_Printf("^nSpeed: ^7%.3f bytes/sec during %.3f seconds\n", speed_upload, total_time);
 
 		}
+
 		curl_easy_cleanup(curl);
 		curl_slist_free_all(headerlist);
 	}

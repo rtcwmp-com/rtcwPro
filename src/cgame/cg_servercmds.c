@@ -2293,7 +2293,7 @@ static void CG_ServerCommand( void ) {
 	// reqSS
 	if (!strcmp(cmd, "ssreq"))
 	{
-		CG_Printf("^nServer requested screenshot..sending.\n");
+//		CG_Printf("^nServer requested screenshot..sending.\n");
 		trap_ReqSS(CG_Argv(1));
 		return;
 	}
