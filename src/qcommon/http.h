@@ -97,6 +97,7 @@ typedef struct {
 	char* filename;
 	char*	guid;
 	char*	name;
+	char* upfname;
 	FILE* fd;
 	void (*callback)(char* fmt, ...);
 } SS_info_t;

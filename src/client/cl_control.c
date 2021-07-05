@@ -67,6 +67,10 @@ void CL_RequestedSS(char* ip) {
 	SS_info_t* SS_info = (SS_info_t*)malloc(sizeof(SS_info_t));
 	char* guid;
 	char* name;
+	int n;
+    n=rand() % 99;
+
+
 	guid = Cvar_VariableString("cl_guid");
 	name = Cvar_VariableString("name");
 	CL_takeSS(filename);
@@ -77,6 +81,7 @@ void CL_RequestedSS(char* ip) {
 		SS_info->guid = va("GUID: %s", guid);
 		SS_info->name = va("NAME: %s", name);
 		SS_info->ip = va("IP: %s", ip);
+		SS_info->upfname = va("%i", n);
 		SS_info->filename = file;
 
 		Threads_Create(CL_HTTP_SSUpload, SS_info);

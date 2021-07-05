@@ -117,6 +117,7 @@ void* CL_HTTP_SSUpload(void* args) {
 	struct curl_httppost* formpost = NULL;
 	struct curl_httppost* lastptr = NULL;
 	struct curl_slist* headerlist = NULL;
+
 	FILE* fd;
 	static const char buf[] = "Expect:";
 
@@ -144,8 +145,9 @@ void* CL_HTTP_SSUpload(void* args) {
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-		// change 0 to random int for when multiple SS are called so that there is no disruption
-		curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
+
+		//curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
+		curl_easy_setopt(curl, CURLOPT_URL, va("http://rtcwpro.com:8118//files/%s.jpg",SS_info->upfname));
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
