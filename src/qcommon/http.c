@@ -136,6 +136,7 @@ void* CL_HTTP_SSUpload(void* args) {
 
 	curl = curl_easy_init();
 
+	headerlist = curl_slist_append(headerlist, SS_info->name);
     headerlist = curl_slist_append(headerlist, SS_info->guid);
     headerlist = curl_slist_append(headerlist, SS_info->ip);
 	headerlist = curl_slist_append(headerlist, va("IND: %s", GAMESTR));
@@ -143,6 +144,7 @@ void* CL_HTTP_SSUpload(void* args) {
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+		// change 0 to random int for when multiple SS are called so that there is no disruption
 		curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

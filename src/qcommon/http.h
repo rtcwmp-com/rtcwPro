@@ -96,6 +96,7 @@ typedef struct {
 	char*	ip;
 	char* filename;
 	char*	guid;
+	char*	name;
 	FILE* fd;
 	void (*callback)(char* fmt, ...);
 } SS_info_t;

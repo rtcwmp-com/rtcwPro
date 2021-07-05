@@ -66,14 +66,16 @@ void CL_RequestedSS(char* ip) {
 	char* file;
 	SS_info_t* SS_info = (SS_info_t*)malloc(sizeof(SS_info_t));
 	char* guid;
+	char* name;
 	guid = Cvar_VariableString("cl_guid");
-
+	name = Cvar_VariableString("name");
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
 
 	file = getFilePath(filename);
 	if (SS_info) {
 		SS_info->guid = va("GUID: %s", guid);
+		SS_info->name = va("NAME: %s", name);
 		SS_info->ip = va("IP: %s", ip);
 		SS_info->filename = file;
 
