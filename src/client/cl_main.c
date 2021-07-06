@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ cvar_t  *cl_updateavailable;
 cvar_t  *cl_updatefiles;
 // DHM - Nerve
 
-// L0 
+// L0
 //HTTP Downloads ..
 cvar_t* cl_wwwDownload;
 
@@ -824,7 +824,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 		autoupdateStarted = qfalse;
 		autoupdateFilename[0] = '\0';
-	} 
+	}
 
 	if ( clc.demofile ) {
 		FS_FCloseFile( clc.demofile );
@@ -873,8 +873,8 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	}
 	else {
 		cls.state = CA_DISCONNECTED;
-		clientIsConnected = qfalse;	
-	} 
+		clientIsConnected = qfalse;
+	}
 
 	// allow cheats locally
 	Cvar_Set( "sv_cheats", "1" );
@@ -1138,6 +1138,11 @@ void CL_Reconnect_f( void ) {
 		Com_Printf( "Can't reconnect to localhost.\n" );
 		return;
 	}
+
+    CL_Vid_Restart_f();  // temporary fix for defeating pure issue when reconnecting after being dropped.  A better solution will follow.
+
+
+
 	Cbuf_AddText( va( "connect %s\n", cls.servername ) );
 }
 
@@ -1838,7 +1843,7 @@ void CL_DisconnectPacket( netadr_t from ) {
 		return;
 	}
 
-	// L0 - HTTP downloads	
+	// L0 - HTTP downloads
 	// if we are doing a disconnected download, leave the 'connecting' screen on with the progress information
 	if (!cls.bWWWDlDisconnected) {
 		// drop the connection
@@ -1851,7 +1856,7 @@ void CL_DisconnectPacket( netadr_t from ) {
 		CL_Disconnect(qfalse);
 		Cvar_Set("ui_connecting", "1");
 		Cvar_Set("ui_dl_running", "1");
-	} 
+	}
 }
 
 /*
@@ -2760,7 +2765,7 @@ void CL_CheckAutoUpdate(void) {
 	}
 
 	srand(Com_Milliseconds());
-	// TRACEMARK - L0 
+	// TRACEMARK - L0
 	//if (!NET_StringToAdr(WEB_GET_UPDATE, &cls.autoupdateServer, NA_IP)) {
 	//	return;
 	//}
