@@ -549,8 +549,8 @@ gotnewcl:
 	//Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
 	//Info_SetValueForKey(userinfo, "cl_guid", guid);
 
-	guid = Info_ValueForKey(userinfo, "cl_guid");
-	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
+	//guid = Info_ValueForKey(userinfo, "cl_guid");
+	//Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
 
 	// save the userinfo
 	Q_strncpyz( newcl->userinfo, userinfo, sizeof( newcl->userinfo ) );

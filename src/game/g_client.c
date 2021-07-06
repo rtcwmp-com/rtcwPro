@@ -1666,8 +1666,8 @@ void ClientUserinfoChanged( int clientNum ) {
 
 
 	// L0 - Set guid
-	if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
-		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);
+	/*if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
+		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);*/
 
 	// colors
 	c1 = Info_ValueForKey( userinfo, "color" );
@@ -1778,11 +1778,11 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	}
 
 	// Auth client
-	if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
+	/*if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
 		if (!Info_ValueForKey(userinfo, "cl_guid") || !Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), NO_GUID)) {
 			return "Valid GUID is required to enter this server.";
 		}
-	}
+	}*/
 
 	// Xian - check for max lives enforcement ban
 	if ( g_enforcemaxlives.integer && ( g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0 ) ) {
