@@ -1487,10 +1487,7 @@ void ClientThink_real( gentity_t *ent ) {
 		pm.noWeapClips = qtrue; // ensure AI characters don't use clips if they're not supposed to.
 
 	}
-		// OSPx - Fixed physics
-	//if (g_fixedphysics.integer) {
-	//	pm.fixedphysicsfps = 125;
-	//}
+
 	// Ridah
 //	if (ent->r.svFlags & SVF_NOFOOTSTEPS)
 //		pm.noFootsteps = qtrue;

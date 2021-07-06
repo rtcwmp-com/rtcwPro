@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "g_local.h"
 #include "../../MAIN/ui_mp/menudef.h"
 
+#define REF_ARG_SIZE 128
 
 //
 // UGH!  Clean me!!!!
@@ -89,16 +90,10 @@ qboolean G_refCommandCheck(gentity_t *ent, char *cmd) {
 		G_refMute_cmd(ent, qfalse);
 	}
 	else if (!Q_stricmp(cmd, "rename")) {
-		G_RenameClient(ent);
-	}
-	else if (!Q_stricmp(cmd, "cancelvote")) {
-		G_CancelVote(ent);
-	}
-	else if (!Q_stricmp(cmd, "passvote")) {
-		G_PassVote(ent);
+		G_refRenameClient(ent);
 	}
 	else if (!Q_stricmp(cmd, "getstatus")) {
-		Cmd_getStatus(ent);
+		G_refGetStatus(ent);
 	}
 	else { return(qfalse); }
 
@@ -472,6 +467,143 @@ void G_refMute_cmd(gentity_t *ent, qboolean mute) {
 	}
 }
 
+/*
+===========
+Rename client
+===========
+*/
+void G_refRenameClient(gentity_t* ent) {
+	char client_num[MAX_TOKEN_CHARS];
+	gentity_t* targetent;
+	char* newname;
+	char userinfo[MAX_INFO_STRING];
+	char cmd[MAX_TOKEN_CHARS];
+
+	trap_Argv(1, cmd, sizeof(cmd));
+
+	if (!*cmd) {
+		G_Printf("usage: Rename <client id>.\n");
+		return;
+	}
+
+	trap_Argv(2, client_num, sizeof(client_num));
+	if (GetClientEntity(ent, client_num, &targetent) == NULL)
+	{
+		return;
+	}
+
+	newname = ConcatArgs(3);
+
+	AP(va("chat \"console: %s ^7renamed %s ^7to %s^7!\n\"", ent->client->pers.netname, targetent->client->pers.netname, newname));
+
+	// Rename..
+	trap_GetUserinfo(targetent->s.clientNum, userinfo, sizeof(userinfo));
+	Info_SetValueForKey(userinfo, "name", newname);
+	trap_SetUserinfo(targetent->s.clientNum, userinfo);
+	ClientUserinfoChanged(targetent->s.clientNum);
+}
+
+/*
+===========
+Getstatus
+
+Prints IP's and some match info..
+===========
+*/
+void G_refGetStatus(gentity_t* ent) {
+	gclient_t* cl;
+	int	j;
+	// uptime
+	int secs = level.time / 1000;
+	int mins = (secs / 60) % 60;
+	int hours = (secs / 3600) % 24;
+	int days = (secs / (3600 * 24));
+	// sswolf - new stuff
+	char mapName[64];
+
+	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
+
+	CP(va("print \"\n^3Mod: ^7%s \n^3Server: ^7%s\n\"", GAMEVERSION, sv_hostname.string));
+	CP(va("print \"^3Map: ^7%s\n\"", mapName));
+	if (g_gamelocked.integer == 3) { CP("print \n\"^3Teams are locked^1!\n\""); }
+	CP("print \"^3--------------------------------------------------------------------------\n\"");
+	CP("print \"^7CN : Team : Name            : ^3IP              ^7: Ping ^7: Status\n\"");
+	CP("print \"^3--------------------------------------------------------------------------\n\"");
+
+	for (j = 0; j <= (MAX_CLIENTS - 1); j++) {
+
+		if (g_entities[j].client && !(ent->r.svFlags & SVF_BOT)) {
+			char* team, * slot, * ip, * status, * adminTag, * ignoreStatus;
+			int ping, fps;
+			cl = g_entities[j].client;
+
+			// player is connecting
+			if (cl->pers.connected == CON_CONNECTING) {
+				CP(va("print \"%2i : >><< :                 : ^3>>Connecting<<  ^7:      : \n\"", j));
+				continue;
+			}
+
+			// player is connected
+			if (cl->pers.connected == CON_CONNECTED) {
+				status = "";
+				ignoreStatus = "";
+				slot = va("%2d", j);
+				adminTag = "Ref";
+
+				team = (cl->sess.sessionTeam == TEAM_SPECTATOR) ? "^3Spec^7" :
+					(cl->sess.sessionTeam == TEAM_RED ? "^1Axis^7" : "^4Ally^7");
+
+				ip = ent->client->sess.ip;
+
+				ping = cl->ps.ping;
+				if (ping > 999) ping = 999;
+
+				if (cl->sess.referee)
+				{
+					status = "^3Referee";
+				}
+
+				if (cl->sess.muted)
+				{
+					status = "^3Muted";
+				}
+
+				if (cl->sess.sessionTeam != TEAM_SPECTATOR)
+				{
+					if (cl->pers.ready == qtrue)
+					{
+						status = "^3Ready";
+					}
+					else
+					{
+						status = "^3Not Ready";
+					}
+				}
+
+				if (cl->sess.specLocked && cl->sess.sessionTeam != TEAM_SPECTATOR)
+				{
+					status = "^3SpecLocked";
+				}
+
+				// Print it now
+				CP(va("print \"%-2s : %s : %s ^7: ^3%-15s ^7: %-4d ^7: %-11s \n\"",
+					slot,
+					team,
+					TablePrintableColorName(cl->pers.netname, 15),
+					ip,
+					ping,
+					status
+				));
+			}
+		}
+	}
+	CP("print \"^3--------------------------------------------------------------------------\n\"");
+	CP(va("print \"Time  : ^3%s \n^7Uptime: ^3%d ^7day%s ^3%d ^7hours ^3%d ^7minutes\n\"", getDateTime(), days, (days != 1 ? "s" : ""), hours, mins));
+	CP("print \"\n\"");
+
+	return;
+}
+
 //////////////////////////////
 //  Client authentication
 //
@@ -621,173 +753,6 @@ void G_UnMuteClient() {
 			G_Printf("User is not muted.\n");
 		}
 	}
-}
-
-/*
-===========
-Rename player
-===========
-*/
-void G_RenameClient(gentity_t* ent) {
-	char client_num[MAX_TOKEN_CHARS];
-	gentity_t* targetent;
-	char* newname;
-	char userinfo[MAX_INFO_STRING];
-	char cmd[MAX_TOKEN_CHARS];
-
-	trap_Argv(1, cmd, sizeof(cmd));
-
-	if (!*cmd) {
-		G_Printf("usage: Rename <client id>.\n");
-		return;
-	}
-
-	trap_Argv(2, client_num, sizeof(client_num));
-	if (GetClientEntity(ent, client_num, &targetent) == NULL)
-	{
-		return;
-	}
-
-	newname = ConcatArgs(3);
-
-	AP(va("chat \"console: %s ^7renamed %s ^7to %s^7!\n\"", ent->client->pers.netname, targetent->client->pers.netname, newname));
-
-	// Rename..
-	trap_GetUserinfo(targetent->s.clientNum, userinfo, sizeof(userinfo));
-	Info_SetValueForKey(userinfo, "name", newname);
-	trap_SetUserinfo(targetent->s.clientNum, userinfo);
-	ClientUserinfoChanged(targetent->s.clientNum);
-}
-
-/*
-===========
-Cancels any vote in progress
-===========
-*/
-void G_CancelVote(gentity_t* ent) {
-
-	if (level.voteTime) 
-	{
-		level.voteNo = level.numConnectedClients;
-		CheckVote();
-		AP(va("chat \"%s cancelled the vote.\n\"2", ent->client->pers.netname));
-	}
-}
-
-/*
-===========
-Passes any vote in progress
-===========
-*/
-void G_PassVote(gentity_t* ent) {
-
-	if (level.voteTime) 
-	{
-		level.voteYes = level.numConnectedClients;
-		CheckVote();
-		AP(va("chat \"%s passed the vote.\n\"2", ent->client->pers.netname));
-	}
-}
-
-/*
-===========
-Getstatus
-
-Prints IP's and some match info..
-===========
-*/
-void Cmd_getStatus(gentity_t* ent) {
-	gclient_t* cl;
-	int	j;
-	// uptime
-	int secs = level.time / 1000;
-	int mins = (secs / 60) % 60;
-	int hours = (secs / 3600) % 24;
-	int days = (secs / (3600 * 24));
-	// sswolf - new stuff
-	char mapName[64];
-
-	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
-
-	CP(va("print \"\n^3Mod: ^7%s \n^3Server: ^7%s\n\"", GAMEVERSION, sv_hostname.string));
-	CP(va("print \"^3Map: ^7%s\n\"", mapName));
-	if (g_gamelocked.integer == 3) { CP("print \n\"^3Teams are locked^1!\n\""); }
-	CP("print \"^3--------------------------------------------------------------------------\n\"");
-	CP("print \"^7CN : Team : Name            : ^3IP              ^7: Ping ^7: Status\n\"");
-	CP("print \"^3--------------------------------------------------------------------------\n\"");
-
-	for (j = 0; j <= (MAX_CLIENTS - 1); j++) {
-
-		if (g_entities[j].client && !(ent->r.svFlags & SVF_BOT)) {
-			char* team, * slot, * ip, * status, * adminTag, * ignoreStatus;
-			int ping, fps;
-			cl = g_entities[j].client;
-
-			// player is connecting
-			if (cl->pers.connected == CON_CONNECTING) {
-				CP(va("print \"%2i : >><< :                 : ^3>>Connecting<<  ^7:      : \n\"", j));
-				continue;
-			}
-
-			// player is connected
-			if (cl->pers.connected == CON_CONNECTED) {
-				status = "";
-				ignoreStatus = "";
-				slot = va("%2d", j);
-				adminTag = "Ref";
-
-				team = (cl->sess.sessionTeam == TEAM_SPECTATOR) ? "^3Spec^7" :
-					(cl->sess.sessionTeam == TEAM_RED ? "^1Axis^7" : "^4Ally^7");
-
-				ip = ent->client->sess.ip;
-
-				ping = cl->ps.ping;
-				if (ping > 999) ping = 999;
-
-				if (cl->sess.referee)
-				{
-					status = "^3Referee";
-				}
-
-				if (cl->sess.muted)
-				{
-					status = "^3Muted";
-				}
-
-				if (cl->sess.sessionTeam != TEAM_SPECTATOR)
-				{
-					if (cl->pers.ready == qtrue)
-					{
-						status = "^3Ready";
-					}
-					else
-					{
-						status = "^3Not Ready";
-					}
-				}
-
-				if (cl->sess.specLocked && cl->sess.sessionTeam != TEAM_SPECTATOR)
-				{
-					status = "^3SpecLocked";
-				}
-
-				// Print it now
-				CP(va("print \"%-2s : %s : %s ^7: ^3%-15s ^7: %-4d ^7: %-11s \n\"",
-					slot,
-					team,
-					TablePrintableColorName(cl->pers.netname, 15),
-					ip,
-					ping,
-					status
-				));
-			}
-		}
-	}
-	CP("print \"^3--------------------------------------------------------------------------\n\"");
-	CP(va("print \"Time  : ^3%s \n^7Uptime: ^3%d ^7day%s ^3%d ^7hours ^3%d ^7minutes\n\"", getDateTime(), days, (days != 1 ? "s" : ""), hours, mins));
-	CP("print \"\n\"");
-
-	return;
 }
 
 /*

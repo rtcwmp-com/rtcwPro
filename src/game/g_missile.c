@@ -875,7 +875,9 @@ void G_ExplodeMissile( gentity_t *ent ) {
 		if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_GRENADE_LAUNCHER ||
 			ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
 			ent->s.weapon == WP_ARTY) {
-			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
+			// RTCWPro custom screen shake
+			//Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
+			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * (!g_screenShake.integer ? 1 : g_screenShake.integer));
 		}
 		return;
 	}

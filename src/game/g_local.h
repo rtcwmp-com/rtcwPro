@@ -1482,7 +1482,6 @@ extern vmCvar_t g_fastResMsec;
 extern vmCvar_t g_knifeonly;                // Xian - Wacky Knife-Only rounds
 extern vmCvar_t g_enforcemaxlives;          // Xian - Temp ban with maxlives between rounds
 
-extern vmCvar_t g_needpass;
 extern vmCvar_t g_weaponTeamRespawn;
 extern vmCvar_t g_doWarmup;
 extern vmCvar_t g_teamAutoJoin;
@@ -1521,6 +1520,7 @@ extern vmCvar_t g_engineerChargeTime;
 extern vmCvar_t g_LTChargeTime;
 extern vmCvar_t g_soldierChargeTime;
 extern vmCvar_t sv_screenshake;
+extern vmCvar_t g_screenShake;
 // jpw
 
 // NERVE - SMF
@@ -1547,8 +1547,6 @@ extern vmCvar_t g_dbgRevive;
 extern vmCvar_t refereePassword;
 extern vmCvar_t team_maxplayers;
 extern vmCvar_t team_nocontrols;
-extern vmCvar_t vote_limit;
-extern vmCvar_t vote_percent;
 
 extern vmCvar_t match_warmupDamage;
 extern vmCvar_t match_mutespecs;
@@ -1560,7 +1558,6 @@ extern vmCvar_t	g_spectatorAllowDemo;
 extern vmCvar_t match_timeoutcount;
 
 // Server stuff
-extern vmCvar_t	g_dropReload;
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
 extern vmCvar_t g_gamelocked;
@@ -1570,13 +1567,11 @@ extern vmCvar_t g_bannedMSG;
 extern vmCvar_t g_privateServer;
 extern vmCvar_t TXThandle;
 extern vmCvar_t g_serverMessage;
-extern vmCvar_t g_maxVotes;
 extern vmCvar_t g_showFlags;
 extern vmCvar_t g_allowPMs;
 extern vmCvar_t	g_hitsounds;
 extern vmCvar_t	g_crouchRate;
 extern vmCvar_t g_drawHitboxes;
-extern vmCvar_t team_nocontrols;
 extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t	g_disableInv;
 extern vmCvar_t	g_axisSpawnProtectionTime;
@@ -1936,6 +1931,8 @@ void G_refSpeclockTeams_cmd( gentity_t *ent, qboolean fLock );
 void G_refWarmup_cmd( gentity_t* ent );
 void G_refWarning_cmd( gentity_t* ent );
 void G_refMute_cmd( gentity_t *ent, qboolean mute );
+void G_refRenameClient(gentity_t* ent);
+void G_refGetStatus(gentity_t* ent);
 int  G_refClientnumForName( gentity_t *ent, const char *name );
 void G_refPrintf(gentity_t* ent, const char *fmt, ...);// _attribute((format(printf, 2, 3)));
 void G_PlayerBan(void);
@@ -1943,10 +1940,6 @@ void G_MakeReferee(void);
 void G_RemoveReferee(void);
 void G_MuteClient(void);
 void G_UnMuteClient(void);
-void G_RenameClient(gentity_t* ent);
-void G_CancelVote(gentity_t* ent);
-void G_PassVote(gentity_t* ent);
-void Cmd_getStatus(gentity_t* ent);
 void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
 
