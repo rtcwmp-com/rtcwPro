@@ -6,7 +6,7 @@ Source: Nate (rtcwMP)
 #include "client.h"
 #include "../qcommon/http.h"
 #include <sys/stat.h> // reqSS
-
+#include <time.h>
 /*
 ================
 Takes ScreenShot
@@ -68,6 +68,8 @@ void CL_RequestedSS(char* ip) {
 	char* guid;
 	char* name;
 	int n;
+
+    srand(time(0));
     n=rand() % 99;
 
 
