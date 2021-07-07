@@ -350,3 +350,5 @@ ASALocalRun/
 *.pk3
 /src/servercache.dat
 /src/main/authkey
+src/Release_Dedicated/wolf.exe.recipe
+src/Release_Dedicated/wolf.vcxproj.FileListAbsolute.txt
