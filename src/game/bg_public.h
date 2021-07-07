@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,18 +32,12 @@ If you have questions concerning this license or the applicable additional terms
  * desc:		definitions shared by both the server game and client game modules
  *
 */
-#ifndef  ___BG_PUBLIC_H
-#define ___BG_PUBLIC_H
-
-
-#include "../../MAIN/ui_mp/menudef.h" // For vote options
 
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2 Alpha" // this will print on the server and show up as the RtcwPro version
-#define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
+
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
 #define GIB_HEALTH          -175 // JPW NERVE
@@ -113,9 +107,6 @@ typedef enum {
 	CLDMG_MAX
 } clientDamage_t;
 
-typedef enum popupMessageType_e {
-	PM_MESSAGE
-} popupMessageType_t;
 // RF
 #define MAX_TAGCONNECTS     32
 
@@ -180,13 +171,6 @@ typedef enum popupMessageType_e {
 #define CS_TARGETEFFECT         35      //----(SA)
 
 #define CS_WOLFINFO             36      // NERVE - SMF
-
-#define CS_REINFSEEDS			39
-#define CS_PAUSED				40
-#define CS_READY				41
-#define CS_SERVERTOGGLES        42		// Shows current enable/disabled settings (for voting UI)
-#define CS_MATCHID              43		// match id for stats
-#define CS_ROUNDINFO			44		// match id for stats
 
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
@@ -335,7 +319,6 @@ typedef struct {
 	// for fixed msec Pmove
 	int pmove_fixed;
 	int pmove_msec;
-	int fixedphysicsfps; // OSPx
 
 	// callbacks to test the world
 	// these will be different functions during game and cgame
@@ -397,13 +380,7 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
-
-	PERS_HITHEAD,
-	PERS_HITBODY
-
-	// Weapon Restrictions
-	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
+	PERS_WOLFKICK
 } persEnum_t;
 
 
@@ -470,8 +447,6 @@ typedef enum {
 	PW_REDFLAG,
 	PW_BLUEFLAG,
 	PW_BALL,
-	PW_READY,			// Ready
-	PW_BLACKOUT,		// Specklock
 
 	PW_NUM_POWERUPS
 } powerup_t;
@@ -648,7 +623,6 @@ typedef enum {
 extern int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP];
 // jpw
 
-
 typedef struct ammotable_s {
 	int maxammo;            //
 	int uses;               //
@@ -663,12 +637,8 @@ typedef struct ammotable_s {
 	int mod;                // means of death
 } ammotable_t;
 
-//extern ammotable_t* GetAmmoTableData(int ammoIndex);
 extern ammotable_t ammoTable[];     // defined in bg_misc.c
 extern int weapAlts[];  // defined in bg_misc.c
-int BG_MaxAmmoForWeapon(weapon_t weaponNum);
-
-#define GetAmmoTableData( ammoIndex ) ( (ammotable_t*)( &ammoTable[ammoIndex] ) )
 
 
 //----(SA)
@@ -795,9 +765,6 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
-	// OSPx
-	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
-	// -OSPx
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,
@@ -1124,54 +1091,9 @@ typedef enum {
 
 // Time between location updates
 #define TEAM_LOCATION_UPDATE_TIME       1000
-// L0 - OSP stats dump / weapon stat info: mapping between MOD_ and WP_ types
-typedef enum extWeaponStats_s
-{
-	WS_KNIFE,               // 0
-	WS_LUGER,               // 1
-	WS_COLT,                // 2
-	WS_MP40,                // 3
-	WS_THOMPSON,            // 4
-	WS_STEN,                // 5
-	WS_FG42,                // 6	-- Also includes WS_BAR (allies version of fg42)
-	WS_PANZERFAUST,         // 7
-	WS_FLAMETHROWER,        // 8
-	WS_GRENADE,             // 9	-- Includes axis and allies grenade types
-	WS_MORTAR,              // 10
-	WS_DYNAMITE,            // 11
-	WS_AIRSTRIKE,           // 12	-- Lt. smoke grenade attack
-	WS_ARTILLERY,           // 13	-- Lt. binocular attack
-	WS_SYRINGE,             // 14	-- Medic syringe uses/successes
-	WS_SMOKE,               // 15
-	WS_MG42,                // 16
-	WS_RIFLE,				// 17 - equivalent american weapon to german mauser
-	WS_VENOM,				// 18
-	WS_MAX
-} extWeaponStats_t;
-
-typedef struct {
-	qboolean fHasHeadShots;
-	const char *pszCode;
-	const char *pszName;
-} weap_ws_t;
-
-extern const weap_ws_t aWeaponInfo[WS_MAX];
-
-typedef struct weap_ws_convert_s {
-	weapon_t iWeapon;
-	extWeaponStats_t iWS;
-} weap_ws_convert_t;
-// OSP
-
-// RtcwPro - struct for holding client ready info that both server and client can access
-typedef struct {
-	int isReady;
-} player_ready_status_t;
-
-player_ready_status_t player_ready_status[MAX_CLIENTS];
 
 // How many players on the overlay
-#define TEAM_MAXOVERLAY     10 // RtcwPro changed this to 10
+#define TEAM_MAXOVERLAY     8
 
 // means of death
 typedef enum {
@@ -1261,15 +1183,7 @@ typedef enum {
 	MOD_ENGINEER,   // not sure if we'll use
 	MOD_MEDIC,      // these like this or not
 //
-	MOD_BAT,
-
-// OSPx
-	MOD_ADMKILL,
-	MOD_SELFKILL,
-	MOD_ARTILLERY,
-	MOD_SWITCHTEAM,
-	MOD_NUM_MODS
-// -OSPx
+	MOD_BAT
 
 } meansOfDeath_t;
 
@@ -1776,7 +1690,6 @@ typedef enum
 // Global Function Decs
 
 animModelInfo_t *BG_ModelInfoForModelname( char *modelname );
-animModelInfo_t* BG_ModelInfoForClient(int client);
 qboolean BG_AnimParseAnimConfig( animModelInfo_t *animModelInfo, const char *filename, const char *input );
 void BG_AnimParseAnimScript( animModelInfo_t *modelInfo, animScriptData_t *scriptData, int client, char *filename, char *input );
 int BG_AnimScriptAnimation( playerState_t *ps, aistateEnum_t state, scriptAnimMoveTypes_t movetype, qboolean isContinue );
@@ -1798,40 +1711,3 @@ int BG_GetAnimScriptEvent( playerState_t *ps, scriptAnimEventTypes_t event );
 
 extern animStringItem_t animStateStr[];
 extern animStringItem_t animBodyPartsStr[];
-
-// OSPx
-
-// Crosshairs
-void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
-void BG_ParseColorCvar(char* cvarString, float* color);
-// Client flags for server processing
-#define CGF_AUTORELOAD      0x01
-#define CGF_STATSDUMP       0x02
-#define CGF_AUTOACTIVATE    0x04
-#define CGF_PREDICTITEMS    0x08
-//
-// Voting
-typedef struct {
-	const char  *pszCvar;
-	int flag;
-} voteType_t;
-
-extern const voteType_t voteToggles[];
-extern int numVotesAvailable;
-
-#define VOTING_DISABLED     ( ( 1 << numVotesAvailable ) - 1 )
-extWeaponStats_t BG_WeapStatForWeapon( weapon_t iWeaponID );
-// ET Port
-int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF );
-// L0 - bg_stats.c
-//
-
-// -OSPx
-// L0 - Reinforcements offset
-#define MAX_REINFSEEDS  8
-//#define REINF_RANGE     16      // (0 to n-1 second offset)
-#define REINF_BLUEDELT  3       // Allies shift offset
-#define REINF_REDDELT   2       // Axis shift offset
-extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
-
-#endif // ! ___BG_PUBLIC_H

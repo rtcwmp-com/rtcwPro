@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -131,19 +131,6 @@ extern vmCvar_t ui_limboOptions;
 extern vmCvar_t ui_isSpectator;
 // -NERVE - SMF
 
-// OSPx
-extern vmCvar_t ui_crosshairColor;
-extern vmCvar_t ui_crosshairColorAlt;
-extern vmCvar_t ui_crosshairAlpha;
-extern vmCvar_t ui_crosshairAlphaAlt;
-extern vmCvar_t ui_crosshairSize;
-// Speclock
-extern vmCvar_t ui_blackout;
-extern vmCvar_t ui_showtooltips;
-// -OSPx
-extern vmCvar_t ui_demoDir;
-extern vmCvar_t ui_gameversion;
-extern vmCvar_t fs_game;
 //
 // ui_qmenu.c
 //
@@ -894,11 +881,6 @@ typedef struct {
 	int nextFindPlayerRefresh;
 
 	int currentCrosshair;
-	// OSPx - Crosshairs
-	vec4_t xhairColor;
-	vec4_t xhairColorAlt;
-	// -OSPx
-
 	int startPostGameTime;
 	sfxHandle_t newHighScoreSound;
 

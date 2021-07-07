@@ -89,9 +89,9 @@ static void AddSkyPolygon( int nump, vec3_t vecs ) {
 	{
 		VectorAdd( vp, v, v );
 	}
-	av[0] = Q_fabs( v[0] );
-	av[1] = Q_fabs( v[1] );
-	av[2] = Q_fabs( v[2] );
+	av[0] = fabs( v[0] );
+	av[1] = fabs( v[1] );
+	av[2] = fabs( v[2] );
 	if ( av[0] > av[1] && av[0] > av[2] ) {
 		if ( v[0] < 0 ) {
 			axis = 1;
@@ -576,9 +576,6 @@ static void FillCloudySkySide( const int mins[2], const int maxs[2], qboolean ad
 	tHeight = maxs[1] - mins[1] + 1;
 	sWidth = maxs[0] - mins[0] + 1;
 
-	// ydnar: overflow check
-	RB_CHECKOVERFLOW((maxs[0] - mins[0]) * (maxs[1] - mins[1]), (sWidth - 1) * (tHeight - 1) * 6);
-
 	for ( t = mins[1] + HALF_SKY_SUBDIVISIONS; t <= maxs[1] + HALF_SKY_SUBDIVISIONS; t++ )
 	{
 		for ( s = mins[0] + HALF_SKY_SUBDIVISIONS; s <= maxs[0] + HALF_SKY_SUBDIVISIONS; s++ )
@@ -719,6 +716,7 @@ static void FillCloudBox( const shader_t *shader, int stage ) {
 ** R_BuildCloudData
 */
 void R_BuildCloudData( shaderCommands_t *input ) {
+	int i;
 	shader_t    *shader;
 
 	shader = input->shader;
@@ -733,19 +731,13 @@ void R_BuildCloudData( shaderCommands_t *input ) {
 	tess.numVertexes = 0;
 
 	if ( input->shader->sky.cloudHeight ) {
-		// ok, this is really wierd. it's iterating through shader stages here,
-		// which is unecessary for a multi-stage sky shader, as far as i can tell
-		// nuking this
-#if 0
-		for (i = 0; i < MAX_SHADER_STAGES; i++) {
-			if (!tess.xstages[i]) {
+		for ( i = 0; i < MAX_SHADER_STAGES; i++ )
+		{
+			if ( !tess.xstages[i] ) {
 				break;
 			}
-			FillCloudBox(input->shader, i);
+			FillCloudBox( input->shader, i );
 		}
-#else
-		FillCloudBox(input->shader, 0);
-#endif
 	}
 }
 
@@ -834,7 +826,6 @@ void RB_DrawSun( void ) {
 	if ( !r_drawSun->integer ) {
 		return;
 	}
-	qglPushMatrix();
 	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
 	qglTranslatef( backEnd.viewParms.or.origin[0], backEnd.viewParms.or.origin[1], backEnd.viewParms.or.origin[2] );
 
@@ -859,6 +850,58 @@ void RB_DrawSun( void ) {
 	RB_BeginSurface( tr.sunShader, tess.fogNum );
 
 	RB_AddQuadStamp( origin, vec1, vec2, color );
+/*
+		VectorCopy( origin, temp );
+		VectorSubtract( temp, vec1, temp );
+		VectorSubtract( temp, vec2, temp );
+		VectorCopy( temp, tess.xyz[tess.numVertexes] );
+		tess.texCoords[tess.numVertexes][0][0] = 0;
+		tess.texCoords[tess.numVertexes][0][1] = 0;
+		tess.vertexColors[tess.numVertexes][0] = 255;
+		tess.vertexColors[tess.numVertexes][1] = 255;
+		tess.vertexColors[tess.numVertexes][2] = 255;
+		tess.numVertexes++;
+
+		VectorCopy( origin, temp );
+		VectorAdd( temp, vec1, temp );
+		VectorSubtract( temp, vec2, temp );
+		VectorCopy( temp, tess.xyz[tess.numVertexes] );
+		tess.texCoords[tess.numVertexes][0][0] = 0;
+		tess.texCoords[tess.numVertexes][0][1] = 1;
+		tess.vertexColors[tess.numVertexes][0] = 255;
+		tess.vertexColors[tess.numVertexes][1] = 255;
+		tess.vertexColors[tess.numVertexes][2] = 255;
+		tess.numVertexes++;
+
+		VectorCopy( origin, temp );
+		VectorAdd( temp, vec1, temp );
+		VectorAdd( temp, vec2, temp );
+		VectorCopy( temp, tess.xyz[tess.numVertexes] );
+		tess.texCoords[tess.numVertexes][0][0] = 1;
+		tess.texCoords[tess.numVertexes][0][1] = 1;
+		tess.vertexColors[tess.numVertexes][0] = 255;
+		tess.vertexColors[tess.numVertexes][1] = 255;
+		tess.vertexColors[tess.numVertexes][2] = 255;
+		tess.numVertexes++;
+
+		VectorCopy( origin, temp );
+		VectorSubtract( temp, vec1, temp );
+		VectorAdd( temp, vec2, temp );
+		VectorCopy( temp, tess.xyz[tess.numVertexes] );
+		tess.texCoords[tess.numVertexes][0][0] = 1;
+		tess.texCoords[tess.numVertexes][0][1] = 0;
+		tess.vertexColors[tess.numVertexes][0] = 255;
+		tess.vertexColors[tess.numVertexes][1] = 255;
+		tess.vertexColors[tess.numVertexes][2] = 255;
+		tess.numVertexes++;
+
+		tess.indexes[tess.numIndexes++] = 0;
+		tess.indexes[tess.numIndexes++] = 1;
+		tess.indexes[tess.numIndexes++] = 2;
+		tess.indexes[tess.numIndexes++] = 0;
+		tess.indexes[tess.numIndexes++] = 2;
+		tess.indexes[tess.numIndexes++] = 3;
+*/
 	RB_EndSurface();
 
 
@@ -893,10 +936,12 @@ void RB_DrawSun( void ) {
 
 	// back to normal depth range
 	qglDepthRange( 0.0, 1.0 );
-	qglPopMatrix();
 }
 
+
+
 extern void R_Fog( glfog_t *curfog );
+
 /*
 ================
 RB_StageIteratorSky
@@ -944,8 +989,6 @@ void RB_StageIteratorSky( void ) {
 	} else {
 		qglDepthRange( 1.0, 1.0 );
 	}
-
-	GL_Cull(CT_TWO_SIDED);
 
 	// draw the outer skybox
 	if ( tess.shader->sky.outerbox[0] && tess.shader->sky.outerbox[0] != tr.defaultImage ) {

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -485,25 +485,6 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			}
 		}
 
-		if (e < sv_maxclients->integer) {
-			sharedEntity_t* client;
-
-			if (e == frame->ps.clientNum) {
-				continue;
-			}
-
-			client = SV_GentityNum(frame->ps.clientNum);
-			if (wh_active->integer && !portal && !(client->r.svFlags & SVF_BOT) &&
-				(frame->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)) 
-			{
-				if (!SV_CanSee(frame->ps.clientNum, e)){
-					SV_RandomizePos(frame->ps.clientNum, e);
-					SV_AddEntToSnapshot(svEnt, ent, eNums);
-					continue;
-				}
-			}
-		}
-
 		// add it
 		SV_AddEntToSnapshot( svEnt, ent, eNums );
 
@@ -632,13 +613,6 @@ static void SV_BuildClientSnapshot( client_t *client ) {
 		ent = SV_GentityNum( entityNumbers.snapshotEntities[i] );
 		state = &svs.snapshotEntities[svs.nextSnapshotEntities % svs.numSnapshotEntities];
 		*state = ent->s;
-
-		if (wh_active->integer && entityNumbers.snapshotEntities[i] < sv_maxclients->integer) {
-			if (SV_PositionChanged(entityNumbers.snapshotEntities[i])) {
-				SV_RestorePos(entityNumbers.snapshotEntities[i]);
-			}
-		}
-
 		svs.nextSnapshotEntities++;
 		// this should never hit, map should always be restarted first in SV_Frame
 		if ( svs.nextSnapshotEntities >= 0x7FFFFFFE ) {
@@ -658,9 +632,8 @@ to take to clear, based on the current rate
 TTimo - use sv_maxRate or sv_dl_maxRate depending on regular or downloading client
 ====================
 */
-#ifdef _WIN32
 #define HEADER_RATE_BYTES   48      // include our header, IP header, and some overhead
-int SV_RateMsec( client_t *client, int messageSize ) {
+static int SV_RateMsec( client_t *client, int messageSize ) {
 	int rate;
 	int rateMsec;
 	int maxRate;
@@ -690,7 +663,7 @@ int SV_RateMsec( client_t *client, int messageSize ) {
 
 	return rateMsec;
 }
-#endif
+
 /*
 =======================
 SV_SendMessageToClient
@@ -720,11 +693,7 @@ void SV_SendMessageToClient( msg_t *msg, client_t *client ) {
 	}
 
 	// normal rate / snapshotMsec calculation
-	#ifdef _WIN32
 	rateMsec = SV_RateMsec( client, msg->cursize );
-	#else
-	rateMsec = SV_RateMsec( client );
-	#endif
 
 	// TTimo - during a download, ignore the snapshotMsec
 	// the update server on steroids, with this disabled and sv_fps 60, the download can reach 30 kb/s
@@ -787,10 +756,7 @@ void SV_SendClientSnapshot( client_t *client ) {
 	SV_WriteSnapshotToClient( client, &msg );
 
 	// Add any download data if the client is downloading
-	if (sv_wwwDownload->integer) {
-	  SV_WriteDownloadToClient( client, &msg );
-	}
-	//SV_WriteDownloadToClient( client, &msg );
+	SV_WriteDownloadToClient( client, &msg );
 
 	// check for overflow
 	if ( msg.overflowed ) {
@@ -828,8 +794,6 @@ void SV_SendClientMessages( void ) {
 		if ( svs.time < c->nextSnapshotTime ) {
 			continue;       // not time yet
 		}
-		if(*c->downloadName)
-			continue;		// Client is downloading, don't send snapshots
 
 		numclients++;       // NERVE - SMF - net debugging
 
@@ -837,11 +801,7 @@ void SV_SendClientMessages( void ) {
 		// was too large to send at once
 		if ( c->netchan.unsentFragments ) {
 			c->nextSnapshotTime = svs.time +
-#ifndef _WIN32
-                                    SV_RateMsec( c);
-#else
 								  SV_RateMsec( c, c->netchan.unsentLength - c->netchan.unsentFragmentStart );
-#endif
 			SV_Netchan_TransmitNextFragment( c );
 			continue;
 		}

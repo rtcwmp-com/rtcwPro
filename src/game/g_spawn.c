@@ -845,7 +845,6 @@ level.spawnVars[], then call the class specfic spawn function
 void G_SpawnGEntityFromSpawnVars( void ) {
 	int i;
 	gentity_t   *ent;
-	char* str;
 
 	// get the next free entity
 	ent = G_Spawn();
@@ -873,21 +872,6 @@ void G_SpawnGEntityFromSpawnVars( void ) {
 		if ( i ) {
 			G_FreeEntity( ent );
 			return;
-		}
-	}
-
-	// sswolf - allowteams - ET port
-	G_SpawnString("allowteams", "", &str);
-	if (str[0])
-	{
-		str = Q_strlwr(str);
-		if (strstr(str, "axis"))
-		{
-			ent->allowteams |= ALLOW_AXIS_TEAM;
-		}
-		if (strstr(str, "allies"))
-		{
-			ent->allowteams |= ALLOW_ALLIED_TEAM;
 		}
 	}
 

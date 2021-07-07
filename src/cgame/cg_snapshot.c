@@ -184,11 +184,6 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 		}
 	}
 	// -NERVE - SMF
-	// OSPx - Demo
-	if (cg.demoPlayback) {
-		trap_Key_SetCatcher(KEYCATCH_CGAME);
-		CG_EventHandling(CGAME_EVENT_DEMO, qtrue);
-	}
 }
 
 

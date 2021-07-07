@@ -692,15 +692,12 @@ typedef struct {
 	byte color[4];
 } drawVert_t;
 
-#define drawVert_t_cleared(x) drawVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0, 0}}
-
 typedef enum {
 	MST_BAD,
 	MST_PLANAR,
 	MST_PATCH,
 	MST_TRIANGLE_SOUP,
-	MST_FLARE,
-	MST_FOLIAGE // L0 - TODO: add support for foliage surfaces
+	MST_FLARE
 } mapSurfaceType_t;
 
 typedef struct {

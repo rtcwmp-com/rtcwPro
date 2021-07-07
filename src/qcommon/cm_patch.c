@@ -462,9 +462,9 @@ int CM_PlaneEqual( patchPlane_t *p, float plane[4], int *flipped ) {
 
 	if (
 		fabs( p->plane[0] - plane[0] ) < NORMAL_EPSILON
-		&& Q_fabs( p->plane[1] - plane[1] ) < NORMAL_EPSILON
-		&& Q_fabs( p->plane[2] - plane[2] ) < NORMAL_EPSILON
-		&& Q_fabs( p->plane[3] - plane[3] ) < DIST_EPSILON ) {
+		&& fabs( p->plane[1] - plane[1] ) < NORMAL_EPSILON
+		&& fabs( p->plane[2] - plane[2] ) < NORMAL_EPSILON
+		&& fabs( p->plane[3] - plane[3] ) < DIST_EPSILON ) {
 		*flipped = qfalse;
 		return qtrue;
 	}
@@ -474,9 +474,9 @@ int CM_PlaneEqual( patchPlane_t *p, float plane[4], int *flipped ) {
 
 	if (
 		fabs( p->plane[0] - invplane[0] ) < NORMAL_EPSILON
-		&& Q_fabs( p->plane[1] - invplane[1] ) < NORMAL_EPSILON
-		&& Q_fabs( p->plane[2] - invplane[2] ) < NORMAL_EPSILON
-		&& Q_fabs( p->plane[3] - invplane[3] ) < DIST_EPSILON ) {
+		&& fabs( p->plane[1] - invplane[1] ) < NORMAL_EPSILON
+		&& fabs( p->plane[2] - invplane[2] ) < NORMAL_EPSILON
+		&& fabs( p->plane[3] - invplane[3] ) < DIST_EPSILON ) {
 		*flipped = qtrue;
 		return qtrue;
 	}
@@ -489,12 +489,12 @@ void CM_SnapVector( vec3_t normal ) {
 
 	for ( i = 0 ; i < 3 ; i++ )
 	{
-		if ( Q_fabs( normal[i] - 1 ) < NORMAL_EPSILON ) {
+		if ( fabs( normal[i] - 1 ) < NORMAL_EPSILON ) {
 			VectorClear( normal );
 			normal[i] = 1;
 			break;
 		}
-		if ( Q_fabs( normal[i] - -1 ) < NORMAL_EPSILON ) {
+		if ( fabs( normal[i] - -1 ) < NORMAL_EPSILON ) {
 			VectorClear( normal );
 			normal[i] = -1;
 			break;
@@ -1583,7 +1583,7 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 			} else {
 				// NOTE: this works even though the plane might be flipped because the bbox is centered
 				offset = DotProduct( tw->offsets[ planes->signbits ], plane );
-				plane[3] += Q_fabs( offset );
+				plane[3] += fabs( offset );
 				VectorCopy( tw->start, startp );
 				VectorCopy( tw->end, endp );
 			}
@@ -1670,7 +1670,7 @@ qboolean CM_PositionTestInPatchCollide( traceWork_t *tw, const struct patchColli
 	planes = pc->planes;
 	for ( i = 0 ; i < pc->numPlanes ; i++, planes++ ) {
 		d = DotProduct( tw->start, planes->plane ) - planes->plane[3];
-		offset = Q_fabs( DotProduct( tw->offsets[ planes->signbits ], planes->plane ) );
+		offset = fabs( DotProduct( tw->offsets[ planes->signbits ], planes->plane ) );
 		if ( d < -offset ) {
 			cross[i] = BOX_FRONT;
 		} else if ( d > offset ) {
@@ -1795,7 +1795,7 @@ void CM_DrawDebugSurface( void ( *drawPoly )( int color, int numPoints, float *p
 				} else { v1[n] = mins[n];}
 			} //end for
 			VectorNegate( plane, v2 );
-			plane[3] += Q_fabs( DotProduct( v1, v2 ) );
+			plane[3] += fabs( DotProduct( v1, v2 ) );
 			//*/
 
 			w = BaseWindingForPlane( plane,  plane[3] );
@@ -1829,7 +1829,7 @@ void CM_DrawDebugSurface( void ( *drawPoly )( int color, int numPoints, float *p
 					} else { v1[n] = mins[n];}
 				} //end for
 				VectorNegate( plane, v2 );
-				plane[3] -= Q_fabs( DotProduct( v1, v2 ) );
+				plane[3] -= fabs( DotProduct( v1, v2 ) );
 
 				ChopWindingInPlace( &w, plane, plane[3], 0.1f );
 			}

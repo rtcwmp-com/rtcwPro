@@ -697,7 +697,7 @@ void PC_AddBuiltinDefines( source_t *source ) {
 int PC_ExpandBuiltinDefine( source_t *source, token_t *deftoken, define_t *define,
 							token_t **firsttoken, token_t **lasttoken ) {
 	token_t *token;
-	time_t t;
+	unsigned long t;    //	time_t t; //to prevent LCC warning
 	char *curtime;
 
 	token = PC_CopyToken( deftoken );
@@ -2463,7 +2463,7 @@ int PC_Directive_evalfloat( source_t *source ) {
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	sprintf( token.string, "%1.2f", Q_fabs( value ) );
+	sprintf( token.string, "%1.2f", fabs( value ) );
 	token.type = TT_NUMBER;
 	token.subtype = TT_FLOAT | TT_LONG | TT_DECIMAL;
 	PC_UnreadSourceToken( source, &token );
@@ -2573,7 +2573,7 @@ int PC_DollarDirective_evalfloat( source_t *source ) {
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	sprintf( token.string, "%1.2f", Q_fabs( value ) );
+	sprintf( token.string, "%1.2f", fabs( value ) );
 	token.type = TT_NUMBER;
 	token.subtype = TT_FLOAT | TT_LONG | TT_DECIMAL;
 #ifdef NUMBERVALUE

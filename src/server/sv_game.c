@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "server.h"
 
 #include "../game/botlib.h"
-#include "../qcommon/database.h"
 
 botlib_export_t *botlib_export;
 
@@ -91,10 +90,6 @@ Sends a command string to a client
 ===============
 */
 void SV_GameSendServerCommand( int clientNum, const char *text ) {
-	if (strlen(text) > 1022) {
-		return;
-	}
-
 	if ( clientNum == -1 ) {
 		SV_SendServerCommand( NULL, "%s", text );
 	} else {
@@ -153,6 +148,8 @@ void SV_SetBrushModel( sharedEntity_t *ent, const char *name ) {
 
 	SV_LinkEntity( ent );       // FIXME: remove
 }
+
+
 
 /*
 =================
@@ -298,11 +295,6 @@ void SV_GetUsercmd( int clientNum, usercmd_t *cmd ) {
 
 //==============================================
 
-/*
-====================
-FloatAsInt
-====================
-*/
 static int  FloatAsInt( float f ) {
 	int temp;
 
@@ -346,9 +338,6 @@ int SV_GameSystemCalls( int *args ) {
 	case G_CVAR_SET:
 		Cvar_Set( (const char *)VMA( 1 ), (const char *)VMA( 2 ) );
 		return 0;
-	case G_CVAR_REST_LOAD:
-		SV_SetCvarRestrictions();
-		return 0;
 	case G_CVAR_VARIABLE_INTEGER_VALUE:
 		return Cvar_VariableIntegerValue( (const char *)VMA( 1 ) );
 	case G_CVAR_VARIABLE_STRING_BUFFER:
@@ -363,8 +352,6 @@ int SV_GameSystemCalls( int *args ) {
 		Cbuf_ExecuteText( args[1], VMA( 2 ) );
 		return 0;
 
-	case G_FS_FILE_EXIST:
-		return (int)FS_FileExists( VMA(1) );
 	case G_FS_FOPEN_FILE:
 		return FS_FOpenFileByMode( VMA( 1 ), VMA( 2 ), args[3] );
 	case G_FS_READ:
@@ -472,7 +459,7 @@ int SV_GameSystemCalls( int *args ) {
 		Sys_SnapVector( VMA( 1 ) );
 		return 0;
 	case G_GETTAG:
-		return SV_GetTag(VMA(1), VMA(2), VMA(3), VMA(4));
+		return SV_GetTag( args[1], VMA( 2 ), VMA( 3 ) );
 
 		//====================================
 
@@ -900,42 +887,6 @@ int SV_GameSystemCalls( int *args ) {
 	case TRAP_CEIL:
 		return FloatAsInt( ceil( VMF( 1 ) ) );
 
-	case G_SQL_RUNQUERY:
-            return OW_RunQuery( (char*)VMA(1) );
-
-    case G_SQL_FINISHQUERY:
-            OW_FinishQuery( args[1] );
-            return 0;
-
-    case G_SQL_NEXTROW:
-            return OW_NextRow( args[1] );
-
-    case G_SQL_ROWCOUNT:
-            return OW_RowCount( args[1] );
-
-    case G_SQL_GETFIELDBYID:
-            OW_GetFieldByID( args[1], args[2], (char*)VMA(3), args[4]  );
-            return 0;
-
-    case G_SQL_GETFIELDBYNAME:
-            OW_GetFieldByName( args[1], (char*)VMA(2), (char*)VMA(3), args[4] );
-            return 0;
-
-    case G_SQL_GETFIELDBYID_INT:
-            return OW_GetFieldByID_int( args[1], args[2] );
-
-    case G_SQL_GETFIELDBYNAME_INT:
-            return OW_GetFieldByName_int( args[1], (char*)VMA(2) );
-
-    case G_SQL_FIELDCOUNT:
-            return OW_FieldCount( args[1] );
-
-    case G_SQL_CLEANSTRING:
-            OW_CleanString( (char*)VMA(1), (char*)VMA(2), args[3] );
-            return 0;
-
-	case G_SUBMIT_STATS_CURL:
-		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );
@@ -1064,37 +1015,14 @@ SV_GetTag
 */
 extern qboolean CL_GetTag( int clientNum, char *tagname, orientation_t * or );
 
-qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* tagname, orientation_t* orientation) {
+qboolean SV_GetTag( int clientNum, char *tagname, orientation_t *or ) {
 #ifndef DEDICATED // TTimo: dedicated only binary defines DEDICATED
-	if (com_dedicated->integer) {
+	if ( com_dedicated->integer ) {
 		return qfalse;
 	}
 
-	return CL_GetTag(ent->s.number, tagname, orientation);
+	return CL_GetTag( clientNum, tagname, or );
 #else
-	vec3_t tempAxis[3];
-	vec3_t org;
-	int i;
-
-	if (!animInfo) {
-		return qfalse;
-	}
-
-	if (SV_LerpTag(orientation, animInfo, tagname) < 0)
-		return qfalse;
-
-	VectorCopy(ent->r.currentOrigin, org);
-
-	for (i = 0; i < 3; i++) {
-		VectorMA(org, orientation->origin[i], animInfo->legsAxis[i], org);
-	}
-
-	VectorCopy(org, orientation->origin);
-
-	// rotate with entity
-	MatrixMultiply(animInfo->legsAxis, orientation->axis, tempAxis);
-	memcpy(orientation->axis, tempAxis, sizeof(vec3_t) * 3);
-
-	return qtrue;
+	return qfalse;
 #endif
 }

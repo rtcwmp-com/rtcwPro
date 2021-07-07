@@ -430,13 +430,7 @@ void CL_MouseEvent( int dx, int dy, int time ) {
 		}
 
 	} else if ( cls.keyCatchers & KEYCATCH_CGAME ) {
-		if (cl_bypassMouseInput->integer == 1) {
-			cl.mouseDx[cl.mouseIndex] += dx;
-			cl.mouseDy[cl.mouseIndex] += dy;
-		}
-		else {
-			VM_Call(cgvm, CG_MOUSE_EVENT, dx, dy);
-		}
+		VM_Call( cgvm, CG_MOUSE_EVENT, dx, dy );
 	} else {
 		cl.mouseDx[cl.mouseIndex] += dx;
 		cl.mouseDy[cl.mouseIndex] += dy;
@@ -590,7 +584,7 @@ void CL_CmdButtons( usercmd_t *cmd ) {
 		kb[KB_BUTTONS0 + i].wasPressed = qfalse;
 	}
 
-	for ( i = 0 ; i < 8; i++ ) {
+	for ( i = 0 ; i < 7 ; i++ ) {
 		if ( kb[KB_WBUTTONS0 + i].active || kb[KB_WBUTTONS0 + i].wasPressed ) {
 			cmd->wbuttons |= 1 << i;
 		}
@@ -607,6 +601,7 @@ void CL_CmdButtons( usercmd_t *cmd ) {
 		cmd->buttons |= BUTTON_ANY;
 	}
 }
+
 
 /*
 ==============
@@ -671,7 +666,7 @@ usercmd_t CL_CreateCmd( void ) {
 
 	// RF, set the kickAngles so aiming is effected
 	recoilAdd = cl_recoilPitch->value;
-	if ( Q_fabs( cl.viewangles[PITCH] + recoilAdd ) < 40 ) {
+	if ( fabs( cl.viewangles[PITCH] + recoilAdd ) < 40 ) {
 		cl.viewangles[PITCH] += recoilAdd;
 	}
 	// the recoilPitch has been used, so clear it out
@@ -748,7 +743,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	}
 
 	// If we are downloading, we send no less than 50ms between packets
-	if ( *cls.downloadTempName &&
+	if ( *clc.downloadTempName &&
 		 cls.realtime - clc.lastPacketSentTime < 50 ) {
 		return qfalse;
 	}
@@ -757,7 +752,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	// one packet a second
 	if ( cls.state != CA_ACTIVE &&
 		 cls.state != CA_PRIMED &&
-		 !*cls.downloadTempName &&
+		 !*clc.downloadTempName &&
 		 cls.realtime - clc.lastPacketSentTime < 1000 ) {
 		return qfalse;
 	}
@@ -775,8 +770,8 @@ qboolean CL_ReadyToSendPacket( void ) {
 	// check for exceeding cl_maxpackets
 	if ( cl_maxpackets->integer < 15 ) {
 		Cvar_Set( "cl_maxpackets", "15" );
-	} else if ( cl_maxpackets->integer > 125 ) {
-		Cvar_Set( "cl_maxpackets", "125" );
+	} else if ( cl_maxpackets->integer > 100 ) {
+		Cvar_Set( "cl_maxpackets", "100" );
 	}
 	oldPacketNum = ( clc.netchan.outgoingSequence - 1 ) & PACKET_MASK;
 	delta = cls.realtime -  cl.outPackets[ oldPacketNum ].p_realtime;

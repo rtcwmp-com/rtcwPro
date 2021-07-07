@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -410,7 +410,7 @@ void CG_KickAngles( void ) {
 					cg.kickAngles[i] += kickChange;
 					if ( !cg.kickAngles[i] && frametime ) {
 						cg.kickAVel[i] = 0;
-					} else if ( Q_fabs( cg.kickAngles[i] ) > maxKickAngles[i] ) {
+					} else if ( fabs( cg.kickAngles[i] ) > maxKickAngles[i] ) {
 						cg.kickAngles[i] = maxKickAngles[i] * ( ( 2 * ( cg.kickAngles[i] > 0 ) ) - 1 );
 						cg.kickAVel[i] = 0; // force Avel to return us to center rather than keep going outside range
 					}
@@ -424,7 +424,7 @@ void CG_KickAngles( void ) {
 		// recoil is added to input viewangles per frame
 		if ( cg.recoilPitch ) {
 			// apply max recoil
-			if ( Q_fabs( cg.recoilPitch ) > recoilMaxSpeed ) {
+			if ( fabs( cg.recoilPitch ) > recoilMaxSpeed ) {
 				if ( cg.recoilPitch > 0 ) {
 					cg.recoilPitch = recoilMaxSpeed;
 				} else {
@@ -435,7 +435,7 @@ void CG_KickAngles( void ) {
 			if ( frametime ) {
 				idealCenterSpeed = -( 2.0 * ( cg.recoilPitch > 0 ) - 1.0 ) * recoilCenterSpeed * ft;
 				if ( idealCenterSpeed ) {
-					if ( Q_fabs( idealCenterSpeed ) < Q_fabs( cg.recoilPitch ) ) {
+					if ( fabs( idealCenterSpeed ) < fabs( cg.recoilPitch ) ) {
 						cg.recoilPitch += idealCenterSpeed;
 					} else {    // back zero out
 						cg.recoilPitch = 0;
@@ -443,7 +443,7 @@ void CG_KickAngles( void ) {
 				}
 			}
 		}
-		if ( Q_fabs( cg.recoilPitch ) > recoilIgnoreCutoff ) {
+		if ( fabs( cg.recoilPitch ) > recoilIgnoreCutoff ) {
 			cg.recoilPitchAngle += cg.recoilPitch * ft;
 		}
 	}
@@ -715,6 +715,7 @@ static void CG_OffsetFirstPersonView( void ) {
 // Zoom controls
 //
 
+
 // probably move to server variables
 float zoomTable[ZOOM_MAX_ZOOMS][2] = {
 // max {out,in}
@@ -727,11 +728,6 @@ float zoomTable[ZOOM_MAX_ZOOMS][2] = {
 	{55, 55}    //	mg42
 };
 
-/*
-==============
-CG_AdjustZoomVal
-==============
-*/
 void CG_AdjustZoomVal( float val, int type ) {
 	cg.zoomval += val;
 	if ( cg.zoomval > zoomTable[type][ZOOM_OUT] ) {
@@ -742,11 +738,6 @@ void CG_AdjustZoomVal( float val, int type ) {
 	}
 }
 
-/*
-==============
-CG_ZoomIn_f
-==============
-*/
 void CG_ZoomIn_f( void ) {
 	if ( cg_entities[cg.snap->ps.clientNum].currentState.weapon == WP_SNIPERRIFLE ) {
 		CG_AdjustZoomVal( -( cg_zoomStepSniper.value ), ZOOM_SNIPER );
@@ -757,11 +748,6 @@ void CG_ZoomIn_f( void ) {
 	}
 }
 
-/*
-==============
-CG_ZoomOut_f
-==============
-*/
 void CG_ZoomOut_f( void ) {
 	if ( cg_entities[cg.snap->ps.clientNum].currentState.weapon == WP_SNIPERRIFLE ) {
 		CG_AdjustZoomVal( cg_zoomStepSniper.value, ZOOM_SNIPER );
@@ -771,6 +757,7 @@ void CG_ZoomOut_f( void ) {
 		CG_AdjustZoomVal( cg_zoomStepSniper.value, ZOOM_SNIPER ); // JPW NERVE per atvi request BINOC);
 	}
 }
+
 
 /*
 ==============
@@ -818,183 +805,6 @@ void CG_Zoom( void ) {
 			cg.zoomval = 0;
 		}
 	}
-}
-
-/*
-====================
-OSPx - Zoom FOV
-CG_zoomViewSet_f
-
-Toggles zoom effect (based upon cg_zoomFOV value - can be in or out)
-====================
-*/
-void CG_zoomViewSet_f(void) {
-	float value;
-
-	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ||
-		cg.snap->ps.pm_flags & PMF_FOLLOW)
-		return;
-
-	if (cg_zoomedFOV.value > 120)
-		value = 120;
-	else if (cg_zoomedFOV.value < 90)
-		value = 90;
-	else
-		value = cg_zoomedFOV.value;
-
-	if (!cg.zoomedFOV) {
-		cg.zoomedVal = value;
-		cg.zoomedTime = cg.time;
-		cg.zoomedFOV = qtrue;
-	}
-}
-
-/*
-====================
-OSPx - Zoom FOV
-CG_zoomViewRevert_f
-
-Reverts back to default (when player releases the key)
-====================
-*/
-void CG_zoomViewRevert_f(void) {
-	cg.zoomedVal = cg_fov.value;
-	cg.zoomedTime = cg.time;
-	cg.zoomedFOV = qfalse;
-	// Need to reset this..
-	cg.zoomed = qfalse;
-	cg.zoomedBinoc = qfalse;
-	cg.zoomedScope = qfalse;
-	cg.zoomTime = 0;
-	cg.zoomval = 0;
-}
-
-/*
-====================
-OSPx - Zoom FOV
-CG_CalcZoomedFov
-
-Basically a rip of CG_CalcFov
-====================
-*/
-static int CG_CalcZoomedFov(void) {
-	static float lastfov = 90;      // for transitions back from zoomed in modes
-	float x;
-	float fov_x, fov_y;
-	float zoomFov;
-	float f;
-	float value;
-
-	if (cg.predictedPlayerState.stats[STAT_HEALTH] <= 0 && !(cgs.gametype >= GT_WOLF && cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-		cg.zoomedFOV = qfalse;
-		cg.zoomedTime = 0;
-		cg.zoomedVal = 0;
-		// Reset any other views..
-	}
-	else {
-		cg.zoomed = qfalse;
-		cg.zoomedBinoc = qfalse;
-		cg.zoomedScope = qfalse;
-		cg.zoomTime = 0;
-		cg.zoomval = 0;
-	}
-
-	if (cg.predictedPlayerState.pm_type == PM_INTERMISSION) {
-		// if in intermission, use a fixed value
-		fov_x = 90;
-	}
-	else {
-		// user selectable
-		if (cgs.dmflags & DF_FIXED_FOV) {
-			// dmflag to prevent wide fov for all clients
-			fov_x = 90;
-		}
-		else {
-			fov_x = cg_fov.value;
-			if (cgs.gametype == GT_SINGLE_PLAYER) {
-				if (fov_x < 1) {
-					fov_x = 1;	// OSPx - Limited from 120 to 90
-				}
-				else if (fov_x > 120) {
-					fov_x = 120;
-				}
-			}
-			else {
-				if (fov_x < 90) {
-					fov_x = 90;	 // OSPx - Limited from 120 to 90
-				}
-				else if (fov_x > 120) {
-					fov_x = 120;
-				}
-			}
-		}
-
-		// account for zooms
-		if (cg.zoomedVal) {
-			zoomFov = cg.zoomedVal;   // (SA) use user scrolled amount
-
-			if (zoomFov < 1) {
-				zoomFov = 1;	// OSPx - Limited from 120 to 90
-			}
-			else if (zoomFov > 120) {
-				zoomFov = 120;
-			}
-		}
-		else {
-			zoomFov = lastfov;
-		}
-
-		// zooming in
-		if (cg.zoomedFOV) {
-			cg.zoomedBinoc = qfalse;
-			f = (cg.time - cg.zoomedTime) / (float)ZOOM_TIME;
-			if (f > 1.0) {
-				fov_x = cg.zoomedVal;
-			}
-			else {
-				fov_x = fov_x + f * (cg.zoomedVal - fov_x);
-			}
-			lastfov = fov_x;
-		}
-		else { // zooming out
-			f = (cg.time - cg.zoomedTime) / (float)ZOOM_TIME;
-			if (f > 1.0) {
-				fov_x = fov_x;
-			}
-			else {
-				fov_x = zoomFov + f * (fov_x - zoomFov);
-			}
-		}
-	}
-
-	x = cg.refdef.width / tan(fov_x / 360 * M_PI);
-	fov_y = atan2(cg.refdef.height, x);
-	fov_y = fov_y * 360 / M_PI;
-	// set it
-	cg.refdef.fov_x = fov_x;
-	cg.refdef.fov_y = fov_y;
-
-	if (cg_zoomedSens.value > 2.0f)
-		value = 2.0f;
-	else if (cg_zoomedSens.value < 0.0f)
-		value = 0.1f;
-	else
-		value = cg_zoomedSens.value;
-
-
-//	if (cg.snap->ps.pm_type == PM_FREEZE || (cg.snap->ps.pm_type == PM_DEAD && (cg.snap->ps.pm_flags & PMF_LIMBO)) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER) {
-if (cg.snap->ps.pm_type == PM_FREEZE) {
-		// No movement for pauses
-		cg.zoomSensitivity = 0;
-	}
-	else if (!cg.zoomedFOV) {
-		cg.zoomSensitivity = 1;
-	}
-	else {
-		cg.zoomSensitivity = value;
-	}
-
-	return qfalse;
 }
 
 
@@ -1121,29 +931,12 @@ static int CG_CalcFov( void ) {
 	} else {
 		cg.refdef.rdflags &= ~RDF_UNDERWATER;
 	}
-/*
-	// L0 - Poison										// Pause handling
-	if (  cg.predictedPlayerState.eFlags & EF_POISONED && !cg.snap->ps.pm_type == PM_FREEZE )
-	{
-		phase = cg.time / 1000.0 * 0.3 * M_PI * 2;	//phase = cg.time / 1000.0 * 0.6 * M_PI * 2;
-		v = 12 * sin( phase );	//v = 2 * sin( phase );
-		fov_x += v;
-		fov_y -= v;
-		cg.refdef.rdflags |= RDF_UNDERWATER;
 
-		inwater = qtrue;
-	} // End
-*/
 	// set it
 	cg.refdef.fov_x = fov_x;
 	cg.refdef.fov_y = fov_y;
 
-	// L0 - Freezed
-//	if ( cg.snap->ps.pm_type == PM_FREEZE || ( cg.snap->ps.pm_type == PM_DEAD && ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER ) {
-	if ( cg.snap->ps.pm_type == PM_FREEZE ) {
-		// No movement for pauses
-		cg.zoomSensitivity = 0;
-	} else if ( !cg.zoomedBinoc ) {
+	if ( !cg.zoomedBinoc ) {
 		// NERVE - SMF - fix for zoomed in/out movement bug
 		if ( cg.zoomval ) {
 			if ( cg.snap->ps.weapon == WP_SNOOPERSCOPE ) {
@@ -1230,15 +1023,13 @@ static void CG_DamageBlendBlob( void ) {
 		VectorMA( ent.origin, vd->damageX * -8, cg.refdef.viewaxis[1], ent.origin );
 		VectorMA( ent.origin, vd->damageY * 8, cg.refdef.viewaxis[2], ent.origin );
 
-		ent.radius = vd->damageValue * 0.4 * ( 0.5 + 0.5 * (float)t / maxTime ) * ( 0.75 + 0.5 * Q_fabs( sin( vd->damageTime ) ) );
+		ent.radius = vd->damageValue * 0.4 * ( 0.5 + 0.5 * (float)t / maxTime ) * ( 0.75 + 0.5 * fabs( sin( vd->damageTime ) ) );
 
 		ent.customShader = cgs.media.viewBloodAni[(int)( floor( ( (float)t / maxTime ) * 4.9 ) )]; //cgs.media.viewBloodShader;
 		ent.shaderRGBA[0] = 255;
 		ent.shaderRGBA[1] = 255;
 		ent.shaderRGBA[2] = 255;
-		// OSPx - Blood Damage Blend
-		ent.shaderRGBA[3] = 255 * (	(cg_bloodDamageBlend.value > 1.0f) ? 1.0f :
-									(cg_bloodDamageBlend.value < 0.0f) ? 0.0f : cg_bloodDamageBlend.value);
+		ent.shaderRGBA[3] = 255;
 		trap_R_AddRefEntityToScene( &ent );
 
 		redFlash += ent.radius;
@@ -1246,7 +1037,7 @@ static void CG_DamageBlendBlob( void ) {
 
 	/* moved over to cg_draw.c
 	if (cg.v_dmg_time > cg.time) {
-		redFlash = Q_fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
+		redFlash = fabs(cg.v_dmg_pitch * ((cg.v_dmg_time - cg.time) / DAMAGE_TIME));
 
 		// blend the entire screen red
 		if (redFlash > 5)
@@ -1369,7 +1160,7 @@ static int CG_CalcViewValues( void ) {
 	}
 
 	cg.bobcycle = ( ps->bobCycle & 128 ) >> 7;
-	cg.bobfracsin = Q_fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
+	cg.bobfracsin = fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
 	cg.xyspeed = sqrt( ps->velocity[0] * ps->velocity[0] +
 					   ps->velocity[1] * ps->velocity[1] );
 
@@ -1470,12 +1261,7 @@ static int CG_CalcViewValues( void ) {
 	}
 
 	// field of view
-	// OSPx - Patched for zoomed POV
-	if (cg.zoomedFOV)
-		return CG_CalcZoomedFov();
-	else
-		// End
-		return CG_CalcFov();
+	return CG_CalcFov();
 }
 
 
@@ -1571,6 +1357,7 @@ void CG_DrawSkyBoxPortal( void ) {
 		fov_x = 90;
 	}
 
+
 	// setup fog the first time, ignore this part of the configstring after that
 	token = COM_ParseExt( &cstr, qfalse );
 	if ( !token || !token[0] ) {
@@ -1626,6 +1413,7 @@ void CG_DrawSkyBoxPortal( void ) {
 
 //----(SA)	end
 
+
 	if ( cg.predictedPlayerState.pm_type == PM_INTERMISSION ) {
 		// if in intermission, use a fixed value
 		fov_x = 90;
@@ -1665,18 +1453,6 @@ void CG_DrawSkyBoxPortal( void ) {
 				fov_x = fov_x + f * ( zoomFov - fov_x );
 			}
 			lastfov = fov_x;
-// OSPx - zommed FOV
-		}
-		else if (cg.zoomedFOV) {
-			f = (cg.time - cg.zoomedTime) / (float)ZOOM_TIME;
-			if (f > 1.0) {
-				fov_x = cg.zoomedVal;
-			}
-			else {
-				fov_x = fov_x + f * (cg.zoomedVal - fov_x);
-			}
-			lastfov = fov_x;
-// End
 		} else if ( cg.zoomval ) {    // zoomed by sniper/snooper
 			fov_x = cg.zoomval;
 			lastfov = fov_x;
@@ -1699,6 +1475,9 @@ void CG_DrawSkyBoxPortal( void ) {
 	if ( cg.snap->ps.persistant[PERS_HWEAPON_USE] ) {
 		fov_x = 55;
 	}
+
+
+
 
 	cg.refdef.time = cg.time;
 
@@ -1801,7 +1580,8 @@ void CG_DrawNotebook( void ) {
 
 //=========================================================================
 
-extern void CG_SetupDlightstyles(void);
+extern void CG_SetupDlightstyles( void );
+
 
 //#define DEBUGTIME_ENABLED
 #ifdef DEBUGTIME_ENABLED
@@ -2025,16 +1805,5 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	}
 
 	DEBUGTIME
-
-	// sswolf - complete OSP demo features
-	// OSPx - Count time..
-	if (!cg.timeCounter) {
-		cg.timeCounter = cg.time + 1000;
-		cg.timein++;
-	}
-	else if (cg.timeCounter < cg.time) {
-		cg.timeCounter = cg.time + 1000;
-		cg.timein++;
-	}
 }
 

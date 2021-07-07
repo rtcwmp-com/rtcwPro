@@ -99,7 +99,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( Q_fabs( x ) == 0.0 ) {
+	if ( fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;

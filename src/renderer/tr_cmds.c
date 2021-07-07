@@ -437,15 +437,6 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 	}
 
 	//
-	// anisotropic filtering stuff
-	//
-	if (r_textureAnisotropy->modified) {
-		R_SyncRenderThread();
-		GL_TextureAnisotropy(r_textureAnisotropy->value);
-		r_textureAnisotropy->modified = qfalse;
-	}
-
-	//
 	// NVidia stuff
 	//
 

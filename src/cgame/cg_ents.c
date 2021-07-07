@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -309,7 +309,7 @@ static void CG_EntityEffects( centity_t *cent ) {
 	// Ridah, flaming sounds
 	if ( CG_EntOnFire( cent ) ) {
 		// play a flame blow sound when moving
-		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flameBlowSound, (int)( 255.0 * ( 1.0 - Q_fabs( cent->fireRiseDir[2] ) ) ) );
+		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flameBlowSound, (int)( 255.0 * ( 1.0 - fabs( cent->fireRiseDir[2] ) ) ) );
 		// play a burning sound when not moving
 		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flameSound, (int)( 0.3 * 255.0 * ( pow( cent->fireRiseDir[2],2 ) ) ) );
 	}
@@ -1768,6 +1768,7 @@ static void CG_Prop( centity_t *cent ) {
 
 }
 
+
 /*
 =========================
 CG_AdjustPositionForMover
@@ -1779,8 +1780,6 @@ void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int
 	centity_t   *cent;
 	vec3_t oldOrigin, origin, deltaOrigin;
 	vec3_t oldAngles, angles, deltaAngles;
-//	vec3_t	matrix[3], transpose[3];
-//	vec3_t	org, org2, move2;
 
 	if ( outDeltaAngles ) {
 		VectorClear( outDeltaAngles );
@@ -1788,7 +1787,6 @@ void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int
 
 	if ( moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL ) {
 		VectorCopy( in, out );
-//		VectorCopy(angles_in, angles_out);
 		return;
 	}
 
@@ -1796,7 +1794,6 @@ void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int
 
 	if ( cent->currentState.eType != ET_MOVER ) {
 		VectorCopy( in, out );
-//		VectorCopy(angles_in, angles_out);
 		return;
 	}
 
@@ -1809,14 +1806,12 @@ void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int
 	VectorSubtract( origin, oldOrigin, deltaOrigin );
 	VectorSubtract( angles, oldAngles, deltaAngles );
 
-
-
 	VectorAdd( in, deltaOrigin, out );
 	if ( outDeltaAngles ) {
 		VectorCopy( deltaAngles, outDeltaAngles );
 	}
 
-//	VectorAdd( angles_in, deltaAngles, angles_out );
+	// FIXME: origin change when on a rotating object
 }
 
 
@@ -1891,10 +1886,8 @@ static void CG_CalcEntityLerpPositions( centity_t *cent ) {
 	// player state
 	if ( cent != &cg.predictedPlayerEntity ) {
 		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum,
-							cg.snap->serverTime, cg.time, cent->lerpOrigin, NULL );
-							//							cg.snap->serverTime, cg.time, cent->lerpOrigin, cent->lerpAngles, cent->lerpAngles);
+								   cg.snap->serverTime, cg.time, cent->lerpOrigin, NULL );
 	}
-
 }
 
 /*

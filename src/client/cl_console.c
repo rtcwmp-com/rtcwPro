@@ -594,8 +594,8 @@ void Con_DrawNotify( void ) {
 			if ( ( text[x] & 0xff ) == ' ' ) {
 				continue;
 			}
-			if ( ( ( text[x] >> 8 ) & COLOR_BITS) != currentColor ) {
-				currentColor = ( text[x] >> 8 ) & COLOR_BITS;
+			if ( ( ( text[x] >> 8 ) & 7 ) != currentColor ) {
+				currentColor = ( text[x] >> 8 ) & 7;
 				re.SetColor( g_color_table[currentColor] );
 			}
 			SCR_DrawSmallChar( cl_conXOffset->integer + con.xadjust + ( x + 1 ) * SMALLCHAR_WIDTH, v, text[x] & 0xff );
@@ -677,7 +677,7 @@ void Con_DrawSolidConsole( float frac ) {
 			re.SetColor( color );
 
 			// draw the logo
-			SCR_DrawPic( 362, 70, 256, 128, cls.consoleShader2 );
+			SCR_DrawPic( 192, 70, 256, 128, cls.consoleShader2 );
 			re.SetColor( NULL );
 		}
 		// -NERVE - SMF
@@ -748,8 +748,8 @@ void Con_DrawSolidConsole( float frac ) {
 				continue;
 			}
 
-			if ( ( ( text[x] >> 8 ) & COLOR_BITS) != currentColor ) {
-				currentColor = ( text[x] >> 8 ) & COLOR_BITS;
+			if ( ( ( text[x] >> 8 ) & 7 ) != currentColor ) {
+				currentColor = ( text[x] >> 8 ) & 7;
 				re.SetColor( g_color_table[currentColor] );
 			}
 			SCR_DrawSmallChar(  con.xadjust + ( x + 1 ) * SMALLCHAR_WIDTH, y, text[x] & 0xff );

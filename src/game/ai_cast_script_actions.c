@@ -1820,7 +1820,7 @@ qboolean AICast_ScriptAction_Mount( cast_state_t *cs, char *params ) {
 	}
 
 	// if we are facing it, start holding activate
-	if ( Q_fabs( cs->bs->ideal_viewangles[YAW] - cs->bs->viewangles[YAW] ) < 10 ) {
+	if ( fabs( cs->bs->ideal_viewangles[YAW] - cs->bs->viewangles[YAW] ) < 10 ) {
 		ent = &g_entities[cs->entityNum];
 		Cmd_Activate_f( ent );
 		// did we mount it?

@@ -1150,29 +1150,23 @@ skyParms <outerbox> <cloudheight> <innerbox>
 ===============
 */
 static void ParseSkyParms( char **text ) {
-	char* token;
-	static char* suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
+	char        *token;
+	static char *suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
 	char pathname[MAX_QPATH];
 	int i;
 
 	// outerbox
-	token = COM_ParseExt(text, qfalse);
-	if (token[0] == 0) {
-		ri.Printf(PRINT_WARNING, "WARNING: 'skyParms' missing parameter in shader '%s'\n", shader.name);
+	token = COM_ParseExt( text, qfalse );
+	if ( token[0] == 0 ) {
+		ri.Printf( PRINT_WARNING, "WARNING: 'skyParms' missing parameter in shader '%s'\n", shader.name );
 		return;
 	}
-	if (strcmp(token, "-")) {
-		for (i = 0; i < 6; i++) {
-			Com_sprintf(pathname, sizeof(pathname), "%s_%s.tga"
-				, token, suf[i]);
-			// L0 - ioquake ATI skybox fix
-#ifdef GL_CLAMP_TO_EDGE
-			shader.sky.outerbox[i] = R_FindImageFile((char*)pathname, qtrue, qtrue, GL_CLAMP_TO_EDGE);
-#else
-			shader.sky.outerbox[i] = R_FindImageFile((char*)pathname, qtrue, qtrue, GL_CLAMP);
-#endif 
-			// End			
-			if (!shader.sky.outerbox[i]) {
+	if ( strcmp( token, "-" ) ) {
+		for ( i = 0 ; i < 6 ; i++ ) {
+			Com_sprintf( pathname, sizeof( pathname ), "%s_%s.tga"
+						 , token, suf[i] );
+			shader.sky.outerbox[i] = R_FindImageFile( ( char * ) pathname, qtrue, qtrue, GL_CLAMP );
+			if ( !shader.sky.outerbox[i] ) {
 				shader.sky.outerbox[i] = tr.defaultImage;
 			}
 		}
@@ -1396,10 +1390,6 @@ static qboolean ParseShader( char **text ) {
 		}
 		// stage definition
 		else if ( token[0] == '{' ) {
-			if (s >= MAX_SHADER_STAGES) {
-				ri.Printf(PRINT_WARNING, "WARNING: too many stages in shader %s\n", shader.name);
-				return qfalse;
-			}
 			if ( !ParseStage( &stages[s], text ) ) {
 				return qfalse;
 			}
@@ -1543,7 +1533,7 @@ static qboolean ParseShader( char **text ) {
 				ri.Printf( PRINT_WARNING, "WARNING: missing shader name for 'sunshader'\n" );
 				continue;
 			}
-			tr.sunShaderName = "sun";
+			tr.sunShaderName = CopyString( token );
 		}
 //----(SA)	added
 		else if ( !Q_stricmp( token, "lightgridmulamb" ) ) { // ambient multiplier for lightgrid
@@ -2350,7 +2340,7 @@ static shader_t *FinishShader( void ) {
 	shader.numUnfoggedPasses = stage;
 
 	// fogonly shaders don't have any normal passes
-	if (stage == 0 && !shader.isSky) {
+	if ( stage == 0 ) {
 		shader.sort = SS_FOG;
 	}
 
@@ -2524,12 +2514,6 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 		lightmapIndex = LIGHTMAP_BY_VERTEX;
 	}
 
-	else if (lightmapIndex < LIGHTMAP_2D) {
-		// negative lightmap indexes cause stray pointers (think tr.lightmaps[lightmapIndex])
-		ri.Printf(PRINT_WARNING, "WARNING: shader '%s' has invalid lightmap index of %d\n", name, lightmapIndex);
-		lightmapIndex = LIGHTMAP_BY_VERTEX;
-	}
-
 	COM_StripExtension2( name, strippedName, sizeof( strippedName ) );
 
 	hash = generateHashValue( strippedName );
@@ -2537,6 +2521,25 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 	//
 	// see if the shader is already loaded
 	//
+#if 1
+	for ( sh = hashTable[hash]; sh; sh = sh->next ) {
+		// index by name
+
+		// Ridah, modified this so we don't keep trying to load an invalid lightmap shader
+/*
+		if ( sh->lightmapIndex == lightmapIndex &&
+			!Q_stricmp(sh->name, strippedName)) {
+			// match found
+			return sh;
+		}
+*/
+		if ( ( ( sh->lightmapIndex == lightmapIndex ) || ( sh->lightmapIndex < 0 && lightmapIndex >= 0 ) ) &&
+			 !Q_stricmp( sh->name, strippedName ) ) {
+			// match found
+			return sh;
+		}
+	}
+#else
 	for ( sh = hashTable[hash]; sh; sh = sh->next ) {
 		// NOTE: if there was no shader or image available with the name strippedName
 		// then a default shader is created with lightmapIndex == LIGHTMAP_NONE, so we
@@ -2548,7 +2551,7 @@ shader_t *R_FindShader( const char *name, int lightmapIndex, qboolean mipRawImag
 			return sh;
 		}
 	}
-
+#endif
 
 	// make sure the render thread is stopped, because we are probably
 	// going to have to upload an image
@@ -2671,13 +2674,6 @@ qhandle_t RE_RegisterShaderFromImage( const char *name, int lightmapIndex, image
 	shader_t    *sh;
 
 	hash = generateHashValue( name );
-
-	// probably not necessary since this function
-	// only gets called from tr_font.c with lightmapIndex == LIGHTMAP_2D
-	// but better safe than sorry.
-	if (lightmapIndex >= tr.numLightmaps) {
-		lightmapIndex = LIGHTMAP_WHITEIMAGE;
-	}
 
 	//
 	// see if the shader is already loaded
@@ -3117,16 +3113,7 @@ static void CreateInternalShaders( void ) {
 static void CreateExternalShaders( void ) {
 	tr.projectionShadowShader = R_FindShader( "projectionShadow", LIGHTMAP_NONE, qtrue );
 	tr.flareShader = R_FindShader( "flareShader", LIGHTMAP_NONE, qtrue );
-	// Hack to make fogging work correctly on flares. Fog colors are calculated
-	// in tr_flare.c already.
-	if (!tr.flareShader->defaultShader) {
-		int index;
-
-		for (index = 0; index < tr.flareShader->numUnfoggedPasses; index++) {
-			tr.flareShader->stages[index]->adjustColorsForFog = ACFF_NONE;
-			tr.flareShader->stages[index]->stateBits |= GLS_DEPTHTEST_DISABLE;
-		}
-	}
+//	tr.sunShader = R_FindShader( "sun", LIGHTMAP_NONE, qtrue );	//----(SA)	let sky shader set this
 	tr.sunflareShader[0] = R_FindShader( "sunflare1", LIGHTMAP_NONE, qtrue );
 	tr.dlightShader = R_FindShader( "dlightshader", LIGHTMAP_NONE, qtrue );
 }

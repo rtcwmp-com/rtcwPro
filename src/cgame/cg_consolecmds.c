@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,10 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
-// sswolf - minimizer
-#ifdef _WIN32
-#include <windows.h>
-#endif
+
 
 void CG_TargetCommand_f( void ) {
 	int targetNum;
@@ -468,12 +465,6 @@ static void CG_SetWeaponCrosshair_f( void ) {
 }
 // -NERVE - SMF
 
-// sswolf - reset the top speed for cg_drawspeed
-static void CG_ResetMaxSpeed_f(void)
-{
-	cg.resetmaxspeed = qtrue;
-}
-
 /*
 ===================
 CG_DumpLocation_f
@@ -533,221 +524,6 @@ static void CG_DumpLocation_f( void ) {
 			   (int) cg.snap->ps.origin[0], (int) cg.snap->ps.origin[1], (int) cg.snap->ps.origin[2] );
 }
 
-/*
-===================
-OSPx
-
-+vstr
-===================
-*/
-
-/************ L0 - OSP dump ************/
-const char *aMonths[12] = {
-	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-
-// currentime
-void CG_currentTime_f( void ) {
-	qtime_t ct;
-
-	trap_RealTime( &ct );
-	CG_Printf( "[cgnotify]Current time: ^3%02d:%02d:%02d (%02d %s %d)\n", ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, aMonths[ct.tm_mon], 1900 + ct.tm_year );
-}
-// Dynamically names a demo and sets up the recording
-void CG_autoRecord_f(void) {	// Due rtcw bug we need to sync"h" first..but to avoid any bugs we set it to 0 first..
-	trap_SendConsoleCommand(va("g_synchronousclients 0;g_synchronousclients 1;record %s;g_synchronousclients 0\n", CG_generateFilename()));
-}
-
-// Dynamically names a screenshot[JPEG]
-void CG_autoScreenShot_f(void) {
-	trap_SendConsoleCommand(va("screenshot%s %s\n", ((cg_useScreenshotJPEG.integer) ? "JPEG" : ""), CG_generateFilename()));
-}
-void CG_vstrDown_f(void) {
-	if (trap_Argc() == 5) {
-		trap_SendConsoleCommand(va("vstr %s;", CG_Argv(1)));
-	}
-	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
-}
-
-/*
-===================
-OSPx
-
--vstr
-===================
-*/
-void CG_vstrUp_f(void) {
-	if (trap_Argc() == 5) {
-		trap_SendConsoleCommand(va("vstr %s;", CG_Argv(2)));
-	}
-	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
-}
-
-// +wstats
-void CG_wStatsDown_f( void ) {
-	if ( !cg.demoPlayback ) {
-		int i = cg.snap->ps.clientNum;
-
-		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
-			CPri( "You must be a player or following a player to use +wstats\n" );
-			return;
-		}
-
-        if(cgs.gamestats.requestTime < cg.time) {
-            cgs.gamestats.requestTime = cg.time + 500;
-            trap_SendClientCommand(va("wstats %d", i));
-        }
-
-        cg.showStats = qtrue;
-    }
-
-
-}
-
-// -wstats
-void CG_wStatsUp_f( void ) {
-
-		cg.showStats = qfalse;
-		cgs.gamestats.show = SHOW_SHUTDOWN;
-        CG_windowFree( cg.statsWindow );
-		cg.statsWindow = NULL;
-
-}
-// +stats
-void CG_StatsDown_f( void ) {
-    /*
-	if ( !cg.demoPlayback ) {
-		int i = cg.snap->ps.clientNum;
-
-		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
-			CPri( "You must be a player or following a player to use +stats\n" );
-			return;
-		}
-
-		// wstats overlap so close them first if they're open
-		if ( cgs.gamestats.show == SHOW_ON ) {
-			CG_wStatsUp_f();
-		}
-
-		if ( cgs.clientGameStats.show == SHOW_SHUTDOWN && cg.time < cgs.clientGameStats.fadeTime ) {
-			cgs.clientGameStats.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.clientGameStats.fadeTime;
-		} else if ( cgs.clientGameStats.show != SHOW_ON ) {
-			cgs.clientGameStats.fadeTime = cg.time + STATS_FADE_TIME;
-		}
-
-		cgs.clientGameStats.show = SHOW_ON;
-
-		if ( cgs.clientGameStats.requestTime < cg.time ) {
-			cgs.clientGameStats.requestTime = cg.time + 2000;
-			trap_SendClientCommand( va( "cstats %d", i ) );
-		}
-	}
-	*/
-    if ( !cg.demoPlayback ) {
-		int i = cg.snap->ps.clientNum;
-
-		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
-			CPri( "You must be a player or following a player to use +stats\n" );
-			return;
-		}
-
-        if(cgs.clientGameStats.requestTime < cg.time) {
-            cgs.clientGameStats.requestTime = cg.time + 500;
-            trap_SendClientCommand( va( "cstats %d", i ) );
-        }
-
-        cg.showCLgameStats = qtrue;
-    }
-
-}
-
-// -stats
-void CG_StatsUp_f( void ) {
-    /*
-	if ( cgs.clientGameStats.show == SHOW_ON ) {
-		cgs.clientGameStats.show = SHOW_SHUTDOWN;
-		if ( cg.time < cgs.clientGameStats.fadeTime ) {
-			cgs.clientGameStats.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.clientGameStats.fadeTime;
-		} else {
-			cgs.clientGameStats.fadeTime = cg.time + STATS_FADE_TIME;
-		}
-		CG_windowFree( cg.clientStatsWindow );
-		cg.clientStatsWindow = NULL;
-	}
-	*/
-    cg.showCLgameStats = qfalse;
-    cgs.clientGameStats.show = SHOW_SHUTDOWN;
-    CG_windowFree( cg.clientStatsWindow );
-    cg.clientStatsWindow = NULL;
-
-}
-
-// +topshots
-void CG_topshotsDown_f( void ) {
-	if ( !cg.demoPlayback ) {
-		if ( cgs.topshots.show == SHOW_SHUTDOWN && cg.time < cgs.topshots.fadeTime ) {
-			cgs.topshots.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.topshots.fadeTime;
-		} else if ( cgs.topshots.show != SHOW_ON ) {
-			cgs.topshots.fadeTime = cg.time + STATS_FADE_TIME;
-		}
-
-		cgs.topshots.show = SHOW_ON;
-
-		if ( cgs.topshots.requestTime < cg.time ) {
-			cgs.topshots.requestTime = cg.time + 2000;
-			trap_SendClientCommand( "stshots" );
-		}
-	}
-}
-
-// -topshots
-void CG_topshotsUp_f( void ) {
-	if ( cgs.topshots.show == SHOW_ON ) {
-		cgs.topshots.show = SHOW_SHUTDOWN;
-		if ( cg.time < cgs.topshots.fadeTime ) {
-			cgs.topshots.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.topshots.fadeTime;
-		} else {
-			cgs.topshots.fadeTime = cg.time + STATS_FADE_TIME;
-		}
-		CG_windowFree( cg.topshotsWindow );
-		cg.topshotsWindow = NULL;
-	}
-}
-
-// Dumps stats in file
-void CG_dumpStats_f( void ) {
-	if ( cgs.dumpStatsTime < cg.time ) {
-		cgs.dumpStatsTime = cg.time + 2000;
-		trap_SendClientCommand( ( (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR) ) ? "statsall" : "weaponstats" );
-	}
-}
-// Force tapout
-void CG_ForceTapOut_f(void) {
-	trap_SendClientCommand("forcetapout");
-}
-/************ L0 - OSP dump ends here ************/
-
-/*
-================
-sswolf - minimizer (windows only)
-Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
-================
-*/
-static void CG_Minimize_f(void) 
-{
-#ifdef _WIN32
-	HWND wnd;
-
-	wnd = GetForegroundWindow();
-	if (wnd) 
-	{
-		ShowWindow(wnd, SW_MINIMIZE);
-	}
-#else
-	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
-#endif
-}
 
 typedef struct {
 	char    *cmd;
@@ -802,32 +578,10 @@ static consoleCommand_t commands[] = {
 	{ "SetWeaponCrosshair", CG_SetWeaponCrosshair_f },
 	// -NERVE - SMF
 
-	// OSPx
-	{ "statsdump", CG_dumpStats_f },
-	{ "+zoomView", CG_zoomViewSet_f },
-	{ "-zoomView", CG_zoomViewRevert_f },
-	{ "+vstr", CG_vstrDown_f },
-	{ "-vstr", CG_vstrUp_f },
-	{ "autoRecord", CG_autoRecord_f },
-	{ "autoScreenshot", CG_autoScreenShot_f },
-	{ "+wstats", CG_wStatsDown_f },
-	{ "-wstats", CG_wStatsUp_f },
-	{ "+stats", CG_StatsDown_f },
-	{ "-stats", CG_StatsUp_f },
-	{ "+wtopshots", CG_topshotsDown_f },
-	{ "-wtopshots", CG_topshotsUp_f },
-	{ "forcetapout", CG_ForceTapOut_f },
-	{ "timerSet", CG_TimerSet_f },
-	{ "timerReset", CG_TimerReset_f },
-	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
-	// -OSPx
-
-	{ "minimize", CG_Minimize_f },
-	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
-
 	// Arnout
 	{ "dumploc", CG_DumpLocation_f },
 };
+
 
 /*
 =================
@@ -857,6 +611,7 @@ qboolean CG_ConsoleCommand( void ) {
 
 	return qfalse;
 }
+
 
 /*
 =================
@@ -918,134 +673,8 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "follownext" );
 	trap_AddCommand( "followprev" );
 
-	trap_AddCommand( "startmatch" );
-	trap_AddCommand( "resetmatch" );
+	trap_AddCommand( "start_match" );
+	trap_AddCommand( "reset_match" );
 	trap_AddCommand( "swap_teams" );
 	// -NERVE - SMF
-	// L0 - Make it more available..
-	trap_AddCommand( "players" );		// Prints user info (IP, GUID, STATUS..)
-	trap_AddCommand( "ref" );
-	trap_AddCommand( "?" );
-	trap_AddCommand( "gib" );			// Kills player and sends him/her straight to limbo
-	trap_AddCommand( "pm" );			// Private message
-	trap_AddCommand( "msg" );			// Private message (alternative)
-	trap_AddCommand( "smoke" );			// Toggles between smoke and Air Strike (only for LT's)
-	trap_AddCommand( "private" );		// Private chat for admins
-	trap_AddCommand( "commands" );
-    trap_AddCommand( "help" );
-    trap_AddCommand( "commandsHelp" );
-
-	trap_AddCommand( "lock" );		// Locks team
-	trap_AddCommand( "unlock" );		// Unlocks team
-	trap_AddCommand( "speclock" );		// Locks team from specs
-	trap_AddCommand( "specunlock" );	// Opens team for specs
-	trap_AddCommand( "specinvite" );		// Invites player to spec team
-	trap_AddCommand( "specuninvite" );		// Takes players ability to spec the team
-	trap_AddCommand( "specuninviteall" );	// Removes all spectators from that team
-	// Pause
-	trap_AddCommand("pause");
-	trap_AddCommand("unpause");
-	trap_AddCommand("timein");
-	trap_AddCommand("timeout");
-	// Ready
-	trap_AddCommand("readyteam");
-	trap_AddCommand("ready");
-	trap_AddCommand("notready");
-	// Misc
-	trap_AddCommand("players");
-	trap_AddCommand("say_teamnl");
-	trap_AddCommand("forcefps");		// adding this so we don't get an invalid command error
-	// Stats
-	trap_AddCommand( "scores" );		// Prints score table
-	trap_AddCommand( "weaponstats" );	// +wstats equivalent for console
-	trap_AddCommand( "topshots" );		// +topshots equivalent for console
-	trap_AddCommand( "bottomshots" );	// Dumps to console
-	trap_AddCommand( "stats" );			// Dumps to console (same as +stats just no fancy window)
-	trap_AddCommand( "statsall" );		// Dumps stats of all players
-	trap_AddCommand( "statsdump" );		// Dumps current stats
-	// Enemy spawn timer
-	trap_AddCommand("timerSet");
-	trap_AddCommand("timerReset");
-	// End
-}
-
-/*
-=================
-CG_RelayCommand
-
-Relays any client command to server.
-=================
-*/
-qboolean CG_RelayCommand(char* type, int value) {
-	
-	if (!cg.snap) {
-		return qfalse;
-	}
-
-	//if (!Q_stricmp(type, RELAY_RKVALD)) {
-	//	trap_SendClientCommand(va("say_team rkvald %d", value));
-	//}
-	return qfalse;
-}
-
-/**
- * @brief ETPro style enemy spawntimer
- */
-static void CG_TimerSet_f(void)
-{
-	if (cgs.gamestate != GS_PLAYING)
-	{
-		CG_Printf("You may only use this command during the match.\n");
-		return;
-	}
-
-	if (trap_Argc() == 1)
-	{
-		trap_Cvar_Set("cg_spawnTimer_set", "-1");
-	}
-	else if (trap_Argc() == 2)
-	{
-		char buff[32] = { "" };
-		int  spawnPeriod;
-
-		trap_Argv(1, buff, sizeof(buff));
-		spawnPeriod = atoi(buff);
-
-		if (spawnPeriod == 0)
-		{
-			trap_Cvar_Set("cg_spawnTimer_set", "-1");
-		}
-		else if (spawnPeriod < 1 || spawnPeriod > 60)
-		{
-			CG_Printf("Argument must be a number between 1 and 60 - no argument will disable the spawn timer.\n");
-		}
-		else
-		{
-			int msec = (int)(cgs.timelimit * 60000.f) - (cg.time - cgs.levelStartTime);  // 60.f * 1000.f
-
-			trap_Cvar_Set("cg_spawnTimer_period", buff);
-			trap_Cvar_Set("cg_spawnTimer_set", va("%d", msec / 1000));
-		}
-	}
-	else
-	{
-		CG_Printf("Usage: timerSet [seconds]\n");
-	}
-}
-
-/**
- * @brief ETPro style timer resetting
- */
-static void CG_TimerReset_f(void)
-{
-	int msec;
-
-	if (cgs.gamestate != GS_PLAYING)
-	{
-		CG_Printf("You may only use this command during the match.\n");
-		return;
-	}
-
-	msec = (int)(cgs.timelimit * 60000.f) - (cg.time - cgs.levelStartTime); // 60.f * 1000.f
-	trap_Cvar_Set("cg_spawnTimer_set", va("%d", msec / 1000));
 }

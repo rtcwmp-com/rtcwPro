@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -350,10 +350,9 @@ void Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip ) {
 
 	} else {                                        // using clips
 		totalcount = ent->client->ps.ammo[ammoweap] + ent->client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
-		// RtcwPro - let the user keep adding ammo from guns they pickup
-		//if ( totalcount > ammoTable[ammoweap].maxammo ) {
-		//	ent->client->ps.ammo[ammoweap] = ammoTable[ammoweap].maxammo - ent->client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
-		//}
+		if ( totalcount > ammoTable[ammoweap].maxammo ) {
+			ent->client->ps.ammo[ammoweap] = ammoTable[ammoweap].maxammo - ent->client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
+		}
 
 	}
 
@@ -417,11 +416,6 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 						}
 						ent->parent->client->PCSpecialPickedUpCount++;
 					}
-					// L0 - /stats
-					if ((ent->parent) && (ent->parent != other) &&
-						(OnSameTeam(ent->parent, other)))
-						ent->parent->client->sess.ammo_given++;
-					// End
 				}
 			}
 		}
@@ -528,13 +522,10 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 	//----(SA)	end
 
 // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
-	if (alreadyHave) 
-	{
-		Add_Ammo(other, ent->item->giTag, quantity, !alreadyHave);
-	}
-	else 
-	{
-		other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
+	if ( alreadyHave ) {
+		Add_Ammo( other, ent->item->giTag, quantity, !alreadyHave );
+	} else {
+		other->client->ps.ammoclip[BG_FindClipForWeapon( ent->item->giTag )] = quantity;
 	}
 // jpw
 
@@ -568,11 +559,6 @@ int Pickup_Health( gentity_t *ent, gentity_t *other ) {
 					}
 					ent->parent->client->PCSpecialPickedUpCount++;
 				}
-				// L0 - /stats
-				if ((ent->parent) && (ent->parent != other) &&
-					(OnSameTeam(ent->parent, other)))
-					ent->parent->client->sess.med_given++;
-				// end
 			}
 		}
 	}
@@ -746,14 +732,7 @@ void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		return;
 	}
 
-	// OSPx - Don't let them pickup winning stuff in warmup
-	if (g_gamestate.integer != GS_PLAYING) {
-		if (ent->item->giType != IT_WEAPON &&
-			ent->item->giType != IT_AMMO &&
-			ent->item->giType != IT_HEALTH) {
-			return;
-		}
-	}
+	G_LogPrintf( "Item: %i %s\n", other->s.number, ent->item->classname );
 
 	// call the item-specific pickup function
 	switch ( ent->item->giType ) {

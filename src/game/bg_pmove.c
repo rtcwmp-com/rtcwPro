@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -2324,11 +2324,11 @@ void PM_AdjustAimSpreadScale( void ) {
 		// TODO: also check for jump/crouch and adjust accordingly
 		if ( pm->ps->weapon == WP_SNIPERRIFLE || pm->ps->weapon == WP_SNOOPERSCOPE ) {
 			for ( i = 0; i < 2; i++ )
-				viewchange += Q_fabs( pm->ps->velocity[i] );
+				viewchange += fabs( pm->ps->velocity[i] );
 		} else {
 			// take player view rotation into account
 			for ( i = 0; i < 2; i++ )
-				viewchange += Q_fabs( SHORT2ANGLE( pm->cmd.angles[i] ) - SHORT2ANGLE( pm->oldcmd.angles[i] ) );
+				viewchange += fabs( SHORT2ANGLE( pm->cmd.angles[i] ) - SHORT2ANGLE( pm->oldcmd.angles[i] ) );
 		}
 
 		viewchange = (float)viewchange / cmdTime;   // convert into this movement for a second
@@ -3263,10 +3263,6 @@ void PM_UpdateLean( playerState_t *ps, usercmd_t *cmd, pmove_t *tpm ) {
 		return;
 	}
 
-	// OSPx - Don't bother with this..
-	if (ps->pm_type == PM_FREEZE) {
-		return;
-	}
 	if ( ( cmd->wbuttons & ( WBUTTON_LEANLEFT | WBUTTON_LEANRIGHT ) )  && !cmd->forwardmove && cmd->upmove <= 0 ) {
 		// if both are pressed, result is no lean
 		if ( cmd->wbuttons & WBUTTON_LEANLEFT ) {
@@ -3411,7 +3407,6 @@ void PM_UpdateViewAngles( playerState_t *ps, usercmd_t *cmd, void( trace ) ( tra
 	}
 
 	if ( ps->eFlags & EF_MG42_ACTIVE ) {
-//		VectorCopy( ps->viewangles, oldViewAngles );
 		float yaw, oldYaw;
 		float degsSec = MG42_YAWSPEED;
 		float arcMin, arcMax, arcDiff;
@@ -3749,10 +3744,6 @@ void PM_Sprint( void ) {
 			pm->ps->sprintTime += 10;
 		} else {
 			if ( pm->gametype != GT_SINGLE_PLAYER ) {
-				extern vmCvar_t	g_crouchRate;
-
-				if (g_crouchRate.integer > 0 && (pm->ps->pm_flags & PMF_DUCKED))
-					pm->ps->sprintTime += g_crouchRate.integer * pml.frametime;
 				pm->ps->sprintTime += 500 * pml.frametime;        // JPW NERVE adjusted for framerate independence
 				if ( pm->ps->sprintTime > 5000 ) {
 					pm->ps->sprintTime += 500 * pml.frametime;    // JPW NERVE adjusted for framerate independence
@@ -3906,7 +3897,6 @@ void PmoveSingle( pmove_t *pmove ) {
 
 	// update the viewangles
 	// Ridah
-/*
 	if ( !isDummy ) {
 		// done.
 		if ( !( pm->ps->pm_flags & PMF_LIMBO ) ) { // JPW NERVE
@@ -3914,12 +3904,6 @@ void PmoveSingle( pmove_t *pmove ) {
 
 		}
 	}
-*/
-	if (!isDummy)
-		// done.
-	if (!(pm->ps->pm_flags & PMF_LIMBO)) // JPW NERVE
-		PM_UpdateViewAngles(pm->ps, &pm->cmd, pm->trace);	//----(SA)	modified
-
 	AngleVectors( pm->ps->viewangles, pml.forward, pml.right, pml.up );
 
 	if ( pm->cmd.upmove < 10 ) {

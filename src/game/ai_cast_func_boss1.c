@@ -167,7 +167,7 @@ char *AIFunc_FZombie_LightningAttack( cast_state_t *cs ) {
 				ent->client->ps.eFlags |= EF_FORCED_ANGLES; // face angles exactly
 				cs->bs->ideal_viewangles[ROLL] = 0;
 
-				if ( Q_fabs( cs->bs->viewangles[ROLL] ) < 5 ) { // we are done, dismount and get outta here
+				if ( fabs( cs->bs->viewangles[ROLL] ) < 5 ) { // we are done, dismount and get outta here
 					ent->client->ps.powerups[PW_FLIGHT] = 0;
 					return AIFunc_DefaultStart( cs );
 				}

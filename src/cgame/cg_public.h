@@ -63,8 +63,7 @@ enum {
 	CGAME_EVENT_NONE,
 	CGAME_EVENT_TEAMMENU,
 	CGAME_EVENT_SCOREBOARD,
-	CGAME_EVENT_EDITHUD,
-	CGAME_EVENT_DEMO               // OSP
+	CGAME_EVENT_EDITHUD
 };
 
 
@@ -221,13 +220,8 @@ typedef enum {
 	CG_KEY_SETBINDING,
 	CG_KEY_KEYNUMTOSTRINGBUF,
 
-	CG_TRANSLATE_STRING,
-
-	CG_R_VALIDATE,
-	CG_R_BUILD,
+	CG_TRANSLATE_STRING
 	// -NERVE - SMF
-
-	CG_REQ_SS // reqSS
 } cgameImport_t;
 
 
@@ -283,13 +277,8 @@ typedef enum {
 //	qboolean CG_GetTag( int clientNum, char *tagname, orientation_t *or );
 
 	CG_CHECKCENTERVIEW,
-//	qboolean CG_CheckCenterView(void);
+//	qboolean CG_CheckCenterView();
 
-	CG_CHECKEXECKEY,
-//  qboolean CG_CheckExecKey(int key);
-
-	CG_RELAY_COMMAND,
-//	qboolean(*CG_RelayCommand)(const char type, int value);
 } cgameExport_t;
 
 //----------------------------------------------

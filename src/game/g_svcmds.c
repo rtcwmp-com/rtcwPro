@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,8 +25,14 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+
+
+
+
 // this file holds commands that can be executed by the server console, but not remote clients
+
 #include "g_local.h"
+
 
 /*
 ==============================================================================
@@ -77,19 +83,9 @@ typedef struct ipGUID_s
 
 #define MAX_IPFILTERS   1024
 
-typedef struct ipFilterList_s {
-	ipFilter_t ipFilters[MAX_IPFILTERS];
-	int numIPFilters;
-	char cvarIPList[32];
-} ipFilterList_t;
-
-static ipFilterList_t ipFilters;
-static ipFilterList_t ipMaxLivesFilters;
-/*#ifdef USEXPSTORAGE
-static ipXPStorageList_t ipXPStorage;
-#endif
-*/
-static ipGUID_t guidMaxLivesFilters[MAX_IPFILTERS];
+static ipFilter_t ipFilters[MAX_IPFILTERS];
+static ipGUID_t ipMaxLivesFilters[MAX_IPFILTERS];
+static int numIPFilters;
 static int numMaxLivesFilters = 0;
 
 /*
@@ -97,7 +93,7 @@ static int numMaxLivesFilters = 0;
 StringToFilter
 =================
 */
-static qboolean StringToFilter( const char *s, ipFilter_t *f ) {
+static qboolean StringToFilter( char *s, ipFilter_t *f ) {
 	char num[128];
 	int i, j;
 	byte b[4];
@@ -151,7 +147,7 @@ static qboolean StringToFilter( const char *s, ipFilter_t *f ) {
 UpdateIPBans
 =================
 */
-static void UpdateIPBans(ipFilterList_t *ipFilterList) {
+static void UpdateIPBans( void ) {
 	byte b[4];
 	byte m[4];
 	int i,j;
@@ -159,16 +155,17 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 	char ip[64];
 
 	*iplist_final = 0;
-	for ( i = 0 ; i < ipFilterList->numIPFilters ; i++ )
+	for ( i = 0 ; i < numIPFilters ; i++ )
 	{
-		if (ipFilterList->ipFilters[i].compare == 0xffffffff ) {
+		if ( ipFilters[i].compare == 0xffffffff ) {
 			continue;
 		}
 
-		*(unsigned *)b = ipFilterList->ipFilters[i].compare;
-		*(unsigned *)m = ipFilterList->ipFilters[i].mask;
+		*(unsigned *)b = ipFilters[i].compare;
+		*(unsigned *)m = ipFilters[i].mask;
 		*ip = 0;
-		for ( j = 0; j < 4 ; j++ ) {
+		for ( j = 0 ; j < 4 ; j++ )
+		{
 			if ( m[j] != 255 ) {
 				Q_strcat( ip, sizeof( ip ), "*" );
 			} else {
@@ -180,12 +177,12 @@ static void UpdateIPBans(ipFilterList_t *ipFilterList) {
 			Q_strcat( iplist_final, sizeof( iplist_final ), ip );
 		} else
 		{
-			Com_Printf( "%s overflowed at MAX_CVAR_VALUE_STRING\n", ipFilterList->cvarIPList );
+			Com_Printf( "g_banIPs overflowed at MAX_CVAR_VALUE_STRING\n" );
 			break;
 		}
 	}
 
-	trap_Cvar_Set( ipFilterList->cvarIPList, iplist_final );
+	trap_Cvar_Set( "g_banIPs", iplist_final );
 }
 
 void PrintMaxLivesGUID() {
@@ -193,58 +190,17 @@ void PrintMaxLivesGUID() {
 
 	for ( i = 0 ; i < numMaxLivesFilters ; i++ )
 	{
-		G_LogPrintf( "%i. %s\n", i, guidMaxLivesFilters[i].compare );
+		G_LogPrintf( "%i. %s\n", i, ipMaxLivesFilters[i].compare );
 	}
 	G_LogPrintf( "--- End of list\n" );
 }
 
 /*
 =================
-G_FindIpData
-=================
-
-
-ipXPStorage_t* G_FindIpData( ipXPStorageList_t *ipXPStorageList, char *from ) {
-	int i;
-	unsigned in;
-	byte m[4];
-	char *p;
-
-	i = 0;
-	p = from;
-	while ( *p && i < 4 ) {
-		m[i] = 0;
-		while ( *p >= '0' && *p <= '9' ) {
-			m[i] = m[i] * 10 + ( *p - '0' );
-			p++;
-		}
-		if ( !*p || *p == ':' ) {
-			break;
-		}
-		i++, p++;
-	}
-
-	in = *(unsigned *)m;
-
-	for ( i = 0; i < MAX_IPFILTERS; i++ ) {
-		if ( !ipXPStorageList->ipFilters[ i ].timeadded || level.time - ipXPStorageList->ipFilters[ i ].timeadded > ( 5 * 60000 ) ) {
-			continue;
-		}
-
-		if ( ( in & ipXPStorageList->ipFilters[ i ].filter.mask ) == ipXPStorageList->ipFilters[ i ].filter.compare ) {
-			return &ipXPStorageList->ipFilters[ i ];
-		}
-	}
-
-	return NULL;
-}
-*/
-/*
-=================
 G_FilterPacket
 =================
 */
-qboolean G_FilterPacket(ipFilterList_t *ipFilterList, char *from ) {
+qboolean G_FilterPacket( char *from ) {
 	int i;
 	unsigned in;
 	byte m[4];
@@ -266,33 +222,14 @@ qboolean G_FilterPacket(ipFilterList_t *ipFilterList, char *from ) {
 
 	in = *(unsigned *)m;
 
-	for (i = 0; i < ipFilterList->numIPFilters; i++)
-		if ((in & ipFilterList->ipFilters[i].mask) == ipFilterList->ipFilters[i].compare) {
+	for ( i = 0 ; i < numIPFilters ; i++ )
+		if ( ( in & ipFilters[i].mask ) == ipFilters[i].compare ) {
 			return g_filterBan.integer != 0;
 		}
 
 	return g_filterBan.integer == 0;
 }
 
-qboolean G_FilterIPBanPacket( char *from ) {
-	return( G_FilterPacket( &ipFilters, from ) );
-}
-
-qboolean G_FilterMaxLivesIPPacket( char *from ) {
-	return( G_FilterPacket( &ipMaxLivesFilters, from ) );
-}
-
-#ifdef USEXPSTORAGE
-ipXPStorage_t* G_FindXPBackup( char *from ) {
-	ipXPStorage_t* storage = G_FindIpData( &ipXPStorage, from );
-
-	if ( storage ) {
-		storage->timeadded = 0;
-	}
-
-	return storage;
-}
-#endif // USEXPSTORAGE
 /*
  Check to see if the user is trying to sneak back in with g_enforcemaxlives enabled
 */
@@ -301,7 +238,7 @@ qboolean G_FilterMaxLivesPacket( char *from ) {
 
 	for ( i = 0 ; i < numMaxLivesFilters ; i++ )
 	{
-		if ( !Q_stricmp( guidMaxLivesFilters[i].compare, from ) ) {
+		if ( !Q_stricmp( ipMaxLivesFilters[i].compare, from ) ) {
 			return 1;
 		}
 	}
@@ -313,33 +250,26 @@ qboolean G_FilterMaxLivesPacket( char *from ) {
 AddIP
 =================
 */
-void AddIP( ipFilterList_t *ipFilterList, const char *str ) {
+static void AddIP( char *str ) {
 	int i;
 
-	for ( i = 0; i < ipFilterList->numIPFilters; i++ ) {
-		if (  ipFilterList->ipFilters[i].compare == 0xffffffff ) {
+	for ( i = 0 ; i < numIPFilters ; i++ )
+		if ( ipFilters[i].compare == 0xffffffff ) {
 			break;
 		}               // free spot
-	}
-	if ( i == ipFilterList->numIPFilters ) {
-		if ( ipFilterList->numIPFilters == MAX_IPFILTERS ) {
+	if ( i == numIPFilters ) {
+		if ( numIPFilters == MAX_IPFILTERS ) {
 			G_Printf( "IP filter list is full\n" );
 			return;
 		}
-		ipFilterList->numIPFilters++;
+		numIPFilters++;
 	}
 
-	if ( !StringToFilter( str, &ipFilterList->ipFilters[i] ) ) {
-		ipFilterList->ipFilters[i].compare = 0xffffffffu;
+	if ( !StringToFilter( str, &ipFilters[i] ) ) {
+		ipFilters[i].compare = 0xffffffffu;
 	}
 
-	UpdateIPBans( ipFilterList );
-}
-void AddIPBan(const char *str) {
-	AddIP(&ipFilters, str);
-}
-void AddMaxLivesBan( const char *str ) {
-	AddIP( &ipMaxLivesFilters, str );
+	UpdateIPBans();
 }
 /*
 =================
@@ -353,7 +283,7 @@ void AddMaxLivesGUID( char *str ) {
 		G_Printf( "MaxLives GUID filter list is full\n" );
 		return;
 	}
-	Q_strncpyz( guidMaxLivesFilters[numMaxLivesFilters].compare, str, 33 );
+	Q_strncpyz( ipMaxLivesFilters[numMaxLivesFilters].compare, str, 33 );
 	numMaxLivesFilters++;
 }
 
@@ -366,8 +296,6 @@ G_ProcessIPBans
 void G_ProcessIPBans( void ) {
 	char *s, *t;
 	char str[MAX_CVAR_VALUE_STRING];
-	ipFilters.numIPFilters = 0;
-	Q_strncpyz( ipFilters.cvarIPList, "g_banIPs", sizeof( ipFilters.cvarIPList ) );
 
 	Q_strncpyz( str, g_banIPs.string, sizeof( str ) );
 
@@ -379,7 +307,7 @@ void G_ProcessIPBans( void ) {
 		while ( *s == ' ' )
 			*s++ = 0;
 		if ( *t ) {
-			AddIP( &ipFilters, t );
+			AddIP( t );
 		}
 		t = s;
 	}
@@ -401,7 +329,7 @@ void Svcmd_AddIP_f( void ) {
 
 	trap_Argv( 1, str, sizeof( str ) );
 
-	AddIP( &ipFilters, str );
+	AddIP( str );
 
 }
 
@@ -426,13 +354,13 @@ void Svcmd_RemoveIP_f( void ) {
 		return;
 	}
 
-	for ( i = 0 ; i < ipFilters.numIPFilters ; i++ ) {
-		if ( ipFilters.ipFilters[i].mask == f.mask   &&
-			 ipFilters.ipFilters[i].compare == f.compare ) {
-			ipFilters.ipFilters[i].compare = 0xffffffffu;
+	for ( i = 0 ; i < numIPFilters ; i++ ) {
+		if ( ipFilters[i].mask == f.mask &&
+			 ipFilters[i].compare == f.compare ) {
+			ipFilters[i].compare = 0xffffffffu;
 			G_Printf( "Removed.\n" );
 
-			UpdateIPBans( &ipFilters );
+			UpdateIPBans();
 			return;
 		}
 	}
@@ -443,15 +371,13 @@ void Svcmd_RemoveIP_f( void ) {
 /*
  Xian - Clears out the entire list maxlives enforcement banlist
 */
-void ClearMaxLivesBans() {
+void ClearMaxLivesGUID() {
 	int i;
 
 	for ( i = 0 ; i < numMaxLivesFilters ; i++ ) {
-		guidMaxLivesFilters[i].compare[0] = '\0';
+		ipMaxLivesFilters[i].compare[0] = '\0';
 	}
 	numMaxLivesFilters = 0;
-	ipMaxLivesFilters.numIPFilters = 0;
-	Q_strncpyz( ipMaxLivesFilters.cvarIPList, "g_maxlivesbanIPs", sizeof( ipMaxLivesFilters.cvarIPList ) );
 }
 
 /*
@@ -542,16 +468,6 @@ gclient_t   *ClientForString( const char *s ) {
 	gclient_t   *cl;
 	int i;
 	int idnum;
-	// check for a name match
-	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		cl = &level.clients[i];
-		if ( cl->pers.connected == CON_DISCONNECTED ) {
-			continue;
-		}
-		if ( !Q_stricmp( cl->pers.netname, s ) ) {
-			return cl;
-		}
-	}
 
 	// numeric values are just slot numbers
 	if ( s[0] >= '0' && s[0] <= '9' ) {
@@ -569,102 +485,22 @@ gclient_t   *ClientForString( const char *s ) {
 		return cl;
 	}
 
-	G_Printf( "User %s is not on the server\n", s );
 	// check for a name match
-	return NULL;
-}
-// fretn
-
-static qboolean G_Is_SV_Running( void ) {
-
-	char cvar[MAX_TOKEN_CHARS];
-
-	trap_Cvar_VariableStringBuffer( "sv_running", cvar, sizeof( cvar ) );
-	return (qboolean)atoi( cvar );
-}
-
-/*
-==================
-G_GetPlayerByNum
-==================
-*/
-gclient_t   *G_GetPlayerByNum( int clientNum ) {
-	gclient_t   *cl;
-
-
-	// make sure server is running
-	if ( !G_Is_SV_Running() ) {
-		return NULL;
-	}
-
-	if ( trap_Argc() < 2 ) {
-		G_Printf( "No player specified.\n" );
-		return NULL;
-	}
-
-	if ( clientNum < 0 || clientNum >= level.maxclients ) {
-		Com_Printf( "Bad client slot: %i\n", clientNum );
-		return NULL;
-	}
-
-	cl = &level.clients[clientNum];
-	if ( cl->pers.connected == CON_DISCONNECTED ) {
-		G_Printf( "Client %i is not connected\n", clientNum );
-		return NULL;
-	}
-
-	if ( cl ) {
-		return cl;
-	}
-
-
-	G_Printf( "User %d is not on the server\n", clientNum );
-
-	return NULL;
-}
-
-/*
-==================
-G_GetPlayerByName
-==================
-*/
-gclient_t *G_GetPlayerByName( char *name ) {
-
-	int i;
-	gclient_t   *cl;
-	char cleanName[64];
-
-	// make sure server is running
-	if ( !G_Is_SV_Running() ) {
-		return NULL;
-	}
-
-	if ( trap_Argc() < 2 ) {
-		G_Printf( "No player specified.\n" );
-		return NULL;
-	}
-
-	for ( i = 0; i < level.numConnectedClients; i++ ) {
-
+	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		cl = &level.clients[i];
-
-		if ( !Q_stricmp( cl->pers.netname, name ) ) {
-			return cl;
+		if ( cl->pers.connected == CON_DISCONNECTED ) {
+			continue;
 		}
-
-		Q_strncpyz( cleanName, cl->pers.netname, sizeof( cleanName ) );
-		Q_CleanStr( cleanName );
-		if ( !Q_stricmp( cleanName, name ) ) {
+		if ( !Q_stricmp( cl->pers.netname, s ) ) {
 			return cl;
 		}
 	}
 
-	G_Printf( "Player %s is not on the server\n", name );
+	G_Printf( "User %s is not on the server\n", s );
 
 	return NULL;
 }
 
-// -fretn
 /*
 ===================
 Svcmd_ForceTeam_f
@@ -685,7 +521,7 @@ void    Svcmd_ForceTeam_f( void ) {
 
 	// set the team
 	trap_Argv( 2, str, sizeof( str ) );
-	SetTeam( &g_entities[cl - level.clients], str ,qfalse);
+	SetTeam( &g_entities[cl - level.clients], str );
 }
 
 /*
@@ -696,15 +532,11 @@ NERVE - SMF - starts match if in tournament mode
 ============
 */
 void Svcmd_StartMatch_f() {
-/*	if ( !g_noTeamSwitching.integer ) {
+	if ( !g_noTeamSwitching.integer ) {
 		trap_SendServerCommand( -1, va( "print \"g_noTeamSwitching not activated.\n\"" ) );
 		return;
 	}
-*/
 
-	G_refAllReady_cmd( NULL );
-
-/*
 	if ( level.numPlayingClients <= 1 ) {
 		trap_SendServerCommand( -1, va( "print \"Not enough playing clients to start match.\n\"" ) );
 		return;
@@ -718,7 +550,6 @@ void Svcmd_StartMatch_f() {
 	if ( g_gamestate.integer == GS_WAITING_FOR_PLAYERS ) {
 		trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
 	}
-	*/
 }
 
 /*
@@ -731,64 +562,17 @@ NERVE - SMF - this has three behaviors
 - if in stopwatch mode, reset back to first round
 ============
 */
-void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
-	int i;
-	gclient_t *cl;
-    char *buf;
-    char cs[MAX_STRING_CHARS];
-	for (i = 0; i < level.numConnectedClients; i++) {
-		g_entities[level.sortedClients[i]].client->pers.ready = qfalse;
-		//g_entities[level.sortedClients[i]].client->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on restart
+void Svcmd_ResetMatch_f() {
+	if ( g_gametype.integer == GT_WOLF_STOPWATCH ) {
+		trap_Cvar_Set( "g_currentRound", "0" );
+		trap_Cvar_Set( "g_nextTimeLimit", "0" );
 	}
 
-	// reset all the weapon restrictions so next time the players spawn they get set correctly
-	level.alliedFlamer = level.axisFlamer = 0;
-	level.alliedSniper = level.axisSniper = 0;
-	level.alliedPF = level.axisPF = 0;
-	level.alliedVenom = level.axisVenom = 0;
-
-    if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
-        G_writeGameEarlyExit();  // properly close current stats output
-        // fix stats for when map restarts occur
-        if (!fDoReset && fDoRestart  && g_gametype.integer == GT_WOLF_STOPWATCH) {
-            if (g_currentRound.integer == 1) {
-			    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
-        		buf = Info_ValueForKey(cs, "matchid");		
-		        trap_SetConfigstring( CS_ROUNDINFO, cs );
-			
-                for ( i = 0; i < level.numPlayingClients; i++ ) {
-                    cl = level.clients + level.sortedClients[i];
-                    if ( cl->pers.connected != CON_CONNECTED) {
-                        continue;
-                    }
-                    cl->sess.rounds--; // don't count the half played game as a round...
-                }
-            }
-            else {
-                level.fResetStats = qtrue;
-            }
-        }
-    }
-
-	if (fDoReset) {
-		G_resetRoundState();
-		G_resetModeState();
-	}
-
-
-
-	if (fDoRestart && !g_noTeamSwitching.integer || (g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer)) {
-		trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
+	if ( !g_noTeamSwitching.integer || ( g_minGameClients.integer > 1 && level.numPlayingClients >= g_minGameClients.integer ) ) {
+		trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
 		return;
-	}
-	else { // L0 - Tournament..
-		if (g_tournament.integer) {
-			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WARMUP));
-			trap_SetConfigstring(CS_READY, va("%i", READY_PENDING));
-		}
-		else {
-			trap_SendConsoleCommand(EXEC_APPEND, va("map_restart 0 %i\n", GS_WAITING_FOR_PLAYERS));
-		}
+	} else {
+		trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WAITING_FOR_PLAYERS ) );
 		return;
 	}
 }
@@ -802,19 +586,10 @@ NERVE - SMF - swaps all clients to opposite team
 */
 void Svcmd_SwapTeams_f() {
 //  if ( g_gamestate.integer != GS_PLAYING ) {
-/*	if ( ( g_gamestate.integer == GS_INITIALIZE ) || // JPW NERVE -- so teams can swap between checkpoint rounds
+	if ( ( g_gamestate.integer == GS_INITIALIZE ) || // JPW NERVE -- so teams can swap between checkpoint rounds
 		 ( g_gamestate.integer == GS_WAITING_FOR_PLAYERS ) ||
 		 ( g_gamestate.integer == GS_RESET ) ) {
 		trap_SendServerCommand( -1, va( "print \"Match must be in progress to swap teams.\n\"" ) );
-		return;
-	}
-*/
-	if ((g_gamestate.integer == GS_INITIALIZE) ||
-	    (g_gamestate.integer == GS_WARMUP) ||
-	    ( g_gamestate.integer == GS_WAITING_FOR_PLAYERS ) ||
-	    (g_gamestate.integer == GS_RESET))
-	{
-		G_swapTeams();
 		return;
 	}
 
@@ -822,137 +597,14 @@ void Svcmd_SwapTeams_f() {
 		trap_Cvar_Set( "g_currentRound", "0" );
 		trap_Cvar_Set( "g_nextTimeLimit", "0" );
 	}
-/*
-	// L0 - locked team switch fix on swap
-	if (g_gamelocked.integer == 2)
-		trap_Cvar_Set( "g_gamelocked", "1" );
-	else if (g_gamelocked.integer == 1)
-		trap_Cvar_Set( "g_gamelocked", "2" );
-	// L0 - end
-	*/
-    if (g_gamestate.integer == GS_PLAYING && g_gameStatslog.integer) {
-        G_writeGameEarlyExit();  // properly close current stats output
-    }
-	trap_Cvar_Set( "g_swapteams", "1" );
 
+	trap_Cvar_Set( "g_swapteams", "1" );
 	trap_SendConsoleCommand( EXEC_APPEND, va( "map_restart 0 %i\n", GS_WARMUP ) );
 }
 
 
 
 char    *ConcatArgs( int start );
-/*
-===========
-L0 - Shuffle
-===========
-*/
-void Svcmd_Shuffle_f( void )
-{
-	int count=0, tmpCount, i;
-	int players[MAX_CLIENTS];
-
-	memset(players, -1, sizeof(players));
-
-	if (g_gamestate.integer == GS_RESET)
-	return;
-
-	for (i = 0; i < MAX_CLIENTS; i++)
-	{
-		//skip client numbers that aren't used
-		if ((!g_entities[i].inuse) || (level.clients[i].pers.connected != CON_CONNECTED))
-			continue;
-
-		//ignore spectators
-		if ((level.clients[i].sess.sessionTeam != TEAM_RED) && (level.clients[i].sess.sessionTeam != TEAM_BLUE))
-			continue;
-
-		players[count] = i;
-		count++;
-	}
-
-	tmpCount = count;	//copy the number of active clients
-
-	//loop through all the active players
-	for (i = 0; i < count; i++)
-	{
-		int j;
-
-		do {
-			j = (rand() % count);
-		} while (players[j] == -1);
-
-		//put every other random choice on allies
-		if (i & 1)
-			level.clients[players[j]].sess.sessionTeam = TEAM_BLUE;
-		else
-			level.clients[players[j]].sess.sessionTeam = TEAM_RED;
-
-		ClientUserinfoChanged(players[j]);
-		ClientBegin(players[j]);
-
-
-		players[j] = players[tmpCount-1];
-		players[tmpCount-1] = -1;
-		tmpCount--;
-	}
-
-	// Reset match if there's a shuffle!
-	Svcmd_ResetMatch_f( qfalse, qtrue );
-
-	AP("chat \"^zconsole:^7 Teams were shuffled^1!\n\"");
-}
-/*
-=================
-L0 - Antilag
-=================
-*/
-void Svcmd_Antilag_f( void ) {
-
-	if ( g_antilag.integer != 0 ) {
-		trap_SendConsoleCommand( EXEC_APPEND, "g_antilag 0\n" );
-		AP("chat \"^zconsole:^7 Antilag has been disbled^1!\n\"");
-	} else {
-		trap_SendConsoleCommand( EXEC_APPEND, "g_antilag 1\n" );
-		AP("chat \"^zconsole:^7 Antilag has been enabled^2!\n\"");
-	}
-}
-
-/*
-====================
-Svcmd_ShuffleTeams_f
-
-OSP - randomly places players on teams
-====================
-*/
-void Svcmd_ShuffleTeams_f(void) {
-	G_resetRoundState();
-	G_shuffleTeams();
-
-	if ((g_gamestate.integer == GS_INITIALIZE) ||
-		(g_gamestate.integer == GS_WARMUP) ||
-		(g_gamestate.integer == GS_RESET)) {
-		return;
-	}
-
-	G_resetModeState();
-	Svcmd_ResetMatch_f(qfalse, qtrue);
-}
-
-/*
-=================
-L0 - Pause/Unpause
-=================
-*/
-void Svcmd_Pause_f(qboolean pause) {
-
-	if (pause) {
-		G_handlePause(qtrue, 0);
-		AP(va("cp \"Match has been ^3Paused^7!\n\"2"));
-	} else {
-		G_handlePause(qfalse, 0);
-		AP(va("cp \"Resuming the match..\n\"2"));
-	}
-}
 
 /*
 =================
@@ -1007,13 +659,13 @@ qboolean    ConsoleCommand( void ) {
 
 
 	// NERVE - SMF
-	if ( Q_stricmp( cmd, "startmatch" ) == 0 ) {
+	if ( Q_stricmp( cmd, "start_match" ) == 0 ) {
 		Svcmd_StartMatch_f();
 		return qtrue;
 	}
 
-	if ( Q_stricmp( cmd, "resetmatch" ) == 0 ) {
-		Svcmd_ResetMatch_f(qtrue, qtrue);
+	if ( Q_stricmp( cmd, "reset_match" ) == 0 ) {
+		Svcmd_ResetMatch_f();
 		return qtrue;
 	}
 
@@ -1023,37 +675,16 @@ qboolean    ConsoleCommand( void ) {
 	}
 	// -NERVE - SMF
 
-	// L0 - Callvotes and server side (console) handling
-	// Shuffle
-	if ( Q_stricmp( cmd, "shuffle" ) == 0 ) {
-		Svcmd_Shuffle_f();
-	return qtrue;
-	}
-	// Antilag
-	if ( Q_stricmp( cmd, "antilag" ) == 0 ) {
-		Svcmd_Antilag_f();
-		return qtrue;
-	}
-	// Pause
-	if ( Q_stricmp( cmd, "pause" ) == 0 ) {
-		Svcmd_Pause_f(qtrue);
-		return qtrue;
-	}
-	// UnPause
-	if ( Q_stricmp( cmd, "unpause" ) == 0 ) {
-		Svcmd_Pause_f(qfalse);
-		return qtrue;
-	}
-	// RTCWPro
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {
-			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 1 ) ) );
+			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 1 ) ) );
 			return qtrue;
 		}
 		// everything else will also be printed as a say command
-		trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 0 ) ) );
+		trap_SendServerCommand( -1, va( "print \"server:[lof] %s\"", ConcatArgs( 0 ) ) );
 		return qtrue;
 	}
 
 	return qfalse;
 }
+

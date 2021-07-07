@@ -215,8 +215,8 @@ CG_HorizontalPercentBar
 =================
 */
 void CG_HorizontalPercentBar( float x, float y, float width, float height, float percent ) {
-	vec4_t bgcolor = {0.5f, 0.5f, 0.5f, 0.2f},
-		   color = {0.0f, 0.0f, 0.0f, 0.4f};
+	vec4_t bgcolor = {0.5f, 0.5f, 0.5f, 0.3f},
+		   color = {1.0f, 1.0f, 1.0f, 0.3f};
 	CG_FilledBar( x, y, width, height, color, NULL, bgcolor, percent, BAR_BG | BAR_NOHUDALPHA );
 }
 
@@ -280,18 +280,7 @@ void CG_DrawRect( float x, float y, float width, float height, float size, const
 	trap_R_SetColor( NULL );
 }
 
-/*
-================
-OSPx - CG_DrawPicST (Country Flags by mcwf)
 
-Allows passing of st co-ords
-Coordinates are 640*480 virtual values
-=================
-*/
-void CG_DrawPicST(float x, float y, float width, float height, float s0, float t0, float s1, float t1, qhandle_t hShader) {
-	CG_AdjustFrom640(&x, &y, &width, &height);
-	trap_R_DrawStretchPic(x, y, width, height, s0, t0, s1, t1, hShader);
-}
 
 /*
 ================
@@ -932,23 +921,8 @@ void CG_ColorForHealth( vec4_t hcolor ) {
 	}
 }
 
-/*
-==================
-sswolf
-CG_GetClock
-Returns realtime in the format "hh:mm:ss"
-==================
-*/
-char* CG_GetClock(void) {
-	static char displayTime[19] = { 0 };
-	qtime_t     tm;
 
-	trap_RealTime(&tm);
-	displayTime[0] = '\0';
-	Q_strcat(displayTime, sizeof(displayTime), va("%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec));
 
-	return displayTime;
-}
 
 /*
 =================

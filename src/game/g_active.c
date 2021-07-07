@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -362,56 +362,6 @@ void    G_TouchTriggers( gentity_t *ent ) {
 
 /*
 =================
-sswolf - follow clients in freecam
-by aiming/shooting at them
-Note: using generic tracing
-
-Credits: ETLegacy and rtcwPub
-G_SpectatorAttackFollow
-=================
-*/
-qboolean G_SpectatorAttackFollow(gentity_t* ent)
-{
-	trace_t       tr;
-	vec3_t        forward, right, up;
-	vec3_t        start, end;
-	vec3_t        mins, maxs;
-	static vec3_t enlargeMins = { -5, -5, -5 };
-	static vec3_t enlargeMaxs = { 5, 5, 5 };
-
-	if (!ent->client)
-	{
-		return qfalse;
-	}
-
-	AngleVectors(ent->client->ps.viewangles, forward, right, up);
-	VectorCopy(ent->client->ps.origin, start);
-	VectorMA(start, 8192, forward, end);
-
-	// enlarge the hitboxes, so spectators can easily click on them..
-	VectorCopy(ent->r.mins, mins);
-	VectorCopy(ent->r.maxs, maxs);
-	VectorAdd(mins, enlargeMins, mins);
-	VectorAdd(maxs, enlargeMaxs, maxs);
-
-	// also put the start-point a bit forward, so we don't start the trace in solid..
-	VectorMA(start, 75.0f, forward, start);
-
-	trap_Trace(&tr, start, mins, maxs, end, ent->client->ps.clientNum, CONTENTS_BODY | CONTENTS_CORPSE);
-	//G_HistoricalTrace(ent, &tr, start, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE);
-
-	if ((&g_entities[tr.entityNum])->client)
-	{
-		ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
-		ent->client->sess.spectatorClient = tr.entityNum;
-		return qtrue;
-	}
-
-	return qfalse;
-}
-
-/*
-=================
 SpectatorThink
 =================
 */
@@ -426,16 +376,8 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		client->ps.speed = 400; // faster than normal
 		if ( client->ps.sprintExertTime ) {
 			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
-		}
 
-		// L0 - Pause
-		if ( level.paused != PAUSE_NONE && client->sess.referee == RL_NONE) {
-			client->ps.pm_type = PM_FREEZE;
-			ucmd->buttons = 0;
-			ucmd->forwardmove = 0;
-			ucmd->rightmove = 0;
-			ucmd->upmove = 0;
-			ucmd->wbuttons = 0;
+
 		}
 		// set up for pmove
 		memset( &pm, 0, sizeof( pm ) );
@@ -465,6 +407,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		ent->client->ps.sprintTime = 20000;
 	}
 
+
 	client->oldbuttons = client->buttons;
 	client->buttons = ucmd->buttons;
 
@@ -473,36 +416,13 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	client->wbuttons = ucmd->wbuttons;
 
 	// attack button cycles through spectators
-	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) )
-	{
-		// sswolf - make it usable by aiming/shooting
-		if (client->sess.spectatorState == SPECTATOR_FREE && client->sess.sessionTeam == TEAM_SPECTATOR)
-		{
-			if (G_SpectatorAttackFollow(ent))
-			{
-				return;
-			}
-		}
-
-		Cmd_FollowCycle_f(ent, 1);
-	}
-	// sswolf - make it usable by m1/2 for both directions
-	else if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK) &&
-		!(client->buttons & BUTTON_ACTIVATE))
-	{
-		Cmd_FollowCycle_f(ent, 1);
-	}
-	else if ((client->wbuttons & WBUTTON_ATTACK2) && !(client->oldwbuttons & WBUTTON_ATTACK2) &&
-		!(client->buttons & BUTTON_ACTIVATE))
-	{
-		Cmd_FollowCycle_f(ent, -1);
-	}
-	else if (( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
+	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) ) {
+		Cmd_FollowCycle_f( ent, 1 );
+	} else if (
+		( client->sess.sessionTeam == TEAM_SPECTATOR ) && // don't let dead team players do free fly
 		( client->sess.spectatorState == SPECTATOR_FOLLOW ) &&
 		( client->buttons & BUTTON_ACTIVATE ) &&
-		!( client->oldbuttons & BUTTON_ACTIVATE ) &&
-		G_allowFollow(ent, TEAM_RED) && G_allowFollow(ent, TEAM_BLUE) )
-	{ // OSPx - Speclock
+		!( client->oldbuttons & BUTTON_ACTIVATE ) ) {
 		// code moved to StopFollowing
 		StopFollowing( ent );
 	}
@@ -713,10 +633,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 			break;
 // jpw
 		case EV_FIRE_WEAPON_MG42:
-			// L0 - disable invincible time when player spawns and starts shooting
-			if (g_disableInv.integer)
-				ent->client->ps.powerups[PW_INVULNERABLE] = 0;
-			// end
 			mg42_fire( ent );
 			break;
 
@@ -841,324 +757,7 @@ void WolfFindMedic( gentity_t *self ) {
 	}
 }
 
-
-/*
-==============
-OSPx - LTinfoMsg
-
-Shows ammo stocks of clients..
-==============
-*/
-char *weaponStr(int weapon)
-{
-	switch (weapon) {
-	case WP_MP40:				return "MP40";
-	case WP_THOMPSON:			return "Thompson";
-	case WP_STEN:				return "Sten";
-	case WP_MAUSER:				return "Mauser";
-	case WP_SNIPERRIFLE:		return "Sniper Rifle";
-	case WP_FLAMETHROWER:		return "Flamethrower";
-	case WP_PANZERFAUST:		return "Panzerfaust";
-	case WP_VENOM:				return "Venom";
-	case WP_GRENADE_LAUNCHER:	return "Grenade";
-	case WP_GRENADE_PINEAPPLE:	return "Grenade";
-	case WP_KNIFE:				return "Knife";
-	case WP_KNIFE2:				return "Knife";
-	case WP_LUGER:				return "Luger";
-	case WP_COLT:				return "Colt";
-	case WP_MEDIC_SYRINGE:		return "Syringe";
-	default:
-		return "";
-	}
-}
-// Draw str
-void LTinfoMSG(gentity_t *ent) {
-	unsigned int current = 0;
-	unsigned int stock = 0;
-	unsigned int nades = 0;
-	weapon_t weapon;
-
-	gentity_t *target;
-	trace_t tr;
-	vec3_t start, end, forward;
-
-	if (ent->client->ps.stats[STAT_HEALTH] <= 0)
-		return;
-
-	if (g_gamestate.integer != GS_PLAYING)
-		return;
-
-	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
-
-	VectorCopy(ent->s.pos.trBase, start);	//set 'start' to the player's position (plus the viewheight)
-	start[2] += ent->client->ps.viewheight;
-	VectorMA(start, 512, forward, end);	//put 'end' 512 units forward of 'start'
-
-	//see if we hit anything between 'start' and 'end'
-	trap_Trace(&tr, start, NULL, NULL, end, ent->s.number, (CONTENTS_SOLID | CONTENTS_BODY | CONTENTS_CORPSE | CONTENTS_TRIGGER));
-
-	if (tr.surfaceFlags & SURF_NOIMPACT)	return;
-	if (tr.entityNum == ENTITYNUM_WORLD)	return;
-	if (tr.entityNum >= MAX_CLIENTS)		return;
-
-	target = &g_entities[tr.entityNum];
-	if ((!target->inuse) || (!target->client))		return;
-	if (target->client->ps.stats[STAT_HEALTH] <= 0)	return;
-	if (!OnSameTeam(target, ent))					return;
-
-	ent->client->infoTime = level.time;
-	weapon = target->client->ps.weapon;
-	current += target->client->ps.ammoclip[BG_FindClipForWeapon(weapon)];
-	stock += target->client->ps.ammo[BG_FindAmmoForWeapon(weapon)];
-	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
-	nades += target->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
-
-	if (Q_stricmp(weaponStr(weapon), ""))
-	{
-		if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER)
-			CP(va("cp \"%s: %i\n\"1", weaponStr(weapon), current));
-		else if (weapon == WP_KNIFE || weapon == WP_KNIFE2)
-			CP(va("cp \"%s - Grenades: %i\n\"1", weaponStr(weapon), current, nades));
-		else
-			CP(va("cp \"%s: %i/%i - Grenades: %i\n\"1", weaponStr(weapon), current, stock, nades));
-	}
-}
-
-/*
-==================
-CG_SwingAngles
-==================
-*/
-void G_SwingAngles(float destination, float swingTolerance, float clampTolerance, float speed, float* angle, qboolean* swinging, int msec) {
-	float	swing;
-	float	move;
-	float	scale;
-
-#define	SWING_RIGHT	1
-#define SWING_LEFT	2
-
-	if (!*swinging) {
-		// see if a swing should be started
-		swing = AngleSubtract(*angle, destination);
-		if (swing > swingTolerance || swing < -swingTolerance) {
-			*swinging = qtrue;
-		}
-	}
-
-	if (!*swinging) {
-		return;
-	}
-
-	// modify the speed depending on the delta
-	// so it doesn't seem so linear
-	swing = AngleSubtract(destination, *angle);
-	scale = Q_fabs(swing);
-	scale *= 0.05;
-	if (scale < 0.5)
-		scale = 0.5;
-
-	// swing towards the destination angle
-	if (swing >= 0) {
-		move = msec * scale * speed;
-		if (move >= swing) {
-			move = swing;
-			*swinging = qfalse;
-		}
-		else {
-			*swinging = SWING_LEFT;		// left
-		}
-		*angle = AngleMod(*angle + move);
-	}
-	else if (swing < 0) {
-		move = msec * scale * -speed;
-		if (move <= swing) {
-			move = swing;
-			*swinging = qfalse;
-		}
-		else {
-			*swinging = SWING_RIGHT;	// right
-		}
-		*angle = AngleMod(*angle + move);
-	}
-
-	// clamp to no more than tolerance
-	swing = AngleSubtract(destination, *angle);
-	if (swing > clampTolerance) {
-		*angle = AngleMod(destination - (clampTolerance - 1));
-	}
-	else if (swing < -clampTolerance) {
-		*angle = AngleMod(destination + (clampTolerance - 1));
-	}
-}
-
-/*
-===============
-G_PlayerAngles
-
-Handles seperate torso motion
-
-legs pivot based on direction of movement
-
-head always looks exactly at cent->lerpAngles
-
-if motion < 20 degrees, show in head only
-if < 45 degrees, also show in torso
-===============
-*/
-void G_PlayerAngles(gentity_t* ent, int msec) {
-	vec3_t		legsAngles, torsoAngles, headAngles;
-	float		dest;
-	vec3_t		velocity;
-	float		speed;
-	float		clampTolerance;
-	int			legsSet, torsoSet;
-
-#define SWING_SPEED 0.1f
-
-	legsSet = ent->s.legsAnim & ~ANIM_TOGGLEBIT;
-	torsoSet = ent->s.torsoAnim & ~ANIM_TOGGLEBIT;
-
-	VectorCopy(ent->s.apos.trBase, headAngles);
-	headAngles[YAW] = AngleMod(headAngles[YAW]);
-	VectorClear(legsAngles);
-	VectorClear(torsoAngles);
-
-	// --------- yaw -------------
-
-	// Is the concept of "yawing" and "pitching" needed?
-	// allow yaw to drift a bit, unless these conditions don't allow them
-	if (!(BG_GetConditionValue(ent->s.number, ANIM_COND_MOVETYPE, qfalse) & ((1 << ANIM_MT_IDLE) | (1 << ANIM_MT_IDLECR)))) {
-		ent->client->torsoYawing = qtrue;	// always center
-		ent->client->torsoPitching = qtrue;	// always center
-		ent->client->legsYawing = qtrue;	// always center
-	}
-	else if (BG_GetConditionValue(ent->s.number, ANIM_COND_FIRING, qtrue)) {
-		ent->client->torsoYawing = qtrue;	// always center
-		ent->client->torsoPitching = qtrue;	// always center
-	}
-
-	// adjust legs for movement dir
-	if (ent->s.eFlags & EF_DEAD) {
-		// don't let dead bodies twitch
-		legsAngles[YAW] = headAngles[YAW];
-		torsoAngles[YAW] = headAngles[YAW];
-	}
-	else {
-		legsAngles[YAW] = headAngles[YAW] + ent->s.angles2[YAW];
-
-		if (ent->s.eFlags & EF_NOSWINGANGLES) {
-			legsAngles[YAW] = torsoAngles[YAW] = headAngles[YAW];	// always face firing direction
-			clampTolerance = 60;
-		}
-		else if (!(ent->s.eFlags & EF_FIRING)) {
-			torsoAngles[YAW] = headAngles[YAW] + 0.35 * ent->s.angles2[YAW];
-			clampTolerance = 90;
-		}
-		else {	// must be firing
-			torsoAngles[YAW] = headAngles[YAW];	// always face firing direction
-												//if (Q_fabs(cent->currentState.angles2[YAW]) > 30)
-												//	legsAngles[YAW] = headAngles[YAW];
-			clampTolerance = 60;
-		}
-
-		// torso
-		G_SwingAngles(torsoAngles[YAW], 25, clampTolerance, SWING_SPEED, &ent->client->torsoYawAngle, &ent->client->torsoYawing, msec);
-
-		// if the legs are yawing (facing heading direction), allow them to rotate a bit, so we don't keep calling
-		// the legs_turn animation while an AI is firing, and therefore his angles will be randomizing according to their accuracy
-
-		clampTolerance = 150;
-
-		if (BG_GetConditionValue(ent->s.number, ANIM_COND_MOVETYPE, qfalse) & (1 << ANIM_MT_IDLE))
-		{
-			ent->client->legsYawing = qfalse; // set it if they really need to swing
-			G_SwingAngles(legsAngles[YAW], 20, clampTolerance, 0.5 * SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
-		}
-		else
-			//if	( BG_GetConditionValue( ci->clientNum, ANIM_COND_MOVETYPE, qfalse ) & ((1<<ANIM_MT_STRAFERIGHT)|(1<<ANIM_MT_STRAFELEFT)) )
-			if (strstr(BG_GetAnimString(ent->s.number, legsSet), "strafe"))
-			{
-				ent->client->legsYawing = qfalse; // set it if they really need to swing
-				legsAngles[YAW] = headAngles[YAW];
-				G_SwingAngles(legsAngles[YAW], 0, clampTolerance, SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
-			}
-			else
-				if (ent->client->legsYawing)
-				{
-					G_SwingAngles(legsAngles[YAW], 0, clampTolerance, SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
-				}
-				else
-				{
-					G_SwingAngles(legsAngles[YAW], 40, clampTolerance, SWING_SPEED, &ent->client->legsYawAngle, &ent->client->legsYawing, msec);
-				}
-
-		torsoAngles[YAW] = ent->client->torsoYawAngle;
-		legsAngles[YAW] = ent->client->legsYawAngle;
-	}
-
-	// --------- pitch -------------
-
-	// only show a fraction of the pitch angle in the torso
-	if (headAngles[PITCH] > 180) {
-		dest = (-360 + headAngles[PITCH]) * 0.75;
-	}
-	else {
-		dest = headAngles[PITCH] * 0.75;
-	}
-	G_SwingAngles(dest, 15, 30, 0.1, &ent->client->torsoPitchAngle, &ent->client->torsoPitching, msec);
-	torsoAngles[PITCH] = ent->client->torsoPitchAngle;
-
-	// --------- roll -------------
-
-	// lean towards the direction of travel
-	VectorCopy(ent->s.pos.trDelta, velocity);
-	speed = VectorNormalize(velocity);
-	if (speed) {
-		vec3_t	axis[3];
-		float	side;
-
-		speed *= 0.05;
-
-		AnglesToAxis(legsAngles, axis);
-		side = speed * DotProduct(velocity, axis[1]);
-		legsAngles[ROLL] -= side;
-
-		side = speed * DotProduct(velocity, axis[0]);
-		legsAngles[PITCH] += side;
-	}
-
-	// We don't care about the minute changs pain twitch inflict.
-	/*
-	// pain twitch
-	CG_AddPainTwitch(cent, torsoAngles);
-	*/
-
-	// pull the angles back out of the hierarchial chain
-	AnglesSubtract(headAngles, torsoAngles, headAngles);
-	AnglesSubtract(torsoAngles, legsAngles, torsoAngles);
-	AnglesToAxis(legsAngles, ent->client->animationInfo.legsAxis);
-	AnglesToAxis(torsoAngles, ent->client->animationInfo.torsoAxis);
-	AnglesToAxis(headAngles, ent->client->animationInfo.headAxis);
-}
-
-void G_PlayerAnimation(gentity_t* ent) {
-	int legsSet, torsoSet;
-	animModelInfo_t* modelInfo = NULL;
-
-	modelInfo = BG_ModelInfoForClient(ent->s.number);
-	if (!modelInfo) {
-		return;
-	}
-
-	legsSet = ent->s.legsAnim & ~ANIM_TOGGLEBIT;
-	torsoSet = ent->s.torsoAnim & ~ANIM_TOGGLEBIT;
-
-	ent->client->animationInfo.legsFrame = modelInfo->animations[legsSet].firstFrame + modelInfo->animations[legsSet].numFrames - 1;
-	ent->client->animationInfo.torsoFrame = modelInfo->animations[torsoSet].firstFrame + modelInfo->animations[torsoSet].numFrames - 1;
-}
-
-
-//void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
+void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 void reinforce( gentity_t *ent ); // JPW NERVE
 
 void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id );        // NERVE - SMF
@@ -1174,7 +773,6 @@ If "g_synchronousClients 1" is set, this will be called exactly
 once for each server frame, which makes for smooth demo recording.
 ==============
 */
-int teamRespawnTime(int team, qboolean warmup); // OSPx
 void ClientThink_real( gentity_t *ent ) {
 	gclient_t   *client;
 	pmove_t pm;
@@ -1193,14 +791,12 @@ void ClientThink_real( gentity_t *ent ) {
 	int weapon;
 	trace_t tr;
 // jpw
-	int pclass;
 
 	// Rafael wolfkick
 	//int			validkick;
 	//static int	wolfkicktimer = 0;
 
 	client = ent->client;
-	pclass = client->ps.stats[STAT_PLAYER_CLASS];
 
 	// don't think if the client is not yet connected (and thus not yet spawned in)
 	if ( client->pers.connected != CON_CONNECTED ) {
@@ -1212,7 +808,6 @@ void ClientThink_real( gentity_t *ent ) {
 		trap_LinkEntity( client->cameraPortal );
 		VectorCopy( client->cameraOrigin, client->cameraPortal->s.origin2 );
 	}
-
 
 	// mark the time, so the connection sprite can be removed
 	ucmd = &ent->client->pers.cmd;
@@ -1286,28 +881,6 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	// L0 - Pause
-	if ( ( client->ps.eFlags & EF_VIEWING_CAMERA ) || level.paused != PAUSE_NONE ) {
-		ucmd->buttons = 0;
-		ucmd->forwardmove = 0;
-		ucmd->rightmove = 0;
-		ucmd->upmove = 0;
-		ucmd->wbuttons = 0;
-
-		// freeze player (RELOAD_FAILED still allowed to move/look)
-		if ( level.paused != PAUSE_NONE ) {
-			client->ps.pm_type = PM_FREEZE;
-		} else if ( ( client->ps.eFlags & EF_VIEWING_CAMERA )) {
-			VectorClear( client->ps.velocity );
-			client->ps.pm_type = PM_FREEZE;
-		}
-	} else if ( client->noclip ) {
-		client->ps.pm_type = PM_NOCLIP;
-	} else if ( client->ps.stats[STAT_HEALTH] <= 0 ) {
-		client->ps.pm_type = PM_DEAD;
-	} else {
-		client->ps.pm_type = PM_NORMAL;
-	} // End
 	// JPW NERVE do some time-based muzzle flip -- this never gets touched in single player (see g_weapon.c)
 	// #define RIFLE_SHAKE_TIME 150 // JPW NERVE this one goes with the commented out old damped "realistic" behavior below
 	#define RIFLE_SHAKE_TIME 300 // per Id request, longer recoil time
@@ -1334,18 +907,11 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// JPW drop button drops secondary weapon so new one can be picked up
 	// TTimo explicit braces to avoid ambiguous 'else'
-
 	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {
 		if ( ucmd->wbuttons & WBUTTON_DROP ) {
-			if ( !client->dropWeaponTime  && level.paused == PAUSE_NONE ) {
+			if ( !client->dropWeaponTime ) {
 				client->dropWeaponTime = 1; // just latch it for now
-
-				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
-				// (dropweapon) ADD NEW CVAR (if desired) and include in the following condition to allow medics to drop their weapons
-				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) )
-				// sswolf - decide what classes can drop weapon
-				if (AllowDropForClass(ent, pclass))
-				{
+				if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) ) {
 					for ( i = 0; i < MAX_WEAPS_IN_BANK_MP; i++ ) {
 						weapon = weapBanksMultiPlayer[3][i];
 						if ( COM_BitCheck( client->ps.weapons,weapon ) ) {
@@ -1400,7 +966,6 @@ void ClientThink_real( gentity_t *ent ) {
 			client->dropWeaponTime = 0;
 		}
 	}
-
 // jpw
 
 	// check for inactivity timer, but never drop the local client of a non-dedicated server
@@ -1408,24 +973,16 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	if ( reloading || client->cameraPortal || level.paused != PAUSE_NONE) { // TODO check this against OSPx
+	if ( reloading || client->cameraPortal ) {
 		ucmd->buttons = 0;
 		ucmd->forwardmove = 0;
 		ucmd->rightmove = 0;
 		ucmd->upmove = 0;
 		ucmd->wbuttons = 0;
 		ucmd->wolfkick = 0;
-		// L0 - Pause
-		if ( level.paused != PAUSE_NONE ) {
-			client->ps.pm_type = PM_FREEZE;
-		// End
-		} else if ( client->cameraPortal ) {
-			VectorClear( client->ps.velocity );
+		if ( client->cameraPortal ) {
 			client->ps.pm_type = PM_FREEZE;
 		}
-	// L0 - Pause (TWICE! ...)
-	} else if ( level.paused != PAUSE_NONE ) {
-		client->ps.pm_type = PM_FREEZE;
 	} else if ( client->noclip ) {
 		client->ps.pm_type = PM_NOCLIP;
 	} else if ( client->ps.stats[STAT_HEALTH] <= 0 ) {
@@ -1487,7 +1044,6 @@ void ClientThink_real( gentity_t *ent ) {
 		pm.noWeapClips = qtrue; // ensure AI characters don't use clips if they're not supposed to.
 
 	}
-
 	// Ridah
 //	if (ent->r.svFlags & SVF_NOFOOTSTEPS)
 //		pm.noFootsteps = qtrue;
@@ -1593,14 +1149,8 @@ void ClientThink_real( gentity_t *ent ) {
 	ent->waterlevel = pm.waterlevel;
 	ent->watertype = pm.watertype;
 
-	G_PlayerAngles(ent, msec);
-	G_PlayerAnimation(ent);
-
 	// execute client events
-	// L0 - Pause dump
-	if ( level.paused == PAUSE_NONE ) {
-		ClientEvents( ent, oldEventSequence );
-	}
+	ClientEvents( ent, oldEventSequence );
 
 	// link entity now, after any personal teleporters have been used
 	trap_LinkEntity( ent );
@@ -1612,10 +1162,7 @@ void ClientThink_real( gentity_t *ent ) {
 	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 
 	// store the client's current position for antilag traces
-
-	// L0 - antilag
-	G_StoreTrail( ent );
-	// L0 - end
+	G_StoreClientPosition( ent );
 
 	// touch other objects
 	ClientImpacts( ent, &pm );
@@ -1658,7 +1205,6 @@ void ClientThink_real( gentity_t *ent ) {
 		// dhm - end
 
 		// wait for the attack button to be pressed
-		// TODO check this against OSPx which is wayyyyy different
 		if ( level.time > client->respawnTime ) {
 			// forcerespawn is to prevent users from waiting out powerups
 			if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) &&
@@ -1692,7 +1238,6 @@ void ClientThink_real( gentity_t *ent ) {
 				// jpw
 			}
 			// dhm - Nerve :: end
-
 			// NERVE - SMF - we want to immediately go to limbo mode if gibbed
 			else if ( client->ps.stats[STAT_HEALTH] <= GIB_HEALTH && !( ent->client->ps.pm_flags & PMF_LIMBO ) ) {
 				if ( g_gametype.integer >= GT_WOLF ) {
@@ -1702,27 +1247,12 @@ void ClientThink_real( gentity_t *ent ) {
 				}
 			}
 			// -NERVE - SMF
-		} // -OSPx
+		}
 		return;
 	}
 
 	// perform once-a-second actions
-	// L0 - Pause dump
-	if ( level.paused == PAUSE_NONE ) {
-		ClientTimerActions( ent, msec );
-	}
-}
-
-/*
-==================
-ClientThink_cmd
-==================
-*/
-void ClientThink_cmd(gentity_t* ent, usercmd_t* cmd) {
-
-	ent->client->pers.oldcmd = ent->client->pers.cmd;
-	ent->client->pers.cmd = *cmd;
-	ClientThink_real(ent);
+	ClientTimerActions( ent, msec );
 }
 
 /*
@@ -1734,47 +1264,25 @@ A new command has arrived from the client
 */
 void ClientThink( int clientNum ) {
 	gentity_t *ent;
-	usercmd_t newcmd;
 
 	ent = g_entities + clientNum;
-
-	// sswolf - this goes above
-	//ent->client->pers.oldcmd = ent->client->pers.cmd;
-	// new cmd
-	//trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
-	trap_GetUsercmd(clientNum, &newcmd);
+	ent->client->pers.oldcmd = ent->client->pers.cmd;
+	trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
 
 	// mark the time we got info, so we can display the
 	// phone jack if they don't get any for a while
 	ent->client->lastCmdTime = level.time;
 
-	if (G_DoAntiwarp(ent))
-	{
-		AW_AddUserCmd(clientNum, &newcmd);
-		DoClientThinks(ent);
-	}
-	else
-	{
-		ClientThink_cmd(ent, &newcmd);
-	}
-
-	/*if ( !g_synchronousClients.integer ) {
+	if ( !g_synchronousClients.integer ) {
 		ClientThink_real( ent );
-	}*/
+	}
 }
 
+
 void G_RunClient( gentity_t *ent ) {
-
-	if (G_DoAntiwarp(ent))
-	{
-		DoClientThinks(ent);
-	}
-
-	if ( !g_synchronousClients.integer )
-	{
+	if ( !g_synchronousClients.integer ) {
 		return;
 	}
-
 	ent->client->pers.cmd.serverTime = level.time;
 	ClientThink_real( ent );
 }
@@ -1782,52 +1290,42 @@ void G_RunClient( gentity_t *ent ) {
 /*
 ==================
 SpectatorClientEndFrame
-TODO check this against OSPx its wayyy different
+
 ==================
 */
 void SpectatorClientEndFrame( gentity_t *ent ) {
-	int savedClass;		// NERVE - SMF
-	   	int do_respawn = 0; // JPW NERVE
+	gclient_t   *cl;
+	int do_respawn = 0; // JPW NERVE
+	int savedScore;     // DHM - Nerve
+	int savedRespawns;  // DHM - Nerve
+	int savedClass;     // NERVE - SMF
+	int flags;
+	int testtime;
+
 	// if we are doing a chase cam or a remote view, grab the latest info
-	if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW || (ent->client->ps.pm_flags & PMF_LIMBO))
-	{
-		int       clientNum, testtime;
-		gclient_t *cl;
-	//	qboolean  do_respawn = qfalse;
+	if ( ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) || ( ent->client->ps.pm_flags & PMF_LIMBO ) ) { // JPW NERVE for limbo
+		int clientNum;
 
-		// Players can respawn quickly in warmup
-		if (g_gamestate.integer != GS_PLAYING && ent->client->respawnTime <= level.timeCurrent &&
-		    ent->client->sess.sessionTeam != TEAM_SPECTATOR)
-		{
-//			do_respawn = qtrue;
-			do_respawn = 1;
-		}
-		else if (ent->client->sess.sessionTeam == TEAM_RED)
-		{
-			testtime                            = (level.dwRedReinfOffset + level.timeCurrent - level.startTime) % g_redlimbotime.integer;
-			//do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
-			if (testtime < ent->client->pers.lastReinforceTime) {
-                do_respawn = 1;
+		if ( ent->client->sess.sessionTeam == TEAM_RED ) {
+			testtime = level.time % g_redlimbotime.integer;
+			if ( testtime < ent->client->pers.lastReinforceTime ) {
+				do_respawn = 1;
 			}
 			ent->client->pers.lastReinforceTime = testtime;
-		}
-		else if (ent->client->sess.sessionTeam == TEAM_BLUE)
-		{
-			testtime                            = (level.dwBlueReinfOffset + level.timeCurrent - level.startTime) % g_bluelimbotime.integer;
-			//do_respawn                          = (testtime < ent->client->pers.lastReinforceTime);
-			if (testtime < ent->client->pers.lastReinforceTime) {
-                do_respawn = 1;
+		} else if ( ent->client->sess.sessionTeam == TEAM_BLUE )     {
+			testtime = level.time % g_bluelimbotime.integer;
+			if ( testtime < ent->client->pers.lastReinforceTime ) {
+				do_respawn = 1;
 			}
 			ent->client->pers.lastReinforceTime = testtime;
 		}
 
+		if ( ( g_maxlives.integer > 0 || g_alliedmaxlives.integer > 0 || g_axismaxlives.integer > 0 ) && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] == 0 ) {
+			do_respawn = 0;
+		}
 
-
-
-
-		if (do_respawn)
-		{
-			reinforce(ent);
+		if ( do_respawn ) {
+			reinforce( ent );
 			return;
 		}
 
@@ -1839,35 +1337,26 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 		} else if ( clientNum == -2 ) {
 			clientNum = level.follow2;
 		}
-
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
 			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
-				// L0 - Ping & Score bug fix
-				// This solves the /serverstatus and score table (who's specing/demoing you) bug..
-				int ping = ent->client->ps.ping;
-				int score = ent->client->ps.persistant[PERS_SCORE];
 				// DHM - Nerve :: carry flags over
-                int	flags = ( cl->ps.eFlags & ~( EF_VOTED ) ) | ( ent->client->ps.eFlags & ( EF_VOTED ) );
+				flags = ( cl->ps.eFlags & ~( EF_VOTED ) ) | ( ent->client->ps.eFlags & ( EF_VOTED ) );
 				// JPW NERVE -- limbo latch
 				if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR && ent->client->ps.pm_flags & PMF_LIMBO ) {
 					// abuse do_respawn var
-			//		savedScore = ent->client->ps.persistant[PERS_SCORE];
-
-
+					savedScore = ent->client->ps.persistant[PERS_SCORE];
 					do_respawn = ent->client->ps.pm_time;
-
-
-			//		savedRespawns = ent->client->ps.persistant[PERS_RESPAWNS_LEFT];
+					savedRespawns = ent->client->ps.persistant[PERS_RESPAWNS_LEFT];
 					savedClass = ent->client->ps.stats[STAT_PLAYER_CLASS];
 
 					ent->client->ps = cl->ps;
 					ent->client->ps.pm_flags |= PMF_FOLLOW;
 					ent->client->ps.pm_flags |= PMF_LIMBO;
 
-				//	ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = savedRespawns;
+					ent->client->ps.persistant[PERS_RESPAWNS_LEFT] = savedRespawns;
 					ent->client->ps.pm_time = do_respawn;                           // put pm_time back
-				//	ent->client->ps.persistant[PERS_SCORE] = savedScore;            // put score back
+					ent->client->ps.persistant[PERS_SCORE] = savedScore;            // put score back
 					ent->client->ps.stats[STAT_PLAYER_CLASS] = savedClass;          // NERVE - SMF - put player class back
 				} else {
 					ent->client->ps = cl->ps;
@@ -1876,9 +1365,6 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 				// jpw
 				// DHM - Nerve :: carry flags over
 				ent->client->ps.eFlags = flags;
-				// L0 - Ping & Score bug fix
-				ent->client->ps.ping = ping;
-				ent->client->ps.persistant[PERS_SCORE] = score;
 				return;
 			} else {
 				// drop them to free spectators unless they are dedicated camera followers
@@ -1895,9 +1381,6 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 	} else {
 		ent->client->ps.pm_flags &= ~PMF_SCOREBOARD;
 	}
-	// L0 - Speclock
-	ent->client->ps.powerups[PW_BLACKOUT] = ( G_blockoutTeam( ent, TEAM_RED ) * TEAM_RED ) |
-											( G_blockoutTeam( ent, TEAM_BLUE ) * TEAM_BLUE );
 }
 
 
@@ -2054,34 +1537,6 @@ void WolfReviveBbox( gentity_t *self ) {
 
 // dhm
 
-// sswolf - patched for the pub head stuff
-void G_DrawHitBoxes(gentity_t* ent) {
-	gentity_t* bboxEnt;
-	vec3_t b1, b2;
-
-	// Draw body hitbox
-	VectorCopy(ent->r.currentOrigin, b1);
-	VectorCopy(ent->r.currentOrigin, b2);
-	VectorAdd(b1, ent->r.mins, b1);
-	VectorAdd(b2, ent->r.maxs, b2);
-	bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
-	VectorCopy(b2, bboxEnt->s.origin2);
-	bboxEnt->s.dmgFlags = 1;
-	bboxEnt->s.otherEntityNum2 = ent->s.number;
-
-	// Draw head hitbox
-	UpdateHeadEntity(ent);
-	VectorCopy(ent->head->r.currentOrigin, b1);
-	VectorCopy(ent->head->r.currentOrigin, b2);
-	VectorAdd(b1, ent->head->r.mins, b1);
-	VectorAdd(b2, ent->head->r.maxs, b2);
-	bboxEnt = G_TempEntity(b1, EV_RAILTRAIL);
-	VectorCopy(b2, bboxEnt->s.origin2);
-	bboxEnt->s.dmgFlags = 1;
-	bboxEnt->s.otherEntityNum2 = ent->s.number;
-	RemoveHeadEntity(ent);
-}
-
 /*
 ==============
 ClientEndFrame
@@ -2094,9 +1549,6 @@ while a slow client may have multiple ClientEndFrame between ClientThink.
 void ClientEndFrame( gentity_t *ent ) {
 	int i;
 
-	// used for informing of speclocked teams.
-	// Zero out here and set only for certain specs
-	ent->client->ps.powerups[PW_BLACKOUT] = 0;
 	if ( ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) || ( ent->client->ps.pm_flags & PMF_LIMBO ) ) { // JPW NERVE
 		SpectatorClientEndFrame( ent );
 		return;
@@ -2104,50 +1556,20 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	if ( !ent->aiCharacter ) {
 		// turn off any expired powerups
-		for ( i = 0; i < PW_NUM_POWERUPS; i++ ) {
+		for ( i = 0 ; i < MAX_POWERUPS ; i++ ) {
 
 			if ( i == PW_FIRE ||             // these aren't dependant on level.time
 				 i == PW_ELECTRIC ||
 				 i == PW_BREATHER ||
-				 i == PW_NOFATIGUE ||
-				  ent->client->ps.powerups[i] == 0  // L0 - Pause dump
-				 ) {
+				 i == PW_NOFATIGUE ) {
 
 				continue;
-			}
-			// L0 - Pause dump
-			// OSP -- If we're paused, update powerup timers accordingly.
-			// Make sure we dont let stuff like CTF flags expire.
-			if ( level.paused != PAUSE_NONE &&
-				 ent->client->ps.powerups[i] != INT_MAX ) {
-				ent->client->ps.powerups[i] += level.time - level.previousTime;
 			}
 
 			if ( ent->client->ps.powerups[ i ] < level.time ) {
 				ent->client->ps.powerups[ i ] = 0;
 			}
 		}
-	}
-	// L0 - Pause dump
-	// OSP - If we're paused, make sure other timers stay in sync
-	//		--> Any new things in ET we should worry about?
-	if ( level.paused != PAUSE_NONE ) {
-		int time_delta = level.time - level.previousTime;
-
-		ent->client->airOutTime += time_delta;
-		ent->client->inactivityTime += time_delta;
-		ent->client->lastBurnTime += time_delta;
-		ent->client->pers.connectTime += time_delta;
-		ent->client->pers.enterTime += time_delta;
-		ent->client->pers.teamState.lastreturnedflag += time_delta;
-		ent->client->pers.teamState.lasthurtcarrier += time_delta;
-		ent->client->pers.teamState.lastfraggedcarrier += time_delta;
-		ent->client->ps.classWeaponTime += time_delta;
-		ent->client->respawnTime += time_delta;
-		ent->client->sniperRifleFiredTime += time_delta;
-		ent->lastHintCheckTime += time_delta;
-		ent->pain_debounce_time += time_delta;
-		ent->s.onFireEnd += time_delta;
 	}
 
 	// save network bandwidth
@@ -2214,8 +1636,4 @@ void ClientEndFrame( gentity_t *ent ) {
 		ent->count2 = 0;
 	}
 	// dhm
-
-	if (ent->client->pers.drawHitBoxes && g_drawHitboxes.integer && ent->health > 0) {
-		G_DrawHitBoxes(ent);
-	}
 }

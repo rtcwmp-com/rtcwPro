@@ -1235,7 +1235,11 @@ void Info_RemoveKey_Big( char *s, const char *key ) {
 			return;
 		}
 	}
+
 }
+
+
+
 
 /*
 ==================
@@ -1310,7 +1314,7 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 	char newi[BIG_INFO_STRING];
 
 	if ( strlen( s ) >= BIG_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_SetValueForKey_Big: oversize infostring" );
+		Com_Error( ERR_DROP, "Info_SetValueForKey: oversize infostring" );
 	}
 
 	if ( strchr( key, '\\' ) || strchr( value, '\\' ) ) {
@@ -1343,92 +1347,7 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 	strcat( s, newi );
 }
 
-/*
-==================
-Q_CountChar
-==================
-*/
-int Q_CountChar(const char* string, char tocount) {
-	int count;
 
-	for (count = 0; *string; string++) {
-		if (*string == tocount)
-			count++;
-	}
-	return count;
-}
 
-/*
-==================
-Q_isBadDirChar
-
-Strips whitespaces and bad characters
-==================
-*/
-qboolean Q_isBadDirChar(char c) {
-	char badchars[] = {';', '&', '(', ')', '|', '<', '>', '*', '?', '[', ']', '~', '+', '@', '!', '\\', '/', ' ', '\'', '\"', '\0'};
-	int i;
-
-	for (i = 0; badchars[i] != '\0'; i++) {
-		if (c == badchars[i]) {
-			return qtrue;
-		}
-	}
-
-	return qfalse;
-}
-
-/*
-==================
-Q_CleanDirName
-==================
-*/
-char* Q_CleanDirName(char* dirname) {
-	char* d;
-	char* s;
-
-	s = dirname;
-	d = dirname;
-
-	// clear trailing .'s
-	while (*s == '.') {
-		s++;
-	}
-
-	while (*s != '\0') {
-		if (!Q_isBadDirChar(*s)) {
-			*d++ = *s;
-		}
-		s++;
-	}
-	*d = '\0';
-
-	return dirname;
-}
-
-/*
-==================
-Q_IsNumeric
-
-Float and Int will be considered valid.
-==================
-*/
-qboolean Q_IsNumeric(const char* s) {
-
-	if (!s || strlen(s) < 1) {
-		return qfalse;
-	}
-
-	while (*s) {
-		if (*s == '.'|| *s == '-') {
-			*s++;
-
-			continue;
-		}
-		else if ((isdigit(*s++) == 0))
-			return qfalse;
-	}
-	return qtrue;
-}
 
 //====================================================================

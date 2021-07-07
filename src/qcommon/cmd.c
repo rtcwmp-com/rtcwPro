@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../game/q_shared.h"
 #include "qcommon.h"
 
-#define MAX_CMD_BUFFER  32768 //16384
+#define MAX_CMD_BUFFER  16384
 #define MAX_CMD_LINE    1024
 
 typedef struct {
@@ -435,22 +435,16 @@ char *Cmd_Cmd() {
 /*
 ============
 Cmd_TokenizeString
+
 Parses the given string into command line tokens.
 The text is copied to a seperate buffer and 0 characters
 are inserted in the apropriate place, The argv array
 will point into this temporary buffer.
 ============
 */
-// NOTE TTimo define that to track tokenization issues
-//#define TKN_DBG
-static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
-	const char	*text;
-	char	*textOut;
-
-#ifdef TKN_DBG
-  // FIXME TTimo blunt hook to try to find the tokenization of userinfo
-  Com_DPrintf("Cmd_TokenizeString: %s\n", text_in);
-#endif
+void Cmd_TokenizeString( const char *text_in ) {
+	const char  *text;
+	char    *textOut;
 
 	// clear previous args
 	cmd_argc = 0;
@@ -459,14 +453,14 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 		return;
 	}
 
-	Q_strncpyz( cmd_cmd, text_in, sizeof(cmd_cmd) );
+	Q_strncpyz( cmd_cmd, text_in, sizeof( cmd_cmd ) );
 
 	text = text_in;
 	textOut = cmd_tokenized;
 
 	while ( 1 ) {
 		if ( cmd_argc == MAX_STRING_TOKENS ) {
-			return;			// this is usually something malicious
+			return;         // this is usually something malicious
 		}
 
 		while ( 1 ) {
@@ -475,31 +469,30 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 				text++;
 			}
 			if ( !*text ) {
-				return;			// all tokens parsed
+				return;         // all tokens parsed
 			}
 
 			// skip // comments
 			if ( text[0] == '/' && text[1] == '/' ) {
-				return;			// all tokens parsed
+				return;         // all tokens parsed
 			}
 
 			// skip /* */ comments
-			if ( text[0] == '/' && text[1] =='*' ) {
+			if ( text[0] == '/' && text[1] == '*' ) {
 				while ( *text && ( text[0] != '*' || text[1] != '/' ) ) {
 					text++;
 				}
 				if ( !*text ) {
-					return;		// all tokens parsed
+					return;     // all tokens parsed
 				}
 				text += 2;
 			} else {
-				break;			// we are ready to parse a token
+				break;          // we are ready to parse a token
 			}
 		}
 
 		// handle quoted strings
-    // NOTE TTimo this doesn't handle \" escaping
-		if ( !ignoreQuotes && *text == '"' ) {
+		if ( *text == '"' ) {
 			cmd_argv[cmd_argc] = textOut;
 			cmd_argc++;
 			text++;
@@ -508,7 +501,7 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 			}
 			*textOut++ = 0;
 			if ( !*text ) {
-				return;		// all tokens parsed
+				return;     // all tokens parsed
 			}
 			text++;
 			continue;
@@ -520,7 +513,7 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 
 		// skip until whitespace, quote, or command
 		while ( *text > ' ' ) {
-			if ( !ignoreQuotes && text[0] == '"' ) {
+			if ( text[0] == '"' ) {
 				break;
 			}
 
@@ -529,7 +522,7 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 			}
 
 			// skip /* */ comments
-			if ( text[0] == '/' && text[1] =='*' ) {
+			if ( text[0] == '/' && text[1] == '*' ) {
 				break;
 			}
 
@@ -539,54 +532,12 @@ static void Cmd_TokenizeString2( const char *text_in, qboolean ignoreQuotes ) {
 		*textOut++ = 0;
 
 		if ( !*text ) {
-			return;		// all tokens parsed
+			return;     // all tokens parsed
 		}
 	}
+
 }
 
-/*
-============
-Cmd_TokenizeString
-
-Parses the given string into command line tokens.
-The text is copied to a seperate buffer and 0 characters
-are inserted in the apropriate place, The argv array
-will point into this temporary buffer.
-============
-*/
-void Cmd_TokenizeString( const char *text_in ) {
-    Cmd_TokenizeString2( text_in, qfalse );
-}
-
-/*
-============
-Cmd_TokenizeStringIgnoreQuotes
-============
-*/
-void Cmd_TokenizeStringIgnoreQuotes( const char *text_in ) {
-	Cmd_TokenizeString2( text_in, qtrue );
-}
-
-/*
-============
-Cmd_TokenizeLine
-============
-*/
-void Cmd_TokenizeLine(const char* text_in, const char* delim, char *pos) {
-	char* token;
-
-	cmd_argc = 0;
-	if (!text_in) {
-		return;
-	}
-
-	token = strtok_r((char *)text_in, delim, &pos);
-	while (token != NULL) {
-		cmd_argv[cmd_argc] = token;
-		cmd_argc++;
-		token = strtok_r(NULL, delim, &pos);
-	}
-}
 
 /*
 ============

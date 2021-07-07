@@ -493,7 +493,7 @@ float AAS_FallDelta( float distance ) {
 	float t, delta, gravity;
 
 	gravity = aassettings.sv_gravity;
-	t = sqrt( Q_fabs( distance ) * 2 / gravity );
+	t = sqrt( fabs( distance ) * 2 / gravity );
 	delta = t * gravity;
 	return delta * delta * 0.0001;
 } //end of the function AAS_FallDelta
@@ -1454,7 +1454,7 @@ int AAS_Reachability_Step_Barrier_WaterJump_WalkOffLedge( int area1num, int area
 					VectorCopy( ground_beststart, lreach->start );
 					VectorCopy( ground_bestend, lreach->end );
 					lreach->traveltype = TRAVEL_WALKOFFLEDGE;
-					lreach->traveltime = STARTWALKOFFLEDGE_TIME + Q_fabs( ground_bestdist ) * 50 / aassettings.sv_gravity;
+					lreach->traveltime = STARTWALKOFFLEDGE_TIME + fabs( ground_bestdist ) * 50 / aassettings.sv_gravity;
 					//if falling from too high and not falling into water
 					if ( !AAS_AreaSwim( area2num ) && !AAS_AreaJumpPad( area2num ) ) {
 						if ( AAS_FallDelta( ground_bestdist ) > FALLDELTA_5DAMAGE ) {
@@ -2089,7 +2089,7 @@ int AAS_Reachability_Jump( int area1num, int area2num ) {
 			speed *= 1.2;
 			traveltype = TRAVEL_WALKOFFLEDGE;
 		} //end if
-		else if ( bestdist <= 48 && Q_fabs( beststart[2] - bestend[2] ) < 8 ) {
+		else if ( bestdist <= 48 && fabs( beststart[2] - bestend[2] ) < 8 ) {
 			speed = 400;
 			traveltype = TRAVEL_WALKOFFLEDGE;
 		} //end else if
@@ -3541,7 +3541,7 @@ void AAS_Reachability_JumpPad( void ) {
 			} //end if
 		} //end if
 		  //
-		if ( Q_fabs( velocity[0] ) > 100 || Q_fabs( velocity[1] ) > 100 ) {
+		if ( fabs( velocity[0] ) > 100 || fabs( velocity[1] ) > 100 ) {
 			continue;
 		}
 		//check for areas we can reach with air control
@@ -4193,7 +4193,7 @@ void AAS_Reachability_WalkOffLedge( int areanum ) {
 						VectorCopy( mid, lreach->start );
 						VectorCopy( trace.endpos, lreach->end );
 						lreach->traveltype = TRAVEL_WALKOFFLEDGE;
-						lreach->traveltime = STARTWALKOFFLEDGE_TIME + Q_fabs( mid[2] - trace.endpos[2] ) * 50 / aassettings.sv_gravity;
+						lreach->traveltime = STARTWALKOFFLEDGE_TIME + fabs( mid[2] - trace.endpos[2] ) * 50 / aassettings.sv_gravity;
 						if ( !AAS_AreaSwim( reachareanum ) && !AAS_AreaJumpPad( reachareanum ) ) {
 							if ( AAS_FallDelta( mid[2] - trace.endpos[2] ) > FALLDELTA_5DAMAGE ) {
 								lreach->traveltime += FALLDAMAGE_5_TIME;

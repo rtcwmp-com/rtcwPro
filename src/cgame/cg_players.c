@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +36,6 @@ If you have questions concerning this license or the applicable additional terms
 static char text[100000];
 
 #include "cg_local.h"
-#include "../../MAIN//ui_mp/menudef.h"
 
 #define SWING_RIGHT 1
 #define SWING_LEFT  2
@@ -60,162 +59,6 @@ char    *cg_customSoundNames[MAX_CUSTOM_SOUNDS] = {
 	"*exert3.wav",
 };
 
-/************ OSPx - DRAW HUD NAMES dump ************/
-void VP_AddName(int x, int y, float dist, int clientNum);
-/*
-=================
-VectorAngle
-=================
-*/
-float VectorAngle(const vec3_t a, const vec3_t b)
-{
-	float length_a = VectorLength(a);
-	float length_b = VectorLength(b);
-	float length_ab = length_a*length_b;
-	if (length_ab == 0.0)
-	{
-		return 0.0;
-	}
-	else
-	{
-		return (float)(acos(DotProduct(a, b) / length_ab) * (180.f / M_PI));
-	}
-}
-
-/*
-=================
-MakeVector
-=================
-*/
-void MakeVector(const vec3_t ain, vec3_t vout)
-{
-	float pitch;
-	float yaw;
-	float tmp;
-
-	pitch = (float)(ain[0] * M_PI / 180);
-	yaw = (float)(ain[1] * M_PI / 180);
-	tmp = (float)cos(pitch);
-
-	vout[0] = (float)(-tmp * -cos(yaw));
-	vout[1] = (float)(sin(yaw)*tmp);
-	vout[2] = (float)-sin(pitch);
-}
-
-/*
-=================
-VectorRotateX
-=================
-*/
-void VectorRotateX(const vec3_t in, float angle, vec3_t out)
-{
-	float a, c, s;
-
-	a = (float)(angle * M_PI / 180);
-	c = (float)cos(a);
-	s = (float)sin(a);
-	out[0] = in[0];
-	out[1] = c*in[1] - s*in[2];
-	out[2] = s*in[1] + c*in[2];
-}
-
-/*
-=================
-VectorRotateY
-=================
-*/
-void VectorRotateY(const vec3_t in, float angle, vec3_t out)
-{
-	float a, c, s;
-
-	a = (float)(angle * M_PI / 180);
-	c = (float)cos(a);
-	s = (float)sin(a);
-	out[0] = c*in[0] + s*in[2];
-	out[1] = in[1];
-	out[2] = -s*in[0] + c*in[2];
-}
-
-/*
-=================
-VectorRotateZ
-=================
-*/
-void VectorRotateZ(const vec3_t in, float angle, vec3_t out)
-{
-	float a, c, s;
-
-	a = (float)(angle * M_PI / 180);
-	c = (float)cos(a);
-	s = (float)sin(a);
-	out[0] = c*in[0] - s*in[1];
-	out[1] = s*in[0] + c*in[1];
-	out[2] = in[2];
-}
-
-#define BOUND_VALUE(var,min,max) if((var)>(max)){(var)=(max);};if((var)<(min)){(var)=(min);}
-/*
-=================
-CG_WorldToScreen
-=================
-*/
-int CG_WorldToScreen(float* in, int* out)
-{
-	vec3_t aim;
-	vec3_t newaim;
-	vec3_t view;
-	vec3_t tmp;
-	float num;
-
-	VectorCopy(cg.refdef.vieworg, tmp);
-	VectorSubtract(in, tmp, aim);
-	MakeVector(cg.refdefViewAngles, view);
-
-	//not in fov#!@#!@$#@!$
-	if (VectorAngle(view, aim) > (cg.refdef.fov_x / 1.8))
-		return -1;
-
-	VectorRotateZ(aim, -cg.refdefViewAngles[1], newaim);// yaw
-	VectorRotateY(newaim, -cg.refdefViewAngles[0], tmp);// pitch
-	VectorRotateX(tmp, -cg.refdefViewAngles[2], newaim);// roll
-
-	//they are behind us!@~!#@!$@!$
-	if (newaim[0] <= 0)
-		return -1;
-
-	num = (float)((320.0f / newaim[0])*(120.0 / cg.refdef.fov_x - 1.0 / 3.0));
-
-	out[0] = (int)(320 - num*newaim[1]);
-	out[1] = (int)(240 - num*newaim[2]);
-
-
-	BOUND_VALUE(out[0], 0, 640);
-	BOUND_VALUE(out[1], 0, 480);
-
-	return 0;
-}
-void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
-	int skipNumber, int mask) {
-	trace_t	t;
-
-	trap_CM_BoxTrace(&t, start, end, mins, maxs, 0, mask);
-	t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
-
-	*result = t;
-}
-qboolean PointVisible(vec3_t point) {
-	trace_t trace;
-	//	vec3_t tmp;
-
-	CG_Trace_World(&trace, cg.refdef.vieworg, NULL, NULL, point, 0, MASK_SOLID);
-
-	if (trace.fraction != 1.0) {
-		return qfalse;
-	}
-	return qtrue;
-}
-
-/************ OSPx - END DRAW HUD NAMES ************/
 
 /*
 ================
@@ -384,14 +227,14 @@ void CG_CalcMoveSpeeds( clientInfo_t *ci ) {
 				} else {
 					low = 1;
 				}
-				totalSpeed += Q_fabs( oldPos[low][2] - o[low].origin[2] );
+				totalSpeed += fabs( oldPos[low][2] - o[low].origin[2] );
 			} else {
 				if ( o[0].origin[2] < o[1].origin[2] ) {
 					low = 0;
 				} else {
 					low = 1;
 				}
-				totalSpeed += Q_fabs( oldPos[low][0] - o[low].origin[0] );
+				totalSpeed += fabs( oldPos[low][0] - o[low].origin[0] );
 			}
 
 			numSpeed++;
@@ -1138,9 +981,6 @@ void CG_NewClientInfo( int clientNum ) {
 	v = Info_ValueForKey( configstring, "t" );
 	newInfo.team = atoi( v );
 
-	// ref
-	v = Info_ValueForKey(configstring, "ref");
-	newInfo.refStatus = atoi(v);
 //----(SA) modified this for head separation
 
 	// head
@@ -1200,24 +1040,6 @@ void CG_NewClientInfo( int clientNum ) {
 
 	//----(SA) modify \/ to differentiate for head models/skins as well
 
-	// RtcwPro added ref code
-	trap_Cvar_Set("authLevel", va("%i", newInfo.refStatus));
-
-	if (newInfo.refStatus != ci->refStatus) {
-		if (newInfo.refStatus <= RL_NONE) {
-			const char *info = CG_ConfigString(CS_SERVERINFO);
-
-			trap_Cvar_Set("cg_ui_voteFlags", Info_ValueForKey(info, "voteFlags"));
-			char *str = "^3*** ^1You have been stripped of your referee status! ^3***\n";
-			//CG_PopinPrint(str, SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH, qfalse);
-			CPri(str);
-
-		}
-		else {
-			trap_Cvar_Set("cg_ui_voteFlags", "0");
-			// don't print a message as the MakeRef code already does a center print
-		}
-	}
 
 	// scan for an existing clientinfo that matches this modelname
 	// so we can avoid loading checks if possible
@@ -1791,7 +1613,7 @@ static void CG_SwingAngles( float destination, float swingTolerance, float clamp
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract( destination, *angle );
-	scale = Q_fabs( swing );
+	scale = fabs( swing );
 	scale *= 0.05;
 	if ( scale < 0.5 ) {
 		scale = 0.5;
@@ -1902,11 +1724,11 @@ static void CG_AddPainTwitch( centity_t *cent, vec3_t torsoAngles ) {
 		f = (float)t / duration;
 		if ( f < FADEIN_RATIO ) {
 			torsoAngles[ROLL] += ( 0.5 * direction * ( f * ( 1.0 / FADEIN_RATIO ) ) );
-			torsoAngles[PITCH] -= ( Q_fabs( direction ) * ( f * ( 1.0 / FADEIN_RATIO ) ) );
+			torsoAngles[PITCH] -= ( fabs( direction ) * ( f * ( 1.0 / FADEIN_RATIO ) ) );
 			torsoAngles[YAW] += ( direction * ( f * ( 1.0 / FADEIN_RATIO ) ) );
 		} else {
 			torsoAngles[ROLL] += ( 0.5 * direction * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
-			torsoAngles[PITCH] -= ( Q_fabs( direction ) * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
+			torsoAngles[PITCH] -= ( fabs( direction ) * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
 			torsoAngles[YAW] += ( direction * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
 		}
 	} else {    // fast, Q3 style
@@ -1997,7 +1819,7 @@ static void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], v
 			clampTolerance = 90;
 		} else {    // must be firing
 			torsoAngles[YAW] = headAngles[YAW]; // always face firing direction
-			//if (Q_fabs(cent->currentState.angles2[YAW]) > 30)
+			//if (fabs(cent->currentState.angles2[YAW]) > 30)
 			//	legsAngles[YAW] = headAngles[YAW];
 			clampTolerance = 60;
 		}
@@ -2296,102 +2118,6 @@ static void CG_PlayerFloatSprite( centity_t *cent, qhandle_t shader, int height 
 	ent.shaderRGBA[3] = 255;
 	trap_R_AddRefEntityToScene( &ent );
 }
-/******** OSPx - draw hud names *******/
-
-qboolean CG_WorldCoordToScreenCoordFloat(vec3_t worldCoord, float *x, float *y)
-{
-	vec3_t	local, transformed;
-	vec3_t	vfwd;
-	vec3_t	vright;
-	vec3_t	vup;
-	float	xzi;
-	float	yzi;
-
-	//	xcenter = cg.refdef.width / 2;//gives screen coords adjusted for resolution
-	//	ycenter = cg.refdef.height / 2;//gives screen coords adjusted for resolution
-	//NOTE: did it this way because most draw functions expect virtual 640x480 coords
-	//	and adjust them for current resolution
-	float xcenter = 640.0f / 2.0f;	//gives screen coords in virtual 640x480, to be adjusted when drawn
-	float ycenter = 480.0f / 2.0f;	//gives screen coords in virtual 640x480, to be adjusted when drawn
-	AngleVectors(cg.refdefViewAngles, vfwd, vright, vup);
-	VectorSubtract(worldCoord, cg.refdef.vieworg, local);
-	transformed[0] = DotProduct(local, vright);
-	transformed[1] = DotProduct(local, vup);
-	transformed[2] = DotProduct(local, vfwd);
-
-	// Make sure Z is not negative.
-	if (transformed[2] < 0.01f) {
-		return qfalse;
-	}
-
-	xzi = xcenter / transformed[2] * (96.0f / cg.refdef.fov_x);
-	yzi = ycenter / transformed[2] * (102.0f / cg.refdef.fov_y);
-	*x = xcenter + xzi * transformed[0];
-	*y = ycenter - yzi * transformed[1];
-	return qtrue;
-}
-#define ISVALIDCLIENTNUM(clientNum) ( clientNum >= 0 && clientNum < MAX_CLIENTS )
-
-int CG_Text_Width(const char *text, float scale, int limit);
-int CG_Text_Height(const char *text, float scale, int limit);
-void CG_AddOnScreenText(const char *text, vec3_t origin, int clientNum)
-{
-	float x, y;
-
-	if (!ISVALIDCLIENTNUM(clientNum))
-		return;
-
-	if (CG_WorldCoordToScreenCoordFloat(origin, &x, &y)){
-		float		scale, w, h;
-		float    	dist = VectorDistance(origin, cg.refdef.vieworg);
-		float       dist2 = (dist*dist) / (3600.0f);
-
-		if (dist2 > 2.0f)
-			dist2 = 2.0f;
-
-		scale = 2.4f - dist2 - dist / 6000.0f;
-		if (scale < 0.05f)
-			scale = 0.05f;
-
-		w = CG_Text_Width_ext2(text, scale, 0);
-		h = CG_Text_Height_ext2(text, scale, 0);
-
-		x -= w / 2;
-		y -= h / 2;
-
-		// save it
-		cg.specOnScreenNames[clientNum].x = x;
-		cg.specOnScreenNames[clientNum].y = y;
-		cg.specOnScreenNames[clientNum].scale = scale;
-		cg.specOnScreenNames[clientNum].text = text;
-		VectorCopy(origin, cg.specOnScreenNames[clientNum].origin);
-		cg.specOnScreenNames[clientNum].visible = qtrue;
-	}
-	else {
-		memset(&cg.specOnScreenNames[clientNum], 0, sizeof(cg.specOnScreenNames[clientNum]));
-	}
-}
-static void CG_PlayerFloatText(centity_t *cent, const char *text, int height)
-{
-	vec3_t		origin;
-
-	VectorCopy(cent->lerpOrigin, origin);
-	origin[2] += height;
-
-	// Account for ducking
-	if (cent->currentState.clientNum == cg.snap->ps.clientNum) {
-		if (cg.snap->ps.pm_flags & PMF_DUCKED) {
-			origin[2] -= 18;
-		}
-	}
-	else {
-		if ((qboolean)cent->currentState.animMovetype) {
-			origin[2] -= 18;
-		}
-	}
-	CG_AddOnScreenText(text, origin, cent->currentState.clientNum);
-}
-/******** -OSPx - End draw hud names *******/
 
 
 
@@ -2404,14 +2130,6 @@ Float sprites over the player's head
 */
 static void CG_PlayerSprites( centity_t *cent ) {
 	int team;
-// OSPx - Draw Hud Names
-	clientInfo_t	*ci = &cgs.clientinfo[cent->currentState.clientNum];
-	int				height = 48;
-
-	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR) {
-		CG_PlayerFloatText(cent, ci->name, height + 16);
-	}
-// -OSPx
 
 	if ( cent->currentState.eFlags & EF_CONNECTION ) {
 		CG_PlayerFloatSprite( cent, cgs.media.connectionShader, 48 );
@@ -2497,10 +2215,6 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane ) {
 		return qfalse;
 	}
 
-	// L0 - Don't draw this above 1...
-	if (cg_shadows.integer > 1) {
-		trap_Cvar_Set("cg_shadows", "1");
-	}
 	// no shadows when invisible
 	if ( cent->currentState.powerups & ( 1 << PW_INVIS ) ) {
 		return qfalse;
@@ -2865,7 +2579,7 @@ void CG_Player( centity_t *cent ) {
 
 	shadow = qfalse;                                                // gjd added to make sure it was initialized
 	shadowPlane = 0.0;                                              // ditto
-//	VectorCopy( vec3_origin, playerOrigin );
+	VectorCopy( vec3_origin, playerOrigin );
 
 	// if set to invisible, skip
 	if ( cent->currentState.eFlags & EF_NODRAW ) {
@@ -2983,14 +2697,6 @@ void CG_Player( centity_t *cent ) {
 	//VectorCopy(cent->lerpOrigin, lightorigin);
 	VectorCopy( playerOrigin, lightorigin );
 	lightorigin[2] += 31 + (float)cg_drawFPGun.integer;
-
-	// sswolf - complete OSP demo features
-	// L0 - Keeping this in for demo preview..
-	if (cg.demoPlayback && cgs.wallhack)
-	{
-		if (cent->currentState.number != cg.snap->ps.clientNum)
-			renderfx = RF_DEPTHHACK;
-	}
 
 	//
 	// add the legs

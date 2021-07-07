@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +36,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "q_shared.h"
 #include "bg_public.h"
-#include "../../MAIN//ui_mp/menudef.h"
 
 // JPW NERVE -- added because I need to check single/multiplayer instances and branch accordingly
 #ifdef CGAMEDLL
@@ -48,15 +47,11 @@ extern vmCvar_t g_gametype;
 // jpw
 
 // NOTE: weapons that share ammo (ex. colt/thompson) need to share max ammo, but not necessarily uses or max clip
-#define MAX_AMMO_45     32		// RtcwPro - modified for AddMagicAmmo
-#define MAX_AMMO_9MM    32		// RtcwPro - modified for AddMagicAmmo
-#define MAX_AMMO_MP40	96		// RtcwPro - modified for AddMagicAmmo
-#define MAX_AMMO_STEN	96		// RtcwPro - modified for AddMagicAmmo
-#define MAX_AMMO_THOM	90		// RtcwPro - modified for AddMagicAmmo
-#define MAX_AMMO_PANZ   3		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_45     300
+#define MAX_AMMO_9MM    300
 #define MAX_AMMO_VENOM  1000
-#define MAX_AMMO_MAUSER 30		// RtcwPro - modified for AddMagicAmmo
-#define MAX_AMMO_GARAND 30		// RtcwPro - modified for AddMagicAmmo
+#define MAX_AMMO_MAUSER 50
+#define MAX_AMMO_GARAND 1000
 #define MAX_AMMO_FG42   500
 #define MAX_AMMO_BAR    500
 
@@ -80,10 +75,6 @@ int weapBanksMultiPlayer[MAX_WEAP_BANKS_MP][MAX_WEAPS_IN_BANK_MP] = {
 	{WP_DYNAMITE,           WP_MEDKIT,              WP_AMMO,    0,          0,          0,              0,          0           }
 };
 // jpw
-
-int reloadableWeapons[] = {
-	WP_MP40, WP_THOMPSON, WP_STEN, WP_MAUSER, WP_GARAND, WP_PANZERFAUST, WP_FLAMETHROWER, WP_COLT, WP_LUGER, -1 // BG_AddMagicAmmo leave -1 at the end so we can stop the loop
-};
 
 // [0] = maxammo		-	max player ammo carrying capacity.
 // [1] = uses			-	how many 'rounds' it takes/costs to fire one cycle.
@@ -114,11 +105,11 @@ ammotable_t ammoTable[] = {
 	{   999,            0,      999,    0,      50,             200,    0,      0,      MOD_KNIFE               },  //	WP_KNIFE				// 1
 
 	{   MAX_AMMO_9MM,   1,      8,      1500,   DELAY_PISTOL,   400,    0,      0,      MOD_LUGER               },  //	WP_LUGER				// 2	// NOTE: also 32 round 'snail' magazine
-	{	MAX_AMMO_MP40,	1,		32,		2600,	DELAY_LOW,		100,	0,		0,		MOD_MP40				},	//	WP_MP40					// 3
+	{   MAX_AMMO_9MM,   1,      32,     2600,   DELAY_LOW,      100,    0,      0,      MOD_MP40                },  //	WP_MP40					// 3
 	{   MAX_AMMO_MAUSER,1,      10,     2500,   DELAY_HIGH,     1200,   0,      0,      MOD_MAUSER              },  //	WP_MAUSER				// 4	// NOTE: authentic clips are 5/10/25 rounds
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42                },  //	WP_FG42					// 5
 	{   15,             1,      15,     1000,   DELAY_THROW,    1600,   0,      0,      MOD_GRENADE_LAUNCHER    },  //	WP_GRENADE_LAUNCHER		// 6
-	{   MAX_AMMO_PANZ,  1,      1,      1000,   750,           2000,   0,      0,      MOD_PANZERFAUST         },   //	WP_PANZERFAUST			// 7	// DHM - Nerve :: updated delay so prediction is correct
+	{   5,              1,      1,      1000,   750,           2000,   0,      0,      MOD_PANZERFAUST         },   //	WP_PANZERFAUST			// 7	// DHM - Nerve :: updated delay so prediction is correct
 //	{	MAX_AMMO_VENOM,	1,		500,	3000,	750,			30,		5000,	200,	MOD_VENOM				},	//	WP_VENOM				// -
 	{   MAX_AMMO_VENOM, 1,      500,    3000,   750,            45,     5000,   200,    MOD_VENOM               },  //	WP_VENOM				// 8	// JPW NOTE: changed next_shot 50->45 to genlock firing to every server frame (fire rate shouldn't be framerate dependent now)
 	{   200,            1,      200,    1000,   DELAY_LOW,      50,     0,      0,      MOD_FLAMETHROWER        },  //	WP_FLAMETHROWER			// 9 // JPW NOTE: changed maxclip for MP 500->150
@@ -127,7 +118,7 @@ ammotable_t ammoTable[] = {
 
 	{   999,            0,      999,    0,      50,             200,    0,      0,      MOD_KNIFE2              },  //	WP_KNIFE2				// 12
 	{   MAX_AMMO_45,    1,      8,      1500,   DELAY_PISTOL,   400,    0,      0,      MOD_COLT                },  //	WP_COLT					// 13
-	{	MAX_AMMO_THOM,	1,		30,		2400,	DELAY_LOW,		120,	0,		0,		MOD_THOMPSON			},	//	WP_THOMPSON				// 14	// NOTE: also 50 round drum magazine
+	{   MAX_AMMO_45,    1,      30,     2400,   DELAY_LOW,      120,    0,      0,      MOD_THOMPSON            },  //	WP_THOMPSON				// 14	// NOTE: also 50 round drum magazine
 	{   MAX_AMMO_GARAND,1,      5,      2500,   DELAY_HIGH,     1200,   0,      0,      MOD_GARAND              },  //	WP_GARAND				// 15	// NOTE: always 5 round clips
 	{   MAX_AMMO_BAR,   1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_BAR                 },  //	WP_BAR					// 16
 	{   15,             1,      15,     1000,   DELAY_THROW,    1600,   0,      0,      MOD_GRENADE_PINEAPPLE   },  //	WP_GRENADE_PINEAPPLE	// 17
@@ -141,7 +132,7 @@ ammotable_t ammoTable[] = {
 
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42SCOPE           },  //	WP_FG42SCOPE			// 23
 	{   MAX_AMMO_BAR,   1,      20,     2000,   DELAY_LOW,      90,     0,      0,      MOD_BAR                 },  //	WP_BAR2					// 24
-	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
+	{   MAX_AMMO_9MM,   1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
 	{   3,              1,      1,      1500,   50,             1000,   0,      0,      MOD_SYRINGE             },  //	WP_MEDIC_SYRINGE		// 26 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_AMMO,               },  //	WP_AMMO					// 27 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_ARTY,               },  //	WP_ARTY
@@ -3358,168 +3349,6 @@ qboolean    BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int at
 }
 
 
-int BG_MaxAmmoForWeapon(weapon_t weaponNum) {
-	return(GetAmmoTableData(weaponNum)->maxammo);
-}
-
-/*
-=================================
-BG_AddMagicAmmo:
-	if numOfClips is 0, no ammo is added, it just return whether any ammo CAN be added;
-	otherwise return whether any ammo was ACTUALLY added.
-
-WARNING: when numOfClips is 0, DO NOT CHANGE ANYTHING under ps.
-=================================
-*/
-int BG_GrenadesForClass(int cls) {
-
-	//char currentVal[256];
-
-	switch (cls) {
-		case PC_MEDIC:
-			return 1; // g_medicNades;
-		case PC_SOLDIER:
-			return 4; // g_soldNades;
-		case PC_ENGINEER:
-			return 8; // g_engNades;
-		case PC_LT:
-			return 1; // g_ltNades;
-	}
-	return 0;
-}
-
-weapon_t BG_GrenadeTypeForTeam(team_t team) {
-	switch (team) {
-	case TEAM_RED:
-		return WP_GRENADE_LAUNCHER;
-	case TEAM_BLUE:
-		return WP_GRENADE_PINEAPPLE;
-	default:
-		return WP_NONE;
-	}
-}
-
-
-// Return true/false if the player "needs" the ammo
-qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
-	int i, weapon;
-	int needsAmmo = qfalse;
-	int maxammo;
-	int clip;
-
-	// Gordon: handle grenades first
-	i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS]);
-
-	//Com_Printf("Grenades for class -> %5d\n", i);
-
-	weapon = BG_GrenadeTypeForTeam(teamNum);
-
-	clip = BG_FindClipForWeapon(weapon);
-
-	if (ps->ammoclip[clip] < i) {
-
-		//Com_Printf("Grenade added -> %5d\n", 1);
-
-		//ps->ammoclip[clip] += numOfClips;
-
-		needsAmmo = qtrue;
-
-		COM_BitSet(ps->weapons, weapon);
-
-		//if (ps->ammoclip[clip] > i) {
-		//	ps->ammoclip[clip] = i;
-		//}
-	}
-
-	if (COM_BitCheck(ps->weapons, WP_MEDIC_SYRINGE)) {
-		i = 10;
-
-		clip = BG_FindClipForWeapon(WP_MEDIC_SYRINGE);
-
-		if (ps->ammoclip[clip] < i) {
-
-			//if (!numOfClips) {
-			//	return qtrue;
-			//}
-
-			//Com_Printf("Syringe added -> %5d\n", ps->ammoclip[clip]);
-
-			//ps->ammoclip[clip] += numOfClips;
-
-			needsAmmo = qtrue;
-
-			//if (ps->ammoclip[clip] > i) {
-			//	ps->ammoclip[clip] = i;
-			//}
-		}
-	}
-
-	// Gordon: now other weapons
-	for (i = 0; reloadableWeapons[i] >= 0; i++) {
-		weapon = reloadableWeapons[i];
-		if (COM_BitCheck(ps->weapons, weapon)) {
-			maxammo = BG_MaxAmmoForWeapon(weapon);
-
-			// Handle weapons that just use clip, and not ammo
-			if (weapon == WP_FLAMETHROWER) {
-				clip = BG_FindAmmoForWeapon(weapon);
-				if (ps->ammoclip[clip] < maxammo) {
-
-					// early out
-					//if (!numOfClips) {
-					//	return qtrue;
-					//}
-
-					//Com_Printf("Flame added -> %5d\n", ps->ammoclip[clip]);
-
-					needsAmmo = qtrue;
-					//ps->ammoclip[clip] = maxammo;
-				}
-			}
-			else if (weapon == WP_PANZERFAUST) {
-				clip = BG_FindAmmoForWeapon(weapon);
-				if (ps->ammoclip[clip] < maxammo) {
-
-					// early out
-					//if (!numOfClips) {
-					//	return qtrue;
-					//}
-
-					//Com_Printf("Panzer added -> %5d\n", ps->ammoclip[clip]);
-
-					needsAmmo = qtrue;
-					//ps->ammoclip[clip] += numOfClips;
-					//if (ps->ammoclip[clip] >= maxammo) {
-					//	ps->ammoclip[clip] = maxammo;
-					//}
-				}
-			}
-			else {
-				clip = BG_FindAmmoForWeapon(weapon);
-				if (ps->ammo[clip] < maxammo) {
-
-					// early out
-					//if (!numOfClips) {
-					//	return qtrue;
-					//}
-
-					//Com_Printf("SMG/Pistol added -> %5d\n", ps->ammoclip[clip]);
-
-					needsAmmo = qtrue;
-
-					//weapNumOfClips = numOfClips;
-
-					// add and limit check
-					//ps->ammo[clip] += weapNumOfClips * GetAmmoTableData(weapon)->maxclip;
-					//if (ps->ammo[clip] > maxammo) {
-					//	ps->ammo[clip] = maxammo;
-					//}
-				}
-			}
-		}
-	}
-	return needsAmmo;
-}
 
 #define AMMOFORWEAP BG_FindAmmoForWeapon( item->giTag )
 /*
@@ -3534,17 +3363,7 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	gitem_t *item;
 	int ammoweap,weapbank;     // JPW NERVE
 
-// L0 - unlockWeapons
-#ifdef GAMEDLL
-		extern vmCvar_t g_unlockWeapons;
-		extern vmCvar_t g_disableSMGPickup;
-		int unlockWeapons = g_unlockWeapons.integer;
-		int disableSMGPickup = g_disableSMGPickup.integer;
-#else
-		int unlockWeapons = 0;
-		int disableSMGPickup = 0;
-#endif
-// end
+
 	if ( ent->modelindex < 1 || ent->modelindex >= bg_numItems ) {
 		Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: index out of range" );
 	}
@@ -3552,157 +3371,126 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	item = &bg_itemlist[ent->modelindex];
 
 	switch ( item->giType ) {
-
-		case IT_WEAPON:
-		// L0 - disable SMG Pickup if client already has a SMG
-			if (disableSMGPickup)
-			{
-				// We only check for SMG's
-				if ((item->giTag == WP_MP40) ||
-					(item->giTag == WP_THOMPSON) ||
-					(item->giTag == WP_STEN))
-				{
-					// If client has it, do not pick it up..
-					if (COM_BitCheck(ps->weapons, item->giTag))
-						return qfalse;
-				}
-			}
-	// End
-
-	// JPW NERVE -- medics & engineers can only pick up same weapon type
-
-			if (item->giTag == WP_AMMO) // magic ammo for any two-handed weapon
-			{
-				return BG_AddMagicAmmo((playerState_t*)ps, ps->persistant[PERS_TEAM]); // RtcwPro - check to see if player needs the ammo (ET Port)
-			}
-
-
-			if ((ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC) || (ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER)) {
-				if (!COM_BitCheck( ps->weapons, item->giTag)) {
-					// L0 - unlockWeapons
-					// if this cvar is disabled, then behave like normal
-					if (unlockWeapons == 0)
-						return qfalse;
-					// If it's 1, meds and engs can pickup smg's
-					else if ((unlockWeapons == 1) && ((item->giTag != WP_MP40) && (item->giTag != WP_THOMPSON) && (item->giTag != WP_STEN)))
-						return qfalse;
-					// L0 - end
-				}
-				else {
-					return qtrue;
-				}
-			}
-
-			if ( ps->stats[STAT_PLAYER_CLASS] == PC_LT ) {
-				if ( (item->giTag != WP_MP40) && (item->giTag != WP_THOMPSON) && (item->giTag != WP_STEN) ) {
-					// L0 - allow picking any weapons for all classes if it's set to 2.. includes -> snipers, panzer, flamer..
-					if (unlockWeapons < 2)
-						return qfalse;
-					// End
-				}
-			}
-
-	// JPW NERVE wolf multiplayer: other classes can only pick up weapon if weapon's bank is empty
-	#ifdef GAMEDLL
-			if ( g_gametype.integer >= GT_WOLF )
-	#endif
-	#ifdef CGAMEDLL
-			if ( cg_gameType.integer >= GT_WOLF )
-	#endif
-			{
-				weapbank = 0;
-				for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
-					if ( item->giTag == weapBanksMultiPlayer[3][ammoweap] ) {
-						weapbank = 1;
-					}
-				if ( !weapbank ) {
-					return qfalse;
-				}
-				for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
-					if ( COM_BitCheck( ps->weapons,weapBanksMultiPlayer[3][ammoweap] ) ) {
-						return qfalse;
-					}
-			}
+	case IT_WEAPON:
+// JPW NERVE -- medics & engineers can only pick up same weapon type
+		if ( item->giTag == WP_AMMO ) { // magic ammo for any two-handed weapon
 			return qtrue;
-	// jpw
-		case IT_AMMO:
-			ammoweap = BG_FindAmmoForWeapon( item->giTag );
-
-			if ( ps->ammo[ammoweap] >= ammoTable[ammoweap].maxammo ) {
+		}
+		if ( ( ps->stats[STAT_PLAYER_CLASS] == PC_MEDIC ) || ( ps->stats[STAT_PLAYER_CLASS] == PC_ENGINEER ) ) {
+			if ( !COM_BitCheck( ps->weapons, item->giTag ) ) {
 				return qfalse;
-			}
-
-			return qtrue;
-
-		case IT_ARMOR:
-			// we also clamp armor to the maxhealth for handicapping
-			if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
-				return qfalse;
-			}
-			return qtrue;
-
-		case IT_HEALTH:
-			if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
-				return qfalse;
-			}
-
-			// small and mega healths will go over the max, otherwise
-			// don't pick up if already at max
-			if ( item->quantity == 5 || item->quantity == 100 ) {   // (SA) this is /totally/ a Q3 check.  TODO: adapt for Wolf
-				if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
-					return qfalse;
-				}
+			} else {
 				return qtrue;
 			}
+		}
 
-			if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] ) {
+		if ( ps->stats[STAT_PLAYER_CLASS] == PC_LT ) {
+			if ( ( item->giTag != WP_MP40 ) && ( item->giTag != WP_THOMPSON ) && ( item->giTag != WP_STEN ) ) {
 				return qfalse;
 			}
-			return qtrue;
+		}
 
-		case IT_POWERUP:
-			if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
+// JPW NERVE wolf multiplayer: other classes can only pick up weapon if weapon's bank is empty
+#ifdef GAMEDLL
+		if ( g_gametype.integer >= GT_WOLF )
+#endif
+#ifdef CGAMEDLL
+		if ( cg_gameType.integer >= GT_WOLF )
+#endif
+		{
+			weapbank = 0;
+			for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
+				if ( item->giTag == weapBanksMultiPlayer[3][ammoweap] ) {
+					weapbank = 1;
+				}
+			if ( !weapbank ) {
 				return qfalse;
 			}
-			return qtrue;
-
-		case IT_TEAM: // team items, such as flags
-
-			// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
-			// ent->modelindex2 is non-zero on items if they are dropped
-			// we need to know this because we can pick up our dropped flag (and return it)
-			// but we can't pick up our flag at base
-			if ( ps->persistant[PERS_TEAM] == TEAM_RED ) {
-				if ( item->giTag == PW_BLUEFLAG ||
-					 ( item->giTag == PW_REDFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
-					 ( item->giTag == PW_REDFLAG && ps->powerups[PW_BLUEFLAG] ) ) {
-					return qtrue;
+			for ( ammoweap = 0; ammoweap < MAX_WEAPS_IN_BANK_MP; ammoweap++ )
+				if ( COM_BitCheck( ps->weapons,weapBanksMultiPlayer[3][ammoweap] ) ) {
+					return qfalse;
 				}
-			} else if ( ps->persistant[PERS_TEAM] == TEAM_BLUE ) {
-				if ( item->giTag == PW_REDFLAG ||
-					 ( item->giTag == PW_BLUEFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
-					 ( item->giTag == PW_BLUEFLAG && ps->powerups[PW_REDFLAG] ) ) {
-					return qtrue;
-				}
-			}
+		}
+		return qtrue;
+// jpw
+	case IT_AMMO:
+		ammoweap = BG_FindAmmoForWeapon( item->giTag );
+
+		if ( ps->ammo[ammoweap] >= ammoTable[ammoweap].maxammo ) {
 			return qfalse;
+		}
 
+		return qtrue;
 
-		case IT_HOLDABLE:
+	case IT_ARMOR:
+		// we also clamp armor to the maxhealth for handicapping
+		if ( ps->stats[STAT_ARMOR] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
+			return qfalse;
+		}
+		return qtrue;
+
+	case IT_HEALTH:
+		if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
+			return qfalse;
+		}
+
+		// small and mega healths will go over the max, otherwise
+		// don't pick up if already at max
+		if ( item->quantity == 5 || item->quantity == 100 ) {   // (SA) this is /totally/ a Q3 check.  TODO: adapt for Wolf
+			if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] * 2 ) {
+				return qfalse;
+			}
 			return qtrue;
+		}
 
-		case IT_TREASURE:   // treasure always picked up
-			return qtrue;
+		if ( ps->stats[STAT_HEALTH] >= ps->stats[STAT_MAX_HEALTH] ) {
+			return qfalse;
+		}
+		return qtrue;
 
-		case IT_CLIPBOARD:  // clipboards always picked up
-			return qtrue;
+	case IT_POWERUP:
+		if ( ent->density == ( 1 << 9 ) ) { // density tracks how many uses left
+			return qfalse;
+		}
+		return qtrue;
 
-			//---- (SA) Wolf keys
-		case IT_KEY:
-			return qtrue;   // keys are always picked up
+	case IT_TEAM: // team items, such as flags
 
-		case IT_BAD:
-			Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: IT_BAD" );
+		// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
+		// ent->modelindex2 is non-zero on items if they are dropped
+		// we need to know this because we can pick up our dropped flag (and return it)
+		// but we can't pick up our flag at base
+		if ( ps->persistant[PERS_TEAM] == TEAM_RED ) {
+			if ( item->giTag == PW_BLUEFLAG ||
+				 ( item->giTag == PW_REDFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
+				 ( item->giTag == PW_REDFLAG && ps->powerups[PW_BLUEFLAG] ) ) {
+				return qtrue;
+			}
+		} else if ( ps->persistant[PERS_TEAM] == TEAM_BLUE ) {
+			if ( item->giTag == PW_REDFLAG ||
+				 ( item->giTag == PW_BLUEFLAG && ent->otherEntityNum2 /*ent->modelindex2*/ ) ||
+				 ( item->giTag == PW_BLUEFLAG && ps->powerups[PW_REDFLAG] ) ) {
+				return qtrue;
+			}
+		}
+		return qfalse;
+
+
+	case IT_HOLDABLE:
+		return qtrue;
+
+	case IT_TREASURE:   // treasure always picked up
+		return qtrue;
+
+	case IT_CLIPBOARD:  // clipboards always picked up
+		return qtrue;
+
+		//---- (SA) Wolf keys
+	case IT_KEY:
+		return qtrue;   // keys are always picked up
+
+	case IT_BAD:
+		Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: IT_BAD" );
 
 	}
 	return qfalse;
@@ -4291,226 +4079,4 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 	s->aiChar = ps->aiChar; // Ridah
 	s->teamNum = ps->teamNum;
 	s->aiState = ps->aiState;
-}
-
-//
-// OSPx Stuff Below
-//
-
-//
-// Crosshairs
-//
-
-// Only used locally
-typedef struct {
-	char *colorname;
-	vec4_t *color;
-} colorTable_t;
-
-// Colors for crosshairs
-colorTable_t OSP_Colortable[] =
-{
-	{ "white", &colorWhite },
-	{ "red", &colorRed },
-	{ "green", &colorGreen },
-	{ "blue", &colorBlue },
-	{ "yellow", &colorYellow },
-	{ "magenta", &colorMagenta },
-	{ "cyan", &colorCyan },
-	{ "orange", &colorOrange },
-	{ "mdred", &colorMdRed },
-	{ "mdgreen", &colorMdGreen },
-	{ "dkgreen", &colorDkGreen },
-	{ "mdcyan", &colorMdCyan },
-	{ "mdyellow", &colorMdYellow },
-	{ "mdorange", &colorMdOrange },
-	{ "mdblue", &colorMdBlue },
-	{ "ltgrey", &colorLtGrey },
-	{ "mdgrey", &colorMdGrey },
-	{ "dkgrey", &colorDkGrey },
-	{ "black", &colorBlack },
-	{ NULL, NULL }
-};
-
-extern void trap_Cvar_Set(const char *var_name, const char *value);
-void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
-	char *s = colString;
-
-	col[0] = 1.0f;
-	col[1] = 1.0f;
-	col[2] = 1.0f;
-	col[3] = (alpha > 1.0f) ? 1.0f : (alpha < 0.0f) ? 0.0f : alpha;
-
-	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
-		s += 2;
-		//parse rrggbb
-		if (Q_IsHexColorString(s)) {
-			col[0] = ((float)(gethex(*(s)) * 16 + gethex(*(s + 1)))) / 255.00;
-			col[1] = ((float)(gethex(*(s + 2)) * 16 + gethex(*(s + 3)))) / 255.00;
-			col[2] = ((float)(gethex(*(s + 4)) * 16 + gethex(*(s + 5)))) / 255.00;
-			return;
-		}
-	}
-	else {
-		int i = 0;
-		while (OSP_Colortable[i].colorname != NULL) {
-			if (Q_stricmp(s, OSP_Colortable[i].colorname) == 0) {
-				col[0] = (*OSP_Colortable[i].color)[0];
-				col[1] = (*OSP_Colortable[i].color)[1];
-				col[2] = (*OSP_Colortable[i].color)[2];
-				return;
-			}
-			i++;
-		}
-	}
-
-	trap_Cvar_Set(cvarName, "White");
-}
-
-/*
-===============
-sswolf - because I'm lazy
-
-BG_ParseColorCvar
-Reads RBG(A) cvars and sets parsed color var components
-===============
-*/
-void BG_ParseColorCvar(char* cvarString, float* color) {
-	char* s = cvarString;
-	unsigned int i = 0;
-
-	// white in case we have no good format
-	Vector4Copy(colorWhite, color);
-
-	// hex format
-	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
-		s += 2;
-		if (Q_IsHexColorString(s)) {
-			color[0] = ((float)(gethex(*(s)) * 16 + gethex(*(s + 1)))) / 255.00;
-			color[1] = ((float)(gethex(*(s + 2)) * 16 + gethex(*(s + 3)))) / 255.00;
-			color[2] = ((float)(gethex(*(s + 4)) * 16 + gethex(*(s + 5)))) / 255.00;
-			return;
-		}
-	}
-
-	// colortable
-	while (OSP_Colortable[i].colorname != NULL) {
-		if (!Q_stricmp(s, OSP_Colortable[i].colorname)) {
-			color[0] = (*OSP_Colortable[i].color)[0];
-			color[1] = (*OSP_Colortable[i].color)[1];
-			color[2] = (*OSP_Colortable[i].color)[2];
-			return;
-		}
-		i++;
-	}
-
-	// get space count
-	int spaces = 0;
-	for (i = 0; i < strlen(s); ++i) {
-		if (s[i] == ' ') {
-			spaces++;
-		}
-	}
-
-	// "R G B( A)" format
-	if (spaces >= 2) {
-		char temp[4][8];
-		int j = 0, k = 0;
-		for (i = 0; i < strlen(s) + 1; ++i) {
-			if (s[i] == ' ' || i == strlen(s)) {
-				color[j] = atof(temp[j]);
-				k = i + 1;
-				j++;
-				if (j == 4) {
-					if (color[0] > 1 || color[1] > 1 || color[2] > 1 || color[3] > 1) { // true RGB(A)
-						color[0] /= 255.0f;
-						color[1] /= 255.0f;
-						color[2] /= 255.0f;
-						color[3] /= 255.0f;
-					}
-					return;
-				}
-				continue;
-			}
-
-			if (i - k < 10) {
-				temp[j][i - k] = s[i];
-			}
-		}
-	}
-}
-
-const voteType_t voteToggles[] =
-{
-	{ "vote_allow_comp",         CV_SVF_COMP },
-	{ "vote_allow_gametype",     CV_SVF_GAMETYPE },
-	{ "vote_allow_kick",         CV_SVF_KICK },
-	{ "vote_allow_map",              CV_SVF_MAP },
-	{ "vote_allow_matchreset",       CV_SVF_MATCHRESET },
-	{ "vote_allow_mutespecs",        CV_SVF_MUTESPECS },
-	{ "vote_allow_nextmap",          CV_SVF_NEXTMAP },
-	{ "vote_allow_pub",              CV_SVF_PUB },
-	{ "vote_allow_referee",          CV_SVF_REFEREE },
-	{ "vote_allow_shuffleteamsxp",   CV_SVF_SHUFFLETEAMS },
-	{ "vote_allow_swapteams",        CV_SVF_SWAPTEAMS },
-	{ "vote_allow_friendlyfire", CV_SVF_FRIENDLYFIRE },
-	{ "vote_allow_timelimit",        CV_SVF_TIMELIMIT },
-	{ "vote_allow_warmupdamage", CV_SVF_WARMUPDAMAGE },
-	{ "vote_allow_antilag",          CV_SVF_ANTILAG },
-	{ "vote_allow_balancedteams",    CV_SVF_BALANCEDTEAMS },
-	{ "vote_allow_muting",           CV_SVF_MUTING }
-};
-
-int numVotesAvailable = sizeof(voteToggles) / sizeof(voteType_t);
-// L0 - Reinforcements offset
-const unsigned int aReinfSeeds[MAX_REINFSEEDS] = { 11, 3, 13, 7, 2, 5, 1, 17 };
-// L0 - Stats (It matches extWeaponStats_t in bg_public.h)
-// I think i'm missing few...sniper?
-//
-// EDIT:
-// Added Sniper (scoped) & venom
-//
-// TODO:
-// Add poison & FG42 Scope
-//
-// Weapon full names + headshot capability
-const weap_ws_t aWeaponInfo[WS_MAX] = {
-	{ qfalse,   "KNIF",  "Knife"      },  // 0
-	{ qtrue,    "LUGR",  "Luger"      },  // 1
-	{ qtrue,    "COLT",  "Colt"       },  // 2
-	{ qtrue,    "MP40",  "MP-40"      },  // 3
-	{ qtrue,    "TMPS",  "Thompson"   },  // 4
-	{ qtrue,    "STEN",  "Sten"       },  // 5
-	{ qtrue,    "FG42",  "FG-42"      },  // 6
-	{ qtrue,    "PNZR",  "Panzer" },      // 7
-	{ qtrue,    "FLAM",  "F.Thrower"  },  // 8
-	{ qfalse,   "GRND",  "Grenade"    },  // 9
-	{ qfalse,   "MRTR",  "Mortar" },	  // 10
-	{ qfalse,   "DYNA",  "Dynamite"   },  // 11
-	{ qfalse,   "ARST",  "Airstrike"  },  // 12
-	{ qfalse,   "ARTY",  "Artillery"  },  // 13
-	{ qfalse,   "SRNG",  "Syringe"    },  // 14
-	{ qfalse,   "SMOK", "SmokeScrn"   },  // 15
-	{ qtrue,    "MG42",  "MG-42 Gun"  },  // 16
-	{ qtrue,    "RIFL",  "Mauser" },	  // 17
-	{ qtrue,    "VENM",  "Venom" },		  // 18
-};
-// strip colors and control codes, copying up to dwMaxLength-1 "good" chars and nul-terminating
-// returns the length of the cleaned string
-int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qboolean fCRLF ) {
-	const char *pInCopy = pszIn;
-	const char *pszOutStart = pszOut;
-
-	while ( *pInCopy && ( pszOut - pszOutStart < dwMaxLength - 1 ) ) {
-		if ( *pInCopy == '^' ) {
-			pInCopy += ( ( pInCopy[1] == 0 ) ? 1 : 2 );
-		} else if ( ( *pInCopy < 32 && ( !fCRLF || *pInCopy != '\n' ) ) || ( *pInCopy > 126 ) )    {
-			pInCopy++;
-		} else {
-			*pszOut++ = *pInCopy++;
-		}
-	}
-
-	*pszOut = 0;
-	return( pszOut - pszOutStart );
 }

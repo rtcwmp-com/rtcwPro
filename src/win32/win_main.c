@@ -1096,141 +1096,9 @@ Restart the network subsystem
 =================
 */
 void Sys_Net_Restart_f( void ) {
-	NET_Restart_f();
+	NET_Restart();
 }
 
-/*
-===============
-PrintCpuInfoFromRegistry
-===============
-*/
-static qboolean PrintCpuInfoFromRegistry(void) {
-	DWORD i, numPrinted;
-	HKEY kCpus;
-
-	char name_buf[256];
-	DWORD name_buf_len;
-
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor",
-		0, KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE, &kCpus) != ERROR_SUCCESS) {
-		return qfalse;
-	}
-
-	numPrinted = 0;
-	for (i = 0; name_buf_len = ARRAY_LEN(name_buf),
-		RegEnumKeyEx(kCpus, i, name_buf, &name_buf_len,
-		NULL, NULL, NULL, NULL) == ERROR_SUCCESS; i++) {
-		HKEY kCpu;
-
-		int value_buf_i[256];
-		LPBYTE value_buf = (char*)value_buf_i;
-		DWORD value_buf_len;
-
-		if (RegOpenKeyEx(kCpus, name_buf, 0, KEY_QUERY_VALUE, &kCpu) != ERROR_SUCCESS) {
-			continue;
-		}
-
-		Com_Printf("    Processor %i:\n", (int)i);
-		value_buf_len = sizeof(value_buf_i);
-		if (RegQueryValueEx(kCpu, "ProcessorNameString", NULL, NULL, value_buf, &value_buf_len) == ERROR_SUCCESS) {
-			Com_Printf("        Name: %s\n", value_buf);
-			Cvar_Set("sys_cpustring", value_buf); // L0 - It will ran thru it few times but last one will stay..
-		}
-
-		RegCloseKey(kCpu);
-
-		numPrinted++;
-	}
-
-	RegCloseKey(kCpus);
-
-	return numPrinted > 0;
-}
-
-/*
-===============
-Sys_PrintCpuInfo
-===============
-*/
-void Sys_PrintCpuInfo(void) {
-	SYSTEM_INFO si;
-
-	GetSystemInfo(&si);
-
-	if (si.dwNumberOfProcessors == 1) {
-		Com_Printf("Processor:\n");
-	}
-	else {
-		Com_Printf("Processors (%i):\n", (int)si.dwNumberOfProcessors);
-	}
-
-	if (PrintCpuInfoFromRegistry())
-		return;
-
-	Com_Printf("        Architecture: ");
-
-	switch (si.wProcessorArchitecture) {
-		case PROCESSOR_ARCHITECTURE_INTEL:
-			Com_Printf("x86");
-		break;
-		case PROCESSOR_ARCHITECTURE_MIPS:
-			Com_Printf("MIPS");
-		break;
-		case PROCESSOR_ARCHITECTURE_ALPHA:
-			Com_Printf("ALPHA");
-		break;
-		case PROCESSOR_ARCHITECTURE_PPC:
-			Com_Printf("PPC");
-		break;
-		case PROCESSOR_ARCHITECTURE_SHX:
-			Com_Printf("SHX");
-		break;
-		case PROCESSOR_ARCHITECTURE_ARM:
-			Com_Printf("ARM");
-		break;
-		case PROCESSOR_ARCHITECTURE_IA64:
-			Com_Printf("IA64");
-		break;
-		case PROCESSOR_ARCHITECTURE_ALPHA64:
-			Com_Printf("ALPHA64");
-		break;
-		case PROCESSOR_ARCHITECTURE_MSIL:
-			Com_Printf("MSIL");
-		break;
-		case PROCESSOR_ARCHITECTURE_AMD64:
-			Com_Printf("x64");
-		break;
-		case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64:
-			Com_Printf("WoW64");
-		break;
-		default:
-			Com_Printf("UNKNOWN: %i", (int)si.wProcessorArchitecture);
-		break;
-	}
-
-	Com_Printf("\n");
-	Com_Printf("        Revision: %04X\n", (int)si.wProcessorRevision);
-}
-
-/*
-===============
-Sys_PrintMemoryInfo
-===============
-*/
-void Sys_PrintMemoryInfo(void) {
-	SYSTEM_INFO si;
-	MEMORYSTATUS ms;
-
-	GetSystemInfo(&si);
-
-	GlobalMemoryStatus(&ms);
-
-	Com_Printf("Memory:\n");
-	Com_Printf("    Total Physical: %i MB\n", ms.dwTotalPhys / 1024 / 1024);
-	Com_Printf("    Total Page File: %i MB\n", ms.dwTotalPageFile / 1024 / 1024);
-	Com_Printf("    Load: %i%%\n", ms.dwMemoryLoad);
-	Com_Printf("    Page Size: %i K\n", si.dwPageSize / 1024);
-}
 
 /*
 ================
@@ -1244,7 +1112,8 @@ are initialized
 #define WIN98_BUILD_NUMBER 1998
 
 void Sys_Init( void ) {
-	
+	int cpuid;
+
 	// make sure the timer is high precision, otherwise
 	// NT gets 18ms resolution
 	timeBeginPeriod( 1 );
@@ -1259,10 +1128,10 @@ void Sys_Init( void ) {
 	}
 
 	if ( g_wv.osversion.dwMajorVersion < 4 ) {
-		Sys_Error( "RTCW requires Windows version 4 or greater" );
+		Sys_Error( "Quake3 requires Windows version 4 or greater" );
 	}
 	if ( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32s ) {
-		Sys_Error( "RTCW doesn't run on Win32s" );
+		Sys_Error( "Quake3 doesn't run on Win32s" );
 	}
 
 	if ( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32_NT ) {
@@ -1288,8 +1157,62 @@ void Sys_Init( void ) {
 	//
 	// figure out our CPU
 	//
-	Sys_PrintCpuInfo();
-	Sys_PrintMemoryInfo();
+	Cvar_Get( "sys_cpustring", "detect", 0 );
+	if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "detect" ) ) {
+		Com_Printf( "...detecting CPU, found " );
+
+		cpuid = Sys_GetProcessorId();
+
+		switch ( cpuid )
+		{
+		case CPUID_GENERIC:
+			Cvar_Set( "sys_cpustring", "generic" );
+			break;
+		case CPUID_INTEL_UNSUPPORTED:
+			Cvar_Set( "sys_cpustring", "x86 (pre-Pentium)" );
+			break;
+		case CPUID_INTEL_PENTIUM:
+			Cvar_Set( "sys_cpustring", "x86 (P5/PPro, non-MMX)" );
+			break;
+		case CPUID_INTEL_MMX:
+			Cvar_Set( "sys_cpustring", "x86 (P5/Pentium2, MMX)" );
+			break;
+		case CPUID_INTEL_KATMAI:
+			Cvar_Set( "sys_cpustring", "Intel Pentium III" );
+			break;
+		case CPUID_AMD_3DNOW:
+			Cvar_Set( "sys_cpustring", "AMD w/ 3DNow!" );
+			break;
+		case CPUID_AXP:
+			Cvar_Set( "sys_cpustring", "Alpha AXP" );
+			break;
+		default:
+			Com_Error( ERR_FATAL, "Unknown cpu type %d\n", cpuid );
+			break;
+		}
+	} else
+	{
+		Com_Printf( "...forcing CPU type to " );
+		if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "generic" ) ) {
+			cpuid = CPUID_GENERIC;
+		} else if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "x87" ) )     {
+			cpuid = CPUID_INTEL_PENTIUM;
+		} else if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "mmx" ) )     {
+			cpuid = CPUID_INTEL_MMX;
+		} else if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "3dnow" ) )     {
+			cpuid = CPUID_AMD_3DNOW;
+		} else if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "PentiumIII" ) )     {
+			cpuid = CPUID_INTEL_KATMAI;
+		} else if ( !Q_stricmp( Cvar_VariableString( "sys_cpustring" ), "axp" ) )     {
+			cpuid = CPUID_AXP;
+		} else
+		{
+			Com_Printf( "WARNING: unknown sys_cpustring '%s'\n", Cvar_VariableString( "sys_cpustring" ) );
+			cpuid = CPUID_GENERIC;
+		}
+	}
+	Cvar_SetValue( "sys_cpuid", cpuid );
+	Com_Printf( "%s\n", Cvar_VariableString( "sys_cpustring" ) );
 
 	Cvar_Set( "username", Sys_GetCurrentUser() );
 

@@ -30,12 +30,43 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "cg_local.h"
 
-#if 0
+#define MAX_LOADING_PLAYER_ICONS    16
 #define MAX_LOADING_ITEM_ICONS      26
 
+static int loadingPlayerIconCount;
 static int loadingItemIconCount;
+static qhandle_t loadingPlayerIcons[MAX_LOADING_PLAYER_ICONS];
 static qhandle_t loadingItemIcons[MAX_LOADING_ITEM_ICONS];
-#endif
+
+
+/*
+===================
+CG_DrawLoadingIcons
+===================
+*/
+static void CG_DrawLoadingIcons( void ) {
+	int n;
+	int x, y;
+
+	// JOSEPH 5-2-00 Per MAXX
+	return;
+
+	for ( n = 0; n < loadingPlayerIconCount; n++ ) {
+		x = 16 + n * 78;
+		y = 324;
+		CG_DrawPic( x, y, 64, 64, loadingPlayerIcons[n] );
+	}
+
+	for ( n = 0; n < loadingItemIconCount; n++ ) {
+		y = 400;
+		if ( n >= 13 ) {
+			y += 40;
+		}
+		x = 16 + n % 13 * 48;
+		CG_DrawPic( x, y, 32, 32, loadingItemIcons[n] );
+	}
+}
+
 
 /*
 ======================
@@ -43,11 +74,11 @@ CG_LoadingString
 
 ======================
 */
-void CG_LoadingString(const char *s) {
-	Q_strncpyz(cg.infoScreenText, s, sizeof(cg.infoScreenText));
+void CG_LoadingString( const char *s ) {
+	Q_strncpyz( cg.infoScreenText, s, sizeof( cg.infoScreenText ) );
 
-	if (s && s[0] != 0) {
-		CG_Printf("%s", va("LOADING... %s\n", s));   //----(SA)	added so you can see from the console what's going on
+	if ( s && s[0] != 0 ) {
+		CG_Printf( va( "LOADING... %s\n",s ) );   //----(SA)	added so you can see from the console what's going on
 
 	}
 	trap_UpdateScreen();
@@ -58,23 +89,25 @@ void CG_LoadingString(const char *s) {
 CG_LoadingItem
 ===================
 */
-void CG_LoadingItem(int itemNum) {
-#if 0 //----(SA)	Max Kaufman request that we don't show any pacifier stuff for items
-
+void CG_LoadingItem( int itemNum ) {
 	gitem_t     *item;
 
 	item = &bg_itemlist[itemNum];
 
-	if (item->giType == IT_KEY) { // do not show keys at level startup //----(SA)
+	if ( item->giType == IT_KEY ) { // do not show keys at level startup //----(SA)
 		return;
 	}
 
-	if (item->icon && loadingItemIconCount < MAX_LOADING_ITEM_ICONS) {
-		loadingItemIcons[loadingItemIconCount++] = trap_R_RegisterShaderNoMip(item->icon);
+//----(SA)	Max Kaufman request that we don't show any pacifier stuff for items
+	return;
+//----(SA)	end
+
+
+	if ( item->icon && loadingItemIconCount < MAX_LOADING_ITEM_ICONS ) {
+		loadingItemIcons[loadingItemIconCount++] = trap_R_RegisterShaderNoMip( item->icon );
 	}
 
-	CG_LoadingString(item->pickup_name);
-#endif //----(SA)	end
+	CG_LoadingString( item->pickup_name );
 }
 
 /*
@@ -82,45 +115,44 @@ void CG_LoadingItem(int itemNum) {
 CG_LoadingClient
 ===================
 */
-void CG_LoadingClient(int clientNum) {
+void CG_LoadingClient( int clientNum ) {
 	const char      *info;
 	char            *skin;
 	char personality[MAX_QPATH];
 	char model[MAX_QPATH];
 	char iconName[MAX_QPATH];
 
-	if (cgs.gametype == GT_SINGLE_PLAYER  && clientNum > 0) { // for now only show the player's icon in SP games
+	if ( cgs.gametype == GT_SINGLE_PLAYER  && clientNum > 0 ) { // for now only show the player's icon in SP games
 		return;
 	}
 
-	info = CG_ConfigString(CS_PLAYERS + clientNum);
+	info = CG_ConfigString( CS_PLAYERS + clientNum );
 
-	Q_strncpyz(model, Info_ValueForKey(info, "model"), sizeof(model));
-	skin = strrchr(model, '/');
-	if (skin) {
+	Q_strncpyz( model, Info_ValueForKey( info, "model" ), sizeof( model ) );
+	skin = Q_strrchr( model, '/' );
+	if ( skin ) {
 		*skin++ = '\0';
-	}
-	else {
+	} else {
 		skin = "default";
 	}
 
-	Com_sprintf(iconName, MAX_QPATH, "models/players/%s/icon_%s.tga", model, skin);
+	Com_sprintf( iconName, MAX_QPATH, "models/players/%s/icon_%s.tga", model, skin );
 
-	// (SA) ignore player icons for the moment
-	if (!(cg_entities[clientNum].currentState.aiChar)) {
-		//		if ( loadingPlayerIconCount < MAX_LOADING_PLAYER_ICONS ) {
-		//			loadingPlayerIcons[loadingPlayerIconCount++] = trap_R_RegisterShaderNoMip( iconName );
-		//		}
+// (SA) ignore player icons for the moment
+	if ( !( cg_entities[clientNum].currentState.aiChar ) ) {
+//		if ( loadingPlayerIconCount < MAX_LOADING_PLAYER_ICONS ) {
+//			loadingPlayerIcons[loadingPlayerIconCount++] = trap_R_RegisterShaderNoMip( iconName );
+//		}
 	}
 
-	Q_strncpyz(personality, Info_ValueForKey(info, "n"), sizeof(personality));
-	Q_CleanStr(personality);
+	Q_strncpyz( personality, Info_ValueForKey( info, "n" ), sizeof( personality ) );
+	Q_CleanStr( personality );
 
-	if (cgs.gametype == GT_SINGLE_PLAYER) {
-		trap_S_RegisterSound(va("sound/player/announce/%s.wav", personality));
+	if ( cgs.gametype == GT_SINGLE_PLAYER ) {
+		trap_S_RegisterSound( va( "sound/player/announce/%s.wav", personality ) );
 	}
 
-	CG_LoadingString(personality);
+	CG_LoadingString( personality );
 }
 
 /*
@@ -149,76 +181,76 @@ typedef struct {
 static statsItem_t statsItems[] = {
 	//{ "MISSION STATS",		110, 40,		UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW,		&colorWhite,		"",		600,	UI_SMALLFONT|UI_DROPSHADOW|UI_RIGHT,		&colorWhite,	0 },
 
-	{ "Kills", 170, 40, UI_SMALLFONT | UI_DROPSHADOW, &colorWhite, "%3i/%3i", 600, UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT, &colorWhite, 2 },
-	{ " Nazis", 40, 40, UI_EXSMALLFONT | UI_DROPSHADOW, &colorWhite, "%3i/%3i", 600, UI_EXSMALLFONT | UI_DROPSHADOW | UI_RIGHT, &colorWhite, 2 },
-	{ " Monsters", 15, 40, UI_EXSMALLFONT | UI_DROPSHADOW, &colorWhite, "%3i/%3i", 600, UI_EXSMALLFONT | UI_DROPSHADOW | UI_RIGHT, &colorWhite, 2 },
+	{ "Kills",       170, 40,        UI_SMALLFONT | UI_DROPSHADOW,     &colorWhite,        "%3i/%3i",       600,    UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT,        &colorWhite,    2 },
+	{ " Nazis",      40, 40,     UI_EXSMALLFONT | UI_DROPSHADOW,   &colorWhite,        "%3i/%3i",       600,    UI_EXSMALLFONT | UI_DROPSHADOW | UI_RIGHT,      &colorWhite,    2 },
+	{ " Monsters",   15, 40,     UI_EXSMALLFONT | UI_DROPSHADOW,   &colorWhite,        "%3i/%3i",       600,    UI_EXSMALLFONT | UI_DROPSHADOW | UI_RIGHT,      &colorWhite,    2 },
 
-	{ "Time", 30, 40, UI_SMALLFONT | UI_DROPSHADOW, &colorWhite, "%2ih %2im %2is", 600, UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT, &colorWhite, 3 },
+	{ "Time",        30, 40,     UI_SMALLFONT | UI_DROPSHADOW,     &colorWhite,        "%2ih %2im %2is",    600,    UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT,        &colorWhite,    3 },
 
-	{ "Secrets", 30, 40, UI_SMALLFONT | UI_DROPSHADOW, &colorWhite, "%i/%i", 600, UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT, &colorWhite, 2 },
+	{ "Secrets", 30, 40,     UI_SMALLFONT | UI_DROPSHADOW,     &colorWhite,        "%i/%i",         600,    UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT,        &colorWhite,    2 },
 
-	{ "Attempts", 30, 40, UI_SMALLFONT | UI_DROPSHADOW, &colorWhite, "%i", 600, UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT, &colorWhite, 1 },
+	{ "Attempts",    30, 40,     UI_SMALLFONT | UI_DROPSHADOW,     &colorWhite,        "%i",            600,    UI_SMALLFONT | UI_DROPSHADOW | UI_RIGHT,        &colorWhite,    1 },
 
 	{ NULL }
 };
 
-void CG_DrawStats(char *stats) {
+void CG_DrawStats( char *stats ) {
 	int i, y, v, j;
-#define MAX_STATS_VARS  64
+	#define MAX_STATS_VARS  64
 	int vars[MAX_STATS_VARS];
 	char *str, *token;
 	char *formatStr = NULL; // TTimo: init
 	int varIndex;
 	char string[MAX_QPATH];
 
-	UI_DrawProportionalString(320, 120, "MISSION STATS",
-		UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite);
+	UI_DrawProportionalString( 320, 120, "MISSION STATS",
+							   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
 
-	Q_strncpyz(string, stats, sizeof(string));
+	Q_strncpyz( string, stats, sizeof( string ) );
 	str = string;
 	// convert commas to spaces
-	for (i = 0; str[i]; i++) {
-		if (str[i] == ',') {
+	for ( i = 0; str[i]; i++ ) {
+		if ( str[i] == ',' ) {
 			str[i] = ' ';
 		}
 	}
 
-	for (i = 0, y = 0, v = 0; statsItems[i].label; i++) {
+	for ( i = 0, y = 0, v = 0; statsItems[i].label; i++ ) {
 		y += statsItems[i].YOfs;
 
-		UI_DrawProportionalString(statsItems[i].labelX, y, statsItems[i].label,
-			statsItems[i].labelFlags, *statsItems[i].labelColor);
+		UI_DrawProportionalString( statsItems[i].labelX, y, statsItems[i].label,
+								   statsItems[i].labelFlags, *statsItems[i].labelColor );
 
-		if (statsItems[i].numVars) {
+		if ( statsItems[i].numVars ) {
 			varIndex = v;
-			for (j = 0; j < statsItems[i].numVars; j++) {
-				token = COM_Parse(&str);
-				if (!token || !token[0]) {
-					CG_Error("error parsing mission stats\n");
+			for ( j = 0; j < statsItems[i].numVars; j++ ) {
+				token = COM_Parse( &str );
+				if ( !token || !token[0] ) {
+					CG_Error( "error parsing mission stats\n" );
 					return;
 				}
 
-				vars[v++] = atoi(token);
+				vars[v++] = atoi( token );
 			}
 
 			// build the formatStr
-			switch (statsItems[i].numVars) {
+			switch ( statsItems[i].numVars ) {
 			case 1:
-				formatStr = va(statsItems[i].format, vars[varIndex]);
+				formatStr = va( statsItems[i].format, vars[varIndex] );
 				break;
 			case 2:
-				formatStr = va(statsItems[i].format, vars[varIndex], vars[varIndex + 1]);
+				formatStr = va( statsItems[i].format, vars[varIndex], vars[varIndex + 1] );
 				break;
 			case 3:
-				formatStr = va(statsItems[i].format, vars[varIndex], vars[varIndex + 1], vars[varIndex + 2]);
+				formatStr = va( statsItems[i].format, vars[varIndex], vars[varIndex + 1], vars[varIndex + 2] );
 				break;
 			case 4:
-				formatStr = va(statsItems[i].format, vars[varIndex], vars[varIndex + 1], vars[varIndex + 2], vars[varIndex + 3]);
+				formatStr = va( statsItems[i].format, vars[varIndex], vars[varIndex + 1], vars[varIndex + 2], vars[varIndex + 3] );
 				break;
 			}
 
-			UI_DrawProportionalString(statsItems[i].formatX, y, formatStr,
-				statsItems[i].formatFlags, *statsItems[i].formatColor);
+			UI_DrawProportionalString( statsItems[i].formatX, y, formatStr,
+									   statsItems[i].formatFlags, *statsItems[i].formatColor );
 		}
 	}
 }
@@ -230,455 +262,261 @@ CG_DrawInformation
 Draw all the status / pacifier stuff during level loading
 ====================
 */
-void CG_DrawInformation(void) {
+void CG_DrawInformation( void ) {
 	const char  *s;
 	const char  *info;
+	const char  *sysInfo;
+	int y;
+	int value;
 	qhandle_t levelshot = 0; // TTimo: init
+//	qhandle_t	detail;
+	char buf[1024];
+	static int lastDraw = 0;  // Ridah, so we don't draw the screen more often than we need to
+	int ms;
 	static int callCount = 0;
 	float percentDone;
 
 	int expectedHunk;
 	char hunkBuf[MAX_QPATH];
 
-	if (cg.snap) {
+	vec4_t color;
+
+	if ( cg.snap && ( strlen( cg_missionStats.string ) <= 1 ) ) {
 		return;     // we are in the world, no need to draw information
 	}
 
-	if (callCount) {    // reject recursive calls
+	if ( callCount ) {    // reject recursive calls
 		return;
 	}
 
+	ms = trap_Milliseconds();
+	if ( ( lastDraw <= ms ) && ( lastDraw > ms - 100 ) ) {
+		return;
+	}
+	lastDraw = ms;
+
 	callCount++;
 
-	info = CG_ConfigString(CS_SERVERINFO);
+	info = CG_ConfigString( CS_SERVERINFO );
+	sysInfo = CG_ConfigString( CS_SYSTEMINFO );
 
-	trap_Cvar_VariableStringBuffer("com_expectedhunkusage", hunkBuf, MAX_QPATH);
-	expectedHunk = atoi(hunkBuf);
+	trap_Cvar_VariableStringBuffer( "com_expectedhunkusage", hunkBuf, MAX_QPATH );
+	expectedHunk = atoi( hunkBuf );
 
 
-	s = Info_ValueForKey(info, "mapname");
-	levelshot = trap_R_RegisterShaderNoMip(va("levelshots/%s.tga", s));
-	if (!levelshot) {
-		levelshot = trap_R_RegisterShaderNoMip("levelshots/unknownmap.jpg");
+	s = Info_ValueForKey( info, "mapname" );
+	if ( s && s[0] != 0 ) {  // there is often no 's'
+		if ( strlen( cg_missionStats.string ) > 1 && cg_missionStats.string[0] == 's' ) {
+			levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/pre_%s_stats.tga", s ) );
+		} else {    // show briefing screen
+			if ( s && s[0] != 0 ) {  // there is often no 's'
+				levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/%s.tga", s ) );
+			}
+		}
 	}
-	trap_R_SetColor(NULL);
-	CG_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, levelshot);
+	if ( !levelshot ) {
+		levelshot = trap_R_RegisterShaderNoMip( "menu/art/unknownmap" );
+	}
+	trap_R_SetColor( NULL );
+	CG_DrawPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, levelshot );
 
-	// show the server motd
-	CG_DrawMotd();
+	// blend a detail texture over it
+	//detail = trap_R_RegisterShader( "levelShotDetail" );
+	//trap_R_DrawStretchPic( 0, 0, cgs.glconfig.vidWidth, cgs.glconfig.vidHeight, 0, 0, 2.5, 2, detail );
 
-	// show the percent complete bar
-	if (expectedHunk >= 0) {
+
+// (SA) commented out for Drew
+//	UI_DrawProportionalString( 320, 16, va( "Loading %s", Info_ValueForKey( info, "mapname" ) ), UI_SMALLFONT|UI_CENTER|UI_DROPSHADOW, colorWhite );
+
+	// show the loading progress
+	VectorSet( color, 0.8, 0.8, 0.8 );
+	color[3] = 0.8;
+
+	if ( strlen( cg_missionStats.string ) > 1 && cg_missionStats.string[0] == 's' ) {
+		vec2_t xy = { 190, 470 };
+		vec2_t wh = { 260, 10 };
+
+		// draw the mission stats while loading
+		if ( !Q_strncmp( cg_missionStats.string, "s=", 2 ) ) {
+			CG_DrawStats( cg_missionStats.string + 2 );
+		}
+
+		if ( cg_waitForFire.integer == 1 ) {
+			// waiting for server to finish loading the map
+			UI_DrawProportionalString( 320, xy[1] + wh[1] - 10, "press fire to continue",
+									   UI_CENTER | UI_EXSMALLFONT | UI_DROPSHADOW, color );
+		} else if ( expectedHunk > 0 ) {
+			percentDone = (float)( cg_hunkUsed.integer + cg_soundAdjust.integer ) / (float)( expectedHunk );
+			if ( percentDone > 0.97 ) { // never actually show 100%, since we are not in the game yet
+				percentDone = 0.97;
+			}
+			CG_HorizontalPercentBar( xy[0] + 10, xy[1] + wh[1] - 10, wh[0] - 20, 10, percentDone );
+		} else if ( expectedHunk == -2 ) {
+			// we're ready, press a key to start playing
+			if ( ( ms % 1000 ) < 700 ) {  // flashing to get our attention
+				UI_DrawProportionalString( 320, xy[1] + wh[1] - 10, "press fire to begin",
+										   UI_CENTER | UI_EXSMALLFONT | UI_DROPSHADOW, color );
+			}
+		} else {
+			UI_DrawProportionalString( 320, xy[1] + wh[1] - 10, "please wait",
+									   UI_CENTER | UI_EXSMALLFONT | UI_DROPSHADOW, color );
+		}
+
+		trap_UpdateScreen();
+		callCount--;
+		return;
+	}
+
+	// Ridah, in single player, cheats disabled, don't show unnecessary information
+	// DHM - Nerve :: maybe temp, but we want to display the same as single player right now
+	if ( cgs.gametype == GT_SINGLE_PLAYER || cgs.gametype >= GT_WOLF ) {
 		vec2_t xy = { 200, 468 };
 		vec2_t wh = { 240, 10 };
 
-		percentDone = (float)(cg_hunkUsed.integer + cg_soundAdjust.integer) / (float)(expectedHunk);
-		if (percentDone > 0.97) { // never actually show 100%, since we are not in the game yet
-			percentDone = 0.97;
-		}
-		CG_HorizontalPercentBar(xy[0], xy[1], wh[0], wh[1], percentDone);
+		// show the server motd
+		CG_DrawMotd();
 
+		// show the percent complete bar
+		if ( expectedHunk > 0 ) {
+			percentDone = (float)( cg_hunkUsed.integer + cg_soundAdjust.integer ) / (float)( expectedHunk );
+			if ( percentDone > 0.97 ) {
+				percentDone = 0.97;
+			}
+			CG_HorizontalPercentBar( xy[0], xy[1], wh[0], wh[1], percentDone );
+		} else if ( expectedHunk == -2 ) {
+			// we're ready, press a key to start playing
+			if ( ( ms % 1000 ) < 700 ) {  // flashing to get our attention
+				UI_DrawProportionalString( 320, xy[1] - 2, "press fire to begin",
+										   UI_CENTER | UI_EXSMALLFONT | UI_DROPSHADOW, color );
+			}
+		}
+
+		trap_UpdateScreen();
+		callCount--;
+		return;
+	}
+	// done.
+
+	// draw the icons of thiings as they are loaded
+	CG_DrawLoadingIcons();
+
+	// the first 150 rows are reserved for the client connection
+	// screen to write into
+	if ( cg.infoScreenText[0] ) {
+		UI_DrawProportionalString( 320, 128, va( "Loading... %s", cg.infoScreenText ),
+								   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+	} else {
+		UI_DrawProportionalString( 320, 128, "Awaiting snapshot...",
+								   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+	}
+
+	// draw info string information
+	y = 180;
+
+	// don't print server lines if playing a local game
+	trap_Cvar_VariableStringBuffer( "sv_running", buf, sizeof( buf ) );
+	if ( !atoi( buf ) ) {
+		// server hostname
+		s = Info_ValueForKey( info, "sv_hostname" );
+		UI_DrawProportionalString( 320, y, s,
+								   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+		y += PROP_HEIGHT;
+
+		// server-specific message of the day
+		s = CG_ConfigString( CS_MOTD );
+		if ( s[0] ) {
+			UI_DrawProportionalString( 320, y, s,
+									   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+			y += PROP_HEIGHT;
+		}
+
+		// some extra space after hostname and motd
+		y += 10;
+	}
+
+	// map-specific message (long map name)
+	s = CG_ConfigString( CS_MESSAGE );
+	if ( s[0] ) {
+		UI_DrawProportionalString( 320, y, s,
+								   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+		y += PROP_HEIGHT;
+	}
+
+	// cheats warning
+	s = Info_ValueForKey( sysInfo, "sv_cheats" );
+	if ( s[0] == '1' ) {
+		UI_DrawProportionalString( 320, y, "CHEATS ARE ENABLED",
+								   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+		y += PROP_HEIGHT;
+	}
+
+	// game type
+	switch ( cgs.gametype ) {
+	case GT_FFA:
+		s = "Free For All";
+		break;
+	case GT_SINGLE_PLAYER:
+		s = "Single Player";
+		break;
+	case GT_TOURNAMENT:
+		s = "Tournament";
+		break;
+	case GT_TEAM:
+		s = "Team Deathmatch";
+		break;
+	case GT_CTF:
+		s = "Capture The Flag";
+		break;
+		// JPW NERVE
+	case GT_WOLF:
+		s = "Wolfenstein Multiplayer";
+		break;
+		// jpw
+		// NERVE - SMF
+	case GT_WOLF_STOPWATCH:
+		s = "WolfMP Stopwatch";
+		break;
+	case GT_WOLF_CP:
+		s = "WolfMP Checkpoint";
+		break;
+		// -NERVE - SMF
+		// JPW NERVE
+	case GT_WOLF_CPH:
+		s = "WolfMP Capture & Hold";
+		break;
+		// jpw
+	default:
+		s = "Unknown Gametype";
+		break;
+	}
+	UI_DrawProportionalString( 320, y, s,
+							   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+	y += PROP_HEIGHT;
+
+	value = atoi( Info_ValueForKey( info, "timelimit" ) );
+	if ( value ) {
+		UI_DrawProportionalString( 320, y, va( "timelimit %i", value ),
+								   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+		y += PROP_HEIGHT;
+	}
+
+	if ( cgs.gametype != GT_CTF && cgs.gametype != GT_SINGLE_PLAYER ) {
+		value = atoi( Info_ValueForKey( info, "fraglimit" ) );
+		if ( value ) {
+			UI_DrawProportionalString( 320, y, va( "fraglimit %i", value ),
+									   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+			y += PROP_HEIGHT;
+		}
+	}
+
+	if ( cgs.gametype == GT_CTF ) {
+		value = atoi( Info_ValueForKey( info, "capturelimit" ) );
+		if ( value ) {
+			UI_DrawProportionalString( 320, y, va( "capturelimit %i", value ),
+									   UI_CENTER | UI_SMALLFONT | UI_DROPSHADOW, colorWhite );
+			y += PROP_HEIGHT;
+		}
 	}
 
 	callCount--;
 }
-/*
-	OSPx 
-	
-	Demo key actions...
-*/
-extern void CG_createControlsWindow(void);
-void CG_DemoClick(int key) {
-	int milli = trap_Milliseconds();
-	
-	switch (key)
-	{	
-	case K_TAB:
-		if (cgs.demoControlInfo.show != SHOW_ON) {
-			cgs.demoControlInfo.show = SHOW_ON;
-			CG_createControlsWindow();
-			trap_Cvar_Set("demo_controlsWindow", "1");
-		}
-		else {
-			cgs.demoControlInfo.show = SHOW_SHUTDOWN;
-			if (cg.time < cgs.demoControlInfo.fadeTime) {
-				cgs.demoControlInfo.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoControlInfo.fadeTime;
-			}
-			else {
-				cgs.demoControlInfo.fadeTime = cg.time + STATS_FADE_TIME;
-			}
-			CG_windowFree(cg.demoControlsWindow);
-			cg.demoControlsWindow = NULL;
-			trap_Cvar_Set("demo_controlsWindow", "0");
-		}
-		return;	
-	case K_BACKSPACE:
-		if (cgs.demoControlInfo.show != SHOW_ON) {
-			cgs.demoControlInfo.show = SHOW_ON;
-			CG_createControlsWindow();
-			trap_Cvar_Set("demo_controlsWindow", "1");
-		}
-		else {
-			cgs.demoControlInfo.show = SHOW_SHUTDOWN;
-			if (cg.time < cgs.demoControlInfo.fadeTime) {
-				cgs.demoControlInfo.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoControlInfo.fadeTime;
-			}
-			else {
-				cgs.demoControlInfo.fadeTime = cg.time + STATS_FADE_TIME;
-			}
-			CG_windowFree(cg.demoControlsWindow);
-			cg.demoControlsWindow = NULL;
-			trap_Cvar_Set("demo_controlsWindow", "0");
-		}
-		return;
-	case K_SHIFT:
-		if (demo_infoWindow.integer)
-			trap_Cvar_Set("demo_infoWindow", "0");
-		else
-			trap_Cvar_Set("demo_infoWindow", "1");
-		return;
-	case K_CTRL:
-		if (demo_showTimein.integer)
-			trap_Cvar_Set("demo_showTimein", "0");
-		else
-			trap_Cvar_Set("demo_showTimein", "1");
-		return;
-	case K_MOUSE1:
-		CG_zoomViewSet_f();
-		return;
-	case K_MOUSE2:
-		CG_zoomViewRevert_f();
-		return;
-	case K_ENTER:	
-		trap_Cvar_Set("cg_thirdperson", ((cg_thirdPerson.integer == 0) ? "1" : "0"));
-		return;	
-	case K_UPARROW:
-		if (milli > cgs.thirdpersonUpdate) {
-			float range = cg_thirdPersonRange.value;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			range -= ((range >= 4 * DEMO_RANGEDELTA) ? DEMO_RANGEDELTA : (range - DEMO_RANGEDELTA));
-			trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
-		}
-		return;
-	case K_DOWNARROW:
-		if (milli > cgs.thirdpersonUpdate) {
-			float range = cg_thirdPersonRange.value;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			range += ((range >= 120 * DEMO_RANGEDELTA) ? 0 : DEMO_RANGEDELTA);
-			trap_Cvar_Set("cg_thirdPersonRange", va("%f", range));
-		}
-		return;
-	case K_RIGHTARROW:
-		if (milli > cgs.thirdpersonUpdate) {
-			float angle = cg_thirdPersonAngle.value - DEMO_ANGLEDELTA;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			if (angle < 0) {
-				angle += 360.0f;
-			}
-			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
-		}
-		return;
-	case K_LEFTARROW:
-		if (milli > cgs.thirdpersonUpdate) {
-			float angle = cg_thirdPersonAngle.value + DEMO_ANGLEDELTA;
-
-			cgs.thirdpersonUpdate = milli + DEMO_THIRDPERSONUPDATE;
-			if (angle >= 360.0f) {
-				angle -= 360.0f;
-			}
-			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
-		}
-		return;
-	// Timescale controls
-	case K_SPACE:
-		trap_Cvar_Set("timescale", "1");
-		trap_SendConsoleCommand("s_stop\n");
-		return;
-	case K_KP_UPARROW:
-		trap_Cvar_Set("timescale", va("%f", cg_timescale.value + 1.0f));
-		return;
-	case K_KP_DOWNARROW:
-	{
-		float tscale = cg_timescale.value;
-
-		if (tscale <= 1.1f) {
-			if (tscale > 0.1f) {
-				tscale -= 0.1f;
-			}
-		}
-		else { tscale -= 1.0; }
-		trap_Cvar_Set("timescale", va("%f", tscale));
-	}
-		return;
-	case K_KP_RIGHTARROW:
-		trap_Cvar_Set("timescale", va("%f", cg_timescale.value + 0.1f));
-		return;
-	case K_KP_LEFTARROW:
-		if (cg_timescale.value > 0.1f) {
-			trap_Cvar_Set("timescale", va("%f", cg_timescale.value - 0.1f));
-		}
-		return;
-	case K_MWHEELDOWN:
-		if (cg_timescale.value > 0.1f) {
-			trap_Cvar_Set("timescale", va("%f", cg_timescale.value - 0.1f));
-			return;
-	case K_MWHEELUP:
-		trap_Cvar_Set("timescale", va("%f", cg_timescale.value + 0.5f));
-		return;
-
-	// Hacks
-	case K_F1:
-		if (cgs.wallhack)
-			cgs.wallhack = qfalse;
-		else
-			cgs.wallhack = qtrue;
-		return;
-	case K_F2:
-		if (cgs.showNormals) {
-			trap_Cvar_Set("r_showNormals", "0");
-			cgs.showNormals = qfalse;
-		}
-		else {
-			trap_Cvar_Set("r_showNormals", "1");
-			cgs.showNormals = qtrue;
-		}
-		return;
-	case K_F3:
-		if (!cgs.noChat) {
-			cgs.noChat = 1;
-			cgs.demoPopUpInfo.show = SHOW_ON;
-			CG_createDemoPopUpWindow("All chats are ^nDISABLED", 2);
-		}
-		else {
-			cgs.noChat = 0;
-			cgs.demoPopUpInfo.show = SHOW_ON;
-			CG_createDemoPopUpWindow("All chats are ^nENABLED\n", 2);
-		}
-		return;
-	case K_F4:
-		if (!cgs.noVoice) {
-			cgs.noVoice = 1;
-			cgs.demoPopUpInfo.show = SHOW_ON;
-			CG_createDemoPopUpWindow("All ^3VOICE ^7chats are ^nDISABLED", 2);
-		}
-		else if (cgs.noVoice == 1) {
-			cgs.demoPopUpInfo.show = SHOW_ON;
-			CG_createDemoPopUpWindow("All ^3VOICE ^7chats are ^nENABLED", 2);
-			cgs.noVoice = 0;
-		}
-		return;
-	case K_MOUSE3:
-		if (!cgs.freezeDemo) {
-			cgs.freezeDemo = qtrue;
-			trap_Cvar_Set("cl_freezeDemo", "1");
-		}
-		else {
-			cgs.freezeDemo = qfalse;
-			trap_Cvar_Set("cl_freezeDemo", "0");
-		}
-		return;
-		break;
-		}
-	}
-}
-
-/*
-	OSPx 
-
-	Demo controls
-*/
-typedef struct {
-	char *command;
-	char *key;
-} helpCmd_reference_t;
-
-static const helpCmd_reference_t helpInfo[] = {
-		{ "TAB",		"Show/Hide This Window" },
-		{ "SHIFT",		"Show/Hide Status Window" },
-		{ "CTRL",		"Show/Hide Start Timer"}, 
-		{ " ",			" "},
-		{ "F1",			"Toggle Wallhack" },
-		{ "F2",			"Toggle ShowNormals" },
-		{ "F3",			"Show/Hide Chats" },
-		{ "F4",			"Show/Hide Voice chats" },
-		{ " ", " " },
-		{ "MOUSE 1",	"Zoom IN FOV" },
-		{ "MOUSE 2",	"Zoom OUT FOV" },
-		{ "MOUSE 3",	"Toggle Demo Freeze"},
-		{ " ", " " },			
-		{ "NUM ARROWS",	"TimeScale Slow/Fast"},
-		{ "SPACE",		"Timescale reset" },
-		{ "SCROLL",		"Timescale Slow/Fast" },
-		{ " ", " " },		
-		{ "ENTER",		"Toggle third person view"},
-		{ "ARROWS",		"Third person rotation" }
-};
-
-void CG_createControlsWindow(void) {
-	if (cgs.demoControlInfo.show == SHOW_OFF) {
-		return;
-	}
-	else {		
-		vec4_t colorGeneralFill = { 0.1f, 0.1f, 0.1f, 0.8f };
-		int i, aHelp = ARRAY_LEN(helpInfo);
-		const helpCmd_reference_t *hCM;		
-
-		if (aHelp != 0) {
-			cg_window_t *sw = CG_windowAlloc(WFX_TEXTSIZING | WFX_FADEIN | WFX_FLASH | WFX_SCROLLRIGHT, 500);
-			char *str;
-
-			cg.demoControlsWindow = sw;
-			if (sw == NULL) {
-				return;
-			}
-
-			// Window specific
-			sw->id = WID_DEMOCONTROLS;
-			sw->fontScaleX = 0.7f;
-			sw->fontScaleY = 0.8f;
-			sw->x = -10;
-			sw->y = -36;
-			sw->flashMidpoint = sw->flashPeriod * 0.7f;
-			memcpy(&sw->colorBackground2, colorGeneralFill, sizeof(vec4_t));
-
-			// Pump stuff in it now
-			cg.windowCurrent = sw;
-			for (i = 0; i < aHelp; i++) {
-				hCM = &helpInfo[i];
-
-				if (hCM->command) {
-					str = va("^n%-14s ^z%s", hCM->command, hCM->key);
-					CG_printWindow((char*)str);
-				}
-				else {
-					break;
-				}
-			}
-		}
-	}
-}
-
-/*
-	Basic info and not even a window..
-
-	NOTE: Ugly inlines :|
-*/
-void CG_demoView(void) {
-
-	if (cg.demoPlayback && demo_infoWindow.integer) {
-		vec4_t colorGeneralFill = { 0.1f, 0.1f, 0.1f, 0.4f };
-		vec4_t colorBorderFill = { 0.1f, 0.1f, 0.1f, 0.8f };
-		char *s = va("^nWallhack: ^7%s ^n| Timescale: ^7%.1f", (cgs.wallhack ? "On" : "Off"), cg_timescale.value);
-		char *ts = (cg_timescale.value != 1.0 ? "Space: Default" : "Fst/Slw: Scroll");
-		int w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
-		char *s2 = (cgs.wallhack ? va("^nToggle: F1     | %s", ts) : va("^nToggle: F1      | %s", ts));
-
-		CG_FillRect(42 - 2, 400, w + 5, SMALLCHAR_HEIGHT + 3, colorGeneralFill);
-		CG_DrawRect(42 - 2, 400, w + 5, SMALLCHAR_HEIGHT + 3, 1, colorBorderFill);
-
-		CG_DrawStringExt(42, 400, s, colorWhite, qfalse, qtrue, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 0);
-		CG_DrawStringExt(42, 420, s2, colorWhite, qfalse, qtrue, TINYCHAR_WIDTH - 1, TINYCHAR_HEIGHT - 1, 0);
-	}
-}
-
-/*
-	Tournament Overlay
-*/
-/*
-void CG_tournamentOverlay(void) {
-	int x, y;	
-	char *str;
-
-	if (cgs.tournamentMode == TOURNY_FULL && cg.tournamentInfo.inProgress && cg_tournamentHUD.integer) {
-
-		// Don't draw timer if client is checking scoreboard
-		if (CG_DrawScoreboard())
-			return;
-
-		x = TOURINFO_RIGHT;
-		y = TOURINFO_TOP - (2 * (TOURINFO_TEXTSIZE + 1));
-
-		// Round
-		str = va("^n%d/%d", (cg.tournamentInfo.resultAxis + cg.tournamentInfo.resultAllied + 1), cg.tournamentInfo.rounds);
-		CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-			y + 1,
-			str,
-			colorWhite, qfalse, qtrue,
-			TOURINFO_TEXTSIZE - 1,
-			TOURINFO_TEXTSIZE - 1, 0);
-
-		// Axis
-		{	
-			y += 2 * (TOURINFO_TEXTSIZE + 1);
-			CG_DrawPic(TOURINFO_RIGHT - (2 * TOURINFO_TEXTSIZE), y, 2 * TOURINFO_TEXTSIZE, TOURINFO_TEXTSIZE, trap_R_RegisterShaderNoMip("ui_mp/assets/ger_flag.tga"));
-
-			y += TOURINFO_TEXTSIZE + 1;
-			str = va("W: ^7%2d", cg.tournamentInfo.resultAxis);
-			CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-				y,
-				str,
-				colorOrange, qfalse, qtrue,
-				TOURINFO_TEXTSIZE - 1,
-				TOURINFO_TEXTSIZE - 1, 0);
-
-			y += TOURINFO_TEXTSIZE + 1;
-			str = va("T: ^7%2d", cg.tournamentInfo.timeoutAxis);
-			CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-				y,
-				str,
-				colorOrange, qfalse, qtrue,
-				TOURINFO_TEXTSIZE - 1,
-				TOURINFO_TEXTSIZE - 1, 0);
-			
-			if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR) {
-				y += TOURINFO_TEXTSIZE + 1;
-				str = va("Re: ^7%2d", (int)CG_CalculateReinfTimeSpecs(TEAM_RED));
-				CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-					y,
-					str,
-					colorOrange, qfalse, qtrue,
-					TOURINFO_TEXTSIZE - 1,
-					TOURINFO_TEXTSIZE - 1, 0);
-			}
-		}
-
-		// Allies
-		{
-			y += 2 * (TOURINFO_TEXTSIZE + 1);
-			CG_DrawPic(TOURINFO_RIGHT - (2 * TOURINFO_TEXTSIZE), y, 2 * TOURINFO_TEXTSIZE, TOURINFO_TEXTSIZE, trap_R_RegisterShaderNoMip("ui_mp/assets/usa_flag.tga"));
-
-			y += TOURINFO_TEXTSIZE + 1;
-			str = va("W: ^7%2d", cg.tournamentInfo.resultAllied);
-			CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-				y,
-				str,
-				colorOrange, qfalse, qtrue,
-				TOURINFO_TEXTSIZE - 1,
-				TOURINFO_TEXTSIZE - 1, 0);
-
-			y += TOURINFO_TEXTSIZE + 1;
-			str = va("T: ^7%2d", cg.tournamentInfo.timeoutAllied);
-			CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-				y,
-				str,
-				colorOrange, qfalse, qtrue,
-				TOURINFO_TEXTSIZE - 1,
-				TOURINFO_TEXTSIZE - 1, 0);
-
-			if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR) {
-				y += TOURINFO_TEXTSIZE + 1;
-				str = va("Re: ^7%2d", (int)CG_CalculateReinfTimeSpecs(TEAM_BLUE));
-				CG_DrawStringExt(x - (CG_DrawStrlen(str) * (TOURINFO_TEXTSIZE - 1)) - 2,
-					y,
-					str,
-					colorOrange, qfalse, qtrue,
-					TOURINFO_TEXTSIZE - 1,
-					TOURINFO_TEXTSIZE - 1, 0);
-			}
-		}
-	}
-}*/
-

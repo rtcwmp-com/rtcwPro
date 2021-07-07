@@ -143,7 +143,7 @@ static void CG_Obituary( entityState_t *ent ) {
 
 	switch ( mod ) {
 	case MOD_SUICIDE:
-		message = "killed himself";
+		message = "committed suicide";
 		break;
 	case MOD_FALLING:
 		message = "fell to his death";
@@ -194,19 +194,6 @@ static void CG_Obituary( entityState_t *ent ) {
 		case MOD_EXPLOSIVE:
 			message = "died in his own explosion";
 			break;
-// OSPx - MODs
-		case MOD_ARTILLERY:			
-			message = "fired-for-effect on himself";
-			break;
-		case MOD_SWITCHTEAM:
-			return;
-		case MOD_SUICIDE:
-			message = "killed himself";
-			break;
-		case MOD_SELFKILL:
-			message = "slit his own throat";
-			break;			
-// -OSPx
 		default:
 			message = "killed himself";
 			break;
@@ -272,7 +259,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			//message = "'s face was the unwilling recipient of";
 			//message2 = "'s .45ACP 1911 rounds";
 			message = "was killed by";
-			message2 = "'s .45ACP 1911";
+			message2 = " 's .45ACP 1911";
 			break;
 		case MOD_MP40:
 			//message = "was force fed a magazine of";
@@ -371,12 +358,6 @@ static void CG_Obituary( entityState_t *ent ) {
 			message = "was blasted by";
 			message2 = "'s support fire"; // JPW NERVE changed since it gets called for both air strikes and artillery
 			break;
-// OSPx
-		case MOD_ARTILLERY:
-			message = "was shelled by";
-			message2 = "'s artillery support";			
-			break;
-// -OSPx
 // jpw
 // (SA) leaving a sample of two part obit's
 //		case MOD_ROCKET:
@@ -1894,30 +1875,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_NOAMMO:
 		DEBUGNAME( "EV_NOAMMO" );
-		if (	( es->weapon != WP_GRENADE_LAUNCHER ) && 
-				( es->weapon != WP_GRENADE_PINEAPPLE ) && 
-				( es->weapon != WP_DYNAMITE ) && 
-				( es->weapon != WP_DYNAMITE2 ) &&
-				( es->weapon != WP_AMMO ) &&
-				( es->weapon != WP_MEDKIT ) ) {
+		if ( ( es->weapon != WP_GRENADE_LAUNCHER ) && ( es->weapon != WP_GRENADE_PINEAPPLE ) && ( es->weapon != WP_DYNAMITE )  && ( es->weapon != WP_DYNAMITE2 ) ) {
 			trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound );
 		}
-		/*
 		if ( es->number == cg.snap->ps.clientNum ) {
-			CG_OutOfAmmoChange(qtrue);
-		}
-		break;
-		*/
-		if ( es->number == cg.snap->ps.clientNum && (
-				 ( cg_noAmmoAutoSwitch.integer > 0 && !CG_WeaponSelectable( cg.weaponSelect ) ) ||
-				 es->weapon == WP_GRENADE_LAUNCHER ||
-				 es->weapon == WP_GRENADE_PINEAPPLE ||
-				 es->weapon == WP_DYNAMITE ||
-				 es->weapon == WP_PANZERFAUST ||
-				 es->weapon == WP_AMMO ||
-				 es->weapon == WP_MEDKIT ||
-				 es->weapon == WP_SMOKE_GRENADE) ) {
-			CG_OutOfAmmoChange(qtrue); // event == EV_NOAMMO ? qfalse : qtrue);
+			CG_OutOfAmmoChange();
 		}
 		break;
 	case EV_CHANGE_WEAPON:
@@ -2272,34 +2234,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 		break;
 		// dhm - end
-// OSPx
-	// Announcer sounds
-	case EV_ANNOUNCER_SOUND:
-		DEBUGNAME("EV_ANNOUNCER_SOUND");
-		if (cg_announcer.integer) {
-			// Ridah, check for a sound script
-			s = CG_ConfigString(CS_SOUNDS + es->eventParm);
-			if (!strstr(s, ".wav")) {
-				if (CG_SoundPlaySoundScript(s, NULL, es->number)) {
-					break;
-				}
-				// try with .wav
-				Q_strncpyz(tempStr, s, sizeof(tempStr));
-				Q_strcat(tempStr, sizeof(tempStr), ".wav");
-				s = tempStr;
-			}
-			// done.
-
-			if (cgs.gameSounds[es->eventParm]) {
-				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_ANNOUNCER, cgs.gameSounds[es->eventParm]);
-			}
-			else {
-				s = CG_ConfigString(CS_SOUNDS + es->eventParm);
-				trap_S_StartSound(NULL, cg.snap->ps.clientNum, CHAN_ANNOUNCER, CG_CustomSound(es->number, s));
-			}
-		}
-		break;
-// -OSPx
 
 	case EV_PAIN:
 		// local player sounds are triggered in CG_CheckLocalSounds,

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -687,11 +687,7 @@ void G_RunMover( gentity_t *ent ) {
 
 	// if stationary at one of the positions, don't move anything
 	if ( ent->s.pos.trType != TR_STATIONARY || ent->s.apos.trType != TR_STATIONARY ) {
-		// L0 - Pause
-		if ( level.paused == PAUSE_NONE ) {
-			G_MoverTeam( ent );
-		} else { ent->s.pos.trTime += level.time - level.previousTime;}
-		// End
+		G_MoverTeam( ent );
 	}
 
 	// check think function
@@ -1843,8 +1839,8 @@ static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_
 
 	axis = ent->count;
 	VectorClear( dir );
-	if ( Q_fabs( other->s.origin[axis] - ent->r.absmax[axis] ) <
-		 Q_fabs( other->s.origin[axis] - ent->r.absmin[axis] ) ) {
+	if ( fabs( other->s.origin[axis] - ent->r.absmax[axis] ) <
+		 fabs( other->s.origin[axis] - ent->r.absmin[axis] ) ) {
 		origin[axis] = ent->r.absmin[axis] - 10;
 		dir[axis] = -1;
 	} else {
@@ -2149,36 +2145,21 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	walking = (qboolean)( ent->flags & FL_SOFTACTIVATE );
 
 
-	if ( ( ent->s.apos.trType == TR_STATIONARY && ent->s.pos.trType == TR_STATIONARY ) )
-	{
-		if ( ent->active == qfalse )
-		{
-			// door force locked
-			//if ( ent->key < 0 )
-			// sswolf - allowteams ET - port
-			if (ent->key < 0 || !G_AllowTeamsAllowed(ent, activator))
-			{
-				// only send audible event if not trying to open slowly
-				if ( !walking && activator )
-				{
+	if ( ( ent->s.apos.trType == TR_STATIONARY && ent->s.pos.trType == TR_STATIONARY ) ) {
+		if ( ent->active == qfalse ) {
+			if ( ent->key < 0 ) {  // door force locked
+				if ( !walking && activator ) { // only send audible event if not trying to open slowly
 					AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_LOCKED );   // "someone tried locked door near me!"
 				}
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos3 );
 				return;
 			}
 
-			if ( activator )
-			{
-				if ( ent->key > 0 )
-				{  // door requires key
+			if ( activator ) {
+				if ( ent->key > 0 ) {  // door requires key
 					gitem_t *item = BG_FindItemForKey( ent->key, 0 );
-					//if ( !( activator->client->ps.stats[STAT_KEYS] & ( 1 << item->giTag ) ) )
-					// sswolf - allowteams - ET port
-					if (!(activator->client->ps.stats[STAT_KEYS] & (1 << item->giTag)) || (!G_AllowTeamsAllowed(ent, activator)))
-					{
-						// only send audible event if not trying to open slowly
-						if ( !walking )
-						{
+					if ( !( activator->client->ps.stats[STAT_KEYS] & ( 1 << item->giTag ) ) ) {
+						if ( !walking ) {  // only send audible event if not trying to open slowly
 							AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_LOCKED );   // "someone tried locked door near me!"
 						}
 						// player does not have key
@@ -2324,9 +2305,9 @@ void SP_func_door( gentity_t *ent ) {
 	// calculate second position
 	trap_SetBrushModel( ent, ent->model );
 	G_SetMovedir( ent->s.angles, ent->movedir );
-	abs_movedir[0] = Q_fabs( ent->movedir[0] );
-	abs_movedir[1] = Q_fabs( ent->movedir[1] );
-	abs_movedir[2] = Q_fabs( ent->movedir[2] );
+	abs_movedir[0] = fabs( ent->movedir[0] );
+	abs_movedir[1] = fabs( ent->movedir[1] );
+	abs_movedir[2] = fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = DotProduct( abs_movedir, size ) - lip;
 	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
@@ -2357,13 +2338,7 @@ void SP_func_door( gentity_t *ent ) {
 
 	InitMover( ent );
 
-	//ent->s.dmgFlags = HINT_DOOR;    // make it a door for cursorhints
-
-	// sswolf - allowteams - ET port
-	if (!ent->allowteams)
-	{
-		ent->s.dmgFlags = HINT_DOOR;    // make it a door for cursorhints
-	}
+	ent->s.dmgFlags = HINT_DOOR;    // make it a door for cursorhints
 
 	if ( !( ent->flags & FL_TEAMSLAVE ) ) {
 		int health;
@@ -2455,18 +2430,18 @@ void SP_func_secret( gentity_t *ent ) {
 	// calculate second position
 	trap_SetBrushModel( ent, ent->model );
 	G_SetMovedir( ent->s.angles, ent->movedir );
-	abs_movedir[0] = Q_fabs( ent->movedir[0] );
-	abs_movedir[1] = Q_fabs( ent->movedir[1] );
-	abs_movedir[2] = Q_fabs( ent->movedir[2] );
+	abs_movedir[0] = fabs( ent->movedir[0] );
+	abs_movedir[1] = fabs( ent->movedir[1] );
+	abs_movedir[2] = fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = DotProduct( abs_movedir, size ) - lip;
 	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
 
 	// calculate third position
 	G_SetMovedir( angles2, ent->movedir );
-	abs_movedir[0] = Q_fabs( ent->movedir[0] );
-	abs_movedir[1] = Q_fabs( ent->movedir[1] );
-	abs_movedir[2] = Q_fabs( ent->movedir[2] );
+	abs_movedir[0] = fabs( ent->movedir[0] );
+	abs_movedir[1] = fabs( ent->movedir[1] );
+	abs_movedir[2] = fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = DotProduct( abs_movedir, size ) - lip;
 	VectorMA( ent->pos2, distance, ent->movedir, ent->pos3 );
@@ -2703,9 +2678,9 @@ void SP_func_button( gentity_t *ent ) {
 	G_SpawnFloat( "lip", "4", &lip );
 
 	G_SetMovedir( ent->s.angles, ent->movedir );
-	abs_movedir[0] = Q_fabs( ent->movedir[0] );
-	abs_movedir[1] = Q_fabs( ent->movedir[1] );
-	abs_movedir[2] = Q_fabs( ent->movedir[2] );
+	abs_movedir[0] = fabs( ent->movedir[0] );
+	abs_movedir[1] = fabs( ent->movedir[1] );
+	abs_movedir[2] = fabs( ent->movedir[2] );
 	VectorSubtract( ent->r.maxs, ent->r.mins, size );
 	distance = abs_movedir[0] * size[0] + abs_movedir[1] * size[1] + abs_movedir[2] * size[2] - lip;
 	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
@@ -3801,7 +3776,7 @@ void SP_func_pendulum( gentity_t *ent ) {
 	trap_SetBrushModel( ent, ent->model );
 
 	// find pendulum length
-	length = Q_fabs( ent->r.mins[2] );
+	length = fabs( ent->r.mins[2] );
 	if ( length < 8 ) {
 		length = 8;
 	}
@@ -3932,13 +3907,7 @@ void SP_func_door_rotating( gentity_t *ent ) {
 
 	InitMoverRotate( ent );
 
-	//ent->s.dmgFlags = HINT_DOOR_ROTATING;
-
-	// sswolf - allowteams - ET port
-	if (!ent->allowteams)
-	{
-		ent->s.dmgFlags = HINT_DOOR_ROTATING;
-	}
+	ent->s.dmgFlags = HINT_DOOR_ROTATING;
 
 	if ( !( ent->flags & FL_TEAMSLAVE ) ) {
 		int health;

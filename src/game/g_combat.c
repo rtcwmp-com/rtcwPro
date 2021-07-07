@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ void AddScore( gentity_t *ent, int score ) {
 		return;
 	}
 	// no scoring during pre-match warmup
-	if (g_gamestate.integer != GS_PLAYING) {
+	if ( level.warmupTime ) {
 		return;
 	}
 
@@ -65,27 +65,6 @@ void AddScore( gentity_t *ent, int score ) {
 		level.teamScores[ ent->client->ps.persistant[PERS_TEAM] ] += score;
 	}
 	CalculateRanks();
-}
-
-/*
-=================
-Droppable weapons and FindIndex for TossClientItems
-=================
-*/
-int droppableWeapons[] = {
-	WP_MP40, WP_THOMPSON, WP_STEN, WP_MAUSER, WP_PANZERFAUST, WP_FLAMETHROWER, WP_COLT, WP_LUGER
-};
-int FindIndex(int a[], int num_elements, int value)
-{
-	int i;
-	for (i = 0; i < num_elements; i++)
-	{
-		if (a[i] == value)
-		{
-			return(value);
-		}
-	}
-	return(-1);
 }
 
 /*
@@ -124,7 +103,7 @@ void TossClientItems( gentity_t *self ) {
 	}
 	// jpw
 
-	if ( weapon > WP_NONE && FindIndex(droppableWeapons, ARRAY_LEN(droppableWeapons), weapon) >= 0 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) { // < WP_MONSTER_ATTACK1 replaced
+	if ( weapon > WP_NONE && weapon < WP_MONSTER_ATTACK1 && self->client->ps.ammo[ BG_FindAmmoForWeapon( weapon )] ) {
 		// find the item type for this weapon
 		item = BG_FindItemForWeapon( weapon );
 		// spawn the item
@@ -261,12 +240,6 @@ char    *modNames[] = {
 	"MOD_MORTAR_SPLASH",
 	"MOD_KICKED",
 	"MOD_GRABBER",
-	"MOD_DYNAMITE",
-	"MOD_DYNAMITE_SPLASH",
-	"MOD_AIRSTRIKE",
-	"MOD_SYRINGE",
-	"MOD_AMMO",
-	"MOD_ARTILLERY",
 	"MOD_WATER",
 	"MOD_SLIME",
 	"MOD_LAVA",
@@ -291,14 +264,8 @@ char    *modNames[] = {
 	"MOD_LT_AIRSTRIKE",
 	"MOD_ENGINEER",  // not sure if we'll use
 	"MOD_MEDIC",     // these like this or not
-	"MOD_BAT",
 // jpw
-// OSPx
-	"MOD_ADMKILL",
-	"MOD_SELFKILL",
-	"MOD_SWITCHTEAM",
-	"MOD_NUM_MODS"
-// -OSPx
+	"MOD_BAT"
 };
 
 /*
@@ -328,10 +295,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		return;
 	}
 
-
-	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
-	G_addStats( self, attacker, damage, meansOfDeath );
-	// OSP
 	self->client->ps.pm_type = PM_DEAD;
 
 	G_AddEvent( self, EV_STOPSTREAMINGSOUND, 0 );
@@ -353,87 +316,15 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		killerName = "<world>";
 	}
 
-	if ( meansOfDeath == MOD_SELFKILL && g_gamestate.integer == GS_PLAYING) {
-		int r = rand() %2; // randomize messages
-
-		if (r == 0)
-			AP(va("print \"%s ^7slit his throat.\n\"", self->client->pers.netname));
-		else if (r == 1)
-			AP(va("print \"%s ^7commited suicide.\n\"", self->client->pers.netname));
-	}
-	/* new stats if (meansOfDeath == MOD_KNIFE2 && g_gamestate.integer == GS_PLAYING) {
-		attacker->client->pers.stats.knife++;
-	}*/
-
-	// If person gets stabbed use custom sound from soundpack
-	// it's broadcasted to victim and heard only if standing near victim...
-	if ( (meansOfDeath == MOD_KNIFE_STEALTH || meansOfDeath == MOD_KNIFE) && !OnSameTeam(self, attacker) && g_fastStabSound.integer > 0) {
-		int r = rand() %2;
-		char *snd = "goat.wav"; // default
-
-		if (r == 0 || g_fastStabSound.integer == 1)
-			snd = "goat.wav";
-		else if (r == 1 || g_fastStabSound.integer == 2)
-			snd = "humiliation.wav";
-
-		APS(va("sound/match/%s", snd));
-
-		//APRS(self, va("sound/match/%s", ((g_fastStabSound.integer == 1) ? "goat.wav" :
-		//	((g_fastStabSound.integer == 2) ? "humiliation.wav" : snd)	)));
-
-		attacker->client->sess.knifeKills++;
-		//write_RoundStats(attacker->client->pers.netname, attacker->client->pers.stats.knifeStealth, ROUND_FASTSTABS);
-	}
-
-	// RtcwPro commented this out - we want artillery distinguished from airstrike
-	//if (meansOfDeath == MOD_ARTILLERY && g_gamestate.integer == GS_PLAYING)  {
-	//	meansOfDeath = MOD_AIRSTRIKE; // Just Remaps it back..
-	//}
-
 	if ( meansOfDeath < 0 || meansOfDeath >= sizeof( modNames ) / sizeof( modNames[0] ) ) {
 		obit = "<bad obituary>";
 	} else {
 		obit = modNames[ meansOfDeath ];
 	}
 
-	// L0 - Don't bother in warmup etc..
-	if (g_gamestate.integer == GS_PLAYING) // this is only on server side not needed during warmup
-	{
-		G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
+	G_LogPrintf( "Kill: %i %i %i: %s killed %s by %s\n",
 				 killer, self->s.number, meansOfDeath, killerName,
 				 self->client->pers.netname, obit );
-        // GameStats logging .... probably want to control this via cvar (as well as do a better job in general)
-        if (g_gameStatslog.integer) {
-            if (killer == self->s.number) {
-                 G_writeGeneralEvent(self,self,obit,eventSuicide);
-            }
-            else if (OnSameTeam(attacker, self)) {
-                if ( attacker->client ) {
-                    G_writeGeneralEvent(attacker,self,obit,eventTeamkill);
-                }
-            }
-            else {
-                if ( attacker->client ) {
-                    int weapID;
-                    weapID = G_weapStatIndex_MOD( meansOfDeath );
-                    //G_writeGeneralEvent(attacker,self,obit,eventKill);
-					G_writeGeneralEvent(attacker, self, va("%s", aWeaponInfo[weapID].pszName), eventKill);
-                }
-            }
-
-        }
-	}
-	// L0 - Stats
-	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
-		// Life kills & death spress
-		if (!OnSameTeam(attacker, self))
-		{
-			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
-			attacker->client->pers.life_kills++;		// life kills
-		} // End
-	}
-
-	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
 
 	// broadcast the death event to everyone
 	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
@@ -442,11 +333,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	ent->s.otherEntityNum2 = killer;
 	ent->r.svFlags = SVF_BROADCAST; // send to everyone
 
-	//}
-
 	self->enemy = attacker;
 
-	self->client->ps.persistant[PERS_KILLED]++; // TODO find out what PERS_KILLED is used for????
+	self->client->ps.persistant[PERS_KILLED]++;
 
 // JPW NERVE -- if player is holding ticking grenade, drop it
 	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {
@@ -457,8 +346,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			VectorScale( launchvel, 160, launchvel );
 			VectorCopy( self->r.currentOrigin, launchspot );
 			launchspot[2] += 40;
-			fire_grenade( self, launchspot, launchvel, self->s.weapon )->damage = 0;
-			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
+			fire_grenade( self, launchspot, launchvel, self->s.weapon );
+
 		}
 	}
 // jpw
@@ -485,16 +374,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				// jpw
 				AddScore( attacker, -1 );
 			}
-			// L0 - Life stats
-			if (g_lifeStats.integer) {
-				float acc = 0.00f;
-
-				acc = (self->client->pers.life_acc_shots == 0) ?
-					0.00 : ((float)self->client->pers.life_acc_hits / (float)self->client->pers.life_acc_shots ) * 100.00f ;
-
-					CPx(self-g_entities, va("chat \"^zLast life: ^7Kills:^z%d ^7Headshots:^z%d ^7Acc:^z%2.2f\n\"",
-						self->client->pers.life_kills, self->client->pers.life_headshots, acc));
-			} // End
 		} else {
 			// JPW NERVE -- mostly added as conveneience so we can tweak from the #defines all in one place
 			if ( g_gametype.integer >= GT_WOLF ) {
@@ -505,27 +384,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			}
 
 			attacker->client->lastKillTime = level.time;
-			// L0 - Life stats
-			if (g_lifeStats.integer) {
-				float acc = 0.00f;
-
-				acc = (self->client->pers.life_acc_shots == 0) ?
-					0.00 : ((float)self->client->pers.life_acc_hits / (float)self->client->pers.life_acc_shots ) * 100.00f ;
-
-				// Class based..
-				/*if (self->client->ps.stats[PC_MEDIC])
-					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7Rev:^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
-						self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_revives, acc, attacker->client->pers.netname, attacker->health));
-				else if (self->client->ps.stats[PC_LT])
-					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7AmmoGiv:^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
-					self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_ammo, acc, attacker->client->pers.netname, attacker->health));
-				else if (self->client->ps.stats[PC_ENGINEER])
-					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7Gibs: ^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
-						self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_gibs, acc, attacker->client->pers.netname, attacker->health));
-				else*/
-					CPx(self-g_entities, va("chat \"^3Last life: ^7Kills:^3%d ^7Hs:^3%d ^7Gibs: ^3%d ^7Acc:^3%2.2f ^7Killer: %s^3(%ihp)\n\"",
-					self->client->pers.life_kills, self->client->pers.life_headshots, self->client->pers.life_gibs, acc, attacker->client->pers.netname, attacker->health));
-			} // End
 		}
 	} else {
 		AddScore( self, -1 );
@@ -550,7 +408,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
+
 			self->client->ps.powerups[PW_REDFLAG] = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
@@ -558,16 +416,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}
 
 		if ( item ) {
-			G_writeObjectiveEvent(self, objDropped  );
-			launchvel[0] = 0;
-			launchvel[1] = 0;
-			launchvel[2] = 40;
+			launchvel[0] = crandom() * 20;
+			launchvel[1] = crandom() * 20;
+			launchvel[2] = 10 + random() * 10;
 
 			flag = LaunchItem( item,self->r.currentOrigin,launchvel,self->s.number );
 			flag->s.modelindex2 = self->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
@@ -722,6 +578,199 @@ int CheckArmor( gentity_t *ent, int damage, int dflags ) {
 	return save;
 }
 
+qboolean IsHeadShotWeapon( int mod, qboolean aicharacter ) {
+	if ( aicharacter ) {       // ai's are allowed headshots from these weapons
+		if ( mod == MOD_SNIPERRIFLE ||
+			 mod == MOD_SNOOPERSCOPE ) {
+			return qtrue;
+		}
+
+		return qfalse;
+	}
+
+	// players are allowed headshots from these weapons
+	if (    mod == MOD_LUGER ||
+			mod == MOD_COLT ||
+			mod == MOD_AKIMBO ||    //----(SA)	added
+			mod == MOD_MP40 ||
+			mod == MOD_THOMPSON ||
+			mod == MOD_STEN ||
+			mod == MOD_BAR ||
+			mod == MOD_FG42 ||
+			mod == MOD_FG42SCOPE ||
+			mod == MOD_MAUSER ||
+			mod == MOD_GARAND || // JPW NERVE this was left out
+			mod == MOD_SNIPERRIFLE ||
+			mod == MOD_SNOOPERSCOPE ||
+			mod == MOD_SILENCER ||  //----(SA)	modified
+			mod == MOD_SNIPERRIFLE ) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+qboolean IsHeadShot( gentity_t *targ, qboolean isAICharacter, vec3_t dir, vec3_t point, int mod ) {
+	gentity_t   *head;
+	trace_t tr;
+	vec3_t start, end;
+	gentity_t   *traceEnt;
+	orientation_t or;           // DHM - Nerve
+
+	qboolean head_shot_weapon = qfalse;
+
+	// not a player or critter so bail
+	if ( !( targ->client ) ) {
+		return qfalse;
+	}
+
+	if ( targ->health <= 0 ) {
+		return qfalse;
+	}
+
+	head_shot_weapon = IsHeadShotWeapon( mod, isAICharacter );
+
+	if ( head_shot_weapon ) {
+		head = G_Spawn();
+
+		if ( trap_GetTag( targ->s.number, "tag_head", &or ) ) {
+			G_SetOrigin( head, or.origin );
+		} else {
+			float height, dest;
+			vec3_t v, angles, forward, up, right;
+
+			G_SetOrigin( head, targ->r.currentOrigin );
+
+			if ( targ->client->ps.pm_flags & PMF_DUCKED ) { // closer fake offset for 'head' box when crouching
+				height = targ->client->ps.crouchViewHeight - 12;
+			} else {
+				height = targ->client->ps.viewheight;
+			}
+
+			// NERVE - SMF - this matches more closely with WolfMP models
+			VectorCopy( targ->client->ps.viewangles, angles );
+			if ( angles[PITCH] > 180 ) {
+				dest = ( -360 + angles[PITCH] ) * 0.75;
+			} else {
+				dest = angles[PITCH] * 0.75;
+			}
+			angles[PITCH] = dest;
+
+			AngleVectors( angles, forward, right, up );
+			VectorScale( forward, 5, v );
+			VectorMA( v, 18, up, v );
+
+			VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
+			head->r.currentOrigin[2] += height / 2;
+			// -NERVE - SMF
+		}
+
+		VectorCopy( head->r.currentOrigin, head->s.origin );
+		VectorCopy( targ->r.currentAngles, head->s.angles );
+		VectorCopy( head->s.angles, head->s.apos.trBase );
+		VectorCopy( head->s.angles, head->s.apos.trDelta );
+		VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+		VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
+		head->clipmask = CONTENTS_SOLID;
+		head->r.contents = CONTENTS_SOLID;
+
+		trap_LinkEntity( head );
+
+		// trace another shot see if we hit the head
+		VectorCopy( point, start );
+		VectorMA( start, 64, dir, end );
+		trap_Trace( &tr, start, NULL, NULL, end, targ->s.number, MASK_SHOT );
+
+		traceEnt = &g_entities[ tr.entityNum ];
+
+		if ( g_debugBullets.integer >= 3 ) {   // show hit player head bb
+			gentity_t *tent;
+			vec3_t b1, b2;
+			VectorCopy( head->r.currentOrigin, b1 );
+			VectorCopy( head->r.currentOrigin, b2 );
+			VectorAdd( b1, head->r.mins, b1 );
+			VectorAdd( b2, head->r.maxs, b2 );
+			tent = G_TempEntity( b1, EV_RAILTRAIL );
+			VectorCopy( b2, tent->s.origin2 );
+			tent->s.dmgFlags = 1;
+
+			// show headshot trace
+			// end the headshot trace at the head box if it hits
+			if ( tr.fraction != 1 ) {
+				VectorMA( start, ( tr.fraction * 64 ), dir, end );
+			}
+			tent = G_TempEntity( start, EV_RAILTRAIL );
+			VectorCopy( end, tent->s.origin2 );
+			tent->s.dmgFlags = 0;
+		}
+
+		G_FreeEntity( head );
+
+		if ( traceEnt == head ) {
+			level.totalHeadshots++;         // NERVE - SMF
+			return qtrue;
+		} else {
+			level.missedHeadshots++;    // NERVE - SMF
+		}
+	}
+
+	return qfalse;
+}
+
+gentity_t* G_BuildHead( gentity_t *ent ) {
+	gentity_t* head;
+	orientation_t or;           // DHM - Nerve
+
+	head = G_Spawn();
+
+	if ( trap_GetTag( ent->s.number, "tag_head", &or ) ) {
+		G_SetOrigin( head, or.origin );
+	} else {
+		float height, dest;
+		vec3_t v, angles, forward, up, right;
+
+		G_SetOrigin( head, ent->r.currentOrigin );
+
+		if ( ent->client->ps.pm_flags & PMF_DUCKED ) { // closer fake offset for 'head' box when crouching
+			height = ent->client->ps.crouchViewHeight - 12;
+		} else {
+			height = ent->client->ps.viewheight;
+		}
+
+		// NERVE - SMF - this matches more closely with WolfMP models
+		VectorCopy( ent->client->ps.viewangles, angles );
+		if ( angles[PITCH] > 180 ) {
+			dest = ( -360 + angles[PITCH] ) * 0.75;
+		} else {
+			dest = angles[PITCH] * 0.75;
+		}
+		angles[PITCH] = dest;
+
+		AngleVectors( angles, forward, right, up );
+		VectorScale( forward, 5, v );
+		VectorMA( v, 18, up, v );
+
+		VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
+		head->r.currentOrigin[2] += height / 2;
+		// -NERVE - SMF
+	}
+
+	VectorCopy( head->r.currentOrigin, head->s.origin );
+	VectorCopy( ent->r.currentAngles, head->s.angles );
+	VectorCopy( head->s.angles, head->s.apos.trBase );
+	VectorCopy( head->s.angles, head->s.apos.trDelta );
+	VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+	VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
+	head->clipmask = CONTENTS_SOLID;
+	head->r.contents = CONTENTS_SOLID;
+	head->parent = ent;
+	head->s.eType = ET_TEMPHEAD;
+
+	trap_LinkEntity( head );
+
+	return head;
+}
+
 /*
 ==============
 G_ArmorDamage
@@ -763,7 +812,7 @@ void G_ArmorDamage( gentity_t *targ ) {
 	// ... Ick, just discovered that the refined hit detection ("hit nearest to which tag") is clientside...
 
 	// For now, I'll randomly pick a part that hasn't been cleared.  This might end up looking okay, and we won't need the refined hits.
-	//	however, we still have control on the server-side of which parts come off, regardless of what scheme is used.
+	//	however, we still have control on the server-side of which parts come off, regardless of what shceme is used.
 
 	brokeparts = (int)( ( 1 - ( (float)( targ->health ) / (float)( targ->client->ps.stats[STAT_MAX_HEALTH] ) ) ) * numParts );
 
@@ -801,44 +850,6 @@ void G_ArmorDamage( gentity_t *targ ) {
 }
 
 /*
-==============
-G_Hitsounds
-==============
-*/
-void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
-	qboolean 	onSameTeam = OnSameTeam( target, attacker);
-
-	if (g_hitsounds.integer) {
-
-		// if player is hurting him self don't give any sounds
-		if (target->client == attacker->client) {
-			return;  // this happens at flaming your self... just return silence...			
-		}
-
-		// if team mate
-		if (target->client && attacker->client && onSameTeam ) {
-			attacker->client->ps.persistant[PERS_HITBODY]--;
-		}
-
-		// If enemy
-		else if ( target &&
-				target->client &&
-				attacker &&
-				attacker->client &&
-				attacker->s.number != ENTITYNUM_NONE &&
-				attacker->s.number != ENTITYNUM_WORLD &&
-				attacker != target &&
-				!onSameTeam 
-		) {   
-			if (body)
-				attacker->client->ps.persistant[PERS_HITBODY]++;
-			else
-				attacker->client->ps.persistant[PERS_HITHEAD]++;
-		}
-	}
-}
-
-/*
 ============
 T_Damage
 
@@ -861,6 +872,7 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
+
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t   *client;
@@ -875,7 +887,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	// the intermission has allready been qualified for, so don't
 	// allow any extra scoring
-	if ( level.intermissionQueued || ( g_gamestate.integer != GS_PLAYING && match_warmupDamage.integer == 0 ) ) {
+	if ( level.intermissionQueued || g_gamestate.integer != GS_PLAYING ) {
 		return;
 	}
 
@@ -920,7 +932,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			case MOD_ROCKET:
 			case MOD_ROCKET_SPLASH:
 			case MOD_AIRSTRIKE:
-			case MOD_ARTILLERY:
 			case MOD_GRENADE_PINEAPPLE:
 			case MOD_MORTAR:
 			case MOD_MORTAR_SPLASH:
@@ -944,7 +955,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	client = targ->client;
 
 	if ( client ) {
-		if ( client->noclip) { // KK commenting this out during our alpha test || client->ps.powerups[PW_INVULNERABLE]  ) {
+		if ( client->noclip ) {
 			return;
 		}
 	}
@@ -959,18 +970,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( knockback > 200 ) {
 		knockback = 200;
 	}
-	// L0 - Now by default knockback is set to 100 (was 1000) so if it's not touched
-	// multiply nade and AS to 1000 so it acts and feels like default
-	if (dflags & DAMAGE_RADIUS) {
-		if (g_knockback.integer <= 100)
-			knockback *= 10;
-	} // End
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
 	if ( dflags & DAMAGE_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
+
 	// figure momentum add, even if the damage won't be taken
 	if ( knockback && targ->client && ( g_friendlyFire.integer || !OnSameTeam( targ, attacker ) ) ) {
 		vec3_t kvel;
@@ -1017,7 +1023,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		// if TF_NO_FRIENDLY_FIRE is set, don't do damage to the target
 		// if the attacker was on the same team
 		if ( targ != attacker && OnSameTeam( targ, attacker )  ) {
-			if ( ( g_gamestate.integer != GS_PLAYING && match_warmupDamage.integer == 0 ) ) {
+			if ( !g_friendlyFire.integer ) {
 				return;
 			}
 		}
@@ -1068,44 +1074,24 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
-	G_Hitsounds(targ, attacker, qtrue);
+	if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 
-	// sswolf - head stuff
-	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
-	if (targ->headshot && targ->client) {
-
-		if ( take * 2 < g_hsDamage.integer )
-		{
-			take = g_hsDamage.integer; // head shots, all weapons, do minimum 50 points damage
-		}
-		else
-		{
+		if ( take * 2 < 50 ) { // head shots, all weapons, do minimum 50 points damage
+			take = 50;
+		} else {
 			take *= 2; // sniper rifles can do full-kill (and knock into limbo)
 
 		}
-
 		if ( !( targ->client->ps.eFlags & EF_HEADSHOT ) ) {  // only toss hat on first headshot
 			G_AddEvent( targ, EV_LOSE_HAT, DirToByte( dir ) );
 		}
 
-		// sswolf - some debug info
-		if (g_debugBullets.integer)
-		{
-			AP(va("print \"%s ^7headshot for %i dmg\n\"", targ->client->pers.netname, take));
-		}
-
 		targ->client->ps.eFlags |= EF_HEADSHOT;
-		// L0 - OSP stats - Record the headshot
-		if ( client && attacker && attacker->client
-			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
-			G_addStatsHeadShot( attacker, mod );
-		} // End
-
-		G_Hitsounds(targ, attacker, qfalse);
 	}
 
 	if ( g_debugDamage.integer ) {
-		G_Printf( "client:%i health:%i damage:%i\n", targ->s.number, targ->health, take); //, asave );
+		G_Printf( "client:%i health:%i damage:%i armor:%i\n", targ->s.number,
+				  targ->health, take, asave );
 	}
 
 	// add to the damage inflicted on a player this frame
@@ -1117,7 +1103,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		} else {
 			client->ps.persistant[PERS_ATTACKER] = ENTITYNUM_WORLD;
 		}
-		//client->damage_armor += asave;
+		client->damage_armor += asave;
 		client->damage_blood += take;
 		client->damage_knockback += knockback;
 
@@ -1129,7 +1115,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			client->damage_fromWorld = qtrue;
 		}
 	}
-
 
 	// See if it's the player hurting the emeny flag carrier
 	Team_CheckHurtCarrier( targ, attacker );
@@ -1151,39 +1136,22 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 		}
 
-
 // JPW NERVE overcome previous chunk of code for making grenades work again
 		if ( ( g_gametype.integer != GT_SINGLE_PLAYER ) && ( take > 190 ) ) { // 190 is greater than 2x mauser headshot, so headshots don't gib
 			targ->health = GIB_HEALTH - 1;
-
-			// gibbed by a nade or other explosion
-			/*if (attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP)) //do not add gibs to stats during warmup.
-			{
-                    attacker->client->sess.gibs++;	//gibbed an enemy
-                    attacker->client->pers.life_gibs++;
-            }*/
 		}
 // jpw
 		//G_Printf("health at: %d\n", targ->health);
 		if ( targ->health <= 0 ) {
-			if (client) {
+			if ( client ) {
 				targ->flags |= FL_NO_KNOCKBACK;
-				if (g_gametype.integer >= GT_WOLF) {
-
-					// do gib counting before sending them to limbo
-					if ((targ->health <= FORCE_LIMBO_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO)
-						&& attacker->client && attacker != targ && !OnSameTeam(attacker, targ) && (g_gamestate.integer != GS_WARMUP))) //do not add gibs to stats during warmup.
-					{
-						attacker->client->sess.gibs++;
-						attacker->client->pers.life_gibs++;
+// JPW NERVE -- repeated shooting sends to limbo
+				if ( g_gametype.integer >= GT_WOLF ) {
+					if ( ( targ->health < FORCE_LIMBO_HEALTH ) && ( targ->health > GIB_HEALTH ) && ( !( targ->client->ps.pm_flags & PMF_LIMBO ) ) ) {
+						limbo( targ, qtrue );
 					}
-
-					// JPW NERVE -- repeated shooting sends to limbo
-					if ((targ->health < FORCE_LIMBO_HEALTH) && (targ->health > GIB_HEALTH) && (!(targ->client->ps.pm_flags & PMF_LIMBO))) {
-						limbo(targ, qtrue);
-					}
-					// jpw
 				}
+// jpw
 			}
 
 			if ( targ->health < -999 ) {
@@ -1220,10 +1188,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			if ( targ->s.number >= MAX_CLIENTS ) {
 				G_Script_ScriptEvent( targ, "pain", va( "%d %d", targ->health, targ->health + take ) );
 			}
-		// L0 - OSP - update weapon/dmg stats
-		} else {
-			G_addStats( targ, attacker, take, mod );
-		} // End
+		}
 
 		//G_ArmorDamage(targ);	//----(SA)	moved out to separate routine
 

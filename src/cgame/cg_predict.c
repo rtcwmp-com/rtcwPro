@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -227,8 +227,7 @@ int     CG_PointContents( const vec3_t point, int passEntityNum ) {
 			continue;
 		}
 
-		contents |= trap_CM_TransformedPointContents( point, cmodel, cent->lerpOrigin, cent->lerpAngles );
-		//		contents |= trap_CM_TransformedPointContents( point, cmodel, ent->origin, ent->angles );
+		contents |= trap_CM_TransformedPointContents( point, cmodel, ent->origin, ent->angles );
 	}
 
 	return contents;
@@ -645,10 +644,8 @@ void CG_PredictPlayerState( void ) {
 
 	if ( pmove_msec.integer < 8 ) {
 		trap_Cvar_Set( "pmove_msec", "8" );
-		trap_Cvar_Update( &pmove_msec );
-	} else if ( pmove_msec.integer > 33 ) {
+	} else if ( pmove_msec.integer > 33 )     {
 		trap_Cvar_Set( "pmove_msec", "33" );
-		trap_Cvar_Update( &pmove_msec );
 	}
 
 	cg_pmove.pmove_fixed = pmove_fixed.integer; // | cg_pmove_fixed.integer;
@@ -710,10 +707,9 @@ void CG_PredictPlayerState( void ) {
 				}
 				cg.thisFrameTeleport = qfalse;
 			} else {
-				vec3_t adjusted; //vec3_t adjusted;
+				vec3_t adjusted;
 				CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
-				//cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, cg.predictedPlayerState.viewangles, new_angles);
-				cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles );
+										   cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles );
 				// RF, add the deltaAngles (fixes jittery view while riding trains)
 				cg.predictedPlayerState.delta_angles[YAW] += ANGLE2SHORT( deltaAngles[YAW] );
 
@@ -758,12 +754,6 @@ void CG_PredictPlayerState( void ) {
 			cg_pmove.cmd.serverTime = ( ( cg_pmove.cmd.serverTime + pmove_msec.integer - 1 ) / pmove_msec.integer ) * pmove_msec.integer;
 		}
 
-		// ydnar: if server respawning, freeze the player
-		if (cg.serverRespawning) {
-			cg_pmove.ps->pm_type = PM_FREEZE;
-		}
-
-
 		// RF, if waiting for mission stats to go, ignore all input
 		if ( strlen( cg_missionStats.string ) > 1 || cg_norender.integer ) {
 			cg_pmove.cmd.buttons = 0;
@@ -807,9 +797,7 @@ void CG_PredictPlayerState( void ) {
 	// adjust for the movement of the groundentity
 	CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
 							   cg.predictedPlayerState.groundEntityNum,
-							//cg.physicsTime, cg.time, cg.predictedPlayerState.origin, cg.predictedPlayerState.viewangles, cg.predictedPlayerState.viewangles);
 							   cg.physicsTime, cg.time, cg.predictedPlayerState.origin, deltaAngles );
-
 
 	// fire events and other transition triggered things
 	CG_TransitionPlayerState( &cg.predictedPlayerState, &oldPlayerState );

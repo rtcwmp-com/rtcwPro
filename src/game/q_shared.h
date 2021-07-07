@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwMP-Pro 1.2"  // Custom Client Version
 
+#define Q3_VERSION      "Wolf 1.41b-MP"
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
 // 1.3-MP : final for release
@@ -72,10 +72,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #if defined( ppc ) || defined( __ppc ) || defined( __ppc__ ) || defined( __POWERPC__ )
 #define idppc 1
-#endif
-
-#ifndef DIRECTINPUT_VERSION
-#define DIRECTINPUT_VERSION 0x0800
 #endif
 
 /**********************************************************************
@@ -118,13 +114,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
-#ifndef ID_INLINE
-#if defined(NDEBUG) || defined(_WIN32)
-#define ID_INLINE __inline
-#else
-#define ID_INLINE
-#endif
-#endif
 
 // this is the define for determining if we have an asm version of a C function
 #if ( defined _M_IX86 || defined __i386__ ) && !defined __sun__  && !defined __LCC__
@@ -189,7 +178,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( Q_fabs( x ) == 0.0 ) {
+	if ( fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;
@@ -235,7 +224,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( Q_fabs( x ) == 0.0 ) {
+	if ( fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;
@@ -328,7 +317,7 @@ typedef int clipHandle_t;
 #define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
 #define MAX_TOKEN_CHARS     1024    // max length of an individual token
 
-#define MAX_INFO_STRING     4096 // sswolf - increase from 1024
+#define MAX_INFO_STRING     1024
 #define MAX_INFO_KEY        1024
 #define MAX_INFO_VALUE      1024
 
@@ -499,19 +488,9 @@ extern vec4_t colorWhite;
 extern vec4_t colorLtGrey;
 extern vec4_t colorMdGrey;
 extern vec4_t colorDkGrey;
-// OSPx - Colors
-extern vec4_t colorOrange;
-extern vec4_t colorMdRed;
-extern vec4_t colorMdGreen;
-extern vec4_t colorDkGreen;
-extern vec4_t colorMdCyan;
-extern vec4_t colorMdYellow;
-extern vec4_t colorMdOrange;
-extern vec4_t colorMdBlue;
 
 #define Q_COLOR_ESCAPE  '^'
-#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isgraph(*((p)+1))) // ^[0-9a-zA-Z]
-// -OSPx
+#define Q_IsColorString( p )  ( p && *( p ) == Q_COLOR_ESCAPE && *( ( p ) + 1 ) && *( ( p ) + 1 ) != Q_COLOR_ESCAPE )
 
 #define COLOR_BLACK     '0'
 #define COLOR_RED       '1'
@@ -521,54 +500,18 @@ extern vec4_t colorMdBlue;
 #define COLOR_CYAN      '5'
 #define COLOR_MAGENTA   '6'
 #define COLOR_WHITE     '7'
-// OSPx - New colors
-#define COLOR_ORANGE    '8'
-#define COLOR_MDGREY    '9'
-#define COLOR_LTGREY    ':'
-#define COLOR_MDGREEN   '<'
-#define COLOR_MDYELLOW  '='
-#define COLOR_MDBLUE    '>'
-#define COLOR_MDRED     '?'
-#define COLOR_LTORANGE  'A'
-#define COLOR_MDCYAN    'B'
-#define COLOR_MDPURPLE  'C'
-#define COLOR_NULL      '*'
+#define ColorIndex( c )   ( ( ( c ) - '0' ) & 7 )
 
-#define COLOR_BITS  31
-#define ColorIndex( c )   ( ( ( c ) - '0' ) & COLOR_BITS )
-// -OSPx
+#define S_COLOR_BLACK   "^0"
+#define S_COLOR_RED     "^1"
+#define S_COLOR_GREEN   "^2"
+#define S_COLOR_YELLOW  "^3"
+#define S_COLOR_BLUE    "^4"
+#define S_COLOR_CYAN    "^5"
+#define S_COLOR_MAGENTA "^6"
+#define S_COLOR_WHITE   "^7"
 
-#define S_COLOR_BLACK		"^0"
-#define S_COLOR_RED			"^1"
-#define S_COLOR_GREEN		"^2"
-#define S_COLOR_YELLOW		"^3"
-#define S_COLOR_BLUE		"^4"
-#define S_COLOR_CYAN		"^5"
-#define S_COLOR_MAGENTA		"^6"
-#define S_COLOR_WHITE		"^7"
-// OSPx - New colors
-#define S_COLOR_ORANGE      "^8"
-#define S_COLOR_MDGREY      "^9"
-#define S_COLOR_LTGREY      "^:"
-#define S_COLOR_MDGREEN     "^<"
-#define S_COLOR_MDYELLOW    "^="
-#define S_COLOR_MDBLUE      "^>"
-#define S_COLOR_MDRED       "^?"
-#define S_COLOR_LTORANGE    "^A"
-#define S_COLOR_MDCYAN      "^B"
-#define S_COLOR_MDPURPLE    "^C"
-#define S_COLOR_NULL        "^*"
-
-extern vec4_t g_color_table[32];
-
-// Hex Color string support
-#define gethex( ch ) ( ( ch ) > '9' ? ( ( ch ) >= 'a' ? ( ( ch ) - 'a' + 10 ) : ( ( ch ) - '7' ) ) : ( ( ch ) - '0' ) )
-#define ishex( ch )  ( ( ch ) && ( ( ( ch ) >= '0' && ( ch ) <= '9' ) || ( ( ch ) >= 'A' && ( ch ) <= 'F' ) || ( ( ch ) >= 'a' && ( ch ) <= 'f' ) ) )
-
-// check if it's format rrggbb r,g,b e {0..9} U {A...F}
-#define Q_IsHexColorString( p ) ( ishex( *( p ) ) && ishex( *( ( p ) + 1 ) ) && ishex( *( ( p ) + 2 ) ) && ishex( *( ( p ) + 3 ) ) && ishex( *( ( p ) + 4 ) ) && ishex( *( ( p ) + 5 ) ) )
-#define Q_HexColorStringHasAlpha( p ) ( ishex( *( ( p ) + 6 ) ) && ishex( *( ( p ) + 7 ) ) )
-// -OSPx
+extern vec4_t g_color_table[8];
 
 #define MAKERGB( v, r, g, b ) v[0] = r; v[1] = g; v[2] = b
 #define MAKERGBA( v, r, g, b, a ) v[0] = r; v[1] = g; v[2] = b; v[3] = a
@@ -719,13 +662,6 @@ void PerpendicularVector( vec3_t dst, const vec3_t src );
 void GetPerpendicularViewVector( const vec3_t point, const vec3_t p1, const vec3_t p2, vec3_t up );
 void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj );
 // done.
-
-//
-// q_shared_c
-//
-int Q_CountChar(const char* string, char tocount);
-char* Q_CleanDirName(char* dirname);
-qboolean Q_IsNumeric(const char* s);
 
 //=============================================
 
@@ -891,7 +827,7 @@ void Info_NextPair( const char **s, char *key, char *value );
 // this is only here so the functions in q_shared.c and bg_*.c can link
 void QDECL Com_Error( int level, const char *error, ... );
 void QDECL Com_Printf( const char *msg, ... );
-void QDECL Com_DPrintf(const char* fmt, ...);
+
 
 /*
 ==========================================================
@@ -903,8 +839,6 @@ cheats is zero, force all unspecified variables to their
 default values.
 ==========================================================
 */
-#define MAX_CVARS				1024
-#define MAX_CVAR_VALUE_STRING   256
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
 								// used for system variables, not for player
@@ -926,65 +860,6 @@ default values.
 #define CVAR_NORESTART      1024    // do not clear when a cvar_restart is issued
 #define CVAR_WOLFINFO       2048    // DHM - NERVE :: Like userinfo, but for wolf multiplayer info
 
-#define SVC_NONE            0
-#define SVC_EQUAL           1
-#define SVC_NOTEQUAL        2
-#define SVC_GREATER         3
-#define SVC_GREATEREQUAL    4
-#define SVC_LOWER           5
-#define SVC_LOWEREQUAL      6
-#define SVC_INSIDE          7
-#define SVC_OUTSIDE         8
-#define SVC_INCLUDE         9
-#define SVC_EXCLUDE         10
-#define SVC_WITHBITS        11
-#define SVC_WITHOUTBITS     12
-#define SVC_MAX             13
-
-#define SVC_TYPE_STRING     0
-#define SVC_TYPE_INT        1
-#define SVC_TYPE_FLOAT      2
-#define SVC_TYPE_MAX        3
-
-// Cvar restrictions table for tags
-typedef struct {
-	int type;
-	char* operatorFlag;
-	char* longDesc;
-} cvar_restrictions_l;
-
-// Cvar restriction tags
-static const cvar_restrictions_l Cvar_Restriction_Flags[] = {
-	{ SVC_NONE, "", "<any>" },
-	{ SVC_EQUAL, "EQ", "EQUAL" },
-	{ SVC_NOTEQUAL, "!EQ", "NOT EQUAL" },
-	{ SVC_GREATER, "GRT", "GREATER" },
-	{ SVC_GREATEREQUAL, "GQ", "GREATER OR EQUAL" },
-	{ SVC_LOWER, "LO", "LOWER" },
-	{ SVC_LOWEREQUAL, "LQ", "LOWER OR EQUAL" },
-	{ SVC_INSIDE, "IN", "BETWEEN" },
-	{ SVC_OUTSIDE, "OUT", "OUTSIDE" },
-	{ SVC_INCLUDE, "INCLUDE", "INCLUDE" },
-	{ SVC_EXCLUDE, "EXCLUDE", "NOT INCLUDE" },
-	{ SVC_WITHBITS, "WBIT", "WITH BITS" },
-	{ SVC_WITHOUTBITS, "!WBIT", "WITHOUT BITS" }
-};
-
-// Cvar restrictions
-typedef struct cvar_restrictions_s {
-	char* name;
-	unsigned int type;
-	char*   sVal1;
-	char*   sVal2;
-	float   fVal1;
-	float   fVal2;
-	int     iVal1;
-	int     iVal2;
-	struct cvar_restrictions_s* next;
-	struct cvar_restrictions_s* hashNext;
-	qboolean flagged;
-} cvar_rest_t;
-
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s {
 	char        *name;
@@ -999,6 +874,8 @@ typedef struct cvar_s {
 	struct cvar_s *next;
 	struct cvar_s *hashNext;
 } cvar_t;
+
+#define MAX_CVAR_VALUE_STRING   256
 
 typedef int cvarHandle_t;
 
@@ -1024,18 +901,19 @@ COLLISION DETECTION
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
-#define PLANE_X				0
-#define PLANE_Y				1
-#define PLANE_Z				2
-#define PLANE_NON_AXIAL		3
-#define PLANE_NON_PLANAR    4
+#define PLANE_X         0
+#define PLANE_Y         1
+#define PLANE_Z         2
+#define PLANE_NON_AXIAL 3
+
 
 /*
 =================
 PlaneTypeForNormal
 =================
 */
-#define PlaneTypeForNormal( x ) ( x[0] == 1.0 ? PLANE_X : ( x[1] == 1.0 ? PLANE_Y : ( x[2] == 1.0 ? PLANE_Z : ( x[0] == 0.f && x[1] == 0.f && x[2] == 0.f ? PLANE_NON_PLANAR : PLANE_NON_AXIAL ) ) ) )
+
+#define PlaneTypeForNormal( x ) ( x[0] == 1.0 ? PLANE_X : ( x[1] == 1.0 ? PLANE_Y : ( x[2] == 1.0 ? PLANE_Z : PLANE_NON_AXIAL ) ) )
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
@@ -1147,10 +1025,6 @@ typedef enum {
 
 //#define	MAX_CONFIGSTRINGS	1024
 #define MAX_CONFIGSTRINGS   2048
-
-#define NUM_MODELS 2
-#define AXIS_MODEL_HANDLE	0
-#define ALLIED_MODEL_HANDLE 1
 
 #define MAX_DLIGHT_CONFIGSTRINGS    128
 #define MAX_CLIPBOARD_CONFIGSTRINGS 64
@@ -1400,6 +1274,7 @@ typedef struct playerState_s {
 
 //====================================================================
 
+
 //
 // usercmd_t->button bits, many of which are generated by the client system,
 // so they aren't game/cgame only definitions
@@ -1419,6 +1294,9 @@ typedef struct playerState_s {
 //----(SA)	end
 
 #define BUTTON_ANY          128         // any key whatsoever
+
+
+
 
 //----(SA) wolf buttons
 #define WBUTTON_ATTACK2     1
@@ -1574,15 +1452,6 @@ typedef struct entityState_s {
 
 } entityState_t;
 
-typedef struct {
-	vec3_t legsAxis[3];
-	vec3_t torsoAxis[3];
-	vec3_t headAxis[3];
-	int legsFrame;
-	int torsoFrame;
-	qhandle_t bodyModelHandle;
-} clientAnimationInfo_t;
-
 typedef enum {
 	CA_UNINITIALIZED,
 	CA_DISCONNECTED,    // not talking to a server
@@ -1670,6 +1539,8 @@ typedef enum _flag_status {
 	FLAG_DROPPED
 } flagStatus_t;
 
+
+
 #define MAX_GLOBAL_SERVERS          2048
 #define MAX_OTHER_SERVERS           128
 #define MAX_PINGREQUESTS            16
@@ -1713,28 +1584,5 @@ typedef enum {
 #define VOTEFLAGS_TYPE              ( 1 << 5 )
 #define VOTEFLAGS_KICK              ( 1 << 6 )
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
-
-//
-// L0 
-// New stuff bellow
-//
-#define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
-#define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
-#define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
-#define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
-#define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
-#define GUID_LEN				33
-#define NO_GUID					"NO_GUID"
-
-// Indicates if client is connected or not.
-// Deals with Bloom issues as well as just identifying if extra stuff should be ran..
-qboolean clientIsConnected;
-
-#if defined(_WIN32) || defined(_WIN64)
-/* We are on Windows */
-# define strtok_r strtok_s
-#endif
-
-#define ArrayLength(x)	(sizeof(x) / sizeof(*(x)))
 
 #endif  // __Q_SHARED_H

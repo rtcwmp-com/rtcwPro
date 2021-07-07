@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -152,9 +152,6 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		trap_LinkEntity( player );
 	}
-
-	// L0 - Antilag
-	G_ResetTrail(player);
 }
 
 
@@ -1584,10 +1581,7 @@ void Fire_Lead( gentity_t *ent, gentity_t *activator, float spread, int damage )
 	VectorMA( end, r, right, end );
 	VectorMA( end, u, up, end );
 
-	// sswolf - unused
-	// RtcwPro added historical trace (unlagged)
-	//G_HistoricalTrace( ent, &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
-	trap_Trace(&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
+	G_HistoricalTrace( ent, &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		AICast_ProcessBullet( activator, muzzle, tr.endpos );
@@ -1677,7 +1671,7 @@ void clamp_hweapontofirearc( gentity_t *self, vec3_t dang ) {
 
 	// sanity check the angles again to make sure we don't go passed the harc
 	diff = AngleDifference( self->s.angles[YAW], dang[YAW] );
-	if ( Q_fabs( diff ) > self->harc ) {
+	if ( fabs( diff ) > self->harc ) {
 		clamped = qtrue;
 
 		if ( diff > 0 ) {
@@ -2407,7 +2401,7 @@ void miscGunnerThink( gentity_t *ent ) {
 		}
 
 		// restrict vertical range
-		if ( dang[0] < 0 && Q_fabs( dang[0] ) > ( gun->varc / 2 ) ) {
+		if ( dang[0] < 0 && fabs( dang[0] ) > ( gun->varc / 2 ) ) {
 			clamped = qtrue;
 			if ( dang[0] < 0 ) {
 				dang[0] = -( gun->varc / 2 );
@@ -2421,7 +2415,7 @@ void miscGunnerThink( gentity_t *ent ) {
 		for ( i = 0; i < 3; i++ ) {
 			BG_EvaluateTrajectory( &gun->s.apos, level.time, gun->r.currentAngles );
 			diff = AngleDifference( dang[i], gun->r.currentAngles[i] );
-			if ( Q_fabs( diff ) > ( yawspeed * ( (float)FRAMETIME / 1000.0 ) ) ) {
+			if ( fabs( diff ) > ( yawspeed * ( (float)FRAMETIME / 1000.0 ) ) ) {
 				clamped = qtrue;
 				if ( diff > 0 ) {
 					dang[i] = AngleMod( gun->r.currentAngles[i] + ( yawspeed * ( (float)FRAMETIME / 1000.0 ) ) );
@@ -2443,7 +2437,7 @@ void miscGunnerThink( gentity_t *ent ) {
 		gun->s.apos.trDuration = 50;
 
 		// if we are facing them, fire
-		if ( Q_fabs( AngleNormalize180( gun->r.currentAngles[YAW] - gun->TargetAngles[YAW] ) ) < 10 ) {
+		if ( fabs( AngleNormalize180( gun->r.currentAngles[YAW] - gun->TargetAngles[YAW] ) ) < 10 ) {
 			AngleVectors( gun->r.currentAngles, forward, right, up );
 			VectorCopy( gspot, muzzle );
 
@@ -2644,4 +2638,5 @@ void misc_firetrails_think( gentity_t *ent ) {
 void SP_misc_firetrails( gentity_t *ent ) {
 	ent->think = misc_firetrails_think;
 	ent->nextthink = level.time + 100;
+
 }

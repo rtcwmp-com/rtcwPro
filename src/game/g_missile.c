@@ -48,7 +48,7 @@ void Shaker_think( gentity_t *ent ) {
 	gentity_t   *player;
 	float len, radius = ent->splashDamage, bounceamt;
 	int i;
-	//char cmd[64];       //DAJ
+	char cmd[64];       //DAJ
 /* JPW NERVE used for trigger_concussive_dust, currently not working
 	vec3_t		mins, maxs; // JPW NERVE
 	static vec3_t	range; // JPW NERVE
@@ -119,13 +119,12 @@ void Shaker_think( gentity_t *ent ) {
 		if ( len > radius ) { // largest bomb blast = 600
 			continue;
 		}
-		bounceamt = 1.0f - (len/radius);
+
 		// NERVE - SMF - client side camera shake
 		//DAJ BUGFIX va() not doing %f's correctly
-//		bounceamt = min( 1.0f, 1.0f - ( len / radius ) );
-//		sprintf( cmd, "shake %.4f", bounceamt );   //DAJ
-	//	trap_SendServerCommand( player->s.clientNum, cmd );
-		trap_SendServerCommand( player->s.clientNum, va( "shake %f", min( 1.f, bounceamt)));
+		bounceamt = min( 1.0f, 1.0f - ( len / radius ) );
+		sprintf( cmd, "shake %.4f", bounceamt );   //DAJ
+		trap_SendServerCommand( player->s.clientNum, cmd );
 //DAJ BUGFIX		trap_SendServerCommand( player->s.clientNum, va( "shake %f", &bounceamt));
 	}
 }
@@ -475,411 +474,157 @@ void M_think( gentity_t *ent ) {
 }
 
 /*
---------------------------------
-	OSPx - Fix FFE building bug
-	ET's RadiusDamage system 
-
-	Port from ET to S4NDMoD
-	- Dutchmeat
-	- S4NDMANN
-	- AG3NT
-	------------
-	OSPx - Just Ported here
-*/
-
-/*
 ================
 G_ExplodeMissile
 
 Explode a missile without an impact
-================
-*/
-void G_AdjustedDamageVec(gentity_t *ent, vec3_t origin, vec3_t v) {
-	int i;
-
-	if (!ent->r.bmodel) {
-		VectorSubtract(ent->r.currentOrigin, origin, v); // JPW NERVE simpler centroid check that doesn't have box alignment weirdness
-	}
-	else {
-		for (i = 0; i < 3; i++) {
-			if (origin[i] < ent->r.absmin[i]) {
-				v[i] = ent->r.absmin[i] - origin[i];
-			}
-			else if (origin[i] > ent->r.absmax[i]) {
-				v[i] = origin[i] - ent->r.absmax[i];
-			}
-			else {
-				v[i] = 0;
-			}
-		}
-	}
-}
-
-/*
-===============
-AccuracyHit
-===============
-*/
-qboolean AccuracyHit(gentity_t *target, gentity_t *attacker) {
-	if (!target->takedamage) {
-		return qfalse;
-	}
-
-	if (!attacker) {
-		return qfalse;
-	}
-
-	if (target == attacker) {
-		return qfalse;
-	}
-
-	if (!target->client) {
-		return qfalse;
-	}
-
-	if (!attacker->client) {
-		return qfalse;
-	}
-
-	if (target->client->ps.stats[STAT_HEALTH] <= 0) {
-		return qfalse;
-	}
-
-	if (OnSameTeam(target, attacker)) {
-		return qfalse;
-	}
-
-	return qtrue;
-}
-
-/*
-============
-G_ET_RadiusDamage
-
-dutch: changed the function name,
-so all other entities that doesn't have a problem with
-the orignal G_RadiusDamage can still use the old one
-============
-*/
-qboolean G_ET_RadiusDamage(vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod) {
-	float points, dist;
-	gentity_t   *ent;
-	int entityList[MAX_GENTITIES];
-	int numListedEntities;
-	vec3_t mins, maxs;
-	vec3_t v;
-	vec3_t dir;
-	int i, e;
-	qboolean hitClient = qfalse;
-	float boxradius;
-	vec3_t dest;
-	trace_t tr;
-	vec3_t midpoint;
-	int flags = DAMAGE_RADIUS;
-
-	if (radius < 1) {
-		radius = 1;
-	}
-
-	boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement --
-	// bounding box was checking against radius / sqrt(2) if collision is along box plane
-	for (i = 0; i < 3; i++) {
-		mins[i] = origin[i] - boxradius;
-		maxs[i] = origin[i] + boxradius;
-	}
-
-	numListedEntities = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
-
-	for (e = 0; e < level.num_entities; e++) {
-		g_entities[e].dmginloop = qfalse;
-	}
-
-	for (e = 0; e < numListedEntities; e++) {
-		ent = &g_entities[entityList[e]];
-
-		if (ent == ignore) {
-			continue;
-		}
-		if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
-			continue;
-		}
-
-		G_AdjustedDamageVec(ent, origin, v);
-
-		dist = VectorLength(v);
-		if (dist >= radius) {
-			continue;
-		}
-
-		points = damage * (1.0 - dist / radius);
-
-		if (CanDamage(ent, origin)) {
-			if (ent->dmgparent) {
-				ent = ent->dmgparent;
-			}
-
-			if (ent->dmginloop) {
-				continue;
-			}
-
-			if (AccuracyHit(ent, attacker)) {
-				hitClient = qtrue;
-			}
-			VectorSubtract(ent->r.currentOrigin, origin, dir);
-			// push the center of mass higher than the origin so players
-			// get knocked into the air more
-			dir[2] += 24;
-
-
-			G_Damage(ent, inflictor, attacker, dir, origin, (int)points, flags, mod);
-		}
-		else {
-			VectorAdd(ent->r.absmin, ent->r.absmax, midpoint);
-			VectorScale(midpoint, 0.5, midpoint);
-			VectorCopy(midpoint, dest);
-
-			trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
-			if (tr.fraction < 1.0) {
-				VectorSubtract(dest, origin, dest);
-				dist = VectorLength(dest);
-				if (dist < radius * 0.2f) { // closer than 1/4 dist
-					if (ent->dmgparent) {
-						ent = ent->dmgparent;
-					}
-
-					if (ent->dmginloop) {
-						continue;
-					}
-
-					if (AccuracyHit(ent, attacker)) {
-						hitClient = qtrue;
-					}
-					VectorSubtract(ent->r.currentOrigin, origin, dir);
-					dir[2] += 24;
-					G_Damage(ent, inflictor, attacker, dir, origin, (int)(points * 0.1f), flags, mod);
-				}
-			}
-		}
-	}
-	return hitClient;
-}
-
-/*
-================
-BG_ET_EvaluateTrajectory
-
-dutch: changed the function name,
-so all other entities that doesn't have a problem with
-the oriignal BG_EvaluateTrajectory can still use the old one
-
-================
-*/
-
-void BG_ET_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qboolean isAngle, int splinePath) {
-	float deltaTime;
-	float phase;
-	vec3_t v;
-
-	switch (tr->trType) {
-	case TR_STATIONARY:
-	case TR_INTERPOLATE:
-	case TR_GRAVITY_PAUSED: //----(SA)
-		VectorCopy(tr->trBase, result);
-		break;
-	case TR_LINEAR:
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		VectorMA(tr->trBase, deltaTime, tr->trDelta, result);
-		break;
-	case TR_SINE:
-		deltaTime = (atTime - tr->trTime) / (float)tr->trDuration;
-		phase = sin(deltaTime * M_PI * 2);
-		VectorMA(tr->trBase, phase, tr->trDelta, result);
-		break;
-		//----(SA)	removed
-	case TR_LINEAR_STOP:
-		if (atTime > tr->trTime + tr->trDuration) {
-			atTime = tr->trTime + tr->trDuration;
-		}
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		if (deltaTime < 0) {
-			deltaTime = 0;
-		}
-		VectorMA(tr->trBase, deltaTime, tr->trDelta, result);
-		break;
-	case TR_GRAVITY:
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		VectorMA(tr->trBase, deltaTime, tr->trDelta, result);
-		result[2] -= 0.5 * DEFAULT_GRAVITY * deltaTime * deltaTime;     // FIXME: local gravity...
-		break;
-		// Ridah
-	case TR_GRAVITY_LOW:
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		VectorMA(tr->trBase, deltaTime, tr->trDelta, result);
-		result[2] -= 0.5 * (DEFAULT_GRAVITY * 0.3) * deltaTime * deltaTime;     // FIXME: local gravity...
-		break;
-		// done.
-		//----(SA)
-	case TR_GRAVITY_FLOAT:
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		VectorMA(tr->trBase, deltaTime, tr->trDelta, result);
-		result[2] -= 0.5 * (DEFAULT_GRAVITY * 0.2) * deltaTime;
-		break;
-		//----(SA)	end
-		// RF, acceleration
-	case TR_ACCELERATE:     // trDelta is the ultimate speed
-		if (atTime > tr->trTime + tr->trDuration) {
-			atTime = tr->trTime + tr->trDuration;
-		}
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		// phase is the acceleration constant
-		phase = VectorLength(tr->trDelta) / (tr->trDuration * 0.001);
-		// trDelta at least gives us the acceleration direction
-		VectorNormalize2(tr->trDelta, result);
-		// get distance travelled at current time
-		VectorMA(tr->trBase, phase * 0.5 * deltaTime * deltaTime, result, result);
-		break;
-	case TR_DECCELERATE:    // trDelta is the starting speed
-		if (atTime > tr->trTime + tr->trDuration) {
-			atTime = tr->trTime + tr->trDuration;
-		}
-		deltaTime = (atTime - tr->trTime) * 0.001;    // milliseconds to seconds
-		// phase is the breaking constant
-		phase = VectorLength(tr->trDelta) / (tr->trDuration * 0.001);
-		// trDelta at least gives us the acceleration direction
-		VectorNormalize2(tr->trDelta, result);
-		// get distance travelled at current time (without breaking)
-		VectorMA(tr->trBase, deltaTime, tr->trDelta, v);
-		// subtract breaking force
-		VectorMA(v, -phase * 0.5 * deltaTime * deltaTime, result, result);
-		break;
-	default:
-		Com_Error(ERR_DROP, "BG_EvaluateTrajectory: unknown trType: %i", tr->trTime);
-		break;
-	}
-}
-
-// -OSPx - FFE Damage Fix dump ends here
-
-/*
-================
-G_ExplodeMissile
-
-Explode a missile without an impact
-OSPx - Modified to work with ET Damage port.
 ================
 */
 void G_ExplodeMissile( gentity_t *ent ) {
 	vec3_t dir;
 	vec3_t origin;
+	qboolean small = qfalse;
+	qboolean zombiespit = qfalse;
 	int etype;
-	qboolean isSmall = qfalse;
 
-	etype = ent->s.eType;
-	ent->s.eType = ET_GENERAL;
-
-	// splash damage
-	if (ent->splashDamage) {
-		vec3_t origin;
-		trace_t tr;
-
-		VectorCopy(ent->r.currentOrigin, origin);
-
-		trap_Trace(&tr, origin, vec3_origin, vec3_origin, origin, ENTITYNUM_NONE, MASK_SHOT);
-
-		G_ET_RadiusDamage(origin, ent, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath); //----(SA)
-	}
-
-	BG_ET_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse, ent->s.effect2Time);
-	SnapVector(origin);
-	G_SetOrigin(ent, origin);
+	BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
+	SnapVector( origin );
+	G_SetOrigin( ent, origin );
 
 	// we don't have a valid direction, so just point straight up
 	dir[0] = dir[1] = 0;
 	dir[2] = 1;
 
-	if (!Q_stricmp(ent->classname, "props_explosion")) {
-		G_AddEvent(ent, EV_MISSILE_MISS_SMALL, DirToByte(dir));
-		isSmall = qtrue;
+	etype = ent->s.eType;
+
+	ent->s.eType = ET_GENERAL;
+
+	if ( !Q_stricmp( ent->classname, "props_explosion" ) ) {
+		G_AddEvent( ent, EV_MISSILE_MISS_SMALL, DirToByte( dir ) );
+		small = qtrue;
 	}
-	// JPW NERVE
-	else if (!Q_stricmp(ent->classname, "air strike")) {
-		G_AddEvent(ent, EV_MISSILE_MISS_LARGE, DirToByte(dir));
-		isSmall = qfalse;
+// JPW NERVE
+	else if ( !Q_stricmp( ent->classname, "air strike" ) ) {
+		G_AddEvent( ent, EV_MISSILE_MISS_LARGE, DirToByte( dir ) );
+		small = qfalse;
 	}
-	// jpw
-	else if (!Q_stricmp(ent->classname, "props_explosion_large")) {
-		G_AddEvent(ent, EV_MISSILE_MISS_LARGE, DirToByte(dir));
-		isSmall = qfalse;
-	}
-	else if (!Q_stricmp(ent->classname, "zombiespit")) {
-		G_AddEvent(ent, EV_SPIT_MISS, DirToByte(dir));
-	}
-	else if (!Q_stricmp(ent->classname, "flamebarrel")) {
+// jpw
+	else if ( !Q_stricmp( ent->classname, "props_explosion_large" ) ) {
+		G_AddEvent( ent, EV_MISSILE_MISS_LARGE, DirToByte( dir ) );
+		small = qfalse;
+	} else if ( !Q_stricmp( ent->classname, "zombiespit" ) )      {
+		G_AddEvent( ent, EV_SPIT_MISS, DirToByte( dir ) );
+		zombiespit = qtrue;
+	} else if ( !Q_stricmp( ent->classname, "flamebarrel" ) )      {
 		ent->freeAfterEvent = qtrue;
-		trap_LinkEntity(ent);
+		trap_LinkEntity( ent );
 		return;
-	}
-	else {
-		G_AddEvent(ent, EV_MISSILE_MISS, DirToByte(dir));
+	} else {
+		G_AddEvent( ent, EV_MISSILE_MISS, DirToByte( dir ) );
 	}
 
 	ent->freeAfterEvent = qtrue;
 
-	trap_LinkEntity(ent);
-
-	if (etype == ET_MISSILE) {
-
-		if (ent->s.weapon == WP_DYNAMITE ) { // do some scoring
-			// check if dynamite is in trigger_objective_info field
-			vec3_t mins, maxs;
-			int i, num, touch[MAX_GENTITIES];
-			gentity_t   *hit;
-
-			// NERVE - SMF - made this the actual bounding box of dynamite instead of range
-			VectorAdd(ent->r.currentOrigin, ent->r.mins, mins);
-			VectorAdd(ent->r.currentOrigin, ent->r.maxs, maxs);
-			num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
-
-			for (i = 0; i < num; i++) {
-				hit = &g_entities[touch[i]];
-				if (!hit->target) {
-					continue;
-				}
-
-				if ((hit->s.eType != ET_OID_TRIGGER)) {
-					continue;
-				}
-
-				if (!(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE))) {
-					continue;
-				}
-
-				if (hit->target_ent) {
-					// Arnout - only if it targets a func_explosive
-					if (hit->target_ent->s.eType != ET_EXPLOSIVE) {
-						continue;
-					}
-				}
-
-				if (((hit->spawnflags & AXIS_OBJECTIVE) && (ent->s.teamNum == TEAM_BLUE)) || 
-					((hit->spawnflags & ALLIED_OBJECTIVE) && (ent->s.teamNum == TEAM_RED))) 
-				{
-					G_UseTargets(hit, ent);
-					hit->think = G_FreeEntity;
-					hit->nextthink = level.time + FRAMETIME;
-				}
+	// splash damage
+	if ( ent->splashDamage ) {
+		if ( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath ) ) {    //----(SA)
+			if ( g_entities[ent->r.ownerNum].client ) {
+				g_entities[ent->r.ownerNum].client->ps.persistant[PERS_ACCURACY_HITS]++;
 			}
 		}
+	}
 
-		// give big weapons the shakey shakey
-		if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_GRENADE_LAUNCHER ||
-			ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
-			ent->s.weapon == WP_ARTY) {
-			// RTCWPro custom screen shake
-			//Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
-			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * (!g_screenShake.integer ? 1 : g_screenShake.integer));
+	trap_LinkEntity( ent );
+
+	if ( etype == ET_MISSILE ) {
+		// DHM - Nerve :: ... in single player anyway
+		if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
+			if ( ent->s.weapon == WP_VENOM_FULL ) { // no default impact smoke
+				zombiespit = qtrue;
+			} else if ( ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_DYNAMITE2 ) {
+//				// shot heard round the world...
+				gentity_t *player;
+				player = AICast_FindEntityForName( "player" );
+				Concussive_fx( player->r.currentOrigin );
+			}
 		}
-		return;
+// JPW NERVE -- big nasty dynamite scoring section
+		else {
+			if ( g_gametype.integer >= GT_WOLF ) {
+				if ( ent->s.weapon == WP_DYNAMITE ) { // do some scoring
+// check if dynamite is in trigger_objective_info field
+					vec3_t mins, maxs;
+					//static vec3_t	range = { 18, 18, 18 }; // NOTE can use this to massage throw distance outside trigger field // TTimo unused
+					int i,num,touch[MAX_GENTITIES];
+					gentity_t   *hit;
+
+					// NERVE - SMF - made this the actual bounding box of dynamite instead of range
+					VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
+					VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
+					num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
+					VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
+					VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
+
+					for ( i = 0 ; i < num ; i++ ) {
+						hit = &g_entities[touch[i]];
+						if ( !hit->target ) {
+							continue;
+						}
+
+						if ( !( hit->r.contents & CONTENTS_TRIGGER ) ) {
+							continue;
+						}
+						if ( !strcmp( hit->classname,"trigger_objective_info" ) ) {
+							if ( !( hit->spawnflags & ( AXIS_OBJECTIVE | ALLIED_OBJECTIVE ) ) ) {
+								continue;
+							}
+
+							if ( ( ( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->s.teamNum == TEAM_BLUE ) ) ||
+								 ( ( hit->spawnflags & ALLIED_OBJECTIVE ) && ( ent->s.teamNum == TEAM_RED ) ) ) {
+								G_UseTargets( hit,ent );
+								hit->think = G_FreeEntity;
+								hit->nextthink = level.time + FRAMETIME;
+
+								if ( ent->parent->client ) {
+									if ( ent->s.teamNum == ent->parent->client->sess.sessionTeam ) { // make sure player hasn't changed teams -- per atvi req
+										AddScore( ent->parent, hit->accuracy ); // set from map, see g_trigger
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			// give big weapons the shakey shakey
+			if ( ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_GRENADE_LAUNCHER ||
+				 ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
+				 ent->s.weapon == WP_ARTY ) {
+				Ground_Shaker( ent->r.currentOrigin, ent->splashDamage * 4 );
+			}
+			return;
+		}
+// jpw
+	}
+
+
+	if ( !zombiespit ) {
+		gentity_t *Msmoke;
+
+		Msmoke = G_Spawn();
+		VectorCopy( ent->r.currentOrigin, Msmoke->s.origin );
+		if ( small ) {
+			Msmoke->s.density = 1;
+		}
+		Msmoke->think = M_think;
+		Msmoke->nextthink = level.time + FRAMETIME;
+
+		if ( ent->parent && !Q_stricmp( ent->parent->classname, "props_flamebarrel" ) ) {
+			Msmoke->health = 10;
+		} else {
+			Msmoke->health = 5;
+		}
+
+		Concussive_fx( Msmoke->s.origin );
 	}
 }
 
@@ -1255,8 +1000,7 @@ void G_RunFlamechunk( gentity_t *ent ) {
 	if ( level.time - ent->timestamp > 50 ) {
 		VectorCopy( ent->s.pos.trDelta, vel );
 		speed = VectorNormalize( vel );
-		//S4NDM4NN take into account sv_fps
-		speed -= ((1000.0f/sv_fps.value) / 1000.0f) * FLAME_FRICTION_PER_SEC;
+		speed -= ( 50.f / 1000.f ) * FLAME_FRICTION_PER_SEC;
 
 		if ( speed < FLAME_MIN_SPEED ) {
 			speed = FLAME_MIN_SPEED;
@@ -1268,7 +1012,7 @@ void G_RunFlamechunk( gentity_t *ent ) {
 	}
 
 	// Move the chunk
-	VectorScale( ent->s.pos.trDelta, (1000.0f/sv_fps.value) / 1000.0f, add );
+	VectorScale( ent->s.pos.trDelta, 50.f / 1000.f, add );
 	VectorAdd( ent->r.currentOrigin, add, neworg );
 
 	trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, neworg, ent->r.ownerNum, MASK_SHOT | MASK_WATER ); // JPW NERVE
@@ -1336,15 +1080,13 @@ fire_flamechunk
 gentity_t *fire_flamechunk( gentity_t *self, vec3_t start, vec3_t dir ) {
 	gentity_t   *bolt;
 
+	// Only spawn every other frame
+	if ( self->count2 ) {
+		self->count2--;
+		return NULL;
+	}
 
-//S4NDM4NN - moving delay to where fire_flamechunk is called and making it time based...
-// Only spawn every other frame
-//	if ( self->count2 ) {
-//		self->count2--;
-//		return NULL;
-//	}
-//	self->count2 = 1;
-
+	self->count2 = 1;
 	VectorNormalize( dir );
 
 	bolt = G_Spawn();

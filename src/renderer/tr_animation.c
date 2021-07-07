@@ -100,7 +100,7 @@ static float ProjectRadius( float r, vec3_t location ) {
 	}
 
 	p[0] = 0;
-	p[1] = Q_fabs( r );
+	p[1] = fabs( r );
 	p[2] = -dist;
 
 	projected[0] = p[0] * tr.viewParms.projectionMatrix[0] +
@@ -687,7 +687,7 @@ void R_CalcBone( mdsHeader_t *header, const refEntity_t *refent, int boneNum ) {
 			// blend the angles together
 			for ( j = 0; j < 3; j++ ) {
 				diff = tangles[j] - angles[j];
-				if ( Q_fabs( diff ) > 180 ) {
+				if ( fabs( diff ) > 180 ) {
 					diff = AngleNormalize180( diff );
 				}
 				angles[j] = angles[j] + thisBoneInfo->torsoWeight * diff;
@@ -711,7 +711,7 @@ void R_CalcBone( mdsHeader_t *header, const refEntity_t *refent, int boneNum ) {
 			// blend the angles together
 			for ( j = 0; j < 3; j++ ) {
 				diff = tangles[j] - angles[j];
-				if ( Q_fabs( diff ) > 180 ) {
+				if ( fabs( diff ) > 180 ) {
 					diff = AngleNormalize180( diff );
 				}
 				angles[j] = angles[j] + thisBoneInfo->torsoWeight * diff;
@@ -884,7 +884,7 @@ void R_CalcBoneLerp( mdsHeader_t *header, const refEntity_t *refent, int boneNum
 			// blend the angles together
 			for ( j = 0; j < 3; j++ ) {
 				diff = tangles[j] - angles[j];
-				if ( Q_fabs( diff ) > 180 ) {
+				if ( fabs( diff ) > 180 ) {
 					diff = AngleNormalize180( diff );
 				}
 				angles[j] = angles[j] + thisBoneInfo->torsoWeight * diff;
