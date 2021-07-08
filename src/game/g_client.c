@@ -1509,7 +1509,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		// To solve the IP bug..
 		s =	va("%s", client->sess.ip);
 	}
-
+	// Check for "" GUID..
+	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
+		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
+		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+	}
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	// check the item prediction
@@ -1666,8 +1670,8 @@ void ClientUserinfoChanged( int clientNum ) {
 
 
 	// L0 - Set guid
-	/*if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
-		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);*/
+	if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
+		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);
 
 	// colors
 	c1 = Info_ValueForKey( userinfo, "color" );

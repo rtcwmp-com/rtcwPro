@@ -320,7 +320,7 @@ void SV_DirectConnect( netadr_t from ) {
 	char* denied;
 	int count;
 	//char guid[GUID_LEN];
-	char* guid;
+//	char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
 
@@ -330,7 +330,7 @@ void SV_DirectConnect( netadr_t from ) {
 
 	if (SV_CheckDRDoS(from)) {
 		return;
-	} 
+	}
 
 	// Check whether this client is banned.
 	if (SV_IsBanned(&from, qfalse)) {
@@ -360,7 +360,7 @@ void SV_DirectConnect( netadr_t from ) {
 	for ( i = 0, cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
 		if ( NET_CompareBaseAdr( from, cl->netchan.remoteAddress )
 			 && ( cl->netchan.qport == qport
-				  || from.port == cl->netchan.remoteAddress.port ) ) 
+				  || from.port == cl->netchan.remoteAddress.port ) )
 		{
 			if ( ( svs.time - cl->lastConnectTime )
 				 < ( sv_reconnectlimit->integer * 1000 ) ) {
@@ -1352,7 +1352,7 @@ void SV_WriteDownloadToClient(client_t* cl, msg_t* msg) {
 				Com_sprintf(errorMessage, sizeof(errorMessage), "File \"%s\" not found on server for autodownloading.\n", cl->downloadName);
 			}
 
-			// L0 - HTTP downloads 			
+			// L0 - HTTP downloads
 			SV_BadDownload(cl, msg);
 			MSG_WriteString(msg, errorMessage); // (could SV_DropClient isntead?)
 			// End
@@ -1837,6 +1837,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 	// maintain the IP information
 	// this is set in SV_DirectConnect (directly on the server, not transmitted), may be lost when client updates it's userinfo
 	// the banning code relies on this being consistently present
+	/*
 	if (NET_IsLocalAddress(cl->netchan.remoteAddress))
 		ip = "localhost";
 	else
@@ -1852,12 +1853,23 @@ void SV_UserinfoChanged( client_t *cl ) {
 		SV_DropClient(cl, "userinfo string length exceeded");
 	else
 		Info_SetValueForKey(cl->userinfo, "ip", ip);
-
+*/
+	val = Info_ValueForKey( cl->userinfo, "ip" );
+	if ( !val[0] ) {
+		//Com_DPrintf("Maintain IP in userinfo for '%s'\n", cl->name);
+		if ( !NET_IsLocalAddress( cl->netchan.remoteAddress ) ) {
+			Info_SetValueForKey( cl->userinfo, "ip", NET_AdrToString( cl->netchan.remoteAddress ) );
+		} else {
+			// force the "ip" info key to "localhost" for local clients
+			Info_SetValueForKey( cl->userinfo, "ip", "localhost" );
+		}
+	}
 	// etp: force auth and guid into userinfo so client cant mess with it
-	Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
+//	Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
 
 	// TTimo
 	// download prefs of the client
+#ifdef CLWWW
 	val = Info_ValueForKey(cl->userinfo, "cl_wwwDownload");
 	cl->bDlOK = qfalse;
 	if (strlen(val)) {
@@ -1866,6 +1878,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 			cl->bDlOK = qtrue;
 		}
 	}
+#endif
 }
 
 /*
@@ -2244,9 +2257,9 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
 
-	if (Q_stricmp(sv_GameConfig->string, "") && 
-		cl->clientRestValidated != RKVALD_TIME_OFF && 
-		cl->clientRestValidated < svs.time && 
+	if (Q_stricmp(sv_GameConfig->string, "") &&
+		cl->clientRestValidated != RKVALD_TIME_OFF &&
+		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT
 	) {
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");

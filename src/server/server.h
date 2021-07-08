@@ -194,7 +194,7 @@ typedef struct client_s {
 	netchan_buffer_t *netchan_start_queue;
 	netchan_buffer_t **netchan_end_queue;
 	int downloadnotify; //bani
-	char guid[GUID_LEN]; // L0
+	//char guid[GUID_LEN]; // L0
 	int clientRestValidated;
 } client_t;
 

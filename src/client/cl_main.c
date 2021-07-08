@@ -98,12 +98,14 @@ cvar_t  *cl_updatefiles;
 
 // L0
 //HTTP Downloads ..
-cvar_t* cl_wwwDownload;
-
+#ifdef CLWWW
+cvar_t *cl_wwwDownload;
+#endif
 // Streaming
-cvar_t* cl_StreamingSelfSignedCert;
-cvar_t* cl_guid;
-
+cvar_t *cl_StreamingSelfSignedCert;
+#ifdef clGUID
+cvar_t *cl_guid;
+#endif
 // ~L0
 
 clientActive_t cl;
@@ -2473,11 +2475,12 @@ void CL_Frame( int msec ) {
 	// if we haven't gotten a packet in a long time,
 	// drop the connection
 	CL_CheckTimeout();
-
+#ifdef CLWWW
 	// wwwdl download may survive a server disconnect
 	if ((cls.state == CA_CONNECTED && clc.bWWWDl) || cls.bWWWDlDisconnected) {
 		CL_WWWDownload();
 	}
+#endif
 
 	// send intentions now
 	CL_SendCmd();
@@ -2805,8 +2808,9 @@ void CL_GetAutoUpdate( void ) {
 
 	// L0 - HTTP downloads
 	Cvar_Set("cl_allowDownload", "1"); // general flag
+  #ifdef CLWWW
 	Cvar_Set("cl_wwwDownload", "1"); // ftp/http support
-
+  #endif
 	// clear any previous "server full" type messages
 	clc.serverMessage[0] = 0;
 
@@ -3115,7 +3119,9 @@ void CL_Init( void ) {
 	cl_showMouseRate = Cvar_Get( "cl_showmouserate", "0", 0 );
 
 	cl_allowDownload = Cvar_Get( "cl_allowDownload", "1", CVAR_ARCHIVE );
+	#ifdef CLWWW
 	cl_wwwDownload = Cvar_Get("cl_wwwDownload", "1", CVAR_USERINFO | CVAR_ARCHIVE);
+	#endif
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
 
@@ -3145,11 +3151,19 @@ void CL_Init( void ) {
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
-
+#ifdef clGUID
 	cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM | CVAR_USERINFO);
+
+	/*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
 		CL_SetGuid();
 	}
+	*/
+
+	if (strlen(cl_guid->string) != (CDKEY_LEN - 1)) {
+		CL_SetGuid();
+	}
+#endif
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
 

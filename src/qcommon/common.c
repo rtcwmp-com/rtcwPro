@@ -2308,6 +2308,9 @@ char cl_cdkey[34] = "                                ";
 char cl_cdkey[34] = "123456789";
 #endif
 
+
+
+
 /*
 =================
 Com_ReadCDKey
@@ -2336,6 +2339,7 @@ void Com_ReadCDKey( const char *filename ) {
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
+
 }
 
 /*
@@ -2359,11 +2363,13 @@ void Com_ReadAuthKey(const char* filename) {
 
 	FS_Read(buffer, 16, f);
 	FS_FCloseFile(f);
+#ifdef clGUID
 /*
 #ifndef DEDICATED
 	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
 #endif
 */
+#endif
 
 }
 

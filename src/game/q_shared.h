@@ -328,7 +328,7 @@ typedef int clipHandle_t;
 #define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
 #define MAX_TOKEN_CHARS     1024    // max length of an individual token
 
-#define MAX_INFO_STRING     4096 // sswolf - increase from 1024
+#define MAX_INFO_STRING     1024 // sswolf - increase from 1024
 #define MAX_INFO_KEY        1024
 #define MAX_INFO_VALUE      1024
 
@@ -1715,7 +1715,7 @@ typedef enum {
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
 
 //
-// L0 
+// L0
 // New stuff bellow
 //
 #define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
