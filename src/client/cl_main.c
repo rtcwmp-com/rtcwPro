@@ -3149,7 +3149,7 @@ void CL_Init( void ) {
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
-    cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ARCHIVE );
+    cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM  );
 
 
 /*
