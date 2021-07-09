@@ -3034,11 +3034,11 @@ static void FS_Startup( const char *gameName ) {
 			FS_AddGameDirectory( fs_homepath->string, fs_gamedirvar->string );
 		}
 	}
-/*
+//#ifdef CLGUID
 #ifndef DEDICATED
 	Com_ReadAuthKey(BASEGAME);
 #endif
-*/
+//#endif
 	Com_ReadCDKey( BASEGAME );
 	fs = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
 	if ( fs && fs->string[0] != 0 ) {

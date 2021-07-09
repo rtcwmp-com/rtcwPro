@@ -2361,15 +2361,17 @@ void Com_ReadAuthKey(const char* filename) {
 
 	Com_Memset(buffer, 0, sizeof(buffer));
 
-	FS_Read(buffer, 16, f);
+	//FS_Read(buffer, 16, f);
+	FS_Read(buffer, 33, f);
 	FS_FCloseFile(f);
-#ifdef clGUID
-/*
+//#ifdef clGUID
+
 #ifndef DEDICATED
-	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+	//Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+	Cvar_Set("cl_guid", buffer);
 #endif
-*/
-#endif
+
+//#endif
 
 }
 

@@ -72,11 +72,9 @@ void CL_RequestedSS(char* ip) {
     srand(time(0));
     n=rand() % 99;
 
-#ifdef clGUID
+
 	guid = Cvar_VariableString("cl_guid");
-#else
-    guid = "XXXX";
-#endif
+
 
 	name = Cvar_VariableString("name");
 	CL_takeSS(filename);

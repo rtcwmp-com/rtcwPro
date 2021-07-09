@@ -319,8 +319,8 @@ void SV_DirectConnect( netadr_t from ) {
 	int startIndex;
 	char* denied;
 	int count;
-	//char guid[GUID_LEN];
-//	char* guid;
+	char guid[GUID_LEN];
+	//char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
 
@@ -546,11 +546,11 @@ gotnewcl:
 	newcl->netchan_end_queue = &newcl->netchan_start_queue;
 
 	// Save guid so game code can get it.
-	//Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
-	//Info_SetValueForKey(userinfo, "cl_guid", guid);
+	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
+	Info_SetValueForKey(userinfo, "cl_guid", guid);
 
-	//guid = Info_ValueForKey(userinfo, "cl_guid");
-	//Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
+//	guid = Info_ValueForKey(userinfo, "cl_guid");
+//	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
 
 	// save the userinfo
 	Q_strncpyz( newcl->userinfo, userinfo, sizeof( newcl->userinfo ) );
@@ -1864,9 +1864,10 @@ void SV_UserinfoChanged( client_t *cl ) {
 			Info_SetValueForKey( cl->userinfo, "ip", "localhost" );
 		}
 	}
+#ifdef CLGUID
 	// etp: force auth and guid into userinfo so client cant mess with it
-//	Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
-
+    Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
+#endif
 	// TTimo
 	// download prefs of the client
 #ifdef CLWWW

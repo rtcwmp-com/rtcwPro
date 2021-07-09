@@ -365,6 +365,9 @@ vmCvar_t demo_noAdvertisement;
 
 vmCvar_t int_cl_maxpackets;
 vmCvar_t int_cl_timenudge;
+
+vmCvar_t str_cl_guid;
+
 vmCvar_t int_m_pitch;
 vmCvar_t int_sensitivity;
 vmCvar_t int_timescale;
@@ -610,6 +613,7 @@ cvarTable_t cvarTable[] = {
 	{ &cf_wstats, "cf_wstats", "1.2", CVAR_ARCHIVE },
 	{ &cf_wtopshots, "cf_wtopshots", "1.0", CVAR_ARCHIVE },
 	{ &int_cl_maxpackets, "cl_maxpackets", "125", CVAR_ARCHIVE },
+	{ &str_cl_guid, "cl_guid", NO_GUID, CVAR_ARCHIVE },
 	{ &cg_noAmmoAutoSwitch, "cg_noAmmoAutoSwitch", "0", CVAR_ARCHIVE },
     { &cg_forceTapout, "cg_forceTapout", "0", CVAR_ARCHIVE },
 	{ &int_cl_timenudge, "cl_timenudge", "0", CVAR_ARCHIVE|CVAR_LATCH },
@@ -717,7 +721,7 @@ void CG_UpdateCvars( void ) {
 
 			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
 				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems) {
+				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &str_cl_guid) {
 				fSetFlags = qtrue;
 			}
 			else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
@@ -762,7 +766,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %s",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -775,7 +779,9 @@ void CG_setClientFlags(void) {
 		// Timenudge
 		int_cl_timenudge.integer,
 		// MaxPackets
-		int_cl_maxpackets.integer
+		int_cl_maxpackets.integer,
+		// GUID
+		str_cl_guid.string
 	));
 }
 

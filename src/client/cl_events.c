@@ -35,8 +35,7 @@ CL_SetGuid
 */
 
 void CL_SetGuid(void) {
-	//Com_ReadAuthKey(BASEGAME);
-	Com_ReadCDKey(BASEGAME);
+	Com_ReadAuthKey(BASEGAME);
 }
 
 /*

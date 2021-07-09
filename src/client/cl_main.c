@@ -103,9 +103,7 @@ cvar_t *cl_wwwDownload;
 #endif
 // Streaming
 cvar_t *cl_StreamingSelfSignedCert;
-#ifdef clGUID
 cvar_t *cl_guid;
-#endif
 // ~L0
 
 clientActive_t cl;
@@ -3151,19 +3149,15 @@ void CL_Init( void ) {
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
-#ifdef clGUID
-	cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM | CVAR_USERINFO);
+    cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ARCHIVE );
 
-	/*
+
+/*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
 		CL_SetGuid();
 	}
-	*/
+*/
 
-	if (strlen(cl_guid->string) != (CDKEY_LEN - 1)) {
-		CL_SetGuid();
-	}
-#endif
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
 
