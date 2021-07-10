@@ -2363,14 +2363,14 @@ void Com_WriteAuthKey(const char* filename) {
 
 
 
-    if (buffer) {
-            for (int n = 0;n < GUID_LEN;n++) {
+
+    for (int n = 0;n < GUID_LEN-1;n++) {
                 int val = rand() % (int) (sizeof(charset) -1);
                 buffer[n] = charset[val];
-            }
-
-            buffer[GUID_LEN] = '\0';
     }
+
+    buffer[GUID_LEN-1] = '\0';
+
 
 
 
@@ -2408,10 +2408,10 @@ void Com_ReadAuthKey(const char* filename) {
 	}
 	Com_Memset(buffer, 0, sizeof(buffer));
 
-	FS_Read(buffer, 16, f);
+	//FS_Read(buffer, 16, f);
 
 
-	//FS_Read(buffer, 33, f);
+	FS_Read(buffer, 33, f);
 	FS_FCloseFile(f);
 #ifndef DEDICATED
 	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
