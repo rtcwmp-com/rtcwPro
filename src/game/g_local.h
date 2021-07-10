@@ -526,7 +526,8 @@ typedef struct {
 	unsigned int uci;   // mcwf's GeoIP
 //	unsigned char ip[4];// IPs
 	char ip[47];		// IP
-	char guid[15];		// Guid
+	//char guid[15];		// Guid
+	char guid[GUID_LEN];		// Guid
 	int ignoreClients[MAX_CLIENTS / ( sizeof( int ) * 8 )];
 	qboolean muted;
 	int selectedWeapon; // If enabled allows mp40, sten, thompson..
