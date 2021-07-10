@@ -2344,6 +2344,52 @@ void Com_ReadCDKey( const char *filename ) {
 
 /*
 =================
+Com_WriteAuthKey  ( temporary as this will change in the future)
+=================
+*/
+void Com_WriteAuthKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[GUID_LEN];
+	char fbuffer[MAX_OSPATH];
+    static char charset[] = "abcdefg123456789";
+
+	sprintf(fbuffer, "%s/authkey", filename);
+
+    f = FS_SV_FOpenFileWrite( fbuffer );
+	if (!f) {
+		Com_Printf( "Couldn't write %s.\n", filename );
+		return;
+	}
+
+
+
+    if (buffer) {
+            for (int n = 0;n < GUID_LEN;n++) {
+                int val = rand() % (int) (sizeof(charset) -1);
+                buffer[n] = charset[val];
+            }
+
+            buffer[GUID_LEN] = '\0';
+    }
+
+
+
+	FS_Write( buffer, GUID_LEN, f );
+
+	FS_FCloseFile( f );
+
+
+#ifndef DEDICATED
+	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+#endif
+
+
+}
+
+
+
+/*
+=================
 Com_ReadAuthKey
 =================
 */
@@ -2356,17 +2402,19 @@ void Com_ReadAuthKey(const char* filename) {
 
 	FS_SV_FOpenFileRead(fbuffer, &f);
 	if (!f) {
+        Com_WriteAuthKey(filename);  // temporary as this will change in the future
+
 		return;
 	}
-
 	Com_Memset(buffer, 0, sizeof(buffer));
 
 	FS_Read(buffer, 16, f);
+
+
 	//FS_Read(buffer, 33, f);
 	FS_FCloseFile(f);
 #ifndef DEDICATED
 	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
-	//Cvar_Set("cl_guid", buffer);
 #endif
 
 
