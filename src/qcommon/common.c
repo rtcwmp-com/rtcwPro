@@ -2340,6 +2340,10 @@ void Com_ReadCDKey( const char *filename ) {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
 
+	#ifndef DEDICATED
+        Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+    #endif
+
 }
 
 /*
@@ -2369,8 +2373,8 @@ void Com_WriteAuthKey(const char* filename) {
                 buffer[n] = charset[val];
     }
 
-   
-	
+
+
 
 
 

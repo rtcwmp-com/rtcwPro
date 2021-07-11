@@ -3035,6 +3035,7 @@ static void FS_Startup( const char *gameName ) {
 		}
 	}
 //#ifdef CLGUID
+/*
 #ifndef DEDICATED
 	int retval = Com_ReadAuthKey(BASEGAME);
 	if (retval == 0) {
@@ -3042,6 +3043,7 @@ static void FS_Startup( const char *gameName ) {
         Com_ReadAuthKey(BASEGAME);
 	}
 #endif
+*/
 //#endif
 	Com_ReadCDKey( BASEGAME );
 	fs = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
