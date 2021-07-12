@@ -1517,6 +1517,11 @@ void ClientUserinfoChanged( int clientNum ) {
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
+
+	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
+        trap_DropClient(clientNum, "No GUID..");
+	}
+
 	// check the item prediction
 	s = Info_ValueForKey( userinfo, "cg_predictItems" );
 	if ( !atoi( s ) ) {
@@ -1672,6 +1677,8 @@ void ClientUserinfoChanged( int clientNum ) {
 	// L0 - Set guid
 //	if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
 //		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);
+
+
 
 	// colors
 	c1 = Info_ValueForKey( userinfo, "color" );
