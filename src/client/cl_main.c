@@ -3195,7 +3195,7 @@ void CL_Init( void ) {
 	Cvar_Get( "model", "multi", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "head", "default", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "color", "4", CVAR_USERINFO | CVAR_ARCHIVE );
-	Cvar_Get( "handicap", "100", CVAR_USERINFO | CVAR_ARCHIVE );
+	//Cvar_Get( "handicap", "100", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "sex", "male", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "cl_anonymous", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 

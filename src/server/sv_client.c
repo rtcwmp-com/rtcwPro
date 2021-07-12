@@ -1815,7 +1815,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 	if ( strlen( val ) ) {
 		i = atoi( val );
 		if ( i <= 0 || i > 100 || strlen( val ) > 4 ) {*/
-			Info_SetValueForKey( cl->userinfo, "handicap", "100" ); // rtcwpro always set to 100 to avoid pickup ammo/health bug
+			//Info_SetValueForKey( cl->userinfo, "handicap", "100" ); // rtcwpro always set to 100 to avoid pickup ammo/health bug
 	/*	}
 	}*/
 

@@ -1698,11 +1698,9 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
-				client->pers.netname, client->sess.sessionTeam, model, head, c1,
-				100, client->sess.wins, client->sess.losses, // rtcwpro changed HC to always be set to 100 for non-bot players
-				client->sess.uci, (client->sess.muted ? 1 : 0),
-				client->sess.referee
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
+				client->pers.netname, client->sess.sessionTeam, model, head, c1, client->sess.wins, client->sess.losses,
+				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee
 			);
 	}
 
