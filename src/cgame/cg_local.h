@@ -2126,6 +2126,7 @@ extern vmCvar_t	demo_noAdvertisement;
 // engine mappings
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
+extern vmCvar_t str_cl_guid;
 
 // draw speed
 extern vmCvar_t cg_drawSpeed;

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (?RTCW MP Source Code?).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (?RTCW MP Source Code?).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 /*
 ===================
-L0 - Str replacer 
+L0 - Str replacer
 
 Ported from etPub
 ===================
@@ -52,7 +52,7 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 		return final;
 	}
 	if(*newp) {
-		Q_strncpyz(newStr, newp, sizeof(newStr));	
+		Q_strncpyz(newStr, newp, sizeof(newStr));
 	}
 
 	dest[0] = '\0';
@@ -72,7 +72,7 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp)
 		}
 		haystack++;
 	}
-	// tjw: don't work with final return value in case haystack 
+	// tjw: don't work with final return value in case haystack
 	//      was pointing at it.
 	Q_strncpyz(final, dest, sizeof(final));
 return final;
@@ -156,7 +156,7 @@ void setGuid( char *in, char *out ) {
 	int length = strlen( in );
 	int i = 0, j = 0;
 
-	for ( i = length - 14; i < length; i++ )
+	for ( i = length - GUID_LEN; i < length; i++ )
 		out[j++] = in[i];
 
 	out[j++] = '\0';
@@ -165,7 +165,7 @@ void setGuid( char *in, char *out ) {
 
 /*
 ===========
-Global sound - Hooked under cg_announced .. 
+Global sound - Hooked under cg_announced ..
 ===========
 */
 void AAPSound(char *sound) {
