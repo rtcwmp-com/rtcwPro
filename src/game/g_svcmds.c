@@ -752,10 +752,12 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
         // fix stats for when map restarts occur
         if (!fDoReset && fDoRestart  && g_gametype.integer == GT_WOLF_STOPWATCH) {
             if (g_currentRound.integer == 1) {
+			    /*
 			    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
-        		buf = Info_ValueForKey(cs, "matchid");		
-		        trap_SetConfigstring( CS_ROUNDINFO, cs );
-			
+        		buf = Info_ValueForKey(cs, "matchid");
+        		*/
+
+
                 for ( i = 0; i < level.numPlayingClients; i++ ) {
                     cl = level.clients + level.sortedClients[i];
                     if ( cl->pers.connected != CON_CONNECTED) {

@@ -184,9 +184,11 @@ typedef enum popupMessageType_e {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
-#define CS_SERVERTOGGLES        42		// Shows current enable/disabled settings (for voting UI)
-#define CS_MATCHID              43		// match id for stats
-#define CS_ROUNDINFO			44		// match id for stats
+#define CS_SVCVAR               42		// RTCWPro - Cvar limiting
+#define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
+#define CS_MATCHID              44    // match id for stats
+#define CS_ROUNDINFO            45    // match id for stats
+
 
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )

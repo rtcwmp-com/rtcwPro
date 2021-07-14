@@ -233,7 +233,6 @@ int G_read_round_jstats( void )
     if (g_currentRound.integer == 1) {
         trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
         buf = Info_ValueForKey(cs, "matchid");
-        trap_SetConfigstring( CS_ROUNDINFO, cs );
     }
     else {
         G_Printf("Incorrect round, not going to touch stats\n");
