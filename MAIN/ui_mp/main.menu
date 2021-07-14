@@ -181,7 +181,7 @@ menuDef {
 	itemDef {
 		name WOLFICON
 		style WINDOW_STYLE_SHADER
-		rect 220 380 200 100
+		rect 223 380 200 100
 		background "WOLFICON"
 		visible 1
 		decoration
@@ -360,31 +360,6 @@ menuDef {
 
 
 
-	//	SINGLE PLAYER	//
-
-	itemDef {
-		name play
-		text "SINGLE PLAYER"
-		type 1
-		style 0		
-		textstyle 6
-		rect 3 420 100 14 
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255		
-		textalignx 7
-		textaligny 10
-		forecolor 1 1 1 1
-		visible 0
-
-		action {
-			play "sound/misc/zap.wav";
-			open single_player_menu
-		}
-	}
-
-
-
 
 	itemDef {
       	name fadebox					// Box for fading in menus
@@ -416,22 +391,12 @@ menuDef {
     }
 
 	itemDef {
-		name osp_gfx
-		style WINDOW_STYLE_SHADER
-		rect 150 175 339 191
-		background "gfx/2d/rtcwpro.tga"
-		forecolor 1 1 1 0.2
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name window
-		text "" // show the cvar below
-		cvar ui_gameversion
+		name rtcwpro_sourceurl
+		text "Source" // show the cvar below
+		//cvar ui_gameversion
 		tooltip "RtcwPro Version"
 		tooltipaligny -40
-		type 4
+		type 1
 		style 0	
 		rect 545 450 170 14
 		textalign 0
@@ -445,18 +410,18 @@ menuDef {
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
-			uiScript openModURL
+			uiScript openModSource
 		}
     }
 
 	itemDef {
-		name osp_url
-		text "RtcwPro Repository"
-		tooltip "RtcwPro Repository"
+		name rtcwpro_modurl
+		text "RtcwPro.com"
+		tooltip "RtcwPro.com"
 		tooltipaligny -40
 		type 1
 		style 0
-		rect 515 465 170 14
+		rect 545 465 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
 		textstyle ITEM_TEXTSTYLE_UNDERLINED

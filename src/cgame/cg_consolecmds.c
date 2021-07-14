@@ -952,7 +952,6 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand("ready");
 	trap_AddCommand("notready");
 	// Misc
-	trap_AddCommand("players");
 	trap_AddCommand("say_teamnl");
 	trap_AddCommand("forcefps");		// adding this so we don't get an invalid command error
 	// Stats

@@ -3003,6 +3003,28 @@ void CL_singlePlayLink_f( void ) {
 	Sys_OpenURL( "http://www.activision.com/games/wolfenstein/home.html", qtrue );
 }
 
+/*
+==============
+CL_modURL_f
+
+RTCWPro
+==============
+*/
+void CL_modURL_f(void) {
+	Sys_OpenURL("https://rtcwpro.com/", qtrue);
+}
+
+/*
+==============
+CL_modSource_f
+
+RTCWPro
+==============
+*/
+void CL_modSource_f(void) {
+	Sys_OpenURL("https://github.com/rtcwmp-com/rtcwPro", qtrue);
+}
+
 #if !defined( __MACOS__ )
 
 /*
@@ -3275,6 +3297,9 @@ void CL_Init( void ) {
 	Cmd_AddCommand( "singlePlayLink", CL_singlePlayLink_f );            // NERVE - SMF
 
 	Cmd_AddCommand( "setRecommended", CL_SetRecommended_f );
+
+	Cmd_AddCommand("openModURL", CL_modURL_f); // RTCWPro
+	Cmd_AddCommand("openModSource", CL_modSource_f); // RTCWPro
 
 	//bani - we eat these commands to prevent exploits
 	Cmd_AddCommand("userinfo", CL_EatMe_f);

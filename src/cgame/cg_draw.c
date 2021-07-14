@@ -845,11 +845,6 @@ static float CG_DrawTeamOverlay( float y ) {
 
 			Com_sprintf( st, sizeof( st ), "%s", CG_TranslateString( classType ) );
 
-
-
-
-
-
 			// JPW NERVE
 			if ( ci->health > 80 ) {
 				pcolor = hcolor;
@@ -865,6 +860,12 @@ static float CG_DrawTeamOverlay( float y ) {
 			// jpw
 
 			xx = x + 1; // * TINYCHAR_WIDTH;
+
+			// RTCWPro - display obj carriers
+			if (ci->powerups & ((1 << PW_REDFLAG) | (1 << PW_BLUEFLAG)))
+			{
+				CG_DrawPic(xx - 3, y - 3, 15, 15, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+			}
 
 			hcolor[0] = hcolor[1] = 1.0;
 			hcolor[2] = 0.0;
