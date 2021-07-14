@@ -1938,6 +1938,7 @@ void G_refWarmup_cmd( gentity_t* ent );
 void G_refWarning_cmd( gentity_t* ent );
 void G_refMute_cmd( gentity_t *ent, qboolean mute );
 void G_refRenameClient(gentity_t* ent);
+void G_refRequestSS(gentity_t* ent);
 void G_refGetStatus(gentity_t* ent);
 int  G_refClientnumForName( gentity_t *ent, const char *name );
 void G_refPrintf(gentity_t* ent, const char *fmt, ...);// _attribute((format(printf, 2, 3)));

@@ -92,6 +92,9 @@ qboolean G_refCommandCheck(gentity_t *ent, char *cmd) {
 	else if (!Q_stricmp(cmd, "rename")) {
 		G_refRenameClient(ent);
 	}
+	else if (!Q_stricmp(cmd, "reqss")) {
+		G_refRequestSS(ent);
+	}
 	else if (!Q_stricmp(cmd, "getstatus")) {
 		G_refGetStatus(ent);
 	}
@@ -473,7 +476,7 @@ Rename client
 ===========
 */
 void G_refRenameClient(gentity_t* ent) {
-	char client_num[MAX_TOKEN_CHARS];
+	char client_num[128];
 	gentity_t* targetent;
 	char* newname;
 	char userinfo[MAX_INFO_STRING];
@@ -501,6 +504,29 @@ void G_refRenameClient(gentity_t* ent) {
 	Info_SetValueForKey(userinfo, "name", newname);
 	trap_SetUserinfo(targetent->s.clientNum, userinfo);
 	ClientUserinfoChanged(targetent->s.clientNum);
+}
+
+/*
+=============
+sswolf
+G_refRequestSS
+=============
+*/
+void G_refRequestSS(gentity_t* ent) {
+	gentity_t* targetent;
+	int pid;
+	char arg[MAX_TOKEN_CHARS];
+
+	trap_Argv(2, arg, sizeof(arg));
+	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
+		return;
+	}
+
+	targetent = g_entities + pid;
+
+	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", pid));
+	CP(va("print \"Requested SS from %s (%d)\n\"", targetent->client->pers.netname, pid));
+
 }
 
 /*
@@ -553,7 +579,7 @@ void G_refGetStatus(gentity_t* ent) {
 				team = (cl->sess.sessionTeam == TEAM_SPECTATOR) ? "^3Spec^7" :
 					(cl->sess.sessionTeam == TEAM_RED ? "^1Axis^7" : "^4Ally^7");
 
-				ip = ent->client->sess.ip;
+				ip = cl->sess.ip;
 
 				ping = cl->ps.ping;
 				if (ping > 999) ping = 999;
