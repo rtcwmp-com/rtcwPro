@@ -1123,8 +1123,8 @@ void CG_NewClientInfo( int clientNum ) {
 	newInfo.botSkill = atoi( v );
 
 	// handicap
-	v = Info_ValueForKey( configstring, "hc" );
-	newInfo.handicap = atoi( v );
+	//v = Info_ValueForKey( configstring, "hc" );
+	//newInfo.handicap = atoi( v );
 
 	// wins
 	v = Info_ValueForKey( configstring, "w" );

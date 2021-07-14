@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 CL_SetGuid
 ====================
 */
+
 void CL_SetGuid(void) {
 	Com_ReadAuthKey(BASEGAME);
 }

@@ -1715,7 +1715,7 @@ typedef enum {
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
 
 //
-// L0 
+// L0
 // New stuff bellow
 //
 #define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))

@@ -1150,53 +1150,47 @@ static void SV_Status_f( void ) {
 
 	Com_Printf("map: %s\n", sv_mapname->string);
 
-	Com_Printf("cl score ping name            guid            address                               \n");
-	Com_Printf("-- ----- ---- --------------- --------------- --------------------------------------\n");
-	for (i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++) {
-		if (!cl->state) {
+	Com_Printf( "num score ping name            lastmsg address               qport rate\n" );
+	Com_Printf( "--- ----- ---- --------------- ------- --------------------- ----- -----\n" );
+	for ( i = 0,cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ )
+	{
+		if ( !cl->state ) {
 			continue;
 		}
-		Com_Printf("%2i ", i);
-		ps = SV_GameClientNum(i);
-		Com_Printf("%5i ", ps->persistant[PERS_SCORE]);
+		Com_Printf( "%3i ", i );
+		ps = SV_GameClientNum( i );
+		Com_Printf( "%5i ", ps->persistant[PERS_SCORE] );
 
-		if (cl->state == CS_CONNECTED) {
-			Com_Printf("CON ");
+		if ( cl->state == CS_CONNECTED ) {
+			Com_Printf( "CNCT " );
+		} else if ( cl->state == CS_ZOMBIE ) {
+			Com_Printf( "ZMBI " );
+		} else
+		{
+			ping = cl->ping < 9999 ? cl->ping : 9999;
+			Com_Printf( "%4i ", ping );
 		}
-		else if (cl->state == CS_ZOMBIE) {
-			Com_Printf("ZMB ");
-		}
-		else {
-			ping = cl->ping < 9999?cl->ping:9999;
-			Com_Printf("%4i ", ping);
-		}
 
-		Com_Printf("%s", cl->name);
+		Com_Printf( "%s", cl->name );
+		l = 16 - strlen( cl->name );
+		for ( j = 0 ; j < l ; j++ )
+			Com_Printf( " " );
 
-		l = 16 - SV_Strlen(cl->name);
-		j = 0;
+		Com_Printf( "%7i ", svs.time - cl->lastPacketTime );
 
-		do {
-			Com_Printf(" ");
-			j++;
-		} while (j < l);
+		s = NET_AdrToString( cl->netchan.remoteAddress );
+		Com_Printf( "%s", s );
+		l = 22 - strlen( s );
+		for ( j = 0 ; j < l ; j++ )
+			Com_Printf( " " );
 
-		Com_Printf("^7%16s ", cl->guid);
+		Com_Printf( "%5i", cl->netchan.qport );
 
-		// TTimo adding a ^7 to reset the color
-		s = NET_AdrToString(cl->netchan.remoteAddress);
-		Com_Printf("^7%s", s);
-		l = 39 - strlen(s);
-		j = 0;
+		Com_Printf( " %5i", cl->rate );
 
-		do {
-			Com_Printf(" ");
-			j++;
-		} while (j < l);
-
-		Com_Printf("\n");
+		Com_Printf( "\n" );
 	}
-	Com_Printf("\n");
+	Com_Printf( "\n" );
 }
 
 /*

@@ -209,7 +209,7 @@ qboolean    NET_IsLocalAddress( netadr_t adr );
 const char  *NET_AdrToString( netadr_t a );
 const char	*NET_AdrToStringwPort (netadr_t a);
 qboolean	NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask);
-const char* NET_AdrToString(netadr_t a);
+//const char* NET_AdrToString(netadr_t a);
 void        NET_JoinMulticast6(void);
 void        NET_LeaveMulticast6(void);
 int			NET_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
@@ -793,7 +793,8 @@ MISC
 extern char cl_cdkey[34];
 void Com_AppendCDKey( const char *filename );
 void Com_ReadCDKey( const char *filename );
-void Com_ReadAuthKey(const char* filename);
+void Com_WriteAuthKey(const char* filename);
+int Com_ReadAuthKey(const char* filename);
 
 // returnbed by Sys_GetProcessorId
 #define CPUID_GENERIC           0           // any unrecognized processor

@@ -74,6 +74,8 @@ void CL_RequestedSS(char* ip) {
 
 
 	guid = Cvar_VariableString("cl_guid");
+
+
 	name = Cvar_VariableString("name");
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
