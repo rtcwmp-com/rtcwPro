@@ -1504,6 +1504,27 @@ void ClientThink_real( gentity_t *ent ) {
 
 	monsterslick = Pmove( &pm );
 
+	// RTCWPro - revive anim bug fix
+	if (ent->client->revive_animation_playing)
+	{
+		if (ent->client->ps.pm_time == 0 || !(ent->client->ps.pm_flags & PMF_TIME_LOCKPLAYER))
+		{
+			int lock_time_remaining = 2100 - (level.time - ent->client->movement_lock_begin_time);
+
+			if (lock_time_remaining <= 0)
+			{
+				ent->client->revive_animation_playing = qfalse;
+				ent->client->ps.legsTimer = 0;
+				ent->client->ps.torsoTimer = 0;
+			}
+			else
+			{
+				ent->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
+				ent->client->ps.pm_time = lock_time_remaining;
+			}
+		}
+	}
+
 	if ( monsterslick && !( ent->flags & FL_NO_MONSTERSLICK ) ) {
 		//vec3_t	dir;
 		//vec3_t	kvel;

@@ -808,6 +808,11 @@ struct gclient_s {
 	float cmddelta;							// antiwarp command queue # valid commands
 	usercmd_t cmds[LAG_MAX_COMMANDS];       // antiwarp command queue
 	// End
+
+	// revive anim bug fix
+	qboolean revive_animation_playing;
+	int movement_lock_begin_time;
+
 };
 
 //

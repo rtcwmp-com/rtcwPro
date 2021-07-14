@@ -1603,7 +1603,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		Q_strncpyz( model, Info_ValueForKey( userinfo, "model" ), sizeof( model ) );
 	}
 
-	// sswolf - revive anim bug fix, credits: Nobo
+	// RTCWPro: revive anim bug fix, credits: Nobo
 	// RF, reset anims so client's dont freak out
 	//client->ps.legsAnim = 0;
 	//client->ps.torsoAnim = 0;

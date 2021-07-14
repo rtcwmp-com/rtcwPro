@@ -382,12 +382,18 @@ void Weapon_Syringe( gentity_t *ent ) {
 				// DHM - Nerve :: Play revive animation
 
 				// Xian -- This was gay and I always hated it.
-				if ( g_fastres.integer > 0 ) {
+				if ( g_fastres.integer > 0 ) 
+				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_JUMP, qfalse, qtrue );
-				} else {
+				} 
+				else 
+				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_REVIVE, qfalse, qtrue );
 					traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
 					traceEnt->client->ps.pm_time = 2100;
+					// RTCWPro: revive anim bug fix
+					traceEnt->client->revive_animation_playing = qtrue;
+					traceEnt->client->movement_lock_begin_time = level.time;
 				}
 
 
