@@ -1114,7 +1114,7 @@ void G_writeGameLogStart(void)
     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
 
     buf = Info_ValueForKey(cs, "matchid");
-    level.match_id = va("%s",buf);
+//    level.match_id = va("%s",buf);
     buf3 = Info_ValueForKey(cs, "round");
     level.round_id = va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2");
     if (level.gameStatslogFile) {

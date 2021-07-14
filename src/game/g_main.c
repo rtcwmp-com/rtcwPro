@@ -1463,6 +1463,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 if (g_currentRound.integer == 1) {
                     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
                     buf = Info_ValueForKey(cs, "matchid");
+
 					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
                 }
                 else {
@@ -1470,7 +1471,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 }
 
 
-
+                level.match_id = va("%s",buf);
                 Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
                 trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
                 //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
