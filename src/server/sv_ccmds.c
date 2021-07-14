@@ -1341,6 +1341,13 @@ static void SV_RequestSS_f(void) {
 
 	if (!cl) 
 	{
+		Com_Printf("Invalid client id!\n");
+		return;
+	}
+
+	if (cl->ping < 0 || cl->ping >= 999)
+	{
+		Com_Printf("Invalid client id!\n");
 		return;
 	}
 
