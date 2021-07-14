@@ -476,25 +476,18 @@ Rename client
 ===========
 */
 void G_refRenameClient(gentity_t* ent) {
-	char client_num[128];
 	gentity_t* targetent;
 	char* newname;
 	char userinfo[MAX_INFO_STRING];
-	char cmd[MAX_TOKEN_CHARS];
+	int pid;
+	char arg[MAX_TOKEN_CHARS];
 
-	trap_Argv(1, cmd, sizeof(cmd));
-
-	if (!*cmd) {
-		G_Printf("usage: Rename <client id>.\n");
+	trap_Argv(2, arg, sizeof(arg));
+	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
 		return;
 	}
 
-	trap_Argv(2, client_num, sizeof(client_num));
-	if (GetClientEntity(ent, client_num, &targetent) == NULL)
-	{
-		return;
-	}
-
+	targetent = g_entities + pid;
 	newname = ConcatArgs(3);
 
 	AP(va("chat \"console: %s ^7renamed %s ^7to %s^7!\n\"", ent->client->pers.netname, targetent->client->pers.netname, newname));
