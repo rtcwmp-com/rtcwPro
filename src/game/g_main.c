@@ -1450,7 +1450,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
 		}
         if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) { // definitely needs improving but here for testing purposes
-                char newGamestatFile[MAX_QPATH];
+                char newGamestatFile[256];
                 char mapName[64];
                 qtime_t ct;
                 trap_RealTime(&ct);
