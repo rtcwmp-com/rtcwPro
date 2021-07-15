@@ -808,22 +808,24 @@ G_Hitsounds
 void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body ) {
 	qboolean 	onSameTeam = OnSameTeam( target, attacker);
 
-	if (mod == MOD_ARTILLERY || 
-		mod == MOD_GRENADE_SPLASH || 
-		mod == MOD_DYNAMITE_SPLASH || 
-		mod == MOD_DYNAMITE || 
-		mod == MOD_ROCKET || 
-		mod == MOD_ROCKET_SPLASH || 
-		mod == MOD_KNIFE ||  
-		mod == MOD_GRENADE || 
-		mod == MOD_AIRSTRIKE)
-		return;
-
 	if (g_hitsounds.integer) {
 
 		// if player is hurting him self don't give any sounds
 		if (target->client == attacker->client) {
 			return;  // this happens at flaming your self... just return silence...			
+		}
+
+		if (mod == MOD_ARTILLERY ||
+			mod == MOD_GRENADE_SPLASH ||
+			mod == MOD_DYNAMITE_SPLASH ||
+			mod == MOD_DYNAMITE ||
+			mod == MOD_ROCKET ||
+			mod == MOD_ROCKET_SPLASH ||
+			mod == MOD_KNIFE ||
+			mod == MOD_GRENADE ||
+			mod == MOD_AIRSTRIKE)
+		{
+			return;
 		}
 
 		// if team mate
