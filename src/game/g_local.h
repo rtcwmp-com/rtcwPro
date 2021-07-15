@@ -2006,9 +2006,6 @@ void GeoIP_open(void);
 void GeoIP_close(void);
 extern GeoIP* gidb;
 
-// g_match.c
-void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
-void G_loadMatchGame(void);
 
 //
 // g_stats.c
