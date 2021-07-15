@@ -1137,6 +1137,7 @@ const char* getMonthString(int monthIndex);
 int getYearFromCYear(int cYear);
 int getDaysInMonth(int monthIndex);
 char* TablePrintableColorName(const char* name, int maxlength);
+qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension);
 
 //
 // g_combat.c

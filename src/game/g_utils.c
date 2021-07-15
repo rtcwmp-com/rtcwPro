@@ -1040,3 +1040,86 @@ char* TablePrintableColorName(const char* name, int maxlength)
 	return va("%s%s", dirty, spaces);
 }
 
+/*
+==================
+RTCWPro
+GetFileExtension
+==================
+*/
+void GetFileExtension(const char* filename, char* out)
+{
+	qboolean at_extension;
+
+	at_extension = qfalse;
+
+	while (*filename)
+	{
+		if (*filename == '.')
+		{
+			at_extension = qtrue;
+		}
+
+		if (at_extension)
+		{
+			*out++ = *filename;
+		}
+
+		filename++;
+	}
+
+	*out = 0;
+}
+
+/*
+==================
+RTCWPro
+FileExists
+==================
+*/
+qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension)
+{
+	char files[MAX_MAPCONFIGSTRINGS];
+	char file_exists[MAX_QPATH];
+	char* fs_filename, * fs_filepath;
+	char file_extension[10];
+	int i, filecount;
+
+	GetFileExtension(filename, file_extension);
+	if (file_extension[0])
+	{
+		if (Q_stricmp(file_extension, expected_extension))
+		{
+			return qfalse;
+		}
+
+		Q_strncpyz(file_exists, filename, sizeof(file_exists));
+
+		if (!can_have_extension)
+		{
+			*strstr(filename, file_extension) = 0;
+		}
+	}
+	else
+	{
+		Q_strncpyz(file_exists, filename, sizeof(file_exists));
+		Q_strcat(file_exists, sizeof(file_exists), expected_extension);
+	}
+
+	filecount = trap_FS_GetFileList(directory, expected_extension, files, sizeof(files));
+	fs_filepath = files;
+
+	for (i = 0; i < filecount; ++i)
+	{
+		fs_filename = COM_SkipPath(fs_filepath);
+
+		if (!Q_stricmp(file_exists, fs_filename))
+		{
+			return qtrue;
+		}
+
+		fs_filepath += strlen(fs_filepath) + 1;
+	}
+
+	return qfalse;
+}
+
