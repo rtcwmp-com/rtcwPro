@@ -77,23 +77,25 @@ void SV_GetChallenge( netadr_t from ) {
 		}
 	}
 
-	if ( i == MAX_CHALLENGES ) {
+	if (i == MAX_CHALLENGES) {
 		// this is the first time this client has asked for a challenge
 		challenge = &svs.challenges[oldest];
 
+		challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
 		challenge->adr = from;
 		challenge->firstTime = svs.time;
-		challenge->wasAuthorized = qfalse;
 		challenge->firstPing = 0;
+		challenge->time = svs.time;
 		challenge->connected = qfalse;
-		challenge->wasrefused = qfalse;
-		challenge->authMessage = "";
+		//challenge->wasAuthorized = qfalse;
+		//challenge->wasrefused = qfalse;
+		//challenge->authMessage = "";
 		i = oldest;
 	}
 
 	// always generate a new challenge number, so the client cannot circumvent sv_maxping
-	challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
-	challenge->time = svs.time;
+	//challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
+	//challenge->time = svs.time;
 
 	// if they are on a lan address, send the challengeResponse immediately
 	if ( Sys_IsLANAddress( from ) ) {
@@ -399,10 +401,11 @@ void SV_DirectConnect( netadr_t from ) {
 		}
 
 		challengeptr = &svs.challenges[i];
-		if (challengeptr->wasrefused) {
+		
+		/*if (challengeptr->wasrefused) {
 			// Return silently, so that error messages written by the server keep being displayed.
 			return;
-		}
+		}*/
 
 		// force the IP key/value pair so the game can filter based on ip
 		Info_SetValueForKey( userinfo, "ip", NET_AdrToString( from ) );
@@ -422,13 +425,13 @@ void SV_DirectConnect( netadr_t from ) {
 			if ( sv_minPing->value && ping < sv_minPing->value ) {
 				NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is for high pings only\n" );
 				Com_DPrintf( "Client %i rejected on a too low ping\n", i );
-				challengeptr->wasrefused = qtrue;
+				//challengeptr->wasrefused = qtrue;
 				return;
 			}
 			if ( sv_maxPing->value && ping > sv_maxPing->value ) {
 				NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is for low pings only\n" );
 				Com_DPrintf( "Client %i rejected on a too high ping: %i\n", i, ping );
-				challengeptr->wasrefused = qtrue;
+				//challengeptr->wasrefused = qtrue;
 				return;
 			}
 
@@ -441,7 +444,7 @@ void SV_DirectConnect( netadr_t from ) {
 					else {
 						NET_OutOfBandPrint(NS_SERVER, from, va("print\n%s\n", challengeptr->authMessage));
 					}
-					challengeptr->wasrefused = qtrue;
+					//challengeptr->wasrefused = qtrue;
 					return;
 				}
 			}
