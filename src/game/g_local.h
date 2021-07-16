@@ -1137,6 +1137,7 @@ const char* getMonthString(int monthIndex);
 int getYearFromCYear(int cYear);
 int getDaysInMonth(int monthIndex);
 char* TablePrintableColorName(const char* name, int maxlength);
+qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension);
 
 //
 // g_combat.c
@@ -2008,9 +2009,6 @@ void GeoIP_open(void);
 void GeoIP_close(void);
 extern GeoIP* gidb;
 
-// g_match.c
-void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
-void G_loadMatchGame(void);
 
 //
 // g_stats.c

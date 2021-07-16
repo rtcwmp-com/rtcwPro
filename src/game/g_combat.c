@@ -805,7 +805,7 @@ void G_ArmorDamage( gentity_t *targ ) {
 G_Hitsounds
 ==============
 */
-void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
+void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body ) {
 	qboolean 	onSameTeam = OnSameTeam( target, attacker);
 
 	if (g_hitsounds.integer) {
@@ -813,6 +813,19 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
 		// if player is hurting him self don't give any sounds
 		if (target->client == attacker->client) {
 			return;  // this happens at flaming your self... just return silence...			
+		}
+
+		if (mod == MOD_ARTILLERY ||
+			mod == MOD_GRENADE_SPLASH ||
+			mod == MOD_DYNAMITE_SPLASH ||
+			mod == MOD_DYNAMITE ||
+			mod == MOD_ROCKET ||
+			mod == MOD_ROCKET_SPLASH ||
+			mod == MOD_KNIFE ||
+			mod == MOD_GRENADE ||
+			mod == MOD_AIRSTRIKE)
+		{
+			return;
 		}
 
 		// if team mate
@@ -1068,7 +1081,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
-	G_Hitsounds(targ, attacker, qtrue);
+	G_Hitsounds(targ, attacker, mod, qtrue);
 
 	// sswolf - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
@@ -1101,7 +1114,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_addStatsHeadShot( attacker, mod );
 		} // End
 
-		G_Hitsounds(targ, attacker, qfalse);
+		G_Hitsounds(targ, attacker, mod, qfalse);
 	}
 
 	if ( g_debugDamage.integer ) {

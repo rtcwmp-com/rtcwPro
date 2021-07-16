@@ -531,6 +531,12 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 
 		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2 );
 
+		if (!FileExists(arg2, "maps", ".bsp", qfalse))
+		{
+			CP(va("print \"^7Could not find ^3%s\n\"", arg2));
+			return(G_INVALID);
+		}
+
 		// Vote action (vote has passed)
 	} else {
 		char s[MAX_STRING_CHARS];
