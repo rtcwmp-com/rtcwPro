@@ -225,14 +225,14 @@ int G_read_round_jstats( void )
     qtime_t ct;
     trap_RealTime(&ct);
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
-    char *buf;
+    char buf[64];
     char cs[MAX_STRING_CHARS];
 
     // we want to save some information for the match and round
     // TODO: Change to currentRound >= 1 and set g_currentRound -= 1
     if (g_currentRound.integer == 1) {
-        trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
-        buf = Info_ValueForKey(cs, "matchid");
+         trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+        level.match_id = va("%s",buf);
     }
     else {
         G_Printf("Incorrect round, not going to touch stats\n");
@@ -738,6 +738,7 @@ Output server related information
 ===========
 */
 void G_writeServerInfo(void){
+    char* buf;
     char* s;
     char mapName[MAX_QPATH];
     char gameConfig[MAX_QPATH];
@@ -757,7 +758,9 @@ void G_writeServerInfo(void){
     Info_SetValueForKey( cs, "timelimit", va("%s",GetLevelTime()));
 
     if (g_currentRound.integer == 0) {
-        Info_SetValueForKey( cs, "matchid", va("%ld", unixTime) );
+        buf=va("%ld", unixTime);
+        trap_Cvar_Set( "stats_matchid", buf );
+
     }
     trap_SetConfigstring( CS_ROUNDINFO, cs );
 
@@ -799,7 +802,7 @@ Output end of info (i.e. round, winner, etc)
 void G_writeGameInfo (int winner ){
 	char* s;
 	char mapName[64];
-    char *buf;
+    char buf[64];
     char *buf2;
     char *buf3;
     char *buf4;
@@ -813,7 +816,8 @@ void G_writeGameInfo (int winner ){
 
     json_t *jdata = json_object();
 
-    buf = Info_ValueForKey(cs, "matchid");
+ //   buf = Info_ValueForKey(cs, "matchid");
+    trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
     json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
     buf3 = Info_ValueForKey(cs, "round");
 
@@ -1108,13 +1112,10 @@ void G_writeGameLogStart(void)
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
-    char *buf;
     char *buf3;
     char cs[MAX_STRING_CHARS];
     trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
 
-    buf = Info_ValueForKey(cs, "matchid");
-//    level.match_id = va("%s",buf);
     buf3 = Info_ValueForKey(cs, "round");
     level.round_id = va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2");
     if (level.gameStatslogFile) {

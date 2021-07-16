@@ -261,6 +261,8 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
+vmCvar_t stats_matchid;
+
 vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
 vmCvar_t g_spawnOffset;
@@ -484,6 +486,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_spawnOffset, "g_spawnOffset", "9", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
@@ -1461,17 +1464,17 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
-                    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
-                    buf = Info_ValueForKey(cs, "matchid");
-
 					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
+					buf = va("%s",level.match_id);
                 }
                 else {
                      buf=va("%ld", unixTime);
+                     trap_Cvar_Set( "stats_matchid", buf);
+                     level.match_id = va("%s",buf);
                 }
 
 
-                level.match_id = va("%s",buf);
+
                 Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
                 trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
                 //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);

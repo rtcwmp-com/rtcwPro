@@ -1631,6 +1631,8 @@ extern vmCvar_t vote_allow_balancedteams;
 extern vmCvar_t vote_allow_muting;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
+
+extern vmCvar_t stats_matchid;
 // Ref tag..
 #define REFEREE	"^3Ref^7"
 
