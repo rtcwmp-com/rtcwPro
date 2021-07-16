@@ -739,6 +739,7 @@ typedef struct {
 
 	// RTCWPro
 	int refStatus;
+	int shoutStatus;
 	int playerAmmo;
 	int playerAmmoClip;
 	int playerWeapon;

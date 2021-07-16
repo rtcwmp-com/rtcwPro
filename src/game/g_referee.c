@@ -214,7 +214,7 @@ void G_scs_cmd(gentity_t* ent, qboolean fValue) {
 	if (ent) 
 	{
 		if (!Q_stricmp(shoutcastPassword.string, "none") || !shoutcastPassword.string[0]) {
-			CP("cpm \"Sorry, referee status disabled on this server.\n\"");
+			CP("cpm \"Sorry, shoutcaster status disabled on this server.\n\"");
 			return;
 		}
 
@@ -248,7 +248,7 @@ void G_scs_cmd(gentity_t* ent, qboolean fValue) {
 			ent->client->ps.pm_type = PM_NORMAL;
 		}
 
-		AP(va("cp \"%s\n^3has become a shoutcaster\n\"", ent->client->pers.netname));
+		AP(va("cp \"%s\n^3has become a Shoutcaster\n\"", ent->client->pers.netname));
 		CP("print \"^3You have logged in as a Shoutcaster.\n\"");
 		ClientUserinfoChanged(ent - g_entities);
 	}
@@ -358,10 +358,6 @@ void G_refMakeShoutcaster_cmd(gentity_t* ent)
 	G_MakeShoutcaster(player);
 }
 
-/**
- * @brief G_refRemoveShoutcaster_cmd
- * @param[in] ent
- */
 void G_refRemoveShoutcaster_cmd(gentity_t* ent)
 {
 	int       pid;

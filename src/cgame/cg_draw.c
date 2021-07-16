@@ -2668,7 +2668,16 @@ CG_DrawSpectator
 =================
 */
 static void CG_DrawSpectator( void ) {
-	CG_DrawBigString( 320 - 9 * 8, 440, CG_TranslateString( "SPECTATOR" ), 1.0F );
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus == 1)
+	{
+		CG_DrawBigString(320 - 9 * 8, 440, CG_TranslateString("SHOUTCASTER"), 1.0F);
+	}
+	else
+	{
+		CG_DrawBigString(320 - 9 * 8, 440, CG_TranslateString("SPECTATOR"), 1.0F);
+	}
+
 	if ( cgs.gametype == GT_TOURNAMENT ) {
 		CG_DrawBigString( 320 - 15 * 8, 460, "waiting to play", 1.0F );
 	}
