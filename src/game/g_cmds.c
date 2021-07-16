@@ -631,6 +631,13 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			}
 		} // end
 
+		// RTCWPro
+		if (ent->client->sess.shoutcaster && (team == TEAM_BLUE || team == TEAM_RED))
+		{
+			CP("print \"Shoutcasters may not join teams.\n\"");
+			CP("cp \"Shoutcasters may not join teams.\n\"");
+			return;
+		}
 
 		// NERVE - SMF
 		// L0 - Ready (temporary) lock
@@ -1111,7 +1118,7 @@ void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char 
 	}
 
 	// NERVE - SMF - if spectator, no chatting to players in WolfMP
-	if (match_mutespecs.integer && (!ent->client->sess.referee) // OSPx
+	if (match_mutespecs.integer && (!ent->client->sess.referee && !ent->client->sess.shoutcaster) // OSPx
 		 && ( ( ent->client->sess.sessionTeam == TEAM_FREE && other->client->sess.sessionTeam != TEAM_FREE ) ||
 			  ( ent->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != TEAM_SPECTATOR ) ) ) {
 		return;
@@ -2729,6 +2736,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "ready",          qtrue,  qtrue,  NULL,           ":^7 Sets your status to ^5ready^7 to start a match"                                         },
 	{ "readyteam",      qfalse, qtrue,  NULL,       ":^7 Sets an entire team's status to ^5ready^7 to start a match"                             },
 	{ "ref",            qtrue,  qtrue,  NULL,             " <password>:^7 Become a referee (admin access)"                                             },
+	{ "scs",            qtrue,  qtrue,  NULL,             " <password>:^7 Become a shoutcaster"                                             },
 //  { "remove",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Removes a player from the team" },
 	{ "say_teamnl",     qtrue,  qtrue,  NULL,      "<msg>:^7 Sends a team chat without location info"                                           },
 	{ "scores",         qtrue,  qtrue,  NULL,          ":^7 Displays current match stat info"                                                       },

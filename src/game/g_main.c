@@ -209,6 +209,7 @@ vmCvar_t vote_allow_muting;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t refereePassword;
+vmCvar_t shoutcastPassword;
 
 vmCvar_t g_spectatorInactivity;
 vmCvar_t g_allowSoftKill;
@@ -462,6 +463,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
+	{ &shoutcastPassword, "shoutcastPassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_crouchRate, "g_crouchRate", "5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse },

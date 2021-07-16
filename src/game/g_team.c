@@ -1744,6 +1744,12 @@ void G_swapTeams( void ) {
 }
 // Return blockout status for a player
 int G_blockoutTeam( gentity_t *ent, int nTeam ) {
+
+	if (ent->client->sess.shoutcaster == 1)
+	{
+		return 0;
+	}
+
 	return( !G_allowFollow( ent, nTeam ) );
 }
 // Figure out if we are allowed/want to follow a given player
@@ -1758,7 +1764,9 @@ qboolean G_allowFollow( gentity_t *ent, int nTeam ) {
 		}
 	}
 
-	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || ent->client->sess.referee == RL_REFEREE || ( ent->client->sess.specInvited & nTeam ) == nTeam ) );
+	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || 
+		ent->client->sess.referee == RL_REFEREE || ent->client->sess.shoutcaster == 1 || 
+		( ent->client->sess.specInvited & nTeam ) == nTeam ) );
 }
 
 // Figure out if we are allowed/want to follow a given player
@@ -1787,6 +1795,10 @@ void G_updateSpecLock( int nTeam, qboolean fLock ) {
 		ent = g_entities + level.sortedClients[i];
 
 		if (ent->client->sess.referee ) {
+			continue;
+		}
+
+		if (ent->client->sess.shoutcaster) {
 			continue;
 		}
 
@@ -1819,7 +1831,7 @@ void G_removeSpecInvite( int team ) {
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = g_entities + level.sortedClients[i];
-		if ( !cl->inuse || cl->client->sess.referee ) {
+		if ( !cl->inuse || cl->client->sess.referee || cl->client->sess.shoutcaster) {
 			continue;
 		}
 

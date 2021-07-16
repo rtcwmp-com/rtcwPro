@@ -398,6 +398,12 @@ int G_Kick_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 			}
 		}
 
+		if (level.clients[pid].sess.shoutcaster)
+		{
+			G_refPrintf(ent, "Can't vote to kick shoutcasters!");
+			return G_INVALID;
+		}
+
 		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid );
 		Com_sprintf( arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname );
 

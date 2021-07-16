@@ -1698,10 +1698,9 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i\\sc\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1, client->sess.wins, client->sess.losses,
-				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee
-			);
+				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee, client->sess.shoutcaster);
 	}
 
 //----(SA) end
@@ -1717,9 +1716,9 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\sc\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
 			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.muted ? "yes" : "no"), client->sess.referee,
-			client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
+			client->sess.shoutcaster, client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
 	// Account for bots..
 	else {

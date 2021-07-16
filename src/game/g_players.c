@@ -113,6 +113,10 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			strcpy(ref, "REF");
 		}
 
+		if (cl->sess.shoutcaster) {
+			strcpy(ref, "SCS");
+		}
+
 		/* this stuff crashed the command???
 		if ((cl->sess.admin || cl->sess.referee) && !cl->sess.incognito) {
 			strcpy(ref, sortTag(ent));
@@ -808,6 +812,7 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 		 || !Q_stricmp(cmd, "msg"))					{ cmd_pmsg(ent);	return qtrue;}
 //	else if(!Q_stricmp(cmd, "smoke"))				{ cmd_pSmoke(ent);			return qtrue;}
 	else if (!Q_stricmp(cmd, "ref"))				{ G_ref_cmd(ent, qtrue);	return qtrue; }
+	else if (!Q_stricmp(cmd, "scs"))				{ G_scs_cmd(ent, qtrue);	return qtrue; }
 	else if(!Q_stricmp(cmd, "readyteam"))			{ pCmd_teamReady(ent, qtrue);	return qtrue;}
 	else if(!Q_stricmp(cmd, "speclock"))			{ cmd_speclock(ent, qtrue);	return qtrue;}
 	else if(!Q_stricmp(cmd, "players"))			    { pCmd_players(ent, qfalse);	return qtrue;}

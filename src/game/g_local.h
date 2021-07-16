@@ -542,7 +542,7 @@ typedef struct {
 	int team_kills;
 
 	// referee
-	int referee, status;
+	int referee, status, shoutcaster;
 	int spec_invite, specInvited, specLocked;
 
 	// New ones
@@ -1552,6 +1552,7 @@ extern vmCvar_t g_dbgRevive;
 // rtcwpro begin
 // Referee/Voting - New cvars
 extern vmCvar_t refereePassword;
+extern vmCvar_t shoutcastPassword;
 extern vmCvar_t team_maxplayers;
 extern vmCvar_t team_nocontrols;
 
@@ -1930,6 +1931,7 @@ char* GetLevelTime(void);
 void Cmd_AuthRcon_f( gentity_t *ent );
 void G_refAllReady_cmd( gentity_t *ent );
 void G_ref_cmd( gentity_t *ent, /*unsigned int dwCommand,*/ qboolean fValue );
+void G_scs_cmd(gentity_t* ent, qboolean fValue);
 qboolean G_refCommandCheck( gentity_t *ent, char *cmd );
 void G_refHelp_cmd( gentity_t *ent );
 void G_refLockTeams_cmd( gentity_t *ent, qboolean fLock );
@@ -1942,6 +1944,8 @@ void G_refWarning_cmd( gentity_t* ent );
 void G_refMute_cmd( gentity_t *ent, qboolean mute );
 void G_refRenameClient(gentity_t* ent);
 void G_refRequestSS(gentity_t* ent);
+void G_refMakeShoutcaster_cmd(gentity_t* ent);
+void G_refRemoveShoutcaster_cmd(gentity_t* ent);
 void G_refGetStatus(gentity_t* ent);
 int  G_refClientnumForName( gentity_t *ent, const char *name );
 void G_refPrintf(gentity_t* ent, const char *fmt, ...);// _attribute((format(printf, 2, 3)));
