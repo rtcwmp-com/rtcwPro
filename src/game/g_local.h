@@ -1642,6 +1642,7 @@ extern vmCvar_t	g_antiWarp; // antiwarp port
 extern vmCvar_t P; // player teams in server info
 extern vmCvar_t	g_hsDamage;
 extern vmCvar_t g_spawnOffset; // random spawn offset for both teams, between 1 and cvar integer - 1
+extern vmCvar_t g_bodiesGrabFlags;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

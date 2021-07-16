@@ -1458,8 +1458,17 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	qboolean playsound = qtrue;
 	qboolean firsttime = qfalse;
 
-	if ( self->count == other->client->sess.sessionTeam || other->health <= 0 ) {
+	if ( self->count == other->client->sess.sessionTeam )
+	{
 		return;
+	}
+
+	if (!g_bodiesGrabFlags.integer)
+	{
+		if (other->health <= 0)
+		{
+			return;
+		}
 	}
 
 // JPW NERVE
