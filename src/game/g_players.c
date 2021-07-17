@@ -109,12 +109,12 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			}
 		}
 
-		if (cl->sess.referee) {
-			strcpy(ref, "REF");
-		}
-
 		if (cl->sess.shoutcaster) {
 			strcpy(ref, "SCS");
+		}
+
+		if (cl->sess.referee) {
+			strcpy(ref, "REF");
 		}
 
 		/* this stuff crashed the command???

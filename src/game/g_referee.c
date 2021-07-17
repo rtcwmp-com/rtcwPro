@@ -106,6 +106,19 @@ qboolean G_refCommandCheck(gentity_t *ent, char *cmd) {
 	else if (!Q_stricmp(cmd, "getstatus")) {
 		G_refGetStatus(ent);
 	}
+	else if (!Q_stricmp(cmd, "logout")) {
+		G_refLogout(ent);
+	}
+	else { return(qfalse); }
+
+	return(qtrue);
+}
+
+qboolean G_scsCommandCheck(gentity_t* ent, char* cmd) {
+
+	if (!Q_stricmp(cmd, "logout")) {
+		G_scsLogout(ent);
+	}
 	else { return(qfalse); }
 
 	return(qtrue);
@@ -208,8 +221,71 @@ void G_ref_cmd(gentity_t *ent, qboolean fValue) { //unsigned int dwCommand,
 	}
 }
 
+void G_refLogout(gentity_t* ent) {
+
+	if (ent) 
+	{
+		ent->client->sess.referee = 0;
+
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_FREEZE;
+		}
+
+		CP("print \"^3Logged out as referee.\n\"");
+		ClientUserinfoChanged(ent - g_entities);
+	}
+}
+
+void G_scsLogout(gentity_t* ent) {
+
+	if (ent)
+	{
+		ent->client->sess.shoutcaster = 0;
+
+		if (!ent->client->sess.referee)    // don't remove referee's invitation
+		{
+			ent->client->sess.spec_invite = 0;
+
+			// unfollow player if team is spec locked
+			if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW)
+			{
+				int spectatorClientTeam = level.clients[ent->client->sess.spectatorClient].sess.sessionTeam;
+
+				if (spectatorClientTeam == TEAM_RED && teamInfo[TEAM_RED].spec_lock)
+				{
+					StopFollowing(ent);
+				}
+				else if (spectatorClientTeam == TEAM_BLUE && teamInfo[TEAM_BLUE].spec_lock)
+				{
+					StopFollowing(ent);
+				}
+			}
+		}
+
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_FREEZE;
+		}
+
+		CP("print \"^3Logged out as shoutcaster.\n\"");
+		ClientUserinfoChanged(ent - g_entities);
+	}
+}
+
 void G_scs_cmd(gentity_t* ent, qboolean fValue) {
 	char arg[MAX_TOKEN_CHARS];
+
+	// Roll through ref commands if already a ref
+	if (ent == NULL || ent->client->sess.shoutcaster) 
+	{
+
+		trap_Argv(1, arg, sizeof(arg));
+
+		if (G_scsCommandCheck(ent, arg)) {
+			return;
+		}
+
+		return;
+	}
 
 	if (ent) 
 	{
