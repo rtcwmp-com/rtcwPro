@@ -274,10 +274,8 @@ void G_scsLogout(gentity_t* ent) {
 void G_scs_cmd(gentity_t* ent, qboolean fValue) {
 	char arg[MAX_TOKEN_CHARS];
 
-	// Roll through ref commands if already a ref
 	if (ent == NULL || ent->client->sess.shoutcaster) 
 	{
-
 		trap_Argv(1, arg, sizeof(arg));
 
 		if (G_scsCommandCheck(ent, arg)) {
