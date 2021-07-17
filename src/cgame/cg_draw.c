@@ -2653,7 +2653,10 @@ static void CG_DrawCrosshairNames( void ) {
 
 	// RtcwPro add player ammo if cg_drawCrosshairNames is 1
 	if (cg_drawCrosshairNames.integer == 1 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
-		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
+	{
+		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo,
+			cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
+	}
 
 	trap_R_SetColor( NULL );
 }
@@ -4518,8 +4521,13 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	// draw status bar and other floating elements
 	CG_Draw2D();
-}
 
+	// RTCWPro
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus == 1) 
+	{
+		CG_ShoutcasterItems();
+	}
+}
 
 /*
 =====================
@@ -4898,3 +4906,123 @@ void CG_AddAnnouncer(char *text, sfxHandle_t sound, float scale, int duration, f
 		cg.centerPrintAnnouncerMode = mode;
 	}
 }
+
+/*
+=============================
+RTCWPro
+CG_SCSortDistance
+=============================
+*/
+int QDECL CG_SCSortDistance(const void* a, const void* b) {
+	scItem_t* A = (scItem_t*)a;
+	scItem_t* B = (scItem_t*)b;
+
+	if (A->dist < B->dist) 
+	{
+		return 1;
+	}
+	else 
+	{
+		return -1;
+	}
+}
+
+/*
+=============================
+RTCWPro
+CG_ShoutcasterItems
+=============================
+*/
+void CG_ShoutcasterItems() {
+	int			i;
+	centity_t* cent;
+
+	memset(cg.scItems, 0, MAX_SCITEMS * sizeof(cg.scItems[0]));
+	cg.numSCItems = 0;
+
+	for (i = 0; i < MAX_ENTITIES; i++) 
+	{
+		cent = &cg_entities[i];
+
+		if (!cent->currentValid)
+			continue;
+
+		switch (cent->currentState.eType) 
+		{
+		case ET_MISSILE:
+			CG_ShoutcasterDynamite(i);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Sort
+	qsort(cg.scItems, cg.numSCItems, sizeof(cg.scItems[0]), CG_SCSortDistance);
+
+	// Draw
+	for (i = 0; i < cg.numSCItems; i++) 
+	{
+		CG_Text_Paint_Ext(cg.scItems[i].position[0], cg.scItems[i].position[1], cg.scItems[i].scale, 
+			cg.scItems[i].scale, cg.scItems[i].color, cg.scItems[i].text, 0, 0, ITEM_TEXTSTYLE_NORMAL, &cgDC.Assets.textFont);
+	}
+}
+/*
+=============================
+RTCWPro
+CG_Shoutcaster_Dynamite
+=============================
+*/
+void CG_ShoutcasterDynamite(int num) {
+	centity_t* cent;
+	vec3_t		origin;
+	vec_t		position[2];
+
+	cent = &cg_entities[num];
+	if (cent->currentState.eType != ET_MISSILE || cent->currentState.weapon != WP_DYNAMITE || cent->currentState.teamNum >= 4)
+		return;
+
+	if (!cent->currentValid)
+		return;
+
+	// Ent visible?
+	if (PointVisible(cent->lerpOrigin))
+		cent->lastSeenTime = cg.time;
+
+	// Break if no action
+	if (!cent->lastSeenTime || cg.time - cent->lastSeenTime >= 1000)
+		return;
+
+	// Ent position
+	VectorCopy(cent->lerpOrigin, origin);
+
+	// Add height, plus a little
+	origin[2] += 20;
+
+	if (!VisibleToScreen(origin, position)) 
+	{
+		return;
+	}
+
+	cg.scItems[cg.numSCItems].position[0] = position[0] / cgs.screenXScale;
+	cg.scItems[cg.numSCItems].position[1] = position[1] / cgs.screenYScale;
+
+	// Distance to player
+	cg.scItems[cg.numSCItems].dist = VectorDistance(cg.predictedPlayerState.origin, origin);
+	cg.scItems[cg.numSCItems].scale = 600 / cg.scItems[cg.numSCItems].dist * 0.2f;
+
+	// Figure out color
+	CG_ColorForPercent(100 * (30000 - cg.time + cent->currentState.effect1Time + 1000) / 30000, cg.scItems[cg.numSCItems].color);
+	cg.scItems[cg.numSCItems].color[3] = 1 - ((float)(cg.time - cent->lastSeenTime) / 1000.f);
+
+	// Center text
+	cg.scItems[cg.numSCItems].text = va("%i", ((30000 - cg.time + cent->currentState.effect1Time) / 1000) + 1);
+	cg.scItems[cg.numSCItems].position[0] -= CG_Text_Width_Ext(cg.scItems[cg.numSCItems].text, cg.scItems[cg.numSCItems].scale, 0, &cgDC.Assets.textFont) / 2;
+
+	// Paint the text.
+	//CG_Text_Paint_Ext( position[0], position[1], scale, scale, color, str, 0, 0, ITEM_TEXTSTYLE_NORMAL, &cgs.media.limboFont1 );
+
+	// Increment number of items
+	cg.numSCItems++;
+}
+

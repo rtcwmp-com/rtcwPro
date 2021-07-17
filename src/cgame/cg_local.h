@@ -408,10 +408,18 @@ typedef struct {
 } skinModel_t;
 //----(SA) end
 
+// RTCWPro - shoutcaster
+#define MAX_SCITEMS 256
+typedef struct scItem_s {
+	char* text;
+	float	dist;
+	float	scale;
+	vec_t	position[2];
+	vec4_t	color;
+} scItem_t;
+
 
 //=================================================
-
-
 
 // centity_t have a direct corespondence with gentity_t in the game, but
 // only the entityState_t is directly communicated to the cgame
@@ -488,6 +496,9 @@ typedef struct centity_s {
 
 	int highlightTime;
 	qboolean highlighted;
+
+	// RTCWPro
+	int lastSeenTime;
 } centity_t;
 
 
@@ -1216,6 +1227,10 @@ typedef struct {
 	float topSpeed;
 	float oldSpeed;
 	// tj stuff end
+
+	// RTCWPro
+	scItem_t scItems[MAX_SCITEMS];
+	int numSCItems;
 
 	pmoveExt_t pmext;
 
@@ -2255,9 +2270,8 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 
 // RtcwPro
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
-
-// sswolf - time
 char* CG_GetClock(void);
+void CG_ColorForPercent(float percent, vec4_t hcolor);
 
 //
 // cg_draw.c, cg_newDraw.c
@@ -2303,6 +2317,8 @@ qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 qhandle_t CG_StatusHandle( int task );
 void CG_Fade( int r, int g, int b, int a, float time );
+void CG_ShoutcasterItems();
+void CG_ShoutcasterDynamite(int num);
 
 
 // - Reinforcement offset
@@ -2638,6 +2654,8 @@ void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
 //
 void CG_Respawn( void );
 void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
+qboolean PointVisible(vec3_t point);
+qboolean VisibleToScreen(vec3_t point, vec_t world[2]);
 
 
 //

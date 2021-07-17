@@ -1340,3 +1340,51 @@ char* CG_TranslateString( const char *string ) {
 	// dont even make the call if we're in english
 	return trap_TranslateString( string );
 }
+
+/*
+==================
+RTCWPro
+CG_ColorForPercent
+==================
+*/
+void CG_ColorForPercent(float percent, vec4_t hcolor) {
+
+	// Bail if <= 0
+	if (percent <= 0) 
+	{
+		VectorClear(hcolor);	// black
+		hcolor[3] = 1;
+		return;
+	}
+
+	// set the color based on percent
+	hcolor[0] = 1.0;
+	hcolor[3] = 1.0;
+
+	if (percent >= 100) 
+	{
+		hcolor[2] = 1.0;
+	}
+	else if (percent < 66) 
+	{
+		hcolor[2] = 0;
+	}
+	else 
+	{
+		hcolor[2] = (percent - 66) / 33.0;
+	}
+
+	if (percent > 60) 
+	{
+		hcolor[1] = 1.0;
+	}
+	else if (percent < 30) 
+	{
+		hcolor[1] = 0;
+	}
+	else 
+	{
+		hcolor[1] = (percent - 30) / 30.0;
+	}
+}
+
