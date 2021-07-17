@@ -67,7 +67,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		G_WriteWeaponStatsData(client);
 	}/// End
 
-    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
 		client->sess.sessionTeam,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
@@ -85,6 +85,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		client->sess.latchPlayerSkin,    // DHM - Nerve
 		// L0 - New stuff
 		client->sess.referee,			// User is ref
+		client->sess.shoutcaster,			// User is shoutcaster
 		client->sess.muted,		// User is ignored
 		client->sess.uci,			// mcwf's GeoIP
 		client->sess.ip,			// L0 - IP
@@ -114,8 +115,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		client->sess.obj_captured,
 		client->sess.obj_destroyed,
 		client->sess.obj_returned,
-		client->sess.obj_taken,
-		client->sess.shoutcaster
+		client->sess.obj_taken
 	);
 
 	var = va( "session%i", client - level.clients );
@@ -137,7 +137,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
-    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
+    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -155,6 +155,7 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
 			(int *)&client->sess.referee,
+			(int*)&client->sess.shoutcaster,
 			(int *)&client->sess.muted,
 			&client->sess.uci,
 			(char *)&client->sess.ip,
@@ -184,8 +185,7 @@ void G_ReadSessionData( gclient_t *client ) {
             &client->sess.obj_captured,
             &client->sess.obj_destroyed,
             &client->sess.obj_returned,
-            &client->sess.obj_taken,
-			(int*)&client->sess.shoutcaster
+            &client->sess.obj_taken
 			);
 
 	// L0 - OSP stats -- pull and parse weapon stats

@@ -1174,7 +1174,7 @@ void CG_NewClientInfo( int clientNum ) {
 	newInfo.refStatus = atoi(v);
 
 	// shoutcaster
-	v = Info_ValueForKey(configstring, "sc");
+	v = Info_ValueForKey(configstring, "scs");
 	newInfo.shoutStatus = atoi(v);
 //----(SA) modified this for head separation
 
