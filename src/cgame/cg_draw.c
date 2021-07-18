@@ -1088,26 +1088,32 @@ static float CG_DrawEnemyTimer(float y) {
         return y;
     }
 
-	if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate == GS_PLAYING)
+	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus)
 	{
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW))
 		{
+			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
+				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+			if (period > 0) // prevent division by 0 for weird cases like limbtotime < 1000
+			{
+				seconds = msec / 1000;
+				secondsThen = ((cgs.timelimit * 60000.f) - cg_spawnTimer_set.integer) / 1000;
 
-            seconds     = msec / 1000;
-            secondsThen = ((cgs.timelimit * 60.f * 1000.f )  - cg_spawnTimer_set.integer) / 1000;
-            float temp = cg_spawnTimer_period.integer + (seconds - secondsThen) % cg_spawnTimer_period.integer;
-            str           = va("ERT: %-2d", (int)temp);
-            w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
+				str = va("ERT: %-2i", period + (seconds - secondsThen) % period);
+				w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
-            //	x = 46 + 6;
-            x = 46 + 40;
-            //	y = 480 - 245;
-            y = 480 - 400;
-            CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				//	x = 46 + 6;
+				x = 46 + 40;
+				//	y = 480 - 245;
+				y = 480 - 400;
+				CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+			}
 		}
 	}
 	else if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate != GS_PLAYING)
 	{
+		// We are not playing and the timer is set so reset/disable it
+		// this happens for example when custom period is set by timerSet and map is restarted or changed
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
 	else {
