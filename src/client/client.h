@@ -422,7 +422,7 @@ extern cvar_t  *cl_language;
 extern cvar_t* cl_StreamingSelfSignedCert;
 // ~L0
 
-cvar_t* con_height; // RTCWPro
+extern cvar_t* con_height; // RTCWPro
 
 
 //=================================================
