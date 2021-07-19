@@ -1459,6 +1459,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
         if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) { // definitely needs improving but here for testing purposes
                 char newGamestatFile[256];
                 char mapName[64];
+                char buf2[64];
                 qtime_t ct;
                 trap_RealTime(&ct);
                 trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
@@ -1469,7 +1470,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
 					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
-					buf = va("%s",level.match_id);
+					trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
+					//buf = va("%s",level.match_id);
+					buf = va("%s",buf2);
                 }
                 else {
                      buf=va("%ld", unixTime);
