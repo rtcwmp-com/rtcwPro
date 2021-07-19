@@ -62,6 +62,8 @@ typedef struct {
 qboolean UI_checkKeyExec( int key );        // NERVE - SMF
 qboolean CL_CGameCheckKeyExec(int key);
 
+cvar_t* con_height; // RTCWPro
+
 // names not in this list can either be lowercase ascii, or '0xnn' hex sequences
 keyname_t keynames[] =
 {
