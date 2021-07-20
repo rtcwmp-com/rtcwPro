@@ -76,7 +76,7 @@ CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \
 	../client/cl_net_chan.o ../client/cl_parse.o ../client/cl_scrn.o \
-	../client/cl_ui.o ../client/cl_events.o
+	../client/cl_ui.o ../client/cl_events.o ../client/cl_control.o
 COMMONOBJS := \
 	../qcommon/cm_load.o ../qcommon/cm_patch.o ../qcommon/cm_polylib.o \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
@@ -184,7 +184,7 @@ server: NASM := nasm
 server: CFLAGS := \
 	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
 #server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
-server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl -lm -lz -DCURL_STATICLIB  -lmysqlclient  
+server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs/ -lcurl -lcrypto -ldl -lm -lz -DCURL_STATICLIB  -lmysqlclient  
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -224,6 +224,7 @@ server-w32-clean:
 
 CURLCONF := \
 	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
+	--prefix=$(PWD)/../../libs/curl-7.75.0 \
 	--enable-shared=no --enable-static=yes --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
@@ -232,13 +233,13 @@ CURLCONF := \
 	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual
+	--disable-nonblocking --disable-manual --without-ssl
 
 curl: 
-	cd ../../libs/libcurl && ./configure $(CURLCONF)
-	cd ../../libs/libcurl && make
-	mv ../../libs/libcurl/lib/.libs/libcurl.a ../../libs/libcurl/lib/.libs/libcurl_linux.a
-	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_linux
+	cd ../../libs/curl-7.75.0 && ./configure $(CURLCONF)
+	cd ../../libs/curl-7.75.0 && make
+#	mv ../../libs/libcurl/lib/.libs/libcurl.a ../../libs/libcurl/lib/.libs/libcurl_linux.a
+#	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_linux
 
 curl-w32:
 	cd ../../libs/libcurl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
@@ -248,9 +249,9 @@ curl-w32:
 	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_w32
 
 curl-clean:
-	cd ../../libs/libcurl && make clean
-	rm -rf ../../libs/libcurl/include/curl_linux
-	rm -rf ../../libs/libcurl/include/curl_w32
+	cd ../../libs/curl-7.75.0 && make clean
+#	rm -rf ../../libs/libcurl/include/curl_linux
+#	rm -rf ../../libs/libcurl/include/curl_w32
 
 #####################################################################
 
