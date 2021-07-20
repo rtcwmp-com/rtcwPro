@@ -1591,11 +1591,13 @@ void ClientThink_real( gentity_t *ent ) {
 	}
 
 	// Ridah, fixes jittery zombie movement
-	if ( g_smoothClients.integer ) {
+	/*if ( g_smoothClients.integer ) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue );
 	} else {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
-	}
+	}*/
+
+	BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, level.time, qtrue); // RTCWPro
 
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
@@ -2207,11 +2209,13 @@ void ClientEndFrame( gentity_t *ent ) {
 	// set the latest infor
 
 	// Ridah, fixes jittery zombie movement
-	if ( g_smoothClients.integer ) {
+	/*if ( g_smoothClients.integer ) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
 	} else {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
-	}
+	}*/
+
+	BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, level.time, qfalse); // RTCWPro
 
 	//SendPendingPredictableEvents( &ent->client->ps );
 

@@ -2510,7 +2510,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 	// positively link the client, even if the command times are weird
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
-		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+		//BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+		BG_PlayerStateToEntityState(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 		VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 		trap_LinkEntity( ent );
 	}
@@ -2519,7 +2520,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	ClientEndFrame( ent );
 
 	// clear entity state values
-	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+	//BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+	BG_PlayerStateToEntityState(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 
 	// show_bug.cgi?id=569
 	//G_ResetMarkers( ent );
