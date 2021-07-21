@@ -2347,38 +2347,38 @@ int Com_ReadCDKey( const char *filename ) {
     return 1;
 }
 
+
 /*
 =================
+RTCWPro
 Com_WriteNewKey  ( temporary as this will change in the future)
 =================
 */
 void Com_WriteNewKey(const char* filename) {
 	fileHandle_t f;
-	char buffer[17];
+	char buffer[16] = { '\0' };
 	char fbuffer[MAX_OSPATH];
-    static char charset[] = "abcdefg123456789";
+    static char charset[] = "abcdfghjklmnpqrstvwxyz123456789";
 
-    for (int n = 1;n < 17;n++) {
-                int val = rand() % (int) (sizeof(charset) -1);
-                buffer[n] = charset[val];
+    for (int n = 0; n < 16; n++) {
+		int val = rand() % (int) (sizeof(charset) -1);
+		buffer[n] = charset[val];
     }
+
 	sprintf(fbuffer, "%s/rtcwkey", filename);
 
-    f = FS_SV_FOpenFileWrite( fbuffer );
+    f = FS_SV_FOpenFileWrite(fbuffer);
+
 	if (!f) {
 		Com_Printf( "Couldn't write %s.\n", filename );
 		return;
 	}
-    FS_Printf( f, "%s", buffer );
-	//FS_Write( buffer, 16, f );
 
-	FS_FCloseFile( f );
-
-
+    //FS_Printf(f, "%s", buffer);
+	FS_Write(buffer, 16, f);
+	FS_FCloseFile(f);
 
 }
-
-
 
 /*
 =================
