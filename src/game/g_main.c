@@ -1317,7 +1317,7 @@ void G_UpdateCvars( void ) {
 
 				if (g_spawnOffset.integer < 1)
 				{
-					G_Printf("g_spawnOffset %i is out of range, defaulting to 8\n", g_spawnOffset.integer);
+					G_Printf("g_spawnOffset %i is out of range, defaulting to 9\n", g_spawnOffset.integer);
 					trap_Cvar_Set("g_spawnOffset", "9");
 				}
 			}
