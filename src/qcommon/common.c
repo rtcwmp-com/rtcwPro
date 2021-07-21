@@ -2358,7 +2358,7 @@ void Com_WriteNewKey(const char* filename) {
 	fileHandle_t f;
 	char buffer[16] = { '\0' };
 	char fbuffer[MAX_OSPATH];
-    static char charset[] = "abcdfghjklmnpqrstvwxyz123456789";
+    static char charset[] = "abcdefghjklmnpqrstvwxyz123456789";
 
     for (int n = 0; n < 16; n++) {
 		int val = rand() % (int) (sizeof(charset) -1);
