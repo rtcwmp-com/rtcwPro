@@ -2710,9 +2710,9 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
-
+#ifdef MYSQLDEP
 	OW_Init();
-
+#endif
 	Threads_Init();
 
 	com_fullyInitialized = qtrue;
@@ -3484,9 +3484,9 @@ void Com_Shutdown( void ) {
 		FS_FCloseFile( com_journalFile );
 		com_journalFile = 0;
 	}
-
+#ifdef MYSQLDEP
 	OW_Shutdown();
-
+#endif
 }
 
 #if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD

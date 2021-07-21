@@ -2161,7 +2161,7 @@ typedef enum
 	DP_CONNECTINFO,     ///< Display info on connect
 	DP_MVSPAWN          ///< Set up MV views for clients who need them
 } enum_t_dp;
-
+#ifdef MYSQLDEP
 // SQL
 int				trap_SQL_RunQuery(const char* query);
 void			trap_SQL_FinishQuery(int queryid);
@@ -2173,3 +2173,4 @@ int				trap_SQL_GetFieldbyID_int(int queryid, int fieldid);
 int				trap_SQL_GetFieldbyName_int(int queryid, const char* name);
 int				trap_SQL_FieldCount(int queryid);
 void			trap_SQL_CleanString(const char* in, char* out, int len);
+#endif
