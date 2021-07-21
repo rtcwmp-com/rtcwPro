@@ -3039,13 +3039,19 @@ static void FS_Startup( const char *gameName ) {
 #ifndef DEDICATED
 	int retval = Com_ReadAuthKey(BASEGAME);
 	if (retval == 0) {
-        Com_WriteAuthKey(BASEGAME);  // temporary as this will change in the future
+        //Com_WriteAuthKey(BASEGAME);  // temporary as this will change in the future
         Com_ReadAuthKey(BASEGAME);
 	}
 #endif
 */
 //#endif
-	Com_ReadCDKey( BASEGAME );
+	//Com_ReadCDKey( BASEGAME );
+	int retval = Com_ReadCDKey(BASEGAME);
+	if (retval == 0) {
+        //Com_WriteAuthKey(BASEGAME);  // temporary as this will change in the future
+        Com_WriteNewKey(BASEGAME);
+        Com_ReadCDKey(BASEGAME);
+	}
 	fs = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
 	if ( fs && fs->string[0] != 0 ) {
 		Com_AppendCDKey( fs->string );
