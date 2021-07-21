@@ -1519,7 +1519,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
 
 	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
-        trap_DropClient(clientNum, "No GUID..");
+        trap_DropClient(clientNum, "Empty or invalid rtcwkey");
 	}
 
 	// check the item prediction
