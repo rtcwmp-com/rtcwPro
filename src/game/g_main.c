@@ -1466,30 +1466,31 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
                 char *buf;
                 time_t unixTime = time(NULL);  // come back and make globally available
-                char cs[MAX_STRING_CHARS];
+                //char cs[MAX_STRING_CHARS];
 
+
+                Q_strncpyz(level.jsonStatInfo.round_id,va("%s",g_currentRound.integer == 0 ? "1" : "2"),sizeof(level.jsonStatInfo.round_id) );
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
 					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
 					trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
 					//buf = va("%s",level.match_id);
 					buf = va("%s",buf2);
+					Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
                 else {
                      buf=va("%ld", unixTime);
                      trap_Cvar_Set( "stats_matchid", buf);
-                     level.match_id = va("%s",buf);
+                     //level.match_id = va("%s",buf);
+                     Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
 
+                G_init_match_jstats();
 
 
                 Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
-                trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
-                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
-                //trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
-                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName);
-                //trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName ), &level.gameStatslogFile, FS_WRITE );
-                if ( !level.gameStatslogFile ) {
+                trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.jsonStatInfo.gameStatslogFile, FS_WRITE );
+                if ( !level.jsonStatInfo.gameStatslogFile ) {
                     G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
                 } else {
 
@@ -1497,7 +1498,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                     char game[60];
                     trap_Cvar_VariableStringBuffer( "fs_homepath", hpath, sizeof( hpath ) );
                     trap_Cvar_VariableStringBuffer( "fs_game", game, sizeof( game ) );
-                    Com_sprintf( level.gameStatslogFileName, sizeof( level.gameStatslogFileName ), "%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
+
+                    Com_sprintf( level.jsonStatInfo.gameStatslogFileName, sizeof( level.jsonStatInfo.gameStatslogFileName ), "%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
 
                     G_writeServerInfo();
 
@@ -1653,9 +1655,9 @@ void G_ShutdownGame( int restart ) {
 		G_LogPrintf( "------------------------------------------------------------\n" );
 		trap_FS_FCloseFile( level.logFile );
 	}
-	if (level.gameStatslogFile) {
+	if (level.jsonStatInfo.gameStatslogFile) {
         // we may want to put some closing information into the gamestat file...
-        trap_FS_FCloseFile( level.gameStatslogFile );
+        trap_FS_FCloseFile( level.jsonStatInfo.gameStatslogFile);
 
 	}
 

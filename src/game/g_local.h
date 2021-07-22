@@ -833,6 +833,16 @@ typedef struct voteInfo_s {
 	char vote_value[VOTE_MAXSTRING];        // Desired vote item setting.
 } voteInfo_t;
 
+typedef struct jsonStatInfo_s {
+   char  match_id[MAX_STRING_CHARS];
+   char  round_id[MAX_STRING_CHARS];
+   char  round_start[MAX_STRING_CHARS];
+   char  round_timelimit[MAX_STRING_CHARS];
+   char  gameStatslogFileName[256];
+   fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+} jsonStatInfo_t;
+
+
 typedef struct {
 	struct gclient_s    *clients;       // [maxclients]
 
@@ -844,8 +854,6 @@ typedef struct {
 	qboolean warmupSwap;			// Swaps teams in SW with g_tournament enabled
 
 	fileHandle_t logFile;
-    fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
-    char gameStatslogFileName[256]; // lazy work-around for testing submission of stats....so this is temporary
 
 
 	// store latched cvars here that we want to get at often
@@ -1015,6 +1023,7 @@ typedef struct {
 	int svCvarsCount;
 
 	int eventNum;  // event counter
+	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
 	char* match_id; // for stats round matching...
     char* round_id; //
 } level_locals_t;
@@ -2073,6 +2082,7 @@ enum eventList {
 
 // g_json.c
 int getPstats(json_t *jsonData, char *id, gclient_t *client);
+int G_init_match_jstats( void );
 int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
