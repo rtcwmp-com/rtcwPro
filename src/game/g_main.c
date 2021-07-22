@@ -1469,10 +1469,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 //char cs[MAX_STRING_CHARS];
 
 
-                Q_strncpyz(level.jsonStatInfo.round_id,va("%s",g_currentRound.integer == 0 ? "1" : "2"),sizeof(level.jsonStatInfo.round_id) );
+
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
+
 					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
+                    Q_strncpyz(level.jsonStatInfo.round_id,"2",sizeof(level.jsonStatInfo.round_id) );
+
 					trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
 					//buf = va("%s",level.match_id);
 					buf = va("%s",buf2);
@@ -1482,6 +1485,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                      buf=va("%ld", unixTime);
                      trap_Cvar_Set( "stats_matchid", buf);
                      //level.match_id = va("%s",buf);
+                     Q_strncpyz(level.jsonStatInfo.round_id,"1",sizeof(level.jsonStatInfo.round_id) );
                      Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
 

@@ -11,6 +11,7 @@
 
 
 #define MATCHID level.jsonStatInfo.match_id
+#define ROUNDID level.jsonStatInfo.round_id
 
 /*
   Retrieve player stats from json data and use it to set player session data
@@ -222,7 +223,7 @@ int G_init_match_jstats( void )
 
 
     json_t *jdata = json_object();
-    json_object_set_new(jdata, "matchID",    json_string(level.jsonStatInfo.match_id));
+    json_object_set_new(jdata, "matchID",    json_string(MATCHID));
     json_object_set_new(jdata, "roundID",    json_string(level.jsonStatInfo.round_id));
     json_object_set_new(jdata, "timelimit",    json_string(level.jsonStatInfo.round_timelimit));
     json_object_set_new(jdata, "roundstart",    json_string(level.jsonStatInfo.round_start));
@@ -318,7 +319,7 @@ int G_read_round_jstats( void )
         Q_strncpyz(level.jsonStatInfo.round_id,json_string_value(jstattype),sizeof(level.jsonStatInfo.round_id));
         jstattype = json_object_get(object, "match_id");
         if (json_string_value(jstattype)) {
-            Q_strncpyz(level.jsonStatInfo.match_id,json_string_value(jstattype),sizeof(level.jsonStatInfo.match_id));
+            Q_strncpyz(MATCHID,json_string_value(jstattype),sizeof(MATCHID));
         }
 
         jstats = json_array();
@@ -868,17 +869,21 @@ void G_writeGameInfo (int winner ){
 
     trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
-    buf3 = Info_ValueForKey(cs, "round");
+
+   // buf3 = Info_ValueForKey(cs, "round");
 
     //json_object_set_new(jdata, "round",    json_string(buf3));
-    json_object_set_new(jdata, "round",    json_string(va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2")));
+    //json_object_set_new(jdata, "round",    json_string(va("%s",(Q_strncmp(buf3,"0",1) == 0) ? "1" : "2")));
+    json_object_set_new(jdata, "round",    json_string(va("%s",level.jsonStatInfo.round_id)));
 
-    buf2 = Info_ValueForKey(cs, "roundStart");
-    json_object_set_new(jdata, "round_start",    json_string(buf2));
+  //  buf2 = Info_ValueForKey(cs, "roundStart");
+    //json_object_set_new(jdata, "round_start",    json_string(buf2));
+    json_object_set_new(jdata, "round_start",    json_string(va("%s",level.jsonStatInfo.round_start)));
     json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "map",    json_string(mapName));
-    buf4 = Info_ValueForKey(cs, "timelimit");
-    json_object_set_new(jdata, "time_limit",    json_string(buf4));
+  //  buf4 = Info_ValueForKey(cs, "timelimit");
+    //json_object_set_new(jdata, "time_limit",    json_string(buf4));
+    json_object_set_new(jdata, "time_limit",    json_string(va("%s",level.jsonStatInfo.round_timelimit)));
 
     json_object_set_new(jdata, "allies_cycle",    json_string(va("%i",g_bluelimbotime.integer / 1000)));
     json_object_set_new(jdata, "axis_cycle",    json_string(va("%i",g_redlimbotime.integer / 1000)));
@@ -985,10 +990,14 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
     if ( g_gamestate.integer != GS_PLAYING ) {
         return;
     }
-    trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
-//    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
-    json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
-    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
+ //   trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+        //json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
+
+
+    json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
+
+//    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
+    json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
         switch ( eventType ) {
@@ -1127,10 +1136,12 @@ void G_writeDisconnectEvent (gentity_t* agent){
     if ( g_gamestate.integer != GS_PLAYING || agent->client->sess.sessionTeam == TEAM_SPECTATOR) {
         return;
     }
-    trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
-//    json_object_set_new(jdata, "match_id",    json_string(va("%s",level.match_id)));
-    json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
-    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
+ //   trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+
+ //   json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
+     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
+//    json_object_set_new(jdata, "round_id",    json_string(va("%s",level.round_id)));
+json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("player"));
     json_object_set_new(jdata, "label",    json_string("disconnect"));
