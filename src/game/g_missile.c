@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -477,7 +477,7 @@ void M_think( gentity_t *ent ) {
 /*
 --------------------------------
 	OSPx - Fix FFE building bug
-	ET's RadiusDamage system 
+	ET's RadiusDamage system
 
 	Port from ET to S4NDMoD
 	- Dutchmeat
@@ -758,162 +758,238 @@ void BG_ET_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
 	}
 }
 
-// -OSPx - FFE Damage Fix dump ends here
 
-/*
-================
-G_ExplodeMissile
-
-Explode a missile without an impact
-OSPx - Modified to work with ET Damage port.
-================
-*/
 void G_ExplodeMissile( gentity_t *ent ) {
 	vec3_t dir;
 	vec3_t origin;
-	qboolean	small =	qfalse;
-	qboolean	zombiespit = qfalse;
-	int			etype;
+	int etype;
+	qboolean isSmall = qfalse;
 
-	BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
-	SnapVector( origin );
-	G_SetOrigin( ent, origin );
+	etype = ent->s.eType;
+	ent->s.eType = ET_GENERAL;
+
+	// splash damage
+	if (ent->splashDamage) {
+		vec3_t origin;
+		trace_t tr;
+
+		VectorCopy(ent->r.currentOrigin, origin);
+
+		trap_Trace(&tr, origin, vec3_origin, vec3_origin, origin, ENTITYNUM_NONE, MASK_SHOT);
+		/*
+            Do not call G_ET_RadiusDamage but instead include it directly here (to avoid the desynchronizing of damage & bombs dropped)
+                (Time is short and so please excuse this plop-n-drop )
+
+        */
+        //G_ET_RadiusDamage(origin, ent, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath); //----(SA)
+
+
+        // begin: G_ET_RadiusDamage
+                float points, dist;
+                float radius=ent->splashRadius;
+                gentity_t *inflictor = ent;
+                gentity_t *attacker = ent->parent;
+                float damage =ent->splashDamage;
+                gentity_t *ignore = ent;
+                int mod = ent->splashMethodOfDeath;
+                gentity_t   *ent;
+                int entityList[MAX_GENTITIES];
+                int numListedEntities;
+                vec3_t mins, maxs;
+                vec3_t v;
+                vec3_t dir;
+                int i, e;
+                qboolean hitClient = qfalse;
+                float boxradius;
+                vec3_t dest;
+               // trace_t tr;
+                vec3_t midpoint;
+                int flags = DAMAGE_RADIUS;
+
+                if (radius < 1) {
+                    radius = 1;
+                }
+
+                boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement --
+                // bounding box was checking against radius / sqrt(2) if collision is along box plane
+                for (i = 0; i < 3; i++) {
+                    mins[i] = origin[i] - boxradius;
+                    maxs[i] = origin[i] + boxradius;
+                }
+
+                numListedEntities = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
+
+                for (e = 0; e < level.num_entities; e++) {
+                    g_entities[e].dmginloop = qfalse;
+                }
+
+                for (e = 0; e < numListedEntities; e++) {
+                    ent = &g_entities[entityList[e]];
+
+                    if (ent == ignore) {
+                        continue;
+                    }
+                    if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
+                        continue;
+                    }
+
+                    G_AdjustedDamageVec(ent, origin, v);
+
+                    dist = VectorLength(v);
+                    if (dist >= radius) {
+                        continue;
+                    }
+
+                    points = damage * (1.0 - dist / radius);
+
+                    if (CanDamage(ent, origin)) {
+                        if (ent->dmgparent) {
+                            ent = ent->dmgparent;
+                        }
+
+                        if (ent->dmginloop) {
+                            continue;
+                        }
+
+                        if (AccuracyHit(ent, attacker)) {
+                            hitClient = qtrue;
+                        }
+                        VectorSubtract(ent->r.currentOrigin, origin, dir);
+                        // push the center of mass higher than the origin so players
+                        // get knocked into the air more
+                        dir[2] += 24;
+
+
+                        G_Damage(ent, inflictor, attacker, dir, origin, (int)points, flags, mod);
+                    }
+                    else {
+                        VectorAdd(ent->r.absmin, ent->r.absmax, midpoint);
+                        VectorScale(midpoint, 0.5, midpoint);
+                        VectorCopy(midpoint, dest);
+
+                        trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+                        if (tr.fraction < 1.0) {
+                            VectorSubtract(dest, origin, dest);
+                            dist = VectorLength(dest);
+                            if (dist < radius * 0.2f) { // closer than 1/4 dist
+                                if (ent->dmgparent) {
+                                    ent = ent->dmgparent;
+                                }
+
+                                if (ent->dmginloop) {
+                                    continue;
+                                }
+
+                                if (AccuracyHit(ent, attacker)) {
+                                    hitClient = qtrue;
+                                }
+                                VectorSubtract(ent->r.currentOrigin, origin, dir);
+                                dir[2] += 24;
+                                G_Damage(ent, inflictor, attacker, dir, origin, (int)(points * 0.1f), flags, mod);
+                            }
+                        }
+                    }
+                }
+
+
+
+        //end G_ET_RadiusDamage
+	}
+
+	BG_ET_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse, ent->s.effect2Time);
+	SnapVector(origin);
+	G_SetOrigin(ent, origin);
 
 	// we don't have a valid direction, so just point straight up
 	dir[0] = dir[1] = 0;
 	dir[2] = 1;
 
-	etype = ent->s.eType;
-
-	ent->s.eType = ET_GENERAL;
-	
-	if (!Q_stricmp (ent->classname, "props_explosion"))
-	{
-		G_AddEvent( ent, EV_MISSILE_MISS_SMALL, DirToByte( dir ) );
-		small = qtrue;
+	if (!Q_stricmp(ent->classname, "props_explosion")) {
+		G_AddEvent(ent, EV_MISSILE_MISS_SMALL, DirToByte(dir));
+		isSmall = qtrue;
 	}
-// JPW NERVE
-	else if (!Q_stricmp (ent->classname, "air strike"))
-	{
-		G_AddEvent( ent, EV_MISSILE_MISS_LARGE, DirToByte( dir ) );
-		small = qfalse;
+	// JPW NERVE
+	else if (!Q_stricmp(ent->classname, "air strike")) {
+		G_AddEvent(ent, EV_MISSILE_MISS_LARGE, DirToByte(dir));
+		isSmall = qfalse;
 	}
-// jpw
-	else if (!Q_stricmp (ent->classname, "props_explosion_large"))
-	{
-		G_AddEvent( ent, EV_MISSILE_MISS_LARGE, DirToByte( dir ) );
-		small = qfalse;
+	// jpw
+	else if (!Q_stricmp(ent->classname, "props_explosion_large")) {
+		G_AddEvent(ent, EV_MISSILE_MISS_LARGE, DirToByte(dir));
+		isSmall = qfalse;
 	}
-	else if (!Q_stricmp ( ent->classname, "zombiespit"))
-	{
-		G_AddEvent( ent, EV_SPIT_MISS, DirToByte( dir ) );
-		zombiespit = qtrue;
+	else if (!Q_stricmp(ent->classname, "zombiespit")) {
+		G_AddEvent(ent, EV_SPIT_MISS, DirToByte(dir));
 	}
-	else if (!Q_stricmp ( ent->classname, "flamebarrel"))
-	{
+	else if (!Q_stricmp(ent->classname, "flamebarrel")) {
 		ent->freeAfterEvent = qtrue;
-		trap_LinkEntity( ent );
+		trap_LinkEntity(ent);
 		return;
 	}
-	else
-		G_AddEvent( ent, EV_MISSILE_MISS, DirToByte( dir ) );
+	else {
+		G_AddEvent(ent, EV_MISSILE_MISS, DirToByte(dir));
+	}
 
 	ent->freeAfterEvent = qtrue;
 
-	// splash damage
-	if ( ent->splashDamage ) {
-		if( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath ) ) {	//----(SA)	
-			if(g_entities[ent->r.ownerNum].client)
-				g_entities[ent->r.ownerNum].client->ps.persistant[PERS_ACCURACY_HITS]++;
-		}
-	}
-
-	trap_LinkEntity( ent );
+	trap_LinkEntity(ent);
 
 	if (etype == ET_MISSILE) {
-		// DHM - Nerve :: ... in single player anyway
-		if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
-			if(ent->s.weapon == WP_VENOM_FULL)	// no default impact smoke
-				zombiespit = qtrue;
-			else if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_DYNAMITE2) { 
-//				// shot heard round the world...
-					gentity_t *player;
-					player = AICast_FindEntityForName( "player" );
-					Concussive_fx (player->r.currentOrigin);
+
+		if (ent->s.weapon == WP_DYNAMITE ) { // do some scoring
+			// check if dynamite is in trigger_objective_info field
+			vec3_t mins, maxs;
+			int i, num, touch[MAX_GENTITIES];
+			gentity_t   *hit;
+
+			// NERVE - SMF - made this the actual bounding box of dynamite instead of range
+			VectorAdd(ent->r.currentOrigin, ent->r.mins, mins);
+			VectorAdd(ent->r.currentOrigin, ent->r.maxs, maxs);
+			num = trap_EntitiesInBox(mins, maxs, touch, MAX_GENTITIES);
+
+			for (i = 0; i < num; i++) {
+				hit = &g_entities[touch[i]];
+				if (!hit->target) {
+					continue;
 				}
-		}
-// JPW NERVE -- big nasty dynamite scoring section
-		else {
-			if (g_gametype.integer >= GT_WOLF)
-				if (ent->s.weapon == WP_DYNAMITE) { // do some scoring
-          // check if dynamite is in trigger_objective_info field
-					vec3_t		mins, maxs; 
-					//static vec3_t	range = { 18, 18, 18 }; // NOTE can use this to massage throw distance outside trigger field // TTimo unused
-					int			i,num,touch[MAX_GENTITIES];
-					gentity_t	*hit;
 
-					// NERVE - SMF - made this the actual bounding box of dynamite instead of range
-					VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
-					VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
-					num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
-					VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
-					VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
+				if ((hit->s.eType != ET_OID_TRIGGER)) {
+					continue;
+				}
 
-					for ( i=0 ; i<num ; i++ ) {
-						hit = &g_entities[touch[i]];
-						if (!hit->target)
-							continue;
+				if (!(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE))) {
+					continue;
+				}
 
-						if ( !( hit->r.contents & CONTENTS_TRIGGER ) ) {
-							continue;
-						}
-						if (!strcmp(hit->classname,"trigger_objective_info")) {
-							if ( !(hit->spawnflags & (AXIS_OBJECTIVE | ALLIED_OBJECTIVE)) )
-								continue;
-	
-							if ( ((hit->spawnflags & AXIS_OBJECTIVE) && (ent->s.teamNum == TEAM_BLUE)) ||
-								 ((hit->spawnflags & ALLIED_OBJECTIVE) && (ent->s.teamNum == TEAM_RED)) ) {
-								G_UseTargets(hit,ent);
-								hit->think = G_FreeEntity;
-								hit->nextthink = level.time + FRAMETIME;
-
-								if (ent->parent->client)
-									if (ent->s.teamNum == ent->parent->client->sess.sessionTeam) // make sure player hasn't changed teams -- per atvi req
-										AddScore(ent->parent, hit->accuracy); // set from map, see g_trigger
-							}
-						}
+				if (hit->target_ent) {
+					// Arnout - only if it targets a func_explosive
+					if (hit->target_ent->s.eType != ET_EXPLOSIVE) {
+						continue;
 					}
 				}
-			// give big weapons the shakey shakey
-			if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_GRENADE_LAUNCHER ||
-				ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
-				ent->s.weapon == WP_ARTY )
-				Ground_Shaker(ent->r.currentOrigin, ent->splashDamage*4);
-			return;
+
+				if (((hit->spawnflags & AXIS_OBJECTIVE) && (ent->s.teamNum == TEAM_BLUE)) ||
+					((hit->spawnflags & ALLIED_OBJECTIVE) && (ent->s.teamNum == TEAM_RED)))
+				{
+					G_UseTargets(hit, ent);
+					hit->think = G_FreeEntity;
+					hit->nextthink = level.time + FRAMETIME;
+				}
+			}
 		}
-// jpw
-	}
 
-
-	if (!zombiespit)
-	{
-		gentity_t *Msmoke;
-
-		Msmoke = G_Spawn ();
-		VectorCopy ( ent->r.currentOrigin, Msmoke->s.origin );
-		if (small)
-			Msmoke->s.density = 1;
-		Msmoke->think = M_think;
-		Msmoke->nextthink = level.time + FRAMETIME;
-
-		if (ent->parent && !Q_stricmp (ent->parent->classname, "props_flamebarrel"))
-			Msmoke->health = 10;
-		else
-			Msmoke->health = 5;
-
-		Concussive_fx (Msmoke->s.origin);
+		// give big weapons the shakey shakey
+		if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_GRENADE_LAUNCHER ||
+			ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
+			ent->s.weapon == WP_ARTY) {
+			// RTCWPro custom screen shake
+			//Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
+			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * (!g_screenShake.integer ? 1 : g_screenShake.integer));
+		}
+		return;
 	}
 }
+
 
 /*
 ================
