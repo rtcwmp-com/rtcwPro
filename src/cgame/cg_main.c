@@ -2748,6 +2748,11 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
 
+	// RTCWPro
+	if (cg_shadows.integer) {
+		trap_Cvar_Set("cg_shadows", "0");
+	}
+
 	CG_AutoExec_f();
 }
 

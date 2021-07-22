@@ -953,6 +953,7 @@ void G_ExplodeMissile( gentity_t *ent ) {
 					continue;
 				}
 
+
 				if ((hit->s.eType != ET_OID_TRIGGER)) {
 					continue;
 				}
