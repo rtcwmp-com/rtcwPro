@@ -565,7 +565,8 @@ typedef struct {
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
-	int			clientFlags;		// Sort some stuff based upon user settings
+	int clientFlags;		// Sort some stuff based upon user settings
+	int specSpeed;
 } clientSession_t;
 
 //
@@ -1942,6 +1943,7 @@ void Cmd_AuthRcon_f( gentity_t *ent );
 void G_refAllReady_cmd( gentity_t *ent );
 void G_ref_cmd( gentity_t *ent, /*unsigned int dwCommand,*/ qboolean fValue );
 void G_scs_cmd(gentity_t* ent, qboolean fValue);
+void G_scsSpectatorSpeed(gentity_t* ent);
 void G_refLogout(gentity_t* ent);
 void G_scsLogout(gentity_t* ent);
 qboolean G_refCommandCheck( gentity_t *ent, char *cmd );
