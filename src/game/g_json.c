@@ -866,7 +866,6 @@ void G_writeServerInfo(void){
 
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
-    json_object_set_new(jdata, "serverID",    json_string(sv_serverid.string));
     json_object_set_new(jdata, "serverIP",    json_string(""));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
