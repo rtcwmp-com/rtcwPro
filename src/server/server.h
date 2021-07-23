@@ -196,7 +196,6 @@ typedef struct client_s {
 	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
 	int clientRestValidated;
-	entityState_t s;
 } client_t;
 
 //=============================================================================

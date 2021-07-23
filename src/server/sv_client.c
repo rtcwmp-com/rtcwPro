@@ -2269,13 +2269,10 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT)
 	{
-		if (cl->s.teamNum != TEAM_SPECTATOR)
-		{
-			cl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
-			SV_ExecuteClientCommand(cl, "team s", qtrue);
-			SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
-			return;
-		}
+		cl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+		SV_ExecuteClientCommand(cl, "team s", qtrue);
+		SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
+		return;
 	}
 
 	/*if (Q_stricmp(sv_GameConfig->string, "") &&
