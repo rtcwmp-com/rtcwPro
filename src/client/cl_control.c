@@ -69,14 +69,16 @@ void CL_RequestedSS(char* ip) {
 	char* name;
 	int n;
 
-    srand(time(0));
-    n=rand() % 99;
+	if (clc.demoplaying) {
+		return;
+	}
 
+    srand(time(0));
+    n = rand() % 99;
 
 	guid = Cvar_VariableString("cl_guid");
-
-
 	name = Cvar_VariableString("name");
+
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
 
