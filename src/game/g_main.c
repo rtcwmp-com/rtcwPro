@@ -1489,7 +1489,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                      Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
 
-                G_init_match_jstats();
+                G_write_match_info();
 
 
                 Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
