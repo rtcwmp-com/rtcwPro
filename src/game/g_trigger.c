@@ -898,6 +898,9 @@ void SP_trigger_flagonly( gentity_t *ent ) {
 	ent->accuracy = atof( scorestring );
 	// jpw
 
+	ent->r.svFlags &= ~SVF_NOCLIENT; // RTCWPro - has to be sent in order for draw triggers to work
+	ent->s.eType = ET_CONCUSSIVE_TRIGGER; // RTCWPro - hijack this to let the cgame know what to draw
+
 	trap_LinkEntity( ent );
 }
 

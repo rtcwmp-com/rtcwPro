@@ -4567,6 +4567,12 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	CG_ShakeCamera();       // NERVE - SMF
 
+	// RTCWPro - draw triggers for shoutcasters
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus && cgs.gamestate == GS_PLAYING)
+	{
+		CG_DrawTriggers();
+	}
+
 	trap_R_RenderScene( &cg.refdef );
 
 	// restore original viewpoint if running stereo
