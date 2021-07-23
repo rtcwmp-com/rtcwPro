@@ -583,7 +583,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+	//newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -993,7 +993,10 @@ when the cvar is set to something, the download server will effectively never us
 ==================
 */
 static qboolean SV_CheckFallbackURL(client_t* cl, msg_t* msg) {
-	if (!sv_wwwFallbackURL->string || strlen(sv_wwwFallbackURL->string) == 0) {
+
+	return qfalse;
+
+	/*if (!sv_wwwFallbackURL->string || strlen(sv_wwwFallbackURL->string) == 0) {
 		return qfalse;
 	}
 
@@ -1005,7 +1008,7 @@ static qboolean SV_CheckFallbackURL(client_t* cl, msg_t* msg) {
 	MSG_WriteLong(msg, 0);
 	MSG_WriteLong(msg, 2); // DL_FLAG_URL
 
-	return qtrue;
+	return qtrue;*/
 }
 
 
@@ -2264,9 +2267,23 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
-		cl->netchan.remoteAddress.type != NA_BOT
-	) {
+		cl->netchan.remoteAddress.type != NA_BOT)
+	{
+		if (cl->s.teamNum != TEAM_SPECTATOR)
+		{
+			cl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+			SV_ExecuteClientCommand(cl, "team s", qtrue);
+			SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
+			return;
+		}
+	}
+
+	/*if (Q_stricmp(sv_GameConfig->string, "") &&
+		cl->clientRestValidated != RKVALD_TIME_OFF &&
+		cl->clientRestValidated < svs.time &&
+		cl->netchan.remoteAddress.type != NA_BOT) 
+	{
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
 		return;
-	}
+	}*/
 }
