@@ -202,7 +202,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
     return 1;
 }
 
-int G_init_match_jstats( void )
+int G_write_match_info( void )
 {
     json_t *data = NULL;
     json_t *json,*object,*jstattype, *jstats;
@@ -241,6 +241,55 @@ int G_init_match_jstats( void )
     }
 }
 
+int G_read_match_info( void )
+{
+    json_t *data = NULL;
+    json_t *json,*object,*jstattype, *jstats;
+    json_error_t error;
+
+    json = json_load_file("stats/matchinfo.json", 0, &error);
+    if (error.line != -1) {
+        G_Printf("error: unable to read json round stat file\n");
+        return 0;
+    }
+
+    object = json_object();
+    if (json)
+    {
+        object = json_object_get(json, "matchinfo");
+        jstattype = json_object_get(object, "matchID");
+
+
+        if (json_string_value(jstattype)) {
+            Q_strncpyz(MATCHID,json_string_value(jstattype),sizeof(MATCHID));
+        }
+        else {
+            return 0;
+        }
+
+        jstattype = json_object_get(object, "roundID");
+        if (json_string_value(jstattype)) {
+            Q_strncpyz(ROUNDID,json_string_value(jstattype),sizeof(ROUNDID));
+        }
+        else{
+            return 0;
+        }
+
+        jstattype = json_object_get(object, "timelimit");
+        if (json_string_value(jstattype)) {
+            Q_strncpyz(level.jsonStatInfo.round_timelimit,json_string_value(jstattype),sizeof(level.jsonStatInfo.round_timelimit));
+        }
+        else{
+            return 0;
+        }
+        return 1;
+
+    }
+
+    return 0;
+}
+
+
 /*
  Read in stats from json to client session
 
@@ -266,12 +315,12 @@ int G_read_round_jstats( void )
     char hpath[256];
     char game[60];
     char mapName[64];
-    char *matchid;
+   // char *matchid;
     qtime_t ct;
     trap_RealTime(&ct);
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     char buf[64];
-    char cs[MAX_STRING_CHARS];
+ //   char cs[MAX_STRING_CHARS];
 
     // we want to save some information for the match and round
     // TODO: Change to currentRound >= 1 and set g_currentRound -= 1
@@ -817,6 +866,7 @@ void G_writeServerInfo(void){
 
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
+    json_object_set_new(jdata, "serverID",    json_string(sv_serverid.string));
     json_object_set_new(jdata, "serverIP",    json_string(""));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));

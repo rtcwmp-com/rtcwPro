@@ -2082,7 +2082,8 @@ enum eventList {
 
 // g_json.c
 int getPstats(json_t *jsonData, char *id, gclient_t *client);
-int G_init_match_jstats( void );
+int G_write_match_info( void );
+int G_read_match_info( void );
 int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
