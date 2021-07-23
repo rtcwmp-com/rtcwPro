@@ -926,6 +926,7 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "players" );		// Prints user info (IP, GUID, STATUS..)
 	trap_AddCommand( "ref" );
 	trap_AddCommand("scs");
+	trap_AddCommand("specspeed");
 	trap_AddCommand( "?" );
 	trap_AddCommand( "gib" );			// Kills player and sends him/her straight to limbo
 	trap_AddCommand( "pm" );			// Private message

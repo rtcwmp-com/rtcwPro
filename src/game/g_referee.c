@@ -384,6 +384,48 @@ void G_RemoveShoutcaster(gentity_t* ent)
 	ClientUserinfoChanged(ent - g_entities);
 }
 
+void G_scsSpectatorSpeed(gentity_t* ent) {
+
+	int speedvalue;
+	char speedvalue_arg[128];
+
+	if (ent->client->sess.shoutcaster == 0)
+	{
+		trap_SendServerCommand(ent - g_entities, va("print \"^3Login as a shoutcaster first!\n\""));
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	{
+		trap_SendServerCommand(ent - g_entities, va("print \"^3You cannot use this command as spectator!\n\""));
+		return;
+	}
+
+	trap_Argv(1, speedvalue_arg, sizeof(speedvalue_arg));
+
+	if (!strlen(speedvalue_arg))
+	{
+		CP("print \"^3Speed value must be provided!\n\"");
+		return;
+	}
+
+	speedvalue = atoi(speedvalue_arg);
+
+	if (speedvalue <= 0)
+	{
+		CP("print \"^3Speed value must be provided!\n\"");
+		return;
+	}
+
+	// don't let arbitrary large values in
+	if (speedvalue > 8000)
+	{
+		speedvalue = 8000;
+	}
+
+	ent->client->sess.specSpeed = speedvalue;
+}
+
 void G_refMakeShoutcaster_cmd(gentity_t* ent)
 {
 	int       pid;

@@ -988,6 +988,14 @@ int CG_CalculateReinfTime(qboolean menu)
 	return (int)(CG_CalculateReinfTime_Float(menu));
 }
 
+int CG_CalculateShoutcasterReinfTime(team_t team)
+{
+	int dwDeployTime;
+
+	dwDeployTime = (team == TEAM_RED) ? cg_redlimbotime.integer : cg_bluelimbotime.integer;
+	return (int)(1 + (dwDeployTime - ((cgs.aReinfOffset[team] + cg.time - cgs.levelStartTime) % dwDeployTime)) * 0.001f);
+}
+
 /*
 ========================
 OSPx
@@ -1045,12 +1053,12 @@ static float CG_DrawRespawnTimer(float y) {
 
 /*
 ========================
+RTCWPro
 Enemy Timer
 ========================
 */
 static float CG_DrawEnemyTimer(float y) {
 	char		*str = { 0 };
-
 	int    w;
 	int    tens;
 	int    x;
@@ -1122,6 +1130,42 @@ static float CG_DrawEnemyTimer(float y) {
 
 	return y += TINYCHAR_HEIGHT;
 }
+
+/*
+========================
+RTCWPro
+CG_DrawShoutcastTimer
+========================
+*/
+static float CG_DrawShoutcastTimer(float y) {
+	vec4_t color = { .6f, .6f, .6f, 1.f };
+	char* rtAllies = "", * rtAxis = "";
+	int h = 30;
+	int x = 35;
+	y = 480 - 400;
+
+	if (cgs.gamestate != GS_PLAYING)
+	{
+		return y;
+	}
+
+	int reinfTimeAx = CG_CalculateShoutcasterReinfTime(TEAM_RED);
+	int reinfTimeAl = CG_CalculateShoutcasterReinfTime(TEAM_BLUE);
+
+	rtAllies = va("^$%i", reinfTimeAl);
+	rtAxis = va("^1%i", reinfTimeAx);
+
+	color[3] = 1.f;
+
+	// Axis time
+	CG_DrawStringExt(x, y + h - 5, rtAxis, colorRed, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	// Allies time
+	CG_DrawStringExt(x + 20, y + h - 5, rtAllies, colorBlue, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	return y += TINYCHAR_HEIGHT;
+}
+
 /*
 ========================
 sswolf - complete OSP demo features
@@ -1271,6 +1315,11 @@ static void CG_DrawUpperRight( void ) {
 	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
         y = CG_DrawEnemyTimer(y);
 
+	}
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus && cg_drawReinforcementTime.integer > 0)
+	{
+		y = CG_DrawShoutcastTimer(y);
 	}
 
 	// sswolf - complete OSP demo features
@@ -4517,6 +4566,12 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	// -NERVE - SMF
 
 	CG_ShakeCamera();       // NERVE - SMF
+
+	// RTCWPro - draw triggers for shoutcasters
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus && cgs.gamestate == GS_PLAYING)
+	{
+		CG_DrawTriggers();
+	}
 
 	trap_R_RenderScene( &cg.refdef );
 

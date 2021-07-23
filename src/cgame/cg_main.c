@@ -380,6 +380,9 @@ vmCvar_t cg_spawnTimer_period;      // spawntimer
 // added from et-legacy - crumbs
 vmCvar_t cg_tracers;
 
+// draw triggers
+vmCvar_t	cg_drawTriggers;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -635,6 +638,9 @@ cvarTable_t cvarTable[] = {
 
 	// draw tracers
 	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
+
+	// draw triggers
+	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -1560,6 +1566,14 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.noammoShader = trap_R_RegisterShader( "icons/noammo" );
 	// OSPx - Country Flags (by mcwf)
 	cgs.media.countryFlags = trap_R_RegisterShaderNoMip("gfx/flags/world_flags");
+
+	// draw triggers
+	cgs.media.transmitTrigger = trap_R_RegisterShaderNoMip("gfx/2d/transmitTrigger");
+	cgs.media.transmitTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/transmitTriggerEdges");
+	cgs.media.objTrigger = trap_R_RegisterShaderNoMip("gfx/2d/objTrigger");
+	cgs.media.objTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/objTriggerEdges");
+	cgs.media.customTrigger = trap_R_RegisterShaderNoMip("gfx/2d/customTrigger");
+	cgs.media.customTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/customTriggerEdges");
 
 	// powerup shaders
 //	cgs.media.quadShader = trap_R_RegisterShader("powerups/quad" );

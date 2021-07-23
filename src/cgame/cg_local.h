@@ -1232,6 +1232,12 @@ typedef struct {
 	scItem_t scItems[MAX_SCITEMS];
 	int numSCItems;
 
+	// RTCWPro - draw triggers
+	int drawTriggersCount;
+	int lastGetTriggerDistancesTime;
+	int drawTriggerEntIndexes[MAX_ENTITIES + 1];
+	float drawTriggerDistances[MAX_ENTITIES + 1];
+
 	pmoveExt_t pmext;
 
 } cg_t;
@@ -1744,6 +1750,15 @@ typedef struct {
 	// end of round
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
+
+	// RTCWPro - draw triggers
+	qhandle_t transmitTrigger;
+	qhandle_t transmitTriggerEdges;
+	qhandle_t objTrigger;
+	qhandle_t objTriggerEdges;
+	qhandle_t customTrigger;
+	qhandle_t customTriggerEdges;
+
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -2156,6 +2171,9 @@ extern vmCvar_t cg_spawnTimer_set;
 // added from et-legacy - crumbs
 extern vmCvar_t cg_tracers;
 
+// draw triggers
+extern vmCvar_t	cg_drawTriggers;
+
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
 
@@ -2272,6 +2290,7 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
 char* CG_GetClock(void);
 void CG_ColorForPercent(float percent, vec4_t hcolor);
+void CG_DrawTriggers(void);
 
 //
 // cg_draw.c, cg_newDraw.c
