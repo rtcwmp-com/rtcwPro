@@ -3144,7 +3144,7 @@ void CL_Init( void ) {
 	#endif
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
-	Cvar_Get("cl_checkversion", "108", CVAR_ROM | CVAR_CHEAT | CVAR_LATCH | CVAR_USERINFO);
+	Cvar_Get("cl_checkversion", "108", CVAR_ROM | CVAR_USERINFO);
 
 	// init autoswitch so the ui will have it correctly even
 	// if the cgame hasn't been started
