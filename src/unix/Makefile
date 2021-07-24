@@ -91,7 +91,7 @@ SERVEROBJS := \
 	../server/sv_bot.o ../server/sv_ccmds.o ../server/sv_client.o \
 	../server/sv_game.o ../server/sv_init.o ../server/sv_main.o ../server/sv_control.o \
 	../server/sv_net_chan.o ../server/sv_snapshot.o ../server/sv_animation.o \
-	../server/sv_world.o ../server/sv_wallhack.o  ../server/sv_events.o
+	../server/sv_world.o ../server/sv_wallhack.o  ../server/sv_events.o 
 # ../qcommon/vm_x86.c is not used and not nice to port to mingw
 VMOBJS := \
 	../qcommon/vm.o ../qcommon/vm_interpreted.o
@@ -182,9 +182,10 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+	$(CFLAGSREL) -m32 -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/include/
 #server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
-server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs/ -lcurl -lcrypto -ldl -lm -lz -DCURL_STATICLIB  -lmysqlclient  
+#server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz   -DCURL_STATICLIB  -lmysqlclient 
+server: LDFLAGS := -m32 -ldl -lm -L./../../libs/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz   -DCURL_STATICLIB  -lmysqlclient 
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -225,7 +226,7 @@ server-w32-clean:
 CURLCONF := \
 	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
 	--prefix=$(PWD)/../../libs/curl-7.75.0 \
-	--enable-shared=no --enable-static=yes --disable-rtsp \
+	--enable-shared=no --enable-static=yes --with-ssl --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \
@@ -233,13 +234,15 @@ CURLCONF := \
 	--without-gnutls --without-zlib --with-gnu-ld \
 	--disable-cookies --disable-tls-srp --disable-ntlm-wb \
 	--disable-sspi --disable-verbose  --disable-threaded-resolver \
-	--disable-nonblocking --disable-manual --without-ssl
+	--disable-nonblocking --disable-manual 
 
 curl: 
 	cd ../../libs/curl-7.75.0 && ./configure $(CURLCONF)
 	cd ../../libs/curl-7.75.0 && make
-#	mv ../../libs/libcurl/lib/.libs/libcurl.a ../../libs/libcurl/lib/.libs/libcurl_linux.a
-#	cp -R ../../libs/libcurl/include/curl ../../libs/libcurl/include/curl_linux
+	cp ../../libs/curl-7.75.0/lib/.libs/libcurl.a ../../libs/curl-7.75.0/lib/.libs/libcurl_linux.a
+	cp ../../libs/curl-7.75.0/lib/.libs/libcurl.a ../../libs/.libs/libcurl.a
+	cp -R ../../libs/curl-7.75.0/include/curl ../../libs/curl-7.75.0/include/curl_linux
+	cp -R ../../libs/curl-7.75.0/include/curl ../../libs/include/curl
 
 curl-w32:
 	cd ../../libs/libcurl && CC=i586-mingw32msvc-gcc RANLIB=i586-mingw32msvc-ranlib \
