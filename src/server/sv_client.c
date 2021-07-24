@@ -325,6 +325,7 @@ void SV_DirectConnect( netadr_t from ) {
 	//char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
+	int proversion;
 
 	Com_DPrintf( "SVC_DirectConnect ()\n");
 
@@ -337,6 +338,14 @@ void SV_DirectConnect( netadr_t from ) {
 	// Check whether this client is banned.
 	if (SV_IsBanned(&from, qfalse)) {
 		NET_OutOfBandPrint(NS_SERVER, from, "print\n^7You are ^1Banned ^7from this server^1!\n");
+		return;
+	}
+
+	// RTCWPro
+	proversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
+	if (proversion != 108)
+	{
+		NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version. " "Run updater as admin.\n");
 		return;
 	}
 
