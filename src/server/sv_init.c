@@ -817,7 +817,7 @@ void SV_Init( void ) {
     sv_minRate = Cvar_Get ("sv_minRate", "0", CVAR_ARCHIVE | CVAR_SERVERINFO );
 	sv_maxRate = Cvar_Get( "sv_maxRate", "0", CVAR_ARCHIVE | CVAR_SERVERINFO );
 	// systeminfo
-	Cvar_Get( "sv_cheats", "1", CVAR_SYSTEMINFO | CVAR_ROM );
+	Cvar_Get( "sv_cheats", "0", CVAR_SYSTEMINFO | CVAR_ROM );
 	sv_serverid = Cvar_Get( "sv_serverid", "0", CVAR_SYSTEMINFO | CVAR_ROM );
 	sv_pure = Cvar_Get( "sv_pure", "1", CVAR_SYSTEMINFO );
 	Cvar_Get( "sv_paks", "", CVAR_SYSTEMINFO | CVAR_ROM );
@@ -921,6 +921,8 @@ void SV_Init( void ) {
 	sv_ssMinTime = Cvar_Get("sv_ssMinTime", "600", CVAR_ARCHIVE);
 	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
+
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "108", CVAR_ARCHIVE);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

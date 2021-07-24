@@ -325,7 +325,6 @@ void SV_DirectConnect( netadr_t from ) {
 	//char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
-	int proversion;
 
 	Com_DPrintf( "SVC_DirectConnect ()\n");
 
@@ -342,8 +341,8 @@ void SV_DirectConnect( netadr_t from ) {
 	}
 
 	// RTCWPro
-	proversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
-	if (proversion != 108)
+	int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
+	if (cl_checkversion != sv_checkVersion->integer)
 	{
 		NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version. " "Run updater as admin.\n");
 		return;

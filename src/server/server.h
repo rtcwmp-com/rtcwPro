@@ -381,6 +381,8 @@ extern cvar_t* sv_ssMinTime;
 extern cvar_t* sv_ssMaxTime;
 //extern cvar_t* sv_ssQuality;
 
+extern cvar_t* sv_checkVersion;
+
 //===========================================================
 
 // L0 - ioquake ipv6 banning
