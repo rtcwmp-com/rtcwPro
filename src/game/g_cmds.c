@@ -459,7 +459,12 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent ) {
 	char    *msg;
 
-	if ( !CheatsOk( ent ) ) {
+	/*if ( !CheatsOk( ent ) ) {
+		return;
+	}*/
+
+	if (!g_cheats.integer && !ent->client->sess.shoutcaster) {
+		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
 		return;
 	}
 
