@@ -380,9 +380,7 @@ vmCvar_t cg_spawnTimer_period;      // spawntimer
 // added from et-legacy - crumbs
 vmCvar_t cg_tracers;
 
-// draw triggers
-vmCvar_t cg_drawTriggers;
-
+// ERT
 vmCvar_t cg_drawEnemyTimer;
 
 typedef struct {
@@ -641,9 +639,7 @@ cvarTable_t cvarTable[] = {
 	// draw tracers
 	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
 
-	// draw triggers
-	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
-
+	// ERT
 	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
