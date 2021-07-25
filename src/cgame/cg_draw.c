@@ -1066,20 +1066,14 @@ static float CG_DrawEnemyTimer(float y) {
 	int    msec    = (cgs.timelimit * 60.f * 1000.f ) - (cg.time - cgs.levelStartTime);
 	int    seconds = msec / 1000;
 	int    mins    = seconds / 60;
+	playerState_t* ps;
 
 	seconds -= mins * 60;
 	tens     = seconds / 10;
 	seconds -= tens * 10;
-
-	playerState_t* ps;
-
-	if (cgs.gametype < GT_WOLF) {
-		return y;
-	}
-
 	ps = &cg.snap->ps;
 
-	if (ps->stats[STAT_HEALTH] <= 0) { // don't show when limbo message is drawn
+	if (cgs.gametype < GT_WOLF) {
 		return y;
 	}
 
@@ -1117,7 +1111,14 @@ static float CG_DrawEnemyTimer(float y) {
 				//	x = 46 + 6;
 				x = 46 + 40;
 				//	y = 480 - 245;
-				y = 480 - 400;
+				if (ps->stats[STAT_HEALTH] > 0)
+				{
+					y = 480 - 400;
+				}
+				else
+				{
+					y = 480 - 360;
+				}
 				CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
 		}
@@ -1128,7 +1129,8 @@ static float CG_DrawEnemyTimer(float y) {
 		// this happens for example when custom period is set by timerSet and map is restarted or changed
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
-	else {
+	else 
+	{
         return y;
 	}
 
