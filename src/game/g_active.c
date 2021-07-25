@@ -436,7 +436,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		}
 
 		// L0 - Pause
-		if ( level.paused != PAUSE_NONE && client->sess.referee == RL_NONE) {
+		if ( level.paused != PAUSE_NONE && client->sess.referee == RL_NONE && client->sess.shoutcaster == 0) {
 			client->ps.pm_type = PM_FREEZE;
 			ucmd->buttons = 0;
 			ucmd->forwardmove = 0;
@@ -444,6 +444,11 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 			ucmd->upmove = 0;
 			ucmd->wbuttons = 0;
 		}
+		else if (client->noclip && client->sess.shoutcaster)
+		{
+			client->ps.pm_type = PM_NOCLIP;
+		}
+
 		// set up for pmove
 		memset( &pm, 0, sizeof( pm ) );
 		pm.ps = &client->ps;

@@ -608,10 +608,7 @@ void respawn( gentity_t *ent ) {
 	ClientSpawn( ent, qfalse );
 
 	// L0 - antilag
-	G_ResetTrail( ent );
-#ifndef ANTILAG_REFACTOR
-    ent->client->saved.leveltime = 0;
-#endif
+	G_ResetTrail(ent);
 	// L0 - end
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
@@ -1984,10 +1981,7 @@ void ClientBegin( int clientNum ) {
 	ClientSpawn( ent, qfalse );
 
 	// L0 - antilag
-	G_ResetTrail( ent );
-#ifndef ANTILAG_REFACTOR
-    ent->client->saved.leveltime = 0;
-#endif
+	G_ResetTrail(ent);
 	// L0 - end
 	// Xian -- Changed below for team independant maxlives
 

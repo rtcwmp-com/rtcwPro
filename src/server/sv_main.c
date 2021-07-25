@@ -109,6 +109,8 @@ cvar_t* sv_ssMinTime;
 cvar_t* sv_ssMaxTime;
 //cvar_t* sv_ssQuality;
 
+cvar_t* sv_checkVersion;
+
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
 serverBan_t serverBans[SERVER_MAXBANS];
