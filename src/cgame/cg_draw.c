@@ -1071,7 +1071,6 @@ static float CG_DrawEnemyTimer(float y) {
 	tens     = seconds / 10;
 	seconds -= tens * 10;
 
-
 	playerState_t* ps;
 
 	if (cgs.gametype < GT_WOLF) {
@@ -1095,6 +1094,11 @@ static float CG_DrawEnemyTimer(float y) {
     if (cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
         return y;
     }
+
+	if (!cg_drawEnemyTimer.integer)
+	{
+		return y;
+	}
 
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus)
 	{
@@ -1312,7 +1316,7 @@ static void CG_DrawUpperRight( void ) {
 	}
 
 	// enemy respawn timer (do not include yet)
-	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
+	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0) && (cg_drawEnemyTimer.integer)) {
         y = CG_DrawEnemyTimer(y);
 
 	}

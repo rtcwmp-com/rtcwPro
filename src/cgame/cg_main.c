@@ -381,7 +381,9 @@ vmCvar_t cg_spawnTimer_period;      // spawntimer
 vmCvar_t cg_tracers;
 
 // draw triggers
-vmCvar_t	cg_drawTriggers;
+vmCvar_t cg_drawTriggers;
+
+vmCvar_t cg_drawEnemyTimer;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -641,6 +643,8 @@ cvarTable_t cvarTable[] = {
 
 	// draw triggers
 	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
+
+	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

@@ -2174,6 +2174,8 @@ extern vmCvar_t cg_tracers;
 // draw triggers
 extern vmCvar_t	cg_drawTriggers;
 
+extern vmCvar_t cg_drawEnemyTimer;
+
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
 

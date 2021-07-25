@@ -992,8 +992,13 @@ qboolean CG_RelayCommand(char* type, int value) {
 /**
  * @brief ETPro style enemy spawntimer
  */
-static void CG_TimerSet_f(void)
-{
+static void CG_TimerSet_f(void) {
+
+	if (!cg_drawEnemyTimer.integer)
+	{
+		return;
+	}
+
 	if (cgs.gamestate != GS_PLAYING)
 	{
 		CG_Printf("You may only use this command during the match.\n");
