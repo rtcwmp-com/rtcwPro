@@ -792,6 +792,8 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 	else
 		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
 
+	SV_ReloadRest(qfalse); // RTCWPro
+
 	// call the game begin function
 	VM_Call( gvm, GAME_CLIENT_BEGIN, client - svs.clients );
 }
@@ -2277,7 +2279,8 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT)
 	{
-		cl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+		//cl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+		SV_ReloadRest(qfalse);
 		SV_ExecuteClientCommand(cl, "team s", qtrue);
 		SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
 		return;

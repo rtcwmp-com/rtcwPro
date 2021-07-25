@@ -3145,8 +3145,8 @@ void Com_Frame(void) {
 	}
 
 	// L0 - Fix maxfps abuse..
-	if (com_maxfps->integer > 125)
-		Cvar_Set("com_maxfps", "125");
+	/*if (com_maxfps->integer > 125)
+		Cvar_Set("com_maxfps", "125");*/
 
 	// we may want to spin here if things are going too fast
 	if (!com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer) {
