@@ -379,6 +379,7 @@ vmCvar_t cg_tracers;
 
 // ERT
 vmCvar_t cg_drawEnemyTimer;
+vmCvar_t cg_drawTriggers;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -638,6 +639,7 @@ cvarTable_t cvarTable[] = {
 
 	// ERT
 	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
+	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

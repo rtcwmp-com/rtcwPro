@@ -474,17 +474,6 @@ static void CG_ResetMaxSpeed_f(void)
 	cg.resetmaxspeed = qtrue;
 }
 
-static void CG_DrawTriggers_f(void) {
-
-	if (!cgs.clientinfo[cg.clientNum].shoutStatus)
-	{
-		CG_Printf("Login as a shoutcaster first.\n");
-		return;
-	}
-
-	cg.drawTriggers = !cg.drawTriggers;
-}
-
 /*
 ===================
 CG_DumpLocation_f
@@ -833,7 +822,6 @@ static consoleCommand_t commands[] = {
 	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
 	{ "minimize", CG_Minimize_f },
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
-	{ "drawTriggers", CG_DrawTriggers_f },
 	// RTCWPro
 
 	// Arnout

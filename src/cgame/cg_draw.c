@@ -4574,7 +4574,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_ShakeCamera();       // NERVE - SMF
 
 	// RTCWPro - draw triggers for shoutcasters
-	if (cg.drawTriggers && cgs.clientinfo[cg.clientNum].shoutStatus)
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus)
 	{
 		CG_DrawTriggers();
 	}

@@ -1237,7 +1237,6 @@ typedef struct {
 	int lastGetTriggerDistancesTime;
 	int drawTriggerEntIndexes[MAX_ENTITIES + 1];
 	float drawTriggerDistances[MAX_ENTITIES + 1];
-	qboolean drawTriggers;
 
 	pmoveExt_t pmext;
 
@@ -2174,6 +2173,7 @@ extern vmCvar_t cg_tracers;
 
 // ERT
 extern vmCvar_t cg_drawEnemyTimer;
+extern vmCvar_t cg_drawTriggers;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
