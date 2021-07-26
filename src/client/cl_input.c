@@ -418,26 +418,23 @@ void CL_KeyMove( usercmd_t *cmd ) {
 CL_MouseEvent
 =================
 */
-void CL_MouseEvent( int dx, int dy, int time ) {
-	if ( cls.keyCatchers & KEYCATCH_UI ) {
+void CL_MouseEvent(int dx, int dy, int time) {
+	if (cls.keyCatchers & KEYCATCH_UI) {
 
 		// NERVE - SMF - if we just want to pass it along to game
-		if ( cl_bypassMouseInput->integer == 1 ) {
-			cl.mouseDx[cl.mouseIndex] += dx;
-			cl.mouseDy[cl.mouseIndex] += dy;
-		} else {
-			VM_Call( uivm, UI_MOUSE_EVENT, dx, dy );
-		}
-
-	} else if ( cls.keyCatchers & KEYCATCH_CGAME ) {
 		if (cl_bypassMouseInput->integer == 1) {
 			cl.mouseDx[cl.mouseIndex] += dx;
 			cl.mouseDy[cl.mouseIndex] += dy;
 		}
 		else {
-			VM_Call(cgvm, CG_MOUSE_EVENT, dx, dy);
+			VM_Call(uivm, UI_MOUSE_EVENT, dx, dy);
 		}
-	} else {
+
+	}
+	else if (cls.keyCatchers & KEYCATCH_CGAME) {
+		VM_Call(cgvm, CG_MOUSE_EVENT, dx, dy);
+	}
+	else {
 		cl.mouseDx[cl.mouseIndex] += dx;
 		cl.mouseDy[cl.mouseIndex] += dy;
 	}
@@ -590,7 +587,7 @@ void CL_CmdButtons( usercmd_t *cmd ) {
 		kb[KB_BUTTONS0 + i].wasPressed = qfalse;
 	}
 
-	for ( i = 0 ; i < 8; i++ ) {
+	for ( i = 0 ; i < 7; i++ ) {
 		if ( kb[KB_WBUTTONS0 + i].active || kb[KB_WBUTTONS0 + i].wasPressed ) {
 			cmd->wbuttons |= 1 << i;
 		}

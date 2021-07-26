@@ -204,20 +204,6 @@ void CL_SetClientLerpOrigin( float x, float y, float z ) {
 }
 
 /*
-==================
-CL_CGameCheckKeyExec
-==================
-*/
-qboolean CL_CGameCheckKeyExec(int key) {
-	if (cgvm) {
-		return (qboolean)(VM_Call(cgvm, CG_CHECKEXECKEY, key));
-	}
-	else {
-		return qfalse;
-	}
-}
-
-/*
 ==============
 CL_AddCgameCommand
 ==============

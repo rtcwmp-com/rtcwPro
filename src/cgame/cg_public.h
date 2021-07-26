@@ -285,9 +285,6 @@ typedef enum {
 	CG_CHECKCENTERVIEW,
 //	qboolean CG_CheckCenterView(void);
 
-	CG_CHECKEXECKEY,
-//  qboolean CG_CheckExecKey(int key);
-
 	CG_RELAY_COMMAND,
 //	qboolean(*CG_RelayCommand)(const char type, int value);
 } cgameExport_t;
