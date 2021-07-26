@@ -60,6 +60,7 @@ typedef struct {
 } keyname_t;
 
 qboolean UI_checkKeyExec( int key );        // NERVE - SMF
+qboolean CL_CGameCheckKeyExec(int key);
 
 cvar_t* con_height; // RTCWPro
 
@@ -1847,13 +1848,13 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	}
 
 	// NERVE - SMF - if we just want to pass it along to game
-	if (cl_bypassMouseInput && cl_bypassMouseInput->integer) {    //DAJ BUG in dedicated cl_missionStats don't exist
-		if ((key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3)) {
+	if ( cl_bypassMouseInput && cl_bypassMouseInput->integer ) {    //DAJ BUG in dedicated cl_missionStats don't exist
+		if ((key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3 || key == K_MOUSE4 || key == K_MOUSE5)) {
 			if (cl_bypassMouseInput->integer == 1) {
 				bypassMenu = qtrue;
 			}
 		}
-		else if (!UI_checkKeyExec(key)) {
+		else if (((cls.keyCatchers & KEYCATCH_UI) && !UI_checkKeyExec(key)) || ((cls.keyCatchers & KEYCATCH_CGAME) && !CL_CGameCheckKeyExec(key))) {
 			bypassMenu = qtrue;
 		}
 	}
@@ -1934,17 +1935,16 @@ void CL_CharEvent( int key ) {
 	}
 
 	// distribute the key down event to the apropriate handler
-	if (cls.keyCatchers & KEYCATCH_CONSOLE) {
-		Field_CharEvent(&g_consoleField, key);
-	}
-	else if (cls.keyCatchers & KEYCATCH_UI) {
-		VM_Call(uivm, UI_KEY_EVENT, key | K_CHAR_FLAG, qtrue);
-	}
-	else if (cls.keyCatchers & KEYCATCH_MESSAGE) {
-		Field_CharEvent(&chatField, key);
-	}
-	else if (cls.state == CA_DISCONNECTED) {
-		Field_CharEvent(&g_consoleField, key);
+	if ( cls.keyCatchers & KEYCATCH_CONSOLE ) {
+		Field_CharEvent( &g_consoleField, key );
+	} else if ( cls.keyCatchers & KEYCATCH_UI )   {
+		VM_Call( uivm, UI_KEY_EVENT, key | K_CHAR_FLAG, qtrue );
+	} else if (cls.keyCatchers & KEYCATCH_CGAME) {
+		VM_Call( cgvm, CG_KEY_EVENT, key | K_CHAR_FLAG, qtrue );
+	} else if ( cls.keyCatchers & KEYCATCH_MESSAGE ) {
+		Field_CharEvent( &chatField, key );
+	} else if ( cls.state == CA_DISCONNECTED )   {
+		Field_CharEvent( &g_consoleField, key );
 	}
 }
 
