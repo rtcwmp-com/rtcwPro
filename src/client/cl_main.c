@@ -3144,7 +3144,7 @@ void CL_Init( void ) {
 	#endif
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
-	Cvar_Get("cl_checkversion", "108", CVAR_ROM | CVAR_USERINFO);
+	Cvar_Get("cl_checkversion", "109", CVAR_ROM | CVAR_USERINFO);
 
 	// init autoswitch so the ui will have it correctly even
 	// if the cgame hasn't been started
@@ -3313,7 +3313,7 @@ void CL_Init( void ) {
 
 	Cvar_Set( "cl_running", "1" );
 	// RTCWPro
-	Cvar_Set("cl_checkversion", "108");
+	Cvar_Set("cl_checkversion", "109");
 
 	// DHM - Nerve
 	autoupdateChecked = qfalse;
