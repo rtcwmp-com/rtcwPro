@@ -903,7 +903,7 @@ cheats is zero, force all unspecified variables to their
 default values.
 ==========================================================
 */
-#define MAX_CVARS				2048 //1024 RTCWPro
+#define MAX_CVARS				1024
 #define MAX_CVAR_VALUE_STRING   256
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
