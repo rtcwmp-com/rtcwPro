@@ -32,7 +32,7 @@ Main objective: create a competition mod similar to OSP with updates for tournam
  - 1.1.2 [changelog](changelog/1.1.2-changelog.txt)
    - added nopicmip to tree/ivy/truss shaders so high values of picmip will not remove them
 
- - 1.2 [changelog](changelog/1.2.txt)
+ - 1.2 [changelog](changelog/1.2-changelog.txt)
    - Release 1.2 includes custom client (wolfMP.exe) to allow cvar restrictions, http downloads, and many other features
    - various renderer and overflow fixes
    - add http downloads: cl_wwwdownload, sv_wwwdownload, sv_wwwbaseurl
