@@ -116,7 +116,7 @@ Main objective: create a competition mod similar to OSP with updates for tournam
    - add custom screen shake: g_screenShake
    - default r_mode to 6
 
-If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/TsHH4PEx3w
+If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
 RtcwPro Dev Team
 -nihilist, KrazyKaze, Tarator
