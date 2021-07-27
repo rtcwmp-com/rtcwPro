@@ -238,7 +238,7 @@ gentity_t *AICast_AddCastToGame( gentity_t *ent, char *castname, char *model, ch
 	Info_SetValueForKey( userinfo, "name", castname );
 	Info_SetValueForKey( userinfo, "rate", "25000" );
 	Info_SetValueForKey( userinfo, "snaps", "20" );
-	Info_SetValueForKey( userinfo, "handicap", handicap );
+	//Info_SetValueForKey( userinfo, "handicap", handicap );
 	Info_SetValueForKey( userinfo, "model", model );
 	Info_SetValueForKey( userinfo, "head", head );
 	Info_SetValueForKey( userinfo, "color", color );

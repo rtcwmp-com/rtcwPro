@@ -485,6 +485,25 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			}
 		}
 
+		if (e < sv_maxclients->integer) {
+			sharedEntity_t* client;
+
+			if (e == frame->ps.clientNum) {
+				continue;
+			}
+
+			client = SV_GentityNum(frame->ps.clientNum);
+			if (wh_active->integer && !portal && !(client->r.svFlags & SVF_BOT) &&
+				(frame->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR)) 
+			{
+				if (!SV_CanSee(frame->ps.clientNum, e)){
+					SV_RandomizePos(frame->ps.clientNum, e);
+					SV_AddEntToSnapshot(svEnt, ent, eNums);
+					continue;
+				}
+			}
+		}
+
 		// add it
 		SV_AddEntToSnapshot( svEnt, ent, eNums );
 
@@ -613,6 +632,13 @@ static void SV_BuildClientSnapshot( client_t *client ) {
 		ent = SV_GentityNum( entityNumbers.snapshotEntities[i] );
 		state = &svs.snapshotEntities[svs.nextSnapshotEntities % svs.numSnapshotEntities];
 		*state = ent->s;
+
+		if (wh_active->integer && entityNumbers.snapshotEntities[i] < sv_maxclients->integer) {
+			if (SV_PositionChanged(entityNumbers.snapshotEntities[i])) {
+				SV_RestorePos(entityNumbers.snapshotEntities[i]);
+			}
+		}
+
 		svs.nextSnapshotEntities++;
 		// this should never hit, map should always be restarted first in SV_Frame
 		if ( svs.nextSnapshotEntities >= 0x7FFFFFFE ) {
@@ -761,6 +787,9 @@ void SV_SendClientSnapshot( client_t *client ) {
 	SV_WriteSnapshotToClient( client, &msg );
 
 	// Add any download data if the client is downloading
+	if (sv_wwwDownload->integer) {
+	  SV_WriteDownloadToClient( client, &msg );
+	}
 	//SV_WriteDownloadToClient( client, &msg );
 
 	// check for overflow

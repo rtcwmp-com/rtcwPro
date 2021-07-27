@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="g_shared.c">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="ai_cast.c">
       <Filter>Source Files</Filter>
@@ -79,12 +79,6 @@
     <ClCompile Include="g_active.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_admin.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_admin_bot.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_alarm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,9 +98,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_combat.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g_config.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="g_geoip.c">
@@ -187,9 +178,6 @@
     <ClCompile Include="g_utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_vehicles.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="g_vote.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -211,117 +199,118 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ai_cast.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ai_cast_fight.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ai_cast_global.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\ai_chat.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\ai_cmd.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\ai_dmnet.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\ai_dmq3.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\ai_main.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\ai_team.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ai_char.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ai_chat.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ai_gen.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ai_goal.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ai_move.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ai_weap.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_ea.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bg_local.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bg_public.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\botai.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="botlib.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\chars.h">
-      <Filter>Hedaer Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g_admin.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_local.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_public.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\inv.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\qcommon\jansson_win\jansson.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\match.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="q_shared.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\qcommon\crypto\sha-1\sha1.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="surfaceflags.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\botai\syn.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="be_aas.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="g_team.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_shared.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_stats.h">
-      <Filter>Hedaer Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Hedaer Files">
-      <UniqueIdentifier>{a92ca6d4-66f4-4349-98a6-5766429cf5c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{b37a064e-a701-4410-b6ee-5263e890836d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{a92ca6d4-66f4-4349-98a6-5766429cf5c7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile" />
+    <None Include="game.def" />
   </ItemGroup>
 </Project>

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -477,7 +477,7 @@ void M_think( gentity_t *ent ) {
 /*
 --------------------------------
 	OSPx - Fix FFE building bug
-	ET's RadiusDamage system 
+	ET's RadiusDamage system
 
 	Port from ET to S4NDMoD
 	- Dutchmeat
@@ -758,16 +758,7 @@ void BG_ET_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
 	}
 }
 
-// -OSPx - FFE Damage Fix dump ends here
 
-/*
-================
-G_ExplodeMissile
-
-Explode a missile without an impact
-OSPx - Modified to work with ET Damage port.
-================
-*/
 void G_ExplodeMissile( gentity_t *ent ) {
 	vec3_t dir;
 	vec3_t origin;
@@ -785,8 +776,124 @@ void G_ExplodeMissile( gentity_t *ent ) {
 		VectorCopy(ent->r.currentOrigin, origin);
 
 		trap_Trace(&tr, origin, vec3_origin, vec3_origin, origin, ENTITYNUM_NONE, MASK_SHOT);
+		/*
+            Do not call G_ET_RadiusDamage but instead include it directly here (to avoid the desynchronizing of damage & bombs dropped)
+                (Time is short and so please excuse this plop-n-drop )
 
-		G_ET_RadiusDamage(origin, ent, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath); //----(SA)
+        */
+        //G_ET_RadiusDamage(origin, ent, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath); //----(SA)
+
+
+        // begin: G_ET_RadiusDamage
+                float points, dist;
+                float radius=ent->splashRadius;
+                gentity_t *inflictor = ent;
+                gentity_t *attacker = ent->parent;
+                float damage =ent->splashDamage;
+                gentity_t *ignore = ent;
+                int mod = ent->splashMethodOfDeath;
+                gentity_t   *ent;
+                int entityList[MAX_GENTITIES];
+                int numListedEntities;
+                vec3_t mins, maxs;
+                vec3_t v;
+                vec3_t dir;
+                int i, e;
+                qboolean hitClient = qfalse;
+                float boxradius;
+                vec3_t dest;
+               // trace_t tr;
+                vec3_t midpoint;
+                int flags = DAMAGE_RADIUS;
+
+                if (radius < 1) {
+                    radius = 1;
+                }
+
+                boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement --
+                // bounding box was checking against radius / sqrt(2) if collision is along box plane
+                for (i = 0; i < 3; i++) {
+                    mins[i] = origin[i] - boxradius;
+                    maxs[i] = origin[i] + boxradius;
+                }
+
+                numListedEntities = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
+
+                for (e = 0; e < level.num_entities; e++) {
+                    g_entities[e].dmginloop = qfalse;
+                }
+
+                for (e = 0; e < numListedEntities; e++) {
+                    ent = &g_entities[entityList[e]];
+
+                    if (ent == ignore) {
+                        continue;
+                    }
+                    if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
+                        continue;
+                    }
+
+                    G_AdjustedDamageVec(ent, origin, v);
+
+                    dist = VectorLength(v);
+                    if (dist >= radius) {
+                        continue;
+                    }
+
+                    points = damage * (1.0 - dist / radius);
+
+                    if (CanDamage(ent, origin)) {
+                        if (ent->dmgparent) {
+                            ent = ent->dmgparent;
+                        }
+
+                        if (ent->dmginloop) {
+                            continue;
+                        }
+
+                        if (AccuracyHit(ent, attacker)) {
+                            hitClient = qtrue;
+                        }
+                        VectorSubtract(ent->r.currentOrigin, origin, dir);
+                        // push the center of mass higher than the origin so players
+                        // get knocked into the air more
+                        dir[2] += 24;
+
+
+                        G_Damage(ent, inflictor, attacker, dir, origin, (int)points, flags, mod);
+                    }
+                    else {
+                        VectorAdd(ent->r.absmin, ent->r.absmax, midpoint);
+                        VectorScale(midpoint, 0.5, midpoint);
+                        VectorCopy(midpoint, dest);
+
+                        trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+                        if (tr.fraction < 1.0) {
+                            VectorSubtract(dest, origin, dest);
+                            dist = VectorLength(dest);
+                            if (dist < radius * 0.2f) { // closer than 1/4 dist
+                                if (ent->dmgparent) {
+                                    ent = ent->dmgparent;
+                                }
+
+                                if (ent->dmginloop) {
+                                    continue;
+                                }
+
+                                if (AccuracyHit(ent, attacker)) {
+                                    hitClient = qtrue;
+                                }
+                                VectorSubtract(ent->r.currentOrigin, origin, dir);
+                                dir[2] += 24;
+                                G_Damage(ent, inflictor, attacker, dir, origin, (int)(points * 0.1f), flags, mod);
+                            }
+                        }
+                    }
+                }
+
+
+
+        //end G_ET_RadiusDamage
 	}
 
 	BG_ET_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse, ent->s.effect2Time);
@@ -846,6 +953,7 @@ void G_ExplodeMissile( gentity_t *ent ) {
 					continue;
 				}
 
+
 				if ((hit->s.eType != ET_OID_TRIGGER)) {
 					continue;
 				}
@@ -861,8 +969,8 @@ void G_ExplodeMissile( gentity_t *ent ) {
 					}
 				}
 
-				if (((hit->spawnflags & AXIS_OBJECTIVE) && (ent->s.teamNum == TEAM_BLUE)) || 
-					((hit->spawnflags & ALLIED_OBJECTIVE) && (ent->s.teamNum == TEAM_RED))) 
+				if (((hit->spawnflags & AXIS_OBJECTIVE) && (ent->s.teamNum == TEAM_BLUE)) ||
+					((hit->spawnflags & ALLIED_OBJECTIVE) && (ent->s.teamNum == TEAM_RED)))
 				{
 					G_UseTargets(hit, ent);
 					hit->think = G_FreeEntity;
@@ -875,11 +983,14 @@ void G_ExplodeMissile( gentity_t *ent ) {
 		if (ent->s.weapon == WP_DYNAMITE || ent->s.weapon == WP_PANZERFAUST || ent->s.weapon == WP_GRENADE_LAUNCHER ||
 			ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
 			ent->s.weapon == WP_ARTY) {
-			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
+			// RTCWPro custom screen shake
+			//Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
+			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * (!g_screenShake.integer ? 1 : g_screenShake.integer));
 		}
 		return;
 	}
 }
+
 
 /*
 ================

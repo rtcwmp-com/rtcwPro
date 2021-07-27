@@ -31,8 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-
-#define Q3_VERSION      "Wolf 1.41b-MP"
+#define Q3_VERSION      "RtcwMP-Pro 1.2.109"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -73,6 +72,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #if defined( ppc ) || defined( __ppc ) || defined( __ppc__ ) || defined( __POWERPC__ )
 #define idppc 1
+#endif
+
+#ifndef DIRECTINPUT_VERSION
+#define DIRECTINPUT_VERSION 0x0800
 #endif
 
 /**********************************************************************
@@ -186,7 +189,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( fabs( x ) == 0.0 ) {
+	if ( Q_fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;
@@ -232,7 +235,7 @@ static inline float idSqrt( float x ) {
 	float B, y0, y1;
 
 	// This'll NaN if it hits frsqrte. Handle both +0.0 and -0.0
-	if ( fabs( x ) == 0.0 ) {
+	if ( Q_fabs( x ) == 0.0 ) {
 		return x;
 	}
 	B = x;
@@ -304,9 +307,6 @@ typedef int clipHandle_t;
 
 #define MAX_QINT            0x7fffffff
 #define MIN_QINT            ( -MAX_QINT - 1 )
-// L0 - Ported this
-#define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
-#define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 
 // TTimo gcc: was missing, added from Q3 source
 #ifndef max
@@ -328,7 +328,7 @@ typedef int clipHandle_t;
 #define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
 #define MAX_TOKEN_CHARS     1024    // max length of an individual token
 
-#define MAX_INFO_STRING     1024
+#define MAX_INFO_STRING     4096 // sswolf - increase from 1024
 #define MAX_INFO_KEY        1024
 #define MAX_INFO_VALUE      1024
 
@@ -720,6 +720,13 @@ void GetPerpendicularViewVector( const vec3_t point, const vec3_t p1, const vec3
 void ProjectPointOntoVector( vec3_t point, vec3_t vStart, vec3_t vEnd, vec3_t vProj );
 // done.
 
+//
+// q_shared_c
+//
+int Q_CountChar(const char* string, char tocount);
+char* Q_CleanDirName(char* dirname);
+qboolean Q_IsNumeric(const char* s);
+
 //=============================================
 
 float Com_Clamp( float min, float max, float value );
@@ -884,7 +891,7 @@ void Info_NextPair( const char **s, char *key, char *value );
 // this is only here so the functions in q_shared.c and bg_*.c can link
 void QDECL Com_Error( int level, const char *error, ... );
 void QDECL Com_Printf( const char *msg, ... );
-
+void QDECL Com_DPrintf(const char* fmt, ...);
 
 /*
 ==========================================================
@@ -896,6 +903,8 @@ cheats is zero, force all unspecified variables to their
 default values.
 ==========================================================
 */
+#define MAX_CVARS				1024
+#define MAX_CVAR_VALUE_STRING   256
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
 								// used for system variables, not for player
@@ -917,6 +926,65 @@ default values.
 #define CVAR_NORESTART      1024    // do not clear when a cvar_restart is issued
 #define CVAR_WOLFINFO       2048    // DHM - NERVE :: Like userinfo, but for wolf multiplayer info
 
+#define SVC_NONE            0
+#define SVC_EQUAL           1
+#define SVC_NOTEQUAL        2
+#define SVC_GREATER         3
+#define SVC_GREATEREQUAL    4
+#define SVC_LOWER           5
+#define SVC_LOWEREQUAL      6
+#define SVC_INSIDE          7
+#define SVC_OUTSIDE         8
+#define SVC_INCLUDE         9
+#define SVC_EXCLUDE         10
+#define SVC_WITHBITS        11
+#define SVC_WITHOUTBITS     12
+#define SVC_MAX             13
+
+#define SVC_TYPE_STRING     0
+#define SVC_TYPE_INT        1
+#define SVC_TYPE_FLOAT      2
+#define SVC_TYPE_MAX        3
+
+// Cvar restrictions table for tags
+typedef struct {
+	int type;
+	char* operatorFlag;
+	char* longDesc;
+} cvar_restrictions_l;
+
+// Cvar restriction tags
+static const cvar_restrictions_l Cvar_Restriction_Flags[] = {
+	{ SVC_NONE, "", "<any>" },
+	{ SVC_EQUAL, "EQ", "EQUAL" },
+	{ SVC_NOTEQUAL, "!EQ", "NOT EQUAL" },
+	{ SVC_GREATER, "GRT", "GREATER" },
+	{ SVC_GREATEREQUAL, "GQ", "GREATER OR EQUAL" },
+	{ SVC_LOWER, "LO", "LOWER" },
+	{ SVC_LOWEREQUAL, "LQ", "LOWER OR EQUAL" },
+	{ SVC_INSIDE, "IN", "BETWEEN" },
+	{ SVC_OUTSIDE, "OUT", "OUTSIDE" },
+	{ SVC_INCLUDE, "INCLUDE", "INCLUDE" },
+	{ SVC_EXCLUDE, "EXCLUDE", "NOT INCLUDE" },
+	{ SVC_WITHBITS, "WBIT", "WITH BITS" },
+	{ SVC_WITHOUTBITS, "!WBIT", "WITHOUT BITS" }
+};
+
+// Cvar restrictions
+typedef struct cvar_restrictions_s {
+	char* name;
+	unsigned int type;
+	char*   sVal1;
+	char*   sVal2;
+	float   fVal1;
+	float   fVal2;
+	int     iVal1;
+	int     iVal2;
+	struct cvar_restrictions_s* next;
+	struct cvar_restrictions_s* hashNext;
+	qboolean flagged;
+} cvar_rest_t;
+
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s {
 	char        *name;
@@ -931,8 +999,6 @@ typedef struct cvar_s {
 	struct cvar_s *next;
 	struct cvar_s *hashNext;
 } cvar_t;
-
-#define MAX_CVAR_VALUE_STRING   256
 
 typedef int cvarHandle_t;
 
@@ -958,19 +1024,18 @@ COLLISION DETECTION
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
-#define PLANE_X         0
-#define PLANE_Y         1
-#define PLANE_Z         2
-#define PLANE_NON_AXIAL 3
-
+#define PLANE_X				0
+#define PLANE_Y				1
+#define PLANE_Z				2
+#define PLANE_NON_AXIAL		3
+#define PLANE_NON_PLANAR    4
 
 /*
 =================
 PlaneTypeForNormal
 =================
 */
-
-#define PlaneTypeForNormal( x ) ( x[0] == 1.0 ? PLANE_X : ( x[1] == 1.0 ? PLANE_Y : ( x[2] == 1.0 ? PLANE_Z : PLANE_NON_AXIAL ) ) )
+#define PlaneTypeForNormal( x ) ( x[0] == 1.0 ? PLANE_X : ( x[1] == 1.0 ? PLANE_Y : ( x[2] == 1.0 ? PLANE_Z : ( x[0] == 0.f && x[1] == 0.f && x[2] == 0.f ? PLANE_NON_PLANAR : PLANE_NON_AXIAL ) ) ) )
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
@@ -1082,6 +1147,7 @@ typedef enum {
 
 //#define	MAX_CONFIGSTRINGS	1024
 #define MAX_CONFIGSTRINGS   2048
+#define MAX_MAPCONFIGSTRINGS 8192 // RTCWPro
 
 #define NUM_MODELS 2
 #define AXIS_MODEL_HANDLE	0
@@ -1335,7 +1401,6 @@ typedef struct playerState_s {
 
 //====================================================================
 
-
 //
 // usercmd_t->button bits, many of which are generated by the client system,
 // so they aren't game/cgame only definitions
@@ -1355,9 +1420,6 @@ typedef struct playerState_s {
 //----(SA)	end
 
 #define BUTTON_ANY          128         // any key whatsoever
-
-
-
 
 //----(SA) wolf buttons
 #define WBUTTON_ATTACK2     1
@@ -1609,8 +1671,6 @@ typedef enum _flag_status {
 	FLAG_DROPPED
 } flagStatus_t;
 
-
-
 #define MAX_GLOBAL_SERVERS          2048
 #define MAX_OTHER_SERVERS           128
 #define MAX_PINGREQUESTS            16
@@ -1654,5 +1714,28 @@ typedef enum {
 #define VOTEFLAGS_TYPE              ( 1 << 5 )
 #define VOTEFLAGS_KICK              ( 1 << 6 )
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
+
+//
+// L0
+// New stuff bellow
+//
+#define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
+#define PADLEN(base, alignment)	(PAD((base), (alignment)) - (base))
+#define PADP(base, alignment)	((void *) PAD((intptr_t) (base), (alignment)))
+#define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
+#define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
+#define GUID_LEN				33
+#define NO_GUID					"NO_GUID"
+
+// Indicates if client is connected or not.
+// Deals with Bloom issues as well as just identifying if extra stuff should be ran..
+qboolean clientIsConnected;
+
+#if defined(_WIN32) || defined(_WIN64)
+/* We are on Windows */
+# define strtok_r strtok_s
+#endif
+
+#define ArrayLength(x)	(sizeof(x) / sizeof(*(x)))
 
 #endif  // __Q_SHARED_H

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -194,6 +194,36 @@ int CG_WorldToScreen(float* in, int* out)
 
 	return 0;
 }
+
+/*
+=================
+VisibleToScreen
+=================
+*/
+qboolean VisibleToScreen(vec3_t point, vec_t world[2])
+{
+	vec3_t trans;
+	vec_t xc, yc;
+	vec_t px, py;
+	vec_t z;
+
+	px = tan(cg.refdef.fov_x * M_PI / 360.0);
+	py = tan(cg.refdef.fov_y * M_PI / 360.0);
+
+	VectorSubtract(point, cg.refdef.vieworg, trans);
+
+	xc = cg.refdef.width / 2.0;
+	yc = cg.refdef.height / 2.0;
+
+	z = DotProduct(trans, cg.refdef.viewaxis[0]);
+	if (z <= 0.001)
+		return qfalse;
+
+	world[0] = xc - DotProduct(trans, cg.refdef.viewaxis[1]) * xc / (z * px);
+	world[1] = yc - DotProduct(trans, cg.refdef.viewaxis[2]) * yc / (z * py);
+	return qtrue;
+}
+
 void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
 	int skipNumber, int mask) {
 	trace_t	t;
@@ -203,6 +233,7 @@ void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, cons
 
 	*result = t;
 }
+
 qboolean PointVisible(vec3_t point) {
 	trace_t trace;
 	//	vec3_t tmp;
@@ -384,14 +415,14 @@ void CG_CalcMoveSpeeds( clientInfo_t *ci ) {
 				} else {
 					low = 1;
 				}
-				totalSpeed += fabs( oldPos[low][2] - o[low].origin[2] );
+				totalSpeed += Q_fabs( oldPos[low][2] - o[low].origin[2] );
 			} else {
 				if ( o[0].origin[2] < o[1].origin[2] ) {
 					low = 0;
 				} else {
 					low = 1;
 				}
-				totalSpeed += fabs( oldPos[low][0] - o[low].origin[0] );
+				totalSpeed += Q_fabs( oldPos[low][0] - o[low].origin[0] );
 			}
 
 			numSpeed++;
@@ -1123,8 +1154,8 @@ void CG_NewClientInfo( int clientNum ) {
 	newInfo.botSkill = atoi( v );
 
 	// handicap
-	v = Info_ValueForKey( configstring, "hc" );
-	newInfo.handicap = atoi( v );
+	//v = Info_ValueForKey( configstring, "hc" );
+	//newInfo.handicap = atoi( v );
 
 	// wins
 	v = Info_ValueForKey( configstring, "w" );
@@ -1141,6 +1172,10 @@ void CG_NewClientInfo( int clientNum ) {
 	// ref
 	v = Info_ValueForKey(configstring, "ref");
 	newInfo.refStatus = atoi(v);
+
+	// shoutcaster
+	v = Info_ValueForKey(configstring, "scs");
+	newInfo.shoutStatus = atoi(v);
 //----(SA) modified this for head separation
 
 	// head
@@ -1791,7 +1826,7 @@ static void CG_SwingAngles( float destination, float swingTolerance, float clamp
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract( destination, *angle );
-	scale = fabs( swing );
+	scale = Q_fabs( swing );
 	scale *= 0.05;
 	if ( scale < 0.5 ) {
 		scale = 0.5;
@@ -1902,11 +1937,11 @@ static void CG_AddPainTwitch( centity_t *cent, vec3_t torsoAngles ) {
 		f = (float)t / duration;
 		if ( f < FADEIN_RATIO ) {
 			torsoAngles[ROLL] += ( 0.5 * direction * ( f * ( 1.0 / FADEIN_RATIO ) ) );
-			torsoAngles[PITCH] -= ( fabs( direction ) * ( f * ( 1.0 / FADEIN_RATIO ) ) );
+			torsoAngles[PITCH] -= ( Q_fabs( direction ) * ( f * ( 1.0 / FADEIN_RATIO ) ) );
 			torsoAngles[YAW] += ( direction * ( f * ( 1.0 / FADEIN_RATIO ) ) );
 		} else {
 			torsoAngles[ROLL] += ( 0.5 * direction * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
-			torsoAngles[PITCH] -= ( fabs( direction ) * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
+			torsoAngles[PITCH] -= ( Q_fabs( direction ) * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
 			torsoAngles[YAW] += ( direction * ( 1.0 - ( f - FADEIN_RATIO ) ) * ( 1.0 / FADEOUT_RATIO ) );
 		}
 	} else {    // fast, Q3 style
@@ -1997,7 +2032,7 @@ static void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], v
 			clampTolerance = 90;
 		} else {    // must be firing
 			torsoAngles[YAW] = headAngles[YAW]; // always face firing direction
-			//if (fabs(cent->currentState.angles2[YAW]) > 30)
+			//if (Q_fabs(cent->currentState.angles2[YAW]) > 30)
 			//	legsAngles[YAW] = headAngles[YAW];
 			clampTolerance = 60;
 		}
@@ -2084,12 +2119,12 @@ CG_HasteTrail
 static void CG_HasteTrail( centity_t *cent ) {
 	localEntity_t   *smoke;
 	vec3_t origin;
-	int anim; 
+	int anim;
 
 	if ( cent->trailTime > cg.time ) {
 		return;
 	}
-	anim = cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT; 
+	anim = cent->pe.legs.animationNumber & ~ANIM_TOGGLEBIT;
 // RF, this is all broken by scripting system
 //	if ( anim != LEGS_RUN && anim != LEGS_BACK ) {
 //		return;
@@ -2865,7 +2900,7 @@ void CG_Player( centity_t *cent ) {
 
 	shadow = qfalse;                                                // gjd added to make sure it was initialized
 	shadowPlane = 0.0;                                              // ditto
-//	VectorCopy( vec3_origin, playerOrigin );    // nihi commented
+//	VectorCopy( vec3_origin, playerOrigin );
 
 	// if set to invisible, skip
 	if ( cent->currentState.eFlags & EF_NODRAW ) {
@@ -2986,7 +3021,7 @@ void CG_Player( centity_t *cent ) {
 
 	// sswolf - complete OSP demo features
 	// L0 - Keeping this in for demo preview..
-	if (cg.demoPlayback && cgs.wallhack) 
+	if (cg.demoPlayback && cgs.wallhack)
 	{
 		if (cent->currentState.number != cg.snap->ps.clientNum)
 			renderfx = RF_DEPTHHACK;

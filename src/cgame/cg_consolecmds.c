@@ -802,7 +802,7 @@ static consoleCommand_t commands[] = {
 	{ "SetWeaponCrosshair", CG_SetWeaponCrosshair_f },
 	// -NERVE - SMF
 
-	// OSPx
+	// RTCWPro
 	{ "statsdump", CG_dumpStats_f },
 	{ "+zoomView", CG_zoomViewSet_f },
 	{ "-zoomView", CG_zoomViewRevert_f },
@@ -820,15 +820,13 @@ static consoleCommand_t commands[] = {
 	{ "timerSet", CG_TimerSet_f },
 	{ "timerReset", CG_TimerReset_f },
 	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
-	// -OSPx
-
 	{ "minimize", CG_Minimize_f },
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
+	// RTCWPro
 
 	// Arnout
 	{ "dumploc", CG_DumpLocation_f },
 };
-
 
 /*
 =================
@@ -858,7 +856,6 @@ qboolean CG_ConsoleCommand( void ) {
 
 	return qfalse;
 }
-
 
 /*
 =================
@@ -925,13 +922,11 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "swap_teams" );
 	// -NERVE - SMF
 	// L0 - Make it more available..
-	trap_AddCommand( "getstatus" );		// Prints user info (IP, GUID, STATUS..)
+	trap_AddCommand( "players" );		// Prints user info (IP, GUID, STATUS..)
 	trap_AddCommand( "ref" );
+	trap_AddCommand("scs");
+	trap_AddCommand("specspeed");
 	trap_AddCommand( "?" );
-	trap_AddCommand( "login" );			// Logs user as admin
-	trap_AddCommand( "@login" );		// Silently logs user as admin
-	trap_AddCommand( "logout" );		// Logs out user and revokes admin/ref status
-	trap_AddCommand( "incognito" );		// Toggles admin visibilite status to players
 	trap_AddCommand( "gib" );			// Kills player and sends him/her straight to limbo
 	trap_AddCommand( "pm" );			// Private message
 	trap_AddCommand( "msg" );			// Private message (alternative)
@@ -956,8 +951,8 @@ void CG_InitConsoleCommands( void ) {
 	// Ready
 	trap_AddCommand("readyteam");
 	trap_AddCommand("ready");
+	trap_AddCommand("notready");
 	// Misc
-	trap_AddCommand("players");
 	trap_AddCommand("say_teamnl");
 	trap_AddCommand("forcefps");		// adding this so we don't get an invalid command error
 	// Stats
@@ -973,11 +968,36 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand("timerReset");
 	// End
 }
+
+/*
+=================
+CG_RelayCommand
+
+Relays any client command to server.
+=================
+*/
+qboolean CG_RelayCommand(char* type, int value) {
+	
+	if (!cg.snap) {
+		return qfalse;
+	}
+
+	//if (!Q_stricmp(type, RELAY_RKVALD)) {
+	//	trap_SendClientCommand(va("say_team rkvald %d", value));
+	//}
+	return qfalse;
+}
+
 /**
  * @brief ETPro style enemy spawntimer
  */
-static void CG_TimerSet_f(void)
-{
+static void CG_TimerSet_f(void) {
+
+	if (!cg_drawEnemyTimer.integer)
+	{
+		return;
+	}
+
 	if (cgs.gamestate != GS_PLAYING)
 	{
 		CG_Printf("You may only use this command during the match.\n");
@@ -998,7 +1018,7 @@ static void CG_TimerSet_f(void)
 
 		if (spawnPeriod == 0)
 		{
-			trap_Cvar_Set("cg_spawnTimer_set", "-1");
+			trap_Cvar_Set("cg_spawnTimer_period", 0);
 		}
 		else if (spawnPeriod < 1 || spawnPeriod > 60)
 		{
@@ -1006,10 +1026,8 @@ static void CG_TimerSet_f(void)
 		}
 		else
 		{
-			int msec = (int)(cgs.timelimit * 60000.f) - (cg.time - cgs.levelStartTime);  // 60.f * 1000.f
-
 			trap_Cvar_Set("cg_spawnTimer_period", buff);
-			trap_Cvar_Set("cg_spawnTimer_set", va("%d", msec / 1000));
+			trap_Cvar_Set("cg_spawnTimer_set", va("%i", (cg.time - cgs.levelStartTime)));
 		}
 	}
 	else
@@ -1023,14 +1041,12 @@ static void CG_TimerSet_f(void)
  */
 static void CG_TimerReset_f(void)
 {
-	int msec;
-
 	if (cgs.gamestate != GS_PLAYING)
 	{
 		CG_Printf("You may only use this command during the match.\n");
 		return;
 	}
 
-	msec = (int)(cgs.timelimit * 60000.f) - (cg.time - cgs.levelStartTime); // 60.f * 1000.f
-	trap_Cvar_Set("cg_spawnTimer_set", va("%d", msec / 1000));
+	trap_Cvar_Set("cg_spawnTimer_set", va("%d", cg.time - cgs.levelStartTime));
 }
+

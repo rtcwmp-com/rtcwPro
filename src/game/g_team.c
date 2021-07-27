@@ -1458,8 +1458,17 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	qboolean playsound = qtrue;
 	qboolean firsttime = qfalse;
 
-	if ( self->count == other->client->sess.sessionTeam || other->health <= 0 ) {
+	if ( self->count == other->client->sess.sessionTeam )
+	{
 		return;
+	}
+
+	if (!g_bodiesGrabFlags.integer)
+	{
+		if (other->health <= 0)
+		{
+			return;
+		}
 	}
 
 // JPW NERVE
@@ -1660,7 +1669,9 @@ void G_teamReset(int team_num, qboolean fClearSpecLock) {
 		teamInfo[team_num].spec_lock = qfalse;
 	}
 
-	trap_Cvar_Set("g_gamelocked", "0"); // unlock both teams
+	if (g_gamelocked.integer > 0) {
+		trap_Cvar_Set("g_gamelocked", "0");
+	}
 }
 
 // Shuffle active players onto teams
@@ -1742,6 +1753,12 @@ void G_swapTeams( void ) {
 }
 // Return blockout status for a player
 int G_blockoutTeam( gentity_t *ent, int nTeam ) {
+
+	if (ent->client->sess.shoutcaster == 1)
+	{
+		return 0;
+	}
+
 	return( !G_allowFollow( ent, nTeam ) );
 }
 // Figure out if we are allowed/want to follow a given player
@@ -1756,7 +1773,9 @@ qboolean G_allowFollow( gentity_t *ent, int nTeam ) {
 		}
 	}
 
-	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || ent->client->sess.referee == RL_REFEREE || ( ent->client->sess.specInvited & nTeam ) == nTeam ) );
+	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || 
+		ent->client->sess.referee == RL_REFEREE || ent->client->sess.shoutcaster == 1 || 
+		( ent->client->sess.specInvited & nTeam ) == nTeam ) );
 }
 
 // Figure out if we are allowed/want to follow a given player
@@ -1784,7 +1803,11 @@ void G_updateSpecLock( int nTeam, qboolean fLock ) {
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		ent = g_entities + level.sortedClients[i];
 
-		if ( ent->client->sess.admin || ent->client->sess.referee ) {
+		if (ent->client->sess.referee ) {
+			continue;
+		}
+
+		if (ent->client->sess.shoutcaster) {
 			continue;
 		}
 
@@ -1817,7 +1840,7 @@ void G_removeSpecInvite( int team ) {
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = g_entities + level.sortedClients[i];
-		if ( !cl->inuse || cl->client->sess.admin || cl->client->sess.referee ) {
+		if ( !cl->inuse || cl->client->sess.referee || cl->client->sess.shoutcaster) {
 			continue;
 		}
 
@@ -1917,7 +1940,7 @@ void G_readyResetOnPlayerLeave( int team ) {
 
 void G_readyStart( void ) {
 	level.ref_allready = qtrue;
-	level.CNstart = 0; // Resets countdown
+	level.cnNum = 0; // Resets countdown
 	trap_SetConfigstring( CS_READY, va( "%i", READY_NONE ));
 
 	// Prevents joining once countdown starts..

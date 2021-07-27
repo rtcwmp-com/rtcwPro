@@ -3406,7 +3406,6 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 	int needsAmmo = qfalse;
 	int maxammo;
 	int clip;
-	int weapNumOfClips;
 
 	// Gordon: handle grenades first
 	i = BG_GrenadesForClass(ps->stats[STAT_PLAYER_CLASS]);
@@ -3534,7 +3533,7 @@ This needs to be the same for client side prediction and server use.
 qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *ps ) {
 	gitem_t *item;
 	int ammoweap,weapbank;     // JPW NERVE
-// nihi
+
 // L0 - unlockWeapons
 #ifdef GAMEDLL
 		extern vmCvar_t g_unlockWeapons;
@@ -3571,7 +3570,7 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	// End
 
 	// JPW NERVE -- medics & engineers can only pick up same weapon type
-		
+
 			if (item->giTag == WP_AMMO) // magic ammo for any two-handed weapon
 			{
 				return BG_AddMagicAmmo((playerState_t*)ps, ps->persistant[PERS_TEAM]); // RtcwPro - check to see if player needs the ammo (ET Port)

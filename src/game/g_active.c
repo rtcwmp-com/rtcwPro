@@ -423,13 +423,20 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 
 	if ( client->sess.spectatorState != SPECTATOR_FOLLOW ) {
 		client->ps.pm_type = PM_SPECTATOR;
-		client->ps.speed = 400; // faster than normal
+
+		if (client->sess.specSpeed <= 0)
+		{
+			client->sess.specSpeed = 400; // faster than normal
+		}
+
+		client->ps.speed = client->sess.specSpeed;
+
 		if ( client->ps.sprintExertTime ) {
 			client->ps.speed *= 3;  // (SA) allow sprint in free-cam mode
 		}
 
 		// L0 - Pause
-		if ( level.paused != PAUSE_NONE ) {
+		if ( level.paused != PAUSE_NONE && client->sess.referee == RL_NONE && client->sess.shoutcaster == 0) {
 			client->ps.pm_type = PM_FREEZE;
 			ucmd->buttons = 0;
 			ucmd->forwardmove = 0;
@@ -437,6 +444,11 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 			ucmd->upmove = 0;
 			ucmd->wbuttons = 0;
 		}
+		else if (client->noclip && client->sess.shoutcaster)
+		{
+			client->ps.pm_type = PM_NOCLIP;
+		}
+
 		// set up for pmove
 		memset( &pm, 0, sizeof( pm ) );
 		pm.ps = &client->ps;
@@ -952,7 +964,7 @@ void G_SwingAngles(float destination, float swingTolerance, float clampTolerance
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract(destination, *angle);
-	scale = fabs(swing);
+	scale = Q_fabs(swing);
 	scale *= 0.05;
 	if (scale < 0.5)
 		scale = 0.5;
@@ -1056,7 +1068,7 @@ void G_PlayerAngles(gentity_t* ent, int msec) {
 		}
 		else {	// must be firing
 			torsoAngles[YAW] = headAngles[YAW];	// always face firing direction
-												//if (fabs(cent->currentState.angles2[YAW]) > 30)
+												//if (Q_fabs(cent->currentState.angles2[YAW]) > 30)
 												//	legsAngles[YAW] = headAngles[YAW];
 			clampTolerance = 60;
 		}
@@ -1337,7 +1349,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {
 		if ( ucmd->wbuttons & WBUTTON_DROP ) {
-			if ( !client->dropWeaponTime  ) {
+			if ( !client->dropWeaponTime  && level.paused == PAUSE_NONE ) {
 				client->dropWeaponTime = 1; // just latch it for now
 
 				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
@@ -1401,7 +1413,6 @@ void ClientThink_real( gentity_t *ent ) {
 		}
 	}
 
-
 // jpw
 
 	// check for inactivity timer, but never drop the local client of a non-dedicated server
@@ -1409,7 +1420,7 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	if ( reloading || client->cameraPortal ) { // TODO check this against OSPx
+	if ( reloading || client->cameraPortal || level.paused != PAUSE_NONE) { // TODO check this against OSPx
 		ucmd->buttons = 0;
 		ucmd->forwardmove = 0;
 		ucmd->rightmove = 0;
@@ -1488,10 +1499,7 @@ void ClientThink_real( gentity_t *ent ) {
 		pm.noWeapClips = qtrue; // ensure AI characters don't use clips if they're not supposed to.
 
 	}
-		// OSPx - Fixed physics
-	//if (g_fixedphysics.integer) {
-	//	pm.fixedphysicsfps = 125;
-	//}
+
 	// Ridah
 //	if (ent->r.svFlags & SVF_NOFOOTSTEPS)
 //		pm.noFootsteps = qtrue;
@@ -1507,6 +1515,27 @@ void ClientThink_real( gentity_t *ent ) {
 	// -NERVE - SMF
 
 	monsterslick = Pmove( &pm );
+
+	// RTCWPro - revive anim bug fix
+	if (ent->client->revive_animation_playing)
+	{
+		if (ent->client->ps.pm_time == 0 || !(ent->client->ps.pm_flags & PMF_TIME_LOCKPLAYER))
+		{
+			int lock_time_remaining = 2100 - (level.time - ent->client->movement_lock_begin_time);
+
+			if (lock_time_remaining <= 0)
+			{
+				ent->client->revive_animation_playing = qfalse;
+				ent->client->ps.legsTimer = 0;
+				ent->client->ps.torsoTimer = 0;
+			}
+			else
+			{
+				ent->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
+				ent->client->ps.pm_time = lock_time_remaining;
+			}
+		}
+	}
 
 	if ( monsterslick && !( ent->flags & FL_NO_MONSTERSLICK ) ) {
 		//vec3_t	dir;
@@ -1616,7 +1645,7 @@ void ClientThink_real( gentity_t *ent ) {
 	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 
 	// store the client's current position for antilag traces
-//	G_StoreClientPosition( ent );    // nihi commented out and added below
+
 	// L0 - antilag
 	G_StoreTrail( ent );
 	// L0 - end
@@ -2147,7 +2176,7 @@ void ClientEndFrame( gentity_t *ent ) {
 		ent->client->pers.teamState.lasthurtcarrier += time_delta;
 		ent->client->pers.teamState.lastfraggedcarrier += time_delta;
 		ent->client->ps.classWeaponTime += time_delta;
-	//	ent->client->respawnTime += time_delta;
+		ent->client->respawnTime += time_delta;
 		ent->client->sniperRifleFiredTime += time_delta;
 		ent->lastHintCheckTime += time_delta;
 		ent->pain_debounce_time += time_delta;

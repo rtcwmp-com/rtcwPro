@@ -675,7 +675,7 @@ static void CG_DynamiteTrail( centity_t *ent, const weaponInfo_t *wi ) {
 
 	if ( ent->currentState.teamNum < 4 ) {
 		mult = 0.004f * ( cg.time - ent->currentState.effect1Time ) / 30000.0f;
-		trap_R_AddLightToScene( origin, 200 + 300 * fabs( sin( ( cg.time - ent->currentState.effect1Time ) * mult ) ),1.0,0,0, REF_FORCE_DLIGHT );
+		trap_R_AddLightToScene( origin, 200 + 300 * Q_fabs( sin( ( cg.time - ent->currentState.effect1Time ) * mult ) ),1.0,0,0, REF_FORCE_DLIGHT );
 	} else {
 		mult = 1 - ( ( cg.time - ent->trailTime ) / 15500.0f );
 		trap_R_AddLightToScene( origin, 10 + 300 * mult, 1.f, 1.f, 0, REF_FORCE_DLIGHT );
@@ -4858,7 +4858,7 @@ void CG_AddDebris( vec3_t origin, vec3_t dir, int speed, int duration, int count
 		le = CG_AllocLocalEntity();
 		re = &le->refEntity;
 
-		VectorSet( unitvel, dir[0] + crandom() * 0.9, dir[1] + crandom() * 0.9, fabs( dir[2] ) > 0.5 ? dir[2] * ( 0.2 + 0.8 * random() ) : random() * 0.6 );
+		VectorSet( unitvel, dir[0] + crandom() * 0.9, dir[1] + crandom() * 0.9, Q_fabs( dir[2] ) > 0.5 ? dir[2] * ( 0.2 + 0.8 * random() ) : random() * 0.6 );
 		VectorScale( unitvel, (float)speed + (float)speed * 0.5 * crandom(), velocity );
 
 		le->leType = LE_DEBRIS;
@@ -6103,6 +6103,26 @@ void SnapVectorTowards( vec3_t v, vec3_t to ) {
 	}
 }
 
+/**
+ * @brief Renders bullet tracers if tracer option is valid.
+ * @param[in] pstart
+ * @param[in] pend
+ * @param[in] sourceEntityNum
+ */
+void CG_DrawBulletTracer(vec3_t pstart, vec3_t pend, int sourceEntityNum)
+{
+	if (cg_tracers.integer == 2 && sourceEntityNum != cg.clientNum) {
+		return; // Only own tracers
+	}
+
+	if (cg_tracers.integer == 3 && sourceEntityNum == cg.clientNum) {
+		return; // Only others tracers
+	}
+
+	if (sourceEntityNum >= 0 && sourceEntityNum != ENTITYNUM_NONE && cg_tracers.integer <= 3) {
+		CG_SpawnTracer(sourceEntityNum, pstart, pend);
+	}
+}
 
 /*
 ======================
@@ -6175,19 +6195,21 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 				}
 			}
 
-			// if not flesh, then do a moving tracer
-			if ( flesh ) {
-				// draw a tracer
-				if ( !wolfkick && random() < cg_tracerChance.value ) {
-					CG_Tracer( start, end, 0 );
-				}
-			} else {    // (not flesh)
-				if ( otherEntNum2 >= 0 && otherEntNum2 != ENTITYNUM_NONE ) {
-					CG_SpawnTracer( otherEntNum2, start, end );
-				} else {
-					CG_SpawnTracer( sourceEntityNum, start, end );
+            // draw tracers
+			// Start
+			if (cg_tracers.integer)
+			{
+				// if not flesh, then do a moving tracer
+				if ( flesh ) {
+					// draw a tracer
+					if ( !wolfkick && random() < cg_tracerChance.value ) {
+						CG_Tracer( start, end, 0 );
+					}
+				} else { // (not flesh)
+				    CG_DrawBulletTracer(start, end, sourceEntityNum);
 				}
 			}
+			// End
 		}
 	}
 

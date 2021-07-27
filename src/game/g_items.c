@@ -528,16 +528,14 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 	//----(SA)	end
 
 // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
-if (g_dropReload.integer) {
-		Add_Ammo(other, ent->item->giTag, quantity, qtrue);
+	if (alreadyHave) 
+	{
+		Add_Ammo(other, ent->item->giTag, quantity, !alreadyHave);
 	}
-	else {
-		if (alreadyHave)
-			Add_Ammo(other, ent->item->giTag, quantity, !alreadyHave);
-		else
-			other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
+	else 
+	{
+		other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
 	}
-
 // jpw
 
 	// single player has no respawns	(SA)

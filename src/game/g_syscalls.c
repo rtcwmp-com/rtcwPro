@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,6 +68,10 @@ void    trap_Argv( int n, char *buffer, int bufferLength ) {
 	syscall( G_ARGV, n, buffer, bufferLength );
 }
 
+int		trap_FS_FileExists(const char* filename) {
+	return syscall(G_FS_FILE_EXIST, filename);
+}
+
 int     trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode ) {
 	return syscall( G_FS_FOPEN_FILE, qpath, f, mode );
 }
@@ -108,14 +112,21 @@ void trap_Cvar_Set( const char *var_name, const char *value ) {
 	syscall( G_CVAR_SET, var_name, value );
 }
 
+void trap_Cvar_Restrictions_Load(void) {
+	syscall(G_CVAR_REST_LOAD);
+}
+
 int trap_Cvar_VariableIntegerValue( const char *var_name ) {
 	return syscall( G_CVAR_VARIABLE_INTEGER_VALUE, var_name );
+}
+
+int trap_submit_curlPost( char* jsonfile, char* matchid ) {
+	return syscall( G_SUBMIT_STATS_CURL, jsonfile, matchid );
 }
 
 void trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize ) {
 	syscall( G_CVAR_VARIABLE_STRING_BUFFER, var_name, buffer, bufsize );
 }
-
 
 void trap_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
 						  playerState_t *clients, int sizeofGClient ) {
@@ -127,6 +138,11 @@ void trap_DropClient( int clientNum, const char *reason ) {
 }
 
 void trap_SendServerCommand( int clientNum, const char *text ) {
+	if (strlen(text) > 1022) {
+		G_LogPrintf("ALERT: trap_SendServerCommand( %d, ... ) length exceeds 1022.\n", clientNum);
+		G_LogPrintf("text [%s]\n", text);
+		return;
+	}
 	syscall( G_SEND_SERVER_COMMAND, clientNum, text );
 }
 
@@ -166,7 +182,6 @@ int trap_PointContents( const vec3_t point, int passEntityNum ) {
 	return syscall( G_POINT_CONTENTS, point, passEntityNum );
 }
 
-
 qboolean trap_InPVS( const vec3_t p1, const vec3_t p2 ) {
 	return syscall( G_IN_PVS, p1, p2 );
 }
@@ -190,7 +205,6 @@ void trap_LinkEntity( gentity_t *ent ) {
 void trap_UnlinkEntity( gentity_t *ent ) {
 	syscall( G_UNLINKENTITY, ent );
 }
-
 
 int trap_EntitiesInBox( const vec3_t mins, const vec3_t maxs, int *list, int maxcount ) {
 	return syscall( G_ENTITIES_IN_BOX, mins, maxs, list, maxcount );
@@ -811,3 +825,48 @@ void trap_BotResetWeaponState( int weaponstate ) {
 int trap_GeneticParentsAndChildSelection( int numranks, float *ranks, int *parent1, int *parent2, int *child ) {
 	return syscall( BOTLIB_AI_GENETIC_PARENTS_AND_CHILD_SELECTION, numranks, ranks, parent1, parent2, child );
 }
+#ifdef MYSQLDEP
+int trap_SQL_RunQuery(const char* query) {
+	return syscall(G_SQL_RUNQUERY, query);
+}
+
+void trap_SQL_FinishQuery(int queryid) {
+	syscall(G_SQL_FINISHQUERY, queryid);
+	return;
+}
+
+qboolean trap_SQL_NextRow(int queryid) {
+	return (qboolean)syscall(G_SQL_NEXTROW, queryid);
+}
+
+int trap_SQL_RowCount(int queryid) {
+	return syscall(G_SQL_ROWCOUNT, queryid);
+}
+
+void trap_SQL_GetFieldbyID(int queryid, int fieldid, char* buffer, int len) {
+	syscall(G_SQL_GETFIELDBYID, queryid, fieldid, buffer, len);
+	return;
+}
+
+void trap_SQL_GetFieldbyName(int queryid, const char* name, char* buffer, int len) {
+	syscall(G_SQL_GETFIELDBYNAME, queryid, name, buffer, len);
+	return;
+}
+
+int trap_SQL_GetFieldbyID_int(int queryid, int fieldid) {
+	return syscall(G_SQL_GETFIELDBYID_INT, queryid, fieldid);
+}
+
+int trap_SQL_GetFieldbyName_int(int queryid, const char* name) {
+	return syscall(G_SQL_GETFIELDBYNAME_INT, queryid, name);
+}
+
+int trap_SQL_FieldCount(int queryid) {
+	return syscall(G_SQL_FIELDCOUNT, queryid);
+}
+
+void trap_SQL_CleanString(const char* in, char* out, int len) {
+	syscall(G_SQL_CLEANSTRING, in, out, len);
+	return;
+}
+#endif

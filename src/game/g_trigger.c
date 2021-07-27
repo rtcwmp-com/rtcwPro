@@ -285,7 +285,7 @@ void AimAtTarget( gentity_t *self ) {
 
 	height = ent->s.origin[2] - origin[2];
 	gravity = g_gravity.value;
-	time = sqrt( fabs( height / ( 0.5f * gravity ) ) );
+	time = sqrt( Q_fabs( height / ( 0.5f * gravity ) ) );
 	if ( !time ) {
 		G_FreeEntity( self );
 		return;
@@ -897,6 +897,9 @@ void SP_trigger_flagonly( gentity_t *ent ) {
 	G_SpawnString( "score", "20", &scorestring );
 	ent->accuracy = atof( scorestring );
 	// jpw
+
+	ent->r.svFlags &= ~SVF_NOCLIENT; // RTCWPro - has to be sent in order for draw triggers to work
+	ent->s.eType = ET_CONCUSSIVE_TRIGGER; // RTCWPro - hijack this to let the cgame know what to draw
 
 	trap_LinkEntity( ent );
 }

@@ -29,15 +29,28 @@ If you have questions concerning this license or the applicable additional terms
 // common.c -- misc functions used in client and server
 
 #include "../game/q_shared.h"
+#include "database.h"
+#include "threads.h"
 #include "qcommon.h"
+#ifndef  DEDICATED
+#include "md5.h"
+#endif // ! DEDICATED
 #include <setjmp.h>
+#ifndef  _WIN32
+#include <stdint.h>
+#endif // ! _WIN32
 
 #define MAX_NUM_ARGVS   50
 
 #define MIN_DEDICATED_COMHUNKMEGS 1
-#define MIN_COMHUNKMEGS 42 // JPW NERVE changed this to 42 for MP, was 56 for team arena and 75 for wolfSP
-#define DEF_COMHUNKMEGS "56" // RF, increased this, some maps are exceeding 56mb // JPW NERVE changed this for multiplayer back to 42, 56 for depot/mp_cpdepot, 42 for everything else
-#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
+//#define MIN_COMHUNKMEGS 42 // JPW NERVE changed this to 42 for MP, was 56 for team arena and 75 for wolfSP
+//#define DEF_COMHUNKMEGS "56" // RF, increased this, some maps are exceeding 56mb // JPW NERVE changed this for multiplayer back to 42, 56 for depot/mp_cpdepot, 42 for everything else
+//#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
+
+// sswolf - increase those
+#define MIN_COMHUNKMEGS 128
+#define DEF_COMHUNKMEGS "256"
+#define DEF_COMZONEMEGS "32"
 
 int com_argc;
 char    *com_argv[MAX_NUM_ARGVS + 1];
@@ -295,6 +308,9 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
 		Cvar_Set( "com_errorMessage", com_errorMessage );
 	}
+
+	// L0 / Fixes the issue with modal boxes when Bloom is enabled.
+	clientIsConnected = qfalse;
 
 	if ( code == ERR_SERVERDISCONNECT ) {
 		CL_Disconnect( qtrue );
@@ -874,7 +890,6 @@ void Z_Free( void *ptr ) {
 	}
 }
 
-
 /*
 ================
 Z_FreeTags
@@ -937,7 +952,7 @@ void *Z_TagMalloc( int size, int tag ) {
 	//
 	size += sizeof( memblock_t ); // account for size of block header
 	size += 4;                  // space for memory trash tester
-	size = ( size + 3 ) & ~3;     // align to 32 bit boundary
+	size = PAD(size, sizeof(intptr_t));		// align to 32/64 bit boundary
 
 	base = rover = zone->rover;
 	start = base->prev;
@@ -1421,8 +1436,8 @@ void Com_InitZoneMemory( void ) {
 	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS, CVAR_LATCH | CVAR_ARCHIVE );
 
 #ifndef __MACOS__   //DAJ HOG
-	if ( cv->integer < 16 ) {
-		s_zoneTotal = 1024 * 1024 * 16;
+	if ( cv->integer < 32 ) {
+		s_zoneTotal = 1024 * 1024 * 32;
 	} else
 #endif
 	{
@@ -1776,7 +1791,7 @@ void *Hunk_AllocateTempMemory( int size ) {
 
 	Hunk_SwapBanks();
 
-	size = ( ( size + 3 ) & ~3 ) + sizeof( hunkHeader_t );
+	size = PAD(size, sizeof(intptr_t)) + sizeof(hunkHeader_t);
 
 	if ( hunk_temp->temp + hunk_permanent->permanent + size > s_hunkTotal ) {
 		Com_Error( ERR_DROP, "Hunk_AllocateTempMemory: failed on %i", size );
@@ -2089,6 +2104,10 @@ void Com_RunAndTimeServerPacket( netadr_t *evFrom, msg_t *buf ) {
 	}
 }
 
+#ifndef DEDICATED
+extern qboolean consoleButtonWasPressed;
+#endif
+
 /*
 =================
 Com_EventLoop
@@ -2136,6 +2155,16 @@ int Com_EventLoop( void ) {
 			CL_KeyEvent( ev.evValue, ev.evValue2, ev.evTime );
 			break;
 		case SE_CHAR:
+#ifndef DEDICATED
+		// we just pressed the console button,
+		// so ignore this event
+		// this prevents chars appearing at console input
+		// when you just opened it
+		if (consoleButtonWasPressed) {
+			consoleButtonWasPressed = qfalse;
+			break;
+		}
+#endif
 			CL_CharEvent( ev.evValue );
 			break;
 		case SE_MOUSE:
@@ -2279,12 +2308,15 @@ char cl_cdkey[34] = "                                ";
 char cl_cdkey[34] = "123456789";
 #endif
 
+
+
+
 /*
 =================
 Com_ReadCDKey
 =================
 */
-void Com_ReadCDKey( const char *filename ) {
+int Com_ReadCDKey( const char *filename ) {
 	fileHandle_t f;
 	char buffer[33];
 	char fbuffer[MAX_OSPATH];
@@ -2293,8 +2325,9 @@ void Com_ReadCDKey( const char *filename ) {
 
 	FS_SV_FOpenFileRead( fbuffer, &f );
 	if ( !f ) {
-		Q_strncpyz( cl_cdkey, "                ", 17 );
-		return;
+		//Com_WriteNewKey(filename);
+		//Q_strncpyz( cl_cdkey, "                ", 17 );
+		return 0;
 	}
 
 	Com_Memset( buffer, 0, sizeof( buffer ) );
@@ -2303,10 +2336,79 @@ void Com_ReadCDKey( const char *filename ) {
 	FS_FCloseFile( f );
 
 	if ( CL_CDKeyValidate( buffer, NULL ) ) {
-		Q_strncpyz( cl_cdkey, buffer, 17 );
+		Q_strncpyz(cl_cdkey, buffer, 17);
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
+
+	#ifndef DEDICATED
+        Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+    #endif
+    return 1;
+}
+
+
+/*
+=================
+RTCWPro
+Com_WriteNewKey  ( temporary as this will change in the future)
+=================
+*/
+void Com_WriteNewKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[16] = { '\0' };
+	char fbuffer[MAX_OSPATH];
+    static char charset[] = "abcdefghijklmnopqrstuvwxyz123456789";
+
+    for (int n = 0; n < 16; n++) {
+		int val = rand() % (int) (sizeof(charset) -1);
+		buffer[n] = charset[val];
+    }
+
+	sprintf(fbuffer, "%s/rtcwkey", filename);
+
+    f = FS_SV_FOpenFileWrite(fbuffer);
+
+	if (!f) {
+		Com_Printf( "Couldn't write %s.\n", filename );
+		return;
+	}
+
+    //FS_Printf(f, "%s", buffer);
+	FS_Write(buffer, 16, f);
+	FS_FCloseFile(f);
+
+}
+
+/*
+=================
+Com_ReadAuthKey
+=================
+*/
+int Com_ReadAuthKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[16];
+	char fbuffer[MAX_OSPATH];
+
+	sprintf(fbuffer, "%s/authkey", filename);
+
+	FS_SV_FOpenFileRead(fbuffer, &f);
+	if (!f) {
+		return 0;
+	}
+	Com_Memset(buffer, 0, sizeof(buffer));
+
+	//FS_Read(buffer, 16, f);
+
+
+	FS_Read(buffer, 16, f);
+	FS_FCloseFile(f);
+#ifndef DEDICATED
+	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+	//Cvar_Set("cl_guid", buffer);
+#endif
+    return 1;
+
 }
 
 /*
@@ -2350,10 +2452,7 @@ static void Com_WriteCDKey( const char *filename, const char *ikey ) {
 	char fbuffer[MAX_OSPATH];
 	char key[17];
 
-
 	sprintf( fbuffer, "%s/rtcwkey", filename );
-
-
 	Q_strncpyz( key, ikey, 17 );
 
 	if ( !CL_CDKeyValidate( key, NULL ) ) {
@@ -2498,7 +2597,7 @@ void Com_Init( char *commandLine ) {
 	// init commands and vars
 	//
 	//com_altivec = Cvar_Get ("com_altivec", "1", CVAR_ARCHIVE);
-	com_maxfps = Cvar_Get( "com_maxfps", "85", CVAR_ARCHIVE | CVAR_LATCH );
+	com_maxfps = Cvar_Get( "com_maxfps", "125", CVAR_ARCHIVE ); // RtcwPro unlatched this for forcefps equivalent - cvar restrictions keep players inline //| CVAR_LATCH );
 	com_blood = Cvar_Get( "com_blood", "1", CVAR_ARCHIVE );
 
 	com_developer = Cvar_Get( "developer", "0", CVAR_TEMP );
@@ -2512,6 +2611,7 @@ void Com_Init( char *commandLine ) {
 	com_speeds = Cvar_Get( "com_speeds", "0", 0 );
 	com_timedemo = Cvar_Get( "timedemo", "0", CVAR_CHEAT );
 	com_cameraMode = Cvar_Get( "com_cameraMode", "0", CVAR_CHEAT );
+
     // new stuff for iortcw port of server defined dl rates
 	com_unfocused = Cvar_Get( "com_unfocused", "0", CVAR_ROM );
 	com_maxfpsUnfocused = Cvar_Get( "com_maxfpsUnfocused", "0", CVAR_ARCHIVE );
@@ -2522,8 +2622,6 @@ void Com_Init( char *commandLine ) {
 	#ifdef _WIN32
 	    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
 	#endif
-    //sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
-
 
 	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
 	cl_paused = Cvar_Get( "cl_paused", "0", CVAR_ROM );
@@ -2605,13 +2703,11 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
-	/*
-	com_pipefile = Cvar_Get( "com_pipefile", "", CVAR_ARCHIVE|CVAR_LATCH );
-	if( com_pipefile->string[0] )
-	{
-		pipefile = FS_FCreateOpenPipeFile( com_pipefile->string );
-	}
-	*/
+#ifdef MYSQLDEP
+	OW_Init();
+#endif
+	Threads_Init();
+
 	com_fullyInitialized = qtrue;
 	Com_Printf( "--- Common Initialization Complete ---\n" );
 }
@@ -2767,37 +2863,26 @@ int Com_TimeVal(int minMsec)
 
 	return timeVal;
 }
-#ifdef _WIN32
+
 /*
 =================
 Com_Frame
 =================
 */
-/*
-=================
-Com_Frame
-=================
-*/
+#if defined(_WIN32) && defined(DEDICATED)
 void Com_Frame( void ) {
-
-
 	int key;
-
 	int		msec, minMsec;
 	int		timeVal;
 	int		numBlocks = 1;
 	int		dlStart, deltaT, delayT;
 	static int	dlNextRound = 0;
 	static int	lastTime = 0, bias = 0;
-
 	int		timeBeforeFirstEvents;
 	int		timeBeforeServer;
 	int		timeBeforeEvents;
 	int		timeBeforeClient;
 	int		timeAfter;
-
-
-
 
 	if ( setjmp( abortframe ) ) {
 		return;         // an ERR_DROP was thrown
@@ -2811,19 +2896,12 @@ void Com_Frame( void ) {
 	timeBeforeClient = 0;
 	timeAfter = 0;
 
-
 	// old net chan encryption key
 	key = 0x87243987;
 
-	// DHM - Nerve :: Don't write config on Update Server
-#ifndef UPDATE_SERVER
-	// write config file if anything changed
-	Com_WriteConfiguration();
-#endif
 	if ( com_speeds->integer ) {
 		timeBeforeFirstEvents = Sys_Milliseconds ();
 	}
-
 
 	// Figure out how much time we have
 	if(!com_timedemo->integer)
@@ -2857,84 +2935,78 @@ void Com_Frame( void ) {
 
 	timeVal = 0;
 
-
 	do
 	{
-#ifdef _WIN32     // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
 		com_frameTime = Com_EventLoop();
 		if (lastTime > com_frameTime) {
 			lastTime = com_frameTime;
 		}
-#endif
-			// Busy sleep the last millisecond for better timeout precision
-			if (timeVal < 2) {
-				NET_Sleep(0);
-			}
-			else
+
+		// Busy sleep the last millisecond for better timeout precision
+		if (timeVal < 2) {
+			NET_Sleep(0);
+		}
+		else
+		{
+			if (com_sv_running->integer)
 			{
-
-				if (com_sv_running->integer)
+				// Send out download messages now that we're idle
+				if (sv_dlRate->integer)
 				{
-					// Send out download messages now that we're idle
-					if (sv_dlRate->integer)
+					// Rate limiting. This is very imprecise for high
+					// download rates due to millisecond timedelta resolution
+					dlStart = Sys_Milliseconds();
+					deltaT = dlNextRound - dlStart;
+					if (deltaT > 0)
 					{
-						// Rate limiting. This is very imprecise for high
-						// download rates due to millisecond timedelta resolution
-						dlStart = Sys_Milliseconds();
-						deltaT = dlNextRound - dlStart;
-						if (deltaT > 0)
+						if (deltaT < timeVal)
+							timeVal = deltaT + 1;
+					}
+					else
+					{
+						numBlocks = SV_SendDownloadMessages();
+						if (numBlocks)
 						{
-							if (deltaT < timeVal)
-								timeVal = deltaT + 1;
-						}
-						else
-						{
-							numBlocks = SV_SendDownloadMessages();
-							if (numBlocks)
+							// There are active downloads
+							deltaT = Sys_Milliseconds() - dlStart;
+
+							delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
+							delayT /= sv_dlRate->integer * 1024;
+
+							if (delayT <= deltaT + 1)
 							{
-								// There are active downloads
-								deltaT = Sys_Milliseconds() - dlStart;
-
-								delayT = 1000 * numBlocks * MAX_DOWNLOAD_BLKSIZE;
-								delayT /= sv_dlRate->integer * 1024;
-
-								if (delayT <= deltaT + 1)
-								{
-									// Sending the last round of download messages
-									// took too long for given rate, don't wait for
-									// next round, but always enforce a 1ms delay
-									// between DL message rounds so we don't hog
-									// all of the bandwidth. This will result in an
-									// effective maximum rate of 1MB/s per user, but the
-									// low download window size limits this anyways.
-									timeVal = 2;
-									dlNextRound = dlStart + deltaT + 1;
-								}
-								else
-								{
-									dlNextRound = dlStart + delayT;
-									timeVal = delayT - deltaT;
-								}
+								// Sending the last round of download messages
+								// took too long for given rate, don't wait for
+								// next round, but always enforce a 1ms delay
+								// between DL message rounds so we don't hog
+								// all of the bandwidth. This will result in an
+								// effective maximum rate of 1MB/s per user, but the
+								// low download window size limits this anyways.
+								timeVal = 2;
+								dlNextRound = dlStart + deltaT + 1;
+							}
+							else
+							{
+								dlNextRound = dlStart + delayT;
+								timeVal = delayT - deltaT;
 							}
 						}
 					}
-					else {
-						SV_SendDownloadMessages();
-					}
-				}
-
-				if (com_busyWait->integer) {
-					NET_Sleep(0);
 				}
 				else {
-					NET_Sleep(timeVal - 1);
+					SV_SendDownloadMessages();
 				}
 			}
-#ifdef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
-			msec = com_frameTime - lastTime;
-#else
-			msec = Sys_Milliseconds() - com_frameTime;
-#endif
+
+			if (com_busyWait->integer) {
+				NET_Sleep(0);
+			}
+			else {
+				NET_Sleep(timeVal - 1);
+			}
+		}
+
+		msec = com_frameTime - lastTime;
 		if(msec >= minMsec)
 			timeVal = 0;
 		else
@@ -2945,19 +3017,8 @@ void Com_Frame( void ) {
 
 	lastTime = com_frameTime;
 	com_frameTime = Com_EventLoop();
-#ifndef _WIN32 // fix for windows ded of iortcw port of sv_dlrate (okay okay I will try to stop being mysterious....-nihi)
-	msec = com_frameTime - lastTime;
-#endif
-
 
 	Cbuf_Execute ();
-/*
-	if (com_altivec->modified)
-	{
-		Com_DetectAltivec();
-		com_altivec->modified = qfalse;
-	}
-	*/
 
 	// mess with msec if needed
 	msec = Com_ModifyMsec(msec);
@@ -2968,7 +3029,6 @@ void Com_Frame( void ) {
 	if ( com_speeds->integer ) {
 		timeBeforeServer = Sys_Milliseconds ();
 	}
-
 
 	SV_Frame( msec );
 
@@ -2986,41 +3046,12 @@ void Com_Frame( void ) {
 		}
 	}
 
-	#ifndef DEDICATED
-	//
-	// client system
-	//
-	if ( !com_dedicated->integer ) {
-		//
-		// run event loop a second time to get server to client packets
-		// without a frame of latency
-		//
-		if ( com_speeds->integer ) {
-			timeBeforeEvents = Sys_Milliseconds();
-		}
-		Com_EventLoop();
-		Cbuf_Execute();
-
-		//
-		// client side
-		//
-		if ( com_speeds->integer ) {
-			timeBeforeClient = Sys_Milliseconds();
-		}
-
-		CL_Frame( msec );
-
-		if ( com_speeds->integer ) {
-			timeAfter = Sys_Milliseconds();
-		}
-	}
-#else
 	if ( com_speeds->integer ) {
 		timeAfter = Sys_Milliseconds ();
 		timeBeforeEvents = timeAfter;
 		timeBeforeClient = timeAfter;
 	}
-#endif
+
     NET_FlushPacketQueue();
 	//
 	// report timing information
@@ -3061,28 +3092,189 @@ void Com_Frame( void ) {
 	com_frameNumber++;
 }
 
-
-#else
+#elif defined(_WIN32) && ! defined(DEDICATED)
 /*
 =================
 Com_Frame
 =================
 */
-void Com_Frame( void ) {
-
-
-	int key;
-
+void Com_Frame(void) {
 	int msec, minMsec;
-	int		timeVal, timeValSV;
-	static int	lastTime = 0, bias = 0;
-
+	static int lastTime;
+	int key;
 	int timeBeforeFirstEvents;
 	int timeBeforeServer;
 	int timeBeforeEvents;
 	int timeBeforeClient;
 	int timeAfter;
 
+	if (setjmp(abortframe)) {
+		return;         // an ERR_DROP was thrown
+	}
+
+	// bk001204 - init to zero.
+	//  also:  might be clobbered by `longjmp' or `vfork'
+	timeBeforeFirstEvents = 0;
+	timeBeforeServer = 0;
+	timeBeforeEvents = 0;
+	timeBeforeClient = 0;
+	timeAfter = 0;
+
+	// old net chan encryption key
+	key = 0x87243987;
+
+	// DHM - Nerve :: Don't write config on Update Server
+#ifndef UPDATE_SERVER
+	// write config file if anything changed
+	Com_WriteConfiguration();
+#endif
+
+	// if "viewlog" has been modified, show or hide the log console
+	if (com_viewlog->modified) {
+		if (!com_dedicated->value) {
+			Sys_ShowConsole(com_viewlog->integer, qfalse);
+		}
+		com_viewlog->modified = qfalse;
+	}
+
+	//
+	// main event loop
+	//
+	if (com_speeds->integer) {
+		timeBeforeFirstEvents = Sys_Milliseconds();
+	}
+
+	// L0 - Fix maxfps abuse..
+	/*if (com_maxfps->integer > 125)
+		Cvar_Set("com_maxfps", "125");*/
+
+	// we may want to spin here if things are going too fast
+	if (!com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer) {
+		minMsec = 1000 / com_maxfps->integer;
+	}
+	else {
+		minMsec = 1;
+	}
+	do {
+		com_frameTime = Com_EventLoop();
+		if (lastTime > com_frameTime) {
+			lastTime = com_frameTime;       // possible on first frame
+		}
+		msec = com_frameTime - lastTime;
+	} while (msec < minMsec);
+	Cbuf_Execute();
+
+	lastTime = com_frameTime;
+
+	// mess with msec if needed
+	com_frameMsec = msec;
+	msec = Com_ModifyMsec(msec);
+
+	//
+	// server side
+	//
+	if (com_speeds->integer) {
+		timeBeforeServer = Sys_Milliseconds();
+	}
+
+	SV_Frame(msec);
+
+	// if "dedicated" has been modified, start up
+	// or shut down the client system.
+	// Do this after the server may have started,
+	// but before the client tries to auto-connect
+	if (com_dedicated->modified) {
+		// get the latched value
+		Cvar_Get("dedicated", "0", 0);
+		com_dedicated->modified = qfalse;
+		if (!com_dedicated->integer) {
+			CL_Init();
+			Sys_ShowConsole(com_viewlog->integer, qfalse);
+		}
+		else {
+			CL_Shutdown();
+			Sys_ShowConsole(1, qtrue);
+		}
+	}
+
+	//
+	// client system
+	//
+	if (!com_dedicated->integer) {
+		//
+		// run event loop a second time to get server to client packets
+		// without a frame of latency
+		//
+		if (com_speeds->integer) {
+			timeBeforeEvents = Sys_Milliseconds();
+		}
+		Com_EventLoop();
+		Cbuf_Execute();
+
+		//
+		// client side
+		//
+		if (com_speeds->integer) {
+			timeBeforeClient = Sys_Milliseconds();
+		}
+
+		CL_Frame(msec);
+
+		if (com_speeds->integer) {
+			timeAfter = Sys_Milliseconds();
+		}
+	}
+
+	//
+	// report timing information
+	//
+	if (com_speeds->integer) {
+		int all, sv, ev, cl;
+
+		all = timeAfter - timeBeforeServer;
+		sv = timeBeforeEvents - timeBeforeServer;
+		ev = timeBeforeServer - timeBeforeFirstEvents + timeBeforeClient - timeBeforeEvents;
+		cl = timeAfter - timeBeforeClient;
+		sv -= time_game;
+		cl -= time_frontend + time_backend;
+
+		Com_Printf("frame:%i all:%3i sv:%3i ev:%3i cl:%3i gm:%3i rf:%3i bk:%3i\n",
+			com_frameNumber, all, sv, ev, cl, time_game, time_frontend, time_backend);
+	}
+
+	//
+	// trace optimization tracking
+	//
+	if (com_showtrace->integer) {
+
+		extern int c_traces, c_brush_traces, c_patch_traces;
+		extern int c_pointcontents;
+
+		Com_Printf("%4i traces  (%ib %ip) %4i points\n", c_traces,
+			c_brush_traces, c_patch_traces, c_pointcontents);
+		c_traces = 0;
+		c_brush_traces = 0;
+		c_patch_traces = 0;
+		c_pointcontents = 0;
+	}
+
+	// old net chan encryption key
+	key = lastTime * 0x87243987;
+
+	com_frameNumber++;
+}
+
+#else
+void Com_Frame( void ) {
+	int key;
+	int msec, minMsec;
+	int		timeVal, timeValSV;
+	static int	lastTime = 0, bias = 0;
+	int timeBeforeFirstEvents;
+	int timeBeforeServer;
+	int timeBeforeEvents;
+	int timeBeforeClient;
+	int timeAfter;
 
 	if ( setjmp( abortframe ) ) {
 		return;         // an ERR_DROP was thrown
@@ -3093,7 +3285,6 @@ void Com_Frame( void ) {
 	timeBeforeEvents = 0;
 	timeBeforeClient = 0;
 	timeAfter = 0;
-
 
 	// DHM - Nerve :: Don't write config on Update Server
 #ifndef UPDATE_SERVER
@@ -3137,7 +3328,6 @@ void Com_Frame( void ) {
 	}
 	else
 		minMsec = 1;
-
 	do
 	{
 		if(com_sv_running->integer)
@@ -3232,8 +3422,6 @@ void Com_Frame( void ) {
 	}
 #endif
 
-
-
     NET_FlushPacketQueue();
 	//
 	// report timing information
@@ -3256,7 +3444,6 @@ void Com_Frame( void ) {
 	// trace optimization tracking
 	//
 	if ( com_showtrace->integer ) {
-
 		extern int c_traces, c_brush_traces, c_patch_traces;
 		extern int c_pointcontents;
 
@@ -3290,7 +3477,9 @@ void Com_Shutdown( void ) {
 		FS_FCloseFile( com_journalFile );
 		com_journalFile = 0;
 	}
-
+#ifdef MYSQLDEP
+	OW_Shutdown();
+#endif
 }
 
 #if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD
@@ -3785,7 +3974,6 @@ void Field_CompleteCommand( field_t *field ) {
 	Cmd_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion( PrintMatches );
 }
-
 
 // new stuff (but found not essential at this time) for iortcw port of server defined dl rates
 /*

@@ -850,6 +850,12 @@ void R_SetupFrustum( void ) {
 		tr.viewParms.frustum[i].dist = DotProduct( tr.viewParms.or.origin, tr.viewParms.frustum[i].normal );
 		SetPlaneSignbits( &tr.viewParms.frustum[i] );
 	}
+
+	// ydnar: farplane (testing! use farplane for real)
+	VectorScale(tr.viewParms. or .axis[0], -1, tr.viewParms.frustum[4].normal);
+	tr.viewParms.frustum[4].dist = DotProduct(tr.viewParms. or .origin, tr.viewParms.frustum[4].normal) - tr.viewParms.zFar;
+	tr.viewParms.frustum[4].type = PLANE_NON_AXIAL;
+	SetPlaneSignbits(&tr.viewParms.frustum[4]);
 }
 
 

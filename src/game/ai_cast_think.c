@@ -122,7 +122,7 @@ void AICast_ChangeViewAngles( cast_state_t *cs, float thinktime ) {
 	if ( cs->lockViewAnglesTime < level.time ) {
 		maxchange *= thinktime;
 		for ( i = 0; i < 3; i++ ) {
-			diff = fabs( AngleDifference( bs->viewangles[i], bs->ideal_viewangles[i] ) );
+			diff = Q_fabs( AngleDifference( bs->viewangles[i], bs->ideal_viewangles[i] ) );
 			anglespeed = diff * factor;
 			if ( anglespeed > maxchange ) {
 				anglespeed = maxchange;
@@ -182,7 +182,7 @@ void AICast_InputToUserCommand( cast_state_t *cs, bot_input_t *bi, usercmd_t *uc
 		// don't fire if we are not facing the right direction yet
 		if ( ( cs->triggerReleaseTime < level.time ) &&
 			 (   ( cs->lockViewAnglesTime >= level.time ) ||
-				 ( fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) < 20 ) ) &&
+				 ( Q_fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) < 20 ) ) &&
 			 // check for radid luger firing by skilled users (release fire between shots)
 			 ( ( ( level.time + cs->entityNum * 500 ) / 2000 ) % 2 || !( rand() % ( 1 + g_gameskill.integer ) ) || ( cs->attributes[ATTACK_SKILL] < 0.5 ) || ( cs->bs->weaponnum != WP_LUGER ) || ( cs->bs->cur_ps.weaponTime == 0 ) || ( cs->bs->cur_ps.releasedFire ) ) ) {
 			ucmd->buttons |= BUTTON_ATTACK;
@@ -237,7 +237,7 @@ void AICast_InputToUserCommand( cast_state_t *cs, bot_input_t *bi, usercmd_t *uc
 	//
 	// if viewlock, wait until we are facing ideal angles before we move
 	if ( cs->aiFlags & AIFL_VIEWLOCKED ) {
-		if ( fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) > 10 ) {
+		if ( Q_fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) > 10 ) {
 			return;
 		}
 	}
@@ -249,7 +249,7 @@ void AICast_InputToUserCommand( cast_state_t *cs, bot_input_t *bi, usercmd_t *uc
 	//
 	// only move if we are in combat or we are facing where our ideal angles
 	if ( bi->speed ) {
-		if ( ( !( cs->aiFlags & AIFL_WALKFORWARD ) && cs->bs->enemy >= 0 ) || ( fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) < 60 ) ) {
+		if ( ( !( cs->aiFlags & AIFL_WALKFORWARD ) && cs->bs->enemy >= 0 ) || ( Q_fabs( AngleDifference( cs->bs->ideal_viewangles[YAW], cs->bs->viewangles[YAW] ) ) < 60 ) ) {
 			//NOTE: movement is relative to the REAL view angles
 			//get the horizontal forward and right vector
 			//get the pitch in the range [-180, 180]

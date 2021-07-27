@@ -154,7 +154,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 	// L0 - Antilag
-	G_ResetTrail(player);    // nihi added
+	G_ResetTrail(player);
 }
 
 
@@ -1677,7 +1677,7 @@ void clamp_hweapontofirearc( gentity_t *self, vec3_t dang ) {
 
 	// sanity check the angles again to make sure we don't go passed the harc
 	diff = AngleDifference( self->s.angles[YAW], dang[YAW] );
-	if ( fabs( diff ) > self->harc ) {
+	if ( Q_fabs( diff ) > self->harc ) {
 		clamped = qtrue;
 
 		if ( diff > 0 ) {
@@ -2407,7 +2407,7 @@ void miscGunnerThink( gentity_t *ent ) {
 		}
 
 		// restrict vertical range
-		if ( dang[0] < 0 && fabs( dang[0] ) > ( gun->varc / 2 ) ) {
+		if ( dang[0] < 0 && Q_fabs( dang[0] ) > ( gun->varc / 2 ) ) {
 			clamped = qtrue;
 			if ( dang[0] < 0 ) {
 				dang[0] = -( gun->varc / 2 );
@@ -2421,7 +2421,7 @@ void miscGunnerThink( gentity_t *ent ) {
 		for ( i = 0; i < 3; i++ ) {
 			BG_EvaluateTrajectory( &gun->s.apos, level.time, gun->r.currentAngles );
 			diff = AngleDifference( dang[i], gun->r.currentAngles[i] );
-			if ( fabs( diff ) > ( yawspeed * ( (float)FRAMETIME / 1000.0 ) ) ) {
+			if ( Q_fabs( diff ) > ( yawspeed * ( (float)FRAMETIME / 1000.0 ) ) ) {
 				clamped = qtrue;
 				if ( diff > 0 ) {
 					dang[i] = AngleMod( gun->r.currentAngles[i] + ( yawspeed * ( (float)FRAMETIME / 1000.0 ) ) );
@@ -2443,7 +2443,7 @@ void miscGunnerThink( gentity_t *ent ) {
 		gun->s.apos.trDuration = 50;
 
 		// if we are facing them, fire
-		if ( fabs( AngleNormalize180( gun->r.currentAngles[YAW] - gun->TargetAngles[YAW] ) ) < 10 ) {
+		if ( Q_fabs( AngleNormalize180( gun->r.currentAngles[YAW] - gun->TargetAngles[YAW] ) ) < 10 ) {
 			AngleVectors( gun->r.currentAngles, forward, right, up );
 			VectorCopy( gspot, muzzle );
 
@@ -2644,226 +2644,4 @@ void misc_firetrails_think( gentity_t *ent ) {
 void SP_misc_firetrails( gentity_t *ent ) {
 	ent->think = misc_firetrails_think;
 	ent->nextthink = level.time + 100;
-
-}
-/*
-==============
-PC_SourceError
-==============
-*/
-void PC_SourceError(int handle, char* format, ...)
-{
-	int         line;
-	char        filename[MAX_QPATH];
-	va_list     argptr;
-	static char string[4096];
-
-	va_start(argptr, format);
-	Q_vsnprintf(string, sizeof(string), format, argptr);
-	va_end(argptr);
-
-	filename[0] = '\0';
-	line = 0;
-	trap_PC_SourceFileAndLine(handle, filename, &line);
-
-#ifdef GAMEDLL
-	Com_Error(ERR_DROP, S_COLOR_RED "ERROR: %s, line %d: %s", filename, line, string);
-#else
-	Com_Printf(S_COLOR_RED "ERROR: %s, line %d: %s\n", filename, line, string);
-#endif
-}
-
-/*
-==============
-PC_Float_Parse
-==============
-*/
-qboolean PC_Float_Parse(int handle, float* f)
-{
-	pc_token_t token;
-	int        negative = qfalse;
-
-	if (!trap_PC_ReadToken(handle, &token))
-	{
-		return qfalse;
-	}
-	if (token.string[0] == '-')
-	{
-		if (!trap_PC_ReadToken(handle, &token))
-		{
-			return qfalse;
-		}
-		negative = qtrue;
-	}
-	if (token.type != TT_NUMBER)
-	{
-		PC_SourceError(handle, "expected float but found %s\n", token.string);
-		return qfalse;
-	}
-	if (negative)
-	{
-		*f = -token.floatvalue;
-	}
-	else
-	{
-		*f = token.floatvalue;
-	}
-	return qtrue;
-}
-
-/*
-==============
-PC_Color_Parse
-==============
-*/
-qboolean PC_Color_Parse(int handle, vec4_t* c)
-{
-	int   i;
-	float f;
-
-	for (i = 0; i < 4; i++)
-	{
-		if (!PC_Float_Parse(handle, &f))
-		{
-			return qfalse;
-		}
-		(*c)[i] = f;
-	}
-	return qtrue;
-}
-
-/*
-==============
-PC_Vec_Parse
-==============
-*/
-qboolean PC_Vec_Parse(int handle, vec3_t* c)
-{
-	int   i;
-	float f;
-
-	for (i = 0; i < 3; i++)
-	{
-		if (!PC_Float_Parse(handle, &f))
-		{
-			return qfalse;
-		}
-		(*c)[i] = f;
-	}
-	return qtrue;
-}
-
-/*
-==============
-PC_Point_Parse
-==============
-*/
-qboolean PC_Point_Parse(int handle, vec2_t* c)
-{
-	int   i;
-	float f;
-
-	for (i = 0; i < 2; i++)
-	{
-		if (!PC_Float_Parse(handle, &f))
-		{
-			return qfalse;
-		}
-		(*c)[i] = f;
-	}
-	return qtrue;
-}
-
-/*
-==============
-PC_Int_Parse
-==============
-*/
-qboolean PC_Int_Parse(int handle, int* i)
-{
-	pc_token_t token;
-	int        negative = qfalse;
-
-	if (!trap_PC_ReadToken(handle, &token))
-	{
-		return qfalse;
-	}
-	if (token.string[0] == '-')
-	{
-		if (!trap_PC_ReadToken(handle, &token))
-		{
-			return qfalse;
-		}
-		negative = qtrue;
-	}
-	if (token.type != TT_NUMBER)
-	{
-		PC_SourceError(handle, "expected integer but found %s\n", token.string);
-		return qfalse;
-	}
-	*i = token.intvalue;
-	if (negative)
-	{
-		*i = -*i;
-	}
-	return qtrue;
-}
-
-#ifdef GAMEDLL
-/*
-==============
-PC_String_Parse
-==============
-*/
-const char* PC_String_Parse(int handle)
-{
-	static char buf[MAX_TOKEN_CHARS];
-	pc_token_t  token;
-
-	if (!trap_PC_ReadToken(handle, &token))
-	{
-		return NULL;
-	}
-
-	Q_strncpyz(buf, token.string, MAX_TOKEN_CHARS);
-	return buf;
-}
-
-#else
-
-/*
-==============
-PC_String_Parse
-==============
-*/
-qboolean PC_String_Parse(int handle, const char** out)
-{
-	pc_token_t token;
-
-	if (!trap_PC_ReadToken(handle, &token))
-	{
-		return qfalse;
-	}
-
-	*(out) = String_Alloc(token.string);
-	return qtrue;
-}
-#endif
-
-/*
-==============
-PC_String_ParseNoAlloc
-==============
-*/
-qboolean PC_String_ParseNoAlloc(int handle, char* out, size_t size)
-{
-	pc_token_t token;
-
-	if (!trap_PC_ReadToken(handle, &token))
-	{
-		return qfalse;
-	}
-
-	Q_strncpyz(out, token.string, size);
-	return qtrue;
 }

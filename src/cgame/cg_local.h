@@ -92,7 +92,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GIANT_WIDTH         32
 #define GIANT_HEIGHT        48
 
-#define NUM_CROSSHAIRS      10
+#define NUM_CROSSHAIRS      16
 
 // Ridah, trails
 #define STYPE_STRETCH   0
@@ -112,7 +112,6 @@ If you have questions concerning this license or the applicable additional terms
 #define LIMBO_3D_W  420
 #define LIMBO_3D_H  312
 // -NERVE - SMF
-/* NIHI ADDED BELOW */
 // L0 - OSP's window's dump
 #define MAX_WINDOW_COUNT        10
 #define MAX_WINDOW_LINES        64
@@ -248,7 +247,7 @@ typedef struct {
 	int requestTime;
 } topshotStats_t;
 // End OSP's dump
-/* END NIHI ADDITION */
+
 //=================================================
 
 // player entities need to track more information
@@ -409,10 +408,18 @@ typedef struct {
 } skinModel_t;
 //----(SA) end
 
+// RTCWPro - shoutcaster
+#define MAX_SCITEMS 256
+typedef struct scItem_s {
+	char* text;
+	float	dist;
+	float	scale;
+	vec_t	position[2];
+	vec4_t	color;
+} scItem_t;
+
 
 //=================================================
-
-
 
 // centity_t have a direct corespondence with gentity_t in the game, but
 // only the entityState_t is directly communicated to the cgame
@@ -489,6 +496,9 @@ typedef struct centity_s {
 
 	int highlightTime;
 	qboolean highlighted;
+
+	// RTCWPro
+	int lastSeenTime;
 } centity_t;
 
 
@@ -740,6 +750,7 @@ typedef struct {
 
 	// RTCWPro
 	int refStatus;
+	int shoutStatus;
 	int playerAmmo;
 	int playerAmmoClip;
 	int playerWeapon;
@@ -1207,21 +1218,25 @@ typedef struct {
 	// Time Counter
 	int timein;
 	int timeCounter;
+
+	qboolean serverRespawning;
 // -OSPx
-
-	// RTCWPro - cvar limiting
-	svCvar_t svCvars[MAX_SVCVARS];
-	int svCvarCount;
-
-	// backuping, forceCvar_t is good format, it holds name and value only
-	forceCvar_t cvarBackups[MAX_SVCVARS];
-	int cvarBackupsCount;
 
 	// sswolf - tj stuff
 	qboolean resetmaxspeed;
 	float topSpeed;
 	float oldSpeed;
 	// tj stuff end
+
+	// RTCWPro
+	scItem_t scItems[MAX_SCITEMS];
+	int numSCItems;
+
+	// RTCWPro - draw triggers
+	int drawTriggersCount;
+	int lastGetTriggerDistancesTime;
+	int drawTriggerEntIndexes[MAX_ENTITIES + 1];
+	float drawTriggerDistances[MAX_ENTITIES + 1];
 
 	pmoveExt_t pmext;
 
@@ -1735,6 +1750,15 @@ typedef struct {
 	// end of round
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
+
+	// RTCWPro - draw triggers
+	qhandle_t transmitTrigger;
+	qhandle_t transmitTriggerEdges;
+	qhandle_t objTrigger;
+	qhandle_t objTriggerEdges;
+	qhandle_t customTrigger;
+	qhandle_t customTriggerEdges;
+
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -1776,6 +1800,7 @@ typedef struct {
 	float timelimit;                        // NERVE - SMF - made this a float
 	int maxclients;
 	char mapname[MAX_QPATH];
+	char rawmapname[MAX_QPATH];
 	char redTeam[MAX_QPATH];                // A team
 	char blueTeam[MAX_QPATH];               // B team
 
@@ -1868,11 +1893,11 @@ typedef struct {
 	int ccSelectedTeam;					// Reinforcements offset
 	int fixedphysics;	// Fixed pshysics
 	int pauseState;		// Pause
-	int pauseTime;   // pause time nihi added
+	int pauseTime;
 	int readyState;		// Ready
 	int playersReady;   // number of players ready so far
 	int playerCount;	// number of players
-// nihi added below
+
 	// Pause
 	cPauseSts_t match_paused;
 	int match_resumes;
@@ -2088,13 +2113,13 @@ extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
 extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_muzzleFlash;
-//extern vmCvar_t cg_hitsounds;
+extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
 extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
-// nihi added
+
 extern vmCvar_t	vp_drawnames;
 extern vmCvar_t	cg_drawNames;
 extern vmCvar_t cg_announcer;
@@ -2132,6 +2157,7 @@ extern vmCvar_t	demo_noAdvertisement;
 // engine mappings
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
+extern vmCvar_t str_cl_guid;
 
 // draw speed
 extern vmCvar_t cg_drawSpeed;
@@ -2141,6 +2167,13 @@ extern vmCvar_t cg_speedY;
 //added from et - nihi
 extern vmCvar_t cg_spawnTimer_period;
 extern vmCvar_t cg_spawnTimer_set;
+
+// added from et-legacy - crumbs
+extern vmCvar_t cg_tracers;
+
+// ERT
+extern vmCvar_t cg_drawEnemyTimer;
+extern vmCvar_t cg_drawTriggers;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
@@ -2171,7 +2204,7 @@ qboolean CG_GetTag( int clientNum, char *tagname, orientation_t * or );
 qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t * or );
 
 qboolean CG_CheckCenterView();
-// nihi added lines below
+
 char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
@@ -2256,9 +2289,9 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 
 // RtcwPro
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
-
-// sswolf - time
 char* CG_GetClock(void);
+void CG_ColorForPercent(float percent, vec4_t hcolor);
+void CG_DrawTriggers(void);
 
 //
 // cg_draw.c, cg_newDraw.c
@@ -2304,6 +2337,8 @@ qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 qhandle_t CG_StatusHandle( int task );
 void CG_Fade( int r, int g, int b, int a, float time );
+void CG_ShoutcasterItems();
+void CG_ShoutcasterDynamite(int num);
 
 
 // - Reinforcement offset
@@ -2610,6 +2645,7 @@ void CG_DrawTourneyScoreboard( void );
 //
 qboolean CG_ConsoleCommand( void );
 void CG_InitConsoleCommands( void );
+qboolean CG_RelayCommand(char* type, int value);
 // OSPx
 void CG_autoRecord_f( void );
 void CG_autoScreenShot_f( void );
@@ -2632,13 +2668,14 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
-void CG_UpdateSvCvars(void); // RTCWPro - cvar limiting
 
 //
 // cg_playerstate.c
 //
 void CG_Respawn( void );
 void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
+qboolean PointVisible(vec3_t point);
+qboolean VisibleToScreen(vec3_t point, vec_t world[2]);
 
 
 //
@@ -2680,6 +2717,8 @@ void        trap_Cvar_Register( vmCvar_t *vmCvar, const char *varName, const cha
 void        trap_Cvar_Update( vmCvar_t *vmCvar );
 void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+void		trap_Rest_Validate(void);
+void		trap_Rest_Build(const char *data);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );
@@ -2899,6 +2938,7 @@ void        CG_StartCamera( const char *name, qboolean startBlack );
 int         CG_LoadCamera( const char *name );
 void        CG_FreeCamera( int camNum );
 //----(SA)	end
+
 // Text
 int CG_Text_Width_Ext( const char *text, float scale, int limit, fontInfo_t* font );
 int CG_Text_Height_Ext( const char *text, float scale, int limit, fontInfo_t* font );
@@ -2926,3 +2966,10 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 #define Pri( x ) CG_Printf( "[cgnotify]%s", CG_LocalizeServerCommand( x ) )
 #define CPri( x ) CG_CenterPrint( CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH );
 #define CPriP( x ) CG_PriorityCenterPrint(CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH, -1 );
+
+// reqSS
+//void trap_ReqSS(int quality);
+void trap_ReqSS(char *ip);
+
+//void trap_ReqSS(void);
+

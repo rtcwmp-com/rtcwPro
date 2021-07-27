@@ -522,15 +522,17 @@ void VectorRotate( vec3_t in, vec3_t matrix[3], vec3_t out ) {
 ** float q_rsqrt( float number )
 */
 float Q_rsqrt( float number ) {
-	long i;
+	union {
+		float f;
+		int i;
+	} t;
 	float x2, y;
 	const float threehalfs = 1.5F;
 
 	x2 = number * 0.5F;
-	y  = number;
-	i  = *( long * ) &y;                        // evil floating point bit level hacking
-	i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
-	y  = *( float * ) &i;
+	t.f = number;
+	t.i = 0x5f3759df - (t.i >> 1);				// what the fuck?
+	y = t.f;
 	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
 //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
 
@@ -1030,8 +1032,8 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs ) {
 	float a, b;
 
 	for ( i = 0 ; i < 3 ; i++ ) {
-		a = fabs( mins[i] );
-		b = fabs( maxs[i] );
+		a = Q_fabs( mins[i] );
+		b = Q_fabs( maxs[i] );
 		corner[i] = a > b ? a : b;
 	}
 
@@ -1076,7 +1078,26 @@ int VectorCompare( const vec3_t v1, const vec3_t v2 ) {
 	return 1;
 }
 
+vec_t VectorNormalize( vec3_t v ) {
+	// NOTE: TTimo - Apple G4 altivec source uses double?
+	float	length, ilength;
 
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+
+	if ( length ) {
+		/* writing it this way allows gcc to recognize that rsqrt can be used */
+		ilength = 1/(float)sqrt (length);
+		/* sqrt(length) = length * (1 / sqrt(length)) */
+		length *= ilength;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
+	}
+
+	return length;
+}
+
+/*
 vec_t VectorNormalize( vec3_t v ) {
 	float length, ilength;
 
@@ -1092,7 +1113,7 @@ vec_t VectorNormalize( vec3_t v ) {
 
 	return length;
 }
-
+*/
 //
 // fast vector normalize routine that does not check to make sure
 // that length != 0, nor does it return length
@@ -1308,9 +1329,9 @@ void PerpendicularVector( vec3_t dst, const vec3_t src ) {
 	*/
 	for ( pos = 0, i = 0; i < 3; i++ )
 	{
-		if ( fabs( src[i] ) < minelem ) {
+		if ( Q_fabs( src[i] ) < minelem ) {
 			pos = i;
-			minelem = fabs( src[i] );
+			minelem = Q_fabs( src[i] );
 		}
 	}
 	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;

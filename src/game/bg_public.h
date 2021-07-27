@@ -32,14 +32,18 @@ If you have questions concerning this license or the applicable additional terms
  * desc:		definitions shared by both the server game and client game modules
  *
 */
+#ifndef  ___BG_PUBLIC_H
+#define ___BG_PUBLIC_H
+
+
 #include "../../MAIN/ui_mp/menudef.h" // For vote options
 
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.1.2" // this will print on the server and show up as the RtcwPro version
-
+#define GAMEVERSION			"RtcwPro 1.2" // this will print on the server and show up as the RtcwPro version
+#define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
 #define GIB_HEALTH          -175 // JPW NERVE
@@ -129,36 +133,6 @@ typedef enum popupMessageType_e {
 #define MAX_OID_TRIGGERS    16
 // dhm
 
-// RTCWPro - cvar limiting
-#define MAX_SVCVARS 128
-
-#define SVC_EQUAL           0
-#define SVC_GREATER         1
-#define SVC_GREATEREQUAL    2
-#define SVC_LOWER           3
-#define SVC_LOWEREQUAL      4
-#define SVC_INSIDE          5
-#define SVC_OUTSIDE         6
-#define SVC_INCLUDE         7
-#define SVC_EXCLUDE         8
-#define SVC_WITHBITS        9
-#define SVC_WITHOUTBITS     10
-
-typedef struct svCvar_s
-{
-	char cvarName[MAX_CVAR_VALUE_STRING];
-	int mode;
-	char Val1[MAX_CVAR_VALUE_STRING];
-	char Val2[MAX_CVAR_VALUE_STRING];
-} svCvar_t;
-
-typedef struct forceCvar_s
-{
-	char cvarName[MAX_CVAR_VALUE_STRING];
-	char cvarValue[MAX_CVAR_VALUE_STRING];
-} forceCvar_t;
-// RTCWPro
-
 //
 // config strings are a general means of communicating variable length strings
 // from the server to all connected clients.
@@ -213,7 +187,7 @@ typedef struct forceCvar_s
 #define CS_SVCVAR               42		// RTCWPro - Cvar limiting
 #define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
 #define CS_MATCHID              44    // match id for stats
-#define CS_ROUNDINFO              45    // match id for stats
+#define CS_ROUNDINFO            45    // match id for stats
 
 
 #define CS_MODELS               64
@@ -425,7 +399,11 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK
+	PERS_WOLFKICK,
+
+	PERS_HITHEAD,
+	PERS_HITBODY
+
 	// Weapon Restrictions
 	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
 } persEnum_t;
@@ -495,7 +473,7 @@ typedef enum {
 	PW_BLUEFLAG,
 	PW_BALL,
 	PW_READY,			// Ready
-	PW_BLACKOUT = 14,	// Specklock
+	PW_BLACKOUT,		// Specklock
 
 	PW_NUM_POWERUPS
 } powerup_t;
@@ -819,9 +797,9 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
-// OSPx
-	EV_ANNOUNCER_SOUND,		// Deals with countdown
-// -OSPx
+	// OSPx
+	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
+	// -OSPx
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,
@@ -1853,30 +1831,9 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 // -OSPx
 // L0 - Reinforcements offset
 #define MAX_REINFSEEDS  8
-#define REINF_RANGE     16      // (0 to n-1 second offset)
+//#define REINF_RANGE     16      // (0 to n-1 second offset)
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
-// RTCWPro - custom config
-int trap_PC_LoadSource(const char* filename);
-int trap_PC_FreeSource(int handle);
-int trap_PC_ReadToken(int handle, pc_token_t* pc_token);
-int trap_PC_SourceFileAndLine(int handle, char* filename, int* line);
-
-void PC_SourceError(int handle, char* format, ...);
-//void PC_SourceWarning(int handle, const char *format, ...); // Unused
-
-#ifdef GAMEDLL
-const char* PC_String_Parse(int handle);
-#else
-const char* String_Alloc(const char* p);
-qboolean PC_String_Parse(int handle, const char** out);
-#endif
-qboolean PC_String_ParseNoAlloc(int handle, char* out, size_t size);
-qboolean PC_Int_Parse(int handle, int* i);
-qboolean PC_Color_Parse(int handle, vec4_t* c);
-qboolean PC_Vec_Parse(int handle, vec3_t* c);
-qboolean PC_Float_Parse(int handle, float* f);
-qboolean PC_Point_Parse(int handle, vec2_t* c);
-// RTCWPro
+#endif // ! ___BG_PUBLIC_H

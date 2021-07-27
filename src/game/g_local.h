@@ -34,13 +34,18 @@ If you have questions concerning this license or the applicable additional terms
 #include "bg_public.h"
 #include "g_public.h"
 #include "../../MAIN/ui_mp/menudef.h"
+#ifdef _WIN32
+#include "../qcommon/jansson_win/jansson.h"
+#else
+#include "../qcommon/jansson/jansson.h"
+#endif // _WIN32
 
 //==================================================================
 
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
 //#define GAMEVERSION "RtcwPro 1.0 beta"
-#define JSONGAMESTATVERSION "0.1.2"
+#define JSONGAMESTATVERSION "0.1.3"
 
 // done.
 
@@ -469,33 +474,11 @@ typedef struct {
 	float lastfraggedcarrier;
 } playerTeamState_t;
 
-// L0 - Admins
-typedef enum {
-	ADM_NONE, // Normal players
-	ADM_1,    // Level 1 Admin
-	ADM_2,    // Level 2 Admin
-	ADM_3,    // Level 3 Admin
-	ADM_4,	  // Level 4 Admin
-	ADM_5	  // Level 5 Admin
-} admLvls_t;
-// End
-
-
 // the auto following clients don't follow a specific client
 // number, but instead follow the first two active players
 #define FOLLOW_ACTIVE1  -1
 #define FOLLOW_ACTIVE2  -2
-// OSPx
-// - Admin/Ref..
-typedef enum {
-	USER_REGULAR,
-	USER_REFEREE,	// Temporary, voted in (limited functionality mainly restricted to votes) players..
-	ADMIN_1,		// ADMIN_* can only be obtained by logging in.
-	ADMIN_2,
-	ADMIN_3,
-	ADMIN_4,
-	ADMIN_5
-} adminStatus_t;
+
 // L0 - OSP stats port - weapon stat counters
 typedef struct {
 	unsigned int atts;
@@ -539,16 +522,11 @@ typedef struct {
 	int latchPlayerSkin;            // DHM - Nerve :: for GT_WOLF not archived
 
 	// L0 - New sessions
-	//admLvls_t admin;	// Admins
-	//int incognito;		// Admin is hidden
-	//int ignored;		// User is ignored
 	unsigned int uci;   // mcwf's GeoIP
-//	unsigned char ip[4];// IPs  // nihi commented
-	unsigned int ip[4];						// IP
-	char guid[15];		// Guid
-	adminStatus_t admin;					// Admin, ref..
-	qboolean incognito;						// Hidden admin
-	qboolean ignored;						// Ignored..
+//	unsigned char ip[4];// IPs
+	char ip[47];		// IP
+	//char guid[15];		// Guid
+	char guid[GUID_LEN];		// Guid
 	int ignoreClients[MAX_CLIENTS / ( sizeof( int ) * 8 )];
 	qboolean muted;
 	int selectedWeapon; // If enabled allows mp40, sten, thompson..
@@ -563,7 +541,7 @@ typedef struct {
 	int team_kills;
 
 	// referee
-	int referee, status;
+	int referee, status, shoutcaster;
 	int spec_invite, specInvited, specLocked;
 
 	// New ones
@@ -586,7 +564,8 @@ typedef struct {
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 	//weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
 
-	int			clientFlags;		// Sort some stuff based upon user settings   // nihi addded
+	int clientFlags;		// Sort some stuff based upon user settings
+	int specSpeed;
 } clientSession_t;
 
 //
@@ -635,19 +614,8 @@ typedef struct {
 	unsigned int clientTimeNudge;       // Client cl_timenudge settings
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
-	// Admins
-	char cmd1[128];	// !command
-	char cmd2[128]; // !command attribute
-	char cmd3[128];	// !command attribute extra
-	qboolean nameLocked; // Takes ability to rename from client..it's cleared next round, map load..
-
-	// Server Bot
-	int sb_teamBleed;
-	int sb_ping;
-	int sb_chatWarned;
-	int sb_ignored;
-	int	sb_teamKills;
 	int throwingKnives;
+
 	// Shortcuts
 	int lastkilled_client;
 	int	lastrevive_client;
@@ -671,12 +639,12 @@ typedef struct {
 	qboolean drawHitBoxes;
 } clientPersistant_t;
 
-// L0 - antilag port     nihi added
-#define NUM_CLIENT_TRAILS 10
+// L0 - antilag port
+#define NUM_CLIENT_TRAILS 64
 typedef struct {
-    vec3_t    mins, maxs;
-    vec3_t    currentOrigin;
-    int       time, leveltime;
+    vec3_t mins, maxs;
+    vec3_t currentOrigin;
+    int time;
 	clientAnimationInfo_t animInfo;
 } clientTrail_t;
 
@@ -794,7 +762,7 @@ struct gclient_s {
 	int lastBurnTime;         // JPW NERVE last time index for flamethrower burn
 	int PCSpecialPickedUpCount;         // JPW NERVE used to count # of times somebody's picked up this LTs ammo (or medic health) (for scoring)
 	int saved_persistant[MAX_PERSISTANT];           // DHM - Nerve :: Save ps->persistant here during Limbo
-/* nihi removed below
+/*
 	// g_antilag.c
 	int topMarker;
 	clientMarker_t clientMarkers[MAX_CLIENT_MARKERS];
@@ -809,13 +777,15 @@ struct gclient_s {
 	float legsYawAngle, torsoYawAngle, torsoPitchAngle;
 	qboolean torsoYawing, legsYawing, torsoPitching;
 
-// nihi added below
+
 	// g_antilag.c
 	// L0 - antilag port
-    int              trailHead;
-    clientTrail_t    trail[NUM_CLIENT_TRAILS];
-    clientTrail_t    saved;    // used to restore after time shift
-	// end
+    int trailHead;
+    clientTrail_t trail[NUM_CLIENT_TRAILS];
+	int last_trail_node_store_time;
+	int accum_trail_node_store_time;
+	clientTrail_t saved_trail_node;
+	// antilag end
 
 	gentity_t		*tempHead;	// Gordon: storing a temporary head for bullet head shot detection
 
@@ -832,8 +802,12 @@ struct gclient_s {
 	float cmddelta;							// antiwarp command queue # valid commands
 	usercmd_t cmds[LAG_MAX_COMMANDS];       // antiwarp command queue
 	// End
-};
 
+	// revive anim bug fix
+	qboolean revive_animation_playing;
+	int movement_lock_begin_time;
+
+};
 
 //
 // this structure is cleared as each map is entered
@@ -853,24 +827,16 @@ typedef struct voteInfo_s {
 	char vote_value[VOTE_MAXSTRING];        // Desired vote item setting.
 } voteInfo_t;
 
-// RTCWPro - custom config
-typedef struct cfgCvar_s
-{
-	char name[256];
-	char value[256];
-} cfgCvar_t;
+typedef struct jsonStatInfo_s {
+   char  match_id[MAX_STRING_CHARS];
+   char  round_id[MAX_STRING_CHARS];
+   char  round_start[MAX_STRING_CHARS];
+   char  round_timelimit[MAX_STRING_CHARS];
+   char  gameStatslogFileName[256];
+   fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+} jsonStatInfo_t;
 
-typedef struct config_s
-{
-	char name[256];
-	char version[256];
-	char signature[256];
-	char mapscripthash[256];
-	cfgCvar_t setl[256];
-	int numSetl;
-	qboolean loaded;
-	qboolean publicConfig;
-} config_t;
+
 typedef struct {
 	struct gclient_s    *clients;       // [maxclients]
 
@@ -879,10 +845,10 @@ typedef struct {
 	int num_entities;               // current number, <= MAX_GENTITIES
 
 	int warmupTime;                 // restart match at this time
+	qboolean warmupSwap;			// Swaps teams in SW with g_tournament enabled
 
 	fileHandle_t logFile;
 
-    fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
 
 	// store latched cvars here that we want to get at often
 	int maxclients;
@@ -997,7 +963,8 @@ typedef struct {
 	int numOidTriggers;                 // DHM - Nerve
 
 	qboolean latchGametype;             // DHM - Nerve
-	// L0 - New stuff
+
+// L0 - New stuff
 	int axisLeft;		// For DM
 	int alliedLeft;		// For DM
 	int dwBlueReinfOffset;	// Reinforcements offset
@@ -1007,12 +974,11 @@ typedef struct {
 	int taken;			// Flag retaking
 	int balanceTimer;	// Auto balance teams timer
 	qboolean fResetStats; // OSP Stats
-	int	HAprintnum;
-	int	HAlastPrintTime;
-	int	CNstart;		// count down
 
-	int	CNpush;			// push it forward
-	qboolean CNyes;		// We're done with all..so go to countdown
+	// Countdown
+	qboolean	cnStarted;
+	int			cnPush;
+	int			cnNum;
 
 	// voting and referee
 	voteInfo_t voteInfo;
@@ -1023,8 +989,7 @@ typedef struct {
 	int axisPF, alliedPF;
 	int axisVenom, alliedVenom;
 	int axisFlamer, alliedFlamer;
-	// Admin bot
-	int sb_maxPing;
+
 	// Pause
 	int paused;
 	int timeCurrent;	// Real game clock
@@ -1033,27 +998,28 @@ typedef struct {
 	int alliedTimeouts;
 	qboolean axisCalledTimeout;
 	qboolean autoPaused;
+
 	// OSP Stats
 	int sortedStats[MAX_CLIENTS];	// sorted by weapon stats
+
 	// Map Achievers
 	int topAchiever;
 	char *topAchieverPlayer;
+
 	// Ready
 	qboolean ref_allready;                  // Referee forced match start
 	qboolean readyAll;
 	qboolean readyPrint;
 	qboolean readyTeam[TEAM_NUM_TEAMS];
+
 	// Forced/Instant tapout timer to cope with flood..
 	int spawnFloodTimer;
-	// RTCWPro - sv_cvars
-	svCvar_t svCvars[MAX_SVCVARS];
 	int svCvarsCount;
-	// RTCWPro - custom config
-	config_t config;
+
 	int eventNum;  // event counter
-	char *match_id; // for stats round matching...
-
-
+	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
+	char* match_id; // for stats round matching...
+    char* round_id; //
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1167,6 +1133,14 @@ void G_ProcessTagConnect( gentity_t *ent );
 
 qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // sswolf - allowteams ET - port
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // sswolf - drop weapon stuff
+gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
+char* getDateTime(void);
+char* getDate(void);
+const char* getMonthString(int monthIndex);
+int getYearFromCYear(int cYear);
+int getDaysInMonth(int monthIndex);
+char* TablePrintableColorName(const char* name, int maxlength);
+qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension);
 
 //
 // g_combat.c
@@ -1279,6 +1253,7 @@ void BeginIntermission( void );
 void InitClientPersistant( gclient_t *client );
 void InitClientResp( gclient_t *client );
 void InitBodyQue( void );
+char* SanitizeClientIP(char* ip, qboolean printFull);
 void ClientSpawn( gentity_t *ent, qboolean revived );
 void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 void AddScore( gentity_t *ent, int score );
@@ -1328,6 +1303,7 @@ void DeathmatchScoreboardMessage( gentity_t *client );
 //
 void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message, qboolean localize ); // JPW NERVE removed static declaration so it would link
 qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand);
+void SanitizeString(char* in, char* out);
 
 //
 // g_pweapon.c
@@ -1344,6 +1320,8 @@ void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... );
 void QDECL G_DPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
+void CheckVote(void);
+void sortedActivePlayers(void);
 
 //
 // g_client.c
@@ -1386,7 +1364,6 @@ void G_readyTeamLock( void );
 //
 qboolean G_CanAlloc(unsigned int size);
 void *G_Alloc(unsigned int size);
-//void *G_Alloc( int size );
 void G_Free(void *ptr);
 void G_InitMemory( void );
 void Svcmd_GameMem_f( void );
@@ -1468,7 +1445,10 @@ extern vmCvar_t g_gametype;
 // Rafael gameskill
 extern vmCvar_t g_gameskill;
 // done
-extern vmCvar_t g_gameStatslog; // nihi: temp cvar for event logging
+extern vmCvar_t g_gameStatslog; // temp cvar for event logging
+extern vmCvar_t g_stats_curl_submit;
+extern vmCvar_t g_stats_curl_submit_URL;
+extern vmCvar_t g_stats_curl_submit_headers;
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;
@@ -1512,9 +1492,8 @@ extern vmCvar_t g_fastResMsec;
 extern vmCvar_t g_knifeonly;                // Xian - Wacky Knife-Only rounds
 extern vmCvar_t g_enforcemaxlives;          // Xian - Temp ban with maxlives between rounds
 
-extern vmCvar_t g_needpass;
 extern vmCvar_t g_weaponTeamRespawn;
-//extern vmCvar_t g_doWarmup;
+extern vmCvar_t g_doWarmup;
 extern vmCvar_t g_teamAutoJoin;
 extern vmCvar_t g_teamForceBalance;
 extern vmCvar_t g_banIPs;
@@ -1551,6 +1530,7 @@ extern vmCvar_t g_engineerChargeTime;
 extern vmCvar_t g_LTChargeTime;
 extern vmCvar_t g_soldierChargeTime;
 extern vmCvar_t sv_screenshake;
+extern vmCvar_t g_screenShake;
 // jpw
 
 // NERVE - SMF
@@ -1575,11 +1555,9 @@ extern vmCvar_t g_dbgRevive;
 // rtcwpro begin
 // Referee/Voting - New cvars
 extern vmCvar_t refereePassword;
+extern vmCvar_t shoutcastPassword;
 extern vmCvar_t team_maxplayers;
 extern vmCvar_t team_nocontrols;
-extern vmCvar_t vote_limit;
-extern vmCvar_t vote_percent;
-
 
 extern vmCvar_t match_warmupDamage;
 extern vmCvar_t match_mutespecs;
@@ -1590,53 +1568,21 @@ extern vmCvar_t match_timeoutlength;
 extern vmCvar_t	g_spectatorAllowDemo;
 extern vmCvar_t match_timeoutcount;
 
-// Admins
-extern vmCvar_t	a1_pass;
-extern vmCvar_t	a2_pass;
-extern vmCvar_t	a3_pass;
-extern vmCvar_t	a4_pass;
-extern vmCvar_t	a5_pass;
-extern vmCvar_t	a1_tag;
-extern vmCvar_t	a2_tag;
-extern vmCvar_t	a3_tag;
-extern vmCvar_t	a4_tag;
-extern vmCvar_t	a5_tag;
-extern vmCvar_t	a1_cmds;
-extern vmCvar_t	a2_cmds;
-extern vmCvar_t	a3_cmds;
-extern vmCvar_t	a4_cmds;
-extern vmCvar_t	a5_cmds;
-extern vmCvar_t	a5_allowAll;
-extern vmCvar_t	adm_help;
-
 // Server stuff
-extern vmCvar_t	g_dropReload;
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
 extern vmCvar_t g_gamelocked;
 extern vmCvar_t	sv_hostname;
 extern vmCvar_t svx_serverStreaming;
-extern vmCvar_t g_extendedLog;
 extern vmCvar_t g_bannedMSG;
 extern vmCvar_t g_privateServer;
 extern vmCvar_t TXThandle;
 extern vmCvar_t g_serverMessage;
-extern vmCvar_t g_maxVotes;
 extern vmCvar_t g_showFlags;
-// SAB
-extern vmCvar_t sab_system;
-extern vmCvar_t sab_maxTeamKills;
-extern vmCvar_t sab_maxTeamBleed;
-extern vmCvar_t sab_minLowScore;
-extern vmCvar_t sab_MaxPingFlux;
-extern vmCvar_t sab_maxPingHits;
-extern vmCvar_t sab_censorPenalty;
-extern vmCvar_t sab_autoIgnore;
 extern vmCvar_t g_allowPMs;
-//extern vmCvar_t	g_hitsounds;
+extern vmCvar_t	g_hitsounds;
 extern vmCvar_t	g_crouchRate;
 extern vmCvar_t g_drawHitboxes;
-extern vmCvar_t team_nocontrols;
 extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t	g_disableInv;
 extern vmCvar_t	g_axisSpawnProtectionTime;
@@ -1665,7 +1611,6 @@ extern vmCvar_t g_maxTeamFlamer;
 extern vmCvar_t g_pauseLimit;
 extern vmCvar_t	g_fastStabSound;
 extern vmCvar_t g_duelAutoPause;
-extern vmCvar_t team_commands;
 extern vmCvar_t g_tournament;
 
 //
@@ -1691,21 +1636,25 @@ extern vmCvar_t vote_allow_balancedteams;
 extern vmCvar_t vote_allow_muting;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
+
+extern vmCvar_t stats_matchid;
 // Ref tag..
 #define REFEREE	"^3Ref^7"
 
 extern vmCvar_t	g_antiWarp; // antiwarp port
-extern vmCvar_t g_customConfig; // ET config port
 extern vmCvar_t P; // player teams in server info
 extern vmCvar_t	g_hsDamage;
+extern vmCvar_t g_spawnOffset; // random spawn offset for both teams, between 1 and cvar integer - 1
+extern vmCvar_t g_bodiesGrabFlags;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
 int     trap_Milliseconds( void );
-int		trap_RealTime( qtime_t *qtime );  // nihi - added from wolfX
+int		trap_RealTime( qtime_t *qtime );  // added from wolfX
 int     trap_Argc( void );
 void    trap_Argv( int n, char *buffer, int bufferLength );
 void    trap_Args( char *buffer, int bufferLength );
+int		trap_FS_FileExists(const char* filename);
 int     trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
 void    trap_FS_Read( void *buffer, int len, fileHandle_t f );
 int     trap_FS_Write( const void *buffer, int len, fileHandle_t f );
@@ -1717,6 +1666,7 @@ void    trap_SendConsoleCommand( int exec_when, const char *text );
 void    trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );
 void    trap_Cvar_Update( vmCvar_t *cvar );
 void    trap_Cvar_Set( const char *var_name, const char *value );
+void	trap_Cvar_Restrictions_Load(void);
 int     trap_Cvar_VariableIntegerValue( const char *var_name );
 float   trap_Cvar_VariableValue( const char *var_name );
 void    trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
@@ -1749,6 +1699,8 @@ qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagN
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );
+
+int     trap_submit_curlPost( char* jsonfile, char* matchid );
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );
@@ -1923,7 +1875,6 @@ typedef enum
 	shard_rubble
 } shards_t;
 
-
 // Pause
 #define PAUSE_NONE		0x00	// Match is not paused..
 #define PAUSE_UNPAUSING 0x02    // Pause is about to expire
@@ -1940,7 +1891,7 @@ typedef enum
 #define AA_STATSTEAM    0x02    // Client AutoAction: Dump TEAM player stats
 
 
-// nihi added below
+
 // sswolf - removed unused declarations
 
 // g_antilag.c
@@ -1959,22 +1910,16 @@ void G_ResetMarkers( gentity_t* ent );
 // g_main.c
 //
 void G_UpdateCvars(void);
-void G_wipeCvars(void);
 void G_teamReset(int, qboolean);
 void ServerPlayerInfo(void);
-///////////////////////
-// RTCWPro - g_config.c
-qboolean G_ConfigSet(const char* configname);
-void G_ConfigCheckLocked(void);
-void G_PrintConfigs(gentity_t* ent);
-qboolean G_isValidConfig(gentity_t* ent, const char* configname);
-void G_ReloadConfig(void);
+
 //
 // g_match.c
 //
 void G_loadMatchGame(void);
-void CountDown(qboolean restart);
+void CountDown(void);
 void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
+void G_handlePause(qboolean dPause, int time);
 //void G_verifyMatchState(int nTeam);
 void G_matchPrintInfo(char *msg, qboolean printTime);
 void G_printFull(char *str, gentity_t *ent); // from ET
@@ -1990,7 +1935,12 @@ char* GetLevelTime(void);
 void Cmd_AuthRcon_f( gentity_t *ent );
 void G_refAllReady_cmd( gentity_t *ent );
 void G_ref_cmd( gentity_t *ent, /*unsigned int dwCommand,*/ qboolean fValue );
+void G_scs_cmd(gentity_t* ent, qboolean fValue);
+void G_scsSpectatorSpeed(gentity_t* ent);
+void G_refLogout(gentity_t* ent);
+void G_scsLogout(gentity_t* ent);
 qboolean G_refCommandCheck( gentity_t *ent, char *cmd );
+qboolean G_scsCommandCheck(gentity_t* ent, char* cmd);
 void G_refHelp_cmd( gentity_t *ent );
 void G_refLockTeams_cmd( gentity_t *ent, qboolean fLock );
 void G_refPause_cmd( gentity_t *ent, qboolean fPause );
@@ -2000,6 +1950,11 @@ void G_refSpeclockTeams_cmd( gentity_t *ent, qboolean fLock );
 void G_refWarmup_cmd( gentity_t* ent );
 void G_refWarning_cmd( gentity_t* ent );
 void G_refMute_cmd( gentity_t *ent, qboolean mute );
+void G_refRenameClient(gentity_t* ent);
+void G_refRequestSS(gentity_t* ent);
+void G_refMakeShoutcaster_cmd(gentity_t* ent);
+void G_refRemoveShoutcaster_cmd(gentity_t* ent);
+void G_refGetStatus(gentity_t* ent);
 int  G_refClientnumForName( gentity_t *ent, const char *name );
 void G_refPrintf(gentity_t* ent, const char *fmt, ...);// _attribute((format(printf, 2, 3)));
 void G_PlayerBan(void);
@@ -2015,7 +1970,7 @@ char *Q_StrReplace(char *haystack, char *needle, char *newp);
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
-//void Cmd_hitsounds(gentity_t *ent);
+
 ///////////////////////
 // g_vote.c
 //
@@ -2026,8 +1981,11 @@ int  G_voteCmdCheck( gentity_t *ent, char *arg, char *arg2, qboolean fRefereeCmd
 void G_voteFlags(void);
 void G_voteHelp( gentity_t *ent, qboolean fShowVote );
 void G_playersMessage( gentity_t *ent );
+void G_PrintConfigs(gentity_t* ent);
+qboolean G_isValidConfig(gentity_t* ent, const char* configname);
+qboolean G_ConfigSet(const char* configName);
 // Actual voting commands
-int G_Comp_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
+int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd);
 int G_Gametype_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Kick_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Mute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
@@ -2037,7 +1995,6 @@ int G_MapRestart_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 int G_MatchReset_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Mutespecs_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Nextmap_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
-int G_Pub_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_Referee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_ShuffleTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_StartMatch_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
@@ -2048,7 +2005,7 @@ int G_Warmupfire_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 int G_Unreferee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_AntiLag_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
-int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd); // RTCWPro - custom config
+
 //
 // g_geoip.c
 //
@@ -2062,15 +2019,9 @@ unsigned long GeoIP_addr_to_num(const char *addr);
 unsigned int GeoIP_seek_record(GeoIP *gi, unsigned long ipnum);
 void GeoIP_open(void);
 void GeoIP_close(void);
-extern GeoIP * gidb;
-void G_ReadIP(gclient_t *client);
-//
-// g_config.c
-//
-void G_CompConfigSet(int dwMode, qboolean doComp);
-// g_match.c
-void G_spawnPrintf(int print_type, int print_time, gentity_t *owner);
-void G_loadMatchGame(void);
+extern GeoIP* gidb;
+
+
 //
 // g_stats.c
 //
@@ -2125,6 +2076,10 @@ enum eventList {
 #define JSON_KILLDATA 16  // include additional data on "kill event"
 
 // g_json.c
+int getPstats(json_t *jsonData, char *id, gclient_t *client);
+int G_write_match_info( void );
+int G_read_match_info( void );
+int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
 void G_jWeaponStats(void);
@@ -2158,6 +2113,13 @@ void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
 qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
+// now residing in g_utils.c  (previous declaration in g_admin.h)
+//
+void CPSound(gentity_t *ent, char *sound);
+void APSound(char *sound);
+void APRSound(gentity_t *ent, char *sound);
+
+
 // Macros
 //
 #define AP( x ) trap_SendServerCommand( -1, x )                 // Print to all
@@ -2168,38 +2130,17 @@ qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 #define AAPS(x)		AAPSound(x)									// Global sound but hooked under cg_announcer..
 #define APRS(x, y)	APRSound(x, y)								// Global sound with limited (radius) range
 #define CPS(x, y)	CPSound(x, y)								// Client sound only
-#define ARRAY_LEN(x) (sizeof(x) / sizeof(*(x)))					// Saves some time..
-
 
 extern char *aTeams[TEAM_NUM_TEAMS];
 extern team_info teamInfo[TEAM_NUM_TEAMS];
-void CountDown(qboolean restart);
 qboolean IsWeaponDisabled(gentity_t* ent, int sessionWeapon, weapon_t weapon, team_t team, qboolean quiet);
 int TeamWeaponCount(gentity_t* ent, team_t team, int weap);
 void SetDefaultWeapon(gclient_t *client, qboolean isSold);
-void PauseHandle(void);
-void resetPause(void);
+
 //
-// g_files.c
-//
-#define ADMLOG "./logs/adminLogins.log"
-#define PASSLOG "./logs/adminLoginAttempts.log"
-#define ADMACT "./logs/adminActions.log"
-#define BYPASSLOG "./logs/banBypass.log"
-#define STSPTH "./logs/stats/"
-void logEntry (char *filename, char *info);
-void TEMPBAN_CLIENT(gentity_t *ent, const int minsbanned);
-void clean_tempbans(void);
-extern char *TempBannedMessage;
-int checkBanned(char *data, char * password, qboolean guid);
-void TEMPBAN_GUID_CLIENT(char *guid, const int minsbanned);
 // g_weapon.c
+//
 extern extWeaponStats_t BG_WeapStatForWeapon(weapon_t iWeaponID);
-//
-// Bit flags (for color hacks..)
-//
-#define CFLAGS_HITSOUNDS	1
-void clean_tempbans_guids(void);
 
 #define HELP_COLUMNS    4
 
@@ -2207,6 +2148,7 @@ void clean_tempbans_guids(void);
 // - Config
 #define ZSF_COMP        0x01    // Have comp settings loaded for current gametype?
 
+//
 // g_antiwarp.c
 //
 qboolean G_DoAntiwarp(gentity_t* ent);
@@ -2225,6 +2167,16 @@ typedef enum
 	DP_CONNECTINFO,     ///< Display info on connect
 	DP_MVSPAWN          ///< Set up MV views for clients who need them
 } enum_t_dp;
-
-// Admin headers
-#include "g_admin.h"
+#ifdef MYSQLDEP
+// SQL
+int				trap_SQL_RunQuery(const char* query);
+void			trap_SQL_FinishQuery(int queryid);
+qboolean		trap_SQL_NextRow(int queryid);
+int				trap_SQL_RowCount(int queryid);
+void			trap_SQL_GetFieldbyID(int queryid, int fieldid, char* buffer, int len);
+void			trap_SQL_GetFieldbyName(int queryid, const char* name, char* buffer, int len);
+int				trap_SQL_GetFieldbyID_int(int queryid, int fieldid);
+int				trap_SQL_GetFieldbyName_int(int queryid, const char* name);
+int				trap_SQL_FieldCount(int queryid);
+void			trap_SQL_CleanString(const char* in, char* out, int len);
+#endif

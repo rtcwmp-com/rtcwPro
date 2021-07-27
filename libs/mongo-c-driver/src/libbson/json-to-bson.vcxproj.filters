@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\examples\json-to-bson.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\Pub\Projects\rtcwPro\libs\mongo-c-driver\src\libbson\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{63944ABA-87D9-37ED-A280-339A46730700}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

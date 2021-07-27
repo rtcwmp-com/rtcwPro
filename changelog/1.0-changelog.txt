@@ -1,0 +1,23 @@
+Release 1.0
+
+Initial Version includes all OSP commands except forcefps and mvall (multiview)
+
+New Commands
+
++stats | stats window
+forcetapout | helps not miss spawn at last second (bind key "+moveup; forcetapout" or create a new bind)
+minimize | minimize the client
+
+New Features
+
+unlag antilag
+updated head hitbox animation (RtcwPub port)
+faster PK3 downloads - sv_dlRate (ioRtcw port)
+antiwarp - prevents players warping around on your screen
+player HUD names during spectating
+updated statistics - added Headshots, Accuracy, and Revives in the end-of-round stats
+global level server configuration (ET port) - comp, public, and pug configurations
+server cvar restrictions (ET port) - replacing Punkbuster cvar restriction
+sv_fps fix for flamethrower - high sv_fps setting will result in flamethrower shooting across the map
+mapping setting allow_teams added for ET map porting (i.e. specific team can open doors with lock)
+minimizer using "minimize" console command

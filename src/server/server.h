@@ -27,6 +27,8 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // server.h
+#ifndef ___SERVER_H
+#define ___SERVER_H
 
 #include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
@@ -103,10 +105,6 @@ typedef struct {
 	// -NERVE - SMF
 } server_t;
 
-
-
-
-
 typedef struct {
 	int areabytes;
 	byte areabits[MAX_MAP_AREA_BYTES];                  // portalarea visibility bits
@@ -167,6 +165,14 @@ typedef struct client_s {
 	qboolean downloadEOF;               // We have sent the EOF block
 	int downloadSendTime;               // time we last got an ack from the client
 
+	// L0 - HTTP downloads
+	qboolean bDlOK;					// passed from cl_wwwDownload CVAR_USERINFO, wether this client supports www dl
+	char downloadURL[MAX_OSPATH];	// the URL we redirected the client to
+	qboolean bWWWDl;				// we have a www download going
+	qboolean bWWWing;				// the client is doing an ftp/http download
+	qboolean bFallback;				// last www download attempt failed, fallback to regular download
+									// note: this is one-shot, multiple downloads would cause a www download to be attempted again
+
 	int deltaMessage;                   // frame last client usercmd message
 	int nextReliableTime;               // svs.time when another reliable command will be allowed
 	int lastPacketTime;                 // svs.time when packet was last received
@@ -187,7 +193,30 @@ typedef struct client_s {
 	// buffer them into this queue, and hand them out to netchan as needed
 	netchan_buffer_t *netchan_start_queue;
 	netchan_buffer_t **netchan_end_queue;
+	int downloadnotify; //bani
+	char guid[GUID_LEN]; // L0
+	int clientRestValidated;
 } client_t;
+
+//=============================================================================
+// Rate fix
+typedef struct {
+	netadr_t  adr;
+	int       time;
+} receipt_t;
+
+typedef struct {
+	netadr_t	adr;
+	int			time;
+	int			count;
+	qboolean	flood;
+} floodBan_t;
+
+// MAX_INFO_RECEIPTS is the maximum number of getstatus+getinfo responses that we send
+// in a two second time period.
+#define MAX_INFO_RECEIPTS  48
+
+#define MAX_INFO_FLOOD_BANS 36
 
 //=============================================================================
 
@@ -206,12 +235,13 @@ typedef struct {
 	int pingTime;                   // time the challenge response was sent to client
 	int firstTime;                  // time the adr was first used, for authorize timeout checks
 	int firstPing;                  // Used for min and max ping checks
+	qboolean wasrefused;
 	qboolean connected;
+	qboolean wasAuthorized;
+	char* authMessage;
 } challenge_t;
 
-
 #define MAX_MASTERS 8               // max recipients for heartbeat packets
-
 
 // this structure will be cleared only when the game dll changes
 typedef struct {
@@ -230,7 +260,24 @@ typedef struct {
 	netadr_t redirectAddress;               // for rcon return messages
 
 	netadr_t authorizeAddress;              // for rcon return messages
+
+	receipt_t infoReceipts[MAX_INFO_RECEIPTS];
+	floodBan_t infoFloodBans[MAX_INFO_FLOOD_BANS];
+
+	int ssTime; // reqSS
 } serverStatic_t;
+
+// L0 - ioquake ipv6 banning
+#define SERVER_MAXBANS	1024
+#define SERVER_BANFILE	"serverbans.dat"
+// Structure for managing bans
+typedef struct {
+	netadr_t ip;
+	// For a CIDR-Notation type suffix
+	int subnet;
+
+	qboolean isexception;
+} serverBan_t;
 
 //================
 // DHM - Nerve
@@ -302,13 +349,50 @@ extern cvar_t  *sv_gameskill;
 // TTimo - autodl
 extern cvar_t *sv_dl_maxRate;
 
+// Anti wallhack
+extern cvar_t* wh_active;
+extern cvar_t* wh_bbox_horz;
+extern cvar_t* wh_bbox_vert;
+extern cvar_t* wh_add_xy;
+extern cvar_t* wh_check_fov;
+
+// HTTP Downloads
+extern cvar_t* sv_wwwDownload;	// general flag to enable/disable www download redirects
+extern cvar_t* sv_wwwBaseURL;	// the base URL of all the files
+								// tell clients to perform their downloads while disconnected from the server
+								// this gets you a better throughput, but you loose the ability to control the download usage
+extern cvar_t* sv_wwwDlDisconnected;
+extern cvar_t* sv_wwwFallbackURL;
+
+// Streaming
+extern cvar_t* sv_StreamingToken;
+extern cvar_t* sv_StreamingSelfSignedCert;
+
+// Auth
+extern cvar_t* sv_AuthEnabled;
+extern cvar_t* sv_AuthStrictMode;
+
+// Cvar restrictions
+extern cvar_t* sv_GameConfig;
+
+// reqSS
+extern cvar_t* sv_ssEnable;
+extern cvar_t* sv_ssMinTime;
+extern cvar_t* sv_ssMaxTime;
+//extern cvar_t* sv_ssQuality;
+
+extern cvar_t* sv_checkVersion;
 
 //===========================================================
+
+// L0 - ioquake ipv6 banning
+extern	serverBan_t serverBans[SERVER_MAXBANS];
+extern	int serverBansCount;
 
 //
 // sv_main.c
 //
-void SV_FinalMessage( char *message );
+void SV_FinalMessage( char *message, qboolean disconnect);
 void QDECL SV_SendServerCommand( client_t *cl, const char *fmt, ... );
 
 
@@ -319,9 +403,9 @@ void SV_RemoveOperatorCommands( void );
 void SV_MasterHeartbeat( const char *hbname );
 void SV_MasterShutdown( void );
 
-void SV_MasterGameCompleteStatus();     // NERVE - SMF
+void SV_MasterGameCompleteStatus(void);     // NERVE - SMF
 
-
+void SV_ReloadRest(qboolean disableTime);
 
 //
 // sv_init.c
@@ -355,7 +439,13 @@ void SV_DropClient( client_t *drop, const char *reason );
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
-int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+//#ifdef DEDICATED
+//int SV_WriteDownloadToClient( client_t *cl, msg_t *msg );
+//#else
+int SV_WriteDownloadToClientOrig( client_t *cl, msg_t *msg );
+void SV_WriteDownloadToClient(client_t* cl, msg_t* msg);
+//#endif
+
 #ifndef _WIN32
 int SV_SendQueuedMessages(void);
 int SV_RateMsec( client_t *client ) ;
@@ -364,6 +454,7 @@ int SV_RateMsec( client_t *client ) ;
 // sv_ccmds.c
 //
 void SV_Heartbeat_f( void );
+void SV_SetCvarRestrictions(void);
 
 //
 // sv_snapshot.c
@@ -408,6 +499,20 @@ int         SV_BotGetConsoleMessage( int client, char *buf, int size );
 
 int BotImport_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void BotImport_DebugPolygonDelete( int id );
+
+//
+// sv_events.c
+//
+void SV_AuthorizeClient(char* response, char userinfo[MAX_INFO_STRING]);
+
+//
+// sv_wallhack.c
+//
+void SV_RandomizePos(int player, int other);
+void SV_InitWallhack(void);
+void SV_RestorePos(int cli);
+int SV_CanSee(int player, int other);
+int SV_PositionChanged(int cli);
 
 //============================================================
 //
@@ -473,4 +578,20 @@ void SV_Netchan_TransmitNextFragment( client_t *client );
 int SV_Netchan_TransmitNextFragment( client_t *client );
 #endif
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
+
+qboolean SV_CheckDRDoS(netadr_t from);
+
+// L0 - HTTP downloads
+#define DLNOTIFY_REDIRECT   0x00000001  // "Redirecting client ..."
+#define DLNOTIFY_BEGIN      0x00000002  // "clientDownload: 4 : beginning ..."
+#define DLNOTIFY_ALL        ( DLNOTIFY_REDIRECT | DLNOTIFY_BEGIN )
+
+//
+// sswolf - sv_controls.c - source: Nate (rtcwMP)
+//
+//void SV_SendSSRequest(int clientNum, int quality);
+void SV_SendSSRequest(int clientNum);
+void autoSSTime(void);
+
+#endif // !___SERVER_H
 

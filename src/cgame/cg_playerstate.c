@@ -238,6 +238,8 @@ A respawn happened this snapshot
 ================
 */
 void CG_Respawn( void ) {
+	cg.serverRespawning = qfalse;   // Arnout: just in case
+
 	// no error decay on player movement
 	cg.thisFrameTeleport = qtrue;
 
@@ -402,17 +404,6 @@ CG_CheckLocalSounds
 ==================
 */
 void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
-//	const char	*s;
-//	int			highScore;
-
-/* JPW NERVE pulled from wolf MP
-	// hit changes
-	if ( ps->persistant[PERS_HITS] > ops->persistant[PERS_HITS] ) {
-		trap_S_StartLocalSound( cgs.media.hitSound, CHAN_LOCAL_SOUND );
-	} else if ( ps->persistant[PERS_HITS] < ops->persistant[PERS_HITS] ) {
-		trap_S_StartLocalSound( cgs.media.hitTeamSound, CHAN_LOCAL_SOUND );
-	}
-*/
 
 	// health changes of more than -1 should make pain sounds
 	if ( ps->stats[STAT_HEALTH] < ops->stats[STAT_HEALTH] - 1 ) {
@@ -421,81 +412,25 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		}
 	}
 
-/*	// NERVE - SMF - don't do this in wolfMP
-	// if we are going into the intermission, don't start any voices
-	if ( cg.intermissionStarted ) {
-		return;
+	if (cg_hitsounds.integer) {
+		if (ops->persistant[PERS_HITBODY] != ps->persistant[PERS_HITBODY]) {
+			if (ps->persistant[PERS_HITBODY] < ops->persistant[PERS_HITBODY])
+				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.teamShot);
+			else if (ps->persistant[PERS_HITHEAD] > ops->persistant[PERS_HITHEAD])
+				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot);
+			else
+				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot);
+		}
 	}
-*/
 
-/* JPW NERVE pulled from wolf MP
-	// reward sounds
-	if ( ps->persistant[PERS_REWARD_COUNT] > ops->persistant[PERS_REWARD_COUNT] ) {
-		switch ( ps->persistant[PERS_REWARD] ) {
-		case REWARD_IMPRESSIVE:
-			trap_S_StartLocalSound( cgs.media.impressiveSound, CHAN_ANNOUNCER );
-			cg.rewardTime = cg.time;
-			cg.rewardShader = cgs.media.medalImpressive;
-			cg.rewardCount = ps->persistant[PERS_IMPRESSIVE_COUNT];
-			break;
-		case REWARD_EXCELLENT:
-			trap_S_StartLocalSound( cgs.media.excellentSound, CHAN_ANNOUNCER );
-			cg.rewardTime = cg.time;
-			cg.rewardShader = cgs.media.medalExcellent;
-			cg.rewardCount = ps->persistant[PERS_EXCELLENT_COUNT];
-			break;
-		case REWARD_DENIED:
-			trap_S_StartLocalSound( cgs.media.deniedSound, CHAN_ANNOUNCER );
-			break;
-		case REWARD_GAUNTLET:
-			trap_S_StartLocalSound( cgs.media.humiliationSound, CHAN_ANNOUNCER );
-			// if we are the killer and not the killee, show the award
-			if ( ps->stats[STAT_HEALTH] ) {
-				cg.rewardTime = cg.time;
-				cg.rewardShader = cgs.media.medalGauntlet;
-				cg.rewardCount = ps->persistant[PERS_GAUNTLET_FRAG_COUNT];
-			}
-			break;
-		default:
-			CG_Error( "Bad reward_t" );
-		}
-	} else {
-		// lead changes (only if no reward)
-		s = CG_ConfigString( CS_WARMUP );
-		if ( !s[0] ) {
-			// never play lead changes during warmup
-			if ( ps->persistant[PERS_RANK] != ops->persistant[PERS_RANK] ) {
-				if ( cgs.gametype >= GT_TEAM ) {
-					if ( ps->persistant[PERS_RANK] == 2 ) {
-						trap_S_StartLocalSound( cgs.media.teamsTiedSound, CHAN_ANNOUNCER );
-					} else if (  ps->persistant[PERS_RANK] == 0 ) {
-						trap_S_StartLocalSound( cgs.media.redLeadsSound, CHAN_ANNOUNCER );
-					} else if ( ps->persistant[PERS_RANK] == 1 ) {
-						trap_S_StartLocalSound( cgs.media.blueLeadsSound, CHAN_ANNOUNCER );
-					}
-				} else {
-					if (  ps->persistant[PERS_RANK] == 0 ) {
-						trap_S_StartLocalSound( cgs.media.takenLeadSound, CHAN_ANNOUNCER );
-					} else if ( ps->persistant[PERS_RANK] == RANK_TIED_FLAG ) {
-						trap_S_StartLocalSound( cgs.media.tiedLeadSound, CHAN_ANNOUNCER );
-					} else if ( ( ops->persistant[PERS_RANK] & ~RANK_TIED_FLAG ) == 0 ) {
-						trap_S_StartLocalSound( cgs.media.lostLeadSound, CHAN_ANNOUNCER );
-					}
-				}
-			}
-		}
-	}
-*/
 	// timelimit warnings
 	if ( cgs.timelimit > 0 ) {
+		int msec;
 
 		if (cgs.gamestate != GS_PLAYING)
 			return;
 
-		int msec;
-
 		msec = cg.time - cgs.levelStartTime;
-
 		if ( cgs.timelimit > 2 && !( cg.timelimitWarnings & 1 ) && ( msec > ( cgs.timelimit - 2 ) * 60 * 1000 ) &&
 			 ( msec < ( cgs.timelimit - 2 ) * 60 * 1000 + 1000 ) ) {
 			cg.timelimitWarnings |= 1;
@@ -514,32 +449,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 				trap_S_StartLocalSound( cgs.media.thirtySecondSound_a, CHAN_ANNOUNCER );
 			}
 		}
-/* // JPW NERVE not used in wolf
-		if ( !( cg.timelimitWarnings & 4 ) && msec > ( cgs.timelimit * 60 + 2 ) * 1000 ) {
-			cg.timelimitWarnings |= 4;
-			trap_S_StartLocalSound( cgs.media.suddenDeathSound, CHAN_ANNOUNCER );
-		}
-*/
 	}
-
-/* JPW NERVE -- not used in wolf MP
-	// fraglimit warnings
-	if ( cgs.fraglimit > 0 && cgs.gametype != GT_CTF ) {
-		highScore = cgs.scores1;
-		if ( cgs.fraglimit > 3 && !( cg.fraglimitWarnings & 1 ) && highScore == (cgs.fraglimit - 3) ) {
-			cg.fraglimitWarnings |= 1;
-			trap_S_StartLocalSound( cgs.media.threeFragSound, CHAN_ANNOUNCER );
-		}
-		if ( cgs.fraglimit > 2 && !( cg.fraglimitWarnings & 2 ) && highScore == (cgs.fraglimit - 2) ) {
-			cg.fraglimitWarnings |= 2;
-			trap_S_StartLocalSound( cgs.media.twoFragSound, CHAN_ANNOUNCER );
-		}
-		if ( !( cg.fraglimitWarnings & 4 ) && highScore == (cgs.fraglimit - 1) ) {
-			cg.fraglimitWarnings |= 4;
-			trap_S_StartLocalSound( cgs.media.oneFragSound, CHAN_ANNOUNCER );
-		}
-	}
-*/
 }
 
 /*

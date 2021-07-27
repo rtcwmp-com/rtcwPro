@@ -27,6 +27,8 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 // client.h -- primary header for client
+#ifndef __CLIENT_H
+#define __CLIENT_H
 
 #include "../game/q_shared.h"
 #include "../qcommon/qcommon.h"
@@ -87,6 +89,12 @@ typedef struct {
 #define MAX_PARSE_ENTITIES  2048
 
 extern int g_console_field_width;
+
+typedef struct {
+	int actionTime;
+	int warnedTime;
+	qboolean doPrint;
+} clientHandle_t;
 
 typedef struct {
 	int timeoutcount;               // it requres several frames in a timeout condition
@@ -153,6 +161,10 @@ typedef struct {
 	qboolean corruptedTranslationFile;
 	char translationVersion[MAX_STRING_TOKENS];
 	// -NERVE - SMF
+
+	clientHandle_t handle;
+
+	int clientSSAction; // reqSS
 } clientActive_t;
 
 extern clientActive_t cl;
@@ -207,13 +219,16 @@ typedef struct {
 
 	// file transfer from server
 	fileHandle_t download;
-	char downloadTempName[MAX_OSPATH];
-	char downloadName[MAX_OSPATH];
 	int downloadNumber;
 	int downloadBlock;          // block we are waiting for
 	int downloadCount;          // how many bytes we got
 	int downloadSize;           // how many bytes we got
 	char downloadList[MAX_INFO_STRING];        // list of paks we need to download
+	int downloadFlags;			// misc download behaviour flags sent by the server
+	qboolean bWWWDl;			// we have a www download going
+	qboolean bWWWDlAborting;    // disable the CL_WWWDownload until server gets us a gamestate (used for aborts)
+	char redirectedList[MAX_INFO_STRING];	// list of files that we downloaded through a redirect since last FS_ComparePaks
+	char badChecksumList[MAX_INFO_STRING];	// list of files for which wwwdl redirect is broken (wrong checksum)
 	qboolean downloadRestart;       // if true, we need to do another FS_Restart because we downloaded a pak
 
 	// demo information
@@ -276,11 +291,6 @@ typedef struct {
 	char gameName[MAX_NAME_LENGTH];         // Arnout
 } serverInfo_t;
 
-typedef struct {
-	byte ip[4];
-	unsigned short port;
-} serverAddress_t;
-
 #define MAX_AUTOUPDATE_SERVERS  5
 typedef struct {
 	connstate_t state;              // connection status
@@ -310,17 +320,12 @@ typedef struct {
 	serverInfo_t globalServers[MAX_GLOBAL_SERVERS];
 	// additional global servers
 	int numGlobalServerAddresses;
-	serverAddress_t globalServerAddresses[MAX_GLOBAL_SERVERS];
+	netadr_t globalServerAddresses[MAX_GLOBAL_SERVERS];
 
 	int numfavoriteservers;
 	serverInfo_t favoriteServers[MAX_OTHER_SERVERS];
 
-	int nummplayerservers;
-	serverInfo_t mplayerServers[MAX_OTHER_SERVERS];
-
 	int pingUpdateSource;       // source currently pinging or updating
-
-	int masterNum;
 
 	// update server info
 	netadr_t updateServer;
@@ -330,7 +335,7 @@ typedef struct {
 	netadr_t authorizeServer;
 
 	// DHM - Nerve :: Auto-update Info
-	char autoupdateServerNames[MAX_AUTOUPDATE_SERVERS][MAX_QPATH];
+	char* autoupdateServerName;
 	netadr_t autoupdateServer;
 
 	// rendering info
@@ -339,6 +344,15 @@ typedef struct {
 	qhandle_t whiteShader;
 	qhandle_t consoleShader;
 	qhandle_t consoleShader2;       // NERVE - SMF - merged from WolfSP
+
+	// L0 - HTTP downloads
+	// in the static stuff since this may have to survive server disconnects
+	// if new stuff gets added, CL_ClearStaticDownload code needs to be updated for clear up
+	qboolean bWWWDlDisconnected;			// keep going with the download after server disconnect
+	char downloadName[MAX_OSPATH];
+	char downloadTempName[MAX_OSPATH];		// in wwwdl mode, this is OS path (it's a qpath otherwise)
+	char originalDownloadName[MAX_QPATH];	// if we get a redirect, keep a copy of the original file path
+	qboolean downloadRestart;
 } clientStatic_t;
 
 extern clientStatic_t cls;
@@ -404,6 +418,11 @@ extern cvar_t  *cl_waitForFire;
 extern cvar_t  *cl_language;
 // -NERVE - SMF
 
+// L0
+extern cvar_t* cl_StreamingSelfSignedCert;
+// ~L0
+ 
+
 //=================================================
 
 //
@@ -455,6 +474,7 @@ const char* CL_TranslateStringBuf( const char *string ); // TTimo
 // -NERVE - SMF
 
 void CL_OpenURL( const char *url ); // TTimo
+void CL_ActionGenerateTime(qboolean useFixedTime);
 
 //
 // cl_input
@@ -501,25 +521,14 @@ typedef enum {
 	NUM_BUTTONS
 } kbuttons_t;
 
-
 void CL_ClearKeys( void );
-
 void CL_InitInput( void );
 void CL_SendCmd( void );
 void CL_ClearState( void );
-void CL_ReadPackets( void );
-
 void CL_WritePacket( void );
 void IN_CenterView( void );
 void IN_Notebook( void );
 void IN_Help( void );
-
-//----(SA) salute
-void IN_Salute( void );
-//----(SA)
-
-void CL_VerifyCode( void );
-
 float CL_KeyState( kbutton_t *key );
 char *Key_KeynumToString( int keynum, qboolean bTranslate );
 
@@ -530,9 +539,7 @@ extern int cl_connectedToPureServer;
 
 void CL_SystemInfoChanged( void );
 void CL_ParseServerMessage( msg_t *msg );
-
 //====================================================================
-
 void    CL_UpdateInfoPacket( netadr_t from );       // DHM - Nerve
 
 void    CL_ServerInfoPacket( netadr_t from, msg_t *msg );
@@ -542,12 +549,9 @@ void    CL_FavoriteServers_f( void );
 void    CL_Ping_f( void );
 qboolean CL_UpdateVisiblePings_f( int source );
 
-
 //
 // console
 //
-void Con_DrawCharacter( int cx, int line, int num );
-
 void Con_CheckResize( void );
 void Con_Init( void );
 void Con_Clear_f( void );
@@ -561,6 +565,7 @@ void Con_PageDown( void );
 void Con_Top( void );
 void Con_Bottom( void );
 void Con_Close( void );
+void Con_SetFrac(const float conFrac);	// RTCWPro
 
 
 //
@@ -611,8 +616,15 @@ qboolean CL_GameCommand( void );
 void CL_CGameRendering( stereoFrame_t stereo );
 void CL_SetCGameTime( void );
 void CL_FirstSnapshot( void );
-void CL_ShaderStateChanged( void );
 void CL_UpdateLevelHunkUsage( void );
+
+//
+// cl_events.c
+//
+void CL_SetGuid(void);
+void CL_SetMotd(char* message);
+void CL_ClientNeedsUpdate(char* response);
+
 //
 // cl_ui.c
 //
@@ -630,3 +642,13 @@ void LAN_SaveServersToCache();
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ); //int length, const byte *data );
 void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
+
+// 
+// sswolf - cl_control.c - source: Nate (rtcwMP)
+//
+void CL_checkSSTime(void);
+//void CL_RequestedSS(int quality);
+//void CL_RequestedSS();
+void CL_RequestedSS(char* ip);
+#endif // !__CLIENT_H
+

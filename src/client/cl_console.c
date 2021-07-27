@@ -55,6 +55,7 @@ typedef struct {
 
 	float displayFrac;      // aproaches finalFrac at scr_conspeed
 	float finalFrac;        // 0.0 to 1.0 lines of console to display
+	float userFrac;			// RTCWPro
 
 	int vislines;           // in scanlines
 
@@ -594,8 +595,8 @@ void Con_DrawNotify( void ) {
 			if ( ( text[x] & 0xff ) == ' ' ) {
 				continue;
 			}
-			if ( ( ( text[x] >> 8 ) & 7 ) != currentColor ) {
-				currentColor = ( text[x] >> 8 ) & 7;
+			if ( ( ( text[x] >> 8 ) & COLOR_BITS) != currentColor ) {
+				currentColor = ( text[x] >> 8 ) & COLOR_BITS;
 				re.SetColor( g_color_table[currentColor] );
 			}
 			SCR_DrawSmallChar( cl_conXOffset->integer + con.xadjust + ( x + 1 ) * SMALLCHAR_WIDTH, v, text[x] & 0xff );
@@ -677,7 +678,7 @@ void Con_DrawSolidConsole( float frac ) {
 			re.SetColor( color );
 
 			// draw the logo
-			SCR_DrawPic( 192, 70, 256, 128, cls.consoleShader2 );
+			SCR_DrawPic( 362, 70, 256, 128, cls.consoleShader2 );
 			re.SetColor( NULL );
 		}
 		// -NERVE - SMF
@@ -748,8 +749,8 @@ void Con_DrawSolidConsole( float frac ) {
 				continue;
 			}
 
-			if ( ( ( text[x] >> 8 ) & 7 ) != currentColor ) {
-				currentColor = ( text[x] >> 8 ) & 7;
+			if ( ( ( text[x] >> 8 ) & COLOR_BITS) != currentColor ) {
+				currentColor = ( text[x] >> 8 ) & COLOR_BITS;
 				re.SetColor( g_color_table[currentColor] );
 			}
 			SCR_DrawSmallChar(  con.xadjust + ( x + 1 ) * SMALLCHAR_WIDTH, y, text[x] & 0xff );
@@ -800,11 +801,16 @@ Con_RunConsole
 Scroll it up or down
 ==================
 */
-void Con_RunConsole( void ) {
+void Con_RunConsole( void ) 
+{
 	// decide on the destination height of the console
-	if ( cls.keyCatchers & KEYCATCH_CONSOLE ) {
-		con.finalFrac = 0.5;        // half screen
-	} else {
+	if ( cls.keyCatchers & KEYCATCH_CONSOLE ) 
+	{
+		//con.finalFrac = 0.5;        // half screen
+		con.finalFrac = con.userFrac;	// RTCWPro
+	} 
+	else 
+	{
 		con.finalFrac = 0;              // none visible
 
 	}
@@ -824,6 +830,29 @@ void Con_RunConsole( void ) {
 
 }
 
+/*
+==================
+RTCWPro
+Con_SetFrac
+==================
+*/
+void Con_SetFrac(const float conFrac)
+{
+	// clamp the cvar value
+	// don't let the console be hidden
+	if (conFrac < .1f)
+	{
+		con.userFrac = .1f;
+	}
+	else if (conFrac > 1.0f)
+	{
+		con.userFrac = 1.0f;
+	}
+	else
+	{
+		con.userFrac = conFrac;
+	}
+}
 
 void Con_PageUp( void ) {
 	con.display -= 2;

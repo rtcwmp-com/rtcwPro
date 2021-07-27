@@ -42,6 +42,7 @@ static void GfxInfo_f( void );
 
 cvar_t  *r_flareSize;
 cvar_t  *r_flareFade;
+cvar_t* r_flareCoeff;
 
 cvar_t  *r_railWidth;
 cvar_t  *r_railCoreWidth;
@@ -140,6 +141,7 @@ cvar_t  *r_finish;
 cvar_t  *r_clear;
 cvar_t  *r_swapInterval;
 cvar_t  *r_textureMode;
+cvar_t	*r_textureAnisotropy;
 cvar_t  *r_offsetFactor;
 cvar_t  *r_offsetUnits;
 cvar_t  *r_gamma;
@@ -371,18 +373,30 @@ typedef struct vidmode_s
 
 vidmode_t r_vidModes[] =
 {
-	{ "Mode  0: 320x240",        320,    240,    1 },
-	{ "Mode  1: 400x300",        400,    300,    1 },
-	{ "Mode  2: 512x384",        512,    384,    1 },
-	{ "Mode  3: 640x480",        640,    480,    1 },
-	{ "Mode  4: 800x600",        800,    600,    1 },
-	{ "Mode  5: 960x720",        960,    720,    1 },
-	{ "Mode  6: 1024x768",       1024,   768,    1 },
-	{ "Mode  7: 1152x864",       1152,   864,    1 },
-	{ "Mode  8: 1280x1024",      1280,   1024,   1 },
-	{ "Mode  9: 1600x1200",      1600,   1200,   1 },
-	{ "Mode 10: 2048x1536",      2048,   1536,   1 },
-	{ "Mode 11: 856x480 (wide)",856, 480,    1 }
+	// L0 - modifed and updated resolutions..
+	{ "Mode  0: 320x240", 320, 240, 1 },
+	{ "Mode  1: 400x300", 400, 300, 1 },
+	{ "Mode  2: 512x384", 512, 384, 1 },
+	{ "Mode  3: 640x480", 640, 480, 1 },
+	{ "Mode  4: 800x600", 800, 600, 1 },
+	//{ "Mode  5: 856x480 (wide)", 856, 480, 1 },
+	{ "Mode  5: 960x720", 960, 720, 1 },
+	{ "Mode  6: 1024x768", 1024, 768, 1 },
+	{ "Mode  7: 1152x864", 1152, 864, 1 },
+	{ "Mode  8: 1280x720 (16:9)", 1280, 720, 1 },
+	{ "Mode  9: 1280x768 (16:10)", 1280, 768, 1 },
+	{ "Mode  10: 1280x800 (16:10)", 1280, 800, 1 },
+	{ "Mode  11: 1280x1024", 1280, 1024, 1 },
+	{ "Mode  12: 1360x768 (16:9)", 1360, 768, 1 },
+	{ "Mode  13: 1440x900 (16:10)", 1440, 900, 1 },
+	{ "Mode  14: 1680x1050 (16:10)", 1680, 1050, 1 },
+	{ "Mode  15: 1600x1200", 1600, 1200, 1 },
+	{ "Mode  16: 1920x1080 (FULL HD)", 1920, 1080, 1 },
+	{ "Mode  17: 1920x1200", 1920, 1200, 1 },
+	{ "Mode  18: 2048x1536", 2048, 1536, 1 },
+	{ "Mode  19: 2560x1440 (QHD)", 2560, 1440, 1 },
+	{ "Mode  20: 2560x1600 (16:10)", 2560, 1600, 1 },
+	{ "Mode  21: 3840x2160 (UHD)", 3840, 2160, 1 }
 };
 static int s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
@@ -696,10 +710,19 @@ void R_ScreenShotJPEG_f( void ) {
 		silent = qfalse;
 	}
 
-	if ( ri.Cmd_Argc() == 2 && !silent ) {
+	// sswolf - edited to make reqSS silent and work correctly
+	if ( ri.Cmd_Argc() == 2 && !silent ) 
+	{
 		// explicit filename
 		Com_sprintf( checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv( 1 ) );
-	} else {
+	}
+	else if (ri.Cmd_Argc() == 3 && silent)
+	{
+		// explicit filename
+		Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(2));
+	}
+	else 
+	{
 		// scan for a free filename
 
 		// if we have saved a previous screenshot, don't scan
@@ -751,6 +774,7 @@ void GL_SetDefaultState( void ) {
 	if ( qglActiveTextureARB ) {
 		GL_SelectTexture( 1 );
 		GL_TextureMode( r_textureMode->string );
+		GL_TextureAnisotropy(r_textureAnisotropy->value);
 		GL_TexEnv( GL_MODULATE );
 		qglDisable( GL_TEXTURE_2D );
 		GL_SelectTexture( 0 );
@@ -758,6 +782,7 @@ void GL_SetDefaultState( void ) {
 
 	qglEnable( GL_TEXTURE_2D );
 	GL_TextureMode( r_textureMode->string );
+	GL_TextureAnisotropy(r_textureAnisotropy->value);
 	GL_TexEnv( GL_MODULATE );
 
 	qglShadeModel( GL_SMOOTH );
@@ -834,9 +859,6 @@ void GfxInfo_f( void ) {
 	ri.Printf( PRINT_ALL, "\nGL_VENDOR: %s\n", glConfig.vendor_string );
 	ri.Printf( PRINT_ALL, "GL_RENDERER: %s\n", glConfig.renderer_string );
 	ri.Printf( PRINT_ALL, "GL_VERSION: %s\n", glConfig.version_string );
-	ri.Printf( PRINT_ALL, "GL_EXTENSIONS: %s\n", glConfig.extensions_string );
-	ri.Printf( PRINT_ALL, "GL_MAX_TEXTURE_SIZE: %d\n", glConfig.maxTextureSize );
-	ri.Printf( PRINT_ALL, "GL_MAX_ACTIVE_TEXTURES_ARB: %d\n", glConfig.maxActiveTextures );
 	ri.Printf( PRINT_ALL, "\nPIXELFORMAT: color(%d-bits) Z(%d-bit) stencil(%d-bits)\n", glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
 	ri.Printf( PRINT_ALL, "MODE: %d, %d x %d %s hz:", r_mode->integer, glConfig.vidWidth, glConfig.vidHeight, fsstrings[r_fullscreen->integer == 1] );
 	if ( glConfig.displayFrequency ) {
@@ -885,15 +907,13 @@ void GfxInfo_f( void ) {
 	ri.Printf( PRINT_ALL, "compiled vertex arrays: %s\n", enablestrings[qglLockArraysEXT != 0 ] );
 	ri.Printf( PRINT_ALL, "texenv add: %s\n", enablestrings[glConfig.textureEnvAddAvailable != 0] );
 	ri.Printf( PRINT_ALL, "compressed textures: %s\n", enablestrings[glConfig.textureCompression != TC_NONE] );
+	ri.Printf( PRINT_ALL, "anisotropy: %s\n", r_textureAnisotropy->string );
 
 	ri.Printf( PRINT_ALL, "NV distance fog: %s\n", enablestrings[glConfig.NVFogAvailable != 0] );
 	if ( glConfig.NVFogAvailable ) {
 		ri.Printf( PRINT_ALL, "Fog Mode: %s\n", r_nv_fogdist_mode->string );
 	}
 
-	if ( r_vertexLight->integer || glConfig.hardwareType == GLHW_PERMEDIA2 ) {
-		ri.Printf( PRINT_ALL, "HACK: using vertex lightmap approximation\n" );
-	}
 	if ( glConfig.hardwareType == GLHW_RAGEPRO ) {
 		ri.Printf( PRINT_ALL, "HACK: ragePro approximations\n" );
 	}
@@ -927,11 +947,11 @@ void R_Register( void ) {
 
 //----(SA)	added
 	r_ext_ATI_pntriangles           = ri.Cvar_Get( "r_ext_ATI_pntriangles", "0", CVAR_ARCHIVE | CVAR_LATCH );   //----(SA)	default to '0'
-	r_ati_truform_tess              = ri.Cvar_Get( "r_ati_truform_tess", "1", CVAR_ARCHIVE );
+	r_ati_truform_tess              = ri.Cvar_Get( "r_ati_truform_tess", "0", CVAR_ARCHIVE );
 	r_ati_truform_normalmode        = ri.Cvar_Get( "r_ati_truform_normalmode", "GL_PN_TRIANGLES_NORMAL_MODE_LINEAR", CVAR_ARCHIVE );
 	r_ati_truform_pointmode         = ri.Cvar_Get( "r_ati_truform_pointmode", "GL_PN_TRIANGLES_POINT_MODE_LINEAR", CVAR_ARCHIVE );
 
-	r_ati_fsaa_samples              = ri.Cvar_Get( "r_ati_fsaa_samples", "1", CVAR_ARCHIVE );       //DAJ valids are 1, 2, 4
+	r_ati_fsaa_samples              = ri.Cvar_Get( "r_ati_fsaa_samples", "0", CVAR_ARCHIVE );       //DAJ valids are 1, 2, 4
 
 	r_ext_texture_filter_anisotropic    = ri.Cvar_Get( "r_ext_texture_filter_anisotropic", "0", CVAR_ARCHIVE );
 
@@ -947,7 +967,7 @@ void R_Register( void ) {
 
 	r_picmip = ri.Cvar_Get( "r_picmip", "1", CVAR_ARCHIVE | CVAR_LATCH ); //----(SA)	mod for DM and DK for id build.  was "1" // JPW NERVE pushed back to 1
 	r_roundImagesDown = ri.Cvar_Get( "r_roundImagesDown", "1", CVAR_ARCHIVE | CVAR_LATCH );
-	r_rmse = ri.Cvar_Get( "r_rmse", "0.0", CVAR_ARCHIVE | CVAR_LATCH );
+	r_rmse = ri.Cvar_Get( "r_rmse", "0.0", CVAR_CHEAT);
 	r_colorMipLevels = ri.Cvar_Get( "r_colorMipLevels", "0", CVAR_LATCH );
 	AssertCvarRange( r_picmip, 0, 16, qtrue );
 	r_detailTextures = ri.Cvar_Get( "r_detailtextures", "1", CVAR_ARCHIVE | CVAR_LATCH );
@@ -962,7 +982,7 @@ void R_Register( void ) {
 	r_depthbits = ri.Cvar_Get( "r_depthbits", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_overBrightBits = ri.Cvar_Get( "r_overBrightBits", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_ignorehwgamma = ri.Cvar_Get( "r_ignorehwgamma", "1", CVAR_ARCHIVE | CVAR_LATCH );
-	r_mode = ri.Cvar_Get( "r_mode", "3", CVAR_ARCHIVE | CVAR_LATCH );
+	r_mode = ri.Cvar_Get( "r_mode", "6", CVAR_ARCHIVE | CVAR_LATCH );
 	r_fullscreen = ri.Cvar_Get( "r_fullscreen", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customwidth = ri.Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customheight = ri.Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE | CVAR_LATCH );
@@ -974,6 +994,10 @@ void R_Register( void ) {
 #ifdef MACOS_X
 	// Default to using SMP on Mac OS X if we have multiple processors
 	r_smp = ri.Cvar_Get( "r_smp", Sys_ProcessorCount() > 1 ? "1" : "0", CVAR_ARCHIVE | CVAR_LATCH );
+#elif defined WIN32
+	// ydnar: r_smp is nonfunctional on windows
+	r_smp = ri.Cvar_Get("r_smp", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_ROM);
+	Cvar_Set("r_smp", "0");
 #else
 	r_smp = ri.Cvar_Get( "r_smp", "0", CVAR_ARCHIVE | CVAR_LATCH );
 #endif
@@ -1011,6 +1035,7 @@ void R_Register( void ) {
 	r_dlightBacks = ri.Cvar_Get( "r_dlightBacks", "1", CVAR_ARCHIVE );
 	r_finish = ri.Cvar_Get( "r_finish", "0", CVAR_ARCHIVE );
 	r_textureMode = ri.Cvar_Get( "r_textureMode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
+	r_textureAnisotropy = ri.Cvar_Get("r_textureAnisotropy", "1.0", CVAR_ARCHIVE);
 	r_swapInterval = ri.Cvar_Get( "r_swapInterval", "0", CVAR_ARCHIVE );
 #ifdef __MACOS__
 	r_gamma = ri.Cvar_Get( "r_gamma", "1.2", CVAR_ARCHIVE );
@@ -1023,7 +1048,7 @@ void R_Register( void ) {
 	r_railCoreWidth = ri.Cvar_Get( "r_railCoreWidth", "1", CVAR_ARCHIVE );
 	r_railSegmentLength = ri.Cvar_Get( "r_railSegmentLength", "32", CVAR_ARCHIVE );
 
-	r_primitives = ri.Cvar_Get( "r_primitives", "0", CVAR_ARCHIVE );
+	r_primitives = ri.Cvar_Get( "r_primitives", "2", CVAR_ARCHIVE );
 
 	r_ambientScale = ri.Cvar_Get( "r_ambientScale", "0.5", CVAR_CHEAT );
 	r_directedScale = ri.Cvar_Get( "r_directedScale", "1", CVAR_CHEAT );
@@ -1043,7 +1068,7 @@ void R_Register( void ) {
 	//   with r_cache enabled, non-win32 OSes were leaking 24Mb per R_Init..
 	r_cache = ri.Cvar_Get( "r_cache", "1", CVAR_LATCH );  // leaving it as this for backwards compability. but it caches models and shaders also
 	// TTimo show_bug.cgi?id=570
-	r_cacheShaders = ri.Cvar_Get( "r_cacheShaders", "1", CVAR_LATCH );
+	r_cacheShaders = ri.Cvar_Get( "r_cacheShaders", "0", CVAR_LATCH );
 
 	r_cacheModels = ri.Cvar_Get( "r_cacheModels", "1", CVAR_LATCH );
 	r_compressModels = ri.Cvar_Get( "r_compressModels", "0", 0 );     // converts MD3 -> MDC at run-time
@@ -1054,7 +1079,7 @@ void R_Register( void ) {
 	// done.
 
 	// Rafael - wolf fog
-	r_wolffog = ri.Cvar_Get( "r_wolffog", "1", CVAR_CHEAT ); // JPW NERVE cheat protected per id request
+	r_wolffog = ri.Cvar_Get( "r_wolffog", "1", CVAR_ARCHIVE ); // JPW NERVE cheat protected per id request, altered in rtcwpro
 	// done
 
 	r_nocurves = ri.Cvar_Get( "r_nocurves", "0", CVAR_CHEAT );
@@ -1065,6 +1090,7 @@ void R_Register( void ) {
 	r_flareSize = ri.Cvar_Get( "r_flareSize", "40", CVAR_CHEAT );
 	ri.Cvar_Set( "r_flareFade", "5" ); // to force this when people already have "7" in their config
 	r_flareFade = ri.Cvar_Get( "r_flareFade", "5", CVAR_CHEAT );
+	r_flareCoeff = ri.Cvar_Get("r_flareCoeff", FLARE_STDCOEFF, CVAR_CHEAT);
 
 	r_showSmp = ri.Cvar_Get( "r_showSmp", "0", CVAR_CHEAT );
 	r_skipBackEnd = ri.Cvar_Get( "r_skipBackEnd", "0", CVAR_CHEAT );
@@ -1173,6 +1199,8 @@ void R_Init( void ) {
 	R_NoiseInit();
 
 	R_Register();
+
+	R_BloomInit();
 
 	max_polys = r_maxpolys->integer;
 	if ( max_polys < MAX_POLYS ) {

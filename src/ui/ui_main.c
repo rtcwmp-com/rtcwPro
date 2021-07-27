@@ -27,10 +27,6 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-
-
-
-
 /*
 =======================================================================
 
@@ -40,6 +36,7 @@ USER INTERFACE MAIN
 */
 
 #include "ui_local.h"
+#include "../qcommon/qcommon.h"
 
 // NERVE - SMF
 #define AXIS_TEAM       0
@@ -130,8 +127,8 @@ static const int numSortKeys = sizeof( sortKeys ) / sizeof( const char* );
 
 static char* netnames[] = {
 	"???",
-	"UDP",
-	"IPX",
+	"IPv4",
+	"IPv6",
 	NULL
 };
 
@@ -369,10 +366,10 @@ void AssetCache() {
 	uiInfo.uiDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 
 	for ( n = 0; n < NUM_CROSSHAIRS; n++ ) {
-		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_OSPx", 'a' + n ) );  //nihi commented
+		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c_rtcwpro", 'a' + n ) );  //nihi commented
 	//	uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va( "gfx/2d/crosshair%c", 'a' + n ) );  //nihi addded
 		// OSPx - Crosshairs
-        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_OSPx", 'a' + n)); //nihi commented
+        uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt_rtcwpro", 'a' + n)); //nihi commented
 //		uiInfo.uiDC.Assets.crosshairAltShader[n] = trap_R_RegisterShaderNoMip(va("gfx/2d/crosshair%c_alt", 'a' + n)); //nihi added
 	}
 
@@ -3558,7 +3555,6 @@ static void UI_LoadSavegames() {
 	}
 }
 
-
 /*
 ===============
 UI_LoadMovies
@@ -3588,8 +3584,6 @@ static void UI_LoadMovies() {
 	}
 
 }
-
-
 
 /*
 ===============
@@ -4434,7 +4428,7 @@ static void UI_Update( const char *name ) {
 			trap_Cvar_SetValue( "r_texturebits", 32 );
 			trap_Cvar_SetValue( "r_fastSky", 0 );
 			trap_Cvar_SetValue( "r_inGameVideo", 1 );
-			trap_Cvar_SetValue( "cg_shadows", 1 );
+			trap_Cvar_SetValue( "cg_shadows", 0 );
 			trap_Cvar_SetValue( "cg_brassTime", 2500 );
 			trap_Cvar_Set( "r_texturemode", "GL_LINEAR_MIPMAP_LINEAR" );
 			break;
@@ -4878,15 +4872,15 @@ static void UI_RunMenuScript( char **args ) {
 			}
 
 		} else if ( Q_stricmp( name, "voteGame" ) == 0 ) {
-			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
-			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
-				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", ui_voteGameType ) );
+			int ui_netGameType = trap_Cvar_VariableValue( "ui_netGameType" );
+			if (ui_netGameType >= 0 && ui_netGameType < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote gametype %i\n", uiInfo.gameTypes[ui_netGameType].gtEnum) );
 			}
 
 		} else if ( Q_stricmp( name, "refGame" ) == 0 ) {
-			int ui_voteGameType = trap_Cvar_VariableValue( "ui_voteGameType" );
-			if ( ui_voteGameType >= 0 && ui_voteGameType < uiInfo.numGameTypes ) {
-				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", ui_voteGameType ) );
+			int ui_netGameType = trap_Cvar_VariableValue( "ui_netGameType" );
+			if (ui_netGameType >= 0 && ui_netGameType < uiInfo.numGameTypes ) {
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "ref gametype %i\n", uiInfo.gameTypes[ui_netGameType].gtEnum) );
 			}
 
 		} else if ( Q_stricmp( name, "voteTimelimit" ) == 0 ) {
@@ -5320,7 +5314,11 @@ static void UI_RunMenuScript( char **args ) {
 				trap_SetPbSvStatus( 1 );
 			}
 		} else if ( Q_stricmp( name, "openModURL" ) == 0 ) {
-			trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_modURL" ) );
+			//trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_modURL" ) );
+			trap_Cmd_ExecuteText(EXEC_NOW, "openModURL");
+		} else if (Q_stricmp(name, "openModSource") == 0) {
+			//trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_modURL" ) );
+			trap_Cmd_ExecuteText(EXEC_NOW, "openModSource");
 		} else if ( Q_stricmp( name, "openServerURL" ) == 0 ) {
 			trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_URL" ) );
 		} else if ( Q_stricmp( name, "validate_openURL" ) == 0 ) {
@@ -5509,7 +5507,7 @@ static void UI_BuildServerDisplayList( qboolean force ) {
 	trap_Cvar_VariableStringBuffer( "cl_motdString", uiInfo.serverStatus.motd, sizeof( uiInfo.serverStatus.motd ) );
 	len = strlen( uiInfo.serverStatus.motd );
 	if ( len == 0 ) {
-		strcpy( uiInfo.serverStatus.motd, va( "Wolf Multiplayer - Version: %s", Q3_VERSION ) );
+		strcpy( uiInfo.serverStatus.motd, va( "Wolf Multiplayer - Version: %s | Codename: %s", Q3_VERSION, CODENAME ) );
 		len = strlen( uiInfo.serverStatus.motd );
 	}
 	if ( len != uiInfo.serverStatus.motdLen ) {
@@ -6215,19 +6213,21 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 			}
 			switch ( column ) {
 			case SORT_HOST:
-				if ( ping <= 0 ) {
-					return Info_ValueForKey( info, "addr" );
-				} else {
-					if ( ui_netSource.integer == AS_LOCAL ) {
-						Com_sprintf( hostname, sizeof( hostname ), "%s [%s]",
-									 Info_ValueForKey( info, "hostname" ),
-									 netnames[atoi( Info_ValueForKey( info, "nettype" ) )] );
-						return hostname;
-					} else {
-						return Info_ValueForKey( info, "hostname" );
-					}
+				if (ping <= 0) {
+					return Info_ValueForKey(info, "addr");
 				}
+				else {
+					int nettype = atoi(Info_ValueForKey(info, "nettype"));
 
+					if (nettype < 0 || nettype >= ARRAY_LEN(netnames)) {
+						nettype = 0;
+					}
+
+					Com_sprintf(hostname, sizeof(hostname), "^7[^n%s^7]  %s",
+						netnames[nettype],
+						Info_ValueForKey(info, "hostname"));
+					return hostname;
+				}
 			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
 			/*case SORT_MAP:
 				if (Info_ValueForKey( info, "mapname" ) != "" )
@@ -6959,8 +6959,6 @@ static void UI_RunCinematicFrame( int handle ) {
 	trap_CIN_RunCinematic( handle );
 }
 
-
-
 /*
 =================
 PlayerModel_BuildList
@@ -7537,7 +7535,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	info[0] = '\0';
 
 	if ( !Q_stricmp( cstate.servername,"localhost" ) ) {
-		Text_PaintCenter( centerPoint, yStart + 48, scale, colorWhite,va( "Wolf Multiplayer - Version: %s", Q3_VERSION ), ITEM_TEXTSTYLE_SHADOWEDMORE );
+		Text_PaintCenter( centerPoint, yStart + 48, scale, colorWhite,va( "Wolf Multiplayer - Version: %s | Codename: %s", Q3_VERSION, CODENAME ), ITEM_TEXTSTYLE_SHADOWEDMORE );
 	} else {
 		strcpy( text, va( trap_TranslateString( "Connecting to %s" ), cstate.servername ) );
 		Text_PaintCenter( centerPoint, yStart + 48, scale, colorWhite,text, ITEM_TEXTSTYLE_SHADOWEDMORE );
@@ -8042,7 +8040,6 @@ UI_StartServerRefresh
 =================
 */
 static void UI_StartServerRefresh( qboolean full ) {
-	int i;
 	char    *ptr;
 
 	qtime_t q;
@@ -8071,18 +8068,14 @@ static void UI_StartServerRefresh( qboolean full ) {
 	}
 
 	uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 5000;
-	if ( ui_netSource.integer == AS_GLOBAL || ui_netSource.integer == AS_MPLAYER ) {
-		if ( ui_netSource.integer == AS_GLOBAL ) {
-			i = 0;
-		} else {
-			i = 1;
-		}
+	if (ui_netSource.integer == AS_GLOBAL) {
 
-		ptr = UI_Cvar_VariableString( "debug_protocol" );
-		if ( strlen( ptr ) ) {
-			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %s full empty\n", i, ptr ) );
-		} else {
-			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %d full empty\n", i, (int)trap_Cvar_VariableValue( "protocol" ) ) );
+		ptr = UI_Cvar_VariableString("debug_protocol");
+		if (strlen(ptr)) {
+			trap_Cmd_ExecuteText(EXEC_NOW, va("globalservers 0 %s full empty\n", ptr));
+		}
+		else {
+			trap_Cmd_ExecuteText(EXEC_NOW, va("globalservers 0 %d full empty\n", (int)trap_Cvar_VariableValue("protocol")));
 		}
 	}
 }

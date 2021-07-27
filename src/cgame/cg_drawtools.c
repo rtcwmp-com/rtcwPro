@@ -1340,3 +1340,273 @@ char* CG_TranslateString( const char *string ) {
 	// dont even make the call if we're in english
 	return trap_TranslateString( string );
 }
+
+/*
+==================
+RTCWPro
+CG_ColorForPercent
+==================
+*/
+void CG_ColorForPercent(float percent, vec4_t hcolor) {
+
+	// Bail if <= 0
+	if (percent <= 0) 
+	{
+		VectorClear(hcolor);	// black
+		hcolor[3] = 1;
+		return;
+	}
+
+	// set the color based on percent
+	hcolor[0] = 1.0;
+	hcolor[3] = 1.0;
+
+	if (percent >= 100) 
+	{
+		hcolor[2] = 1.0;
+	}
+	else if (percent < 66) 
+	{
+		hcolor[2] = 0;
+	}
+	else 
+	{
+		hcolor[2] = (percent - 66) / 33.0;
+	}
+
+	if (percent > 60) 
+	{
+		hcolor[1] = 1.0;
+	}
+	else if (percent < 30) 
+	{
+		hcolor[1] = 0;
+	}
+	else 
+	{
+		hcolor[1] = (percent - 30) / 30.0;
+	}
+}
+
+/*
+===============
+RTCWPro
+CG_AddPolyByPoints
+
+Help function of CG_AddShaderToBox
+===============
+*/
+static void CG_AddPolyByPoints(vec3_t p1, vec3_t p2, vec3_t p3, qhandle_t shader) {
+
+	polyVert_t verts[3];
+
+	VectorCopy(p1, verts[0].xyz);
+	VectorCopy(p2, verts[1].xyz);
+	VectorCopy(p3, verts[2].xyz);
+
+	trap_R_AddPolyToScene(shader, 3, verts);
+}
+
+/*
+===============
+RTCWPro
+CG_AddShaderToBox
+
+Add custom shaders to boxes using polyVert struct
+PolyVerts count is limited by the engine, easily reaching max if using edges
+===============
+*/
+#define TRIGGERS_EDGE_THICKNESS 1.0f
+void CG_AddShaderToBox(vec3_t mins, vec3_t maxs, qhandle_t boxShader, qhandle_t edgesShader, int addEdges) {
+	vec3_t diff, p1, p2, p3, p4, p5, p6, temp;
+
+	VectorSubtract(mins, maxs, diff);
+
+	VectorCopy(mins, p1);
+	VectorCopy(mins, p2);
+	VectorCopy(mins, p3);
+	VectorCopy(maxs, p4);
+	VectorCopy(maxs, p5);
+	VectorCopy(maxs, p6);
+
+	p1[0] -= diff[0];
+	p2[1] -= diff[1];
+	p3[2] -= diff[2];
+	p4[0] += diff[0];
+	p5[1] += diff[1];
+	p6[2] += diff[2];
+
+	// bottom side
+	CG_AddPolyByPoints(mins, p1, p2, boxShader);
+	CG_AddPolyByPoints(p1, p2, p6, boxShader);
+
+	// front side
+	CG_AddPolyByPoints(mins, p2, p4, boxShader);
+	CG_AddPolyByPoints(mins, p3, p4, boxShader);
+
+	// back side
+	CG_AddPolyByPoints(p1, p5, p6, boxShader);
+	CG_AddPolyByPoints(p5, p6, maxs, boxShader);
+
+	// left side
+	CG_AddPolyByPoints(p2, p4, maxs, boxShader);
+	CG_AddPolyByPoints(p2, p6, maxs, boxShader);
+
+	// right side
+	CG_AddPolyByPoints(mins, p1, p5, boxShader);
+	CG_AddPolyByPoints(mins, p3, p5, boxShader);
+
+	// top side
+	CG_AddPolyByPoints(p4, p5, maxs, boxShader);
+	CG_AddPolyByPoints(p3, p4, p5, boxShader);
+
+	if (addEdges)
+	{
+		// bottom front edge
+		VectorSet(temp, mins[0] + TRIGGERS_EDGE_THICKNESS, mins[1], mins[2] + TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, p2, edgesShader, edgesShader, 0);
+
+		// bottom back edge
+		VectorSet(temp, p1[0] - TRIGGERS_EDGE_THICKNESS, p1[1], p1[2] + TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, p6, edgesShader, edgesShader, 0);
+
+		// bottom left edge
+		VectorSet(temp, p2[0], p2[1] - TRIGGERS_EDGE_THICKNESS, p2[2] + TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, p6, edgesShader, edgesShader, 0);
+
+		// bottom right edge
+		VectorSet(temp, mins[0], mins[1] + TRIGGERS_EDGE_THICKNESS, mins[2] + TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, p1, edgesShader, edgesShader, 0);
+
+		// front left edge
+		VectorSet(temp, p2[0] + TRIGGERS_EDGE_THICKNESS, p2[1] - TRIGGERS_EDGE_THICKNESS, p2[2]);
+		CG_AddShaderToBox(temp, p4, edgesShader, edgesShader, 0);
+
+		// front right edge
+		VectorSet(temp, mins[0] + TRIGGERS_EDGE_THICKNESS, mins[1] + TRIGGERS_EDGE_THICKNESS, mins[2]);
+		CG_AddShaderToBox(temp, p3, edgesShader, edgesShader, 0);
+
+		// back left edge
+		VectorSet(temp, p6[0] - TRIGGERS_EDGE_THICKNESS, p6[1] - TRIGGERS_EDGE_THICKNESS, p6[2]);
+		CG_AddShaderToBox(temp, maxs, edgesShader, edgesShader, 0);
+
+		// back right edge
+		VectorSet(temp, p1[0] - TRIGGERS_EDGE_THICKNESS, p1[1] + TRIGGERS_EDGE_THICKNESS, p1[2]);
+		CG_AddShaderToBox(temp, p5, edgesShader, edgesShader, 0);
+
+		// top front edge
+		VectorSet(temp, p3[0] + TRIGGERS_EDGE_THICKNESS, p3[1], p3[2] - TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, p4, edgesShader, edgesShader, 0);
+
+		// top back edge
+		VectorSet(temp, p5[0] - TRIGGERS_EDGE_THICKNESS, p5[1], p5[2] - TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, maxs, edgesShader, edgesShader, 0);
+
+		// top left edge
+		VectorSet(temp, p4[0], p4[1] - TRIGGERS_EDGE_THICKNESS, p4[2] - TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, maxs, edgesShader, edgesShader, 0);
+
+		// top right edge
+		VectorSet(temp, p3[0], p3[1] + TRIGGERS_EDGE_THICKNESS, p3[2] - TRIGGERS_EDGE_THICKNESS);
+		CG_AddShaderToBox(temp, p5, edgesShader, edgesShader, 0);
+	}
+}
+
+/*
+===============
+RTCWPro
+CG_DrawTriggers
+
+Add custom shaders to triggers
+===============
+*/
+#define TRIGGERS_DISTANCE_UPDATE_TIME 1000
+void CG_DrawTriggers(void) {
+	centity_t* cent;
+	clipHandle_t cmodel;
+	qhandle_t    triggerShader, edgesShader;
+	vec3_t       mins, maxs, center;
+	float drawScale = 0;
+	int drawEdges = 1;
+
+	// get distances from player to ents to draw triggers in order of distance,
+	// like this close triggers should always draw despite of max polys count
+	if (cg.time > cg.lastGetTriggerDistancesTime + TRIGGERS_DISTANCE_UPDATE_TIME)
+	{ // don't do every frame to prevent lag
+		cg.drawTriggersCount = 0;
+		for (int i = 0; i < MAX_ENTITIES + 1; ++i)
+		{ // loop through all entities
+			cent = &cg_entities[i];
+
+			// only bother with the following types
+			if (cent->currentState.eType != ET_CONCUSSIVE_TRIGGER && cent->currentState.eType != ET_OID_TRIGGER)
+			{
+				continue;
+			}
+
+			// get distance to brush center and store ent index
+			cmodel = cgs.inlineDrawModel[cent->currentState.modelindex];
+
+			if (!cmodel)
+			{
+				continue;
+			}
+
+			trap_R_ModelBounds(cmodel, mins, maxs);
+			VectorSet(center, (mins[0] + maxs[0]) / 2, (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2);
+			cg.drawTriggerDistances[cg.drawTriggersCount] = VectorDistance(cg.refdef.vieworg, center);
+			cg.drawTriggerEntIndexes[cg.drawTriggersCount] = cent->currentState.number;
+
+			// sort by ascending distance
+			for (int j = cg.drawTriggersCount; j > 1; --j)
+			{ // don't sort index 0
+				if (cg.drawTriggerDistances[j] < cg.drawTriggerDistances[j - 1])
+				{
+					float temp = cg.drawTriggerDistances[j - 1];
+					cg.drawTriggerDistances[j - 1] = cg.drawTriggerDistances[j];
+					cg.drawTriggerDistances[j] = temp;
+					int temp2 = cg.drawTriggerEntIndexes[j - 1];
+					cg.drawTriggerEntIndexes[j - 1] = cg.drawTriggerEntIndexes[j];
+					cg.drawTriggerEntIndexes[j] = temp2;
+				}
+			}
+
+			cg.drawTriggersCount++;
+		}
+		cg.lastGetTriggerDistancesTime = cg.time;
+	}
+
+	// actually draw the triggers
+	for (int i = 0; i < cg.drawTriggersCount; ++i)
+	{ // loop through relevant entities indexes
+		cent = &cg_entities[cg.drawTriggerEntIndexes[i]];
+
+		cmodel = cgs.inlineDrawModel[cent->currentState.modelindex];
+
+		if (!cmodel)
+		{
+			continue;
+		}
+
+		trap_R_ModelBounds(cmodel, mins, maxs);
+		VectorSet(mins, mins[0] - drawScale, mins[1] - drawScale, mins[2] - drawScale);
+		VectorSet(maxs, maxs[0] + drawScale, maxs[1] + drawScale, maxs[2] + drawScale);
+
+		triggerShader = cgs.media.customTrigger;
+		edgesShader = cgs.media.customTriggerEdges;
+
+		if (cent->currentState.eType == ET_CONCUSSIVE_TRIGGER)
+		{
+			triggerShader = cgs.media.transmitTrigger;
+			edgesShader = cgs.media.transmitTriggerEdges;
+		}
+		else if (cent->currentState.eType == ET_OID_TRIGGER)
+		{
+			triggerShader = cgs.media.objTrigger;
+			edgesShader = cgs.media.objTriggerEdges;
+		}
+
+		CG_AddShaderToBox(mins, maxs, triggerShader, edgesShader, drawEdges);
+	}
+}
+
