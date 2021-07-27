@@ -115,6 +115,7 @@ Main objective: create a competition mod similar to OSP with updates for tournam
    - allow join during pause
    - add custom screen shake: g_screenShake
    - default r_mode to 6
+   - add cg_tracers
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
