@@ -122,3 +122,5 @@ RtcwPro Dev Team
 -nihilist, KrazyKaze, Tarator
 
 Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, and Spaztik
+Additional credits for public code: Nico, suburb, the OpenJK dev team.
+Installer powered by Advanced Installer: https://www.advancedinstaller.com/
