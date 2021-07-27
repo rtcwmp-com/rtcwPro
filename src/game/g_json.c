@@ -1286,7 +1286,7 @@ void G_writeGameEarlyExit(void)
     time_t unixTime = time(NULL);
     json_t *eventStats =  json_array();
 
-  //  trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+    trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
 
 
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
