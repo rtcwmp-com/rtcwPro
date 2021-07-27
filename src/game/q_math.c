@@ -1078,7 +1078,26 @@ int VectorCompare( const vec3_t v1, const vec3_t v2 ) {
 	return 1;
 }
 
+vec_t VectorNormalize( vec3_t v ) {
+	// NOTE: TTimo - Apple G4 altivec source uses double?
+	float	length, ilength;
 
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+
+	if ( length ) {
+		/* writing it this way allows gcc to recognize that rsqrt can be used */
+		ilength = 1/(float)sqrt (length);
+		/* sqrt(length) = length * (1 / sqrt(length)) */
+		length *= ilength;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
+	}
+
+	return length;
+}
+
+/*
 vec_t VectorNormalize( vec3_t v ) {
 	float length, ilength;
 
@@ -1094,7 +1113,7 @@ vec_t VectorNormalize( vec3_t v ) {
 
 	return length;
 }
-
+*/
 //
 // fast vector normalize routine that does not check to make sure
 // that length != 0, nor does it return length

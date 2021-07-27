@@ -224,8 +224,10 @@ typedef enum {
 	CG_TRANSLATE_STRING,
 
 	CG_R_VALIDATE,
-	CG_R_BUILD
+	CG_R_BUILD,
 	// -NERVE - SMF
+
+	CG_REQ_SS // reqSS
 } cgameImport_t;
 
 

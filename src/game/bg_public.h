@@ -42,8 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2 Alpha" // this will print on the server and show up as the RtcwPro version
-
+#define GAMEVERSION			"RtcwPro 1.2" // this will print on the server and show up as the RtcwPro version
+#define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
 #define GIB_HEALTH          -175 // JPW NERVE
@@ -184,9 +184,11 @@ typedef enum popupMessageType_e {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
-#define CS_SERVERTOGGLES        42		// Shows current enable/disabled settings (for voting UI)
-#define CS_MATCHID              43		// match id for stats
-#define CS_ROUNDINFO			44		// match id for stats
+#define CS_SVCVAR               42		// RTCWPro - Cvar limiting
+#define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
+#define CS_MATCHID              44    // match id for stats
+#define CS_ROUNDINFO            45    // match id for stats
+
 
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
@@ -795,6 +797,9 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
+	// OSPx
+	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
+	// -OSPx
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,
@@ -870,9 +875,6 @@ typedef enum {
 	EV_GIVEPAGE,    //----(SA)	added
 	EV_MG42BULLET_HIT_FLESH,    // Arnout: these two send the seed as well
 	EV_MG42BULLET_HIT_WALL,
-	// OSPx
-	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
-	// -OSPx
 	EV_MAX_EVENTS   // just added as an 'endcap'
 
 } entity_event_t;
@@ -1829,7 +1831,7 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 // -OSPx
 // L0 - Reinforcements offset
 #define MAX_REINFSEEDS  8
-#define REINF_RANGE     16      // (0 to n-1 second offset)
+//#define REINF_RANGE     16      // (0 to n-1 second offset)
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];

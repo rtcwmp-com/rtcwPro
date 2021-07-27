@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ===========================================================================
 */
+#ifdef MYSQLDEP
 #include "database.h"
 
 // Dushan
@@ -408,7 +409,7 @@ void OW_MySQL_CreateTable(void) {
 			//
 			// Mute table structure
 			// This is copy from ban table
-			// 
+			//
 
 			if (mysql_query(connection, "CREATE TABLE IF NOT EXISTS user_mutelist (\
 									mute_id mediumint(8) unsigned NOT NULL auto_increment, \
@@ -433,7 +434,7 @@ void OW_MySQL_CreateTable(void) {
 			//
 			// Create server structure
 			// Server/Mod relevate structure
-			// 
+			//
 
 			// create table players
 			if (mysql_query(connection, "CREATE TABLE `user_players` ( \
@@ -482,3 +483,4 @@ void OW_MySQL_CreateTable(void) {
 
 	}
 }
+#endif

@@ -426,22 +426,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// L0 - Stats
 	if (attacker && attacker->client && g_gamestate.integer == GS_PLAYING) {
 		// Life kills & death spress
-		if (!OnSameTeam(attacker, self)) {
-
+		if (!OnSameTeam(attacker, self))
+		{
 			// attacker->client->pers.spreeDeaths = 0; // Reset deaths for death spress  // nihi commented out
 			attacker->client->pers.life_kills++;		// life kills
-
-		// Count teamkill
-		} else {
-			// Don't count self kills..
-			if (attacker != self) {
-				// Admin bot - teamKills
-				sb_maxTeamKill(attacker);
-
-
-			}
-		}
-	} // End
+		} // End
+	}
 
 	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
 
@@ -815,7 +805,7 @@ void G_ArmorDamage( gentity_t *targ ) {
 G_Hitsounds
 ==============
 */
-void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
+void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body ) {
 	qboolean 	onSameTeam = OnSameTeam( target, attacker);
 
 	if (g_hitsounds.integer) {
@@ -823,6 +813,19 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, qboolean body ) {
 		// if player is hurting him self don't give any sounds
 		if (target->client == attacker->client) {
 			return;  // this happens at flaming your self... just return silence...			
+		}
+
+		if (mod == MOD_ARTILLERY ||
+			mod == MOD_GRENADE_SPLASH ||
+			mod == MOD_DYNAMITE_SPLASH ||
+			mod == MOD_DYNAMITE ||
+			mod == MOD_ROCKET ||
+			mod == MOD_ROCKET_SPLASH ||
+			mod == MOD_KNIFE ||
+			mod == MOD_GRENADE ||
+			mod == MOD_AIRSTRIKE)
+		{
+			return;
 		}
 
 		// if team mate
@@ -954,7 +957,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	client = targ->client;
 
 	if ( client ) {
-		if ( client->noclip || client->ps.powerups[PW_INVULNERABLE]  ) {
+		if ( client->noclip) { // KK commenting this out during our alpha test || client->ps.powerups[PW_INVULNERABLE]  ) {
 			return;
 		}
 	}
@@ -1027,7 +1030,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		// if TF_NO_FRIENDLY_FIRE is set, don't do damage to the target
 		// if the attacker was on the same team
 		if ( targ != attacker && OnSameTeam( targ, attacker )  ) {
-			if ( ( g_gamestate.integer != GS_PLAYING && match_warmupDamage.integer == 1 ) ) {
+			if ( ( g_gamestate.integer != GS_PLAYING && match_warmupDamage.integer == 0 ) ) {
 				return;
 			}
 		}
@@ -1078,7 +1081,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
-	G_Hitsounds(targ, attacker, qtrue);
+	G_Hitsounds(targ, attacker, mod, qtrue);
 
 	// sswolf - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
@@ -1111,7 +1114,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_addStatsHeadShot( attacker, mod );
 		} // End
 
-		G_Hitsounds(targ, attacker, qfalse);
+		G_Hitsounds(targ, attacker, mod, qfalse);
 	}
 
 	if ( g_debugDamage.integer ) {

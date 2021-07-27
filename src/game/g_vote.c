@@ -398,6 +398,12 @@ int G_Kick_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 			}
 		}
 
+		if (level.clients[pid].sess.shoutcaster)
+		{
+			G_refPrintf(ent, "Can't vote to kick shoutcasters!");
+			return G_INVALID;
+		}
+
 		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid );
 		Com_sprintf( arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname );
 
@@ -436,7 +442,7 @@ int G_Mute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 			return( G_INVALID );
 		}
 
-		if ( level.clients[pid].sess.ignored ) {
+		if ( level.clients[pid].sess.muted ) {
 			G_refPrintf( ent, "Player is already muted!" );
 			return( G_INVALID );
 		}
@@ -451,7 +457,7 @@ int G_Mute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 		// Mute a player
 		if ( level.clients[pid].sess.referee != RL_RCON ) {
 			trap_SendServerCommand( pid, va( "cpm \"^3You have been muted\"" ) );
-			level.clients[pid].sess.ignored = qtrue;
+			level.clients[pid].sess.muted = qtrue;
 			AP( va( "cp \"%s\n^3has been muted!\n\"", level.clients[pid].pers.netname ) );
 			ClientUserinfoChanged( pid );
 		} else {
@@ -487,7 +493,7 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 			return( G_INVALID );
 		}
 
-		if ( !level.clients[pid].sess.ignored ) {
+		if ( !level.clients[pid].sess.muted) {
 			G_refPrintf( ent, "Player is not muted!" );
 			return( G_INVALID );
 		}
@@ -502,7 +508,7 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 		// Mute a player
 		if ( level.clients[pid].sess.referee != RL_RCON ) {
 			trap_SendServerCommand( pid, va( "cpm \"^3You have been un-muted\"" ) );
-			level.clients[pid].sess.ignored = qfalse;
+			level.clients[pid].sess.muted = qfalse;
 			AP( va( "cp \"%s\n^3has been un-muted!\n\"", level.clients[pid].pers.netname ) );
 			ClientUserinfoChanged( pid );
 		} else {
@@ -531,9 +537,20 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 
 		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2 );
 
+		if (!FileExists(arg2, "maps", ".bsp", qfalse))
+		{
+			CP(va("print \"^7Could not find ^3%s\n\"", arg2));
+			return(G_INVALID);
+		}
+
 		// Vote action (vote has passed)
 	} else {
 		char s[MAX_STRING_CHARS];
+
+		if (level.paused != PAUSE_NONE)
+		{
+			level.paused = PAUSE_NONE;
+		}
 
 		Svcmd_ResetMatch_f( qtrue, qfalse );
 		trap_Cvar_VariableStringBuffer( "nextmap", s, sizeof( s ) );

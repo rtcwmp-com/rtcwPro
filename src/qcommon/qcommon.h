@@ -209,7 +209,7 @@ qboolean    NET_IsLocalAddress( netadr_t adr );
 const char  *NET_AdrToString( netadr_t a );
 const char	*NET_AdrToStringwPort (netadr_t a);
 qboolean	NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask);
-const char* NET_AdrToString(netadr_t a);
+//const char* NET_AdrToString(netadr_t a);
 void        NET_JoinMulticast6(void);
 void        NET_LeaveMulticast6(void);
 int			NET_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
@@ -754,10 +754,12 @@ char *FS_ShiftedStrStr( const char *string, const char *substring, int shift );
 char *FS_ShiftStr( const char *string, int shift );
 
 void FS_CopyFile( char *fromOSPath, char *toOSPath );
-int FS_CreatePath(const char* OSPath_);
+//int FS_CreatePath(const char* OSPath_);
+qboolean FS_CreatePath( char *OSPath ) ;
 qboolean FS_VerifyPak( const char *pak );
 
 int  submit_curlPost( char* jsonfile, char* matchid );
+void* submit_HTTP_curlPost(void* args) ;
 char* encode_data_b64( char *infilename ) ;
 /*
 ==============================================================
@@ -790,8 +792,11 @@ MISC
 // (old code causing buffer overflows)
 extern char cl_cdkey[34];
 void Com_AppendCDKey( const char *filename );
-void Com_ReadCDKey( const char *filename );
-void Com_ReadAuthKey(const char* filename);
+int Com_ReadCDKey( const char *filename );
+//void Com_ReadCDKey( const char *filename );
+//void Com_WriteAuthKey(const char* filename);
+void Com_WriteNewKey(const char* filename);
+int Com_ReadAuthKey(const char* filename);
 
 // returnbed by Sys_GetProcessorId
 #define CPUID_GENERIC           0           // any unrecognized processor

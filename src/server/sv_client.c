@@ -77,23 +77,25 @@ void SV_GetChallenge( netadr_t from ) {
 		}
 	}
 
-	if ( i == MAX_CHALLENGES ) {
+	if (i == MAX_CHALLENGES) {
 		// this is the first time this client has asked for a challenge
 		challenge = &svs.challenges[oldest];
 
+		challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
 		challenge->adr = from;
 		challenge->firstTime = svs.time;
-		challenge->wasAuthorized = qfalse;
 		challenge->firstPing = 0;
+		challenge->time = svs.time;
 		challenge->connected = qfalse;
-		challenge->wasrefused = qfalse;
-		challenge->authMessage = "";
+		//challenge->wasAuthorized = qfalse;
+		//challenge->wasrefused = qfalse;
+		//challenge->authMessage = "";
 		i = oldest;
 	}
 
 	// always generate a new challenge number, so the client cannot circumvent sv_maxping
-	challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
-	challenge->time = svs.time;
+	//challenge->challenge = ((rand() << 16) ^ rand()) ^ svs.time;
+	//challenge->time = svs.time;
 
 	// if they are on a lan address, send the challengeResponse immediately
 	if ( Sys_IsLANAddress( from ) ) {
@@ -320,6 +322,7 @@ void SV_DirectConnect( netadr_t from ) {
 	char* denied;
 	int count;
 	char guid[GUID_LEN];
+	//char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
 
@@ -329,11 +332,19 @@ void SV_DirectConnect( netadr_t from ) {
 
 	if (SV_CheckDRDoS(from)) {
 		return;
-	} 
+	}
 
 	// Check whether this client is banned.
 	if (SV_IsBanned(&from, qfalse)) {
 		NET_OutOfBandPrint(NS_SERVER, from, "print\n^7You are ^1Banned ^7from this server^1!\n");
+		return;
+	}
+
+	// RTCWPro
+	int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
+	if (cl_checkversion != sv_checkVersion->integer)
+	{
+		NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version. " "Run updater as admin.\n");
 		return;
 	}
 
@@ -359,7 +370,7 @@ void SV_DirectConnect( netadr_t from ) {
 	for ( i = 0, cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ ) {
 		if ( NET_CompareBaseAdr( from, cl->netchan.remoteAddress )
 			 && ( cl->netchan.qport == qport
-				  || from.port == cl->netchan.remoteAddress.port ) ) 
+				  || from.port == cl->netchan.remoteAddress.port ) )
 		{
 			if ( ( svs.time - cl->lastConnectTime )
 				 < ( sv_reconnectlimit->integer * 1000 ) ) {
@@ -398,10 +409,11 @@ void SV_DirectConnect( netadr_t from ) {
 		}
 
 		challengeptr = &svs.challenges[i];
-		if (challengeptr->wasrefused) {
+		
+		/*if (challengeptr->wasrefused) {
 			// Return silently, so that error messages written by the server keep being displayed.
 			return;
-		}
+		}*/
 
 		// force the IP key/value pair so the game can filter based on ip
 		Info_SetValueForKey( userinfo, "ip", NET_AdrToString( from ) );
@@ -421,13 +433,13 @@ void SV_DirectConnect( netadr_t from ) {
 			if ( sv_minPing->value && ping < sv_minPing->value ) {
 				NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is for high pings only\n" );
 				Com_DPrintf( "Client %i rejected on a too low ping\n", i );
-				challengeptr->wasrefused = qtrue;
+				//challengeptr->wasrefused = qtrue;
 				return;
 			}
 			if ( sv_maxPing->value && ping > sv_maxPing->value ) {
 				NET_OutOfBandPrint( NS_SERVER, from, "print\nServer is for low pings only\n" );
 				Com_DPrintf( "Client %i rejected on a too high ping: %i\n", i, ping );
-				challengeptr->wasrefused = qtrue;
+				//challengeptr->wasrefused = qtrue;
 				return;
 			}
 
@@ -440,7 +452,7 @@ void SV_DirectConnect( netadr_t from ) {
 					else {
 						NET_OutOfBandPrint(NS_SERVER, from, va("print\n%s\n", challengeptr->authMessage));
 					}
-					challengeptr->wasrefused = qtrue;
+					//challengeptr->wasrefused = qtrue;
 					return;
 				}
 			}
@@ -548,6 +560,9 @@ gotnewcl:
 	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
 	Info_SetValueForKey(userinfo, "cl_guid", guid);
 
+//	guid = Info_ValueForKey(userinfo, "cl_guid");
+//	Q_strncpyz(newcl->guid, guid, sizeof(newcl->guid));
+
 	// save the userinfo
 	Q_strncpyz( newcl->userinfo, userinfo, sizeof( newcl->userinfo ) );
 
@@ -576,7 +591,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+	//newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -776,6 +791,8 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 		memcpy(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
 	else
 		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
+
+	SV_ReloadRest(qfalse); // RTCWPro
 
 	// call the game begin function
 	VM_Call( gvm, GAME_CLIENT_BEGIN, client - svs.clients );
@@ -986,7 +1003,10 @@ when the cvar is set to something, the download server will effectively never us
 ==================
 */
 static qboolean SV_CheckFallbackURL(client_t* cl, msg_t* msg) {
-	if (!sv_wwwFallbackURL->string || strlen(sv_wwwFallbackURL->string) == 0) {
+
+	return qfalse;
+
+	/*if (!sv_wwwFallbackURL->string || strlen(sv_wwwFallbackURL->string) == 0) {
 		return qfalse;
 	}
 
@@ -998,7 +1018,7 @@ static qboolean SV_CheckFallbackURL(client_t* cl, msg_t* msg) {
 	MSG_WriteLong(msg, 0);
 	MSG_WriteLong(msg, 2); // DL_FLAG_URL
 
-	return qtrue;
+	return qtrue;*/
 }
 
 
@@ -1010,8 +1030,9 @@ Check to see if the client wants a file, open it if needed and start pumping the
 Fill up msg with data, return number of download blocks added
 ==================
 */
-#ifdef DEDICATED
-int SV_WriteDownloadToClient(client_t *cl, msg_t *msg) {
+//#ifdef DEDICATED
+int SV_WriteDownloadToClientOrig(client_t *cl, msg_t *msg) {
+
 	int curindex;
 	int unreferenced = 1;
 	char errorMessage[1024];
@@ -1226,7 +1247,16 @@ int SV_SendDownloadMessages(void) {
 				MSG_Init(&msg, msgBuffer, sizeof(msgBuffer));
 				MSG_WriteLong(&msg, cl->lastClientCommand);
 
-				retval = SV_WriteDownloadToClient(cl, &msg);
+                if (sv_wwwDownload->integer) {
+                    SV_WriteDownloadToClient(cl, &msg);
+                    retval=1;
+
+                    }
+                else {
+                    retval = SV_WriteDownloadToClientOrig(cl, &msg);
+
+				}
+
 
 				if (retval) {
 					MSG_WriteByte(&msg, svc_EOF);
@@ -1240,7 +1270,7 @@ int SV_SendDownloadMessages(void) {
 	return numDLs;
 }
 
-#else
+//#else
 
 void SV_WriteDownloadToClient(client_t* cl, msg_t* msg) {
 	int curindex;
@@ -1338,7 +1368,7 @@ void SV_WriteDownloadToClient(client_t* cl, msg_t* msg) {
 				Com_sprintf(errorMessage, sizeof(errorMessage), "File \"%s\" not found on server for autodownloading.\n", cl->downloadName);
 			}
 
-			// L0 - HTTP downloads 			
+			// L0 - HTTP downloads
 			SV_BadDownload(cl, msg);
 			MSG_WriteString(msg, errorMessage); // (could SV_DropClient isntead?)
 			// End
@@ -1538,7 +1568,7 @@ void SV_WriteDownloadToClient(client_t* cl, msg_t* msg) {
 		cl->downloadSendTime = svs.time;
 	}
 }
-#endif
+//#endif
 
 /*
 ==================
@@ -1801,7 +1831,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 	if ( strlen( val ) ) {
 		i = atoi( val );
 		if ( i <= 0 || i > 100 || strlen( val ) > 4 ) {*/
-			Info_SetValueForKey( cl->userinfo, "handicap", "100" ); // rtcwpro always set to 100 to avoid pickup ammo/health bug
+			//Info_SetValueForKey( cl->userinfo, "handicap", "100" ); // rtcwpro always set to 100 to avoid pickup ammo/health bug
 	/*	}
 	}*/
 
@@ -1823,6 +1853,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 	// maintain the IP information
 	// this is set in SV_DirectConnect (directly on the server, not transmitted), may be lost when client updates it's userinfo
 	// the banning code relies on this being consistently present
+	/*
 	if (NET_IsLocalAddress(cl->netchan.remoteAddress))
 		ip = "localhost";
 	else
@@ -1838,12 +1869,24 @@ void SV_UserinfoChanged( client_t *cl ) {
 		SV_DropClient(cl, "userinfo string length exceeded");
 	else
 		Info_SetValueForKey(cl->userinfo, "ip", ip);
-
+*/
+	val = Info_ValueForKey( cl->userinfo, "ip" );
+	if ( !val[0] ) {
+		//Com_DPrintf("Maintain IP in userinfo for '%s'\n", cl->name);
+		if ( !NET_IsLocalAddress( cl->netchan.remoteAddress ) ) {
+			Info_SetValueForKey( cl->userinfo, "ip", NET_AdrToString( cl->netchan.remoteAddress ) );
+		} else {
+			// force the "ip" info key to "localhost" for local clients
+			Info_SetValueForKey( cl->userinfo, "ip", "localhost" );
+		}
+	}
+#ifdef CLGUID
 	// etp: force auth and guid into userinfo so client cant mess with it
-	Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
-
+    Info_SetValueForKey(cl->userinfo, "cl_guid", cl->guid);
+#endif
 	// TTimo
 	// download prefs of the client
+#ifdef CLWWW
 	val = Info_ValueForKey(cl->userinfo, "cl_wwwDownload");
 	cl->bDlOK = qfalse;
 	if (strlen(val)) {
@@ -1852,6 +1895,7 @@ void SV_UserinfoChanged( client_t *cl ) {
 			cl->bDlOK = qtrue;
 		}
 	}
+#endif
 }
 
 /*
@@ -2230,12 +2274,24 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
 
-	if (Q_stricmp(sv_GameConfig->string, "") && 
-		cl->clientRestValidated != RKVALD_TIME_OFF && 
-		cl->clientRestValidated < svs.time && 
-		cl->netchan.remoteAddress.type != NA_BOT
-	) {
-		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+	if (Q_stricmp(sv_GameConfig->string, "") &&
+		cl->clientRestValidated != RKVALD_TIME_OFF &&
+		cl->clientRestValidated < svs.time &&
+		cl->netchan.remoteAddress.type != NA_BOT)
+	{
+		//cl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+		SV_ReloadRest(qfalse);
+		SV_ExecuteClientCommand(cl, "team s", qtrue);
+		SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
 		return;
 	}
+
+	/*if (Q_stricmp(sv_GameConfig->string, "") &&
+		cl->clientRestValidated != RKVALD_TIME_OFF &&
+		cl->clientRestValidated < svs.time &&
+		cl->netchan.remoteAddress.type != NA_BOT) 
+	{
+		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+		return;
+	}*/
 }

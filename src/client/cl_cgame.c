@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "client.h"
 
 #include "../game/botlib.h"
+#include "../qcommon/threads.h"
 
 extern botlib_export_t *botlib_export;
 
@@ -545,8 +546,8 @@ void CL_CheckRestStatus(void) {
 			int violations = Cvar_ValidateRest();
 
 			if (violations > 0) {
-				Com_Printf(">> ^1You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
-				Com_Printf(">> ^jPlease use /violations and correct them.\n");
+				Com_Printf(">> ^3You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
+				Com_Printf(">> ^3Please use /violations and correct them.\n");
 			}
 			cl.handle.warnedTime = cls.realtime + (violations < 1 ? RKVALD_TIME_PING_L : RKVALD_TIME_PING_S);
 			CL_AddReliableCommand(va("%s %s", CTL_RKVALD, violations < 1 ? RKVALD_OK : RKVALD_NOT_OK));
@@ -961,6 +962,12 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_R_BUILD:
 		Cvar_RestBuildList(VMA(1));
 		CL_SetRestStatus();
+		return 0;
+		// reqSS
+	case CG_REQ_SS:
+		//CL_RequestedSS(args[1]);
+		//CL_RequestedSS();
+		CL_RequestedSS( VMA(1));
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );

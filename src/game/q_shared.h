@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "Wolf 1.41b-MP"
+#define Q3_VERSION      "RtcwMP-Pro 1.2.109"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -949,7 +949,7 @@ default values.
 // Cvar restrictions table for tags
 typedef struct {
 	int type;
-	char* operator;
+	char* operatorFlag;
 	char* longDesc;
 } cvar_restrictions_l;
 
@@ -1147,6 +1147,7 @@ typedef enum {
 
 //#define	MAX_CONFIGSTRINGS	1024
 #define MAX_CONFIGSTRINGS   2048
+#define MAX_MAPCONFIGSTRINGS 8192 // RTCWPro
 
 #define NUM_MODELS 2
 #define AXIS_MODEL_HANDLE	0
@@ -1715,7 +1716,7 @@ typedef enum {
 #define VOTEFLAGS_MAP                   ( 1 << 7 )
 
 //
-// L0 
+// L0
 // New stuff bellow
 //
 #define PAD(base, alignment)	(((base)+(alignment)-1) & ~((alignment)-1))
@@ -1734,5 +1735,7 @@ qboolean clientIsConnected;
 /* We are on Windows */
 # define strtok_r strtok_s
 #endif
+
+#define ArrayLength(x)	(sizeof(x) / sizeof(*(x)))
 
 #endif  // __Q_SHARED_H

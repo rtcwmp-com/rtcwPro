@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -495,9 +495,10 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-int FS_CreatePath(const char* OSPath_) {
+//int FS_CreatePath(const char* OSPath_) {
+qboolean FS_CreatePath( char *OSPath ) {
 	// use va() to have a clean const char* prototype
-	char* OSPath = va("%s", OSPath_);
+//	char* OSPath = va("%s", OSPath_);
 	char* ofs;
 
 	// make absolutely sure that it can't back up the path
@@ -741,7 +742,8 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 	if ( f ) {
 		return FS_filelength( f );
 	}
-	return -1;
+//	return -1;
+	return 0;
 }
 
 /*
@@ -1084,8 +1086,8 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	// The searchpaths do guarantee that something will always
 	// be prepended, so we don't need to worry about "c:" or "//limbo"
 	if ( strstr( filename, ".." ) || strstr( filename, "::" ) ) {
-		if (file == NULL)
-			return -1;
+	//	if (file == NULL)
+	//		return -1;
 		*file = 0;
 		return -1;
 	}
@@ -1093,6 +1095,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 	// make sure the q3key file is only readable by the quake3.exe at initialization
 	// any other time the key should only be accessed in memory using the provided functions
 	if ( com_fullyInitialized && strstr( filename, "rtcwkey" ) || com_fullyInitialized && strstr(filename, "authkey")) {
+	//if ( com_fullyInitialized && strstr( filename, "rtcwkey" ) ) {
 		*file = 0;
 		return -1;
 	}
@@ -1232,9 +1235,10 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 				 && Q_stricmp( filename + l - 5, ".menu" )  // menu files
 				 && Q_stricmp( filename + l - 5, ".game" )  // menu files
 				 && Q_stricmp( filename + l - strlen( demoExt ), demoExt ) // menu files
-				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files	
-				if (!(fs_fakeChkSum = random())) 
-					fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
+				 && Q_stricmp( filename + l - 4, ".dat" ) ) { // for journal files
+				 fs_fakeChkSum = random();
+			//	if (!(fs_fakeChkSum = random()))
+			//		fs_fakeChkSum = 0xdeadbeef; // L0 - unpure bug
 			}
 
 			Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
@@ -2793,7 +2797,7 @@ we are not interested in a download string format, we want something human-reada
 
 ================
 */
-qboolean CL_WWWBadChecksum(const char* pakname); 
+qboolean CL_WWWBadChecksum(const char* pakname);
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 	searchpath_t    *sp;
 	qboolean havepak, badchecksum;
@@ -2853,6 +2857,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
 					Q_strcat(neededpaks, len, " (local file exists with wrong checksum)");
 					// L0 - HTTP downloads
+
 #ifndef DEDICATED
 					// let the client subsystem track bad download redirects (dl file with wrong checksums)
 					// this is a bit ugly but the only other solution would have been callback passing..
@@ -2864,6 +2869,7 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 						FS_Remove(rmv);
 					}
 #endif
+
 					// End
 				}
 				Q_strcat(neededpaks, len, "\n");
@@ -3028,11 +3034,24 @@ static void FS_Startup( const char *gameName ) {
 			FS_AddGameDirectory( fs_homepath->string, fs_gamedirvar->string );
 		}
 	}
-
+//#ifdef CLGUID
+/*
 #ifndef DEDICATED
-	Com_ReadAuthKey(BASEGAME);
+	int retval = Com_ReadAuthKey(BASEGAME);
+	if (retval == 0) {
+        //Com_WriteAuthKey(BASEGAME);  // temporary as this will change in the future
+        Com_ReadAuthKey(BASEGAME);
+	}
 #endif
-	Com_ReadCDKey( BASEGAME );
+*/
+//#endif
+	//Com_ReadCDKey( BASEGAME );
+	int retval = Com_ReadCDKey(BASEGAME);
+	if (retval == 0) {
+        //Com_WriteAuthKey(BASEGAME);  // temporary as this will change in the future
+        Com_WriteNewKey(BASEGAME);
+        Com_ReadCDKey(BASEGAME);
+	}
 	fs = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
 	if ( fs && fs->string[0] != 0 ) {
 		Com_AppendCDKey( fs->string );

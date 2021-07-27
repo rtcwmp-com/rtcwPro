@@ -395,6 +395,7 @@ void CG_DemoClick(int key) {
 	// Timescale controls
 	case K_SPACE:
 		trap_Cvar_Set("timescale", "1");
+		trap_SendConsoleCommand("s_stop\n");
 		return;
 	case K_KP_UPARROW:
 		trap_Cvar_Set("timescale", va("%f", cg_timescale.value + 1.0f));

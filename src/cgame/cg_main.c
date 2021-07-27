@@ -344,7 +344,6 @@ vmCvar_t authLevel;
 vmCvar_t cg_noAmmoAutoSwitch;
 vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_specHelp;
-vmCvar_t cg_uinfo;
 vmCvar_t cg_useScreenshotJPEG;
 
 vmCvar_t ch_font;
@@ -366,6 +365,9 @@ vmCvar_t demo_noAdvertisement;
 
 vmCvar_t int_cl_maxpackets;
 vmCvar_t int_cl_timenudge;
+
+vmCvar_t str_cl_guid;
+
 vmCvar_t int_m_pitch;
 vmCvar_t int_sensitivity;
 vmCvar_t int_timescale;
@@ -377,6 +379,10 @@ vmCvar_t cg_spawnTimer_period;      // spawntimer
 
 // added from et-legacy - crumbs
 vmCvar_t cg_tracers;
+
+// ERT
+vmCvar_t cg_drawEnemyTimer;
+vmCvar_t cg_drawTriggers;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -407,7 +413,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
 	{ &cg_letterbox, "cg_letterbox", "0", CVAR_TEMP },    //----(SA)	added
 	{ &cg_stereoSeparation, "cg_stereoSeparation", "0.4", CVAR_ARCHIVE  },
-	{ &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
+	{ &cg_shadows, "cg_shadows", "0", CVAR_ARCHIVE  },
 	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE  },
 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_CHEAT }, // JPW NERVE changed per atvi req to prevent sniper rifle zoom cheats
 	{ &cg_drawSpreadScale, "cg_drawSpreadScale", "1", CVAR_ARCHIVE },
@@ -611,6 +617,7 @@ cvarTable_t cvarTable[] = {
 	{ &cf_wstats, "cf_wstats", "1.2", CVAR_ARCHIVE },
 	{ &cf_wtopshots, "cf_wtopshots", "1.0", CVAR_ARCHIVE },
 	{ &int_cl_maxpackets, "cl_maxpackets", "125", CVAR_ARCHIVE },
+	{ &str_cl_guid, "cl_guid", NO_GUID, CVAR_ROM | CVAR_TEMP },
 	{ &cg_noAmmoAutoSwitch, "cg_noAmmoAutoSwitch", "0", CVAR_ARCHIVE },
     { &cg_forceTapout, "cg_forceTapout", "0", CVAR_ARCHIVE },
 	{ &int_cl_timenudge, "cl_timenudge", "0", CVAR_ARCHIVE|CVAR_LATCH },
@@ -632,6 +639,10 @@ cvarTable_t cvarTable[] = {
 
 	// draw tracers
 	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
+
+	// ERT
+	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
+	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -718,7 +729,7 @@ void CG_UpdateCvars( void ) {
 
 			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
 				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems) {
+				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &str_cl_guid) {
 				fSetFlags = qtrue;
 			}
 			else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
@@ -763,7 +774,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %s",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -776,7 +787,9 @@ void CG_setClientFlags(void) {
 		// Timenudge
 		int_cl_timenudge.integer,
 		// MaxPackets
-		int_cl_maxpackets.integer
+		int_cl_maxpackets.integer,
+		// GUID
+		str_cl_guid.string
 	));
 }
 
@@ -1555,6 +1568,14 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.noammoShader = trap_R_RegisterShader( "icons/noammo" );
 	// OSPx - Country Flags (by mcwf)
 	cgs.media.countryFlags = trap_R_RegisterShaderNoMip("gfx/flags/world_flags");
+
+	// draw triggers
+	cgs.media.transmitTrigger = trap_R_RegisterShaderNoMip("gfx/2d/transmitTrigger");
+	cgs.media.transmitTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/transmitTriggerEdges");
+	cgs.media.objTrigger = trap_R_RegisterShaderNoMip("gfx/2d/objTrigger");
+	cgs.media.objTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/objTriggerEdges");
+	cgs.media.customTrigger = trap_R_RegisterShaderNoMip("gfx/2d/customTrigger");
+	cgs.media.customTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/customTriggerEdges");
 
 	// powerup shaders
 //	cgs.media.quadShader = trap_R_RegisterShader("powerups/quad" );
@@ -2579,6 +2600,14 @@ void CG_AssetCache() {
 	cgDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 }
 
+// sswolf - autoexec for specific maps from et
+void CG_AutoExec_f()
+{
+	char buffer[MAX_QPATH] = "exec \"autoexec_";
+	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
+	Q_strcat(buffer, sizeof(buffer), "\"");
+	trap_SendConsoleCommand(buffer);
+}
 
 extern qboolean initTrails;
 void CG_ClearTrails( void );
@@ -2734,6 +2763,13 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// L0 - OSP stats
 	cgs.dumpStatsFile = 0;
 	cgs.dumpStatsTime = 0;
+
+	// RTCWPro
+	if (cg_shadows.integer) {
+		trap_Cvar_Set("cg_shadows", "0");
+	}
+
+	CG_AutoExec_f();
 }
 
 /*

@@ -608,8 +608,7 @@ void respawn( gentity_t *ent ) {
 	ClientSpawn( ent, qfalse );
 
 	// L0 - antilag
-	G_ResetTrail( ent );
-    ent->client->saved.leveltime = 0;
+	G_ResetTrail(ent);
 	// L0 - end
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
@@ -1402,7 +1401,7 @@ char *SanitizeClientIP(char *ip, qboolean printFull) {
 		if (strlen(ip) > 15) {
 			token = strtok(ip, "::");
 			return va("%s.*.*.*", ip);
-		}		
+		}
 		token = strtok(ip, ".");
 		return va("%s.*.*.*", token);
 	}
@@ -1507,9 +1506,19 @@ void ClientUserinfoChanged( int clientNum ) {
 		// To solve the IP bug..
 		s =	va("%s", client->sess.ip);
 	}
-
+	// Check for "" GUID..
+	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
+		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
+		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+	}
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
-	sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
+	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
+	sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
+
+	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
+        trap_DropClient(clientNum, "Empty or invalid rtcwkey");
+	}
+
 	// check the item prediction
 	s = Info_ValueForKey( userinfo, "cg_predictItems" );
 	if ( !atoi( s ) ) {
@@ -1549,9 +1558,9 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( client->pers.connected == CON_CONNECTED ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
-			// L0 
+			// L0
 			// Do not allow renaming in intermissions.
-			// Name animations for one; 
+			// Name animations for one;
 			//	Generally suck,
 			// & two;
 			//	Push score table up which is annoying.
@@ -1576,11 +1585,11 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	// set max health // rtcwpro always set to 100 to avoid pickup ammo/health bug
-	client->pers.maxHealth = 100; // atoi(Info_ValueForKey(userinfo, "handicap"));
-	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	// don't use handicap here
+	//client->pers.maxHealth = 100; atoi(Info_ValueForKey(userinfo, "handicap"));
+	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
-	}*/
+	}
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 
 	// set model
@@ -1591,9 +1600,10 @@ void ClientUserinfoChanged( int clientNum ) {
 		Q_strncpyz( model, Info_ValueForKey( userinfo, "model" ), sizeof( model ) );
 	}
 
+	// RTCWPro: revive anim bug fix, credits: Nobo
 	// RF, reset anims so client's dont freak out
-	client->ps.legsAnim = 0;
-	client->ps.torsoAnim = 0;
+	//client->ps.legsAnim = 0;
+	//client->ps.torsoAnim = 0;
 
 	// DHM - Nerve :: Forcibly set both model and skin for multiplayer.
 	if ( g_gametype.integer >= GT_WOLF ) {
@@ -1661,10 +1671,11 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	//dhm - end
 
-
 	// L0 - Set guid
-	if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
-		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);
+//	if (strcmp( ent->client->sess.guid, "0" ) == 0 || strcmp(ent->client->sess.guid, "") == 0)
+//		setGuid(Info_ValueForKey( userinfo, "cl_guid" ), ent->client->sess.guid);
+
+
 
 	// colors
 	c1 = Info_ValueForKey( userinfo, "color" );
@@ -1681,15 +1692,12 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
 				Info_ValueForKey( userinfo, "skill" ),
-				client->sess.uci, (client->sess.ignored ? 1 : 0));
+				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
-				client->pers.netname, client->sess.sessionTeam, model, head, c1,
-				100, client->sess.wins, client->sess.losses, // rtcwpro changed HC to always be set to 100 for non-bot players
-				client->sess.uci, (client->sess.ignored ? 1 : 0),
-				client->sess.referee
-			);
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i\\scs\\%i",
+				client->pers.netname, client->sess.sessionTeam, model, head, c1, client->sess.wins, client->sess.losses,
+				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee, client->sess.shoutcaster);
 	}
 
 //----(SA) end
@@ -1705,9 +1713,9 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\ignored\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
-			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.ignored ? "yes" : "no"), client->sess.admin,
-			client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
+		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\scs\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.muted ? "yes" : "no"), client->sess.referee,
+			client->sess.shoutcaster, client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
 	// Account for bots..
 	else {
@@ -1775,11 +1783,11 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	}
 
 	// Auth client
-	if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
+	/*if (trap_Cvar_VariableIntegerValue("sv_AuthEnabled")) {
 		if (!Info_ValueForKey(userinfo, "cl_guid") || !Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), NO_GUID)) {
 			return "Valid GUID is required to enter this server.";
 		}
-	}
+	}*/
 
 	// Xian - check for max lives enforcement ban
 	if ( g_enforcemaxlives.integer && ( g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0 ) ) {
@@ -1847,7 +1855,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 		else {
 			unsigned long ip = GeoIP_addr_to_num(value);
-			
+
 			if (((ip & 0xFF000000) == 0x0A000000) ||
 				((ip & 0xFFF00000) == 0xAC100000) ||
 				((ip & 0xFFFF0000) == 0xC0A80000)) {
@@ -1874,7 +1882,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 // L0 - MySQL example
 #ifdef USE_MYSQL
 	value = Info_ValueForKey(userinfo, "ip");
-	
+
 	if (sprintf(query, "INSERT INTO test(ip, username) VALUES('%s', '%s') ", value, client->pers.netname)) {
 		trap_SQL_RunQuery(query);
 		G_Printf("INSERT statement succeeded\n");
@@ -1889,13 +1897,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	ClientUserinfoChanged( clientNum );
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
-	if ( firstTime ) {
+	if ( firstTime && !isBot ) {
 
-		// Ridah
-		if ( !ent->r.svFlags & SVF_CASTAI ) {
-			// done.
-			trap_SendServerCommand( -1, va( "print \"[lof]%s" S_COLOR_WHITE " [lon]connected\n\"", client->pers.netname ) );
-		}
+		AP(va("print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname));
 
 		// sswolf - move here from SetTeam
 		CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
@@ -1977,8 +1981,7 @@ void ClientBegin( int clientNum ) {
 	ClientSpawn( ent, qfalse );
 
 	// L0 - antilag
-	G_ResetTrail( ent );
-    ent->client->saved.leveltime = 0;
+	G_ResetTrail(ent);
 	// L0 - end
 	// Xian -- Changed below for team independant maxlives
 
@@ -2457,8 +2460,8 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		}
 
 		// End Xian
-		if (!revived) // RtcwPro #315 only call this if player is spawning (not getting revived)
-			SetWolfSpawnWeapons( ent ); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
+
+		SetWolfSpawnWeapons(ent); // JPW NERVE -- increases stats[STAT_MAX_HEALTH] based on # of medics in game
 	}
 	// dhm - end
 

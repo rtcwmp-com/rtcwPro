@@ -194,6 +194,36 @@ int CG_WorldToScreen(float* in, int* out)
 
 	return 0;
 }
+
+/*
+=================
+VisibleToScreen
+=================
+*/
+qboolean VisibleToScreen(vec3_t point, vec_t world[2])
+{
+	vec3_t trans;
+	vec_t xc, yc;
+	vec_t px, py;
+	vec_t z;
+
+	px = tan(cg.refdef.fov_x * M_PI / 360.0);
+	py = tan(cg.refdef.fov_y * M_PI / 360.0);
+
+	VectorSubtract(point, cg.refdef.vieworg, trans);
+
+	xc = cg.refdef.width / 2.0;
+	yc = cg.refdef.height / 2.0;
+
+	z = DotProduct(trans, cg.refdef.viewaxis[0]);
+	if (z <= 0.001)
+		return qfalse;
+
+	world[0] = xc - DotProduct(trans, cg.refdef.viewaxis[1]) * xc / (z * px);
+	world[1] = yc - DotProduct(trans, cg.refdef.viewaxis[2]) * yc / (z * py);
+	return qtrue;
+}
+
 void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
 	int skipNumber, int mask) {
 	trace_t	t;
@@ -203,6 +233,7 @@ void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, cons
 
 	*result = t;
 }
+
 qboolean PointVisible(vec3_t point) {
 	trace_t trace;
 	//	vec3_t tmp;
@@ -1123,8 +1154,8 @@ void CG_NewClientInfo( int clientNum ) {
 	newInfo.botSkill = atoi( v );
 
 	// handicap
-	v = Info_ValueForKey( configstring, "hc" );
-	newInfo.handicap = atoi( v );
+	//v = Info_ValueForKey( configstring, "hc" );
+	//newInfo.handicap = atoi( v );
 
 	// wins
 	v = Info_ValueForKey( configstring, "w" );
@@ -1141,6 +1172,10 @@ void CG_NewClientInfo( int clientNum ) {
 	// ref
 	v = Info_ValueForKey(configstring, "ref");
 	newInfo.refStatus = atoi(v);
+
+	// shoutcaster
+	v = Info_ValueForKey(configstring, "scs");
+	newInfo.shoutStatus = atoi(v);
 //----(SA) modified this for head separation
 
 	// head

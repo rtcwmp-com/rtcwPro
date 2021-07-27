@@ -255,16 +255,6 @@ qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagN
 	return syscall(G_GETTAG, ent, animInfo, tagName, or );
 }
 
-// sswolf - custom spawns
-void trap_AppendEntityString(char* fileName) {
-	syscall(G_APPEND_ENTITY_STRING, fileName);
-}
-
-void trap_FreeEntityString() {
-	syscall(G_FREE_ENTITY_STRING);
-}
-// custom spawns end
-
 int trap_PC_LoadSource(const char* filename) {
 	return syscall(BOTLIB_PC_LOAD_SOURCE, filename);
 }
@@ -835,7 +825,7 @@ void trap_BotResetWeaponState( int weaponstate ) {
 int trap_GeneticParentsAndChildSelection( int numranks, float *ranks, int *parent1, int *parent2, int *child ) {
 	return syscall( BOTLIB_AI_GENETIC_PARENTS_AND_CHILD_SELECTION, numranks, ranks, parent1, parent2, child );
 }
-
+#ifdef MYSQLDEP
 int trap_SQL_RunQuery(const char* query) {
 	return syscall(G_SQL_RUNQUERY, query);
 }
@@ -879,3 +869,4 @@ void trap_SQL_CleanString(const char* in, char* out, int len) {
 	syscall(G_SQL_CLEANSTRING, in, out, len);
 	return;
 }
+#endif

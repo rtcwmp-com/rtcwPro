@@ -437,8 +437,11 @@ static void SV_MapRestart_f( void ) {
 		}
 
 		if (client->state == CS_ACTIVE)
+		{
 			SV_ClientEnterWorld(client, &client->lastUsercmd);
-		else {
+		}
+		else 
+		{
 			// If we don't reset client->lastUsercmd and are restarting during map load,
 			// the client will hang because we'll use the last Usercmd from the previous map,
 			// which is wrong obviously.
@@ -1150,53 +1153,47 @@ static void SV_Status_f( void ) {
 
 	Com_Printf("map: %s\n", sv_mapname->string);
 
-	Com_Printf("cl score ping name            guid            address                               \n");
-	Com_Printf("-- ----- ---- --------------- --------------- --------------------------------------\n");
-	for (i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++) {
-		if (!cl->state) {
+	Com_Printf( "num score ping name            lastmsg address               qport rate\n" );
+	Com_Printf( "--- ----- ---- --------------- ------- --------------------- ----- -----\n" );
+	for ( i = 0,cl = svs.clients ; i < sv_maxclients->integer ; i++,cl++ )
+	{
+		if ( !cl->state ) {
 			continue;
 		}
-		Com_Printf("%2i ", i);
-		ps = SV_GameClientNum(i);
-		Com_Printf("%5i ", ps->persistant[PERS_SCORE]);
+		Com_Printf( "%3i ", i );
+		ps = SV_GameClientNum( i );
+		Com_Printf( "%5i ", ps->persistant[PERS_SCORE] );
 
-		if (cl->state == CS_CONNECTED) {
-			Com_Printf("CON ");
+		if ( cl->state == CS_CONNECTED ) {
+			Com_Printf( "CNCT " );
+		} else if ( cl->state == CS_ZOMBIE ) {
+			Com_Printf( "ZMBI " );
+		} else
+		{
+			ping = cl->ping < 9999 ? cl->ping : 9999;
+			Com_Printf( "%4i ", ping );
 		}
-		else if (cl->state == CS_ZOMBIE) {
-			Com_Printf("ZMB ");
-		}
-		else {
-			ping = cl->ping < 9999?cl->ping:9999;
-			Com_Printf("%4i ", ping);
-		}
 
-		Com_Printf("%s", cl->name);
+		Com_Printf( "%s", cl->name );
+		l = 16 - strlen( cl->name );
+		for ( j = 0 ; j < l ; j++ )
+			Com_Printf( " " );
 
-		l = 16 - SV_Strlen(cl->name);
-		j = 0;
+		Com_Printf( "%7i ", svs.time - cl->lastPacketTime );
 
-		do {
-			Com_Printf(" ");
-			j++;
-		} while (j < l);
+		s = NET_AdrToString( cl->netchan.remoteAddress );
+		Com_Printf( "%s", s );
+		l = 22 - strlen( s );
+		for ( j = 0 ; j < l ; j++ )
+			Com_Printf( " " );
 
-		Com_Printf("^7%16s ", cl->guid);
+		Com_Printf( "%5i", cl->netchan.qport );
 
-		// TTimo adding a ^7 to reset the color
-		s = NET_AdrToString(cl->netchan.remoteAddress);
-		Com_Printf("^7%s", s);
-		l = 39 - strlen(s);
-		j = 0;
+		Com_Printf( " %5i", cl->rate );
 
-		do {
-			Com_Printf(" ");
-			j++;
-		} while (j < l);
-
-		Com_Printf("\n");
+		Com_Printf( "\n" );
 	}
-	Com_Printf("\n");
+	Com_Printf( "\n" );
 }
 
 /*
@@ -1295,6 +1292,70 @@ static void SV_DumpUser_f( void ) {
 	Com_Printf( "userinfo\n" );
 	Com_Printf( "--------\n" );
 	Info_Print( cl->userinfo );
+}
+
+/* sswolf - reqSS
+===========
+L0 - SV_RequestSS
+
+Requests ScreenShot from client
+===========
+*/
+static void SV_RequestSS_f(void) {
+	client_t* cl;
+	//int quality = 45;
+
+	if (!com_sv_running->integer) 
+	{
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	/*
+	if (!sv_pure->integer) {
+		Com_Printf("SS can only be requested when server is running as pure.\n");
+		return;
+	}
+	*/
+
+	/*if (Cmd_Argc() < 2) 
+	{
+		Com_Printf("Usage: reqss <slot> <optional: jpeg quality[30-100]>\n");
+		return;
+	}*/
+
+	if (Cmd_Argc() < 1)
+	{
+		Com_Printf("Usage: reqss <slot>\n");
+		return;
+	}
+
+	/*if (Cmd_Argv(2)) 
+	{
+		quality = atoi(Cmd_Argv(2));
+
+		if (quality > 100)
+			quality = 100;
+		else if (quality < 30)
+			quality = 30;
+	}*/
+
+	cl = SV_GetPlayerByNum();
+
+	if (!cl) 
+	{
+		Com_Printf("Invalid client id!\n");
+		return;
+	}
+
+	if (cl->ping < 0 || cl->ping >= 999)
+	{
+		Com_Printf("Invalid client id!\n");
+		return;
+	}
+
+	//SV_SendSSRequest(cl->gentity->s.clientNum, quality);
+	SV_SendSSRequest(cl->gentity->s.clientNum);
 }
 
 /*
@@ -1407,6 +1468,9 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand("bandel", SV_BanDel_f);
 	Cmd_AddCommand("exceptdel", SV_ExceptDel_f);
 	Cmd_AddCommand("flushbans", SV_FlushBans_f);
+
+	// reqSS
+	Cmd_AddCommand("reqss", SV_RequestSS_f);
 }
 
 /*

@@ -43,9 +43,14 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_NUM_ARGVS   50
 
 #define MIN_DEDICATED_COMHUNKMEGS 1
-#define MIN_COMHUNKMEGS 42 // JPW NERVE changed this to 42 for MP, was 56 for team arena and 75 for wolfSP
-#define DEF_COMHUNKMEGS "56" // RF, increased this, some maps are exceeding 56mb // JPW NERVE changed this for multiplayer back to 42, 56 for depot/mp_cpdepot, 42 for everything else
-#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
+//#define MIN_COMHUNKMEGS 42 // JPW NERVE changed this to 42 for MP, was 56 for team arena and 75 for wolfSP
+//#define DEF_COMHUNKMEGS "56" // RF, increased this, some maps are exceeding 56mb // JPW NERVE changed this for multiplayer back to 42, 56 for depot/mp_cpdepot, 42 for everything else
+//#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
+
+// sswolf - increase those
+#define MIN_COMHUNKMEGS 128
+#define DEF_COMHUNKMEGS "256"
+#define DEF_COMZONEMEGS "32"
 
 int com_argc;
 char    *com_argv[MAX_NUM_ARGVS + 1];
@@ -1431,8 +1436,8 @@ void Com_InitZoneMemory( void ) {
 	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS, CVAR_LATCH | CVAR_ARCHIVE );
 
 #ifndef __MACOS__   //DAJ HOG
-	if ( cv->integer < 16 ) {
-		s_zoneTotal = 1024 * 1024 * 16;
+	if ( cv->integer < 32 ) {
+		s_zoneTotal = 1024 * 1024 * 32;
 	} else
 #endif
 	{
@@ -2303,12 +2308,15 @@ char cl_cdkey[34] = "                                ";
 char cl_cdkey[34] = "123456789";
 #endif
 
+
+
+
 /*
 =================
 Com_ReadCDKey
 =================
 */
-void Com_ReadCDKey( const char *filename ) {
+int Com_ReadCDKey( const char *filename ) {
 	fileHandle_t f;
 	char buffer[33];
 	char fbuffer[MAX_OSPATH];
@@ -2317,8 +2325,9 @@ void Com_ReadCDKey( const char *filename ) {
 
 	FS_SV_FOpenFileRead( fbuffer, &f );
 	if ( !f ) {
-		Q_strncpyz( cl_cdkey, "                ", 17 );
-		return;
+		//Com_WriteNewKey(filename);
+		//Q_strncpyz( cl_cdkey, "                ", 17 );
+		return 0;
 	}
 
 	Com_Memset( buffer, 0, sizeof( buffer ) );
@@ -2331,6 +2340,44 @@ void Com_ReadCDKey( const char *filename ) {
 	} else {
 		Q_strncpyz( cl_cdkey, "                ", 17 );
 	}
+
+	#ifndef DEDICATED
+        Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+    #endif
+    return 1;
+}
+
+
+/*
+=================
+RTCWPro
+Com_WriteNewKey  ( temporary as this will change in the future)
+=================
+*/
+void Com_WriteNewKey(const char* filename) {
+	fileHandle_t f;
+	char buffer[16] = { '\0' };
+	char fbuffer[MAX_OSPATH];
+    static char charset[] = "abcdefghijklmnopqrstuvwxyz123456789";
+
+    for (int n = 0; n < 16; n++) {
+		int val = rand() % (int) (sizeof(charset) -1);
+		buffer[n] = charset[val];
+    }
+
+	sprintf(fbuffer, "%s/rtcwkey", filename);
+
+    f = FS_SV_FOpenFileWrite(fbuffer);
+
+	if (!f) {
+		Com_Printf( "Couldn't write %s.\n", filename );
+		return;
+	}
+
+    //FS_Printf(f, "%s", buffer);
+	FS_Write(buffer, 16, f);
+	FS_FCloseFile(f);
+
 }
 
 /*
@@ -2338,25 +2385,30 @@ void Com_ReadCDKey( const char *filename ) {
 Com_ReadAuthKey
 =================
 */
-void Com_ReadAuthKey(const char* filename) {
+int Com_ReadAuthKey(const char* filename) {
 	fileHandle_t f;
-	char buffer[33];
+	char buffer[16];
 	char fbuffer[MAX_OSPATH];
 
 	sprintf(fbuffer, "%s/authkey", filename);
 
 	FS_SV_FOpenFileRead(fbuffer, &f);
 	if (!f) {
-		return;
+		return 0;
 	}
-
 	Com_Memset(buffer, 0, sizeof(buffer));
+
+	//FS_Read(buffer, 16, f);
+
 
 	FS_Read(buffer, 16, f);
 	FS_FCloseFile(f);
 #ifndef DEDICATED
 	Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
+	//Cvar_Set("cl_guid", buffer);
 #endif
+    return 1;
+
 }
 
 /*
@@ -2545,7 +2597,7 @@ void Com_Init( char *commandLine ) {
 	// init commands and vars
 	//
 	//com_altivec = Cvar_Get ("com_altivec", "1", CVAR_ARCHIVE);
-	com_maxfps = Cvar_Get( "com_maxfps", "125", CVAR_ARCHIVE | CVAR_LATCH );
+	com_maxfps = Cvar_Get( "com_maxfps", "125", CVAR_ARCHIVE ); // RtcwPro unlatched this for forcefps equivalent - cvar restrictions keep players inline //| CVAR_LATCH );
 	com_blood = Cvar_Get( "com_blood", "1", CVAR_ARCHIVE );
 
 	com_developer = Cvar_Get( "developer", "0", CVAR_TEMP );
@@ -2651,9 +2703,9 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
-
+#ifdef MYSQLDEP
 	OW_Init();
-
+#endif
 	Threads_Init();
 
 	com_fullyInitialized = qtrue;
@@ -3093,8 +3145,8 @@ void Com_Frame(void) {
 	}
 
 	// L0 - Fix maxfps abuse..
-	if (com_maxfps->integer > 125)
-		Cvar_Set("com_maxfps", "125");
+	/*if (com_maxfps->integer > 125)
+		Cvar_Set("com_maxfps", "125");*/
 
 	// we may want to spin here if things are going too fast
 	if (!com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer) {
@@ -3425,9 +3477,9 @@ void Com_Shutdown( void ) {
 		FS_FCloseFile( com_journalFile );
 		com_journalFile = 0;
 	}
-
+#ifdef MYSQLDEP
 	OW_Shutdown();
-
+#endif
 }
 
 #if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD

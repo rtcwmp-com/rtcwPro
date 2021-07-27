@@ -329,8 +329,8 @@ void Weapon_Syringe( gentity_t *ent ) {
 
 				// L0 - Antilag
 				G_ResetTrail(traceEnt);
-				traceEnt->client->saved.leveltime = 0;
 				// end
+
 				memcpy( traceEnt->client->ps.ammo,ammo,sizeof( int ) * MAX_WEAPONS );
 				memcpy( traceEnt->client->ps.ammoclip,ammoclip,sizeof( int ) * MAX_WEAPONS );
 				memcpy( traceEnt->client->ps.weapons,weapons,sizeof( int ) * ( MAX_WEAPONS / ( sizeof( int ) * 8 ) ) );
@@ -380,12 +380,18 @@ void Weapon_Syringe( gentity_t *ent ) {
 				// DHM - Nerve :: Play revive animation
 
 				// Xian -- This was gay and I always hated it.
-				if ( g_fastres.integer > 0 ) {
+				if ( g_fastres.integer > 0 ) 
+				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_JUMP, qfalse, qtrue );
-				} else {
+				} 
+				else 
+				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_REVIVE, qfalse, qtrue );
 					traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
 					traceEnt->client->ps.pm_time = 2100;
+					// RTCWPro: revive anim bug fix
+					traceEnt->client->revive_animation_playing = qtrue;
+					traceEnt->client->movement_lock_begin_time = level.time;
 				}
 
 

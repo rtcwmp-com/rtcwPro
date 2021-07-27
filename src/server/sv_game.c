@@ -474,15 +474,6 @@ int SV_GameSystemCalls( int *args ) {
 	case G_GETTAG:
 		return SV_GetTag(VMA(1), VMA(2), VMA(3), VMA(4));
 
-		// sswolf - custom spawns
-	case G_APPEND_ENTITY_STRING:
-		SV_AppendEntityString(VMA(1));
-		return 0;
-	case G_FREE_ENTITY_STRING:
-		SV_FreeEntityString();
-		return 0;
-		// custom spawns end
-
 		//====================================
 
 	case BOTLIB_SETUP:
@@ -908,7 +899,7 @@ int SV_GameSystemCalls( int *args ) {
 
 	case TRAP_CEIL:
 		return FloatAsInt( ceil( VMF( 1 ) ) );
-
+#ifdef MYSQLDEP
 	case G_SQL_RUNQUERY:
             return OW_RunQuery( (char*)VMA(1) );
 
@@ -942,7 +933,7 @@ int SV_GameSystemCalls( int *args ) {
     case G_SQL_CLEANSTRING:
             OW_CleanString( (char*)VMA(1), (char*)VMA(2), args[3] );
             return 0;
-
+#endif
 	case G_SUBMIT_STATS_CURL:
 		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );
 
@@ -964,9 +955,6 @@ void SV_ShutdownGameProgs( void ) {
 		return;
 	}
 	VM_Call( gvm, GAME_SHUTDOWN, qfalse );
-	// sswolf - custom spawns
-	SV_FreeEntityString();
-	// custom spawns end
 	VM_Free( gvm );
 	gvm = NULL;
 }
@@ -1110,42 +1098,3 @@ qboolean SV_GetTag(sharedEntity_t* ent, clientAnimationInfo_t* animInfo, char* t
 	return qtrue;
 #endif
 }
-
-// sswolf - custom spawns
-/*
-====================
-SV_AppendEntityString
-
-Reads in entity string from file and appends it to the current entity string
-====================
-*/
-void SV_AppendEntityString(char* fileName)
-{
-	int* buf = NULL;
-	int length = FS_ReadFile(fileName, (void**)&buf);
-
-	if (buf)
-	{
-		CM_AppendToEntityString((char*)buf, length);
-		sv.entityParsePoint = CM_EntityString();
-		FS_FreeFile(buf);
-	}
-}
-
-/*
-===============
-SV_FreeEntityString
-
-Z_Frees entity string on map unload
-===============
-*/
-void SV_FreeEntityString()
-{
-	char* entityString = CM_EntityString();
-	if (entityString)
-	{
-		Z_Free(entityString);
-	}
-}
-// custom spawns end
-

@@ -163,6 +163,8 @@ typedef struct {
 	// -NERVE - SMF
 
 	clientHandle_t handle;
+
+	int clientSSAction; // reqSS
 } clientActive_t;
 
 extern clientActive_t cl;
@@ -419,7 +421,7 @@ extern cvar_t  *cl_language;
 // L0
 extern cvar_t* cl_StreamingSelfSignedCert;
 // ~L0
-
+ 
 
 //=================================================
 
@@ -563,6 +565,7 @@ void Con_PageDown( void );
 void Con_Top( void );
 void Con_Bottom( void );
 void Con_Close( void );
+void Con_SetFrac(const float conFrac);	// RTCWPro
 
 
 //
@@ -640,4 +643,12 @@ void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg ); //int length, const byt
 void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 
+// 
+// sswolf - cl_control.c - source: Nate (rtcwMP)
+//
+void CL_checkSSTime(void);
+//void CL_RequestedSS(int quality);
+//void CL_RequestedSS();
+void CL_RequestedSS(char* ip);
 #endif // !__CLIENT_H
+

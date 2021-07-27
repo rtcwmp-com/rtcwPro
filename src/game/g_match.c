@@ -68,7 +68,8 @@ void G_loadMatchGame(void)
 
 	for (i = 0; i < MAX_REINFSEEDS; i++)
 	{
-		aRandomValues[i] = (rand() % REINF_RANGE) * aReinfSeeds[i];
+		//aRandomValues[i] = (rand() % REINF_RANGE) * aReinfSeeds[i];
+		aRandomValues[i] = (rand() % g_spawnOffset.integer) * aReinfSeeds[i];
 		Q_strcat(strReinfSeeds, MAX_STRING_CHARS, va(" %d", aRandomValues[i]));
 	}
 

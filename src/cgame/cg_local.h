@@ -408,10 +408,18 @@ typedef struct {
 } skinModel_t;
 //----(SA) end
 
+// RTCWPro - shoutcaster
+#define MAX_SCITEMS 256
+typedef struct scItem_s {
+	char* text;
+	float	dist;
+	float	scale;
+	vec_t	position[2];
+	vec4_t	color;
+} scItem_t;
+
 
 //=================================================
-
-
 
 // centity_t have a direct corespondence with gentity_t in the game, but
 // only the entityState_t is directly communicated to the cgame
@@ -488,6 +496,9 @@ typedef struct centity_s {
 
 	int highlightTime;
 	qboolean highlighted;
+
+	// RTCWPro
+	int lastSeenTime;
 } centity_t;
 
 
@@ -739,6 +750,7 @@ typedef struct {
 
 	// RTCWPro
 	int refStatus;
+	int shoutStatus;
 	int playerAmmo;
 	int playerAmmoClip;
 	int playerWeapon;
@@ -1215,6 +1227,16 @@ typedef struct {
 	float topSpeed;
 	float oldSpeed;
 	// tj stuff end
+
+	// RTCWPro
+	scItem_t scItems[MAX_SCITEMS];
+	int numSCItems;
+
+	// RTCWPro - draw triggers
+	int drawTriggersCount;
+	int lastGetTriggerDistancesTime;
+	int drawTriggerEntIndexes[MAX_ENTITIES + 1];
+	float drawTriggerDistances[MAX_ENTITIES + 1];
 
 	pmoveExt_t pmext;
 
@@ -1728,6 +1750,15 @@ typedef struct {
 	// end of round
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
+
+	// RTCWPro - draw triggers
+	qhandle_t transmitTrigger;
+	qhandle_t transmitTriggerEdges;
+	qhandle_t objTrigger;
+	qhandle_t objTriggerEdges;
+	qhandle_t customTrigger;
+	qhandle_t customTriggerEdges;
+
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -1769,6 +1800,7 @@ typedef struct {
 	float timelimit;                        // NERVE - SMF - made this a float
 	int maxclients;
 	char mapname[MAX_QPATH];
+	char rawmapname[MAX_QPATH];
 	char redTeam[MAX_QPATH];                // A team
 	char blueTeam[MAX_QPATH];               // B team
 
@@ -2125,6 +2157,7 @@ extern vmCvar_t	demo_noAdvertisement;
 // engine mappings
 extern vmCvar_t int_cl_maxpackets;
 extern vmCvar_t int_cl_timenudge;
+extern vmCvar_t str_cl_guid;
 
 // draw speed
 extern vmCvar_t cg_drawSpeed;
@@ -2137,6 +2170,10 @@ extern vmCvar_t cg_spawnTimer_set;
 
 // added from et-legacy - crumbs
 extern vmCvar_t cg_tracers;
+
+// ERT
+extern vmCvar_t cg_drawEnemyTimer;
+extern vmCvar_t cg_drawTriggers;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
@@ -2252,9 +2289,9 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 
 // RtcwPro
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
-
-// sswolf - time
 char* CG_GetClock(void);
+void CG_ColorForPercent(float percent, vec4_t hcolor);
+void CG_DrawTriggers(void);
 
 //
 // cg_draw.c, cg_newDraw.c
@@ -2300,6 +2337,8 @@ qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 qhandle_t CG_StatusHandle( int task );
 void CG_Fade( int r, int g, int b, int a, float time );
+void CG_ShoutcasterItems();
+void CG_ShoutcasterDynamite(int num);
 
 
 // - Reinforcement offset
@@ -2635,6 +2674,8 @@ void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
 //
 void CG_Respawn( void );
 void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
+qboolean PointVisible(vec3_t point);
+qboolean VisibleToScreen(vec3_t point, vec_t world[2]);
 
 
 //
@@ -2925,3 +2966,10 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 #define Pri( x ) CG_Printf( "[cgnotify]%s", CG_LocalizeServerCommand( x ) )
 #define CPri( x ) CG_CenterPrint( CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH );
 #define CPriP( x ) CG_PriorityCenterPrint(CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH, -1 );
+
+// reqSS
+//void trap_ReqSS(int quality);
+void trap_ReqSS(char *ip);
+
+//void trap_ReqSS(void);
+

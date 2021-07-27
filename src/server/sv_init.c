@@ -677,6 +677,9 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	Hunk_SetMark();
 
+	// reqSS
+	svs.ssTime = svs.time + sv_ssMinTime->integer;
+
 	Cvar_Set( "sv_serverRestarting", "0" );
 
 	Com_Printf( "-----------------------------------\n" );
@@ -814,7 +817,7 @@ void SV_Init( void ) {
     sv_minRate = Cvar_Get ("sv_minRate", "0", CVAR_ARCHIVE | CVAR_SERVERINFO );
 	sv_maxRate = Cvar_Get( "sv_maxRate", "0", CVAR_ARCHIVE | CVAR_SERVERINFO );
 	// systeminfo
-	Cvar_Get( "sv_cheats", "1", CVAR_SYSTEMINFO | CVAR_ROM );
+	Cvar_Get( "sv_cheats", "0", CVAR_SYSTEMINFO | CVAR_ROM );
 	sv_serverid = Cvar_Get( "sv_serverid", "0", CVAR_SYSTEMINFO | CVAR_ROM );
 	sv_pure = Cvar_Get( "sv_pure", "1", CVAR_SYSTEMINFO );
 	Cvar_Get( "sv_paks", "", CVAR_SYSTEMINFO | CVAR_ROM );
@@ -911,7 +914,15 @@ void SV_Init( void ) {
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
 
 	// Cvar Restrictions
-	sv_GameConfig = Cvar_Get( "sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_LATCH );
+	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE); // | CVAR_LATCH );
+
+	// reqSS
+	sv_ssEnable = Cvar_Get("sv_ssEnable", "0", CVAR_ARCHIVE);
+	sv_ssMinTime = Cvar_Get("sv_ssMinTime", "600", CVAR_ARCHIVE);
+	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
+	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
+
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "109", CVAR_ARCHIVE);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -96,14 +96,14 @@ cvar_t  *cl_updateavailable;
 cvar_t  *cl_updatefiles;
 // DHM - Nerve
 
-// L0 
+// L0
 //HTTP Downloads ..
-cvar_t* cl_wwwDownload;
-
+#ifdef CLWWW
+cvar_t *cl_wwwDownload;
+#endif
 // Streaming
-cvar_t* cl_StreamingSelfSignedCert;
-cvar_t* cl_guid;
-
+cvar_t *cl_StreamingSelfSignedCert;
+cvar_t *cl_guid;
 // ~L0
 
 clientActive_t cl;
@@ -824,7 +824,7 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 		autoupdateStarted = qfalse;
 		autoupdateFilename[0] = '\0';
-	} 
+	}
 
 	if ( clc.demofile ) {
 		FS_FCloseFile( clc.demofile );
@@ -873,8 +873,8 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	}
 	else {
 		cls.state = CA_DISCONNECTED;
-		clientIsConnected = qfalse;	
-	} 
+		clientIsConnected = qfalse;
+	}
 
 	// allow cheats locally
 	Cvar_Set( "sv_cheats", "1" );
@@ -1138,6 +1138,11 @@ void CL_Reconnect_f( void ) {
 		Com_Printf( "Can't reconnect to localhost.\n" );
 		return;
 	}
+
+    CL_Vid_Restart_f();  // temporary fix for defeating pure issue when reconnecting after being dropped.  A better solution will follow.
+
+
+
 	Cbuf_AddText( va( "connect %s\n", cls.servername ) );
 }
 
@@ -1838,7 +1843,7 @@ void CL_DisconnectPacket( netadr_t from ) {
 		return;
 	}
 
-	// L0 - HTTP downloads	
+	// L0 - HTTP downloads
 	// if we are doing a disconnected download, leave the 'connecting' screen on with the progress information
 	if (!cls.bWWWDlDisconnected) {
 		// drop the connection
@@ -1851,7 +1856,7 @@ void CL_DisconnectPacket( netadr_t from ) {
 		CL_Disconnect(qfalse);
 		Cvar_Set("ui_connecting", "1");
 		Cvar_Set("ui_dl_running", "1");
-	} 
+	}
 }
 
 /*
@@ -2468,11 +2473,12 @@ void CL_Frame( int msec ) {
 	// if we haven't gotten a packet in a long time,
 	// drop the connection
 	CL_CheckTimeout();
-
+#ifdef CLWWW
 	// wwwdl download may survive a server disconnect
 	if ((cls.state == CA_CONNECTED && clc.bWWWDl) || cls.bWWWDlDisconnected) {
 		CL_WWWDownload();
 	}
+#endif
 
 	// send intentions now
 	CL_SendCmd();
@@ -2760,7 +2766,7 @@ void CL_CheckAutoUpdate(void) {
 	}
 
 	srand(Com_Milliseconds());
-	// TRACEMARK - L0 
+	// TRACEMARK - L0
 	//if (!NET_StringToAdr(WEB_GET_UPDATE, &cls.autoupdateServer, NA_IP)) {
 	//	return;
 	//}
@@ -2800,8 +2806,9 @@ void CL_GetAutoUpdate( void ) {
 
 	// L0 - HTTP downloads
 	Cvar_Set("cl_allowDownload", "1"); // general flag
+  #ifdef CLWWW
 	Cvar_Set("cl_wwwDownload", "1"); // ftp/http support
-
+  #endif
 	// clear any previous "server full" type messages
 	clc.serverMessage[0] = 0;
 
@@ -2996,6 +3003,28 @@ void CL_singlePlayLink_f( void ) {
 	Sys_OpenURL( "http://www.activision.com/games/wolfenstein/home.html", qtrue );
 }
 
+/*
+==============
+CL_modURL_f
+
+RTCWPro
+==============
+*/
+void CL_modURL_f(void) {
+	Sys_OpenURL("https://rtcwpro.com/", qtrue);
+}
+
+/*
+==============
+CL_modSource_f
+
+RTCWPro
+==============
+*/
+void CL_modSource_f(void) {
+	Sys_OpenURL("https://github.com/rtcwmp-com/rtcwPro", qtrue);
+}
+
 #if !defined( __MACOS__ )
 
 /*
@@ -3099,7 +3128,7 @@ void CL_Init( void ) {
 	cl_pitchspeed = Cvar_Get( "cl_pitchspeed", "140", CVAR_ARCHIVE );
 	cl_anglespeedkey = Cvar_Get( "cl_anglespeedkey", "1.5", 0 );
 
-	cl_maxpackets = Cvar_Get( "cl_maxpackets", "30", CVAR_ARCHIVE );
+	cl_maxpackets = Cvar_Get( "cl_maxpackets", "125", CVAR_ARCHIVE );
 	cl_packetdup = Cvar_Get( "cl_packetdup", "1", CVAR_ARCHIVE );
 
 	cl_run = Cvar_Get( "cl_run", "1", CVAR_ARCHIVE );
@@ -3109,10 +3138,13 @@ void CL_Init( void ) {
 
 	cl_showMouseRate = Cvar_Get( "cl_showmouserate", "0", 0 );
 
-	cl_allowDownload = Cvar_Get( "cl_allowDownload", "0", CVAR_ARCHIVE );
+	cl_allowDownload = Cvar_Get( "cl_allowDownload", "1", CVAR_ARCHIVE );
+	#ifdef CLWWW
 	cl_wwwDownload = Cvar_Get("cl_wwwDownload", "1", CVAR_USERINFO | CVAR_ARCHIVE);
+	#endif
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
+	Cvar_Get("cl_checkversion", "109", CVAR_ROM | CVAR_USERINFO);
 
 	// init autoswitch so the ui will have it correctly even
 	// if the cgame hasn't been started
@@ -3140,11 +3172,15 @@ void CL_Init( void ) {
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
+    cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM  );
 
-	cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM | CVAR_USERINFO);
+
+/*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
 		CL_SetGuid();
 	}
+*/
+
 
 	Cvar_Get( "cl_maxPing", "800", CVAR_ARCHIVE );
 
@@ -3176,13 +3212,13 @@ void CL_Init( void ) {
 
 	// userinfo
 	Cvar_Get( "name", "WolfPlayer", CVAR_USERINFO | CVAR_ARCHIVE );
-	Cvar_Get( "rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE );     // NERVE - SMF - changed from 3000
-	Cvar_Get( "snaps", "20", CVAR_USERINFO | CVAR_ARCHIVE );
+	Cvar_Get( "rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE );     // NERVE - SMF - changed from 3000
+	Cvar_Get( "snaps", "40", CVAR_USERINFO | CVAR_ARCHIVE );
 //	Cvar_Get ("model", "american", CVAR_USERINFO | CVAR_ARCHIVE );	// temp until we have an skeletal american model
 	Cvar_Get( "model", "multi", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "head", "default", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "color", "4", CVAR_USERINFO | CVAR_ARCHIVE );
-	Cvar_Get( "handicap", "100", CVAR_USERINFO | CVAR_ARCHIVE );
+	//Cvar_Get( "handicap", "100", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "sex", "male", CVAR_USERINFO | CVAR_ARCHIVE );
 	Cvar_Get( "cl_anonymous", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 
@@ -3263,6 +3299,9 @@ void CL_Init( void ) {
 
 	Cmd_AddCommand( "setRecommended", CL_SetRecommended_f );
 
+	Cmd_AddCommand("openModURL", CL_modURL_f); // RTCWPro
+	Cmd_AddCommand("openModSource", CL_modSource_f); // RTCWPro
+
 	//bani - we eat these commands to prevent exploits
 	Cmd_AddCommand("userinfo", CL_EatMe_f);
 
@@ -3273,6 +3312,8 @@ void CL_Init( void ) {
 	Cbuf_Execute();
 
 	Cvar_Set( "cl_running", "1" );
+	// RTCWPro
+	Cvar_Set("cl_checkversion", "109");
 
 	// DHM - Nerve
 	autoupdateChecked = qfalse;

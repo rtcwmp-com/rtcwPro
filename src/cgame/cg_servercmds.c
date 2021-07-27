@@ -155,6 +155,7 @@ void CG_ParseServerinfo( void ) {
 	cgs.timelimit = atof( Info_ValueForKey( info, "timelimit" ) );
 	cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 	mapname = Info_ValueForKey( info, "mapname" );
+	Q_strncpyz(cgs.rawmapname, mapname, sizeof(cgs.rawmapname));
 	Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
 
 // JPW NERVE
@@ -2286,6 +2287,14 @@ static void CG_ServerCommand( void ) {
 
 	if (!Q_stricmp(cmd, "rereload")) {
 		trap_Rest_Build(CG_Argv(1));
+		return;
+	}
+
+	// reqSS
+	if (!strcmp(cmd, "ssreq"))
+	{
+//		CG_Printf("^nServer requested screenshot..sending.\n");
+		trap_ReqSS(CG_Argv(1));
 		return;
 	}
 

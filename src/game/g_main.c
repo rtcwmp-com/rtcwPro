@@ -77,7 +77,6 @@ vmCvar_t g_debugMove;
 vmCvar_t g_debugDamage;
 vmCvar_t g_debugAlloc;
 vmCvar_t g_debugBullets;    //----(SA)	added
-vmCvar_t g_preciseHeadHitBox;
 vmCvar_t g_weaponRespawn;
 vmCvar_t g_motd;
 vmCvar_t g_synchronousClients;
@@ -98,11 +97,6 @@ vmCvar_t g_swapteams;
 
 vmCvar_t g_restarted;
 vmCvar_t g_log;
-
-vmCvar_t g_stats_curl_submit;
-vmCvar_t g_stats_curl_submit_URL;
-vmCvar_t g_stats_curl_submit_headers;
-vmCvar_t g_gameStatslog; // temp cvar for event logging
 
 vmCvar_t g_logSync;
 vmCvar_t g_podiumDist;
@@ -145,7 +139,6 @@ vmCvar_t g_developer;
 vmCvar_t g_userAim;
 
 vmCvar_t g_forceModel;
-vmCvar_t match_timeoutlength;
 vmCvar_t g_mg42arc;
 
 vmCvar_t g_footstepAudibleRange;
@@ -157,12 +150,8 @@ vmCvar_t g_medicChargeTime;
 vmCvar_t g_engineerChargeTime;
 vmCvar_t g_LTChargeTime;
 vmCvar_t g_soldierChargeTime;
-// screen shakey magnitude multiplier
-vmCvar_t sv_screenshake;
-// jpw
 
-//S4NDM4NN - fix errors when sv_fps is adjusted
-vmCvar_t sv_fps;
+// jpw
 
 // Gordon
 vmCvar_t g_antilag;
@@ -173,30 +162,21 @@ vmCvar_t url;
 vmCvar_t g_dbgRevive;
 
 // rtcwpro begin
-// L0 - New cvars
-// Admins
-vmCvar_t a1_pass;		// Level 1 admin
-vmCvar_t a2_pass;		// Level 2 admin
-vmCvar_t a3_pass;		// Level 3 admin
-vmCvar_t a4_pass;		// Level 4 admin
-vmCvar_t a5_pass;		// Level 5 admin
-vmCvar_t a1_tag;		// Level 1 admin tag
-vmCvar_t a2_tag;		// Level 2 admin tag
-vmCvar_t a3_tag;		// Level 3 admin tag
-vmCvar_t a4_tag;		// Level 4 admin tag
-vmCvar_t a5_tag;		// Level 5 admin tag
-vmCvar_t a1_cmds;		// Level 1 admin commands
-vmCvar_t a2_cmds;		// Level 2 admin commands
-vmCvar_t a3_cmds;		// Level 3 admin commands
-vmCvar_t a4_cmds;		// Level 4 admin commands
-vmCvar_t a5_cmds;		// Level 5 admin commands
-vmCvar_t a5_allowAll;	// Allows level 5 to execute all admin commands + any other that's set in a5_cmds ->
-						// In this case, use a5_cmds for server specific cvars like g_allowVote that would otherwise require rcon etc..
-vmCvar_t adm_help;		// If enabled users can use !list_cmds to get list of commands for their level..
-vmCvar_t g_gamelocked;	// Controls if Admin locked the game so players can't join
+//S4NDM4NN - fix errors when sv_fps is adjusted
+vmCvar_t sv_screenshake;
+vmCvar_t g_screenShake;
+vmCvar_t g_preciseHeadHitBox;
+vmCvar_t sv_fps;
+vmCvar_t g_gamelocked;	// Controls if referee locked the game so players can't join
 vmCvar_t sv_hostname;	// So it's more accesible
 vmCvar_t svx_serverStreaming; // So it's more accessible
-vmCvar_t g_extendedLog;	// Logs various admin actions in a seperate logs
+
+// stats
+vmCvar_t g_stats_curl_submit;
+vmCvar_t g_stats_curl_submit_URL;
+vmCvar_t g_stats_curl_submit_headers;
+vmCvar_t g_gameStatslog; // temp cvar for event logging
+
 // Match
 vmCvar_t team_maxplayers;
 vmCvar_t team_nocontrols;
@@ -229,12 +209,9 @@ vmCvar_t vote_allow_muting;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t refereePassword;
-
-vmCvar_t vote_limit;
-vmCvar_t vote_percent;
+vmCvar_t shoutcastPassword;
 
 vmCvar_t g_spectatorInactivity;
-vmCvar_t g_showFlags;
 vmCvar_t g_allowSoftKill;
 vmCvar_t g_bannedMSG;	// Message that's printed to banned users
 vmCvar_t g_drawHitboxes;	// So I can adjust them a little..
@@ -242,57 +219,30 @@ vmCvar_t g_hitsounds;			// Hitsounds - Requires soundpack
 vmCvar_t g_privateServer; // If disabled it doesn't check for password but instead re-uses it for ban bypass based on NO-SQL solution.
 vmCvar_t TXThandle;		// Optional so text (file) based checks (ip/guid tempban-ban) can be disabled..
 vmCvar_t g_disableInv;			// Disables (re)spawn/revive protection crap when one starts to shot..
-vmCvar_t g_dropReload;			// Enable / Disable Drop reload
 vmCvar_t g_unlockWeapons;		// Gives ability to drop weapon to all classes..
 vmCvar_t g_crouchRate;			// If enabled it recharges stamina faster when player is crouching..
 vmCvar_t g_disableSMGPickup;		// If enabled, client can't pickup SMG if they already have one.
 vmCvar_t g_fastStabSound;		// 0 = off, 1 = (OSP's) goat sound, 2 = humiliation sound, 3 = random between 1 or 2
 vmCvar_t g_axisSpawnProtectionTime;		// How long Axis player is invulrable when (s)he spawns.
 vmCvar_t g_alliedSpawnProtectionTime;	// How long Allied player is invulrable when (s)he spawns.
+
 // MOTD's
 vmCvar_t g_serverMessage;	// Shows a center print each time when player switches teams.
-vmCvar_t g_showMOTD;		// Enable MOTD's (message of the day)
-vmCvar_t motdNum;			// To track motds..
-vmCvar_t g_motd1;			// MESSAGE 1
-vmCvar_t g_motd2;			// MESSAGE 2
-vmCvar_t g_motd3;			// MESSAGE 3
-vmCvar_t g_motd4;			// MESSAGE 4
-vmCvar_t g_motd5;			// MESSAGE 5
-vmCvar_t g_motd6;			// MESSAGE 6
-vmCvar_t g_motd7;			// MESSAGE 7
-vmCvar_t g_motd8;			// MESSAGE 8
-vmCvar_t g_motd9;			// MESSAGE 9
-vmCvar_t g_motd10;			// MESSAGE 10
-vmCvar_t g_motd11;			// MESSAGE 11
-vmCvar_t g_motd12;			// MESSAGE 12
-vmCvar_t g_motdTime;		// Time between each message
-// Server Admin Bot
-vmCvar_t sab_system;		// Controls all sab_ settings (NOTE: To disable any sab_ setting set -1 ->
-							// with exception for low score kick..0 = off rest will be transformed in negative value..)
-vmCvar_t sab_maxTeamKills;	// Max team kills before client gets kicked
-vmCvar_t sab_maxTeamBleed;	// Max bleed points before client gets kicked (NOTE: one hit = 1 point)
-vmCvar_t sab_minLowScore;	// Min low score before client gets kicked
-vmCvar_t sab_MaxPingFlux;	// Max ping limit client can hit
-vmCvar_t sab_maxPingHits;	// How many times can hit it before client gets kicked ->
-							// (1hit = each time it's hitted otherwise counts as 1 per second if constantly above)
-vmCvar_t sab_censorPenalty;	// 1 = Auto ignore client after 3 strikes, 2 = kick client after 3 strikes.
-vmCvar_t sab_autoIgnore;	// If enabled it will auto ignore player (for a round) after 3 spam warnings.
+
 // General
-vmCvar_t g_maxVotes;	// Max votes per user
 vmCvar_t g_showFlags;	// mcwf GeoIP
 vmCvar_t g_inactivityToSpecs;	// Puts inactive players in spectators instead of dropping them.
-vmCvar_t g_ignoreSpecs;	// Ignores spectators - Admins can still bypass the ignore..
+vmCvar_t g_ignoreSpecs;	// Ignores spectators - referees can still bypass the ignore..
 vmCvar_t g_allowVote;	// Replaced voteFlags as i hate it and see it to complicated for new users..
 vmCvar_t g_disallowedVotes; // Disalloved votes separeted by space..
 vmCvar_t g_headshotsOnly;	// Enables headshots only mode
-vmCvar_t g_fixedphysics;	// So it's fair for all..
 vmCvar_t g_allowPMs;		// Allow private messages
 vmCvar_t g_hitsounds;		// Hitsounds - client can disable them localy if they're on.
 vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
-vmCvar_t team_nocontrols;
+
 // Match specific
 vmCvar_t g_tournament;	// Ready-unready system
 vmCvar_t g_ltNades;			// Number of nades a lt starts with
@@ -312,9 +262,12 @@ vmCvar_t g_maxTeamFlamer;	// Max flamers per team
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
 
+vmCvar_t stats_matchid;
+
 vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
-vmCvar_t g_customSpawns;
+vmCvar_t g_spawnOffset;
+vmCvar_t g_bodiesGrabFlags;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -325,6 +278,7 @@ cvarTable_t gameCvarTable[] = {
 	{ NULL, "gamedate", __DATE__, CVAR_ROM, 0, qfalse  },
 	{ &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
 	{ NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
+	{ NULL, "Compile Date", __DATE__, CVAR_ROM | CVAR_SERVERINFO, 0, qfalse  }, // RTCWPro
 
 	// latched vars
 	// DHM - Nerve :: default to GT_WOLF
@@ -398,7 +352,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_filterBan, "g_filterBan", "1", CVAR_ARCHIVE, 0, qfalse  },
 
 	{ &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
-	{ &g_dropReload, "g_dropReload", "0", CVAR_ARCHIVE, 0, qfalse },
     { &g_unlockWeapons, "g_unlockWeapons", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
     { &g_disableSMGPickup, "g_disableSMGPickup", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_speed, "g_speed", "320", 0, 0, qtrue  },
@@ -431,7 +384,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_fastres, "g_fastres", "0", CVAR_ARCHIVE, 0, qtrue},                                  // Xian - Fast Medic Resing
 	{ &g_fastResMsec, "g_fastResMsec", "1000", CVAR_ARCHIVE, 0, qtrue},                                   // Xian - Fast Medic Resing
 	{ &g_knifeonly, "g_knifeonly", "0", 0, 0, qtrue},                                         // Xian - Fast Medic Resing
-	{ &g_enforcemaxlives, "g_enforcemaxlives", "1", CVAR_ARCHIVE, 0, qtrue},                              // Xian - Gestapo enforce maxlives stuff by temp banning
+	{ &g_enforcemaxlives, "g_enforcemaxlives", "0", CVAR_ARCHIVE, 0, qtrue},                              // Xian - Gestapo enforce maxlives stuff by temp banning
 
 	{ &g_enableBreath, "g_enableBreath", "1", CVAR_SERVERINFO, 0, qtrue},
 	{ &g_testPain, "g_testPain", "0", CVAR_CHEAT, 0, qfalse },
@@ -456,27 +409,8 @@ cvarTable_t gameCvarTable[] = {
 	// configured by the server admin, points to the web pages for the server
 	{&url, "URL", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
 
-	{&g_antilag, "g_antilag", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse},
-
-// Admins
-	{ &a1_pass, "a1_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a2_pass, "a2_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a3_pass, "a3_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a4_pass, "a4_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_pass, "a5_pass", "none", CVAR_ARCHIVE, 0, qfalse },
-	{ &a1_tag, "a1_tag", "^1Referee", CVAR_ARCHIVE, 0, qfalse },
-	{ &a2_tag, "a2_tag", "^jMember", CVAR_ARCHIVE, 0, qfalse },
-	{ &a3_tag, "a3_tag", "^2Adm!n", CVAR_ARCHIVE, 0, qfalse },
-	{ &a4_tag, "a4_tag", "^3Adm!n", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_tag, "a5_tag", "^dAdm!n", CVAR_ARCHIVE, 0, qfalse },
-	{ &a1_cmds, "a1_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a2_cmds, "a2_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a3_cmds, "a3_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a4_cmds, "a4_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_cmds, "a5_cmds", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &a5_allowAll, "a5_allowAll", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &adm_help, "adm_help", "1", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_maxVotes, "g_maxVotes", "2", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_antilag, "g_antilag", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse },
+	//{ &g_maxVotes, "g_maxVotes", "2", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 
 // match
 	{ &team_maxplayers, "team_maxplayers", "0", 0, 0, qfalse, qfalse },
@@ -495,7 +429,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
 	{ &svx_serverStreaming, "svx_serverStreaming", "", CVAR_SERVERINFO, 0, qfalse },
-	{ &g_extendedLog, "g_extendedLog", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_bannedMSG, "g_bannedMSG", "You are ^3Banned ^7from this server!", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_privateServer, "g_privateServer", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &TXThandle, "TXThandle", "1", CVAR_ARCHIVE, 0, qfalse },
@@ -504,33 +437,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_serverMessage, "g_serverMessage", "^1Server running RtcwPro", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_disableInv, "g_disableInv", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
-
-	// MOTDs
-	{ &g_showMOTD, "g_showMOTD", "0", 0, 0, qfalse },
-	{ &g_motd1, "g_motd1", "", 0, 0, qfalse},
-	{ &g_motd2, "g_motd2", "", 0, 0, qfalse},
-	{ &g_motd3, "g_motd3", "", 0, 0, qfalse},
-	{ &g_motd4, "g_motd4", "", 0, 0, qfalse},
-	{ &g_motd5, "g_motd5", "", 0, 0, qfalse},
-	{ &g_motd6, "g_motd6", "", 0, 0, qfalse},
-	{ &g_motd7, "g_motd7", "", 0, 0, qfalse},
-	{ &g_motd8, "g_motd8", "", 0, 0, qfalse},
-	{ &g_motd9, "g_motd9", "", 0, 0, qfalse},
-	{ &g_motd10, "g_motd10", "", 0, 0, qfalse},
-	{ &g_motd11, "g_motd11", "", 0, 0, qfalse},
-	{ &g_motd12, "g_motd12", "", 0, 0, qfalse},
-	{ &g_motdTime, "g_motdTime", "80", 0, 0, qtrue},
-	{ &motdNum, "motdNum", "1", 0, 0, qfalse},
-
-	// SAB (Server Admin Bot)
-	{ &sab_system, "sab_system", "0", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_maxTeamKills, "sab_maxTeamKills", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_maxTeamBleed, "sab_maxTeamBleed", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_minLowScore, "sab_minLowScore", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_MaxPingFlux, "sab_MaxPingFlux", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_maxPingHits, "sab_maxPingHits", "-1", CVAR_ARCHIVE|CVAR_LATCH, 0, qfalse },
-	{ &sab_censorPenalty, "sab_censorPenalty", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &sab_autoIgnore, "sab_autoIgnore", "0", CVAR_ARCHIVE, 0, qfalse },
 
 	// voting
 	{ &vote_limit, "vote_limit", "3", CVAR_ARCHIVE, qfalse, qfalse },
@@ -556,8 +462,10 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
 
 	// RTCWPro
+	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
+	{ &shoutcastPassword, "shoutcastPassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_allowPMs, "g_allowPMs", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_crouchRate, "g_crouchRate", "5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_mapConfigs, "g_mapConfigs", "0", CVAR_LATCH, 0, qfalse },
@@ -576,13 +484,14 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamVenom, "g_maxTeamVenom", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &team_nocontrols, "team_nocontrols", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
-	{ &g_customSpawns, "g_customSpawns", "0", CVAR_ARCHIVE, 0, qfalse }, // sswolf - custom spawns, source: Nobo
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &g_spawnOffset, "g_spawnOffset", "9", CVAR_ARCHIVE, 0, qfalse, qfalse },
+	{ &g_bodiesGrabFlags, "g_bodiesGrabFlags", "1", CVAR_ARCHIVE, 0, qtrue },
+	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
@@ -1270,19 +1179,6 @@ void G_RemapTeamShaders() {
 
 /*
 =================
-G_ForceCvars
-=================
-*/
-void G_ForceCvars(void)
-{
-	if (g_antiWarp.integer)
-	{
-		trap_Cvar_Set("g_syncronousClients", "0");
-	}
-}
-
-/*
-=================
 G_RegisterCvars
 =================
 */
@@ -1330,7 +1226,6 @@ void G_RegisterCvars( void ) {
 
 	trap_SetConfigstring(CS_SERVERTOGGLES, va("%d", level.server_settings));
 
-	G_ForceCvars();
 	// OSPx
 	// Ready percents
 	if (match_readypercent.integer < 1) {
@@ -1413,6 +1308,17 @@ void G_UpdateCvars( void ) {
 				else
 				{
 					fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles);
+				}
+
+				if (g_antiWarp.integer)
+				{
+					trap_Cvar_Set("g_synchronousClients", "0");
+				}
+
+				if (g_spawnOffset.integer < 1)
+				{
+					G_Printf("g_spawnOffset %i is out of range, defaulting to 9\n", g_spawnOffset.integer);
+					trap_Cvar_Set("g_spawnOffset", "9");
 				}
 			}
 		}
@@ -1552,34 +1458,43 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
 		}
         if (g_gameStatslog.integer && (g_gamestate.integer == GS_PLAYING)) { // definitely needs improving but here for testing purposes
-                char newGamestatFile[MAX_QPATH];
+                char newGamestatFile[256];
                 char mapName[64];
+                char buf2[64];
                 qtime_t ct;
                 trap_RealTime(&ct);
                 trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
                 char *buf;
                 time_t unixTime = time(NULL);  // come back and make globally available
-                char cs[MAX_STRING_CHARS];
+                //char cs[MAX_STRING_CHARS];
+
+
 
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
-                    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
-                    buf = Info_ValueForKey(cs, "matchid");
-                    trap_SetConfigstring( CS_ROUNDINFO, cs );
+
+					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
+                    Q_strncpyz(level.jsonStatInfo.round_id,"2",sizeof(level.jsonStatInfo.round_id) );
+
+					trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
+					//buf = va("%s",level.match_id);
+					buf = va("%s",buf2);
+					Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
                 else {
                      buf=va("%ld", unixTime);
+                     trap_Cvar_Set( "stats_matchid", buf);
+                     //level.match_id = va("%s",buf);
+                     Q_strncpyz(level.jsonStatInfo.round_id,"1",sizeof(level.jsonStatInfo.round_id) );
+                     Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
 
+                G_write_match_info();
 
 
                 Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
-                trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
-                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName);
-                //trap_FS_FOpenFile( va("stats/gameStats_match_%s_round_%d_%s.json", buf,g_currentRound.integer+1,mapName), &level.gameStatslogFile, FS_WRITE );
-                //Com_sprintf( newGamestatFile, sizeof( newGamestatFile ), "stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer, ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName);
-                //trap_FS_FOpenFile( va("stats/gameStats_r%d_%02d_%02d_%02d_%02d_%d_%d_%s.log", g_currentRound.integer,ct.tm_hour, ct.tm_min, ct.tm_sec, ct.tm_mday, ct.tm_mon, 1900+ct.tm_year,mapName ), &level.gameStatslogFile, FS_WRITE );
-                if ( !level.gameStatslogFile ) {
+                trap_FS_FOpenFile( va("stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName), &level.jsonStatInfo.gameStatslogFile, FS_WRITE );
+                if ( !level.jsonStatInfo.gameStatslogFile ) {
                     G_Printf( "WARNING: Couldn't open gameStatlogfile: %s\n", newGamestatFile );
                 } else {
 
@@ -1587,7 +1502,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                     char game[60];
                     trap_Cvar_VariableStringBuffer( "fs_homepath", hpath, sizeof( hpath ) );
                     trap_Cvar_VariableStringBuffer( "fs_game", game, sizeof( game ) );
-                    Com_sprintf( level.gameStatslogFileName, sizeof( level.gameStatslogFileName ), "%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
+
+                    Com_sprintf( level.jsonStatInfo.gameStatslogFileName, sizeof( level.jsonStatInfo.gameStatslogFileName ), "%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer+1,mapName);
 
                     G_writeServerInfo();
 
@@ -1646,20 +1562,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	InitBodyQue();
 
 	ClearRegisteredItems();
-
-	if (g_customSpawns.integer)
-	{
-		trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
-	}
-
-	if (!restart)
-	{
-		// NOTE(nobo): Append to entity string before it's parsed by G_SpawnEntitiesFromString
-		if (g_customSpawns.integer)
-		{
-			trap_AppendEntityString(va("maps/%s.spawns", mapName));
-		}
-	}
 
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
@@ -1757,9 +1659,9 @@ void G_ShutdownGame( int restart ) {
 		G_LogPrintf( "------------------------------------------------------------\n" );
 		trap_FS_FCloseFile( level.logFile );
 	}
-	if (level.gameStatslogFile) {
+	if (level.jsonStatInfo.gameStatslogFile) {
         // we may want to put some closing information into the gamestat file...
-        trap_FS_FCloseFile( level.gameStatslogFile );
+        trap_FS_FCloseFile( level.jsonStatInfo.gameStatslogFile);
 
 	}
 
@@ -2361,6 +2263,9 @@ void ExitLevel( void ) {
 		}
 	}
 
+	 if (g_altStopwatchMode.integer == 1 && g_currentRound.integer == 1) {
+		G_swapTeams();
+	 }
 	G_LogPrintf( "ExitLevel: executed\n" );
 }
 
@@ -3401,7 +3306,7 @@ void G_RunFrame( int levelTime ) {
 			 || ent->s.eType == ET_FIRE_COLUMN
 			 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
 			 || ent->s.eType == ET_EXPLO_PART
-			 || ent->s.eType == ET_RAMJET 
+			 || ent->s.eType == ET_RAMJET
 		) {
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
@@ -3478,13 +3383,6 @@ void G_RunFrame( int levelTime ) {
 
 	// cancel vote if timed out
 	CheckVote();
-
-
-	// L0 - MOTDs
-//	if (g_showMOTD.integer > 0 && level.startTime > 2000){
-//		if (level.time >= (level.motdTime + g_motdTime.integer*1000))
-//			MOTD();
-//	} // end
 
 	// L0 sync team
 //	if (g_needBalance.integer){

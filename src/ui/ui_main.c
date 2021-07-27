@@ -4428,7 +4428,7 @@ static void UI_Update( const char *name ) {
 			trap_Cvar_SetValue( "r_texturebits", 32 );
 			trap_Cvar_SetValue( "r_fastSky", 0 );
 			trap_Cvar_SetValue( "r_inGameVideo", 1 );
-			trap_Cvar_SetValue( "cg_shadows", 1 );
+			trap_Cvar_SetValue( "cg_shadows", 0 );
 			trap_Cvar_SetValue( "cg_brassTime", 2500 );
 			trap_Cvar_Set( "r_texturemode", "GL_LINEAR_MIPMAP_LINEAR" );
 			break;
@@ -5314,7 +5314,11 @@ static void UI_RunMenuScript( char **args ) {
 				trap_SetPbSvStatus( 1 );
 			}
 		} else if ( Q_stricmp( name, "openModURL" ) == 0 ) {
-			trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_modURL" ) );
+			//trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_modURL" ) );
+			trap_Cmd_ExecuteText(EXEC_NOW, "openModURL");
+		} else if (Q_stricmp(name, "openModSource") == 0) {
+			//trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_modURL" ) );
+			trap_Cmd_ExecuteText(EXEC_NOW, "openModSource");
 		} else if ( Q_stricmp( name, "openServerURL" ) == 0 ) {
 			trap_Cvar_Set( "ui_finalURL", UI_Cvar_VariableString( "ui_URL" ) );
 		} else if ( Q_stricmp( name, "validate_openURL" ) == 0 ) {

@@ -418,7 +418,7 @@ menuDef {
 	itemDef {
 		name osp_gfx
 		style WINDOW_STYLE_SHADER
-		rect 150 175 339 191
+		rect 280 200 339 191
 		background "gfx/2d/rtcwpro.tga"
 		forecolor 1 1 1 0.2
 		visible 1
@@ -426,12 +426,12 @@ menuDef {
 	}
 
 	itemDef {
-		name window
-		text "" // show the cvar below
-		cvar ui_gameversion
+		name rtcwpro_sourceurl
+		text "Source" // show the cvar below
+		//cvar ui_gameversion
 		tooltip "RtcwPro Version"
 		tooltipaligny -40
-		type 4
+		type 1
 		style 0	
 		rect 545 450 170 14
 		textalign 0
@@ -445,14 +445,14 @@ menuDef {
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
-			uiScript openModURL
+			uiScript openModSource
 		}
     }
 
 	itemDef {
-		name osp_url
-		text "RtcwPro Repository"
-		tooltip "RtcwPro Repository"
+		name rtcwpro_modurl
+		text "RtcwPro.com"
+		tooltip "RtcwPro.com"
 		tooltipaligny -40
 		type 1
 		style 0

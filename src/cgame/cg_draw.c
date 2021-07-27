@@ -845,11 +845,6 @@ static float CG_DrawTeamOverlay( float y ) {
 
 			Com_sprintf( st, sizeof( st ), "%s", CG_TranslateString( classType ) );
 
-
-
-
-
-
 			// JPW NERVE
 			if ( ci->health > 80 ) {
 				pcolor = hcolor;
@@ -865,6 +860,12 @@ static float CG_DrawTeamOverlay( float y ) {
 			// jpw
 
 			xx = x + 1; // * TINYCHAR_WIDTH;
+
+			// RTCWPro - display obj carriers
+			if (ci->powerups & ((1 << PW_REDFLAG) | (1 << PW_BLUEFLAG)))
+			{
+				CG_DrawPic(xx - 3, y - 3, 15, 15, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+			}
 
 			hcolor[0] = hcolor[1] = 1.0;
 			hcolor[2] = 0.0;
@@ -987,6 +988,14 @@ int CG_CalculateReinfTime(qboolean menu)
 	return (int)(CG_CalculateReinfTime_Float(menu));
 }
 
+int CG_CalculateShoutcasterReinfTime(team_t team)
+{
+	int dwDeployTime;
+
+	dwDeployTime = (team == TEAM_RED) ? cg_redlimbotime.integer : cg_bluelimbotime.integer;
+	return (int)(1 + (dwDeployTime - ((cgs.aReinfOffset[team] + cg.time - cgs.levelStartTime) % dwDeployTime)) * 0.001f);
+}
+
 /*
 ========================
 OSPx
@@ -1044,12 +1053,12 @@ static float CG_DrawRespawnTimer(float y) {
 
 /*
 ========================
+RTCWPro
 Enemy Timer
 ========================
 */
 static float CG_DrawEnemyTimer(float y) {
 	char		*str = { 0 };
-
 	int    w;
 	int    tens;
 	int    x;
@@ -1057,21 +1066,14 @@ static float CG_DrawEnemyTimer(float y) {
 	int    msec    = (cgs.timelimit * 60.f * 1000.f ) - (cg.time - cgs.levelStartTime);
 	int    seconds = msec / 1000;
 	int    mins    = seconds / 60;
+	playerState_t* ps;
 
 	seconds -= mins * 60;
 	tens     = seconds / 10;
 	seconds -= tens * 10;
-
-
-	playerState_t* ps;
-
-	if (cgs.gametype < GT_WOLF) {
-		return y;
-	}
-
 	ps = &cg.snap->ps;
 
-	if (ps->stats[STAT_HEALTH] <= 0) { // don't show when limbo message is drawn
+	if (cgs.gametype < GT_WOLF) {
 		return y;
 	}
 
@@ -1087,34 +1089,89 @@ static float CG_DrawEnemyTimer(float y) {
         return y;
     }
 
-	if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate == GS_PLAYING)
+	if (!cg_drawEnemyTimer.integer)
+	{
+		return y;
+	}
+
+	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus)
 	{
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW))
 		{
+			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
+				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+			if (period > 0) // prevent division by 0 for weird cases like limbtotime < 1000
+			{
+				seconds = msec / 1000;
+				secondsThen = ((cgs.timelimit * 60000.f) - cg_spawnTimer_set.integer) / 1000;
 
-            seconds     = msec / 1000;
-            secondsThen = ((cgs.timelimit * 60.f * 1000.f )  - cg_spawnTimer_set.integer) / 1000;
-            float temp = cg_spawnTimer_period.integer + (seconds - secondsThen) % cg_spawnTimer_period.integer;
-            str           = va("ERT: %-2d", (int)temp);
-            w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
+				str = va("ERT: %-2i", period + (seconds - secondsThen) % period);
+				w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
-            //	x = 46 + 6;
-            x = 46 + 40;
-            //	y = 480 - 245;
-            y = 480 - 400;
-            CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+				//	x = 46 + 6;
+				x = 46 + 40;
+				//	y = 480 - 245;
+				if (ps->stats[STAT_HEALTH] > 0)
+				{
+					y = 480 - 400;
+				}
+				else
+				{
+					y = 480 - 360;
+				}
+				CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+			}
 		}
 	}
 	else if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate != GS_PLAYING)
 	{
+		// We are not playing and the timer is set so reset/disable it
+		// this happens for example when custom period is set by timerSet and map is restarted or changed
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
-	else {
+	else 
+	{
         return y;
 	}
 
 	return y += TINYCHAR_HEIGHT;
 }
+
+/*
+========================
+RTCWPro
+CG_DrawShoutcastTimer
+========================
+*/
+static float CG_DrawShoutcastTimer(float y) {
+	vec4_t color = { .6f, .6f, .6f, 1.f };
+	char* rtAllies = "", * rtAxis = "";
+	int h = 30;
+	int x = 35;
+	y = 480 - 400;
+
+	if (cgs.gamestate != GS_PLAYING)
+	{
+		return y;
+	}
+
+	int reinfTimeAx = CG_CalculateShoutcasterReinfTime(TEAM_RED);
+	int reinfTimeAl = CG_CalculateShoutcasterReinfTime(TEAM_BLUE);
+
+	rtAllies = va("^$%i", reinfTimeAl);
+	rtAxis = va("^1%i", reinfTimeAx);
+
+	color[3] = 1.f;
+
+	// Axis time
+	CG_DrawStringExt(x, y + h - 5, rtAxis, colorRed, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	// Allies time
+	CG_DrawStringExt(x + 20, y + h - 5, rtAllies, colorBlue, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	return y += TINYCHAR_HEIGHT;
+}
+
 /*
 ========================
 sswolf - complete OSP demo features
@@ -1261,10 +1318,15 @@ static void CG_DrawUpperRight( void ) {
 	}
 
 	// enemy respawn timer (do not include yet)
-//	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
-//        y = CG_DrawEnemyTimer(y);
+	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0) && (cg_drawEnemyTimer.integer)) {
+        y = CG_DrawEnemyTimer(y);
 
-//	}
+	}
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus && cg_drawReinforcementTime.integer > 0)
+	{
+		y = CG_DrawShoutcastTimer(y);
+	}
 
 	// sswolf - complete OSP demo features
 	// OSPx - Time Counter
@@ -1594,7 +1656,7 @@ static void CG_DrawDisconnect( void ) {
 	// also add text in center of screen
 	s = CG_TranslateString( "Connection Interrupted" ); // bk 010215 - FIXME
 	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-	CG_DrawBigString( 320 - w / 2, 100, s, 1.0F );
+	CG_DrawBigString( 320 - w / 2, 80, s, 1.0F );
 
 	// blink the icon
 	if ( ( cg.time >> 9 ) & 1 ) {
@@ -2652,7 +2714,10 @@ static void CG_DrawCrosshairNames( void ) {
 
 	// RtcwPro add player ammo if cg_drawCrosshairNames is 1
 	if (cg_drawCrosshairNames.integer == 1 && cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR)
-		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo, cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
+	{
+		CG_DrawPlayerAmmo(color, cgs.clientinfo[cg.crosshairClientNum].playerWeapon, cgs.clientinfo[cg.crosshairClientNum].playerAmmo,
+			cgs.clientinfo[cg.crosshairClientNum].playerAmmoClip, cgs.clientinfo[cg.crosshairClientNum].playerNades);
+	}
 
 	trap_R_SetColor( NULL );
 }
@@ -2667,7 +2732,16 @@ CG_DrawSpectator
 =================
 */
 static void CG_DrawSpectator( void ) {
-	CG_DrawBigString( 320 - 9 * 8, 440, CG_TranslateString( "SPECTATOR" ), 1.0F );
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus == 1)
+	{
+		CG_DrawBigString(320 - 9 * 8, 440, CG_TranslateString("SHOUTCASTER"), 1.0F);
+	}
+	else
+	{
+		CG_DrawBigString(320 - 9 * 8, 440, CG_TranslateString("SPECTATOR"), 1.0F);
+	}
+
 	if ( cgs.gametype == GT_TOURNAMENT ) {
 		CG_DrawBigString( 320 - 15 * 8, 460, "waiting to play", 1.0F );
 	}
@@ -3223,14 +3297,14 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
-		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^7" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^1" ), sec + 1 );
 		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
 		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
 		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
 		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
 		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 	} else {
-		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^7" ), sec + 1 );
+		s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^1" ), sec + 1 );
 	}
 
 	w = CG_DrawStrlen( s );
@@ -4499,6 +4573,12 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	CG_ShakeCamera();       // NERVE - SMF
 
+	// RTCWPro - draw triggers for shoutcasters
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		CG_DrawTriggers();
+	}
+
 	trap_R_RenderScene( &cg.refdef );
 
 	// restore original viewpoint if running stereo
@@ -4508,8 +4588,13 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 
 	// draw status bar and other floating elements
 	CG_Draw2D();
-}
 
+	// RTCWPro
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus) 
+	{
+		CG_ShoutcasterItems();
+	}
+}
 
 /*
 =====================
@@ -4888,3 +4973,123 @@ void CG_AddAnnouncer(char *text, sfxHandle_t sound, float scale, int duration, f
 		cg.centerPrintAnnouncerMode = mode;
 	}
 }
+
+/*
+=============================
+RTCWPro
+CG_SCSortDistance
+=============================
+*/
+int QDECL CG_SCSortDistance(const void* a, const void* b) {
+	scItem_t* A = (scItem_t*)a;
+	scItem_t* B = (scItem_t*)b;
+
+	if (A->dist < B->dist) 
+	{
+		return 1;
+	}
+	else 
+	{
+		return -1;
+	}
+}
+
+/*
+=============================
+RTCWPro
+CG_ShoutcasterItems
+=============================
+*/
+void CG_ShoutcasterItems() {
+	int			i;
+	centity_t* cent;
+
+	memset(cg.scItems, 0, MAX_SCITEMS * sizeof(cg.scItems[0]));
+	cg.numSCItems = 0;
+
+	for (i = 0; i < MAX_ENTITIES; i++) 
+	{
+		cent = &cg_entities[i];
+
+		if (!cent->currentValid)
+			continue;
+
+		switch (cent->currentState.eType) 
+		{
+		case ET_MISSILE:
+			CG_ShoutcasterDynamite(i);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Sort
+	qsort(cg.scItems, cg.numSCItems, sizeof(cg.scItems[0]), CG_SCSortDistance);
+
+	// Draw
+	for (i = 0; i < cg.numSCItems; i++) 
+	{
+		CG_Text_Paint_Ext(cg.scItems[i].position[0], cg.scItems[i].position[1], cg.scItems[i].scale, 
+			cg.scItems[i].scale, cg.scItems[i].color, cg.scItems[i].text, 0, 0, ITEM_TEXTSTYLE_NORMAL, &cgDC.Assets.textFont);
+	}
+}
+/*
+=============================
+RTCWPro
+CG_Shoutcaster_Dynamite
+=============================
+*/
+void CG_ShoutcasterDynamite(int num) {
+	centity_t* cent;
+	vec3_t		origin;
+	vec_t		position[2];
+
+	cent = &cg_entities[num];
+	if (cent->currentState.eType != ET_MISSILE || cent->currentState.weapon != WP_DYNAMITE || cent->currentState.teamNum >= 4)
+		return;
+
+	if (!cent->currentValid)
+		return;
+
+	// Ent visible?
+	if (PointVisible(cent->lerpOrigin))
+		cent->lastSeenTime = cg.time;
+
+	// Break if no action
+	if (!cent->lastSeenTime || cg.time - cent->lastSeenTime >= 1000)
+		return;
+
+	// Ent position
+	VectorCopy(cent->lerpOrigin, origin);
+
+	// Add height, plus a little
+	origin[2] += 20;
+
+	if (!VisibleToScreen(origin, position)) 
+	{
+		return;
+	}
+
+	cg.scItems[cg.numSCItems].position[0] = position[0] / cgs.screenXScale;
+	cg.scItems[cg.numSCItems].position[1] = position[1] / cgs.screenYScale;
+
+	// Distance to player
+	cg.scItems[cg.numSCItems].dist = VectorDistance(cg.predictedPlayerState.origin, origin);
+	cg.scItems[cg.numSCItems].scale = 600 / cg.scItems[cg.numSCItems].dist * 0.2f;
+
+	// Figure out color
+	CG_ColorForPercent(100 * (30000 - cg.time + cent->currentState.effect1Time + 1000) / 30000, cg.scItems[cg.numSCItems].color);
+	cg.scItems[cg.numSCItems].color[3] = 1 - ((float)(cg.time - cent->lastSeenTime) / 1000.f);
+
+	// Center text
+	cg.scItems[cg.numSCItems].text = va("%i", ((30000 - cg.time + cent->currentState.effect1Time) / 1000) + 1);
+	cg.scItems[cg.numSCItems].position[0] -= CG_Text_Width_Ext(cg.scItems[cg.numSCItems].text, cg.scItems[cg.numSCItems].scale, 0, &cgDC.Assets.textFont) / 2;
+
+	// Paint the text.
+	//CG_Text_Paint_Ext( position[0], position[1], scale, scale, color, str, 0, 0, ITEM_TEXTSTYLE_NORMAL, &cgs.media.limboFont1 );
+
+	// Increment number of items
+	cg.numSCItems++;
+}
+

@@ -379,24 +379,24 @@ vidmode_t r_vidModes[] =
 	{ "Mode  2: 512x384", 512, 384, 1 },
 	{ "Mode  3: 640x480", 640, 480, 1 },
 	{ "Mode  4: 800x600", 800, 600, 1 },
-	{ "Mode  5: 856x480 (wide)", 856, 480, 1 },
-	{ "Mode  6: 960x720", 960, 720, 1 },
-	{ "Mode  7: 1024x768", 1024, 768, 1 },
-	{ "Mode  8: 1152x864", 1152, 864, 1 },
-	{ "Mode  9: 1280x720 (16:9)", 1280, 720, 1 },
-	{ "Mode  10: 1280x768 (16:10)", 1280, 768, 1 },
-	{ "Mode  11: 1280x800 (16:10)", 1280, 800, 1 },
-	{ "Mode  12: 1280x1024", 1280, 1024, 1 },
-	{ "Mode  13: 1360x768 (16:9)", 1360, 768, 1 },
-	{ "Mode  14: 1440x900 (16:10)", 1440, 900, 1 },
-	{ "Mode  15: 1680x1050 (16:10)", 1680, 1050, 1 },
-	{ "Mode  16: 1600x1200", 1600, 1200, 1 },
-	{ "Mode  17: 1920x1080 (FULL HD)", 1920, 1080, 1 },
-	{ "Mode  18: 1920x1200", 1920, 1200, 1 },
-	{ "Mode  19: 2048x1536", 2048, 1536, 1 },
-	{ "Mode  20: 2560x1440 (QHD)", 2560, 1440, 1 },
-	{ "Mode  21: 2560x1600 (16:10)", 2560, 1600, 1 },
-	{ "Mode  22: 3840x2160 (UHD)", 3840, 2160, 1 }
+	//{ "Mode  5: 856x480 (wide)", 856, 480, 1 },
+	{ "Mode  5: 960x720", 960, 720, 1 },
+	{ "Mode  6: 1024x768", 1024, 768, 1 },
+	{ "Mode  7: 1152x864", 1152, 864, 1 },
+	{ "Mode  8: 1280x720 (16:9)", 1280, 720, 1 },
+	{ "Mode  9: 1280x768 (16:10)", 1280, 768, 1 },
+	{ "Mode  10: 1280x800 (16:10)", 1280, 800, 1 },
+	{ "Mode  11: 1280x1024", 1280, 1024, 1 },
+	{ "Mode  12: 1360x768 (16:9)", 1360, 768, 1 },
+	{ "Mode  13: 1440x900 (16:10)", 1440, 900, 1 },
+	{ "Mode  14: 1680x1050 (16:10)", 1680, 1050, 1 },
+	{ "Mode  15: 1600x1200", 1600, 1200, 1 },
+	{ "Mode  16: 1920x1080 (FULL HD)", 1920, 1080, 1 },
+	{ "Mode  17: 1920x1200", 1920, 1200, 1 },
+	{ "Mode  18: 2048x1536", 2048, 1536, 1 },
+	{ "Mode  19: 2560x1440 (QHD)", 2560, 1440, 1 },
+	{ "Mode  20: 2560x1600 (16:10)", 2560, 1600, 1 },
+	{ "Mode  21: 3840x2160 (UHD)", 3840, 2160, 1 }
 };
 static int s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
@@ -710,10 +710,19 @@ void R_ScreenShotJPEG_f( void ) {
 		silent = qfalse;
 	}
 
-	if ( ri.Cmd_Argc() == 2 && !silent ) {
+	// sswolf - edited to make reqSS silent and work correctly
+	if ( ri.Cmd_Argc() == 2 && !silent ) 
+	{
 		// explicit filename
 		Com_sprintf( checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv( 1 ) );
-	} else {
+	}
+	else if (ri.Cmd_Argc() == 3 && silent)
+	{
+		// explicit filename
+		Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(2));
+	}
+	else 
+	{
 		// scan for a free filename
 
 		// if we have saved a previous screenshot, don't scan
@@ -938,11 +947,11 @@ void R_Register( void ) {
 
 //----(SA)	added
 	r_ext_ATI_pntriangles           = ri.Cvar_Get( "r_ext_ATI_pntriangles", "0", CVAR_ARCHIVE | CVAR_LATCH );   //----(SA)	default to '0'
-	r_ati_truform_tess              = ri.Cvar_Get( "r_ati_truform_tess", "1", CVAR_ARCHIVE );
+	r_ati_truform_tess              = ri.Cvar_Get( "r_ati_truform_tess", "0", CVAR_ARCHIVE );
 	r_ati_truform_normalmode        = ri.Cvar_Get( "r_ati_truform_normalmode", "GL_PN_TRIANGLES_NORMAL_MODE_LINEAR", CVAR_ARCHIVE );
 	r_ati_truform_pointmode         = ri.Cvar_Get( "r_ati_truform_pointmode", "GL_PN_TRIANGLES_POINT_MODE_LINEAR", CVAR_ARCHIVE );
 
-	r_ati_fsaa_samples              = ri.Cvar_Get( "r_ati_fsaa_samples", "1", CVAR_ARCHIVE );       //DAJ valids are 1, 2, 4
+	r_ati_fsaa_samples              = ri.Cvar_Get( "r_ati_fsaa_samples", "0", CVAR_ARCHIVE );       //DAJ valids are 1, 2, 4
 
 	r_ext_texture_filter_anisotropic    = ri.Cvar_Get( "r_ext_texture_filter_anisotropic", "0", CVAR_ARCHIVE );
 
@@ -973,7 +982,7 @@ void R_Register( void ) {
 	r_depthbits = ri.Cvar_Get( "r_depthbits", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_overBrightBits = ri.Cvar_Get( "r_overBrightBits", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_ignorehwgamma = ri.Cvar_Get( "r_ignorehwgamma", "1", CVAR_ARCHIVE | CVAR_LATCH );
-	r_mode = ri.Cvar_Get( "r_mode", "4", CVAR_ARCHIVE | CVAR_LATCH );
+	r_mode = ri.Cvar_Get( "r_mode", "6", CVAR_ARCHIVE | CVAR_LATCH );
 	r_fullscreen = ri.Cvar_Get( "r_fullscreen", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customwidth = ri.Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customheight = ri.Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE | CVAR_LATCH );
@@ -1070,7 +1079,7 @@ void R_Register( void ) {
 	// done.
 
 	// Rafael - wolf fog
-	r_wolffog = ri.Cvar_Get( "r_wolffog", "1", CVAR_CHEAT ); // JPW NERVE cheat protected per id request
+	r_wolffog = ri.Cvar_Get( "r_wolffog", "1", CVAR_ARCHIVE ); // JPW NERVE cheat protected per id request, altered in rtcwpro
 	// done
 
 	r_nocurves = ri.Cvar_Get( "r_nocurves", "0", CVAR_CHEAT );
