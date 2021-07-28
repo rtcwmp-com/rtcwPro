@@ -591,7 +591,7 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	//newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
 
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
@@ -791,8 +791,6 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 		memcpy(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
 	else
 		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
-
-	SV_ReloadRest(qfalse); // RTCWPro
 
 	// call the game begin function
 	VM_Call( gvm, GAME_CLIENT_BEGIN, client - svs.clients );
@@ -2274,7 +2272,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
 
-	if (Q_stricmp(sv_GameConfig->string, "") &&
+	/*if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT)
@@ -2284,14 +2282,14 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		SV_ExecuteClientCommand(cl, "team s", qtrue);
 		SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
 		return;
-	}
+	}*/
 
-	/*if (Q_stricmp(sv_GameConfig->string, "") &&
+	if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT) 
 	{
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
 		return;
-	}*/
+	}
 }
