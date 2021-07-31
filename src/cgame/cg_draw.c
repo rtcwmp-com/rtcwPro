@@ -1147,7 +1147,13 @@ static float CG_DrawShoutcastTimer(float y) {
 	char* rtAllies = "", * rtAxis = "";
 	int h = 30;
 	int x = 35;
-	y = 480 - 400;
+
+	if (cg.snap->ps.pm_flags & PMF_FOLLOW) {
+		y = 480 - 380;
+	}
+	else {
+		y = 480 - 400;
+	}
 
 	if (cgs.gamestate != GS_PLAYING)
 	{
