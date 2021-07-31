@@ -304,7 +304,6 @@ vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_muzzleFlash;
 vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
-vmCvar_t cg_reinforcementTimeColor;
 vmCvar_t cg_noChat;
 vmCvar_t cg_noVoice;
 vmCvar_t cg_noAmmoAutoSwitch;
@@ -383,6 +382,8 @@ vmCvar_t cg_tracers;
 // ERT
 vmCvar_t cg_drawEnemyTimer;
 vmCvar_t cg_drawTriggers;
+vmCvar_t cg_enemyTimerColor;
+vmCvar_t cg_reinforcementTimeColor;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -643,6 +644,8 @@ cvarTable_t cvarTable[] = {
 	// ERT
 	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
 	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
+	{ &cg_enemyTimerColor, "cg_enemyTimerColor", "red", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeColor, "cg_reinforcementTimeColor", "green", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

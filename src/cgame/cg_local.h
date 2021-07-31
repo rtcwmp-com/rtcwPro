@@ -2116,7 +2116,6 @@ extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
-extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
 
@@ -2174,6 +2173,8 @@ extern vmCvar_t cg_tracers;
 // ERT
 extern vmCvar_t cg_drawEnemyTimer;
 extern vmCvar_t cg_drawTriggers;
+extern vmCvar_t cg_enemyTimerColor;
+extern vmCvar_t cg_reinforcementTimeColor;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
