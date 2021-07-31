@@ -1111,13 +1111,12 @@ static float CG_DrawEnemyTimer(float y) {
 				//	x = 46 + 6;
 				x = 46 + 40;
 				//	y = 480 - 245;
-				if (ps->stats[STAT_HEALTH] > 0)
-				{
-					y = 480 - 400;
-				}
-				else
-				{
+
+				if (ps->stats[STAT_HEALTH] < 1 || cg.snap->ps.pm_flags & PMF_FOLLOW) {
 					y = 480 - 360;
+				}
+				else {
+					y = 480 - 400;
 				}
 				CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
