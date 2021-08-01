@@ -1040,9 +1040,12 @@ static float CG_DrawRespawnTimer(float y) {
 	w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
 //	x = 46 + 6;
-	x = 46 + 40;
+	//x = 46 + 40; - supposed
 //	y = 480 - 245;
-	y = 480 - 410;
+	//y = 480 - 410; - supposed
+
+	x = cg_reinforcementTimeX.integer;
+	y = cg_reinforcementTimeY.integer;
 
 	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color);
 
@@ -1111,15 +1114,11 @@ static float CG_DrawEnemyTimer(float y) {
 				w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
 				//	x = 46 + 6;
-				x = 46 + 40;
+				//x = 46 + 40; - supposed
 				//	y = 480 - 245;
 
-				if (ps->stats[STAT_HEALTH] < 1 || cg.snap->ps.pm_flags & PMF_FOLLOW) {
-					y = 480 - 360;
-				}
-				else {
-					y = 480 - 400;
-				}
+				x = cg_enemyTimerX.integer;
+				y = cg_enemyTimerY.integer;
 				BG_ParseColorCvar(cg_enemyTimerColor.string, color);
 				CG_DrawStringExt((x + 5) - w, y, str, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
@@ -1294,7 +1293,7 @@ Respawn Timer
 ========================
 */
 static float CG_DrawProRespawnTimer(float y) {
-	int x = 245;
+	int x;
 	int	val = 0;
 	float scale = 0.8f;
 	vec4_t color;
@@ -1322,10 +1321,10 @@ static float CG_DrawProRespawnTimer(float y) {
 	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color);
 	trap_R_SetColor(color);
 
-	if (cg.snap->ps.persistant[PERS_RESPAWNS_LEFT] < 0)
-		x = 140;
+	x = cg_reinforcementTimeProX.integer;
+	y = cg_reinforcementTimeProY.integer;
 
-	CG_DrawField(x, 445, 3, val, 20 * scale, 32 * scale, qtrue, qfalse);
+	CG_DrawField(x, y, 3, val, 20 * scale, 32 * scale, qtrue, qfalse);
 
 	return y;
 }
@@ -1369,10 +1368,6 @@ static float CG_DrawProEnemyTimer(float y) {
 		return y;
 	}
 
-	if (!cg_drawEnemyTimer.integer) {
-		return y;
-	}
-
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) {
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
 			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer :
@@ -1386,10 +1381,10 @@ static float CG_DrawProEnemyTimer(float y) {
 				BG_ParseColorCvar(cg_enemyTimerColor.string, color);
 				trap_R_SetColor(color);
 
-				if (cg.snap->ps.persistant[PERS_RESPAWNS_LEFT] < 0)
-					x = 185;
+				x = cg_enemyTimerProX.integer;
+				y = cg_enemyTimerProY.integer;
 
-				CG_DrawField(x, 445, 3, val, 20 * scale, 32 * scale, qtrue, qfalse);
+				CG_DrawField(x, y, 3, val, 20 * scale, 32 * scale, qtrue, qfalse);
 			}
 		}
 	}

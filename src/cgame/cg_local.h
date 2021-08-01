@@ -2169,12 +2169,21 @@ extern vmCvar_t cg_spawnTimer_set;
 
 // added from et-legacy - crumbs
 extern vmCvar_t cg_tracers;
-
-// ERT
-extern vmCvar_t cg_drawEnemyTimer;
+// draw triggers
 extern vmCvar_t cg_drawTriggers;
+
+// RT and ERT
+extern vmCvar_t cg_drawEnemyTimer;
 extern vmCvar_t cg_enemyTimerColor;
+extern vmCvar_t cg_enemyTimerX;
+extern vmCvar_t cg_enemyTimerY;
+extern vmCvar_t cg_enemyTimerProX;
+extern vmCvar_t cg_enemyTimerProY;
 extern vmCvar_t cg_reinforcementTimeColor;
+extern vmCvar_t cg_reinforcementTimeX;
+extern vmCvar_t cg_reinforcementTimeY;
+extern vmCvar_t cg_reinforcementTimeProX;
+extern vmCvar_t cg_reinforcementTimeProY;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
@@ -2640,6 +2649,7 @@ void CG_demoView(void);
 //
 qboolean CG_DrawScoreboard( void );
 void CG_DrawTourneyScoreboard( void );
+char* WM_TimeToString(float msec);
 
 //
 // cg_consolecmds.c

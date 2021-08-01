@@ -562,7 +562,7 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 	tempx += INFO_LATENCY_WIDTH;
 }
 
-const char* WM_TimeToString( float msec ) {
+char* WM_TimeToString( float msec ) {
 	int mins, seconds, tens;
 
 	seconds = msec / 1000;

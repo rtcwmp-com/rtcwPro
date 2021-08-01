@@ -378,12 +378,21 @@ vmCvar_t cg_spawnTimer_period;      // spawntimer
 
 // added from et-legacy - crumbs
 vmCvar_t cg_tracers;
-
-// ERT
-vmCvar_t cg_drawEnemyTimer;
+// draw triggers
 vmCvar_t cg_drawTriggers;
+
+// RT and ERT
+vmCvar_t cg_drawEnemyTimer;
 vmCvar_t cg_enemyTimerColor;
+vmCvar_t cg_enemyTimerX;
+vmCvar_t cg_enemyTimerY;
+vmCvar_t cg_enemyTimerProX;
+vmCvar_t cg_enemyTimerProY;
 vmCvar_t cg_reinforcementTimeColor;
+vmCvar_t cg_reinforcementTimeX;
+vmCvar_t cg_reinforcementTimeY;
+vmCvar_t cg_reinforcementTimeProX;
+vmCvar_t cg_reinforcementTimeProY;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -640,12 +649,22 @@ cvarTable_t cvarTable[] = {
 
 	// draw tracers
 	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
-
-	// ERT
-	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
+	// draw triggers
 	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
+
+	// RT and ERT
+	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
 	{ &cg_enemyTimerColor, "cg_enemyTimerColor", "red", CVAR_ARCHIVE },
+	{ &cg_enemyTimerX, "cg_enemyTimerX", "98", CVAR_ARCHIVE },
+	{ &cg_enemyTimerY, "cg_enemyTimerY", "60", CVAR_ARCHIVE },
+	{ &cg_enemyTimerProX, "cg_enemyTimerProX", "185", CVAR_ARCHIVE },
+	{ &cg_enemyTimerProY, "cg_enemyTimerProY", "445", CVAR_ARCHIVE },
+
 	{ &cg_reinforcementTimeColor, "cg_reinforcementTimeColor", "green", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeX, "cg_reinforcementTimeX", "86", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeY, "cg_reinforcementTimeY", "70", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeProX, "cg_reinforcementTimeProX", "145", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeProY, "cg_reinforcementTimeProY", "445", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
