@@ -1092,14 +1092,9 @@ static float CG_DrawEnemyTimer(float y) {
     if (cg_spawnTimer_set.integer == -1)
         return y;
 
-
     if (cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
         return y;
     }
-
-	if (!cg_drawEnemyTimer.integer) { 
-		return y;
-	}
 
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) { 
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) { 
@@ -1362,7 +1357,6 @@ static float CG_DrawProEnemyTimer(float y) {
 
 	if (cg_spawnTimer_set.integer == -1)
 		return y;
-
 
 	if (cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
 		return y;

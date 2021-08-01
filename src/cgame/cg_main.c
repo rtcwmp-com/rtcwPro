@@ -659,7 +659,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_enemyTimerY, "cg_enemyTimerY", "60", CVAR_ARCHIVE },
 	{ &cg_enemyTimerProX, "cg_enemyTimerProX", "185", CVAR_ARCHIVE },
 	{ &cg_enemyTimerProY, "cg_enemyTimerProY", "445", CVAR_ARCHIVE },
-
 	{ &cg_reinforcementTimeColor, "cg_reinforcementTimeColor", "green", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeX, "cg_reinforcementTimeX", "86", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeY, "cg_reinforcementTimeY", "70", CVAR_ARCHIVE },
