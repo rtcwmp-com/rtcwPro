@@ -3337,6 +3337,7 @@ static void CG_DrawWarmup( void ) {
 	int cw = 10;
 	const char  *s, *s1, *s2, *configString;
     static qboolean announced = qfalse;
+	const char* t;
 
 	if ( cgs.gametype == GT_SINGLE_PLAYER ) {
 		return;     // (SA) don't bother with this stuff in sp
@@ -3373,11 +3374,23 @@ static void CG_DrawWarmup( void ) {
 
 		} else {
 
-			if (configString != NULL)
-			{
-				w = CG_DrawStrlen(configString);
-				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
-					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			if (cgs.currentRound) {
+				t = va(CG_TranslateString("Clock is now set to %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
+				w = CG_DrawStrlen(t);
+				CG_DrawStringExt(320 - w * cw / 2, 100, t, colorWhite, qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+
+				if (configString != NULL) {
+					w = CG_DrawStrlen(configString);
+					CG_DrawStringExt(320 - w * cw / 2, 80, configString, colorWhite,
+						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+				}
+			}
+			else {
+				if (configString != NULL) {
+					w = CG_DrawStrlen(configString);
+					CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+				}
 			}
 
 			// No need to bother with count..scoreboard gives info..
