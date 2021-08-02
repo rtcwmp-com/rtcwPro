@@ -1680,10 +1680,6 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	char cmd[1024];
 	qboolean bypassMenu = qfalse;       // NERVE - SMF
 
-	if (!key) {
-		return;
-	}
-
 	// update auto-repeat status and BUTTON_ANY status
 	keys[key].down = down;
 
