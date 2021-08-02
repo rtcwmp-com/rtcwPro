@@ -4534,3 +4534,24 @@ char* BG_GetTeam(int teamNum) {
 	return "";
 }
 
+/*
+===============
+RTCWPro
+BG_GetClass
+===============
+*/
+char* BG_GetClass(int classNum) {
+
+	switch (classNum) {
+	case PC_SOLDIER:
+		return "s";
+	case PC_MEDIC:
+		return "m";
+	case PC_LT:
+		return "l";
+	case PC_ENGINEER:
+		return "e";
+	}
+	return "";
+}
+

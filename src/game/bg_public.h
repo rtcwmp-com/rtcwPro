@@ -1837,5 +1837,6 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 char* BG_GetTeam(int teamNum);
+char* BG_GetClass(int classNum);
 
 #endif // ! ___BG_PUBLIC_H
