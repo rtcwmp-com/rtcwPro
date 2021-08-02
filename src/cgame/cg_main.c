@@ -2782,8 +2782,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	}
 
 	// RTCWPro
-	if (!CG_execFile(va("autoexec_%s", cgs.rawmapname))) {
-		CG_execFile("autoexec_default");
+	if (!cg.demoPlayback) {
+		if (!CG_execFile(va("autoexec_%s", cgs.rawmapname))) {
+			CG_execFile("autoexec_default");
+		}
 	}
 }
 

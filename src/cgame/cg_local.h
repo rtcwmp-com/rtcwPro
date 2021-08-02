@@ -1914,6 +1914,11 @@ typedef struct {
 	int timescaleUpdate;                                // Timescale display for demo playback
 } cgs_t;
 
+// RTCWPro - split hitsounds
+#define HITSOUND_HEAD 1
+#define HITSOUND_BODY 2
+#define HITSOUND_TEAM 4
+
 //==============================================================================
 
 extern cgs_t cgs;

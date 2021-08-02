@@ -1255,21 +1255,23 @@ void CG_NewClientInfo( int clientNum ) {
 	}
 
 	// RTCWPro - autoexec
-	if (clientNum == cg.clientNum) {
+	if (!cg.demoPlayback) {
 
-		if (newInfo.team != cgs.clientinfo[cg.clientNum].team) {
+		if (clientNum == cg.clientNum) {
 
-			// autoexec team configs
-			if (newInfo.team != TEAM_FREE) {
-				CG_execFile(va("autoexec_%s", BG_GetTeam(newInfo.team)));
+			if (newInfo.team != cgs.clientinfo[cg.clientNum].team) {
+
+				// autoexec team configs
+				if (newInfo.team != TEAM_FREE) {
+					CG_execFile(va("autoexec_%s", BG_GetTeam(newInfo.team)));
+				}
 			}
-		}
-
-		// autoexec class configs
-		if (newInfo.team != TEAM_SPECTATOR) {
 
 			// autoexec class configs
-			CG_execFile(va("autoexec_%s", BG_GetClass(mp_playerType.integer)));
+			if (newInfo.team != TEAM_SPECTATOR) {
+
+				CG_execFile(va("autoexec_%s", BG_GetClass(mp_playerType.integer)));
+			}
 		}
 	}
 
