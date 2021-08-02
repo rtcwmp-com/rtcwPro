@@ -1836,4 +1836,6 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
+char* BG_GetTeam(int teamNum);
+
 #endif // ! ___BG_PUBLIC_H

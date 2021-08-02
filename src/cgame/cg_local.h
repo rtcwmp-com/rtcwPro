@@ -2218,6 +2218,7 @@ qboolean CG_CheckCenterView();
 char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
+qboolean CG_execFile(char* filename);
 
 //
 // cg_view.c

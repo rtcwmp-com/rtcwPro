@@ -4514,3 +4514,23 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 	*pszOut = 0;
 	return( pszOut - pszOutStart );
 }
+
+/*
+===============
+RTCWPro
+BG_GetTeam
+===============
+*/
+char* BG_GetTeam(int teamNum) {
+
+	switch (teamNum) {
+	case TEAM_RED:
+		return "axis";
+	case TEAM_BLUE:
+		return "allies";
+	case TEAM_SPECTATOR:
+		return "spectator";
+	}
+	return "";
+}
+

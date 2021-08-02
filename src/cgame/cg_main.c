@@ -2621,15 +2621,6 @@ void CG_AssetCache() {
 	cgDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 }
 
-// sswolf - autoexec for specific maps from et
-void CG_AutoExec_f()
-{
-	char buffer[MAX_QPATH] = "exec \"autoexec_";
-	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
-	Q_strcat(buffer, sizeof(buffer), "\"");
-	trap_SendConsoleCommand(buffer);
-}
-
 extern qboolean initTrails;
 void CG_ClearTrails( void );
 extern qboolean initparticles;
@@ -2790,7 +2781,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		trap_Cvar_Set("cg_shadows", "0");
 	}
 
-	CG_AutoExec_f();
+	// RTCWPro
+	if (!CG_execFile(va("autoexec_%s", cgs.rawmapname))) {
+		CG_execFile("autoexec_default");
+	}
 }
 
 /*
@@ -2815,3 +2809,24 @@ L0 - we'll need this later on ..
 qboolean CG_CheckExecKey(int key) {
 	return qfalse;
 }
+
+/*
+=================
+RTCWPro
+
+CG_execFile
+=================
+*/
+qboolean CG_execFile(char* filename) {
+	int handle;
+
+	handle = trap_PC_LoadSource(va("%s.cfg", filename));
+	trap_PC_FreeSource(handle);
+	if (!handle) {
+		// file not found
+		return qfalse;
+	}
+	trap_SendConsoleCommand(va("exec %s.cfg\n", filename));
+	return qtrue;
+}
+
