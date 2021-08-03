@@ -194,7 +194,6 @@
       <Filter>Source Files\unix</Filter>
     </ClCompile>
     <ClCompile Include="unix\unix_net.c">
-<<<<<<< HEAD
       <Filter>Source Files\unix</Filter>
     </ClCompile>
     <ClCompile Include="unix\unix_shared.c">
