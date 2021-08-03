@@ -304,7 +304,6 @@ vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_muzzleFlash;
 vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
-vmCvar_t cg_reinforcementTimeColor;
 vmCvar_t cg_noChat;
 vmCvar_t cg_noVoice;
 vmCvar_t cg_noAmmoAutoSwitch;
@@ -379,10 +378,21 @@ vmCvar_t cg_spawnTimer_period;      // spawntimer
 
 // added from et-legacy - crumbs
 vmCvar_t cg_tracers;
-
-// ERT
-vmCvar_t cg_drawEnemyTimer;
+// draw triggers
 vmCvar_t cg_drawTriggers;
+
+// RT and ERT
+vmCvar_t cg_drawEnemyTimer;
+vmCvar_t cg_enemyTimerColor;
+vmCvar_t cg_enemyTimerX;
+vmCvar_t cg_enemyTimerY;
+vmCvar_t cg_enemyTimerProX;
+vmCvar_t cg_enemyTimerProY;
+vmCvar_t cg_reinforcementTimeColor;
+vmCvar_t cg_reinforcementTimeX;
+vmCvar_t cg_reinforcementTimeY;
+vmCvar_t cg_reinforcementTimeProX;
+vmCvar_t cg_reinforcementTimeProY;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -639,10 +649,21 @@ cvarTable_t cvarTable[] = {
 
 	// draw tracers
 	{ &cg_tracers, "cg_tracers", "1", CVAR_ARCHIVE },
-
-	// ERT
-	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
+	// draw triggers
 	{ &cg_drawTriggers, "cg_drawTriggers", "1", CVAR_ARCHIVE },
+
+	// RT and ERT
+	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
+	{ &cg_enemyTimerColor, "cg_enemyTimerColor", "red", CVAR_ARCHIVE },
+	{ &cg_enemyTimerX, "cg_enemyTimerX", "98", CVAR_ARCHIVE },
+	{ &cg_enemyTimerY, "cg_enemyTimerY", "60", CVAR_ARCHIVE },
+	{ &cg_enemyTimerProX, "cg_enemyTimerProX", "185", CVAR_ARCHIVE },
+	{ &cg_enemyTimerProY, "cg_enemyTimerProY", "445", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeColor, "cg_reinforcementTimeColor", "green", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeX, "cg_reinforcementTimeX", "86", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeY, "cg_reinforcementTimeY", "70", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeProX, "cg_reinforcementTimeProX", "145", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeProY, "cg_reinforcementTimeProY", "445", CVAR_ARCHIVE },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -2600,15 +2621,6 @@ void CG_AssetCache() {
 	cgDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 }
 
-// sswolf - autoexec for specific maps from et
-void CG_AutoExec_f()
-{
-	char buffer[MAX_QPATH] = "exec \"autoexec_";
-	Q_strcat(buffer, sizeof(buffer), cgs.rawmapname);
-	Q_strcat(buffer, sizeof(buffer), "\"");
-	trap_SendConsoleCommand(buffer);
-}
-
 extern qboolean initTrails;
 void CG_ClearTrails( void );
 extern qboolean initparticles;
@@ -2769,7 +2781,12 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		trap_Cvar_Set("cg_shadows", "0");
 	}
 
-	CG_AutoExec_f();
+	// RTCWPro
+	if (!cg.demoPlayback) {
+		if (!CG_execFile(va("autoexec_%s", cgs.rawmapname))) {
+			CG_execFile("autoexec_default");
+		}
+	}
 }
 
 /*
@@ -2794,3 +2811,24 @@ L0 - we'll need this later on ..
 qboolean CG_CheckExecKey(int key) {
 	return qfalse;
 }
+
+/*
+=================
+RTCWPro
+
+CG_execFile
+=================
+*/
+qboolean CG_execFile(char* filename) {
+	int handle;
+
+	handle = trap_PC_LoadSource(va("%s.cfg", filename));
+	trap_PC_FreeSource(handle);
+	if (!handle) {
+		// file not found
+		return qfalse;
+	}
+	trap_SendConsoleCommand(va("exec %s.cfg\n", filename));
+	return qtrue;
+}
+

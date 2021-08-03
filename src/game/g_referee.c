@@ -833,7 +833,7 @@ void G_refRequestSS(gentity_t* ent) {
 	targetent = g_entities + pid;
 
 	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", pid));
-	CP(va("print \"Requested SS from %s (%d)\n\"", targetent->client->pers.netname, pid));
+	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, pid));
 
 }
 

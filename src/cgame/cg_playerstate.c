@@ -413,13 +413,27 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 	}
 
 	if (cg_hitsounds.integer) {
+
 		if (ops->persistant[PERS_HITBODY] != ps->persistant[PERS_HITBODY]) {
-			if (ps->persistant[PERS_HITBODY] < ops->persistant[PERS_HITBODY])
-				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.teamShot);
-			else if (ps->persistant[PERS_HITHEAD] > ops->persistant[PERS_HITHEAD])
-				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot);
-			else
-				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot);
+
+			if (ps->persistant[PERS_HITBODY] < ops->persistant[PERS_HITBODY]) {
+
+				if (cg_hitsounds.integer & HITSOUND_TEAM) {
+					trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.teamShot);
+				}
+			}
+			else if (ps->persistant[PERS_HITHEAD] > ops->persistant[PERS_HITHEAD]) {
+
+				if (cg_hitsounds.integer & HITSOUND_HEAD) {
+					trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot);
+				}
+			}
+			else {
+
+				if (cg_hitsounds.integer & HITSOUND_BODY) {
+					trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot);
+				}
+			}
 		}
 	}
 

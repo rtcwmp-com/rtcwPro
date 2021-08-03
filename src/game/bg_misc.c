@@ -4514,3 +4514,44 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 	*pszOut = 0;
 	return( pszOut - pszOutStart );
 }
+
+/*
+===============
+RTCWPro
+BG_GetTeam
+===============
+*/
+char* BG_GetTeam(int teamNum) {
+
+	switch (teamNum) {
+	case TEAM_RED:
+		return "axis";
+	case TEAM_BLUE:
+		return "allies";
+	case TEAM_SPECTATOR:
+		return "spectator";
+	}
+	return "";
+}
+
+/*
+===============
+RTCWPro
+BG_GetClass
+===============
+*/
+char* BG_GetClass(int classNum) {
+
+	switch (classNum) {
+	case PC_SOLDIER:
+		return "s";
+	case PC_MEDIC:
+		return "m";
+	case PC_LT:
+		return "l";
+	case PC_ENGINEER:
+		return "e";
+	}
+	return "";
+}
+
