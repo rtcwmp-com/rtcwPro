@@ -153,20 +153,14 @@ NET
 //#define	MAX_RELIABLE_COMMANDS	128			// max string commands buffered for restransmit
 #define MAX_RELIABLE_COMMANDS   256 // bigger!
 #define NET_ENABLEV4            0x01
-#define NET_ENABLEV6            0x02
-// if this flag is set, always attempt ipv6 connections instead of ipv4 if a v6 address is found.
-#define NET_PRIOV6              0x04
-// disables ipv6 multicast support if set.
-#define NET_DISABLEMCAST        0x08
 typedef enum {
 	NA_BOT,
 	NA_BAD,                 // an address lookup failed
 	NA_LOOPBACK,
 	NA_BROADCAST,
 	NA_IP,
-	NA_IP6,
-	NA_MULTICAST6,
-	NA_UNSPEC
+	NA_IPX,
+	NA_BROADCAST_IPX
 } netadrtype_t;
 
 typedef enum {
@@ -181,13 +175,12 @@ typedef struct {
 
 	byte ip[4];
 	byte ipx[10];
-	byte ip6[16];
 
 	unsigned short port;
-	unsigned long scope_id;       // Needed for IPv6 link-local addresses
+	unsigned long	scope_id;	// Needed for IPv6 link-local addresses
 } netadr_t;
 
-void        NET_Restart_f(void);
+void		NET_Restart(void);
 void        NET_Init( void );
 void        NET_Shutdown( void );
 void		NET_Restart_f( void );
@@ -210,9 +203,11 @@ const char  *NET_AdrToString( netadr_t a );
 const char	*NET_AdrToStringwPort (netadr_t a);
 qboolean	NET_CompareBaseAdrMask(netadr_t a, netadr_t b, int netmask);
 //const char* NET_AdrToString(netadr_t a);
-void        NET_JoinMulticast6(void);
-void        NET_LeaveMulticast6(void);
-int			NET_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
+//int			NET_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
+
+//int		NET_StringToAdr ( const char *s, netadr_t *a, netadrtype_t family);
+qboolean    NET_StringToAdr( const char *s, netadr_t *a );
+
 qboolean    NET_GetLoopPacket( netsrc_t sock, netadr_t *net_from, msg_t *net_message );
 void		NET_JoinMulticast6(void);
 void		NET_LeaveMulticast6(void);
@@ -633,7 +628,6 @@ int     FS_GetFileList(  const char *path, const char *extension, char *listbuf,
 int     FS_GetModList(  char *listbuf, int bufsize );
 
 fileHandle_t    FS_FOpenFileWrite( const char *qpath );
-fileHandle_t	FS_FOpenFileAppend(const char* filename);
 // will properly create any needed paths and deal with seperater character issues
 
 int     FS_filelength( fileHandle_t f );
@@ -1127,7 +1121,7 @@ void    Sys_SetErrorText( const char *text );
 
 void    Sys_SendPacket( int length, const void *data, netadr_t to );
 
-qboolean    Sys_StringToAdr(const char* s, netadr_t* a, netadrtype_t family);
+qboolean    Sys_StringToAdr( const char *s, netadr_t *a );
 //Does NOT parse port numbers, only base addresses.
 
 qboolean    Sys_IsLANAddress( netadr_t adr );
