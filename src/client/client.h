@@ -343,6 +343,7 @@ typedef struct {
 	char updateInfoString[MAX_INFO_STRING];
 
 	netadr_t authorizeServer;
+	char autoupdateServerNames[MAX_AUTOUPDATE_SERVERS][MAX_QPATH];
 
 	// DHM - Nerve :: Auto-update Info
 	char* autoupdateServerName;

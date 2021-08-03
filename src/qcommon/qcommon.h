@@ -291,6 +291,22 @@ You or the server may be running older versions of the game. Press the auto-upda
 #define MASTER_SERVER_NAME      "wolfmaster.idsoftware.com"
 #define AUTHORIZE_SERVER_NAME   "wolfauthorize.idsoftware.com"
 
+// TTimo: allow override for easy dev/testing..
+// see cons -- update_server=myhost
+#if !defined( AUTOUPDATE_SERVER_NAME )
+#define AUTOUPDATE_SERVER1_NAME   "au2rtcw1.activision.com"            // DHM - Nerve
+#define AUTOUPDATE_SERVER2_NAME   "au2rtcw2.activision.com"            // DHM - Nerve
+#define AUTOUPDATE_SERVER3_NAME   "au2rtcw3.activision.com"            // DHM - Nerve
+#define AUTOUPDATE_SERVER4_NAME   "au2rtcw4.activision.com"            // DHM - Nerve
+#define AUTOUPDATE_SERVER5_NAME   "au2rtcw5.activision.com"            // DHM - Nerve
+#else
+#define AUTOUPDATE_SERVER1_NAME   AUTOUPDATE_SERVER_NAME
+#define AUTOUPDATE_SERVER2_NAME   AUTOUPDATE_SERVER_NAME
+#define AUTOUPDATE_SERVER3_NAME   AUTOUPDATE_SERVER_NAME
+#define AUTOUPDATE_SERVER4_NAME   AUTOUPDATE_SERVER_NAME
+#define AUTOUPDATE_SERVER5_NAME   AUTOUPDATE_SERVER_NAME
+#endif
+
 #define PORT_MASTER         27950
 #define PORT_UPDATE         27951
 #define PORT_AUTHORIZE      27952

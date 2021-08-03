@@ -2753,62 +2753,58 @@ L0 - This is good, we can use this for basis.
 ============================
 */
 void CL_CheckAutoUpdate(void) {
-	int i;
+	int validServerNum = 0;
+	int i = 0, rnd = 0;
+	netadr_t temp;
+	char* servername;
 
 	if (!cl_autoupdate->integer) {
 		return;
 	}
 
-
 	// Only check once per session
 	if (autoupdateChecked) {
-		printf("Updated checked already..");
 		return;
 	}
 
-	srand( Com_Milliseconds() );
+	srand(Com_Milliseconds());
 
 	// Find out how many update servers have valid DNS listings
-	for ( i = 0; i < MAX_AUTOUPDATE_SERVERS; i++ ) {
-		if ( NET_StringToAdr( cls.autoupdateServerNames[i], &temp ) ) {
+	for (i = 0; i < MAX_AUTOUPDATE_SERVERS; i++) {
+		if (NET_StringToAdr(cls.autoupdateServerNames[i], &temp)) {
 			validServerNum++;
 		}
-
 	}
 
-	srand(Com_Milliseconds());
-	// TRACEMARK - L0
-	//if (!NET_StringToAdr(WEB_GET_UPDATE, &cls.autoupdateServer, NA_IP)) {
-	//	return;
-	//}
+	// Pick a random server
+	if (validServerNum > 1) {
+		rnd = rand() % validServerNum;
+	}
+	else {
+		rnd = 0;
+	}
 
-	// Check for Update
-	HTTP_ClientNeedsUpdate();
+	servername = cls.autoupdateServerNames[rnd];
 
-
-	// Fetch MOTD..
-	CL_infoRequestMotd();
-
-	Com_DPrintf( "Resolving AutoUpdate Server... " );
-	if ( !NET_StringToAdr( servername, &cls.autoupdateServer  ) ) {
-		Com_DPrintf( "Couldn't resolve first address, trying default..." );
+	Com_DPrintf("Resolving AutoUpdate Server... ");
+	if (!NET_StringToAdr(servername, &cls.autoupdateServer)) {
+		Com_DPrintf("Couldn't resolve first address, trying default...");
 
 		// Fall back to the first one
-		if ( !NET_StringToAdr( cls.autoupdateServerNames[0], &cls.autoupdateServer  ) ) {
-			Com_DPrintf( "Failed to resolve any Auto-update servers.\n" );
+		if (!NET_StringToAdr(cls.autoupdateServerNames[0], &cls.autoupdateServer)) {
+			Com_DPrintf("Failed to resolve any Auto-update servers.\n");
 			autoupdateChecked = qtrue;
 			return;
 		}
 	}
-	cls.autoupdateServer.port = BigShort( PORT_SERVER );
-	Com_DPrintf( "%i.%i.%i.%i:%i\n", cls.autoupdateServer.ip[0], cls.autoupdateServer.ip[1],
-				 cls.autoupdateServer.ip[2], cls.autoupdateServer.ip[3],
-				 BigShort( cls.autoupdateServer.port ) );
+	cls.autoupdateServer.port = BigShort(PORT_SERVER);
+	Com_DPrintf("%i.%i.%i.%i:%i\n", cls.autoupdateServer.ip[0], cls.autoupdateServer.ip[1],
+		cls.autoupdateServer.ip[2], cls.autoupdateServer.ip[3],
+		BigShort(cls.autoupdateServer.port));
 
-	NET_OutOfBandPrint( NS_CLIENT, cls.autoupdateServer, "getUpdateInfo \"%s\" \"%s\"\n", Q3_VERSION, CPUSTRING );
+	NET_OutOfBandPrint(NS_CLIENT, cls.autoupdateServer, "getUpdateInfo \"%s\" \"%s\"\n", Q3_VERSION, CPUSTRING);
 
 	CL_RequestMotd();
-
 
 	autoupdateChecked = qtrue;
 }
@@ -3279,6 +3275,12 @@ void CL_Init( void ) {
 	cl_updateavailable = Cvar_Get( "cl_updateavailable", "0", CVAR_ROM );
 	cl_updatefiles = Cvar_Get( "cl_updatefiles", "", CVAR_ROM );
 	cls.autoupdateServerName = UPDATE_SERVER_NAME;
+
+	Q_strncpyz(cls.autoupdateServerNames[0], AUTOUPDATE_SERVER1_NAME, MAX_QPATH);
+	Q_strncpyz(cls.autoupdateServerNames[1], AUTOUPDATE_SERVER2_NAME, MAX_QPATH);
+	Q_strncpyz(cls.autoupdateServerNames[2], AUTOUPDATE_SERVER3_NAME, MAX_QPATH);
+	Q_strncpyz(cls.autoupdateServerNames[3], AUTOUPDATE_SERVER4_NAME, MAX_QPATH);
+	Q_strncpyz(cls.autoupdateServerNames[4], AUTOUPDATE_SERVER5_NAME, MAX_QPATH);
 	// DHM - Nerve
 
 	//
@@ -4489,9 +4491,9 @@ static trans_t* LookupTrans( char *original, char *translated[MAX_LANGUAGES], qb
 	}
 
 	// see if we want to save out the translation table everytime a string is added
-	if ( cl_debugTranslation->integer == 2 && !isLoading ) {
+	/*if ( cl_debugTranslation->integer == 2 && !isLoading ) {
 		CL_SaveTransTable();
-	}
+	}*/
 
 	return newt;
 }

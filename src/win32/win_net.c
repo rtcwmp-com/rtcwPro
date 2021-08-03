@@ -1043,3 +1043,19 @@ NET_Restart_f
 void NET_Restart( void ) {
 	NET_Config( networkingEnabled );
 }
+
+#ifdef _WIN32
+const char* NET_AdrToStringwPort(netadr_t a)
+{
+	static  char    s[NET_ADDRSTRMAXLEN];
+
+	if (a.type == NA_LOOPBACK)
+		Com_sprintf(s, sizeof(s), "loopback");
+	else if (a.type == NA_BOT)
+		Com_sprintf(s, sizeof(s), "bot");
+	else if (a.type == NA_IP)
+		Com_sprintf(s, sizeof(s), "%s:%lu", NET_AdrToString(a), (unsigned long)ntohs(a.port));
+
+	return s;
+}
+#endif
