@@ -2753,6 +2753,7 @@ L0 - This is good, we can use this for basis.
 ============================
 */
 void CL_CheckAutoUpdate(void) {
+	int i;
 
 	if (!cl_autoupdate->integer) {
 		return;
@@ -2763,6 +2764,7 @@ void CL_CheckAutoUpdate(void) {
 	if (autoupdateChecked) {
 		printf("Updated checked already..");
 		return;
+	}
 
 	srand( Com_Milliseconds() );
 
