@@ -810,7 +810,7 @@ void WolfFindMedic( gentity_t *self ) {
 	self->client->ps.stats[STAT_DEAD_YAW] = 999;
 
 	// RTCWPro - medcam lock toggle
-	if (!self->client->sess.findMedic) {
+	if (!self->client->pers.findMedic) {
 		return;
 	}
 

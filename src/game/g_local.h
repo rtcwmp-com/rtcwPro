@@ -566,7 +566,6 @@ typedef struct {
 
 	int clientFlags;		// Sort some stuff based upon user settings
 	int specSpeed;
-	qboolean findMedic;
 } clientSession_t;
 
 //
@@ -638,6 +637,7 @@ typedef struct {
 	qboolean ready;
 	int restrictedWeapon;
 	qboolean drawHitBoxes;
+	qboolean findMedic;
 } clientPersistant_t;
 
 // L0 - antilag port

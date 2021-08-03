@@ -1547,10 +1547,10 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	s = Info_ValueForKey(userinfo, "cg_findMedic");
 	if (!atoi(s)) {
-		client->sess.findMedic = qfalse;
+		client->pers.findMedic = qfalse;
 	}
 	else {
-		client->sess.findMedic = qtrue;
+		client->pers.findMedic = qtrue;
 	}
 
 	// set name
