@@ -394,6 +394,9 @@ vmCvar_t cg_reinforcementTimeY;
 vmCvar_t cg_reinforcementTimeProX;
 vmCvar_t cg_reinforcementTimeProY;
 
+// lock camera on medic at death
+vmCvar_t cg_findMedic;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -664,6 +667,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_reinforcementTimeY, "cg_reinforcementTimeY", "70", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeProX, "cg_reinforcementTimeProX", "145", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeProY, "cg_reinforcementTimeProY", "445", CVAR_ARCHIVE },
+
+	// lock camera on medic at death
+	{ &cg_findMedic, "cg_findMedic", "1", CVAR_ARCHIVE | CVAR_USERINFO },
 
 	// sswolf - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

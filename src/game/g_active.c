@@ -809,6 +809,11 @@ void WolfFindMedic( gentity_t *self ) {
 	self->client->ps.viewlocked = 0;
 	self->client->ps.stats[STAT_DEAD_YAW] = 999;
 
+	// RTCWPro - medcam lock toggle
+	if (!self->client->sess.findMedic) {
+		return;
+	}
+
 	VectorCopy( self->s.pos.trBase, start );
 	start[2] += self->client->ps.viewheight;
 

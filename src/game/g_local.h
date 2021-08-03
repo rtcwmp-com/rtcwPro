@@ -566,6 +566,7 @@ typedef struct {
 
 	int clientFlags;		// Sort some stuff based upon user settings
 	int specSpeed;
+	qboolean findMedic;
 } clientSession_t;
 
 //

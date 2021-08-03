@@ -2190,6 +2190,8 @@ extern vmCvar_t cg_reinforcementTimeY;
 extern vmCvar_t cg_reinforcementTimeProX;
 extern vmCvar_t cg_reinforcementTimeProY;
 
+extern vmCvar_t cg_findMedic;
+
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
 
