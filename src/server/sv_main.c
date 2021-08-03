@@ -113,9 +113,6 @@ cvar_t* sv_checkVersion;
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
-serverBan_t serverBans[SERVER_MAXBANS];
-int serverBansCount = 0;
-
 /*
 =============================================================================
 
@@ -260,12 +257,8 @@ but not on every player enter or exit.
 #define HEARTBEAT_DEAD  "WolfFlatline-1"         // NERVE - SMF
 
 void SV_MasterHeartbeat( const char *hbname ) {
-	static netadr_t	adr[MAX_MASTER_SERVERS][2];
+	static netadr_t adr[MAX_MASTER_SERVERS];
 	int i;
-	int	res;
-	int	netenabled;
-
-	netenabled = Cvar_VariableIntegerValue("net_enabled");
 
 	// DHM - Nerve :: Update Server doesn't send heartbeat
 #ifdef UPDATE_SERVER
@@ -273,7 +266,7 @@ void SV_MasterHeartbeat( const char *hbname ) {
 #endif
 
 	// "dedicated 1" is for lan play, "dedicated 2" is for inet public play
-	if (!com_dedicated || com_dedicated->integer != 2 || !(netenabled & (NET_ENABLEV4 | NET_ENABLEV6))) {
+	if ( !com_dedicated || com_dedicated->integer != 2 ) {
 		return;     // only dedicated servers send heartbeats
 	}
 
@@ -283,66 +276,41 @@ void SV_MasterHeartbeat( const char *hbname ) {
 	}
 	svs.nextHeartbeatTime = svs.time + HEARTBEAT_MSEC;
 
+
 	// send to group masters
-	for (i = 0; i < MAX_MASTER_SERVERS; i++) {
-		if (!sv_master[i]->string[0])
+	for ( i = 0 ; i < MAX_MASTER_SERVERS ; i++ ) {
+		if ( !sv_master[i]->string[0] ) {
 			continue;
+		}
 
 		// see if we haven't already resolved the name
 		// resolving usually causes hitches on win95, so only
 		// do it when needed
-		if (sv_master[i]->modified || (adr[i][0].type == NA_BAD && adr[i][1].type == NA_BAD)) {
+		if ( sv_master[i]->modified ) {
 			sv_master[i]->modified = qfalse;
 
-			if (netenabled & NET_ENABLEV4) {
-				Com_Printf("Resolving %s (IPv4)\n", sv_master[i]->string);
-				res = NET_StringToAdr(sv_master[i]->string, &adr[i][0], NA_IP);
-
-				if (res == 2) {
-					// if no port was specified, use the default master port
-					adr[i][0].port = BigShort(PORT_MASTER);
-				}
-
-				if (res)
-					Com_Printf("%s resolved to %s\n", sv_master[i]->string, NET_AdrToStringwPort(adr[i][0]));
-				else
-					Com_Printf("%s has no IPv4 address.\n", sv_master[i]->string);
-			}
-
-			if (netenabled & NET_ENABLEV6) {
-				Com_Printf("Resolving %s (IPv6)\n", sv_master[i]->string);
-				res = NET_StringToAdr(sv_master[i]->string, &adr[i][1], NA_IP6);
-
-				if (res == 2) {
-					// if no port was specified, use the default master port
-					adr[i][1].port = BigShort(PORT_MASTER);
-				}
-
-				if (res)
-					Com_Printf("%s resolved to %s\n", sv_master[i]->string, NET_AdrToStringwPort(adr[i][1]));
-				else
-					Com_Printf("%s has no IPv6 address.\n", sv_master[i]->string);
-			}
-
-			if (adr[i][0].type == NA_BAD && adr[i][1].type == NA_BAD) {
+			Com_Printf( "Resolving %s\n", sv_master[i]->string );
+			if ( !NET_StringToAdr( sv_master[i]->string, &adr[i] ) ) {
 				// if the address failed to resolve, clear it
 				// so we don't take repeated dns hits
-				Com_Printf("Couldn't resolve address: %s\n", sv_master[i]->string);
-				Cvar_Set(sv_master[i]->name, "");
+				Com_Printf( "Couldn't resolve address: %s\n", sv_master[i]->string );
+				Cvar_Set( sv_master[i]->name, "" );
 				sv_master[i]->modified = qfalse;
 				continue;
 			}
+			if ( !strstr( ":", sv_master[i]->string ) ) {
+				adr[i].port = BigShort( PORT_MASTER );
+			}
+			Com_Printf( "%s resolved to %i.%i.%i.%i:%i\n", sv_master[i]->string,
+						adr[i].ip[0], adr[i].ip[1], adr[i].ip[2], adr[i].ip[3],
+						BigShort( adr[i].port ) );
 		}
 
-		Com_Printf("Sending heartbeat to %s\n", sv_master[i]->string);
 
+		Com_Printf( "Sending heartbeat to %s\n", sv_master[i]->string );
 		// this command should be changed if the server info / status format
 		// ever incompatably changes
-
-		if (adr[i][0].type != NA_BAD)
-			NET_OutOfBandPrint(NS_SERVER, adr[i][0], "heartbeat %s\n", HEARTBEAT_GAME);
-		if (adr[i][1].type != NA_BAD)
-			NET_OutOfBandPrint(NS_SERVER, adr[i][1], "heartbeat %s\n", HEARTBEAT_GAME);
+		NET_OutOfBandPrint( NS_SERVER, adr[i], "heartbeat %s\n", hbname );
 	}
 }
 
@@ -375,7 +343,7 @@ void SV_MasterGameCompleteStatus(void) {
 			sv_master[i]->modified = qfalse;
 
 			Com_Printf( "Resolving %s\n", sv_master[i]->string );
-			if ( !NET_StringToAdr( sv_master[i]->string, &adr[i], NA_IP) ) {
+			if ( !NET_StringToAdr( sv_master[i]->string, &adr[i] ) ) {
 				// if the address failed to resolve, clear it
 				// so we don't take repeated dns hits
 				Com_Printf( "Couldn't resolve address: %s\n", sv_master[i]->string );
@@ -750,9 +718,12 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	if (from.type == NA_IP) {
 		from.ip[3] = 0; // xx.xx.xx.0
 	}
+	// L0 - FIXME - commented out since there's no ipv6 atm..
+	/*
 	else {
 		from.ip6[15] = 0;
 	}
+	*/
 
 	// This quick exit strategy while we're being bombarded by getinfo/getstatus requests
 	// directed at a specific IP address doesn't really impact server performance.

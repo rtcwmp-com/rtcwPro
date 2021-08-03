@@ -133,7 +133,7 @@ void SV_GetChallenge( netadr_t from ) {
 	// look up the authorize server's IP
 	if ( !svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD ) {
 		Com_Printf( "Resolving %s\n", AUTHORIZE_SERVER_NAME );
-		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &svs.authorizeAddress, NA_UNSPEC) ) {
+		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &svs.authorizeAddress ) ) {
 			Com_Printf( "Couldn't resolve address\n" );
 			return;
 		}
@@ -180,32 +180,6 @@ void SV_GetChallenge( netadr_t from ) {
 							"getIpAuthorize %i %i.%i.%i.%i %s %i",  svs.challenges[i].challenge,
 							from.ip[0], from.ip[1], from.ip[2], from.ip[3], game, fs->integer );
 	}
-}
-
-/*
-====================
-SV_IsBanned
-====================
-*/
-qboolean SV_IsBanned(netadr_t* from, qboolean isexception) {
-	int index;
-	serverBan_t* curban;
-
-	if (!isexception) {
-		// If this is a query for a ban, first check whether the client is excepted
-		if (SV_IsBanned(from, qtrue))
-			return qfalse;
-	}
-
-	for (index = 0; index < serverBansCount; index++) {
-		curban = &serverBans[index];
-
-		if (curban->isexception == isexception) {
-			if (NET_CompareBaseAdrMask(curban->ip, *from, curban->subnet))
-				return qtrue;
-		}
-	}
-	return qfalse;
 }
 
 /*
@@ -334,12 +308,13 @@ void SV_DirectConnect( netadr_t from ) {
 		return;
 	}
 
+/*
 	// Check whether this client is banned.
 	if (SV_IsBanned(&from, qfalse)) {
 		NET_OutOfBandPrint(NS_SERVER, from, "print\n^7You are ^1Banned ^7from this server^1!\n");
 		return;
 	}
-
+*/
 	// RTCWPro
 	if (!NET_IsLocalAddress(from)) {
 		int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
@@ -349,6 +324,7 @@ void SV_DirectConnect( netadr_t from ) {
 			return;
 		}
 	}
+
 
 	// DHM - Nerve :: Update Server allows any protocol to connect
 #ifndef UPDATE_SERVER
@@ -411,7 +387,7 @@ void SV_DirectConnect( netadr_t from ) {
 		}
 
 		challengeptr = &svs.challenges[i];
-		
+
 		/*if (challengeptr->wasrefused) {
 			// Return silently, so that error messages written by the server keep being displayed.
 			return;
@@ -2289,7 +2265,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
-		cl->netchan.remoteAddress.type != NA_BOT) 
+		cl->netchan.remoteAddress.type != NA_BOT)
 	{
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
 		return;
