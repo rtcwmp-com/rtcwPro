@@ -441,6 +441,28 @@ void Cmd_GetOBJ(gentity_t* ent) {
 	}
 }
 
+void Cmd_SelfRevive_f(gentity_t* ent) {
+
+	if (!ent->client->sess.referee) {
+		return;
+	}
+
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+		return;
+	}
+
+	if (ent->client->ps.stats[STAT_HEALTH] <= 0) {
+		return;
+	}
+
+	ReviveEntity(ent, ent);
+	trap_SendServerCommand(ent - g_entities, "cp \"Selfrevived\n\"");
+}
+
 /*
 ==================
 Cmd_Nofatigue_f
@@ -2688,6 +2710,8 @@ void ClientCommand( int clientNum ) {
 		Cmd_God_f( ent );
 	} else if (Q_stricmp(cmd, "getobj") == 0) {
 		Cmd_GetOBJ(ent);
+	} else if (Q_stricmp(cmd, "selfrevive") == 0) {
+		Cmd_SelfRevive_f(ent);
 	} else if ( Q_stricmp( cmd, "nofatigue" ) == 0 )  {
 		Cmd_Nofatigue_f( ent );
 	} else if ( Q_stricmp( cmd, "notarget" ) == 0 )  {

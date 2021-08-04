@@ -275,6 +275,100 @@ void Weapon_MagicAmmo( gentity_t *ent ) {
 }
 // jpw
 
+/*
+================
+RTCWPro
+This is taken out of Weapon_Syringe
+so it can be used for other stuff
+================
+*/
+qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
+{
+	vec3_t   org, maxs;
+	trace_t  tr;
+	int      healamt, headshot, oldweapon, oldweaponstate, oldclasstime = 0;
+	qboolean usedSyringe = qfalse;          // DHM - Nerve
+	int      ammo[MAX_WEAPONS];         // JPW NERVE total amount of ammo
+	int      ammoclip[MAX_WEAPONS];     // JPW NERVE ammo in clip
+	int      weapons[MAX_WEAPONS / (sizeof(int) * 8)];  // JPW NERVE 64 bits for weapons held
+//	gentity_t	*traceEnt,
+	gentity_t* te;
+
+	// heal the dude
+	// copy some stuff out that we'll wanna restore
+	VectorCopy(traceEnt->client->ps.origin, org);
+	headshot = traceEnt->client->ps.eFlags & EF_HEADSHOT;
+	healamt = traceEnt->client->ps.stats[STAT_MAX_HEALTH] * 0.5;
+	oldweapon = traceEnt->client->ps.weapon;
+	oldweaponstate = traceEnt->client->ps.weaponstate;
+
+	// keep class special weapon time to keep them from exploiting revives
+	oldclasstime = traceEnt->client->ps.classWeaponTime;
+
+	memcpy(ammo, traceEnt->client->ps.ammo, sizeof(int) * MAX_WEAPONS);
+	memcpy(ammoclip, traceEnt->client->ps.ammoclip, sizeof(int) * MAX_WEAPONS);
+	memcpy(weapons, traceEnt->client->ps.weapons, sizeof(int) * (MAX_WEAPONS / (sizeof(int) * 8)));
+
+	ClientSpawn(traceEnt, qtrue);
+
+	// L0 - antilag
+	G_ResetTrail(traceEnt);
+
+	memcpy(traceEnt->client->ps.ammo, ammo, sizeof(int) * MAX_WEAPONS);
+	memcpy(traceEnt->client->ps.ammoclip, ammoclip, sizeof(int) * MAX_WEAPONS);
+	memcpy(traceEnt->client->ps.weapons, weapons, sizeof(int) * (MAX_WEAPONS / (sizeof(int) * 8)));
+
+	if (headshot)
+		traceEnt->client->ps.eFlags |= EF_HEADSHOT;
+	traceEnt->client->ps.weapon = oldweapon;
+	traceEnt->client->ps.weaponstate = oldweaponstate;
+
+	traceEnt->client->ps.classWeaponTime = oldclasstime;
+
+	traceEnt->health = healamt;
+	VectorCopy(org, traceEnt->s.origin);
+	VectorCopy(org, traceEnt->r.currentOrigin);
+	VectorCopy(org, traceEnt->client->ps.origin);
+
+	trap_Trace(&tr, traceEnt->client->ps.origin, traceEnt->client->ps.mins, traceEnt->client->ps.maxs, traceEnt->client->ps.origin, traceEnt->s.number, MASK_PLAYERSOLID);
+	if (tr.allsolid) {
+		if (tr.entityNum >= MAX_CLIENTS) {
+			traceEnt->client->ps.pm_flags |= PMF_DUCKED;
+		}
+	}
+
+	trap_LinkEntity(ent);
+
+	traceEnt->s.effect3Time = level.time;
+	traceEnt->r.contents = CONTENTS_CORPSE;
+	traceEnt->props_frame_state = ent->s.number;
+
+	// DHM - Nerve :: Mark that the medicine was indeed dispensed
+	usedSyringe = qtrue;
+
+	// sound
+	te = G_TempEntity(traceEnt->r.currentOrigin, EV_GENERAL_SOUND);
+	te->s.eventParm = G_SoundIndex("sound/multiplayer/vo_revive.wav");
+
+	// Xian -- This was gay and I always hated it.
+	if (g_fastres.integer > 0)
+		BG_AnimScriptEvent(&traceEnt->client->ps, ANIM_ET_JUMP, qfalse, qtrue);
+	else
+	{
+		// NOTE(nobo): This is what the pm_time should have been set to all along..
+		// Then the invul and time lock would actually match the animation duration..
+		/*traceEnt->client->ps.pm_time = */BG_AnimScriptEvent(&traceEnt->client->ps, ANIM_ET_REVIVE, qfalse, qtrue);
+		traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
+		traceEnt->client->ps.pm_time = 2100;
+		traceEnt->client->revive_animation_playing = qtrue;
+		traceEnt->client->movement_lock_begin_time = level.time;
+	}
+
+	// Tell the caller if we actually used a syringe
+	return usedSyringe;
+
+}
+
 // JPW NERVE Weapon_Syringe:
 /*
 ======================

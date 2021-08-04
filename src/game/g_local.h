@@ -1241,6 +1241,7 @@ void AddHeadEntity(gentity_t* ent);
 void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);
 void RemoveHeadEntity(gentity_t* ent);
+qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt);
 
 //
 // g_client.c
