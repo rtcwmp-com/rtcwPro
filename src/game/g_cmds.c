@@ -455,10 +455,6 @@ void Cmd_SelfRevive_f(gentity_t* ent) {
 		return;
 	}
 
-	if (ent->client->ps.stats[STAT_HEALTH] <= 0) {
-		return;
-	}
-
 	ReviveEntity(ent, ent);
 	trap_SendServerCommand(ent - g_entities, "cp \"Selfrevived\n\"");
 }
