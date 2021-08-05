@@ -510,7 +510,8 @@ extern vec4_t colorMdOrange;
 extern vec4_t colorMdBlue;
 
 #define Q_COLOR_ESCAPE  '^'
-#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isgraph(*((p)+1))) // ^[0-9a-zA-Z]
+//#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isgraph(*((p)+1))) // ^[0-9a-zA-Z]
+#define Q_IsColorString(p)    ((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isgraph(*((p)+1)) && *((p)+1) != Q_COLOR_ESCAPE)
 // -OSPx
 
 #define COLOR_BLACK     '0'
