@@ -99,9 +99,15 @@ void TossClientItems( gentity_t *self ) {
 	gitem_t     *item;
 	int weapon;
 	gentity_t   *drop = 0;
+	int pclass = self->client->ps.stats[STAT_PLAYER_CLASS];
 
 	// drop the weapon if not a gauntlet or machinegun
-	weapon = self->s.weapon;
+	if (pclass != PC_MEDIC) { // RTCWPro - not for medics
+		weapon = self->s.weapon;
+	}
+	else {
+		weapon = WP_NONE;
+	}
 
 	// make a special check to see if they are changing to a new
 	// weapon that isn't the mg or gauntlet.  Without this, a client
