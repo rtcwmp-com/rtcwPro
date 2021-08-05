@@ -841,6 +841,7 @@ void G_writeServerInfo(void){
     char* buf;
     char* s;
     char mapName[MAX_QPATH];
+    char server_ip[16];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
     char cs[MAX_STRING_CHARS];
@@ -855,7 +856,7 @@ void G_writeServerInfo(void){
 
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
-
+	trap_Cvar_VariableStringBuffer("sv_serverIP", server_ip, sizeof(server_ip));
  //   Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
    // Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
  //   Q_strncpyz(ROUNDID,va("%s",g_currentRound.integer),sizeof(ROUNDID));
@@ -871,7 +872,7 @@ void G_writeServerInfo(void){
 
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
-    json_object_set_new(jdata, "serverIP",    json_string(""));
+    json_object_set_new(jdata, "serverIP",    json_string(va("%s",server_ip)));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
     json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i", g_gameStatslog.integer)));
