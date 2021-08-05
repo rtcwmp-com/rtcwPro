@@ -3213,6 +3213,7 @@ static qboolean CG_DrawFollow( void ) {
 	vec4_t color;
 	const char  *name;
 	char deploytime[128];        // JPW NERVE
+	float y;
 
 	if ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) ) {
 		return qfalse;
@@ -3253,11 +3254,12 @@ static qboolean CG_DrawFollow( void ) {
 	} else {
 		// jpw
 		//CG_DrawSmallString( INFOTEXT_STARTX, 68, CG_TranslateString( "following" ), 1.0F ); // original location
-		CG_DrawSmallString( INFOTEXT_STARTX, 83, CG_TranslateString( "following" ), 1.0F ); // below respawn timer
+		if (cgs.gamestate != GS_PLAYING && cgs.currentRound) { y = 63; } else { y = 83; }
+		CG_DrawSmallString( INFOTEXT_STARTX, y, CG_TranslateString( "following" ), 1.0F ); // below respawn timer
 
 		name = cgs.clientinfo[ cg.snap->ps.clientNum ].name;
         //CG_DrawStringExt( 120, 68, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // original location
-		CG_DrawStringExt( 120, 83, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // below respawn timer
+		CG_DrawStringExt( 120, y, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // below respawn timer
 	} // JPW NERVE
 	return qtrue;
 }
