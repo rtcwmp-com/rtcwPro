@@ -67,6 +67,7 @@ cvar_t  *sv_friendlyFire;       // NERVE - SMF
 cvar_t  *sv_maxlives;           // NERVE - SMF
 cvar_t  *sv_tourney;            // NERVE - SMF
 
+cvar_t *sv_serverIP;
 cvar_t *sv_dl_maxRate;
 cvar_t  *sv_dlRate;
 cvar_t	*sv_minRate;

@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
  *
 */
 
+#include <curl/curl.h>
 #include "server.h"
 
 /*
@@ -768,6 +769,26 @@ void SV_LoadModels(void) {
 	SV_LoadMDS(ALLIED_MODEL_HANDLE, "models/players/multi/body.mds");
 }
 
+
+static size_t getIP_response(void *ptr, size_t size, size_t nmemb, void *stream){
+    Cvar_Set("sv_serverIP", va("%s",ptr));
+}
+
+void SV_GetIP(void) {
+  CURL *curl;
+  CURLcode res;
+
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "http://api.ipify.org");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getIP_response);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
+
+}
+
+
 /*
 ===============
 SV_Init
@@ -779,7 +800,7 @@ void SV_BotInitBotLib( void );
 
 void SV_Init( void ) {
 	SV_AddOperatorCommands();
-
+    SV_GetIP();
 	// serverinfo vars
 	Cvar_Get( "dmflags", "0", /*CVAR_SERVERINFO*/ 0 );
 	Cvar_Get( "fraglimit", "0", /*CVAR_SERVERINFO*/ 0 );
@@ -791,6 +812,7 @@ void SV_Init( void ) {
 	sv_gameskill = Cvar_Get( "g_gameskill", "3", CVAR_SERVERINFO | CVAR_LATCH );
 	// done
 
+	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
 	Cvar_Get( "protocol", va( "%i", GAME_PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
 	sv_mapname = Cvar_Get( "mapname", "nomap", CVAR_SERVERINFO | CVAR_ROM );
