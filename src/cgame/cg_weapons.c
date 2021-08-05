@@ -2803,7 +2803,14 @@ void CG_AddPlayerFoot( refEntity_t *parent, playerState_t *ps, centity_t *cent )
 
 }
 
-qboolean hideWeapon(int weapon) {
+/*
+==============
+RTCWPro
+
+CG_HideWeapon
+==============
+*/
+qboolean CG_HideWeapon(int weapon) {
 	qboolean hide;
 
 	if (!cg_drawGun.integer) {
@@ -2884,7 +2891,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		return;
 	}
 	// allow the gun to be completely removed
-	if ((hideWeapon(ps->weapon)) || (cg_uselessNostalgia.integer)) {
+	if ((CG_HideWeapon(ps->weapon)) || (cg_uselessNostalgia.integer)) {
 		vec3_t origin;
 
 		if ( cg.predictedPlayerState.eFlags & EF_FIRING ) {
