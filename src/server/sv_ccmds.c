@@ -574,7 +574,7 @@ void SV_SetCvarRestrictions(void) {
 		}
 		fclose(f);
 
-		Com_Printf("Loading %s\n", filepath);
+		Com_Printf("Loaded %s\n", filepath);
 		Com_Printf("Registered %d restricted cvars.\n", i);
 		if (j > 0) {
 			Com_Printf("Executed %d regular cvars.\n", j);
