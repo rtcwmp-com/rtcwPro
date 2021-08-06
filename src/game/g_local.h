@@ -1375,7 +1375,7 @@ void Svcmd_GameMem_f( void );
 //
 void G_ReadSessionData( gclient_t *client );
 void G_InitSessionData( gclient_t *client, char *userinfo );
-
+void G_ClientSwap( gclient_t *client );
 void G_InitWorldSession( void );
 void G_WriteSessionData( void );
 
