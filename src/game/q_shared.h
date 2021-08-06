@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwMP-Pro 1.2.109"  // RTCWPro
+#define Q3_VERSION      "RtcwMP-Pro 1.2.1.10"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
