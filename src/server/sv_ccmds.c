@@ -1079,7 +1079,7 @@ static void SV_LoadGameConfig_f( void ) {
 		SV_SetCvarRestrictions();
 	}
 	else {
-		Com_Printf("Could not found config named '%s'.\n", config);
+		Com_Printf("Could not find config named '%s'.\n", config);
 	}
 }
 
