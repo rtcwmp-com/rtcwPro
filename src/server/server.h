@@ -371,6 +371,7 @@ extern cvar_t* sv_ssMaxTime;
 //extern cvar_t* sv_ssQuality;
 
 extern cvar_t* sv_checkVersion;
+extern cvar_t* sv_restRunning;
 
 //===========================================================
 

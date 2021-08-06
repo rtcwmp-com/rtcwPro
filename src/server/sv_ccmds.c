@@ -548,6 +548,8 @@ void SV_SetCvarRestrictions(void) {
 		return;
 	}
 
+	Cvar_Set("sv_restRunning", "1");
+
 	if (FS_FileExists(va("configs/%s.config", sv_GameConfig->string))) {
 		char line[MAX_CVAR_VALUE_STRING];
 		char* filepath = va("%s/configs/%s.config", path, sv_GameConfig->string);
@@ -572,6 +574,7 @@ void SV_SetCvarRestrictions(void) {
 		}
 		fclose(f);
 
+		Com_Printf("Loading %s\n", filepath);
 		Com_Printf("Registered %d restricted cvars.\n", i);
 		if (j > 0) {
 			Com_Printf("Executed %d regular cvars.\n", j);
