@@ -570,7 +570,7 @@ gotnewcl:
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
 	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
-
+    newcl->clientValidated = qfalse;
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
 	// gamestate message was not just sent, forcing a retransmit
@@ -1958,7 +1958,11 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	}
 
 	Com_DPrintf( "clientCommand: %s : %i : %s\n", cl->name, seq, s );
+    // if validated then stay validated
+	if ( !Q_strncmp( "rkvald 1", s, 8 )) {
+        cl->clientValidated = qtrue;
 
+	}
 	// drop the connection if we have somehow lost commands
 	if ( seq > cl->lastClientCommand + 1 ) {
 		Com_Printf( "Client %s lost %i clientCommands\n", cl->name,
@@ -1998,11 +2002,14 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	if (!Q_strncmp(CTL_RKVALD, s, strlen(CTL_RKVALD))) {
 		if (!Q_stricmp(sv_GameConfig->string, "")) {
 			cl->clientRestValidated = RKVALD_TIME_OFF;
+			cl->clientValidated = qtrue;
 		}
 		else {
 			Cmd_TokenizeString(s);
 			if (Cmd_Argv(1) && !Q_stricmp(Cmd_Argv(1), RKVALD_OK)) {
+
 				cl->clientRestValidated = svs.time + RKVALD_TIME_FULL;
+				cl->clientValidated = qtrue;
 			}
 		}
 	}
@@ -2265,7 +2272,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
-		cl->netchan.remoteAddress.type != NA_BOT)
+		cl->netchan.remoteAddress.type != NA_BOT && !cl->clientValidated)
 	{
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
 		return;
