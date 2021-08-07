@@ -268,6 +268,7 @@ vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
 vmCvar_t g_spawnOffset;
 vmCvar_t g_bodiesGrabFlags;
+vmCvar_t g_mapScriptDirectory;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -491,6 +492,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_spawnOffset, "g_spawnOffset", "9", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_bodiesGrabFlags, "g_bodiesGrabFlags", "1", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_mapScriptDirectory, "g_mapScriptDirectory", "", 0, qfalse },
 	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
