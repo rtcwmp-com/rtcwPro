@@ -143,9 +143,6 @@ Restart the server on a different map
 static void SV_Map_f( void ) {
 	char        *cmd;
 	char        *map;
-	int i;
-	client_t* client;
-
 	char mapname[MAX_QPATH];
 	qboolean killBots, cheat;
 	char expanded[MAX_QPATH];
@@ -225,28 +222,6 @@ static void SV_Map_f( void ) {
 	} else {
 		Cvar_Set( "sv_cheats", "0" );
 	}
-
-/*
-  Not the best fix for the kicking of people for 0 violations upon map change BUT
-   it suffices our needs at the moment and will cause zero harm (other than giving violators a few
-    additional seconds to fix their cvars. Anyway will revisit later.
-*/
-		//  Give players time to adjust stuff if needed (on map change)
-	for (i = 0; i < sv_maxclients->integer; i++) {
-		client = &svs.clients[i];
-
-		// send the new gamestate to all connected clients
-		if (client->state < CS_CONNECTED) {
-			continue;
-		}
-
-		if (client->netchan.remoteAddress.type != NA_BOT) {
-             client->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
-		}
-	}
-// end fix for kick for 0 violations
-
-
 }
 
 /*
