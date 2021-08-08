@@ -1157,16 +1157,17 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 
-                    /*
-					if (winner == 0)
-					{
-						AAPS("sound/match/winaxis.wav");
+
+					if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
+                            G_writeObjectiveEvent(ent, objCapture  );
+                            cl->sess.obj_captured++;
 					}
-					else if (winner == 1)
+					else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
 					{
-						AAPS("sound/match/winallies.wav");
+                            G_writeObjectiveEvent(ent, objCapture  );
+                            cl->sess.obj_captured++;
 					}
-					*/
+
 
 				}
 				else
@@ -1193,6 +1194,15 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 							AAPS("sound/match/winallies.wav");
 						}
 						*/
+                        if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
+                                G_writeObjectiveEvent(ent, objCapture  );
+                                cl->sess.obj_captured++;
+                        }
+                        else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
+                        {
+                                G_writeObjectiveEvent(ent, objCapture  );
+                                cl->sess.obj_captured++;
+                        }
 
 					}
 					else
@@ -1229,6 +1239,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					{
 						if (winner == 0)
 						{
+
 							AAPS("sound/match/winaxis.wav");
 						}
 						else if (winner == 1)
