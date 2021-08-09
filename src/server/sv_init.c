@@ -947,7 +947,7 @@ void SV_Init( void ) {
 	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "109", CVAR_ARCHIVE);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "10", CVAR_ARCHIVE);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
