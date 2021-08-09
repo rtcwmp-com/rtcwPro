@@ -268,6 +268,7 @@ vmCvar_t P; // ET Port Players server info
 vmCvar_t g_hsDamage;
 vmCvar_t g_spawnOffset;
 vmCvar_t g_bodiesGrabFlags;
+vmCvar_t g_mapScriptDirectory;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -491,6 +492,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_spawnOffset, "g_spawnOffset", "9", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_bodiesGrabFlags, "g_bodiesGrabFlags", "1", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_mapScriptDirectory, "g_mapScriptDirectory", "", 0, qfalse },
 	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
@@ -1473,7 +1475,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
 
-					G_read_round_jstats(); // it can't hurt as it is practically no different than session data
+					G_read_round_jstats(); // load stats from round 1
                     Q_strncpyz(level.jsonStatInfo.round_id,"2",sizeof(level.jsonStatInfo.round_id) );
 
 					trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
@@ -1482,6 +1484,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 					Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
                 else {
+                    	for ( i = 0; i < level.numConnectedClients; i++ ) {
+                            G_deleteStats( level.sortedClients[i] );
+                        }
+
+
+
                      buf=va("%ld", unixTime);
                      trap_Cvar_Set( "stats_matchid", buf);
                      //level.match_id = va("%s",buf);
@@ -2833,6 +2841,7 @@ void CheckGameState( void ) {
 					level.readyPrint = qtrue;
 				}
 			} else {
+
 				level.warmupSwap = qtrue;
 				trap_SetConfigstring( CS_READY, va( "%i", (g_noTeamSwitching.integer ? READY_PENDING : READY_AWAITING) ));
 			}

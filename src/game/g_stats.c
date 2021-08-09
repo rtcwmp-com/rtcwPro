@@ -1157,16 +1157,17 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 					//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 
 
-                    /*
-					if (winner == 0)
-					{
-						AAPS("sound/match/winaxis.wav");
+
+					if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
+                            G_writeObjectiveEvent(ent, objCapture  );
+                            cl->sess.obj_captured++;
 					}
-					else if (winner == 1)
+					else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
 					{
-						AAPS("sound/match/winallies.wav");
+                            G_writeObjectiveEvent(ent, objCapture  );
+                            cl->sess.obj_captured++;
 					}
-					*/
+
 
 				}
 				else
@@ -1193,6 +1194,15 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 							AAPS("sound/match/winallies.wav");
 						}
 						*/
+                        if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
+                                G_writeObjectiveEvent(ent, objCapture  );
+                                cl->sess.obj_captured++;
+                        }
+                        else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
+                        {
+                                G_writeObjectiveEvent(ent, objCapture  );
+                                cl->sess.obj_captured++;
+                        }
 
 					}
 					else
@@ -1221,19 +1231,20 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			//else if (g_gametype.integer == GS_PLAYING)
 			if (g_gametype.integer == GS_PLAYING)
 			{
-
-
 				if (g_timelimit.value && !level.warmupTime)
 				{
 					if (level.time - level.startTime >= g_timelimit.value * 60000)
 					{
 						if (winner == 0)
 						{
+
 							AAPS("sound/match/winaxis.wav");
+							AAPS("sound/multiplayer/music/s_stinglow.wav");
 						}
 						else if (winner == 1)
 						{
 							AAPS("sound/match/winallies.wav");
+							AAPS("sound/multiplayer/music/l_complete_2.wav");
 						}
 					}
 					else
@@ -1241,10 +1252,12 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
+							AAPS("sound/multiplayer/music/s_stinglow.wav");
 						}
 						else if (winner == 1)
 						{
 							AAPS("sound/match/winallies.wav");
+							AAPS("sound/multiplayer/music/l_complete_2.wav");
 						}
 					}
 				}
@@ -1288,7 +1301,7 @@ void G_matchClockDump( gentity_t *ent ) {
 	}
 
                if ( g_currentRound.integer == 1 )
-				{
+			   {
                     endofroundinfo=va( "Clock set to: %d:%02d",
 							g_nextTimeLimit.integer,
 							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
@@ -1297,10 +1310,12 @@ void G_matchClockDump( gentity_t *ent ) {
 					if (winner == 0)
 					{
 						AAPS("sound/match/winaxis.wav");
+						AAPS("sound/multiplayer/music/s_stinglow.wav");
 					}
 					else if (winner == 1)
 					{
 						AAPS("sound/match/winallies.wav");
+						AAPS("sound/multiplayer/music/l_complete_2.wav");
 					}
 
 				}
@@ -1319,12 +1334,13 @@ void G_matchClockDump( gentity_t *ent ) {
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
+							AAPS("sound/multiplayer/music/s_stinglow.wav");
 						}
 						else if (winner == 1)
 						{
 							AAPS("sound/match/winallies.wav");
+							AAPS("sound/multiplayer/music/l_complete_2.wav");
 						}
-
 					}
 					else
 					{
@@ -1336,12 +1352,13 @@ void G_matchClockDump( gentity_t *ent ) {
 						if (winner == 0)
 						{
 							AAPS("sound/match/winaxis.wav");
+							AAPS("sound/multiplayer/music/s_stinglow.wav");
 						}
 						else if (winner == 1)
 						{
 							AAPS("sound/match/winallies.wav");
+							AAPS("sound/multiplayer/music/l_complete_2.wav");
 						}
-
 					}
 				}
 

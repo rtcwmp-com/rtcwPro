@@ -111,6 +111,7 @@ cvar_t* sv_ssMaxTime;
 //cvar_t* sv_ssQuality;
 
 cvar_t* sv_checkVersion;
+cvar_t* sv_restRunning;
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 

@@ -677,7 +677,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// reqSS
 	svs.ssTime = svs.time + sv_ssMinTime->integer;
 
-	if (com_dedicated->integer) {
+	if (com_dedicated->integer && !sv_restRunning->integer) {
 		SV_SetCvarRestrictions();
 	}
 
@@ -938,7 +938,8 @@ void SV_Init( void ) {
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
 
 	// Cvar Restrictions
-	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE); // | CVAR_LATCH );
+	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
+	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
 
 	// reqSS
 	sv_ssEnable = Cvar_Get("sv_ssEnable", "0", CVAR_ARCHIVE);
@@ -977,10 +978,6 @@ void SV_Init( void ) {
 		}
 	}
 #endif
-
-	/*if (com_dedicated->integer) {
-		SV_SetCvarRestrictions();
-	}*/
 }
 
 
@@ -1052,6 +1049,7 @@ void SV_Shutdown( char *finalmsg ) {
 	memset( &svs, 0, sizeof( svs ) );
 
 	Cvar_Set( "sv_running", "0" );
+	Cvar_Set("sv_restRunning", "0"); // RTCWPro
 
 	Com_Printf( "---------------------------\n" );
 

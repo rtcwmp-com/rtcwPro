@@ -196,6 +196,7 @@ typedef struct client_s {
 	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
 	int clientRestValidated;
+	qboolean clientValidated;
 } client_t;
 
 //=============================================================================
@@ -371,6 +372,7 @@ extern cvar_t* sv_ssMaxTime;
 //extern cvar_t* sv_ssQuality;
 
 extern cvar_t* sv_checkVersion;
+extern cvar_t* sv_restRunning;
 
 //===========================================================
 
