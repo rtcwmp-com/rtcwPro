@@ -2805,6 +2805,63 @@ void CG_AddPlayerFoot( refEntity_t *parent, playerState_t *ps, centity_t *cent )
 
 /*
 ==============
+RTCWPro
+
+CG_HideWeapon
+==============
+*/
+qboolean CG_HideWeapon(int weapon) {
+	qboolean hide;
+
+	if (!cg_drawGun.integer) {
+		hide = qtrue;
+	}
+	else if (cg_drawGun.integer == 1) {
+		hide = qfalse;
+	}
+	else {
+		switch (weapon) 
+		{
+		case WP_KNIFE:
+			hide = qfalse;
+			break;
+		case WP_KNIFE2:
+			hide = qfalse;
+			break;
+		case WP_GRENADE_PINEAPPLE:
+			hide = qfalse;
+			break;
+		case WP_MEDIC_SYRINGE:
+			hide = qfalse;
+			break;
+		case WP_AMMO:
+			hide = qfalse;
+			break;
+		case WP_DYNAMITE:
+			hide = qfalse;
+			break;
+		case WP_DYNAMITE2:
+			hide = qfalse;
+			break;
+		case WP_MEDKIT:
+			hide = qfalse;
+			break;
+		case WP_PLIERS:
+			hide = qfalse;
+			break;
+		case WP_SMOKE_GRENADE:
+			hide = qfalse;
+			break;
+		default:
+			hide = qtrue;
+		}
+	}
+
+	return hide;
+}
+
+/*
+==============
 CG_AddViewWeapon
 
 Add the weapon, and flash for the player's view
@@ -2834,7 +2891,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		return;
 	}
 	// allow the gun to be completely removed
-	if ( ( !cg_drawGun.integer ) || ( cg_uselessNostalgia.integer ) ) {
+	if ((CG_HideWeapon(ps->weapon)) || (cg_uselessNostalgia.integer)) {
 		vec3_t origin;
 
 		if ( cg.predictedPlayerState.eFlags & EF_FIRING ) {

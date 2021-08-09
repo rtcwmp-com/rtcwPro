@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.2.1" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -1835,5 +1835,8 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
+
+char* BG_GetTeam(int teamNum);
+char* BG_GetClass(int classNum);
 
 #endif // ! ___BG_PUBLIC_H

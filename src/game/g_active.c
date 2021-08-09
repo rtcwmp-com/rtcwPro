@@ -444,7 +444,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 			ucmd->upmove = 0;
 			ucmd->wbuttons = 0;
 		}
-		else if (client->noclip && client->sess.shoutcaster)
+		else if (client->sess.shoutcaster)
 		{
 			client->ps.pm_type = PM_NOCLIP;
 		}
@@ -808,6 +808,11 @@ void WolfFindMedic( gentity_t *self ) {
 	self->client->ps.viewlocked_entNum = 0;
 	self->client->ps.viewlocked = 0;
 	self->client->ps.stats[STAT_DEAD_YAW] = 999;
+
+	// RTCWPro - medcam lock toggle
+	if (!self->client->pers.findMedic) {
+		return;
+	}
 
 	VectorCopy( self->s.pos.trBase, start );
 	start[2] += self->client->ps.viewheight;

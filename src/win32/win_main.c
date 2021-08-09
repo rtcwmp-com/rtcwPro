@@ -1096,7 +1096,7 @@ Restart the network subsystem
 =================
 */
 void Sys_Net_Restart_f( void ) {
-	NET_Restart_f();
+	NET_Restart();
 }
 
 /*

@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
  *
 */
 
+#include <curl/curl.h>
 #include "server.h"
 
 /*
@@ -257,8 +258,6 @@ void SV_Startup( void ) {
 	svs.initialized = qtrue;
 
 	Cvar_Set( "sv_running", "1" );
-
-	NET_JoinMulticast6();
 }
 
 
@@ -675,10 +674,14 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// send a heartbeat now so the master will get up to date info
 	SV_Heartbeat_f();
 
-	Hunk_SetMark();
-
 	// reqSS
 	svs.ssTime = svs.time + sv_ssMinTime->integer;
+
+	if (com_dedicated->integer && !sv_restRunning->integer) {
+		SV_SetCvarRestrictions();
+	}
+
+	Hunk_SetMark();
 
 	Cvar_Set( "sv_serverRestarting", "0" );
 
@@ -770,6 +773,26 @@ void SV_LoadModels(void) {
 	SV_LoadMDS(ALLIED_MODEL_HANDLE, "models/players/multi/body.mds");
 }
 
+
+static size_t getIP_response(void *ptr, size_t size, size_t nmemb, void *stream){
+    Cvar_Set("sv_serverIP", va("%s",ptr));
+}
+
+void SV_GetIP(void) {
+  CURL *curl;
+  CURLcode res;
+
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "http://api.ipify.org");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getIP_response);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
+
+}
+
+
 /*
 ===============
 SV_Init
@@ -781,7 +804,7 @@ void SV_BotInitBotLib( void );
 
 void SV_Init( void ) {
 	SV_AddOperatorCommands();
-
+    SV_GetIP();
 	// serverinfo vars
 	Cvar_Get( "dmflags", "0", /*CVAR_SERVERINFO*/ 0 );
 	Cvar_Get( "fraglimit", "0", /*CVAR_SERVERINFO*/ 0 );
@@ -793,6 +816,7 @@ void SV_Init( void ) {
 	sv_gameskill = Cvar_Get( "g_gameskill", "3", CVAR_SERVERINFO | CVAR_LATCH );
 	// done
 
+	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
 	Cvar_Get( "protocol", va( "%i", GAME_PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
 	sv_mapname = Cvar_Get( "mapname", "nomap", CVAR_SERVERINFO | CVAR_ROM );
@@ -914,7 +938,8 @@ void SV_Init( void ) {
 	sv_AuthStrictMode = Cvar_Get("sv_AuthStrictMode", "0", CVAR_SERVERINFO | CVAR_INIT);
 
 	// Cvar Restrictions
-	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE); // | CVAR_LATCH );
+	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
+	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
 
 	// reqSS
 	sv_ssEnable = Cvar_Get("sv_ssEnable", "0", CVAR_ARCHIVE);
@@ -922,16 +947,13 @@ void SV_Init( void ) {
 	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "109", CVAR_ARCHIVE);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "10", CVAR_ARCHIVE);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
 
 	// init the botlib here because we need the pre-compiler in the UI
 	SV_BotInitBotLib();
-
-	// Load saved Bans
-	Cbuf_AddText("rehashbans\n");
 
 	SV_LoadModels();
 
@@ -956,10 +978,6 @@ void SV_Init( void ) {
 		}
 	}
 #endif
-
-	if (com_dedicated->integer) {
-		SV_SetCvarRestrictions();
-	}
 }
 
 
@@ -1012,8 +1030,6 @@ void SV_Shutdown( char *finalmsg ) {
 
 	Com_Printf( "----- Server Shutdown -----\n" );
 
-	NET_LeaveMulticast6();
-
 	if ( svs.clients && !com_errorEntered ) {
 		SV_FinalMessage( finalmsg, qtrue);
 	}
@@ -1033,6 +1049,7 @@ void SV_Shutdown( char *finalmsg ) {
 	memset( &svs, 0, sizeof( svs ) );
 
 	Cvar_Set( "sv_running", "0" );
+	Cvar_Set("sv_restRunning", "0"); // RTCWPro
 
 	Com_Printf( "---------------------------\n" );
 

@@ -637,6 +637,7 @@ typedef struct {
 	qboolean ready;
 	int restrictedWeapon;
 	qboolean drawHitBoxes;
+	qboolean findMedic;
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -1240,6 +1241,7 @@ void AddHeadEntity(gentity_t* ent);
 void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);
 void RemoveHeadEntity(gentity_t* ent);
+qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt);
 
 //
 // g_client.c
@@ -1373,7 +1375,7 @@ void Svcmd_GameMem_f( void );
 //
 void G_ReadSessionData( gclient_t *client );
 void G_InitSessionData( gclient_t *client, char *userinfo );
-
+void G_ClientSwap( gclient_t *client );
 void G_InitWorldSession( void );
 void G_WriteSessionData( void );
 
@@ -1646,6 +1648,7 @@ extern vmCvar_t P; // player teams in server info
 extern vmCvar_t	g_hsDamage;
 extern vmCvar_t g_spawnOffset; // random spawn offset for both teams, between 1 and cvar integer - 1
 extern vmCvar_t g_bodiesGrabFlags;
+extern vmCvar_t g_mapScriptDirectory;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

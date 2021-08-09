@@ -196,6 +196,7 @@ typedef struct client_s {
 	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
 	int clientRestValidated;
+	qboolean clientValidated;
 } client_t;
 
 //=============================================================================
@@ -267,18 +268,6 @@ typedef struct {
 	int ssTime; // reqSS
 } serverStatic_t;
 
-// L0 - ioquake ipv6 banning
-#define SERVER_MAXBANS	1024
-#define SERVER_BANFILE	"serverbans.dat"
-// Structure for managing bans
-typedef struct {
-	netadr_t ip;
-	// For a CIDR-Notation type suffix
-	int subnet;
-
-	qboolean isexception;
-} serverBan_t;
-
 //================
 // DHM - Nerve
 #ifdef UPDATE_SERVER
@@ -340,6 +329,7 @@ extern cvar_t  *sv_onlyVisibleClients;
 extern cvar_t  *sv_dlRate;
 extern cvar_t  *sv_minRate;
 extern cvar_t  *sv_maxRate;
+extern cvar_t	*sv_serverIP;
 extern cvar_t  *sv_showAverageBPS;          // NERVE - SMF - net debugging
 
 // Rafael gameskill
@@ -382,12 +372,9 @@ extern cvar_t* sv_ssMaxTime;
 //extern cvar_t* sv_ssQuality;
 
 extern cvar_t* sv_checkVersion;
+extern cvar_t* sv_restRunning;
 
 //===========================================================
-
-// L0 - ioquake ipv6 banning
-extern	serverBan_t serverBans[SERVER_MAXBANS];
-extern	int serverBansCount;
 
 //
 // sv_main.c

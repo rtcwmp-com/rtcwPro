@@ -395,6 +395,70 @@ void Cmd_God_f( gentity_t *ent ) {
 	trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
 
+void Cmd_GetOBJ(gentity_t* ent) {
+	char team[64];
+	gentity_t* axisObj = NULL, * alliesObj = NULL;
+
+	if (!ent->client->sess.referee) {
+		return;
+	}
+
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+		return;
+	}
+
+	if (ent->client->ps.stats[STAT_HEALTH] <= 0) {
+		return;
+	}
+
+	trap_Argv(1, team, sizeof(team));
+
+	if (!strlen(team)) {
+		return;
+	}
+
+	if (Q_stricmp(team, "axis") == 0) {
+
+		axisObj = &g_entities[0];
+		axisObj = G_Find(axisObj, FOFS(classname), "team_CTF_redflag");
+
+		if (axisObj) {
+			Pickup_Team(axisObj, ent);
+		}
+	}
+	else if (Q_stricmp(team, "allies") == 0) {
+
+		alliesObj = &g_entities[0];
+		alliesObj = G_Find(alliesObj, FOFS(classname), "team_CTF_blueflag");
+
+		if (alliesObj) {
+			Pickup_Team(alliesObj, ent);
+		}
+	}
+}
+
+void Cmd_SelfRevive_f(gentity_t* ent) {
+
+	if (!ent->client->sess.referee) {
+		return;
+	}
+
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+		return;
+	}
+
+	ReviveEntity(ent, ent);
+	trap_SendServerCommand(ent - g_entities, "cp \"Selfrevived\n\"");
+}
+
 /*
 ==================
 Cmd_Nofatigue_f
@@ -459,12 +523,7 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent ) {
 	char    *msg;
 
-	/*if ( !CheatsOk( ent ) ) {
-		return;
-	}*/
-
-	if (!g_cheats.integer && !ent->client->sess.shoutcaster) {
-		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
+	if ( !CheatsOk( ent ) ) {
 		return;
 	}
 
@@ -2645,6 +2704,10 @@ void ClientCommand( int clientNum ) {
 		Cmd_Give_f( ent );
 	} else if ( Q_stricmp( cmd, "god" ) == 0 )  {
 		Cmd_God_f( ent );
+	} else if (Q_stricmp(cmd, "getobj") == 0) {
+		Cmd_GetOBJ(ent);
+	} else if (Q_stricmp(cmd, "selfrevive") == 0) {
+		Cmd_SelfRevive_f(ent);
 	} else if ( Q_stricmp( cmd, "nofatigue" ) == 0 )  {
 		Cmd_Nofatigue_f( ent );
 	} else if ( Q_stricmp( cmd, "notarget" ) == 0 )  {

@@ -1545,6 +1545,14 @@ void ClientUserinfoChanged( int clientNum ) {
 		client->pmext.bAutoReload = qfalse;
 	}
 
+	s = Info_ValueForKey(userinfo, "cg_findMedic");
+	if (!atoi(s)) {
+		client->pers.findMedic = qfalse;
+	}
+	else {
+		client->pers.findMedic = qtrue;
+	}
+
 	// set name
 	Q_strncpyz( oldname, client->pers.netname, sizeof( oldname ) );
 	s = Info_ValueForKey( userinfo, "name" );

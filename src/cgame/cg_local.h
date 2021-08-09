@@ -1914,6 +1914,11 @@ typedef struct {
 	int timescaleUpdate;                                // Timescale display for demo playback
 } cgs_t;
 
+// RTCWPro - split hitsounds
+#define HITSOUND_HEAD 1
+#define HITSOUND_BODY 2
+#define HITSOUND_TEAM 4
+
 //==============================================================================
 
 extern cgs_t cgs;
@@ -2116,7 +2121,6 @@ extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
-extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
 
@@ -2170,10 +2174,23 @@ extern vmCvar_t cg_spawnTimer_set;
 
 // added from et-legacy - crumbs
 extern vmCvar_t cg_tracers;
-
-// ERT
-extern vmCvar_t cg_drawEnemyTimer;
+// draw triggers
 extern vmCvar_t cg_drawTriggers;
+
+// RT and ERT
+extern vmCvar_t cg_drawEnemyTimer;
+extern vmCvar_t cg_enemyTimerColor;
+extern vmCvar_t cg_enemyTimerX;
+extern vmCvar_t cg_enemyTimerY;
+extern vmCvar_t cg_enemyTimerProX;
+extern vmCvar_t cg_enemyTimerProY;
+extern vmCvar_t cg_reinforcementTimeColor;
+extern vmCvar_t cg_reinforcementTimeX;
+extern vmCvar_t cg_reinforcementTimeY;
+extern vmCvar_t cg_reinforcementTimeProX;
+extern vmCvar_t cg_reinforcementTimeProY;
+
+extern vmCvar_t cg_findMedic;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
@@ -2208,6 +2225,7 @@ qboolean CG_CheckCenterView();
 char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
+qboolean CG_execFile(char* filename);
 
 //
 // cg_view.c
@@ -2639,6 +2657,7 @@ void CG_demoView(void);
 //
 qboolean CG_DrawScoreboard( void );
 void CG_DrawTourneyScoreboard( void );
+char* WM_TimeToString(float msec);
 
 //
 // cg_consolecmds.c

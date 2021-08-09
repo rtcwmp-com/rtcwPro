@@ -740,7 +740,6 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 		g_entities[level.sortedClients[i]].client->pers.ready = qfalse;
 		//g_entities[level.sortedClients[i]].client->ps.persistant[PERS_RESTRICTEDWEAPON] = WP_NONE; // reset weapon restrictions on restart
 	}
-
 	// reset all the weapon restrictions so next time the players spawn they get set correctly
 	level.alliedFlamer = level.axisFlamer = 0;
 	level.alliedSniper = level.axisSniper = 0;
@@ -756,7 +755,7 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
 			    trap_GetConfigstring(CS_ROUNDINFO, cs, sizeof(cs));  // retrieve round/match info saved
         		buf = Info_ValueForKey(cs, "matchid");
         		*/
-
+                trap_Cvar_Set("g_swapteams", "1");  // horrible fix for the swapping of teams on mid-round 2 maprestarts
 
                 for ( i = 0; i < level.numPlayingClients; i++ ) {
                     cl = level.clients + level.sortedClients[i];
@@ -764,6 +763,7 @@ void Svcmd_ResetMatch_f(qboolean fDoReset, qboolean fDoRestart) {
                         continue;
                     }
                     cl->sess.rounds--; // don't count the half played game as a round...
+
                 }
             }
             else {

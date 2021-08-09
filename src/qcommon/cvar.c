@@ -444,7 +444,7 @@ cvar_t *Cvar_Set2( const char *var_name, const char *value, qboolean force ) {
 	// Check if it's allowed
 	if (rv = Cvar_Rest_FindVar(var_name)) {
 		if (!Cvar_RestValueIsValid(rv, value)) {
-			Com_Printf(va("Value %s not allowed on this server. ^n[%s]\n", value, Cvar_RestAcceptedValues(var_name)));
+			Com_Printf(va("%s %s not allowed on this server. ^n[%s]\n", var_name, value, Cvar_RestAcceptedValues(var_name)));
 			return NULL;
 		}
 	}
@@ -681,7 +681,7 @@ qboolean Cvar_Command( void ) {
 	// Check if it's allowed
 	if (rv = Cvar_Rest_FindVar(v->name)) {
 		if (!Cvar_RestValueIsValid(rv, Cmd_Argv(1))) {
-			Com_Printf(va("Value %s not allowed on this server. ^n[%s]\n", Cmd_Argv(1), Cvar_RestAcceptedValues(v->name)));
+			Com_Printf(va("%s %s not allowed on this server. ^n[%s]\n", v->name, Cmd_Argv(1), Cvar_RestAcceptedValues(v->name)));
 			return qtrue;
 		}
 	}
