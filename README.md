@@ -117,8 +117,8 @@ Main objective: create a competition mod similar to OSP with updates for tournam
    - default r_mode to 6
    - add cg_tracers
 
- - 1.2 [changelog](changelog/1.2.1-changelog.txt)
-   Note for linux servers: always run the image with root permissions!
+ - 1.2.1 [changelog](changelog/1.2.1-changelog.txt)
+   - Note for linux servers: always run the image with root permissions!
    - client: fix /map and /devmap on the client side
    - client: display current round time in warmup between rounds
    - client: add new style for RT: cg_drawReinforcementTime 1 = default, 2 = new, 3 = default and new
