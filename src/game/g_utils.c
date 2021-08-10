@@ -798,7 +798,7 @@ int DebugLine( vec3_t start, vec3_t end, int color ) {
 
 /*
 ================
-sswolf - allowteams - ET port
+RTCWPro - allowteams - ET port
 G_AllowTeamsAllowed
 ================
 */
@@ -822,7 +822,7 @@ qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator)
 
 /*
 ==============
-sswolf - determine if
+RTCWPro - determine if
 class can drop weapon
 Originally from PubJ
 ==============

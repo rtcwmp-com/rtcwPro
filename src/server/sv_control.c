@@ -1,5 +1,5 @@
 /*
-sswolf - reqSS functions.
+RTCWPro - reqSS functions.
 Source: Nate (rtcwMP)
 */
 

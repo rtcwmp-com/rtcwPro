@@ -1071,7 +1071,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	gentity_t *ent;
 	gclient_t *cl;
 
-	// sswolf - move the announcer sound from WM_DrawObjectives in cg, here,
+	// RTCWPro - move the announcer sound from WM_DrawObjectives in cg, here,
 	// to at least temporarily fix whatevr is causing the cut off
 	char cs[MAX_STRING_CHARS];
 	char* buf;
@@ -1227,7 +1227,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 				}
 			}
 
-			// sswolf - non SW exits
+			// RTCWPro - non SW exits
 			//else if (g_gametype.integer == GS_PLAYING)
 			if (g_gametype.integer == GS_PLAYING)
 			{

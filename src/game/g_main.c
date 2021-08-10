@@ -2626,7 +2626,7 @@ void CheckExitRules( void ) {
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "1" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
-			// sswolf - moved from WM_DrawObjectives in cg
+			// RTCWPro - moved from WM_DrawObjectives in cg
 			AAPS("sound/match/winallies.wav");
 			LogExit( "Axis team eliminated." );
 		}

@@ -115,7 +115,7 @@ char* getCurrentPath(char* file) {
 
 /*
 ===============
-sswolf - new (lazy) way
+RTCWPro - new (lazy) way
 to get path to ss
 
 getFilePath

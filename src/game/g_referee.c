@@ -816,7 +816,7 @@ void G_refRenameClient(gentity_t* ent) {
 
 /*
 =============
-sswolf
+RTCWPro
 G_refRequestSS
 =============
 */
@@ -839,8 +839,9 @@ void G_refRequestSS(gentity_t* ent) {
 
 /*
 ===========
-Getstatus
+RTCWPro
 
+Getstatus
 Prints IP's and some match info..
 ===========
 */
@@ -852,7 +853,6 @@ void G_refGetStatus(gentity_t* ent) {
 	int mins = (secs / 60) % 60;
 	int hours = (secs / 3600) % 24;
 	int days = (secs / (3600 * 24));
-	// sswolf - new stuff
 	char mapName[64];
 
 	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));

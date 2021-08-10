@@ -1909,7 +1909,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 		AP(va("print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname));
 
-		// sswolf - move here from SetTeam
+		// RTCWPro - move here from SetTeam
 		CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
 		CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
 		if (strlen(g_serverMessage.string) > 0) CPx(clientNum, va( "cp \"%s\n\"2", g_serverMessage.string));
@@ -2526,7 +2526,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// show_bug.cgi?id=569
 	//G_ResetMarkers( ent );
 
-	// sswolf - head stuff
+	// RTCWPro - head stuff
 	// add the head entity if it already hasn't been
 	AddHeadEntity(ent);
 }
@@ -2684,7 +2684,7 @@ void ClientDisconnect( int clientNum ) {
 	ent->active = 0;
 // jpw
 
-	// sswolf - head stuff
+	// RTCWPro - head stuff
 	FreeHeadEntity(ent);
 
 	trap_SetConfigstring( CS_PLAYERS + clientNum, "" );

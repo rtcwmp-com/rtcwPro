@@ -1,5 +1,5 @@
 /*
-sswolf - antiwarp, original credit to zinx
+RTCWPro - antiwarp, original credit to zinx
 Port: etPro > etPub > S4NDMOD > rtcwPubJ > OSPx
 Warping occurs when the server receives several new commands from a player in a very short period of time.
 This happens because packets from the player were lost or never sent.

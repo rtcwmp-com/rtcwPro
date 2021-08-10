@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
-// sswolf - minimizer
+// RTCWPro - minimizer
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -468,7 +468,7 @@ static void CG_SetWeaponCrosshair_f( void ) {
 }
 // -NERVE - SMF
 
-// sswolf - reset the top speed for cg_drawspeed
+// RTCWPro - reset the top speed for cg_drawspeed
 static void CG_ResetMaxSpeed_f(void)
 {
 	cg.resetmaxspeed = qtrue;
@@ -730,7 +730,7 @@ void CG_ForceTapOut_f(void) {
 
 /*
 ================
-sswolf - minimizer (windows only)
+RTCWPro - minimizer (windows only)
 Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
 ================
 */

@@ -47,7 +47,7 @@ If you have questions concerning this license or the applicable additional terms
 //#define DEF_COMHUNKMEGS "56" // RF, increased this, some maps are exceeding 56mb // JPW NERVE changed this for multiplayer back to 42, 56 for depot/mp_cpdepot, 42 for everything else
 //#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
 
-// sswolf - increase those
+// RTCWPro - increase those
 #define MIN_COMHUNKMEGS 128
 #define DEF_COMHUNKMEGS "256"
 #define DEF_COMZONEMEGS "32"

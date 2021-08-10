@@ -1702,7 +1702,7 @@ void SniperSoundEFX( vec3_t pos ) {
 	sniperEnt = G_TempEntity( pos, EV_SNIPER_SOUND );
 }
 
-// sswolf - begin head stuff
+// RTCWPro - begin head stuff
 qboolean IsHeadshotWeapon(int mod)
 {
 	// players are allowed headshots from these weapons
@@ -1931,7 +1931,7 @@ void RemoveHeadEntities(gentity_t* skip)
 		RemoveHeadEntity(potential_targ);
 	}
 }
-// sswolf - head stuff end
+// RTCWPro - head stuff end
 
 /*
 ==============
@@ -1969,7 +1969,7 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 	}
 }
 
-// sswolf - begin head stuff
+// RTCWPro - begin head stuff
 /*
 ==============
 Bullet_Fire
@@ -2256,7 +2256,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		}
 	}
 }
-// sswolf - head stuff end
+// RTCWPro - head stuff end
 
 /*
 ======================================================================
@@ -2429,7 +2429,7 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	PerpendicularVector( right, forward );
 	CrossProduct( forward, right, up );
 
-	// sswolf - leaving this intact
+	// RTCWPro - leaving this intact
 
 	// L0 Antilag
     if ( g_antilag.integer && ent->client &&
@@ -2686,7 +2686,7 @@ LogAccuracyHit
 */
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
 
-	// sswolf - patched
+	// RTCWPro - patched
 	if (!LogAccuracyShot(target, attacker)) {
 		return qfalse;
 	}

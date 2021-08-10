@@ -1,7 +1,7 @@
 #ifndef __IN_RAW__H__
 #define __IN_RAW__H__
 
-// sswolf - defines needed for the raw mouse input crap
+// RTCWPro - defines needed for the raw mouse input crap
 #ifndef DEDICATED
 
 #ifndef WINUSERAPI

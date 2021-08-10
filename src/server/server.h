@@ -574,7 +574,7 @@ qboolean SV_CheckDRDoS(netadr_t from);
 #define DLNOTIFY_ALL        ( DLNOTIFY_REDIRECT | DLNOTIFY_BEGIN )
 
 //
-// sswolf - sv_controls.c - source: Nate (rtcwMP)
+// RTCWPro - sv_controls.c - source: Nate (rtcwMP)
 //
 //void SV_SendSSRequest(int clientNum, int quality);
 void SV_SendSSRequest(int clientNum);

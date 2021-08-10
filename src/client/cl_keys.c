@@ -1011,7 +1011,7 @@ static void PrintMatches( const char *s ) {
 
 /*
 ===============
-// sswolf - tab value expansion ala ET
+// RTCWPro - tab value expansion ala ET
 
 PrintMatches
 ===============
@@ -1116,7 +1116,7 @@ static void CompleteCommand( void ) {
 
 	// run through again, printing matches
 	Cmd_CommandCompletion( PrintMatches );
-	// sswolf - tab value expansion ala ET
+	// RTCWPro - tab value expansion ala ET
 	//Cvar_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion(PrintCvarMatches);
 }

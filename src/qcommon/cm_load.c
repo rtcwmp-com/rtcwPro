@@ -453,7 +453,7 @@ void CMod_LoadBrushSides( lump_t *l ) {
 
 /*
 =================
-sswolf - repalce Nobo's method
+RTCWPro - repalce Nobo's method
 with openjk's which allows
 full control, not just appending.
 File structure remains the same
@@ -495,7 +495,7 @@ CMod_LoadEntityString
 */
 void CMod_LoadEntityString(lump_t* l, const char* name) {
 
-	// sswolf - new way above
+	// RTCWPro - new way above
 	if (CMod_LoadCustomEntityString(name))
 	{
 		return;
@@ -720,7 +720,7 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum ) {
 	CMod_LoadSubmodels( &header.lumps[LUMP_MODELS] );
 	CMod_LoadNodes( &header.lumps[LUMP_NODES] );
 	//CMod_LoadEntityString( &header.lumps[LUMP_ENTITIES] );
-	CMod_LoadEntityString(&header.lumps[LUMP_ENTITIES], name); // sswolf
+	CMod_LoadEntityString(&header.lumps[LUMP_ENTITIES], name); // RTCWPro
 	CMod_LoadVisibility( &header.lumps[LUMP_VISIBILITY] );
 	CMod_LoadPatches( &header.lumps[LUMP_SURFACES], &header.lumps[LUMP_DRAWVERTS] );
 

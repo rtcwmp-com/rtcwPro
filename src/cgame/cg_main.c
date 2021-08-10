@@ -671,7 +671,7 @@ cvarTable_t cvarTable[] = {
 	// lock camera on medic at death
 	{ &cg_findMedic, "cg_findMedic", "1", CVAR_ARCHIVE | CVAR_USERINFO },
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
 	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
 	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },
