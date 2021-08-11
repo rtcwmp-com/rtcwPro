@@ -1599,8 +1599,14 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	if (g_mapConfigs.integer){
 		//char mapName[64];
 
-		trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+		trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
+
+		for (int x = 0; mapName[x]; x++) {
+			mapName[x] = tolower(mapName[x]);
+		}
+
 		trap_SendConsoleCommand(EXEC_APPEND, va("exec mapConfigs/%s.cfg \n", mapName));
+		G_LogPrintf(va("rtcwPro: Execing %s\n", mapName));
 	} // L0 - end
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAISetup( restart );

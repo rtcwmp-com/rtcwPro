@@ -472,6 +472,10 @@ qboolean CMod_LoadCustomEntityString(const char* name) {
 
 	filename = va("%s.spawns", noext);
 
+	for (int i = 0; filename[i]; i++) {
+		filename[i] = tolower(filename[i]);
+	}
+
 	entFileLen = FS_FOpenFileRead(filename, &file, qtrue);
 
 	if (file && entFileLen > 0)
