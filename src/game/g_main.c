@@ -1596,7 +1596,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	GeoIP_open();
 
 	// L0 - auto cfg for each map
-	if (g_mapConfigs.integer){
+	if (!restart && g_mapConfigs.integer){
 		//char mapName[64];
 
 		trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
