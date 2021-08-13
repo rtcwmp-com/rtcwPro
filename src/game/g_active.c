@@ -1399,7 +1399,9 @@ void ClientThink_real( gentity_t *ent ) {
 							}
 
 							// Clear out empty weapon, change to next best weapon
-							G_AddEvent( ent, EV_NOAMMO, 0 );
+							if (pclass != PC_LT) { // RTCWPro - lazy fix for #282
+								G_AddEvent(ent, EV_NOAMMO, 0);
+							}
 
 							i = MAX_WEAPS_IN_BANK_MP;
 							// show_bug.cgi?id=568
