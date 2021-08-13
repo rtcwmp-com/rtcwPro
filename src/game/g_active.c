@@ -1880,7 +1880,8 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
-			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
+			if ((cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR) ||
+				(cl->pers.connected == CON_CONNECTED && cl->sess.shoutcaster && ent->client->sess.shoutcaster)) { // RTCWPro
 				// L0 - Ping & Score bug fix
 				// This solves the /serverstatus and score table (who's specing/demoing you) bug..
 				int ping = ent->client->ps.ping;

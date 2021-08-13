@@ -1026,7 +1026,8 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// can't follow another spectator
-	if ( level.clients[ i ].sess.sessionTeam == TEAM_SPECTATOR ) {
+	if (level.clients[i].sess.sessionTeam == TEAM_SPECTATOR && 
+		(!level.clients[i].sess.shoutcaster || !ent->client->sess.shoutcaster)) { // RTCWPro
 		return;
 	}
 
