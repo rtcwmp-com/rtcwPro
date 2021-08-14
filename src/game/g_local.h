@@ -1942,6 +1942,7 @@ void G_scs_cmd(gentity_t* ent, qboolean fValue);
 void G_scsSpectatorSpeed(gentity_t* ent);
 void G_refLogout(gentity_t* ent);
 void G_scsLogout(gentity_t* ent);
+void G_scsFollowOBJ(gentity_t* ent);
 qboolean G_refCommandCheck( gentity_t *ent, char *cmd );
 qboolean G_scsCommandCheck(gentity_t* ent, char* cmd);
 void G_refHelp_cmd( gentity_t *ent );
