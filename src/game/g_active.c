@@ -444,7 +444,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 			ucmd->upmove = 0;
 			ucmd->wbuttons = 0;
 		}
-		else if (client->sess.shoutcaster)
+		else if (client->sess.shoutcaster && client->noclip)
 		{
 			client->ps.pm_type = PM_NOCLIP;
 		}
