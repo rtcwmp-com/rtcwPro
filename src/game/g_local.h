@@ -279,6 +279,11 @@ struct gentity_s {
 	void ( *pain )( gentity_t *self, gentity_t *attacker, int damage, vec3_t point );
 	void ( *die )( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 
+	// Nobo - More  (from rtcwPub)
+	void		(*more)(gentity_t *ent);
+	int			moreCalls;
+	qboolean	moreCalled;
+
 	int pain_debounce_time;
 	int fly_sound_debounce_time;            // wind tunnel
 	int last_move_time;
