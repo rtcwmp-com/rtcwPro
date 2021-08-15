@@ -1343,6 +1343,28 @@ void G_UpdateCvars( void ) {
 
 /*
 ==============
+LoadMapList
+  load the list of maps on the server into an array
+==============
+*/
+void LoadMapList(void)
+{
+	char maps[MAX_MAPCONFIGSTRINGS];
+	char noext[MAX_QPATH];
+	int i;
+
+	level.mapcount = trap_FS_GetFileList("maps", ".bsp", maps, sizeof(maps));
+	char* map = maps;
+
+    for (i = 0; i <= level.mapcount+1; i++) {
+		COM_StripExtension(map, noext);
+		strcpy(level.maplist[i],noext);
+		map += strlen(map) + 1;
+	}
+}
+
+/*
+==============
 G_SpawnScriptCamera
 	create the game entity that's used for camera<->script communication and portal location for camera view
 ==============
@@ -1613,6 +1635,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		BotAILoadMap( restart );
 		G_InitBots( restart );
 	}
+
+    LoadMapList();
 
 	G_RemapTeamShaders();
 

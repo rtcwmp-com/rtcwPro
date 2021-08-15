@@ -86,6 +86,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #define FL_NODRAW               0x01000000
 
+
+#define MAX_NUM_MAPS 500
+#define MAX_MAP_NAMELEN 50
 // movers are things like doors, plats, buttons, etc
 typedef enum {
 	MOVER_POS1,
@@ -1017,6 +1020,9 @@ typedef struct {
 	int spawnFloodTimer;
 	int svCvarsCount;
 
+    char maplist[MAX_NUM_MAPS][MAX_MAP_NAMELEN];
+	int mapcount;
+
 	int eventNum;  // event counter
 	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
 	char* match_id; // for stats round matching...
@@ -1915,7 +1921,7 @@ void G_ResetMarkers( gentity_t* ent );
 void G_UpdateCvars(void);
 void G_teamReset(int, qboolean);
 void ServerPlayerInfo(void);
-
+void LoadMapList( void );
 //
 // g_match.c
 //
