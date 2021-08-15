@@ -521,12 +521,13 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
 // *** Map - simpleton: we dont verify map is allowed/exists ***
 int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd ) {
-	// Vote request (vote is being initiated)
+
     int numMatches = 0;
     int mapIndex = -1;
     char vmapname[MAX_STRING_TOKENS]; // not necessary as we could use maplist directly...
     int i;
 
+	// Vote request (vote is being initiated)
 	if ( arg ) {
 		char serverinfo[MAX_INFO_STRING];
 		trap_GetServerinfo( serverinfo, sizeof( serverinfo ) );
@@ -540,49 +541,41 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 			return( G_INVALID );
 		}
 
+		// RTCWPro - check for matching maps (source: PubJ (nihi))
+		for (i = 0; i <= level.mapcount + 1; i++) {
+			if (strstr(level.maplist[i], arg2) != NULL) {
+				if (numMatches == 0) {
+					mapIndex = i;
+				}
+				else if (numMatches == 1) {
+					CP(va("print \"^3Multiple matches found:\n"));
+					CP(va("print \"^3  %s\n\"", level.maplist[mapIndex]));
+					CP(va("print \"^3  %s\n\"", level.maplist[i]));
+				}
+				else if (numMatches > 1) {
+					CP(va("print \"^3  %s\n\"", level.maplist[i]));
+				}
+				numMatches += 1;
+			}
+		}
 
-
-
-		 //  check for matching maps...
-
-
-        for (i = 0; i <= level.mapcount+1; i++) {
-            if (strstr(level.maplist[i],arg2) != NULL) {
-                 if (numMatches == 0) {
-                    mapIndex=i;
-                 }
-                 else if (numMatches == 1) {
-                    CP(va("print \"^3Multiple matches found:\n"));
-                    CP(va("print \"^3  %s\n\"", level.maplist[mapIndex]));
-                    CP(va("print \"^3  %s\n\"", level.maplist[i]));
-                 }
-                 else if (numMatches > 1)             {
-                    CP(va("print \"^3  %s\n\"", level.maplist[i]));
-                 }
-                numMatches += 1;
-            }
-
-        }
-
-        if (numMatches == 1) {
-            CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapIndex]));
-            Q_strncpyz(vmapname,level.maplist[mapIndex],sizeof(vmapname));
-        }
-        else if (numMatches > 1){
-            return(G_INVALID);
-        }
-        else {
+		if (numMatches == 1) {
+			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapIndex]));
+			Q_strncpyz(vmapname, level.maplist[mapIndex], sizeof(vmapname));
+		}
+		else if (numMatches > 1) {
+			return(G_INVALID);
+		}
+		else {
 			CP(va("print \"^3%s ^7is not on the server.\n\"", arg2));
 			return(G_INVALID);
-        }
-
-
- //  end matching maps code
+		}
+		// end matching maps code
 
         Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", vmapname );
 		if (!FileExists(vmapname, "maps", ".bsp", qfalse))
 		{
-			CP(va("print \"^7Could not find ^3%s\n\"", vmapname));
+			CP(va("print \"^3%s ^7is not on the server.\n\"", vmapname));
 			return(G_INVALID);
 		}
 

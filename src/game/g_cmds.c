@@ -567,8 +567,34 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 	BeginIntermission();
 	trap_SendServerCommand( ent - g_entities, "clientLevelShot" );
 }
+
 /*
 ============
+RTCWPro
+Source: rtcwPub
+
+Cmd_More_f
+============
+*/
+void Cmd_More_f(gentity_t* ent)
+{
+	if (ent->more) {
+		if (!ent->moreCalls)
+			ent->moreCalls = 1;
+
+		ent->moreCalled = qtrue;
+		ent->more(ent);
+		ent->moreCalls++;
+		ent->moreCalled = qfalse;
+	}
+}
+
+/*
+============
+RTCWPro - display list of 
+maps on the server
+Source: PubJ (nihi)
+
 Cmd_DisplayMaps_f
 ============
 */
@@ -2792,6 +2818,8 @@ void ClientCommand( int clientNum ) {
 		Cmd_FollowCycle_f( ent, -1 );
 	} else if ( Q_stricmp( cmd, "maps" ) == 0 )  {
 		Cmd_DisplayMaps_f( ent );
+	} else if (Q_stricmp(cmd, "more") == 0) {
+		Cmd_More_f(ent);
 	}
 	//	else if (Q_stricmp (cmd, "team") == 0)		// NERVE - SMF - moved above intermission check
 //		Cmd_Team_f (ent);

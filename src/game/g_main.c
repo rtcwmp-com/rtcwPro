@@ -1343,8 +1343,11 @@ void G_UpdateCvars( void ) {
 
 /*
 ==============
+RTCWPro - load the list of maps on 
+the server into an array
+Source: PubJ (nihi)
+
 LoadMapList
-  load the list of maps on the server into an array
 ==============
 */
 void LoadMapList(void)
@@ -1636,14 +1639,14 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		G_InitBots( restart );
 	}
 
-    LoadMapList();
-
 	G_RemapTeamShaders();
 
 	// L0 - Pause
 	// Start with off! As if map_restart occur while paused screen fade is stuck..
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
+
+	LoadMapList();
 
 	// L0 - Clamp stuff if needed
 	// TODO: Move this if into it's own function if more is introduced (i.e. Duel mode..)
