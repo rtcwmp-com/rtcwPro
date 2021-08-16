@@ -1172,7 +1172,7 @@ static float CG_DrawShoutcastTimer(float y) {
 
 /*
 ========================
-sswolf - complete OSP demo features
+RTCWPro
 OSPx
 Counts time in
 
@@ -1196,7 +1196,7 @@ void CG_startCounter(void) {
 
 /*
 ===================
-sswolf - draw speed
+RTCWPro - draw speed
 with extra features
 Source: PubJ
 
@@ -1456,7 +1456,7 @@ static void CG_DrawUpperRight( void ) {
 		y = CG_DrawShoutcastTimer(y);
 	}
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// OSPx - Time Counter
 	CG_startCounter();
 }

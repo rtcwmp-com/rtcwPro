@@ -627,6 +627,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	self->r.contents = CONTENTS_CORPSE;
 
 	self->s.powerups = 0;
+
 // JPW NERVE -- only corpse in SP; in MP, need CONTENTS_BODY so medic can operate
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		self->s.weapon = WP_NONE;
@@ -652,6 +653,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	// remove powerups
 	memset( self->client->ps.powerups, 0, sizeof( self->client->ps.powerups ) );
+
+	// RTCWPro - set this up
+	self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// never gib in a nodrop
 	if ( self->health <= GIB_HEALTH && !( contents & CONTENTS_NODROP ) ) {
@@ -1089,7 +1093,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	G_Hitsounds(targ, attacker, mod, qtrue);
 
-	// sswolf - head stuff
+	// RTCWPro - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 	if (targ->headshot && targ->client) {
 
@@ -1107,7 +1111,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_AddEvent( targ, EV_LOSE_HAT, DirToByte( dir ) );
 		}
 
-		// sswolf - some debug info
+		// RTCWPro - some debug info
 		if (g_debugBullets.integer)
 		{
 			AP(va("print \"%s ^7headshot for %i dmg\n\"", targ->client->pers.netname, take));

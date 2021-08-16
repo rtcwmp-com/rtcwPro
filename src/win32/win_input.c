@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../client/client.h"
 #include "win_local.h"
 
-// sswolf - begin rinput - source: quake
+// RTCWPro - begin rinput - source: quake
 #include "in_raw.h"
 
 #ifndef DEDICATED
@@ -458,7 +458,7 @@ void IN_RawInput_MouseRead(HANDLE in_device_handle) {
 		rawmice[i].pos[0] = RI_INVALID_POS;
 	}
 
-	// sswolf - notice extra buttons
+	// RTCWPro - notice extra buttons
 	// buttons
 	if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN)
 		Sys_QueEvent(g_wv.sysMsgTime, SE_KEY, K_MOUSE1, qtrue, 0, NULL);

@@ -268,7 +268,7 @@ void G_voteSetVoteString( const char *desc ) {
 
 // *** RTCWPro - custom config ***
 int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd) {
-	
+
 	// Vote request (vote is being initiated)
 	if (arg) {
 
@@ -521,6 +521,12 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
 // *** Map - simpleton: we dont verify map is allowed/exists ***
 int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd ) {
+
+    int numMatches = 0;
+    int mapIndex = -1;
+    char vmapname[MAX_STRING_TOKENS]; // not necessary as we could use maplist directly...
+    int i;
+
 	// Vote request (vote is being initiated)
 	if ( arg ) {
 		char serverinfo[MAX_INFO_STRING];
@@ -535,11 +541,41 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 			return( G_INVALID );
 		}
 
-		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2 );
+		// RTCWPro - check for matching maps (source: PubJ (nihi))
+		for (i = 0; i <= level.mapcount + 1; i++) {
+			if (strstr(level.maplist[i], arg2) != NULL) {
+				if (numMatches == 0) {
+					mapIndex = i;
+				}
+				else if (numMatches == 1) {
+					CP(va("print \"^3Multiple matches found:\n"));
+					CP(va("print \"^3  %s\n\"", level.maplist[mapIndex]));
+					CP(va("print \"^3  %s\n\"", level.maplist[i]));
+				}
+				else if (numMatches > 1) {
+					CP(va("print \"^3  %s\n\"", level.maplist[i]));
+				}
+				numMatches += 1;
+			}
+		}
 
-		if (!FileExists(arg2, "maps", ".bsp", qfalse))
+		if (numMatches == 1) {
+			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapIndex]));
+			Q_strncpyz(vmapname, level.maplist[mapIndex], sizeof(vmapname));
+		}
+		else if (numMatches > 1) {
+			return(G_INVALID);
+		}
+		else {
+			CP(va("print \"^3%s ^7is not on the server.\n\"", arg2));
+			return(G_INVALID);
+		}
+		// end matching maps code
+
+        Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", vmapname );
+		if (!FileExists(vmapname, "maps", ".bsp", qfalse))
 		{
-			CP(va("print \"^7Could not find ^3%s\n\"", arg2));
+			CP(va("print \"^3%s ^7is not on the server.\n\"", vmapname));
 			return(G_INVALID);
 		}
 
@@ -979,7 +1015,7 @@ void G_PrintConfigs(gentity_t* ent) {
 	int  numconfigs = 0, i = 0, namelen = 0;
 	char* configPointer;
 	char gameConfig[MAX_QPATH];
-	
+
 	G_Printf("Starting to read configs\n");
 	trap_Cvar_VariableStringBuffer("sv_GameConfig", gameConfig, sizeof(gameConfig));
 

@@ -426,6 +426,55 @@ void G_scsSpectatorSpeed(gentity_t* ent) {
 	ent->client->sess.specSpeed = speedvalue;
 }
 
+/*
+=================
+RTCWPro
+
+G_scsFollowOBJ
+=================
+*/
+void G_scsFollowOBJ(gentity_t* ent) {
+	gclient_t* cl;
+	int clientnum;
+	int i;
+
+	if (!ent->client->sess.shoutcaster) {
+		CP("print \"Login as a Shoutcaster first.\n\"");
+		return;
+	}
+
+	for (i = 0; i < level.numPlayingClients; i++) {
+
+		cl = &level.clients[level.sortedClients[i]];
+
+		if (cl->pers.connected != CON_CONNECTED) {
+			continue;
+		}
+
+		if (cl->sess.sessionTeam == TEAM_SPECTATOR) {
+			continue;
+		}
+
+		if (ent->client->ps.pm_flags & PMF_LIMBO)
+		{
+			if (cl->ps.pm_flags & PMF_LIMBO)
+			{
+				continue;
+			}
+		}
+
+		if (cl->ps.powerups[PW_REDFLAG] > 0 || cl->ps.powerups[PW_BLUEFLAG] > 0) {
+			clientnum = cl->ps.clientNum;
+		}
+		else {
+			continue;
+		}
+
+		ent->client->sess.spectatorClient = clientnum;
+		ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+	}
+}
+
 void G_refMakeShoutcaster_cmd(gentity_t* ent)
 {
 	int       pid;
@@ -816,7 +865,7 @@ void G_refRenameClient(gentity_t* ent) {
 
 /*
 =============
-sswolf
+RTCWPro
 G_refRequestSS
 =============
 */
@@ -839,8 +888,9 @@ void G_refRequestSS(gentity_t* ent) {
 
 /*
 ===========
-Getstatus
+RTCWPro
 
+Getstatus
 Prints IP's and some match info..
 ===========
 */
@@ -852,7 +902,6 @@ void G_refGetStatus(gentity_t* ent) {
 	int mins = (secs / 60) % 60;
 	int hours = (secs / 3600) % 24;
 	int days = (secs / (3600 * 24));
-	// sswolf - new stuff
 	char mapName[64];
 
 	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));

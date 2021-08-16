@@ -814,6 +814,7 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if (!Q_stricmp(cmd, "ref"))				{ G_ref_cmd(ent, qtrue);	return qtrue; }
 	else if (!Q_stricmp(cmd, "scs"))				{ G_scs_cmd(ent, qtrue);	return qtrue; }
 	else if (!Q_stricmp(cmd, "specspeed"))			{ G_scsSpectatorSpeed(ent);	return qtrue; }
+	else if (!Q_stricmp(cmd, "followobj"))			{ G_scsFollowOBJ(ent);	return qtrue; }
 	else if(!Q_stricmp(cmd, "readyteam"))			{ pCmd_teamReady(ent, qtrue);	return qtrue;}
 	else if(!Q_stricmp(cmd, "speclock"))			{ cmd_speclock(ent, qtrue);	return qtrue;}
 	else if(!Q_stricmp(cmd, "players"))			    { pCmd_players(ent, qfalse);	return qtrue;}

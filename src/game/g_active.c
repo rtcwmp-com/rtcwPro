@@ -362,7 +362,7 @@ void    G_TouchTriggers( gentity_t *ent ) {
 
 /*
 =================
-sswolf - follow clients in freecam
+RTCWPro - follow clients in freecam
 by aiming/shooting at them
 Note: using generic tracing
 
@@ -444,7 +444,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 			ucmd->upmove = 0;
 			ucmd->wbuttons = 0;
 		}
-		else if (client->sess.shoutcaster)
+		else if (client->sess.shoutcaster && client->noclip)
 		{
 			client->ps.pm_type = PM_NOCLIP;
 		}
@@ -487,7 +487,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	// attack button cycles through spectators
 	if ( ( client->buttons & BUTTON_ATTACK ) && !( client->oldbuttons & BUTTON_ATTACK ) )
 	{
-		// sswolf - make it usable by aiming/shooting
+		// RTCWPro - make it usable by aiming/shooting
 		if (client->sess.spectatorState == SPECTATOR_FREE && client->sess.sessionTeam == TEAM_SPECTATOR)
 		{
 			if (G_SpectatorAttackFollow(ent))
@@ -498,7 +498,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 
 		Cmd_FollowCycle_f(ent, 1);
 	}
-	// sswolf - make it usable by m1/2 for both directions
+	// RTCWPro - make it usable by m1/2 for both directions
 	else if ((client->buttons & BUTTON_ATTACK) && !(client->oldbuttons & BUTTON_ATTACK) &&
 		!(client->buttons & BUTTON_ACTIVATE))
 	{
@@ -1360,7 +1360,7 @@ void ClientThink_real( gentity_t *ent ) {
 				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) || (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC )) {
 				// (dropweapon) ADD NEW CVAR (if desired) and include in the following condition to allow medics to drop their weapons
 				//if ( ( client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER ) || ( client->ps.stats[STAT_PLAYER_CLASS] == PC_LT ) )
-				// sswolf - decide what classes can drop weapon
+				// RTCWPro - decide what classes can drop weapon
 				if (AllowDropForClass(ent, pclass))
 				{
 					for ( i = 0; i < MAX_WEAPS_IN_BANK_MP; i++ ) {
@@ -1399,7 +1399,7 @@ void ClientThink_real( gentity_t *ent ) {
 							}
 
 							// Clear out empty weapon, change to next best weapon
-							G_AddEvent( ent, EV_NOAMMO, 0 );
+							G_AddEvent(ent, EV_NOAMMO, 0);
 
 							i = MAX_WEAPS_IN_BANK_MP;
 							// show_bug.cgi?id=568
@@ -1776,7 +1776,7 @@ void ClientThink( int clientNum ) {
 
 	ent = g_entities + clientNum;
 
-	// sswolf - this goes above
+	// RTCWPro - this goes above
 	//ent->client->pers.oldcmd = ent->client->pers.cmd;
 	// new cmd
 	//trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
@@ -1880,7 +1880,8 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
-			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
+			if ((cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR) ||
+				(cl->pers.connected == CON_CONNECTED && cl->sess.shoutcaster && ent->client->sess.shoutcaster)) { // RTCWPro
 				// L0 - Ping & Score bug fix
 				// This solves the /serverstatus and score table (who's specing/demoing you) bug..
 				int ping = ent->client->ps.ping;
@@ -2092,7 +2093,7 @@ void WolfReviveBbox( gentity_t *self ) {
 
 // dhm
 
-// sswolf - patched for the pub head stuff
+// RTCWPro - patched for the pub head stuff
 void G_DrawHitBoxes(gentity_t* ent) {
 	gentity_t* bboxEnt;
 	vec3_t b1, b2;

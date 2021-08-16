@@ -523,8 +523,12 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent ) {
 	char    *msg;
 
-	if ( !CheatsOk( ent ) ) {
+	/*if ( !CheatsOk( ent ) ) {
 		return;
+	} */
+
+	if (!g_cheats.integer && !ent->client->sess.shoutcaster) {
+		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
 	}
 
 	if ( ent->client->noclip ) {
@@ -564,6 +568,91 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 	trap_SendServerCommand( ent - g_entities, "clientLevelShot" );
 }
 
+/*
+============
+RTCWPro
+Source: rtcwPub
+
+Cmd_More_f
+============
+*/
+void Cmd_More_f(gentity_t* ent)
+{
+	if (ent->more) {
+		if (!ent->moreCalls)
+			ent->moreCalls = 1;
+
+		ent->moreCalled = qtrue;
+		ent->more(ent);
+		ent->moreCalls++;
+		ent->moreCalled = qfalse;
+	}
+}
+
+/*
+============
+RTCWPro - display list of 
+maps on the server
+Source: PubJ (nihi)
+
+Cmd_DisplayMaps_f
+============
+*/
+void Cmd_DisplayMaps_f(gentity_t* ent)
+{
+	int i, mapcount;
+	const int moreCount = 100;
+	qboolean more = qfalse;
+
+	if (!ent->moreCalled)
+	{
+		ent->moreCalls = 0;
+	}
+
+	CP(va("print \"^7Total of ^3%d ^7maps on server\n\"", level.mapcount));
+	CP("print \"^3------------------------------------------------------------------------\n\"");
+
+	for (mapcount = 1, i = (ent->moreCalls * moreCount); i < level.mapcount; mapcount += 3)
+	{
+
+		if ((i + 3) <= level.mapcount)
+		{
+			CP(va("print \"^7%-24s^7%-24s^7%-23s\n\"", level.maplist + (level.mapcount - i - mapcount),
+				level.maplist + (level.mapcount - i - mapcount - 1), level.maplist + (level.mapcount - i - mapcount - 2)));
+		}
+		else
+		{
+     		CP(va("print \"^7%s \"", level.maplist + (level.mapcount - i - mapcount)));
+		}
+
+		if (mapcount >= moreCount && (i + 3) != level.mapcount)
+		{
+			more = qtrue;
+			break;
+		}
+		else if ((i + mapcount >= level.mapcount))
+		{
+            more = qfalse;
+            break;
+		}
+	}
+
+	if (more)
+	{
+		int remaining = level.mapcount - i - mapcount - 1;
+		CP("print \"^3------------------------------------------------------------------------\n\"");
+		CP(va("print \"^7Use ^3/more ^7to list the next %d maps\n\"", remaining >= moreCount ? moreCount : remaining));
+		ent->more = Cmd_DisplayMaps_f;
+		return;
+	}
+	else
+	{
+		ent->more = 0;
+		ent->moreCalls = 0;
+		CP("print \"^3------------------------------------------------------------------------\n\"");
+		CP("print \"^7There are no more maps to list\n\"");
+	}
+}
 
 /*
 =================
@@ -1026,7 +1115,8 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// can't follow another spectator
-	if ( level.clients[ i ].sess.sessionTeam == TEAM_SPECTATOR ) {
+	if (level.clients[i].sess.sessionTeam == TEAM_SPECTATOR &&
+		(!level.clients[i].sess.shoutcaster || !ent->client->sess.shoutcaster)) { // RTCWPro
 		return;
 	}
 
@@ -1666,7 +1756,7 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	trap_Argv(1, arg1, sizeof(arg1));
 	trap_Argv(2, arg2, sizeof(arg2));
 
-	// L0 - ioquake callvote exploit fix 
+	// L0 - ioquake callvote exploit fix
 	for (c = arg2; *c; ++c) {
 		switch (*c) {
 			case '\n':
@@ -1749,7 +1839,7 @@ Cmd_Vote_f
 void Cmd_Vote_f( gentity_t *ent ) {
 	char msg[64];
 	int num;
-	
+
 	// DHM - Nerve :: Complaints supercede voting (and share command)
 	if ( ent->client->pers.complaintEndTime > level.time ) {
 
@@ -2726,8 +2816,12 @@ void ClientCommand( int clientNum ) {
 		Cmd_FollowCycle_f( ent, 1 );
 	} else if ( Q_stricmp( cmd, "followprev" ) == 0 )  {
 		Cmd_FollowCycle_f( ent, -1 );
+	} else if ( Q_stricmp( cmd, "maps" ) == 0 )  {
+		Cmd_DisplayMaps_f( ent );
+	} else if (Q_stricmp(cmd, "more") == 0) {
+		Cmd_More_f(ent);
 	}
-//	else if (Q_stricmp (cmd, "team") == 0)		// NERVE - SMF - moved above intermission check
+	//	else if (Q_stricmp (cmd, "team") == 0)		// NERVE - SMF - moved above intermission check
 //		Cmd_Team_f (ent);
 	else if ( Q_stricmp( cmd, "where" ) == 0 ) {
 		Cmd_Where_f( ent );
@@ -2827,6 +2921,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "unready",        qtrue,  qfalse, NULL,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
 	{ "weaponstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 Shows weapon accuracy stats for a player"                                   },
     { "wstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
+    { "maps",    qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
 	{ 0,                qfalse, qtrue,  NULL,                  0                                                                                            }
 };
 

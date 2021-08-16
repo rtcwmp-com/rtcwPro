@@ -876,7 +876,7 @@ void G_SpawnGEntityFromSpawnVars( void ) {
 		}
 	}
 
-	// sswolf - allowteams - ET port
+	// RTCWPro - allowteams - ET port
 	G_SpawnString("allowteams", "", &str);
 	if (str[0])
 	{

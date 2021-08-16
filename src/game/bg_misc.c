@@ -4369,7 +4369,7 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
 
 /*
 ===============
-sswolf - because I'm lazy
+RTCWPro
 
 BG_ParseColorCvar
 Reads RBG(A) cvars and sets parsed color var components

@@ -3040,7 +3040,7 @@ void CG_Player( centity_t *cent ) {
 	VectorCopy( playerOrigin, lightorigin );
 	lightorigin[2] += 31 + (float)cg_drawFPGun.integer;
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// L0 - Keeping this in for demo preview..
 	if (cg.demoPlayback && cgs.wallhack)
 	{

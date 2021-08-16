@@ -1214,7 +1214,7 @@ typedef struct {
 	int popinPrintLines;
 	qboolean popinBlink;
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// Time Counter
 	int timein;
 	int timeCounter;
@@ -1222,7 +1222,7 @@ typedef struct {
 	qboolean serverRespawning;
 // -OSPx
 
-	// sswolf - tj stuff
+	// RTCWPro - tj stuff
 	qboolean resetmaxspeed;
 	float topSpeed;
 	float oldSpeed;

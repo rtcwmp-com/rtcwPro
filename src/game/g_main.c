@@ -1343,6 +1343,31 @@ void G_UpdateCvars( void ) {
 
 /*
 ==============
+RTCWPro - load the list of maps on 
+the server into an array
+Source: PubJ (nihi)
+
+LoadMapList
+==============
+*/
+void LoadMapList(void)
+{
+	char maps[MAX_MAPCONFIGSTRINGS];
+	char noext[MAX_QPATH];
+	int i;
+
+	level.mapcount = trap_FS_GetFileList("maps", ".bsp", maps, sizeof(maps));
+	char* map = maps;
+
+    for (i = 0; i <= level.mapcount+1; i++) {
+		COM_StripExtension(map, noext);
+		strcpy(level.maplist[i],noext);
+		map += strlen(map) + 1;
+	}
+}
+
+/*
+==============
 G_SpawnScriptCamera
 	create the game entity that's used for camera<->script communication and portal location for camera view
 ==============
@@ -1596,10 +1621,16 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	GeoIP_open();
 
 	// L0 - auto cfg for each map
-	if (g_mapConfigs.integer){
+	if (!restart && g_mapConfigs.integer){
 		//char mapName[64];
 
-		trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
+		trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
+
+		for (int x = 0; mapName[x]; x++) {
+			mapName[x] = tolower(mapName[x]);
+		}
+
+		G_LogPrintf(va("rtcwPro: Execing %s.cfg\n", mapName));
 		trap_SendConsoleCommand(EXEC_APPEND, va("exec mapConfigs/%s.cfg \n", mapName));
 	} // L0 - end
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
@@ -1614,6 +1645,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// Start with off! As if map_restart occur while paused screen fade is stuck..
 	// Disconnect while paused is handled in client side.
 	trap_SetConfigstring( CS_PAUSED,  va( "%i", PAUSE_NONE ));
+
+	LoadMapList();
 
 	// L0 - Clamp stuff if needed
 	// TODO: Move this if into it's own function if more is introduced (i.e. Duel mode..)
@@ -2626,7 +2659,7 @@ void CheckExitRules( void ) {
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "1" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
-			// sswolf - moved from WM_DrawObjectives in cg
+			// RTCWPro - moved from WM_DrawObjectives in cg
 			AAPS("sound/match/winallies.wav");
 			LogExit( "Axis team eliminated." );
 		}

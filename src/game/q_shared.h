@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwMP-Pro 1.2.1.10"  // RTCWPro
+#define Q3_VERSION      "RtcwMP-Pro 1.2.2.10"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -328,7 +328,7 @@ typedef int clipHandle_t;
 #define MAX_STRING_TOKENS   256     // max tokens resulting from Cmd_TokenizeString
 #define MAX_TOKEN_CHARS     1024    // max length of an individual token
 
-#define MAX_INFO_STRING     4096 // sswolf - increase from 1024
+#define MAX_INFO_STRING     4096 // RTCWPro - increase from 1024
 #define MAX_INFO_KEY        1024
 #define MAX_INFO_VALUE      1024
 

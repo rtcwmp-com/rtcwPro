@@ -956,7 +956,7 @@ static void SV_DumpUser_f( void ) {
 	Info_Print( cl->userinfo );
 }
 
-/* sswolf - reqSS
+/* RTCWPro - reqSS
 ===========
 L0 - SV_RequestSS
 

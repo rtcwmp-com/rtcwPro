@@ -934,7 +934,7 @@ void CG_ColorForHealth( vec4_t hcolor ) {
 
 /*
 ==================
-sswolf
+RTCWPro
 CG_GetClock
 Returns realtime in the format "hh:mm:ss"
 ==================

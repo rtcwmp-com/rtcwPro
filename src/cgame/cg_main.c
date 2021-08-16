@@ -657,12 +657,12 @@ cvarTable_t cvarTable[] = {
 
 	// RT and ERT
 	{ &cg_drawEnemyTimer, "cg_drawEnemyTimer", "1", CVAR_ARCHIVE },
-	{ &cg_enemyTimerColor, "cg_enemyTimerColor", "red", CVAR_ARCHIVE },
+	{ &cg_enemyTimerColor, "cg_enemyTimerColor", "green", CVAR_ARCHIVE },
 	{ &cg_enemyTimerX, "cg_enemyTimerX", "98", CVAR_ARCHIVE },
 	{ &cg_enemyTimerY, "cg_enemyTimerY", "60", CVAR_ARCHIVE },
 	{ &cg_enemyTimerProX, "cg_enemyTimerProX", "185", CVAR_ARCHIVE },
 	{ &cg_enemyTimerProY, "cg_enemyTimerProY", "445", CVAR_ARCHIVE },
-	{ &cg_reinforcementTimeColor, "cg_reinforcementTimeColor", "green", CVAR_ARCHIVE },
+	{ &cg_reinforcementTimeColor, "cg_reinforcementTimeColor", "red", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeX, "cg_reinforcementTimeX", "86", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeY, "cg_reinforcementTimeY", "70", CVAR_ARCHIVE },
 	{ &cg_reinforcementTimeProX, "cg_reinforcementTimeProX", "145", CVAR_ARCHIVE },
@@ -671,7 +671,7 @@ cvarTable_t cvarTable[] = {
 	// lock camera on medic at death
 	{ &cg_findMedic, "cg_findMedic", "1", CVAR_ARCHIVE | CVAR_USERINFO },
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
 	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
 	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },

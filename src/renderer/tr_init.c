@@ -710,7 +710,7 @@ void R_ScreenShotJPEG_f( void ) {
 		silent = qfalse;
 	}
 
-	// sswolf - edited to make reqSS silent and work correctly
+	// RTCWPro - edited to make reqSS silent and work correctly
 	if ( ri.Cmd_Argc() == 2 && !silent ) 
 	{
 		// explicit filename
