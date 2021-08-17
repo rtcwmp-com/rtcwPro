@@ -208,6 +208,7 @@ vmCvar_t vote_allow_warmupdamage;
 vmCvar_t vote_allow_antilag;
 vmCvar_t vote_allow_balancedteams;
 vmCvar_t vote_allow_muting;
+vmCvar_t vote_allow_cointoss;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t refereePassword;
@@ -461,6 +462,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_antilag,      "vote_allow_antilag", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_balancedteams,"vote_allow_balancedteams", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_muting,       "vote_allow_muting", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_cointoss,		"vote_allow_cointoss", "1", 0, 0, qfalse, qfalse },
 	{ &vote_limit,      "vote_limit", "5", 0, 0, qfalse, qfalse },
 	{ &vote_percent,    "vote_percent", "51", 0, 0, qfalse, qfalse }, // set to 51 percent
 
