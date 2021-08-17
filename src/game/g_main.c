@@ -145,6 +145,8 @@ vmCvar_t g_footstepAudibleRange;
 // JPW NERVE multiplayer reinforcement times
 vmCvar_t g_redlimbotime;
 vmCvar_t g_bluelimbotime;
+
+//vmCvar_t g_asoffset; // temporary for adjusting a/s delay
 // charge times for character class special weapons
 vmCvar_t g_medicChargeTime;
 vmCvar_t g_engineerChargeTime;
@@ -335,7 +337,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_userTimeLimit, "g_userTimeLimit", "0", 0, 0, qfalse  },
 	{ &g_userAlliedRespawnTime, "g_userAlliedRespawnTime", "0", 0, 0, qfalse  },
 	{ &g_userAxisRespawnTime, "g_userAxisRespawnTime", "0", 0, 0, qfalse  },
-
+//	{ &g_asoffset, "g_asoffset", "1000", 0, 0, qfalse  },  // temporary for adjusting a/s delay
 	{ &g_swapteams, "g_swapteams", "0", CVAR_ROM, 0, qfalse },
 	// -NERVE - SMF
 
@@ -1250,6 +1252,9 @@ void G_RegisterCvars( void ) {
 	// -OSPx
 }
 
+
+
+
 /*
 =================
 G_UpdateCvars
@@ -1343,7 +1348,7 @@ void G_UpdateCvars( void ) {
 
 /*
 ==============
-RTCWPro - load the list of maps on 
+RTCWPro - load the list of maps on
 the server into an array
 Source: PubJ (nihi)
 

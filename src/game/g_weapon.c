@@ -474,11 +474,11 @@ void Weapon_Syringe( gentity_t *ent ) {
 				// DHM - Nerve :: Play revive animation
 
 				// Xian -- This was gay and I always hated it.
-				if ( g_fastres.integer > 0 ) 
+				if ( g_fastres.integer > 0 )
 				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_JUMP, qfalse, qtrue );
-				} 
-				else 
+				}
+				else
 				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_REVIVE, qfalse, qtrue );
 					traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
@@ -894,7 +894,8 @@ void weapon_callAirStrike( gentity_t *ent ) {
 
 	for ( i = 0; i < NUMBOMBS; i++ ) {
 		bomb = G_Spawn();
-		bomb->nextthink = level.time + i * 100 + crandom() * 50 + 1000; // 1000 for aircraft flyby, other term for tumble stagger
+		// value 1600 is used to delay the a/s .... needs to be adjusted slightly
+		bomb->nextthink = level.time + i * 100+  + crandom() * 50 + 1600; // + crandom() * 50 + g_asoffset.integer; // 1000 for aircraft flyby, other term for tumble stagger
 		bomb->think = G_AirStrikeExplode;
 		bomb->s.eType       = ET_MISSILE;
 		bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_NOCLIENT;

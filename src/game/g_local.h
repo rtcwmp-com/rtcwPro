@@ -1539,6 +1539,8 @@ extern vmCvar_t g_footstepAudibleRange;
 extern vmCvar_t g_redlimbotime;
 extern vmCvar_t g_bluelimbotime;
 extern vmCvar_t g_medicChargeTime;
+//extern vmCvar_t g_asoffset; // temporary for adjusting a/s delay
+
 extern vmCvar_t g_engineerChargeTime;
 extern vmCvar_t g_LTChargeTime;
 extern vmCvar_t g_soldierChargeTime;
@@ -1923,6 +1925,7 @@ void G_ResetMarkers( gentity_t* ent );
 ///////////////////////
 // g_main.c
 //
+
 void G_UpdateCvars(void);
 void G_teamReset(int, qboolean);
 void ServerPlayerInfo(void);
