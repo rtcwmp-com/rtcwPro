@@ -913,9 +913,9 @@ void weapon_callAirStrike( gentity_t *ent ) {
 		//bomb->splashDamage = 400;
 		bomb->damage        = 0;//400; // maybe should un-hard-code these?
 		bomb->splashDamage  = 0; //400;
+		bomb->splashRadius	= 0;//400;
 		// RTCWPro - end
 		bomb->classname             = "air strike";
-		bomb->splashRadius          = 0;//400;
 		bomb->methodOfDeath         = MOD_AIRSTRIKE;
 		bomb->splashMethodOfDeath   = MOD_AIRSTRIKE;
 		bomb->clipmask = MASK_MISSILESHOT;
