@@ -816,9 +816,14 @@ void G_AirStrikeExplode( gentity_t *self ) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
-
+	// moved here due to rogue bombs that never truly exploded
+    self->damage = 400;
+    self->splashDamage = 400;
+    self->splashRadius = 400;
+    // end addition
 	self->think = G_ExplodeMissile;
 	self->nextthink = level.time + 50;
+
 }
 
 #define NUMBOMBS 10
@@ -893,19 +898,21 @@ void weapon_callAirStrike( gentity_t *ent ) {
 	VectorScale( bombaxis,BOMBSPREAD,bombaxis ); // bomb drop direction offset
 
 	for ( i = 0; i < NUMBOMBS; i++ ) {
+
 		bomb = G_Spawn();
-		// value 1600 is used to delay the a/s .... needs to be adjusted slightly
-		bomb->nextthink = level.time + i * 100+  + crandom() * 50 + 1600; // + crandom() * 50 + g_asoffset.integer; // 1000 for aircraft flyby, other term for tumble stagger
+		// value 1200 is used to delay the a/s .... needs to be adjusted slightly
+		bomb->nextthink = level.time + i * 100+  + crandom() * 50 + 1200; // + crandom() * 50 + g_asoffset.integer; // 1000 for aircraft flyby, other term for tumble stagger
 		bomb->think = G_AirStrikeExplode;
 		bomb->s.eType       = ET_MISSILE;
 		bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_NOCLIENT;
 		bomb->s.weapon      = WP_ARTY; // might wanna change this
 		bomb->r.ownerNum    = ent->s.number;
 		bomb->parent        = ent->parent;
-		bomb->damage        = 400; // maybe should un-hard-code these?
-		bomb->splashDamage  = 400;
+		// changed to 0 and moved to G_AirStrikeExplode due to rogue bombs that never truly explode
+		bomb->damage        = 0;//400; // maybe should un-hard-code these?
+		bomb->splashDamage  = 0; //400;
 		bomb->classname             = "air strike";
-		bomb->splashRadius          = 400;
+		bomb->splashRadius          = 0;//400;
 		bomb->methodOfDeath         = MOD_AIRSTRIKE;
 		bomb->splashMethodOfDeath   = MOD_AIRSTRIKE;
 		bomb->clipmask = MASK_MISSILESHOT;
