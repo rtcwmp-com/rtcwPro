@@ -816,7 +816,7 @@ void G_AirStrikeExplode( gentity_t *self ) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
-	// moved here due to rogue bombs that never truly exploded
+	// RTCWPro - moved here due to rogue bombs that never truly exploded
     self->damage = 400;
     self->splashDamage = 400;
     self->splashRadius = 400;
@@ -901,16 +901,19 @@ void weapon_callAirStrike( gentity_t *ent ) {
 
 		bomb = G_Spawn();
 		// value 1200 is used to delay the a/s .... needs to be adjusted slightly
-		bomb->nextthink = level.time + i * 100+  + crandom() * 50 + 1200; // + crandom() * 50 + g_asoffset.integer; // 1000 for aircraft flyby, other term for tumble stagger
+		bomb->nextthink = level.time + i * 100+  + crandom() * 50 + 1000; // + crandom() * 50 + g_asoffset.integer; // 1000 for aircraft flyby, other term for tumble stagger
 		bomb->think = G_AirStrikeExplode;
 		bomb->s.eType       = ET_MISSILE;
 		bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_NOCLIENT;
 		bomb->s.weapon      = WP_ARTY; // might wanna change this
 		bomb->r.ownerNum    = ent->s.number;
 		bomb->parent        = ent->parent;
-		// changed to 0 and moved to G_AirStrikeExplode due to rogue bombs that never truly explode
+		// RTCWPro - moved to G_AirStrikeExplode and changed the rest to 0 due to rogue bombs that never truly explode
+		//bomb->damage = 400; // maybe should un-hard-code these?
+		//bomb->splashDamage = 400;
 		bomb->damage        = 0;//400; // maybe should un-hard-code these?
 		bomb->splashDamage  = 0; //400;
+		// RTCWPro - end
 		bomb->classname             = "air strike";
 		bomb->splashRadius          = 0;//400;
 		bomb->methodOfDeath         = MOD_AIRSTRIKE;
