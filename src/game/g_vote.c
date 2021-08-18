@@ -547,6 +547,7 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 			if (strstr(level.maplist[i], arg2) != NULL) {
 				if (numMatches == 0) {
 					mapIndex = i;
+
 				}
 				else if (numMatches == 1) {
 					CP(va("print \"^3Multiple matches found:\n"));
@@ -557,6 +558,9 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 					CP(va("print \"^3  %s\n\"", level.maplist[i]));
 				}
 				numMatches += 1;
+			}
+			if (Q_stricmp(level.maplist[i], arg2) == 0) {
+                break;
 			}
 		}
 
