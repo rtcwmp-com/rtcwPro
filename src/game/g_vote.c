@@ -90,6 +90,7 @@ static const vote_reference_t aVoteInfo[] = {
 	{ 0x1ff, "warmupdamage",	G_Warmupfire_v,		"Warmup Damage",				" <0|1|2>^7\n  Specifies if players can inflict damage during warmup" },
 	{ 0x1ff, "antilag",			G_AntiLag_v,		"Anti-Lag",						" <0|1>^7\n  Toggles Anti-Lag on the server" },
 	{ 0x1ff, "balancedteams",	G_BalancedTeams_v,	"Balanced Teams",				" <0|1>^7\n  Toggles team balance forcing" },
+	{ 0x1ff, "cointoss",		G_CoinToss_v,		"Coin Toss",					" ^7\n  Heads or Tails." },
 	{ 0, 0, NULL, 0 }
 };
 
@@ -898,6 +899,29 @@ int G_Timelimit_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	}
 
 	return( G_OK );
+}
+
+int G_CoinToss_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd) {
+
+	// Vote request (vote is being initiated)
+	if (arg) {
+		if (!vote_allow_cointoss.integer &&
+			ent &&
+			!ent->client->sess.referee) {
+			G_voteDisableMessage(ent, arg);
+			return (G_INVALID);
+		}
+		// Vote action (vote has passed)
+	}
+	else {
+		char* side = rand() % 2 ? "HEADS" : "TAILS";
+
+		AP(va("cp \"Coin toss comes up^3 %s^7!\"", side));
+		AP(va("cpm \"Coin toss comes up^3 %s^7!\"", side));
+		AP(va("chat \"^zconsole: ^7Coin toss comes up^3 %s^7!\"", side));
+	}
+
+	return (G_OK);
 }
 
 // *** G_WarmupDamageTypeList ***
