@@ -845,7 +845,6 @@ void G_writeServerInfo(void){
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
     char cs[MAX_STRING_CHARS];
-
 	qtime_t ct;
 	trap_RealTime(&ct);
 
@@ -857,6 +856,11 @@ void G_writeServerInfo(void){
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
 	trap_Cvar_VariableStringBuffer("sv_serverIP", server_ip, sizeof(server_ip));
+
+
+
+
+
  //   Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
    // Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
  //   Q_strncpyz(ROUNDID,va("%s",g_currentRound.integer),sizeof(ROUNDID));
@@ -1302,8 +1306,9 @@ void G_writeGameEarlyExit(void)
         json_decref(jdata);
         free(s);
         trap_FS_Write( "]\n}\n", strlen( "]\n}\n" ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
         if (g_stats_curl_submit.integer) {
-            trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+
        //     submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
 //            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
