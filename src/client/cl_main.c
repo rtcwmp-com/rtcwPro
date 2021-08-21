@@ -98,9 +98,10 @@ cvar_t  *cl_updatefiles;
 
 // L0
 //HTTP Downloads ..
-#ifdef CLWWW
+// commented to ensure it is defined (even if not used)
+//#ifdef CLWWW
 cvar_t *cl_wwwDownload;
-#endif
+//#endif
 // Streaming
 cvar_t *cl_StreamingSelfSignedCert;
 cvar_t *cl_guid;
