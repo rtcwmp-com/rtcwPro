@@ -55,7 +55,7 @@ typedef struct {
 
 	float displayFrac;      // aproaches finalFrac at scr_conspeed
 	float finalFrac;        // 0.0 to 1.0 lines of console to display
-	float userFrac;			// RTCWPro
+	//float userFrac;			// RTCWPro - con height
 
 	int vislines;           // in scanlines
 
@@ -821,8 +821,8 @@ void Con_RunConsole( void )
 	// decide on the destination height of the console
 	if ( cls.keyCatchers & KEYCATCH_CONSOLE ) 
 	{
-		//con.finalFrac = 0.5;        // half screen
-		con.finalFrac = con.userFrac;	// RTCWPro
+		con.finalFrac = 0.5;        // half screen
+		//con.finalFrac = con.userFrac;	// RTCWPro - con height
 	} 
 	else 
 	{
@@ -847,11 +847,11 @@ void Con_RunConsole( void )
 
 /*
 ==================
-RTCWPro
+RTCWPro - con height
 Con_SetFrac
 ==================
 */
-void Con_SetFrac(const float conFrac)
+/*void Con_SetFrac(const float conFrac)
 {
 	// clamp the cvar value
 	// don't let the console be hidden
@@ -867,7 +867,7 @@ void Con_SetFrac(const float conFrac)
 	{
 		con.userFrac = conFrac;
 	}
-}
+}*/
 
 void Con_PageUp( void ) {
 	con.display -= 2;
