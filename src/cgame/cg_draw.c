@@ -2986,8 +2986,7 @@ static void CG_DrawIntermission( void ) {
 		return;
 	}
 
-// OSPx
-	// Auto Actions
+	// RTCWPro - Auto Actions
 	if (!cg.demoPlayback) {
 		static int doScreenshot = 0, doDemostop = 0;
 
@@ -3018,7 +3017,11 @@ static void CG_DrawIntermission( void ) {
 			doDemostop = 0;
 		}
 	}
-// -OSPx
+
+	trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	trap_Cvar_Set("cg_spawnTimer_period", "0");
+	// RTCWPro
+
 	cg.scoreFadeTime = cg.time;
 	CG_DrawScoreboard();
 }
