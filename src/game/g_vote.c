@@ -542,7 +542,8 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 			return( G_INVALID );
 		}
 
-		// RTCWPro - check for matching maps (source: PubJ (nihi))
+		// RTCWPro - check for matching maps
+            // nihi : done quickly and will clean this up later
 		for (i = 0; i <= level.mapcount + 1; i++) {
 			if (strstr(level.maplist[i], arg2) != NULL) {
 				if (numMatches == 0) {
@@ -559,7 +560,9 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 				}
 				numMatches += 1;
 			}
-			if (Q_stricmp(level.maplist[i], arg2) == 0) {
+            if (Q_stricmp(level.maplist[i], arg2) == 0) {
+                mapIndex=i;
+                numMatches = 1; // found exact match...there are better ways but it works for now
                 break;
 			}
 		}
