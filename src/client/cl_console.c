@@ -74,7 +74,7 @@ cvar_t      *con_notifytime;
 
 // DHM - Nerve :: Must hold CTRL + SHIFT + ~ to get console
 cvar_t      *con_restricted;
-cvar_t		*con_color; // RTCWPro
+//cvar_t		*con_color; // RTCWPro
 
 #define DEFAULT_CONSOLE_WIDTH   78
 
@@ -362,7 +362,7 @@ void Con_Init( void ) {
 	con_conspeed = Cvar_Get( "scr_conspeed", "3", 0 );
 	con_debug = Cvar_Get( "con_debug", "0", CVAR_ARCHIVE ); //----(SA)	added
 	con_restricted = Cvar_Get( "con_restricted", "0", CVAR_INIT );      // DHM - Nerve
-	con_color = Cvar_Get("con_color", "-1", CVAR_ARCHIVE); // RTCWPro
+	//con_color = Cvar_Get("con_color", "-1", CVAR_ARCHIVE); // RTCWPro
 
 	Field_Clear( &g_consoleField );
 	g_consoleField.widthInChars = g_console_field_width;
@@ -651,8 +651,8 @@ void Con_DrawSolidConsole( float frac ) {
 	int lines;
 	int currentColor;
 	vec4_t color;
-	static int  colorModCount = 0;
-	static vec4_t consoleColor = { 1, 1, 1, 1 };
+	//static int  colorModCount = 0;
+	//static vec4_t consoleColor = { 1, 1, 1, 1 };
 
 	lines = cls.glconfig.vidHeight * frac;
 	if ( lines <= 0 ) {
@@ -673,7 +673,7 @@ void Con_DrawSolidConsole( float frac ) {
 		y = 0;
 	} else {
 		// RTCWPro - change console color
-		if (con_color->integer == -1) {
+		/*if (con_color->integer == -1) {
 			SCR_DrawPic(0, 0, SCREEN_WIDTH, y, cls.consoleShader);
 		}
 		else {
@@ -682,7 +682,9 @@ void Con_DrawSolidConsole( float frac ) {
 				memcpy(consoleColor, g_color_table[((unsigned)con_color->integer) % ArrayLength(g_color_table)], sizeof(consoleColor));
 			}
 			SCR_FillRect(0, 0, SCREEN_WIDTH, y, consoleColor);
-		}
+		}*/
+
+		SCR_DrawPic(0, 0, SCREEN_WIDTH, y, cls.consoleShader);
 
 		// NERVE - SMF - merged from WolfSP
 		if ( frac >= 0.5f ) {
