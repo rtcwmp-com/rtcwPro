@@ -70,6 +70,7 @@ vmCvar_t g_speed;
 vmCvar_t g_gravity;
 vmCvar_t g_cheats;
 vmCvar_t g_knockback;
+vmCvar_t g_damageRadiusKnockback;
 vmCvar_t g_quadfactor;
 vmCvar_t g_forcerespawn;
 vmCvar_t g_inactivity;
@@ -360,7 +361,8 @@ cvarTable_t gameCvarTable[] = {
     { &g_disableSMGPickup, "g_disableSMGPickup", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_speed, "g_speed", "320", 0, 0, qtrue  },
 	{ &g_gravity, "g_gravity", "800", 0, 0, qtrue  },
-	{ &g_knockback, "g_knockback", "100", 0, 0, qtrue  },
+	{ &g_knockback, "g_knockback", "500", 0, 0, qtrue  },
+	{ &g_damageRadiusKnockback, "g_damageRadiusKnockback", "1000", 0, 0, qtrue  },
 	{ &g_quadfactor, "g_quadfactor", "3", 0, 0, qtrue  },
 	{ &g_weaponRespawn, "g_weaponrespawn", "5", 0, 0, qtrue  },
 	{ &g_weaponTeamRespawn, "g_weaponTeamRespawn", "30", 0, 0, qtrue },
