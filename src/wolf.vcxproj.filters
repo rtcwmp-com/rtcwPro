@@ -372,9 +372,6 @@
     <ClInclude Include="qcommon\database.h">
       <Filter>Source Files\database</Filter>
     </ClInclude>
-    <ClInclude Include="win32\in_raw.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="client\client.h">
       <Filter>Header Files</Filter>
     </ClInclude>

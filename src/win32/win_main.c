@@ -1293,7 +1293,7 @@ void Sys_Init( void ) {
 
 	Cvar_Set( "username", Sys_GetCurrentUser() );
 
-	IN_Init();      // FIXME: not in dedicated?
+	//IN_Init();      // FIXME: not in dedicated? // RTCWPro - moved below
 }
 
 
@@ -1336,6 +1336,10 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 	Com_Init( sys_cmdline );
 	NET_Init();
+
+#ifndef DEDICATED
+	IN_Init(); // RTCWPro - raw input must be initialized after video
+#endif
 
 	_getcwd( cwd, sizeof( cwd ) );
 	Com_Printf( "Working directory: %s\n", cwd );
