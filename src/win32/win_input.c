@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../client/client.h"
 #include "win_local.h"
 
-// RTCWPro - begin raw input - source: quake
+// RTCWPro - raw input begin - source: quake
 // defines
 #define MAX_RI_DEVICE_SIZE 128
 #define INIT_RIBUFFER_SIZE (sizeof(RAWINPUTHEADER)+sizeof(RAWMOUSE))
@@ -140,7 +140,7 @@ void IN_JoyMove( void );
 
 static void MidiInfo_f( void );
 
-// RTCWPro - begin raw input
+// RTCWPro - raw input begin
 /*
 =========================================================================
 
@@ -507,6 +507,7 @@ void IN_RawInput_MouseRead(HANDLE in_device_handle)
 	rawmice[i].buttons &= ~RI_RAWBUTTON_MASK;
 	rawmice[i].buttons |= tbuttons;
 }
+// raw input end
 
 /*
 ============================================================
@@ -739,7 +740,7 @@ void IN_StartupMouse( void ) {
 
 	s_wmv.mouseInitialized = qtrue;
 
-	// RTCWPro - raw mouse input
+	// RTCWPro - raw input
 	if (in_mouse->integer == 1)
 	{
 		IN_InitWin32Mouse();
@@ -790,7 +791,7 @@ IN_MouseMove
 void IN_MouseMove( void ) {
 	int mx, my;
 
-	// RTCWPro - raw mouse input
+	// RTCWPro - raw input
 	//IN_Win32Mouse( &mx, &my );
 	if (rawmicecount > 0)
 	{
