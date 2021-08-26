@@ -1480,7 +1480,6 @@ extern vmCvar_t g_needpass;
 extern vmCvar_t g_gravity;
 extern vmCvar_t g_speed;
 extern vmCvar_t g_knockback;
-extern vmCvar_t g_damageRadiusKnockback;
 extern vmCvar_t g_quadfactor;
 extern vmCvar_t g_forcerespawn;
 extern vmCvar_t g_inactivity;
@@ -1603,10 +1602,11 @@ extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t	g_disableInv;
 extern vmCvar_t	g_axisSpawnProtectionTime;
 extern vmCvar_t	g_alliedSpawnProtectionTime;
+extern vmCvar_t g_damageRadiusKnockback;
+extern vmCvar_t	g_dropWeapons;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
-extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
 extern vmCvar_t	g_ltNades;
