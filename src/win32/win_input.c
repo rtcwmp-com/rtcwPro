@@ -200,7 +200,6 @@ int IN_RawInput_IsRDPMouse(char* cDeviceString)
 
 int IN_RegisterRawMouse(void)
 {
-	int registrationResult;
 	// This function registers to receive the WM_INPUT messages
 	RAWINPUTDEVICE Rid; // Register only for mouse messages from wm_input.  
 
