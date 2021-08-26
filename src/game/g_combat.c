@@ -982,12 +982,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( knockback > 200 ) {
 		knockback = 200;
 	}
-	// L0 - Now by default knockback is set to 100 (was 1000) so if it's not touched
-	// multiply nade and AS to 1000 so it acts and feels like default
-	if (dflags & DAMAGE_RADIUS) {
-		if (g_knockback.integer <= 100)
-			knockback *= 10;
-	} // End
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
 	}
@@ -1006,7 +1000,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			dir[2] = 0.3;
 		}
 
-		VectorScale( dir, g_knockback.value * (float)knockback / mass, kvel );
+    	if (dflags & DAMAGE_RADIUS) {
+		    VectorScale( dir, g_damageRadiusKnockback.value * (float)knockback / mass, kvel );	
+		} else {
+        	VectorScale( dir, g_knockback.value * (float)knockback / mass, kvel );
+		}
+		
 		VectorAdd( targ->client->ps.velocity, kvel, targ->client->ps.velocity );
 
 		if ( targ == attacker && !(  mod != MOD_ROCKET &&
