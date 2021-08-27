@@ -293,12 +293,11 @@ int G_read_match_info( void )
 */
 int G_check_before_submit( char* jsonfile)
 {
-     json_t *data = NULL;
+    json_t *data = NULL;
     json_t *json,*jstats;
     json_error_t error;
 
-    int minPlayers = 2; // require 3 players for stats submission
-
+    int minPlayers = 3; // require 3 players for stats submission
 
     json = json_load_file(jsonfile, 0, &error);
     if (error.line != -1) {
@@ -306,12 +305,11 @@ int G_check_before_submit( char* jsonfile)
         return 0;
     }
 
-
     if (json)
     {
-      //  Can add more conditions but for now based on only on number of players
+      //  Can add more conditions but for now based only on number of players
         jstats = json_object_get(json, "stats");
-        if (json_array_size(jstats) > minPlayers) {
+        if (json_array_size(jstats) >= minPlayers) {
             return 1;
         }
 
@@ -865,6 +863,7 @@ void G_writeServerInfo(void){
     char* s;
     char mapName[MAX_QPATH];
     char server_ip[16];
+    char server_country[3];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
     char cs[MAX_STRING_CHARS];
@@ -879,10 +878,12 @@ void G_writeServerInfo(void){
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
 	trap_Cvar_VariableStringBuffer("sv_serverIP", server_ip, sizeof(server_ip));
+    trap_Cvar_VariableStringBuffer("sv_serverCountry", server_country, sizeof(server_country));
 
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
     json_object_set_new(jdata, "serverIP",    json_string(va("%s",server_ip)));
+    json_object_set_new(jdata, "serverCountry",    json_string(va("%s",server_country)));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
     json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i", g_gameStatslog.integer)));
@@ -1209,7 +1210,7 @@ void G_writeDisconnectEvent (gentity_t* agent){
 void G_writeClosingJson(void)
 {
     char buf[64];
-    int ret;
+    int ret = 0;
     if (level.jsonStatInfo.gameStatslogFile) {
         trap_FS_Write( "}\n", strlen( "}\n"), level.jsonStatInfo.gameStatslogFile );
         trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
