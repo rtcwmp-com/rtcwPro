@@ -4720,8 +4720,8 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_ShakeCamera();       // NERVE - SMF
 
 	// RTCWPro - draw triggers for shoutcasters
-	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus)
-	{
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus && !(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+
 		CG_DrawTriggers();
 	}
 
@@ -4736,7 +4736,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_Draw2D();
 
 	// RTCWPro
-	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus) 
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && 
+		cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus &&
+		!cg.showScores) 
 	{
 		CG_ShoutcasterItems();
 	}

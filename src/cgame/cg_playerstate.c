@@ -412,6 +412,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		}
 	}
 
+	// RTCWPro
 	if (cg_hitsounds.integer) {
 
 		if (ops->persistant[PERS_HITBODY] != ps->persistant[PERS_HITBODY]) {
@@ -425,17 +426,48 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 			else if (ps->persistant[PERS_HITHEAD] > ops->persistant[PERS_HITHEAD]) {
 
 				if (cg_hitsounds.integer & HITSOUND_HEAD) {
-					trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot);
+
+					if (cg_hitsoundHeadStyle.integer == 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot1);
+					}
+					else if (cg_hitsoundHeadStyle.integer > 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot2);
+					}
+					else {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot1);
+					}
 				}
 			}
 			else {
 
 				if (cg_hitsounds.integer & HITSOUND_BODY) {
-					trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot);
+
+					if (cg_hitsoundBodyStyle.integer == 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot1);
+					}
+					else if (cg_hitsoundBodyStyle.integer > 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot2);
+					}
+					else {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot1);
+					}
 				}
 			}
 		}
 	}
+
+	if (cg_pauseMusic.integer) {
+
+		if (cgs.match_paused == PAUSE_ON) {
+
+			trap_S_AddLoopingSound(cg.snap->ps.clientNum, cg.snap->ps.origin, vec3_origin, cgs.media.pIntermission, 255);
+		}
+		else if (cgs.match_paused == PAUSE_RESUMING) {
+
+			trap_S_ClearLoopingSounds(qtrue);
+		}
+	}
+	// RTCWPro
 
 	// timelimit warnings
 	if ( cgs.timelimit > 0 ) {
