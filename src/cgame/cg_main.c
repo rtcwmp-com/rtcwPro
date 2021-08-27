@@ -396,6 +396,9 @@ vmCvar_t cg_reinforcementTimeProY;
 
 // lock camera on medic at death
 vmCvar_t cg_findMedic;
+vmCvar_t cg_hitsoundBodyStyle;
+vmCvar_t cg_hitsoundHeadStyle;
+vmCvar_t cg_pauseMusic;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -670,6 +673,13 @@ cvarTable_t cvarTable[] = {
 
 	// lock camera on medic at death
 	{ &cg_findMedic, "cg_findMedic", "1", CVAR_ARCHIVE | CVAR_USERINFO },
+
+	// hitsound styles
+	{ &cg_hitsoundBodyStyle, "cg_hitsoundBodyStyle", "1", CVAR_ARCHIVE },
+	{ &cg_hitsoundHeadStyle, "cg_hitsoundHeadStyle", "1", CVAR_ARCHIVE },
+
+	// pause music
+	{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -1366,10 +1376,14 @@ static void CG_RegisterSounds( void ) {
 */
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
+	// pause
+	cgs.media.pIntermission = trap_S_RegisterSound("sound/match/pause_m.wav");
 	// Hitsounds
-	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
-	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
-	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
+	cgs.media.headShot1 = trap_S_RegisterSound("sound/hitsounds/hithead1.wav");
+	cgs.media.headShot2 = trap_S_RegisterSound("sound/hitsounds/hithead2.wav");
+	cgs.media.bodyShot1 = trap_S_RegisterSound("sound/hitsounds/hitbody1.wav");
+	cgs.media.bodyShot2 = trap_S_RegisterSound("sound/hitsounds/hitbody2.wav");
+	cgs.media.teamShot = trap_S_RegisterSound("sound/hitsounds/hitTeam.wav");
 	// chats
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");

@@ -1741,8 +1741,10 @@ typedef struct {
 	// Country Flags
 	qhandle_t countryFlags;
 	// Hitsounds
-	sfxHandle_t	headShot;
-	sfxHandle_t	bodyShot;
+	sfxHandle_t	headShot1;
+	sfxHandle_t	headShot2;
+	sfxHandle_t	bodyShot1;
+	sfxHandle_t	bodyShot2;
 	sfxHandle_t	teamShot;
 	// chats
 	sfxHandle_t normalChat;
@@ -1750,6 +1752,8 @@ typedef struct {
 	// end of round
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
+	// pause
+	sfxHandle_t pIntermission;
 
 	// RTCWPro - draw triggers
 	qhandle_t transmitTrigger;
@@ -2191,6 +2195,9 @@ extern vmCvar_t cg_reinforcementTimeProX;
 extern vmCvar_t cg_reinforcementTimeProY;
 
 extern vmCvar_t cg_findMedic;
+extern vmCvar_t cg_hitsoundBodyStyle;
+extern vmCvar_t cg_hitsoundHeadStyle;
+extern vmCvar_t cg_pauseMusic;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
