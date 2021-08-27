@@ -107,6 +107,8 @@ cvar_t *cl_StreamingSelfSignedCert;
 cvar_t *cl_guid;
 // ~L0
 
+cvar_t* cl_activatelean; // RTCWPro
+
 clientActive_t cl;
 clientConnection_t clc;
 clientStatic_t cls;
@@ -3174,6 +3176,7 @@ void CL_Init( void ) {
 	#endif
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
+	cl_activatelean = Cvar_Get("cl_activatelean", "1", CVAR_ARCHIVE);
 	Cvar_Get("cl_checkversion", "11", CVAR_ROM | CVAR_USERINFO);
 
 	// init autoswitch so the ui will have it correctly even
