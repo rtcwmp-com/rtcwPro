@@ -4736,7 +4736,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_Draw2D();
 
 	// RTCWPro
-	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus) 
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && 
+		cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus &&
+		!cg.showScores) 
 	{
 		CG_ShoutcasterItems();
 	}
