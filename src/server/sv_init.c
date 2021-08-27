@@ -794,7 +794,7 @@ void SV_GetIP(void) {
 
 static size_t getCountry_response(void *ptr, size_t size, size_t nmemb, void *stream){
     char out[3];
-    if (strlen(ptr)<=3) {
+    if (0<strlen(ptr)<=3) {
         Q_strncpyz(out,ptr,3);   // quick and lazy way for dealing with the response...
         Cvar_Set("sv_serverCountry", va("%s",out));
     }
