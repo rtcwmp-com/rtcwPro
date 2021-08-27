@@ -2104,7 +2104,7 @@ int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
 void G_jWeaponStats(void);
-
+int G_check_before_submit( char* jsonfile);
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);
 void G_writeDisconnectEvent (gentity_t* agent);

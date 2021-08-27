@@ -287,6 +287,37 @@ int G_read_match_info( void )
 
     return 0;
 }
+/*
+ Check if stats meet requirement for submission
+
+*/
+int G_check_before_submit( char* jsonfile)
+{
+     json_t *data = NULL;
+    json_t *json,*jstats;
+    json_error_t error;
+
+    int minPlayers = 2; // require 3 players for stats submission
+
+
+    json = json_load_file(jsonfile, 0, &error);
+    if (error.line != -1) {
+        G_Printf("error: unable to read json round stat file\n");
+        return 0;
+    }
+
+
+    if (json)
+    {
+      //  Can add more conditions but for now based on only on number of players
+        jstats = json_object_get(json, "stats");
+        if (json_array_size(jstats) > minPlayers) {
+            return 1;
+        }
+
+    }
+    return 0;
+}
 
 
 /*
@@ -1178,10 +1209,15 @@ void G_writeDisconnectEvent (gentity_t* agent){
 void G_writeClosingJson(void)
 {
     char buf[64];
+    int ret;
     if (level.jsonStatInfo.gameStatslogFile) {
         trap_FS_Write( "}\n", strlen( "}\n"), level.jsonStatInfo.gameStatslogFile );
-        if (g_stats_curl_submit.integer) {
-            trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+        trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+
+        // check stats file to make sure it satisfies conditions for submission....
+        ret = G_check_before_submit(level.jsonStatInfo.gameStatslogFileName);
+        if (g_stats_curl_submit.integer && ret > 0) {
+
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
 
