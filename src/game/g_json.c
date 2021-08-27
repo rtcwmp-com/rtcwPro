@@ -212,7 +212,6 @@ int G_write_match_info( void )
     char mapName[MAX_QPATH];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
-  //  char cs[MAX_STRING_CHARS];
     fileHandle_t matchfileinfo;
 	qtime_t ct;
 	trap_RealTime(&ct);
@@ -295,13 +294,6 @@ int G_read_match_info( void )
 
  Currently reads in stats from round 1 but the idea is to have it reload
  stats from previous round upon a map_restart and g_currentround > 1...
-
- The idea is easy to implement but just need to do it...also dont forget to reset g_currentround (since it gets incremented with map_restart)
-
- To see that it works....simply make a function call
-		G_read_round_jstats("dummyarg");
- in g_svccmds.c or where ever you like for testing
-
 
 */
 int G_read_round_jstats( void )
@@ -857,23 +849,6 @@ void G_writeServerInfo(void){
     trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
 	trap_Cvar_VariableStringBuffer("sv_serverIP", server_ip, sizeof(server_ip));
 
-
-
-
-
- //   Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
-   // Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
- //   Q_strncpyz(ROUNDID,va("%s",g_currentRound.integer),sizeof(ROUNDID));
-  //  Info_SetValueForKey( cs, "timelimit", va("%s",GetLevelTime()));
-  //  trap_SetConfigstring( CS_ROUNDINFO, cs );
-  /*
-    if (g_currentRound.integer == 0) {
-        buf=va("%ld", unixTime);
-        trap_Cvar_Set( "stats_matchid", buf );
-
-    }
-*/
-
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
     json_object_set_new(jdata, "serverIP",    json_string(va("%s",server_ip)));
@@ -1231,7 +1206,6 @@ void G_writeGameLogStart(void)
     if (level.jsonStatInfo.gameStatslogFile) {
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.jsonStatInfo.gameStatslogFile );
         json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
-        //json_object_set_new(jdata, "round_id",    json_string(va("%s",va("%s",(Q_strncmp(ROUNDID,"0",1) == 0) ? "1" : "2"))));
         json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
@@ -1293,12 +1267,12 @@ void G_writeGameEarlyExit(void)
 
     trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
 
-
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
     json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(jdata, "label",    json_string("map_restart"));
+
     if (level.jsonStatInfo.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
@@ -1307,12 +1281,12 @@ void G_writeGameEarlyExit(void)
         free(s);
         trap_FS_Write( "]\n}\n", strlen( "]\n}\n" ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+       /*
+       // do not submit rounds that exit early
         if (g_stats_curl_submit.integer) {
-
-       //     submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
-//            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
         }
+      */
     }
 
 
