@@ -68,6 +68,7 @@ cvar_t  *sv_maxlives;           // NERVE - SMF
 cvar_t  *sv_tourney;            // NERVE - SMF
 
 cvar_t *sv_serverIP;
+cvar_t *sv_serverCountry;
 cvar_t *sv_dl_maxRate;
 cvar_t  *sv_dlRate;
 cvar_t	*sv_minRate;
@@ -923,7 +924,7 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 
 	if ( !Q_stricmp( c,"getstatus" ) ) {
 		if (SV_CheckDRDoS(from)) {
-			return; 
+			return;
 		}
 		SVC_Status( from  );
 	} else if ( !Q_stricmp( c,"getinfo" ) ) {
