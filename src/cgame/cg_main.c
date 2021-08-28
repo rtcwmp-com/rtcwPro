@@ -399,6 +399,8 @@ vmCvar_t cg_findMedic;
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
 vmCvar_t cg_pauseMusic;
+vmCvar_t cg_notifyTextX;
+vmCvar_t cg_notifyTextY;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -680,6 +682,10 @@ cvarTable_t cvarTable[] = {
 
 	// pause music
 	{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
+
+	// notify text position
+	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
+	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

@@ -1632,6 +1632,9 @@ static void CG_DrawNotify( void ) {
 	float alphapercent;
 	char var[MAX_TOKEN_CHARS];
 	float notifytime = 1.0f;
+	// RTCWPro
+	int x = cg_notifyTextX.integer;
+	int y = cg_notifyTextY.integer;
 
 	trap_Cvar_VariableStringBuffer( "con_notifytime", var, sizeof( var ) );
 	notifytime = atof( var ) * 1000;
@@ -1680,10 +1683,8 @@ static void CG_DrawNotify( void ) {
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt( NOTIFYLOC_X + TINYCHAR_WIDTH,
-							  NOTIFYLOC_Y - ( cgs.notifyPos - i ) * TINYCHAR_HEIGHT,
-							  cgs.notifyMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - ( cgs.notifyPos - i ) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight], 
+				hcolor, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay );
 		}
 	}
 }

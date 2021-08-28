@@ -2198,6 +2198,8 @@ extern vmCvar_t cg_findMedic;
 extern vmCvar_t cg_hitsoundBodyStyle;
 extern vmCvar_t cg_hitsoundHeadStyle;
 extern vmCvar_t cg_pauseMusic;
+extern vmCvar_t cg_notifyTextX;
+extern vmCvar_t cg_notifyTextY;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
