@@ -4391,7 +4391,10 @@ NERVE - SMF
 =================
 */
 static void CG_DrawCompass( void ) {
-	float basex = 290, basey = 420;
+	// RTCWPro
+	float basex = cg_drawGun.integer; //290 
+	float basey = cg_drawTriggers.integer; //420;
+	// RTCWPro
 	float basew = 60, baseh = 60;
 	snapshot_t  *snap;
 	vec4_t hcolor;

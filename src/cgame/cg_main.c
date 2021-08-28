@@ -405,6 +405,8 @@ vmCvar_t cg_chatX;
 vmCvar_t cg_chatY;
 vmCvar_t cg_teamOverlayX;
 vmCvar_t cg_teamOverlayY;
+vmCvar_t cg_compassX;
+vmCvar_t cg_compassY;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -698,6 +700,10 @@ cvarTable_t cvarTable[] = {
 	// team overlay
 	{ &cg_teamOverlayX, "cg_teamOverlayX", "640", CVAR_ARCHIVE },
 	{ &cg_teamOverlayY, "cg_teamOverlayY", "0", CVAR_ARCHIVE },
+
+	// compass
+	{ &cg_compassX, "cg_compassX", "290", CVAR_ARCHIVE },
+	{ &cg_compassY, "cg_compassY", "420", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

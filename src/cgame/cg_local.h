@@ -2204,6 +2204,8 @@ extern vmCvar_t cg_chatX;
 extern vmCvar_t cg_chatY;
 extern vmCvar_t cg_teamOverlayX;
 extern vmCvar_t cg_teamOverlayY;
+extern vmCvar_t cg_compassX;
+extern vmCvar_t cg_compassY;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
