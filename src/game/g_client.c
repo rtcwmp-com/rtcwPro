@@ -797,6 +797,71 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 	}
 }
 
+/*
+===========
+RTCWPro
+Checks and potentially sets STAT_MAX_HEALTH for both teams
+
+CheckMaxHealth
+===========
+*/
+void CheckMaxHealth() {
+	int numMedics = 0;
+	int starthealth = 100;
+	int i, team;
+	gclient_t* cl;
+
+	// check both teams
+	for (team = TEAM_RED; team <= TEAM_SPECTATOR; ++team)
+	{
+		// count up # of medics on team
+		for (i = 0; i < level.maxclients; i++) {
+
+			cl = level.clients + i;
+
+			if (cl->pers.connected != CON_CONNECTED) {
+
+				continue;
+			}
+
+			if (cl->sess.sessionTeam != team) {
+
+				continue;
+			}
+
+			if (cl->ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC) {
+
+				continue;
+			}
+
+			numMedics++;
+		}
+
+		// compute health mod
+		starthealth = 100 + 10 * numMedics;
+		if (starthealth > 125) {
+
+			starthealth = 125;
+		}
+
+		// give everybody health mod in stat_max_health
+		for (i = 0; i < level.maxclients; i++) {
+
+			cl = level.clients + i;
+
+			if (cl->pers.connected == CON_DISCONNECTED) {
+
+				continue;
+			}
+
+			if (cl->sess.sessionTeam == team) {
+
+				cl->pers.maxHealth = cl->ps.stats[STAT_MAX_HEALTH] = starthealth;
+			}
+		}
+	}
+}
+
 void SetWolfSpawnWeapons( gentity_t *ent ) {
 
 	gclient_t* client = ent->client;
@@ -1134,7 +1199,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		}
 	} // End Knifeonly stuff -- Ensure that medics get their basic stuff
 
-
+	// RTCWPro - moved to CheckMaxHealth
+	CheckMaxHealth();
+	/*
 	// JPW NERVE -- medics on each team make cumulative health bonus -- this gets overridden for "revived" players
 	// count up # of medics on team
 	for ( i = 0; i < level.maxclients; i++ ) {
@@ -1166,6 +1233,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		}
 	}
 	// jpw
+	*/
 }
 // dhm - end
 
@@ -1593,12 +1661,16 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
+	// RTCWPro
 	// don't use handicap here
 	//client->pers.maxHealth = 100; atoi(Info_ValueForKey(userinfo, "handicap"));
-	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
 	}
-	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
+	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;*/
+
+	CheckMaxHealth();
+	// RTCWPro
 
 	// set model
 	if ( g_forceModel.integer ) {
