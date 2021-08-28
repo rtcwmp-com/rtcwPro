@@ -812,8 +812,10 @@ void CheckMaxHealth() {
 	gclient_t* cl;
 
 	// check both teams
-	for (team = TEAM_RED; team <= TEAM_SPECTATOR; ++team)
-	{
+	for (team = TEAM_RED; team <= TEAM_SPECTATOR; ++team) {
+
+		numMedics = 0;
+
 		// count up # of medics on team
 		for (i = 0; i < level.maxclients; i++) {
 
