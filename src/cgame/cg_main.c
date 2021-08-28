@@ -394,13 +394,17 @@ vmCvar_t cg_reinforcementTimeY;
 vmCvar_t cg_reinforcementTimeProX;
 vmCvar_t cg_reinforcementTimeProY;
 
-// lock camera on medic at death
-vmCvar_t cg_findMedic;
+
+vmCvar_t cg_findMedic; // lock camera on medic at death
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
 vmCvar_t cg_pauseMusic;
 vmCvar_t cg_notifyTextX;
 vmCvar_t cg_notifyTextY;
+vmCvar_t cg_chatX;
+vmCvar_t cg_chatY;
+vmCvar_t cg_teamOverlayX;
+vmCvar_t cg_teamOverlayY;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -686,6 +690,14 @@ cvarTable_t cvarTable[] = {
 	// notify text position
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
 	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
+
+	// chat
+	{ &cg_chatX, "cg_teamChatX", "0", CVAR_ARCHIVE },
+	{ &cg_chatY, "cg_teamChatY", "385", CVAR_ARCHIVE },
+
+	// team overlay
+	{ &cg_teamOverlayX, "cg_teamOverlayX", "640", CVAR_ARCHIVE },
+	{ &cg_teamOverlayY, "cg_teamOverlayY", "0", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

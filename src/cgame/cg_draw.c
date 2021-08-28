@@ -797,7 +797,13 @@ static float CG_DrawTeamOverlay( float y ) {
 		w = ( pwidth + lwidth + 8 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
 
 	}
-	x = 640 - w - 4; // JPW was -32
+
+	// RTCWPro
+	//x = 640 - w - 4; // JPW was -32
+	x = cg_teamOverlayX.integer - w - 4;
+	y = cg_teamOverlayY.integer;
+	// RTCWPro
+
 	h = plyrs * TINYCHAR_HEIGHT;
 
 	// DHM - Nerve :: Set the max characters that can be printed before the left edge
@@ -1406,7 +1412,13 @@ static void CG_DrawUpperRight( void ) {
 	y = 0; // JPW NERVE move team overlay below obits, even with timer on left
 
 	if ( cgs.gametype >= GT_TEAM ) {
-		y = CG_DrawTeamOverlay( y );
+		// RTCWPro - don't offset if it's not in its default position, since it's customizable
+		if (cg_teamOverlayY.integer == 0 && cg_teamOverlayX.integer == 640) {
+			y = CG_DrawTeamOverlay(y);
+		}
+		else {
+			CG_DrawTeamOverlay(0);
+		}
 	}
 	if ( cg_drawSnapshot.integer ) {
 		y = CG_DrawSnapshot( y );
@@ -1481,6 +1493,9 @@ static void CG_DrawTeamInfo( void ) {
 	int chatHeight;
 	float alphapercent;
 	float chatAlpha = (float)cg_chatAlpha.value;
+	// RTCWPro
+	int x = cg_chatX.integer;
+	int y = cg_chatY.integer;
 
 #define CHATLOC_Y 385 // bottom end
 #define CHATLOC_X 0
@@ -1551,16 +1566,15 @@ static void CG_DrawTeamInfo( void ) {
 				BG_setCrosshair(cg_chatBackgroundColor.string, hcolor, chatAlpha * alphapercent, "cg_chatBackgroundColor");
 // End
 			trap_R_SetColor( hcolor );
-			CG_DrawPic( CHATLOC_X, CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
+			CG_DrawPic( x, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt( CHATLOC_X + TINYCHAR_WIDTH,
-							  CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT,
-							  cgs.teamChatMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0 );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, cgs.teamChatMsgs[i % chatHeight], 
+				hcolor, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
 //			CG_DrawSmallString( CHATLOC_X + SMALLCHAR_WIDTH,
 //				CHATLOC_Y - (cgs.teamChatPos - i)*SMALLCHAR_HEIGHT,
 //				cgs.teamChatMsgs[i % TEAMCHAT_HEIGHT], 1.0F );

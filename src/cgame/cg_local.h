@@ -2200,6 +2200,10 @@ extern vmCvar_t cg_hitsoundHeadStyle;
 extern vmCvar_t cg_pauseMusic;
 extern vmCvar_t cg_notifyTextX;
 extern vmCvar_t cg_notifyTextY;
+extern vmCvar_t cg_chatX;
+extern vmCvar_t cg_chatY;
+extern vmCvar_t cg_teamOverlayX;
+extern vmCvar_t cg_teamOverlayY;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
