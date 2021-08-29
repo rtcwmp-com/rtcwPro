@@ -977,9 +977,9 @@ static int CG_CalcZoomedFov(void) {
 	// RTCWPro
 	/*if (cg_zoomedSens.value > 2.0f)
 		value = 2.0f;
-	else if (cg_zoomedSens.value < 0.0f)
+	else */if (cg_zoomedSens.value < 0.0f)
 		value = 0.1f;
-	else*/
+	else
 		value = cg_zoomedSens.value;
 	// RTCWPro
 
@@ -1150,7 +1150,7 @@ static int CG_CalcFov( void ) {
 		if ( cg.zoomval ) {
 
 			// RTCWPro
-			if (cg_zoomedSens.value) {
+			if (cg_zoomedSens.value > 0) {
 				cg.zoomSensitivity = cg_zoomedSens.value;
 			}
 			else {
