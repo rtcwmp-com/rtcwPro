@@ -974,12 +974,14 @@ static int CG_CalcZoomedFov(void) {
 	cg.refdef.fov_x = fov_x;
 	cg.refdef.fov_y = fov_y;
 
-	if (cg_zoomedSens.value > 2.0f)
+	// RTCWPro
+	/*if (cg_zoomedSens.value > 2.0f)
 		value = 2.0f;
 	else if (cg_zoomedSens.value < 0.0f)
 		value = 0.1f;
-	else
+	else*/
 		value = cg_zoomedSens.value;
+	// RTCWPro
 
 
 //	if (cg.snap->ps.pm_type == PM_FREEZE || (cg.snap->ps.pm_type == PM_DEAD && (cg.snap->ps.pm_flags & PMF_LIMBO)) || cg.snap->ps.pm_flags & PMF_TIME_LOCKPLAYER) {
@@ -1146,14 +1148,22 @@ static int CG_CalcFov( void ) {
 	} else if ( !cg.zoomedBinoc ) {
 		// NERVE - SMF - fix for zoomed in/out movement bug
 		if ( cg.zoomval ) {
-			if ( cg.snap->ps.weapon == WP_SNOOPERSCOPE ) {
-				cg.zoomSensitivity = 0.3f * ( cg.zoomval / 90.f );  // NERVE - SMF - changed to get less sensitive as you zoom in;
+
+			// RTCWPro
+			if (cg_zoomedSens.value) {
+				cg.zoomSensitivity = cg_zoomedSens.value;
 			}
-//				cg.zoomSensitivity = 0.2;
 			else {
-				cg.zoomSensitivity = 0.6 * ( cg.zoomval / 90.f );   // NERVE - SMF - changed to get less sensitive as you zoom in
+				if (cg.snap->ps.weapon == WP_SNOOPERSCOPE) {
+					cg.zoomSensitivity = 0.3f * (cg.zoomval / 90.f);  // NERVE - SMF - changed to get less sensitive as you zoom in;
+				}
+				// cg.zoomSensitivity = 0.2;
+				else {
+					cg.zoomSensitivity = 0.6 * (cg.zoomval / 90.f);   // NERVE - SMF - changed to get less sensitive as you zoom in
+				}
+				// cg.zoomSensitivity = 0.1;
 			}
-//				cg.zoomSensitivity = 0.1;
+			// RTCWPro
 		} else {
 			cg.zoomSensitivity = 1;
 		}
