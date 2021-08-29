@@ -845,7 +845,7 @@ void SV_Init( void ) {
 	SV_GetIP();
 	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
 	SV_GetCountry(sv_serverIP->string);
-	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_LATCH);
+	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_SERVERINFO | CVAR_ROM);
     // end sIP/Country
 
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
