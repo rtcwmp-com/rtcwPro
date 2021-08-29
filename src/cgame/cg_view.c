@@ -1150,7 +1150,7 @@ static int CG_CalcFov( void ) {
 		if (cg.zoomval) {
 
 			// RTCWPro
-			if (cg_lockZoomedSens.integer) {
+			if (cg_zoomedSensLock.integer) {
 
 				cg.zoomSensitivity = cg_zoomedSens.value;
 			}

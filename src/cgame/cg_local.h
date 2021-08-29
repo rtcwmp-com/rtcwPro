@@ -2207,7 +2207,7 @@ extern vmCvar_t cg_teamOverlayX;
 extern vmCvar_t cg_teamOverlayY;
 extern vmCvar_t cg_compassX;
 extern vmCvar_t cg_compassY;
-extern vmCvar_t cg_lockZoomedSens;
+extern vmCvar_t cg_zoomedSensLock;
 
 static void CG_TimerSet_f(void);
 static void CG_TimerReset_f(void);
