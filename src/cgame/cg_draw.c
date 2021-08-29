@@ -1027,8 +1027,13 @@ static float CG_DrawRespawnTimer(float y) {
 	}*/
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
 	if (cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return y;
@@ -1092,8 +1097,13 @@ static float CG_DrawEnemyTimer(float y) {
 	}
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
     if (cg_spawnTimer_set.integer == -1)
         return y;
@@ -1304,6 +1314,10 @@ static float CG_DrawProRespawnTimer(float y) {
 		return y;
 	}
 
+	if (cg.showScores) {
+		return y;
+	}
+
 	if (cgs.gamestate != GS_PLAYING) {
 		return y;
 	}
@@ -1358,8 +1372,13 @@ static float CG_DrawProEnemyTimer(float y) {
 	}
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
 	if (cg_spawnTimer_set.integer == -1)
 		return y;
