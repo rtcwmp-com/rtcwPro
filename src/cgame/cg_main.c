@@ -408,6 +408,7 @@ vmCvar_t cg_teamOverlayX;
 vmCvar_t cg_teamOverlayY;
 vmCvar_t cg_compassX;
 vmCvar_t cg_compassY;
+vmCvar_t cg_lockZoomedSens;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -706,6 +707,9 @@ cvarTable_t cvarTable[] = {
 	// compass
 	{ &cg_compassX, "cg_compassX", "290", CVAR_ARCHIVE },
 	{ &cg_compassY, "cg_compassY", "420", CVAR_ARCHIVE },
+
+	// zoomed sens
+	{ &cg_lockZoomedSens, "cg_lockZoomedSens", "0", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

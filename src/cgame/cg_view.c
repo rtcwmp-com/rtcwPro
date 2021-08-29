@@ -1147,24 +1147,31 @@ static int CG_CalcFov( void ) {
 		cg.zoomSensitivity = 0;
 	} else if ( !cg.zoomedBinoc ) {
 		// NERVE - SMF - fix for zoomed in/out movement bug
-		if ( cg.zoomval ) {
+		if (cg.zoomval) {
 
 			// RTCWPro
-			if (cg_zoomedSens.value > 0) {
+			if (cg_lockZoomedSens.integer) {
+
 				cg.zoomSensitivity = cg_zoomedSens.value;
 			}
 			else {
+
 				if (cg.snap->ps.weapon == WP_SNOOPERSCOPE) {
-					cg.zoomSensitivity = 0.3f * (cg.zoomval / 90.f);  // NERVE - SMF - changed to get less sensitive as you zoom in;
+
+					//cg.zoomSensitivity = 0.3f * (cg.zoomval / 90.f);  // NERVE - SMF - changed to get less sensitive as you zoom in;
+					cg.zoomSensitivity = cg_zoomedSens.value * (cg.zoomval / 90.f);
 				}
 				// cg.zoomSensitivity = 0.2;
 				else {
-					cg.zoomSensitivity = 0.6 * (cg.zoomval / 90.f);   // NERVE - SMF - changed to get less sensitive as you zoom in
+
+					//cg.zoomSensitivity = 0.6 * (cg.zoomval / 90.f);   // NERVE - SMF - changed to get less sensitive as you zoom in
+					cg.zoomSensitivity = cg_zoomedSens.value * (cg.zoomval / 90.f);
 				}
 				// cg.zoomSensitivity = 0.1;
 			}
 			// RTCWPro
-		} else {
+		}
+		else {
 			cg.zoomSensitivity = 1;
 		}
 		// -NERVE - SMF
