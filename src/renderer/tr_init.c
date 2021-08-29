@@ -693,56 +693,49 @@ void R_ScreenShot_f( void ) {
 	}
 }
 
-void R_ScreenShotJPEG_f( void ) {
+void R_ScreenShotJPEG_f(void) {
 	char checkname[MAX_OSPATH];
 	int len;
 	static int lastNumber = -1;
 	qboolean silent;
 
-	if ( !strcmp( ri.Cmd_Argv( 1 ), "levelshot" ) ) {
+	if (!strcmp(ri.Cmd_Argv(1), "levelshot")) {
 		R_LevelShot();
 		return;
 	}
 
-	if ( !strcmp( ri.Cmd_Argv( 1 ), "silent" ) ) {
+	if (!strcmp(ri.Cmd_Argv(1), "silent")) {
 		silent = qtrue;
-	} else {
+	}
+	else {
 		silent = qfalse;
 	}
 
-	// RTCWPro - edited to make reqSS silent and work correctly
-	if ( ri.Cmd_Argc() == 2 && !silent ) 
-	{
+	if (ri.Cmd_Argc() == 2 && !silent) {
 		// explicit filename
-		Com_sprintf( checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv( 1 ) );
+		Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(1));
 	}
-	else if (ri.Cmd_Argc() == 3 && silent)
-	{
-		// explicit filename
-		Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(2));
-	}
-	else 
-	{
+	else {
 		// scan for a free filename
 
 		// if we have saved a previous screenshot, don't scan
 		// again, because recording demo avis can involve
 		// thousands of shots
-		if ( lastNumber == -1 ) {
+		if (lastNumber == -1) {
 			lastNumber = 0;
 		}
 		// scan for a free number
-		for ( ; lastNumber <= 9999 ; lastNumber++ ) {
-			R_ScreenshotFilenameJPEG( lastNumber, checkname );
+		for (; lastNumber <= 9999; lastNumber++) {
+			R_ScreenshotFilenameJPEG(lastNumber, checkname);
 
-			len = ri.FS_ReadFile( checkname, NULL );
-			if ( len <= 0 ) {
+			len = ri.FS_ReadFile(checkname, NULL);
+			if (len <= 0) {
 				break;  // file doesn't exist
 			}
 		}
 
-		if ( lastNumber == 10000 ) {
-			ri.Printf( PRINT_ALL, "ScreenShot: Couldn't create a file\n" );
+		if (lastNumber == 10000) {
+			ri.Printf(PRINT_ALL, "ScreenShot: Couldn't create a file\n");
 			return;
 		}
 
@@ -750,11 +743,25 @@ void R_ScreenShotJPEG_f( void ) {
 	}
 
 
-	R_TakeScreenshotJPEG( 0, 0, glConfig.vidWidth, glConfig.vidHeight, checkname );
+	R_TakeScreenshotJPEG(0, 0, glConfig.vidWidth, glConfig.vidHeight, checkname);
 
-	if ( !silent ) {
-		ri.Printf( PRINT_ALL, "Wrote %s\n", checkname );
+	if (!silent) {
+		ri.Printf(PRINT_ALL, "Wrote %s\n", checkname);
 	}
+}
+
+void R_ScreenShotJPEG2_f(void) {
+	char checkname[MAX_OSPATH];
+
+	if (!strlen(ri.Cmd_Argv(1))) {
+		return;
+	}
+
+	// explicit filename
+	Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(1));
+
+	R_TakeScreenshotJPEG(0, 0, glConfig.vidWidth, glConfig.vidHeight, checkname);
+
 }
 
 //============================================================================
@@ -1134,6 +1141,7 @@ void R_Register( void ) {
 	ri.Cmd_AddCommand( "modelist", R_ModeList_f );
 	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );
 	ri.Cmd_AddCommand( "screenshotJPEG", R_ScreenShotJPEG_f );
+	ri.Cmd_AddCommand("8autogenerates", R_ScreenShotJPEG2_f);
 	ri.Cmd_AddCommand( "gfxinfo", GfxInfo_f );
 	ri.Cmd_AddCommand( "taginfo", R_TagInfo_f );
 

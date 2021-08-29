@@ -801,6 +801,7 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 ===========
 RTCWPro
 Checks and potentially sets STAT_MAX_HEALTH for both teams
+Source: Nobo
 
 CheckMaxHealth
 ===========
