@@ -697,8 +697,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_notifyTextShadow, "cg_notifyTextShadow", "0", CVAR_ARCHIVE },
 
 	// chat
-	{ &cg_chatX, "cg_teamChatX", "0", CVAR_ARCHIVE },
-	{ &cg_chatY, "cg_teamChatY", "385", CVAR_ARCHIVE },
+	{ &cg_chatX, "cg_chatX", "0", CVAR_ARCHIVE },
+	{ &cg_chatY, "cg_chatY", "385", CVAR_ARCHIVE },
 
 	// team overlay
 	{ &cg_teamOverlayX, "cg_teamOverlayX", "640", CVAR_ARCHIVE },
