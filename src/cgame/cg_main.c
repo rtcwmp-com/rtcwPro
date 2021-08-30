@@ -409,6 +409,8 @@ vmCvar_t cg_teamOverlayY;
 vmCvar_t cg_compassX;
 vmCvar_t cg_compassY;
 vmCvar_t cg_zoomedSensLock;
+vmCvar_t cg_lagometerX;
+vmCvar_t cg_lagometerY;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -710,6 +712,10 @@ cvarTable_t cvarTable[] = {
 
 	// zoomed sens
 	{ &cg_zoomedSensLock, "cg_zoomedSensLock", "0", CVAR_ARCHIVE },
+
+	// lagometer
+	{ &cg_lagometerX, "cg_lagometerX", "585", CVAR_ARCHIVE },
+	{ &cg_lagometerY, "cg_lagometerY", "340", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

@@ -1842,7 +1842,8 @@ CG_DrawLagometer
 ==============
 */
 static void CG_DrawLagometer( void ) {
-	int a, x, y, i;
+	// RTCWPro
+	int a, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i;
 	float v;
 	float ax, ay, aw, ah, mid, range;
 	int color;
@@ -1861,8 +1862,9 @@ static void CG_DrawLagometer( void ) {
 	//
 	// draw the graph
 	//
-	x = 640 - 55;
-	y = 480 - 140;
+	// RTCWPro
+	//x = 640 - 55;
+	//y = 480 - 140;
 
 	trap_R_SetColor( NULL );
 	CG_DrawPic( x, y, 48, 48, cgs.media.lagometerShader );
