@@ -806,8 +806,11 @@ static float CG_DrawTeamOverlay( float y ) {
 
 	h = plyrs * TINYCHAR_HEIGHT;
 
+	// RTCWPro
+	if (cg_notifyTextY.integer == 42 && cg_teamOverlayY.integer == 0) {
 	// DHM - Nerve :: Set the max characters that can be printed before the left edge
-	maxCharsBeforeOverlay = ( x / TINYCHAR_WIDTH ) - 1;
+		maxCharsBeforeOverlay = (x / TINYCHAR_WIDTH) - 1;
+	}
 
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED ) {
 		hcolor[0] = 0.5f; // was 0.38 instead of 0.5 JPW NERVE
@@ -1717,8 +1720,8 @@ static void CG_DrawNotify( void ) {
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - ( cgs.notifyPos - i ) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight], 
-				hcolor, qfalse, shadow, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
+				hcolor, qfalse, shadow, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay);
 		}
 	}
 }
