@@ -2745,7 +2745,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	}
 }
 
-
+// RTCWPro - new one below
+#if 0
 /*
 ==============
 CG_CheckEvents
@@ -2824,7 +2825,71 @@ skipEvent:
 	// set the event back so we don't think it's changed next frame (unless it really has)
 	cent->currentState.event = cent->previousEvent;
 }
+#endif
 
+/*
+==============
+RTCWPro
+
+CG_CheckEvents
+==============
+*/
+void CG_CheckEvents(centity_t* cent) {
+	int i, event;
+
+	// calculate the position at exactly the frame time
+	BG_EvaluateTrajectory(&cent->currentState.pos, cg.snap->serverTime, cent->lerpOrigin);
+	CG_SetEntitySoundPosition(cent);
+
+	// check for event-only entities
+	if (cent->currentState.eType >= ET_EVENTS)
+	{
+		if (cent->previousEvent)
+		{
+			return;     // already fired
+		}
+
+		cent->previousEvent = 1;
+		cent->currentState.event = cent->currentState.eType - ET_EVENTS;
+
+		CG_EntityEvent(cent, cent->lerpOrigin);
+	}
+	else
+	{
+		// Entities that make it here are Not TempEntities.
+		//      As far as we could tell, for all non-TempEntities, the
+		//      circular 'events' list contains the valid events.  So we
+		//      skip processing the single 'event' field and go straight
+		//      to the circular list.
+
+		// check the sequencial list
+		// if we've added more events than can fit into the list, make sure we only add them once
+		if (cent->currentState.eventSequence < cent->previousEventSequence)
+		{
+			cent->previousEventSequence -= (1 << 8); // eventSequence is sent as an 8-bit through network stream
+		}
+
+		if (cent->currentState.eventSequence - cent->previousEventSequence > MAX_EVENTS)
+		{
+			cent->previousEventSequence = cent->currentState.eventSequence - MAX_EVENTS;
+		}
+
+		for (i = cent->previousEventSequence; i != cent->currentState.eventSequence; i++)
+		{
+			event = cent->currentState.events[i & (MAX_EVENTS - 1)];
+
+			cent->currentState.event = event;
+			cent->currentState.eventParm = cent->currentState.eventParms[i & (MAX_EVENTS - 1)];
+
+			CG_EntityEvent(cent, cent->lerpOrigin);
+		}
+
+		cent->previousEventSequence = cent->currentState.eventSequence;
+
+		// set the event back so we don't think it's changed next frame (unless it really has)
+		cent->currentState.event = cent->previousEvent;
+	}
+}
 
 /*
 void CG_CheckEvents( centity_t *cent ) {
