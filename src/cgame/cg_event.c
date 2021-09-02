@@ -1364,6 +1364,71 @@ void CG_BatDeath( centity_t *cent ) {
 	CG_ParticleExplosion( "blood", cent->lerpOrigin, vec3_origin, 400, 20, 30 );
 }
 
+/*
+===============
+RTCWPro
+
+CG_PlayHitSound
+===============
+*/
+void CG_PlayHitSound(const int clientNum, const int hitSound) { 
+
+	if (!cg_hitsounds.integer) {
+		return;
+	}
+
+	// Are we spectating someone?
+	if (cg.snap->ps.clientNum != cg.clientNum && cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR && 
+		!(cg.snap->ps.pm_flags & PMF_LIMBO)) 
+	{
+		return;
+	}
+
+	// Is the event for the current client (might be the player or a player being spectated)
+	if (clientNum != cg.snap->ps.clientNum) {
+		return;
+	}
+
+	switch (hitSound)
+	{
+	case HIT_TEAMSHOT:
+		if (cg_hitsounds.integer & HITSOUND_TEAM) {
+			trap_S_StartLocalSound(cgs.media.teamShot, CHAN_LOCAL_SOUND);
+		}
+		break;
+	case HIT_HEADSHOT:
+		if (cg_hitsounds.integer & HITSOUND_HEAD) {
+
+			if (cg_hitsoundHeadStyle.integer == 1) {
+				trap_S_StartLocalSound(cgs.media.headShot1, CHAN_LOCAL_SOUND);
+			}
+			else if (cg_hitsoundHeadStyle.integer > 1) {
+				trap_S_StartLocalSound(cgs.media.headShot2, CHAN_LOCAL_SOUND);
+			}
+			else {
+				trap_S_StartLocalSound(cgs.media.headShot1, CHAN_LOCAL_SOUND);
+			}
+		}
+		break;
+	case HIT_BODYSHOT:
+		if (cg_hitsounds.integer & HITSOUND_BODY) {
+
+			if (cg_hitsoundBodyStyle.integer == 1) {
+				trap_S_StartLocalSound(cgs.media.bodyShot1, CHAN_LOCAL_SOUND);
+			}
+			else if (cg_hitsoundBodyStyle.integer > 1) {
+				trap_S_StartLocalSound(cgs.media.bodyShot2, CHAN_LOCAL_SOUND);
+			}
+			else {
+				trap_S_StartLocalSound(cgs.media.bodyShot1, CHAN_LOCAL_SOUND);
+			}
+		}
+		break;
+	default:
+		CG_Printf("Unkown hitsound: %i\n", hitSound);
+		break;
+	}
+}
 
 /*
 ==============
@@ -1844,6 +1909,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		DEBUGNAME( "EV_VENOMFULL" );
 		CG_VenomFire( es, qtrue );
 		break;
+
+	// RTCWPro - hijack this event to comm hitsounds
+	case EV_BULLET:
+		CG_PlayHitSound(es->clientNum, es->eventParm);
+		break;
+	// RTCWPro end
 
 	case EV_NOITEM:
 		DEBUGNAME( "EV_NOITEM" );

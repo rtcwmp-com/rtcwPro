@@ -816,48 +816,60 @@ G_Hitsounds
 ==============
 */
 void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body ) {
-	qboolean 	onSameTeam = OnSameTeam( target, attacker);
+	qboolean onSameTeam = OnSameTeam( target, attacker);
+	int hitEventType = HIT_NONE;
 
-	if (g_hitsounds.integer) {
+	// if player is hurting him self don't give any sounds
+	if (target->client == attacker->client) {
+		return;  // this happens at flaming your self... just return silence...			
+	}
 
-		// if player is hurting him self don't give any sounds
-		if (target->client == attacker->client) {
-			return;  // this happens at flaming your self... just return silence...			
+	if (mod == MOD_ARTILLERY ||
+		mod == MOD_GRENADE_SPLASH ||
+		mod == MOD_DYNAMITE_SPLASH ||
+		mod == MOD_DYNAMITE ||
+		mod == MOD_ROCKET ||
+		mod == MOD_ROCKET_SPLASH ||
+		mod == MOD_KNIFE ||
+		mod == MOD_GRENADE ||
+		mod == MOD_AIRSTRIKE ||
+		mod == MOD_ARTY ||
+		mod == MOD_EXPLOSIVE ||
+		mod == MOD_MORTAR ||
+		mod == MOD_MORTAR_SPLASH ||
+		mod == MOD_SYRINGE)
+	{
+		return;
+	}
+
+	// if team mate
+	if (target->client && attacker->client && onSameTeam) {
+		//attacker->client->ps.persistant[PERS_HITBODY]--;
+		hitEventType = HIT_TEAMSHOT;
+	}
+
+	// If enemy
+	else if (target &&
+		target->client &&
+		attacker &&
+		attacker->client &&
+		attacker->s.number != ENTITYNUM_NONE &&
+		attacker->s.number != ENTITYNUM_WORLD &&
+		attacker != target &&
+		!onSameTeam)
+	{
+		if (body) {
+			//attacker->client->ps.persistant[PERS_HITBODY]++;
+			hitEventType = HIT_BODYSHOT;
 		}
-
-		if (mod == MOD_ARTILLERY ||
-			mod == MOD_GRENADE_SPLASH ||
-			mod == MOD_DYNAMITE_SPLASH ||
-			mod == MOD_DYNAMITE ||
-			mod == MOD_ROCKET ||
-			mod == MOD_ROCKET_SPLASH ||
-			mod == MOD_KNIFE ||
-			mod == MOD_GRENADE ||
-			mod == MOD_AIRSTRIKE)
-		{
-			return;
+		else {
+			//attacker->client->ps.persistant[PERS_HITHEAD]++;
+			hitEventType = HIT_HEADSHOT;
 		}
+	}
 
-		// if team mate
-		if (target->client && attacker->client && onSameTeam ) {
-			attacker->client->ps.persistant[PERS_HITBODY]--;
-		}
-
-		// If enemy
-		else if ( target &&
-				target->client &&
-				attacker &&
-				attacker->client &&
-				attacker->s.number != ENTITYNUM_NONE &&
-				attacker->s.number != ENTITYNUM_WORLD &&
-				attacker != target &&
-				!onSameTeam 
-		) {   
-			if (body)
-				attacker->client->ps.persistant[PERS_HITBODY]++;
-			else
-				attacker->client->ps.persistant[PERS_HITHEAD]++;
-		}
+	if (hitEventType) {
+		G_AddEvent(attacker, EV_BULLET, hitEventType);
 	}
 }
 
@@ -1090,7 +1102,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
-	G_Hitsounds(targ, attacker, mod, qtrue);
+	if (g_hitsounds.integer) {
+		G_Hitsounds(targ, attacker, mod, qtrue);
+	}
 
 	// RTCWPro - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
@@ -1123,7 +1137,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_addStatsHeadShot( attacker, mod );
 		} // End
 
-		G_Hitsounds(targ, attacker, mod, qfalse);
+		if (g_hitsounds.integer) {
+			G_Hitsounds(targ, attacker, mod, qfalse);
+		}
 	}
 
 	if ( g_debugDamage.integer ) {
