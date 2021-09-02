@@ -61,6 +61,18 @@ static void CG_ResetEntity( centity_t *cent ) {
 	if ( cent->currentState.eType == ET_PLAYER ) {
 		CG_ResetPlayerEntity( cent );
 	}
+
+	// RTCWPro - reset some additional stuff
+	cent->muzzleFlashTime = 0;
+	cent->overheatTime = 0;
+	cent->miscTime = 0;
+
+	VectorClear(cent->rawOrigin);
+	VectorClear(cent->rawAngles);
+
+	cent->lastFuseSparkTime = 0;
+	cent->highlightTime = 0;
+	cent->highlighted = qfalse;
 }
 
 
