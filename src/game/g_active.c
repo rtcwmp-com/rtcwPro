@@ -1244,11 +1244,14 @@ void ClientThink_real( gentity_t *ent ) {
 // jpw
 
 	// sanity check the command time to prevent speedup cheating
-	if ( ucmd->serverTime > level.time + 200 ) {
+	if (ucmd->serverTime > level.time + 200)
+	{
 		ucmd->serverTime = level.time + 200;
 //		G_Printf("serverTime <<<<<\n" );
 	}
-	if ( ucmd->serverTime < level.time - 1000 ) {
+
+	if (ucmd->serverTime < level.time - 1000)
+	{
 		ucmd->serverTime = level.time - 1000;
 //		G_Printf("serverTime >>>>>\n" );
 	}
@@ -1607,12 +1610,16 @@ void ClientThink_real( gentity_t *ent ) {
 		ent->r.eventTime = level.time;
 	}
 
+	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	if ( g_smoothClients.integer ) {
+	/*if ( g_smoothClients.integer ) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue );
 	} else {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
-	}
+	}*/
+
+	BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+	// RTCWPro end
 
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
@@ -2224,12 +2231,16 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// set the latest infor
 
+	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	if ( g_smoothClients.integer ) {
+	/*if ( g_smoothClients.integer ) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
 	} else {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
-	}
+	}*/
+
+	BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qfalse);
+	// RTCWPro end
 
 	//SendPendingPredictableEvents( &ent->client->ps );
 
