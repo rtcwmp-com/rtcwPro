@@ -2211,8 +2211,8 @@ extern vmCvar_t cg_zoomedSensLock;
 extern vmCvar_t cg_lagometerX;
 extern vmCvar_t cg_lagometerY;
 
-static void CG_TimerSet_f(void);
-static void CG_TimerReset_f(void);
+//static void CG_TimerSet_f(void);
+//static void CG_TimerReset_f(void);
 
 //
 // cg_main.c
