@@ -412,8 +412,8 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		}
 	}
 
-	// RTCWPro
-	if (cg_hitsounds.integer) {
+	// RTCWPro - moved to events
+	/*if (cg_hitsounds.integer) {
 
 		if (ops->persistant[PERS_HITBODY] != ps->persistant[PERS_HITBODY]) {
 
@@ -454,7 +454,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 				}
 			}
 		}
-	}
+	}*/
 
 	if (cg_pauseMusic.integer) {
 

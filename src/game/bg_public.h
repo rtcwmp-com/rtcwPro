@@ -399,10 +399,11 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
+	PERS_WOLFKICK
 
-	PERS_HITHEAD,
-	PERS_HITBODY
+	// RTCWPro - unused
+	//PERS_HITHEAD,
+	//PERS_HITBODY
 
 	// Weapon Restrictions
 	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
@@ -1839,5 +1840,14 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 char* BG_GetTeam(int teamNum);
 char* BG_GetClass(int classNum);
+
+// RTCWPro - hitsounds
+typedef enum
+{
+	HIT_NONE = 0,
+	HIT_TEAMSHOT,
+	HIT_HEADSHOT,
+	HIT_BODYSHOT
+} hitEvent_t;
 
 #endif // ! ___BG_PUBLIC_H

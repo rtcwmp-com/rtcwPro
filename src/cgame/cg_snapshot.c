@@ -33,7 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "cg_local.h"
 
-
+// RTCWPro - only reset entities that were valid in the last frame
+static qboolean oldValid[MAX_GENTITIES];
 
 /*
 ==================
@@ -60,6 +61,18 @@ static void CG_ResetEntity( centity_t *cent ) {
 	if ( cent->currentState.eType == ET_PLAYER ) {
 		CG_ResetPlayerEntity( cent );
 	}
+
+	// RTCWPro - reset some additional stuff
+	cent->muzzleFlashTime = 0;
+	cent->overheatTime = 0;
+	cent->miscTime = 0;
+
+	VectorClear(cent->rawOrigin);
+	VectorClear(cent->rawAngles);
+
+	cent->lastFuseSparkTime = 0;
+	cent->highlightTime = 0;
+	cent->highlighted = qfalse;
 }
 
 
@@ -96,12 +109,24 @@ static void CG_TransitionEntity( centity_t *cent ) {
 		}
 	}
 
+	// RTCWPro
+	// if each frame since last CheckEvents olds entity number n
+	// then cent will never be reset in CG_TransitionSnapshot and
+	// so previousEvent will never return to 0 (condition cg_entities[id].currentValid == qfalse).
+	// this ensures cent->previousEvent is 0 when a new event occurs
+	if (cent->nextState.eType < ET_EVENTS ||
+		cent->currentState.otherEntityNum != cent->nextState.otherEntityNum ||
+		cent->currentState.otherEntityNum2 != cent->nextState.otherEntityNum2)
+	{
+		cent->previousEvent = 0;
+	}
+	// RTCWPro end
+
 	//----(SA)	the ent lost or gained some part(s), do any necessary effects
 	//TODO: check for ai first
 	if ( cent->currentState.dmgFlags != cent->nextState.dmgFlags ) {
 		CG_AttachedPartChange( cent );
 	}
-
 
 	cent->currentState = cent->nextState;
 	cent->currentValid = qtrue;
@@ -203,28 +228,37 @@ The transition point from snap to nextSnap has passed
 static void CG_TransitionSnapshot( void ) {
 	centity_t           *cent;
 	snapshot_t          *oldFrame;
-	int i;
+	int i, id;
 
-	if ( !cg.snap ) {
-		CG_Error( "CG_TransitionSnapshot: NULL cg.snap" );
+	if (!cg.snap) 
+	{
+		CG_Error("CG_TransitionSnapshot: NULL cg.snap");
 	}
-	if ( !cg.nextSnap ) {
-		CG_Error( "CG_TransitionSnapshot: NULL cg.nextSnap" );
+
+	if (!cg.nextSnap) 
+	{
+		CG_Error("CG_TransitionSnapshot: NULL cg.nextSnap");
 	}
 
 	// execute any server string commands before transitioning entities
 	CG_ExecuteNewServerCommands( cg.nextSnap->serverCommandSequence );
 
+	// RTCWPro
 	// if we had a map_restart, set everthing with initial
-
-	if ( !( cg.snap ) || !( cg.nextSnap ) ) {
+	/*if (!(cg.snap) || !(cg.nextSnap)) 
+	{
 		return;
-	}
+	}*/
+
+	memset(&oldValid, 0, sizeof(oldValid));
+	// RTCWPro end
 
 	// clear the currentValid flag for all entities in the existing snapshot
-	for ( i = 0 ; i < cg.snap->numEntities ; i++ ) {
-		cent = &cg_entities[ cg.snap->entities[ i ].number ];
+	for (i = 0; i < cg.snap->numEntities; i++) 
+	{
+		cent = &cg_entities[cg.snap->entities[i].number];
 		cent->currentValid = qfalse;
+		oldValid[cg.snap->entities[i].number] = qtrue; // RTCWPro
 	}
 
 	// move nextSnap to snap and do the transitions
@@ -233,15 +267,54 @@ static void CG_TransitionSnapshot( void ) {
 
 	//BG_PlayerStateToEntityState( &cg.snap->ps, &cg_entities[ cg.snap->ps.clientNum ].currentState, qfalse );
 	BG_PlayerStateToEntityStatePro(&cg.snap->ps, &cg_entities[cg.snap->ps.clientNum].currentState, cg.time, qfalse); // RTCWPro
-	cg_entities[ cg.snap->ps.clientNum ].interpolate = qfalse;
+	cg_entities[cg.snap->ps.clientNum].interpolate = qfalse;
 
-	for ( i = 0 ; i < cg.snap->numEntities ; i++ ) {
-		cent = &cg_entities[ cg.snap->entities[ i ].number ];
-		CG_TransitionEntity( cent );
+	for (i = 0; i < cg.snap->numEntities; i++) 
+	{
+		// RTCWPro
+		//cent = &cg_entities[cg.snap->entities[i].number];
+		//CG_TransitionEntity(cent);
+		id = cg.snap->entities[i].number;
+		CG_TransitionEntity(&cg_entities[id]);
+		// RTCWPro end
 	}
 
 	cg.nextSnap = NULL;
 
+	// RTCWPro
+	// check for playerstate transition events and entities that need reset from oldFrame
+	if (oldFrame)
+	{
+		// reset entity not valid in this frame but valid last frame.
+		for (i = 0; i < oldFrame->numEntities; i++)
+		{
+			id = oldFrame->entities[i].number;
+
+			if (cg_entities[id].currentValid == qfalse && oldValid[id] == qtrue)
+			{
+				CG_ResetEntity(&cg_entities[id]);
+			}
+		}
+
+		playerState_t* ops = &oldFrame->ps;
+		playerState_t* ps = &cg.snap->ps;
+
+		// teleporting checks are irrespective of prediction
+		if ((ps->eFlags ^ ops->eFlags) & EF_TELEPORT_BIT)
+		{
+			cg.thisFrameTeleport = qtrue;   // will be cleared by prediction code
+		}
+
+		// if we are not doing client side movement prediction for any
+		// reason, then the client events and view changes will be issued now
+		if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW) || 
+			cg_nopredict.integer || cg_synchronousClients.integer)
+		{
+			CG_TransitionPlayerState(ps, ops);
+		}
+	}
+
+	/*
 	// check for playerstate transition events
 	if ( oldFrame ) {
 		playerState_t   *ops, *ps;
@@ -259,8 +332,8 @@ static void CG_TransitionSnapshot( void ) {
 			 || cg_nopredict.integer || cg_synchronousClients.integer ) {
 			CG_TransitionPlayerState( ps, ops );
 		}
-	}
-
+	}*/
+	// RTCWPro end
 }
 
 
