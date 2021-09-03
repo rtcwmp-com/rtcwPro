@@ -4039,6 +4039,9 @@ void CG_DrawObjectiveIcons() {
 	int i, num, status,barheight;
 	vec4_t hcolor = { 0.2f, 0.2f, 0.2f, 1.f };
 	int msec, mins, seconds, tens; // JPW NERVE
+	// RTCWPro
+	playerState_t* ps;
+	clientInfo_t* ci;
 
 // JPW NERVE added round timer
 	y = 48;
@@ -4193,11 +4196,19 @@ void CG_DrawObjectiveIcons() {
 	VectorSet( hcolor, 1, 1, 1 );
 	hcolor[3] = cg_hudAlpha.value;
 	trap_R_SetColor( hcolor );
-	if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
+	// RTCWPro
+	/*if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
 		 cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_BLUEFLAG ) ) {
 		CG_DrawPic( -7, y, 48, 48, trap_R_RegisterShader( "models/multiplayer/treasure/treasure" ) );
 		y += 50;
+	}*/
+	ps = &cg.snap->ps;
+	ci = &cgs.clientinfo[ps->clientNum];
+	if (ps->powerups[PW_REDFLAG] || ps->powerups[PW_BLUEFLAG]) {
+		CG_DrawPic(-7, y, 48, 48, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+		y += 50;
 	}
+	// RTCWPro end
 }
 // -NERVE - SMF
 
