@@ -1910,12 +1910,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		CG_VenomFire( es, qtrue );
 		break;
 
-	// RTCWPro - hijack this event to comm hitsounds
-	case EV_BULLET:
-		CG_PlayHitSound(es->clientNum, es->eventParm);
-		break;
-	// RTCWPro end
-
 	case EV_NOITEM:
 		DEBUGNAME( "EV_NOITEM" );
 		if ( es->number == cg.snap->ps.clientNum ) {
@@ -2052,9 +2046,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		CG_FireWeapon( cent );
 		break;
 
-//----(SA)	added
+//----(SA)	added // RTCWPro - hijack this for hitsounds
 	case EV_FIRE_QUICKGREN:
-		// testing.  no client side effect yet
+		DEBUGNAME("EV_FIRE_QUICKGREN");
+		if (cg_hitsounds.integer) {
+			CG_PlayHitSound(es->clientNum, es->eventParm);
+		}
 		break;
 //----(SA)	end
 //----(SA)	added

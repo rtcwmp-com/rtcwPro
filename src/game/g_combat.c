@@ -869,7 +869,7 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body
 	}
 
 	if (hitEventType) {
-		G_AddEvent(attacker, EV_BULLET, hitEventType);
+		G_AddEvent(attacker, EV_FIRE_QUICKGREN, hitEventType);
 
 		if (g_debugDamage.integer) {
 			G_Printf("Hitsound event: %d\n", hitEventType);
