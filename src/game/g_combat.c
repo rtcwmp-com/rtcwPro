@@ -870,6 +870,10 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body
 
 	if (hitEventType) {
 		G_AddEvent(attacker, EV_BULLET, hitEventType);
+
+		if (g_debugDamage.integer) {
+			G_Printf("Hitsound event: %d\n", hitEventType);
+		}
 	}
 }
 
@@ -1102,10 +1106,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor( targ, take, dflags );
 	take -= asave;
 
-	if (g_hitsounds.integer) {
-		G_Hitsounds(targ, attacker, mod, qtrue);
-	}
-
 	// RTCWPro - head stuff
 	//if ( IsHeadShot( targ, qfalse, dir, point, mod ) ) {
 	if (targ->headshot && targ->client) {
@@ -1136,10 +1136,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
+	}
 
-		if (g_hitsounds.integer) {
-			G_Hitsounds(targ, attacker, mod, qfalse);
-		}
+	// RTCWPro - hitsounds
+	if (g_hitsounds.integer) {
+		G_Hitsounds(targ, attacker, mod, targ->headshot ? qfalse : qtrue);
 	}
 
 	if ( g_debugDamage.integer ) {
