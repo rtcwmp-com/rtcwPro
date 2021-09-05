@@ -412,7 +412,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		}
 	}
 
-	// RTCWPro - moved to events
+	// RTCWPro - moved entirely on the server side
 	/*if (cg_hitsounds.integer) {
 
 		if (ops->persistant[PERS_HITBODY] != ps->persistant[PERS_HITBODY]) {

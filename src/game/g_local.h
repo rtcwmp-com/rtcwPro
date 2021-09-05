@@ -620,6 +620,9 @@ typedef struct {
 	unsigned int clientFlags;           // Client settings that need server involvement
 	unsigned int clientMaxPackets;      // Client com_maxpacket settings
 	unsigned int clientTimeNudge;       // Client cl_timenudge settings
+	unsigned int hitSoundType;
+	unsigned int hitSoundBodyStyle;
+	unsigned int hitSoundHeadStyle;
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
 	int throwingKnives;

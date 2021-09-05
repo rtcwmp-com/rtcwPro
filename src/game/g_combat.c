@@ -815,12 +815,13 @@ void G_ArmorDamage( gentity_t *targ ) {
 G_Hitsounds
 ==============
 */
-void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body ) {
+void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean headshot ) {
 	qboolean onSameTeam = OnSameTeam( target, attacker);
-	int hitEventType = HIT_NONE;
+	gentity_t* te;
 
 	// if player is hurting him self don't give any sounds
-	if (target->client == attacker->client) {
+	if (target->client == attacker->client) 
+	{
 		return;  // this happens at flaming your self... just return silence...			
 	}
 
@@ -842,12 +843,24 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body
 		return;
 	}
 
-	// if team mate
-	if (target->client && attacker->client && onSameTeam) {
-		//attacker->client->ps.persistant[PERS_HITBODY]--;
-		hitEventType = HIT_TEAMSHOT;
+	if (!attacker->client->pers.hitSoundType) 
+	{
+		return;
 	}
 
+	// if team mate
+	if (target->client && attacker->client && onSameTeam) 
+	{
+		//attacker->client->ps.persistant[PERS_HITBODY]--;
+		//hitEventType = HIT_TEAMSHOT;
+
+		if (attacker->client->pers.hitSoundType & HITSOUND_TEAM) 
+		{
+			te = G_TempEntity(attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND);
+			te->s.eventParm = G_SoundIndex("sound/hitsounds/hitteam.wav");
+			te->s.teamNum = attacker->s.clientNum;
+		}
+	}
 	// If enemy
 	else if (target &&
 		target->client &&
@@ -858,22 +871,52 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean body
 		attacker != target &&
 		!onSameTeam)
 	{
-		if (body) {
-			//attacker->client->ps.persistant[PERS_HITBODY]++;
-			hitEventType = HIT_BODYSHOT;
-		}
-		else {
-			//attacker->client->ps.persistant[PERS_HITHEAD]++;
-			hitEventType = HIT_HEADSHOT;
-		}
-	}
+		te = G_TempEntity(attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND);
 
-	if (hitEventType) {
-		G_AddEvent(attacker, EV_FIRE_QUICKGREN, hitEventType);
+		if (headshot) 
+		{
+			if (attacker->client->pers.hitSoundType & HITSOUND_HEAD) 
+			{
+				//attacker->client->ps.persistant[PERS_HITHEAD]++;
+				//hitEventType = HIT_HEADSHOT;
 
-		if (g_debugDamage.integer) {
-			G_Printf("Hitsound event: %d\n", hitEventType);
+				if (attacker->client->pers.hitSoundHeadStyle == 1) 
+				{
+					te->s.eventParm = G_SoundIndex("sound/hitsounds/hithead1.wav");
+				}
+				else if (attacker->client->pers.hitSoundHeadStyle == 2) 
+				{
+					te->s.eventParm = G_SoundIndex("sound/hitsounds/hithead2.wav");
+				}
+				else 
+				{
+					te->s.eventParm = G_SoundIndex("sound/hitsounds/hithead1.wav");
+				}
+			}
 		}
+		else 
+		{
+			if (attacker->client->pers.hitSoundType & HITSOUND_BODY) 
+			{
+				//attacker->client->ps.persistant[PERS_HITBODY]++;
+				//hitEventType = HIT_BODYSHOT;
+
+				if (attacker->client->pers.hitSoundBodyStyle == 1) 
+				{
+					te->s.eventParm = G_SoundIndex("sound/hitsounds/hitbody1.wav");
+				}
+				else if (attacker->client->pers.hitSoundBodyStyle == 2) 
+				{
+					te->s.eventParm = G_SoundIndex("sound/hitsounds/hitbody2.wav");
+				}
+				else 
+				{
+					te->s.eventParm = G_SoundIndex("sound/hitsounds/hitbody1.wav");
+				}
+			}
+		}
+
+		te->s.teamNum = attacker->s.clientNum;
 	}
 }
 
@@ -907,6 +950,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	int save;
 	int asave;
 	int knockback;
+	qboolean isHeadShot = qfalse;
 
 	if ( !targ->takedamage ) {
 		return;
@@ -1131,16 +1175,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 
 		targ->client->ps.eFlags |= EF_HEADSHOT;
+
+		isHeadShot = qtrue;
+
 		// L0 - OSP stats - Record the headshot
 		if ( client && attacker && attacker->client
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-	}
-
-	// RTCWPro - hitsounds
-	if (g_hitsounds.integer) {
-		G_Hitsounds(targ, attacker, mod, targ->headshot ? qfalse : qtrue);
 	}
 
 	if ( g_debugDamage.integer ) {
@@ -1169,7 +1211,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 	}
 
-
 	// See if it's the player hurting the emeny flag carrier
 	Team_CheckHurtCarrier( targ, attacker );
 
@@ -1177,6 +1218,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		// set the last client who damaged the target
 		targ->client->lasthurt_client = attacker->s.number;
 		targ->client->lasthurt_mod = mod;
+	}
+
+	// RTCWPro - hitsounds
+	if (g_hitsounds.integer) {
+		G_Hitsounds(targ, attacker, mod, isHeadShot);
 	}
 
 	// do the damage

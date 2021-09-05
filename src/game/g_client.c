@@ -1584,7 +1584,9 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
-	sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
+	//sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
+	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, 
+		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
 
 	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
         trap_DropClient(clientNum, "Empty or invalid rtcwkey");

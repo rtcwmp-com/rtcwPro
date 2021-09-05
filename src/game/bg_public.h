@@ -1842,12 +1842,8 @@ char* BG_GetTeam(int teamNum);
 char* BG_GetClass(int classNum);
 
 // RTCWPro - hitsounds
-typedef enum
-{
-	HIT_NONE = 0,
-	HIT_TEAMSHOT,
-	HIT_HEADSHOT,
-	HIT_BODYSHOT
-} hitEvent_t;
+#define HITSOUND_HEAD 1
+#define HITSOUND_BODY 2
+#define HITSOUND_TEAM 4
 
 #endif // ! ___BG_PUBLIC_H

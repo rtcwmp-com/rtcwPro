@@ -801,7 +801,8 @@ void CG_UpdateCvars( void ) {
 
 			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
 				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &str_cl_guid) {
+				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &cg_hitsounds || 
+				cv->vmCvar == &cg_hitsoundBodyStyle || cv->vmCvar == &cg_hitsoundHeadStyle || cv->vmCvar == &str_cl_guid) {
 				fSetFlags = qtrue;
 			}
 			else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
@@ -836,6 +837,7 @@ void CG_UpdateCvars( void ) {
 
 /*
 =================
+RTCWPro
 OSPx - Client Flags
 =================
 */
@@ -846,7 +848,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %s",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d %d %s",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -860,6 +862,10 @@ void CG_setClientFlags(void) {
 		int_cl_timenudge.integer,
 		// MaxPackets
 		int_cl_maxpackets.integer,
+		// hitsounds
+		cg_hitsounds.integer,
+		cg_hitsoundBodyStyle.integer,
+		cg_hitsoundHeadStyle.integer,
 		// GUID
 		str_cl_guid.string
 	));
