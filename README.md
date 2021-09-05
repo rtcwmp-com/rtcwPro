@@ -2,11 +2,15 @@
 
 ![Alt tag](Assets/rtcwpro.png?raw=true "Title")
 
-Return to Castle Wolfenstein Mod - based on OSPx/xMod (created by Nate) with additions from RtcwPub, ioRtcw, Enemy Territory, ETPub, and other Q3 mods
+Return to Castle Wolfenstein Mod/Engine - based on OSPx/xMod (created by Nate) with additions from RtcwPub, ioRtcw, Enemy Territory, ETPub, and other Q3 mods
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
 
-[b]Change Log[/b]
+To run a RtcwPro server (Linux only) you may use Msh Docker available here: https://github.com/msh100/rtcw-config
+
+To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.htm
+
+**Change Log**
  - 1.0/1.0.1
    - corrected head hitboxes (RtcwPub port)
    - faster PK3 downloads (ioRtcw port)
@@ -151,6 +155,21 @@ Main objective: create a competition mod similar to OSP with updates for tournam
    - server: fix stats offset bug with map_restart on SW2
    - server: fix swap after map_restart on SW2
    - server: add objective captures to json events and player stats
+ 
+ - 1.2.2
+   - server: lowercase expected file name for map configs (linux)
+   - server: lowercase expected file name for .spawns files (linux)
+   - server: only exec map configs on map load (not map restart)
+   - server: fix ready status being reset on client death
+   - server: shoutcasters can follow other shoutcasters by /follow id
+   - server: shoutcasters can /followobj to follow active obj carrier (if any)
+   - server: shoutcasters can /noclip
+   - server: add map name search on /callvote map
+   - server: add /maps to list maps on server
+ 
+ - 1.2.3
+   - server: fix early airstrikes bug
+   - server: add vote_allow_cointoss
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
