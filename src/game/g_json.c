@@ -1065,7 +1065,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
                 json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
                 json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
                 json_object_set_new(jdata, "weapon",    json_string(weapon));
-                json_object_set_new(jdata, "other_health",    json_integer(agent->health));
+                json_object_set_new(jdata, "agent_health",    json_integer(agent->health));
                 if (g_gameStatslog.integer & JSON_KILLDATA) {
                     json_object_set_new(jdata, "agent_pos",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
                     json_object_set_new(jdata, "agent_angle",    json_string(va("%f",agent->client->ps.viewangles[1])));
