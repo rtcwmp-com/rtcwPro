@@ -1638,7 +1638,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			mapName[x] = tolower(mapName[x]);
 		}
 
-		G_LogPrintf(va("rtcwPro: Execing %s.cfg\n", mapName));
 		trap_SendConsoleCommand(EXEC_APPEND, va("exec mapConfigs/%s.cfg \n", mapName));
 	} // L0 - end
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
