@@ -137,7 +137,6 @@ vmCvar_t cg_crosshairX;
 vmCvar_t cg_crosshairY;
 vmCvar_t cg_crosshairHealth;
 vmCvar_t cg_draw2D;
-vmCvar_t cg_drawFrags;
 vmCvar_t cg_teamChatsOnly;
 vmCvar_t cg_noVoiceChats;           // NERVE - SMF
 vmCvar_t cg_noVoiceText;            // NERVE - SMF
@@ -410,6 +409,9 @@ vmCvar_t cg_compassY;
 vmCvar_t cg_zoomedSensLock;
 vmCvar_t cg_lagometerX;
 vmCvar_t cg_lagometerY;
+vmCvar_t cg_drawFrags;
+vmCvar_t cg_fragsY;
+vmCvar_t cg_fragsWidth;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -444,7 +446,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE  },
 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_CHEAT }, // JPW NERVE changed per atvi req to prevent sniper rifle zoom cheats
 	{ &cg_drawSpreadScale, "cg_drawSpreadScale", "1", CVAR_ARCHIVE },
-	{ &cg_drawFrags, "cg_drawFrags", "1", CVAR_ARCHIVE },
 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 	{ &cg_drawFPS, "cg_drawFPS", "0", CVAR_ARCHIVE  },
@@ -715,6 +716,11 @@ cvarTable_t cvarTable[] = {
 	// lagometer
 	{ &cg_lagometerX, "cg_lagometerX", "585", CVAR_ARCHIVE },
 	{ &cg_lagometerY, "cg_lagometerY", "340", CVAR_ARCHIVE },
+
+	// cp frags
+	{ &cg_drawFrags, "cg_drawFrags", "1", CVAR_ARCHIVE },
+	{ &cg_fragsY, "cg_fragsY", "0", CVAR_ARCHIVE },
+	{ &cg_fragsWidth, "cg_fragsWidth", "16", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

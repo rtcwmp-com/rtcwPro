@@ -1959,7 +1959,6 @@ extern vmCvar_t cg_crosshairSize;
 extern vmCvar_t cg_crosshairHealth;
 extern vmCvar_t cg_drawStatus;
 extern vmCvar_t cg_draw2D;
-extern vmCvar_t cg_drawFrags;
 extern vmCvar_t cg_animSpeed;
 extern vmCvar_t cg_debugAnim;
 extern vmCvar_t cg_debugPosition;
@@ -2205,6 +2204,9 @@ extern vmCvar_t cg_compassY;
 extern vmCvar_t cg_zoomedSensLock;
 extern vmCvar_t cg_lagometerX;
 extern vmCvar_t cg_lagometerY;
+extern vmCvar_t cg_drawFrags;
+extern vmCvar_t cg_fragsY;
+extern vmCvar_t cg_fragsWidth;
 
 //static void CG_TimerSet_f(void);
 //static void CG_TimerReset_f(void);
