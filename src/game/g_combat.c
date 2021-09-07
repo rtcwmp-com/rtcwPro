@@ -1222,7 +1222,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	// RTCWPro - hitsounds
 	if (g_hitsounds.integer) {
-		G_Hitsounds(targ, attacker, mod, isHeadShot);
+		if ((attacker->client) && (targ->client)) {
+			G_Hitsounds(targ, attacker, mod, isHeadShot);
+		}
 	}
 
 	// do the damage
