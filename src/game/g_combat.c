@@ -819,6 +819,12 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 	qboolean onSameTeam = OnSameTeam( target, attacker);
 	gentity_t* te;
 
+	if (!target || !attacker || !target->client || !attacker->client) 
+	{
+		
+		return;
+	}
+
 	// if player is hurting him self don't give any sounds
 	if (target->client == attacker->client) 
 	{
