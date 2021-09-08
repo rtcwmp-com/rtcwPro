@@ -1,4 +1,4 @@
-# Cvar / Command list
+# Cvar list
 
 <br>
 
@@ -34,7 +34,6 @@
 | ch_font | `integer` | `0-2` | `0` | Enable/disable OSP fonts |
 | cg_drawWeaponIconFlash | `integer` | `0-1` | `0` |  Enable/disable weapon icon flashing when empty |
 | cg_printObjectiveInfo | `integer` | `0-1` | `1` | Enable/disable printing of OBJ notifications in kill feed |
-| cg_hitsounds | `bitflag` | `0-1-2-4` | `0` | Control hitsounds. `1` - headshot only, `2` - body only, `4` - team only, `7` - all |
 | cg_noChat | `integer` | `0-1` | `0` | Draw chat messages |
 | cg_noVoice | `integer` | `0-1` | `0` | Draw and play voice chat messages |
 | cg_drawPickupItems | `integer` | `0-1` | `1` | Draw item names upon pickup |
@@ -44,19 +43,34 @@
 | cg_chatBeep | `integer` | `0-1` | `0` | Enable/disable chat sound notifications |
 | cf_wstats | `float` | `0.0-99.0` | `1.2` | Change +wstats window scale |
 | cf_wtopshots | `float` | `0.0-99.0` | `1.0` | Change +wtopshots window scale |
-| cg_zoomedSens | `float` | `0.0-99.0` | `.3` | Change sensitivity when scoped |
-| cg_zoomedSensLock | `integer` | `0-1` | `0` | Enable/disable decreasing of sensitivity with each zoom step while scoped |
+| cg_noAmmoAutoSwitch | `integer` | `0-1` | `0` | Enable/disable auto weapon switch when primary is out of ammo |
+| cg_drawSpeed | `integer` | `0-4` | `0` | Draw speed meter. `1` - current only, `2` - current and top, `3` - current with accel color, `4` - current and top with accel color |
+| cg_speedX | `integer` | `-999-999` | `315` | Change speed meter position in the horizontal axis |
+| cg_speedY | `integer` | `-999-999` | `340` | Change speed meter position in the vertical axis |
+| cg_tracers | `integer` | `0-3` | `1` | Draw bullet tracers. `1` - all, `2` - own only, `3` - other's only |
+| cg_drawTriggers | `integer` | `0-1` | `1` | Draw objeective triggers (for Shoutcasters only) |
+| cg_hitsounds | `bitflag` | `0-1-2-4` | `0` | Control hitsounds. `1` - headshot only, `2` - body only, `4` - team only, `7` - all |
+| cg_hitsoundBodyStyle | `integer` | `1-9` | `1` | Change body hit sound |
+| cg_hitsoundHeadStyle | `integer` | `1-11` | `1` | Change head hit sound |
+| cg_spawnTimer_period | `integer` | `0-60` | `0` | [See here (use /timerset seconds)](https://www.youtube.com/watch?v=_NNYI8VbFyY) |
+| cg_spawnTimer_set | `integer` | `-1-60` | `-1` | [See here (use /timerset seconds)](https://www.youtube.com/watch?v=_NNYI8VbFyY) |
 | cg_drawReinforcementTime | `integer` | `0-3` | `1` | Draw respawn time. `1` - default, `2` - new, `3` - default and new |
 | cg_reinforcementTimeColor | `string` | `color table` | `red` | Change respawn time color |
 | cg_reinforcementTimeX | `integer ` | `-999-999` | `86` | Change default respawn time position in the horizontal axis |
 | cg_reinforcementTimeY | `integer ` | `-999-999` | `70` | Change default respawn time position in the vertical axis |
 | cg_reinforcementTimeProX | `integer ` | `-999-999` | `145` | Change new respawn time position in the horizontal axis |
 | cg_reinforcementTimeProY | `integer ` | `-999-999` | `445` | Change new respawn time position in the vertical axis |
-| cg_hitsoundBodyStyle | `integer` | `1-9` | `1` | Change body hit sound |
-| cg_hitsoundHeadStyle | `integer` | `1-11` | `1` | Change head hit sound |
-| cg_drawSpeed | `integer` | `0-4` | `0` | Draw speed meter. `1` - current only, `2` - current and top, `3` - current with accel color, `4` - current and top with accel color |
-| cg_speedX | `integer` | `-999-999` | `315` | Change speed meter position in the horizontal axis |
-| cg_speedY | `integer` | `-999-999` | `340` | Change speed meter position in the vertical axis |
-| cg_tracers | `integer` | `0-3` | `1` | Draw bullet tracers. `1` - all, `2` - own only, `3` - other's only |
-| cg_drawTriggers | `integer` | `0-1` | `1` | Draw objeective triggers (for Shoutcasters only) |
+| cg_drawEnemyTimer | `integer` | `0-1` | `1` | Draw enemy timer. `1` - default, `2` - new, `3` - default and new |
+| cg_enemyTimerColor | `string` | `color table` | `green` | Change enemy timer color |
+| cg_enemyTimerX | `integer` | `-999-999` | `98` | Change default enemy timer position in the horizontal axis |
+| cg_enemyTimerY | `integer` | `-999-999` | `60` | Change default enemy timer position in the vertical axis |
+| cg_enemyTimerProX | `integer` | `-999-999` | `185` | Change new enemy timer position in the horizontal axis |
+| cg_enemyTimerProY | `integer` | `-999-999` | `445` | Change new enemy timer position in the vertical axis |
+| cg_findMedic | `integer` | `0-1` | `1` | Enable/disable camera lock at team medics when waiting for a revive |
+| cg_pauseMusic | `integer` | `0-1` | `1` | Enable/disable music during pause |
+| cg_zoomedSens | `float` | `0.0-99.0` | `.3` | Change sensitivity when scoped |
+| cg_zoomedSensLock | `integer` | `0-1` | `0` | Enable/disable decreasing of sensitivity with each zoom step while scoped |
+
+
+
 
