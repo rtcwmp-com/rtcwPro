@@ -299,7 +299,6 @@ vmCvar_t cg_crosshairX;
 vmCvar_t cg_crosshairY;
 vmCvar_t cg_coloredCrosshairNames;
 vmCvar_t cg_drawWeaponIconFlash;
-vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_muzzleFlash;
 vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
@@ -1429,12 +1428,6 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// pause
 	cgs.media.pIntermission = trap_S_RegisterSound("sound/match/pause_m.wav");
-	// Hitsounds
-	cgs.media.headShot1 = trap_S_RegisterSound("sound/hitsounds/hithead1.wav");
-	cgs.media.headShot2 = trap_S_RegisterSound("sound/hitsounds/hithead2.wav");
-	cgs.media.bodyShot1 = trap_S_RegisterSound("sound/hitsounds/hitbody1.wav");
-	cgs.media.bodyShot2 = trap_S_RegisterSound("sound/hitsounds/hitbody2.wav");
-	cgs.media.teamShot = trap_S_RegisterSound("sound/hitsounds/hitTeam.wav");
 	// chats
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");

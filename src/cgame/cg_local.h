@@ -2114,7 +2114,6 @@ extern vmCvar_t cg_crosshairColorAlt;
 extern vmCvar_t cg_coloredCrosshairNames;
 extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
-extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
