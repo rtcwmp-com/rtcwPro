@@ -6,7 +6,7 @@
 > `string` - normal text characters  
 > `integer` - whole numbers variable, e.g. 1, 2, 3, 4  
 > `float` - floating point value variable, e.g. 1.0, 0.9, 0.8, 0.7  
-> `bitflag` - binary digit whole value, e.g. 1, 2, 4, 8, 16 (or add 1+2 = 3, 1+2+4 = 7, etc)  
+> `bitflag` - binary digit whole value variable, e.g. 1, 2, 4, 8, 16, etc (or add 1+2 = 3, 1+2+4 = 7, etc)  
 
 > #### Cvar color table  
 `white` `red` `green` `blue` `yellow` `magenta` `cyan` `orange` `mdred` `mdgreen` `dkgreen` `mdcyan` `mdyellow` `mdorange` `mdblue` `ltgrey` `mdgrey` `dkgrey` `black`  
@@ -25,7 +25,7 @@
 |---------|---------------|-------------|---------|-------------|
 | cg_crosshairPulse | `integer` | `0-1` | `1` | Enable/disable pulsing of the crosshair. |
 | cg_showFlags | `integer` | `0-1` | `1` | Enable/disable scoreboard coutnry flags |
-| cg_bloodDamageBlend | `float` | `0.0-1.0` | `1.0` | Control blood flends when getting shot |
+| cg_bloodDamageBlend | `float` | `0.0-1.0` | `1.0` | Control blood blends when getting shot |
 | cg_bloodFlash | `float` | `0.0-1.0` | `1.0` | Control blood flash when getting shot |
 | cg_crosshairAlpha | `float` | `0.0-1.0` | `1.0` | Control crosshair opacity |
 | cg_crosshairAlphaAlt | `float` | `0.0-1.0` | `1.0` | Control crosshair alt opacity |
@@ -34,7 +34,9 @@
 | ch_font | `integer` | `0-2` | `0` | Enable/disable OSP fonts |
 | cg_drawWeaponIconFlash | `integer` | `0-1` | `0` |  Enable/disable weapon icon flashing when empty |
 | cg_printObjectiveInfo | `integer` | `0-1` | `1` | Enable/disable printing of OBJ notifications in kill feed |
-| cg_htisounds | `bitflag` | `1-2-4` | `0` | Control hitsounds |
+| cg_hitsounds | `bitflag` | `0-1-2-4` | `0` | Control hitsounds. `1` - headshot only, `2` - body only, `4` - team only, `7` - all |
+| cg_hitsoundBodyStyle | `integer` | `1-9` | `1` | Change body hit sound |
+| cg_hitsoundHeadStyle | `integer` | `1-11` | `1` | Change head hit sound |
 | cg_drawSpeed | `integer` | `0-4` | `0` | Draw speed meter. `1` - current only, `2` - current and top, `3` - current with accel color, `4` - current and top with accel color |
 | cg_speedX | `integer` | `-999-999` | `315` | Change speed meter position in the horizontal axis |
 | cg_speedY | `integer` | `-999-999` | `340` | Change speed meter position in the vertical axis |
