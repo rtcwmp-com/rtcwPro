@@ -1672,6 +1672,8 @@ static void CG_DrawNotify( void ) {
 	int x = cg_notifyTextX.integer;
 	int y = cg_notifyTextY.integer;
 	qboolean shadow = cg_notifyTextShadow.integer;
+	int width = cg_notifyTextWidth.integer;
+	int height = cg_notifyTextHeight.integer;
 
 	trap_Cvar_VariableStringBuffer( "con_notifytime", var, sizeof( var ) );
 	notifytime = atof( var ) * 1000;
@@ -1721,7 +1723,12 @@ static void CG_DrawNotify( void ) {
 			trap_R_SetColor( hcolor );
 
 			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
+				hcolor, qfalse, shadow, width, height, maxCharsBeforeOverlay);
+
+			/*
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
 				hcolor, qfalse, shadow, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay);
+			*/
 		}
 	}
 }

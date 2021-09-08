@@ -400,6 +400,8 @@ vmCvar_t cg_pauseMusic;
 vmCvar_t cg_notifyTextX;
 vmCvar_t cg_notifyTextY;
 vmCvar_t cg_notifyTextShadow;
+vmCvar_t cg_notifyTextWidth;
+vmCvar_t cg_notifyTextHeight;
 vmCvar_t cg_chatX;
 vmCvar_t cg_chatY;
 vmCvar_t cg_teamOverlayX;
@@ -635,7 +637,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_noVoice, "cg_noVoice", "0", CVAR_ARCHIVE },
 	{ &cg_zoomedFOV, "cg_zoomedFOV", "90", CVAR_ARCHIVE },
 	{ &cg_statsList, "cg_statsList", "0", CVAR_ARCHIVE },
-	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
 	{ &vp_drawnames, "vp_drawnames", "0", CVAR_ARCHIVE | CVAR_CHEAT },
 	{ &cg_drawNames, "cg_drawNames", "1", CVAR_ROM },
 	{ &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
@@ -697,6 +698,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
 	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
 	{ &cg_notifyTextShadow, "cg_notifyTextShadow", "0", CVAR_ARCHIVE },
+	{ &cg_notifyTextWidth, "cg_notifyTextWidth", "8", CVAR_ARCHIVE },
+	{ &cg_notifyTextHeight, "cg_notifyTextHeight", "8", CVAR_ARCHIVE },
 
 	// chat
 	{ &cg_chatX, "cg_chatX", "0", CVAR_ARCHIVE },
@@ -712,6 +715,7 @@ cvarTable_t cvarTable[] = {
 
 	// zoomed sens
 	{ &cg_zoomedSensLock, "cg_zoomedSensLock", "0", CVAR_ARCHIVE },
+	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
 
 	// lagometer
 	{ &cg_lagometerX, "cg_lagometerX", "585", CVAR_ARCHIVE },
