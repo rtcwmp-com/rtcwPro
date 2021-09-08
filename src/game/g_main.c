@@ -245,6 +245,7 @@ vmCvar_t g_mapConfigs;		// Essentials for custom map configs...
 vmCvar_t g_lifeStats;		// If enabled it prints killer health
 vmCvar_t g_pauseLimit;	// How many pauses per team
 vmCvar_t g_duelAutoPause; // If enabled, it auto pauses when in duel mode with uneven teams.
+vmCvar_t g_damageRadiusKnockback; // explosions knockback
 
 // Match specific
 vmCvar_t g_tournament;	// Ready-unready system
@@ -360,7 +361,7 @@ cvarTable_t gameCvarTable[] = {
     { &g_disableSMGPickup, "g_disableSMGPickup", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_speed, "g_speed", "320", 0, 0, qtrue  },
 	{ &g_gravity, "g_gravity", "800", 0, 0, qtrue  },
-	{ &g_knockback, "g_knockback", "100", 0, 0, qtrue  },
+	{ &g_knockback, "g_knockback", "1000", 0, 0, qtrue  },
 	{ &g_quadfactor, "g_quadfactor", "3", 0, 0, qtrue  },
 	{ &g_weaponRespawn, "g_weaponrespawn", "5", 0, 0, qtrue  },
 	{ &g_weaponTeamRespawn, "g_weaponTeamRespawn", "30", 0, 0, qtrue },
@@ -397,7 +398,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_rankings, "g_rankings", "0", 0, 0, qfalse},
 	{ &g_userAim, "g_userAim", "1", CVAR_CHEAT, 0, qfalse },
 
-	{ &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
+	//{ &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
 	{ &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},
 	{ &pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
 
@@ -488,7 +489,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamSniper, "g_maxTeamSniper", "-1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamVenom, "g_maxTeamVenom", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
-	{ &g_duelAutoPause, "g_duelAutoPause", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
@@ -497,6 +497,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_spawnOffset, "g_spawnOffset", "9", CVAR_ARCHIVE, 0, qfalse, qfalse },
 	{ &g_bodiesGrabFlags, "g_bodiesGrabFlags", "1", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_mapScriptDirectory, "g_mapScriptDirectory", "", 0, qfalse },
+	{ &g_damageRadiusKnockback, "g_damageRadiusKnockback", "1000", 0, 0, qtrue },
 	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
@@ -1637,7 +1638,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			mapName[x] = tolower(mapName[x]);
 		}
 
-		G_LogPrintf(va("rtcwPro: Execing %s.cfg\n", mapName));
 		trap_SendConsoleCommand(EXEC_APPEND, va("exec mapConfigs/%s.cfg \n", mapName));
 	} // L0 - end
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {

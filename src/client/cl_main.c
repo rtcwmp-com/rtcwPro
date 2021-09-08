@@ -98,13 +98,16 @@ cvar_t  *cl_updatefiles;
 
 // L0
 //HTTP Downloads ..
-#ifdef CLWWW
+// commented to ensure it is defined (even if not used)
+//#ifdef CLWWW
 cvar_t *cl_wwwDownload;
-#endif
+//#endif
 // Streaming
 cvar_t *cl_StreamingSelfSignedCert;
 cvar_t *cl_guid;
 // ~L0
+
+cvar_t* cl_activatelean; // RTCWPro
 
 clientActive_t cl;
 clientConnection_t clc;
@@ -3173,7 +3176,8 @@ void CL_Init( void ) {
 	#endif
 
 	cl_StreamingSelfSignedCert = Cvar_Get("cl_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
-	Cvar_Get("cl_checkversion", "10", CVAR_ROM | CVAR_USERINFO);
+	cl_activatelean = Cvar_Get("cl_activatelean", "1", CVAR_ARCHIVE);
+	Cvar_Get("cl_checkversion", "11", CVAR_ROM | CVAR_USERINFO);
 
 	// init autoswitch so the ui will have it correctly even
 	// if the cgame hasn't been started
@@ -3348,7 +3352,7 @@ void CL_Init( void ) {
 
 	Cvar_Set( "cl_running", "1" );
 	// RTCWPro
-	Cvar_Set("cl_checkversion", "10");
+	Cvar_Set("cl_checkversion", "11");
 
 	// DHM - Nerve
 	autoupdateChecked = qfalse;

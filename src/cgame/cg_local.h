@@ -1741,8 +1741,10 @@ typedef struct {
 	// Country Flags
 	qhandle_t countryFlags;
 	// Hitsounds
-	sfxHandle_t	headShot;
-	sfxHandle_t	bodyShot;
+	sfxHandle_t	headShot1;
+	sfxHandle_t	headShot2;
+	sfxHandle_t	bodyShot1;
+	sfxHandle_t	bodyShot2;
 	sfxHandle_t	teamShot;
 	// chats
 	sfxHandle_t normalChat;
@@ -1750,6 +1752,8 @@ typedef struct {
 	// end of round
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
+	// pause
+	sfxHandle_t pIntermission;
 
 	// RTCWPro - draw triggers
 	qhandle_t transmitTrigger;
@@ -1914,11 +1918,6 @@ typedef struct {
 	int timescaleUpdate;                                // Timescale display for demo playback
 } cgs_t;
 
-// RTCWPro - split hitsounds
-#define HITSOUND_HEAD 1
-#define HITSOUND_BODY 2
-#define HITSOUND_TEAM 4
-
 //==============================================================================
 
 extern cgs_t cgs;
@@ -1960,7 +1959,6 @@ extern vmCvar_t cg_crosshairSize;
 extern vmCvar_t cg_crosshairHealth;
 extern vmCvar_t cg_drawStatus;
 extern vmCvar_t cg_draw2D;
-extern vmCvar_t cg_drawFrags;
 extern vmCvar_t cg_animSpeed;
 extern vmCvar_t cg_debugAnim;
 extern vmCvar_t cg_debugPosition;
@@ -2116,7 +2114,6 @@ extern vmCvar_t cg_crosshairColorAlt;
 extern vmCvar_t cg_coloredCrosshairNames;
 extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
-extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
@@ -2191,9 +2188,29 @@ extern vmCvar_t cg_reinforcementTimeProX;
 extern vmCvar_t cg_reinforcementTimeProY;
 
 extern vmCvar_t cg_findMedic;
+extern vmCvar_t cg_hitsoundBodyStyle;
+extern vmCvar_t cg_hitsoundHeadStyle;
+extern vmCvar_t cg_pauseMusic;
+extern vmCvar_t cg_notifyTextX;
+extern vmCvar_t cg_notifyTextY;
+extern vmCvar_t cg_notifyTextShadow;
+extern vmCvar_t cg_notifyTextWidth;
+extern vmCvar_t cg_notifyTextHeight;
+extern vmCvar_t cg_chatX;
+extern vmCvar_t cg_chatY;
+extern vmCvar_t cg_teamOverlayX;
+extern vmCvar_t cg_teamOverlayY;
+extern vmCvar_t cg_compassX;
+extern vmCvar_t cg_compassY;
+extern vmCvar_t cg_zoomedSensLock;
+extern vmCvar_t cg_lagometerX;
+extern vmCvar_t cg_lagometerY;
+extern vmCvar_t cg_drawFrags;
+extern vmCvar_t cg_fragsY;
+extern vmCvar_t cg_fragsWidth;
 
-static void CG_TimerSet_f(void);
-static void CG_TimerReset_f(void);
+//static void CG_TimerSet_f(void);
+//static void CG_TimerReset_f(void);
 
 //
 // cg_main.c

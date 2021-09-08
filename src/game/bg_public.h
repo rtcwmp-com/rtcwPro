@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2.3" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.2.4" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -399,10 +399,11 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
+	PERS_WOLFKICK
 
-	PERS_HITHEAD,
-	PERS_HITBODY
+	// RTCWPro - unused
+	//PERS_HITHEAD,
+	//PERS_HITBODY
 
 	// Weapon Restrictions
 	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
@@ -1488,6 +1489,7 @@ void    BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, player
 
 void    BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean snap );
 void    BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, int time, qboolean snap );
+void	BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int time, qboolean snap); // RTCWPro
 
 qboolean    BG_WeaponInWolfMP( int weapon );
 qboolean    BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
@@ -1838,5 +1840,10 @@ extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
 
 char* BG_GetTeam(int teamNum);
 char* BG_GetClass(int classNum);
+
+// RTCWPro - hitsounds
+#define HITSOUND_HEAD 1
+#define HITSOUND_BODY 2
+#define HITSOUND_TEAM 4
 
 #endif // ! ___BG_PUBLIC_H

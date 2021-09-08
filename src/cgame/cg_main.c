@@ -137,7 +137,6 @@ vmCvar_t cg_crosshairX;
 vmCvar_t cg_crosshairY;
 vmCvar_t cg_crosshairHealth;
 vmCvar_t cg_draw2D;
-vmCvar_t cg_drawFrags;
 vmCvar_t cg_teamChatsOnly;
 vmCvar_t cg_noVoiceChats;           // NERVE - SMF
 vmCvar_t cg_noVoiceText;            // NERVE - SMF
@@ -300,13 +299,11 @@ vmCvar_t cg_crosshairX;
 vmCvar_t cg_crosshairY;
 vmCvar_t cg_coloredCrosshairNames;
 vmCvar_t cg_drawWeaponIconFlash;
-vmCvar_t cg_printObjectiveInfo;
 vmCvar_t cg_muzzleFlash;
 vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
 vmCvar_t cg_noChat;
 vmCvar_t cg_noVoice;
-vmCvar_t cg_noAmmoAutoSwitch;
 vmCvar_t cg_wideScreen;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
@@ -394,8 +391,28 @@ vmCvar_t cg_reinforcementTimeY;
 vmCvar_t cg_reinforcementTimeProX;
 vmCvar_t cg_reinforcementTimeProY;
 
-// lock camera on medic at death
-vmCvar_t cg_findMedic;
+
+vmCvar_t cg_findMedic; // lock camera on medic at death
+vmCvar_t cg_hitsoundBodyStyle;
+vmCvar_t cg_hitsoundHeadStyle;
+vmCvar_t cg_pauseMusic;
+vmCvar_t cg_notifyTextX;
+vmCvar_t cg_notifyTextY;
+vmCvar_t cg_notifyTextShadow;
+vmCvar_t cg_notifyTextWidth;
+vmCvar_t cg_notifyTextHeight;
+vmCvar_t cg_chatX;
+vmCvar_t cg_chatY;
+vmCvar_t cg_teamOverlayX;
+vmCvar_t cg_teamOverlayY;
+vmCvar_t cg_compassX;
+vmCvar_t cg_compassY;
+vmCvar_t cg_zoomedSensLock;
+vmCvar_t cg_lagometerX;
+vmCvar_t cg_lagometerY;
+vmCvar_t cg_drawFrags;
+vmCvar_t cg_fragsY;
+vmCvar_t cg_fragsWidth;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -430,7 +447,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE  },
 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_CHEAT }, // JPW NERVE changed per atvi req to prevent sniper rifle zoom cheats
 	{ &cg_drawSpreadScale, "cg_drawSpreadScale", "1", CVAR_ARCHIVE },
-	{ &cg_drawFrags, "cg_drawFrags", "1", CVAR_ARCHIVE },
 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 	{ &cg_drawFPS, "cg_drawFPS", "0", CVAR_ARCHIVE  },
@@ -620,7 +636,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_noVoice, "cg_noVoice", "0", CVAR_ARCHIVE },
 	{ &cg_zoomedFOV, "cg_zoomedFOV", "90", CVAR_ARCHIVE },
 	{ &cg_statsList, "cg_statsList", "0", CVAR_ARCHIVE },
-	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
 	{ &vp_drawnames, "vp_drawnames", "0", CVAR_ARCHIVE | CVAR_CHEAT },
 	{ &cg_drawNames, "cg_drawNames", "1", CVAR_ROM },
 	{ &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
@@ -670,6 +685,45 @@ cvarTable_t cvarTable[] = {
 
 	// lock camera on medic at death
 	{ &cg_findMedic, "cg_findMedic", "1", CVAR_ARCHIVE | CVAR_USERINFO },
+
+	// hitsound styles
+	{ &cg_hitsoundBodyStyle, "cg_hitsoundBodyStyle", "1", CVAR_ARCHIVE },
+	{ &cg_hitsoundHeadStyle, "cg_hitsoundHeadStyle", "1", CVAR_ARCHIVE },
+
+	// pause music
+	{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
+
+	// notify text
+	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
+	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
+	{ &cg_notifyTextShadow, "cg_notifyTextShadow", "0", CVAR_ARCHIVE },
+	{ &cg_notifyTextWidth, "cg_notifyTextWidth", "8", CVAR_ARCHIVE },
+	{ &cg_notifyTextHeight, "cg_notifyTextHeight", "8", CVAR_ARCHIVE },
+
+	// chat
+	{ &cg_chatX, "cg_chatX", "0", CVAR_ARCHIVE },
+	{ &cg_chatY, "cg_chatY", "385", CVAR_ARCHIVE },
+
+	// team overlay
+	{ &cg_teamOverlayX, "cg_teamOverlayX", "640", CVAR_ARCHIVE },
+	{ &cg_teamOverlayY, "cg_teamOverlayY", "0", CVAR_ARCHIVE },
+
+	// compass
+	{ &cg_compassX, "cg_compassX", "290", CVAR_ARCHIVE },
+	{ &cg_compassY, "cg_compassY", "420", CVAR_ARCHIVE },
+
+	// zoomed sens
+	{ &cg_zoomedSensLock, "cg_zoomedSensLock", "0", CVAR_ARCHIVE },
+	{ &cg_zoomedSens, "cg_zoomedSens", ".3", CVAR_ARCHIVE },
+
+	// lagometer
+	{ &cg_lagometerX, "cg_lagometerX", "585", CVAR_ARCHIVE },
+	{ &cg_lagometerY, "cg_lagometerY", "340", CVAR_ARCHIVE },
+
+	// cp frags
+	{ &cg_drawFrags, "cg_drawFrags", "1", CVAR_ARCHIVE },
+	{ &cg_fragsY, "cg_fragsY", "0", CVAR_ARCHIVE },
+	{ &cg_fragsWidth, "cg_fragsWidth", "16", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -756,7 +810,8 @@ void CG_UpdateCvars( void ) {
 
 			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
 				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
-				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &str_cl_guid) {
+				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &cg_hitsounds || 
+				cv->vmCvar == &cg_hitsoundBodyStyle || cv->vmCvar == &cg_hitsoundHeadStyle || cv->vmCvar == &str_cl_guid) {
 				fSetFlags = qtrue;
 			}
 			else if (cv->vmCvar == &cg_crosshairColor || cv->vmCvar == &cg_crosshairAlpha) {
@@ -791,6 +846,7 @@ void CG_UpdateCvars( void ) {
 
 /*
 =================
+RTCWPro
 OSPx - Client Flags
 =================
 */
@@ -801,7 +857,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %s",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d %d %s",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -815,6 +871,10 @@ void CG_setClientFlags(void) {
 		int_cl_timenudge.integer,
 		// MaxPackets
 		int_cl_maxpackets.integer,
+		// hitsounds
+		cg_hitsounds.integer,
+		cg_hitsoundBodyStyle.integer,
+		cg_hitsoundHeadStyle.integer,
 		// GUID
 		str_cl_guid.string
 	));
@@ -1366,10 +1426,8 @@ static void CG_RegisterSounds( void ) {
 */
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
-	// Hitsounds
-	cgs.media.headShot = trap_S_RegisterSound( "sound/hitsounds/hitH.wav" );
-	cgs.media.bodyShot = trap_S_RegisterSound( "sound/hitsounds/hit.wav" );
-	cgs.media.teamShot = trap_S_RegisterSound( "sound/hitsounds/hitTeam.wav" );
+	// pause
+	cgs.media.pIntermission = trap_S_RegisterSound("sound/match/pause_m.wav");
 	// chats
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");

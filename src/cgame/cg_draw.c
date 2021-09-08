@@ -797,11 +797,20 @@ static float CG_DrawTeamOverlay( float y ) {
 		w = ( pwidth + lwidth + 8 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
 
 	}
-	x = 640 - w - 4; // JPW was -32
+
+	// RTCWPro
+	//x = 640 - w - 4; // JPW was -32
+	x = cg_teamOverlayX.integer - w - 4;
+	y = cg_teamOverlayY.integer;
+	// RTCWPro
+
 	h = plyrs * TINYCHAR_HEIGHT;
 
+	// RTCWPro
+	if (cg_notifyTextY.integer == 42 && cg_teamOverlayY.integer == 0) {
 	// DHM - Nerve :: Set the max characters that can be printed before the left edge
-	maxCharsBeforeOverlay = ( x / TINYCHAR_WIDTH ) - 1;
+		maxCharsBeforeOverlay = (x / TINYCHAR_WIDTH) - 1;
+	}
 
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED ) {
 		hcolor[0] = 0.5f; // was 0.38 instead of 0.5 JPW NERVE
@@ -1021,8 +1030,13 @@ static float CG_DrawRespawnTimer(float y) {
 	}*/
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
 	if (cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return y;
@@ -1086,8 +1100,13 @@ static float CG_DrawEnemyTimer(float y) {
 	}
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
     if (cg_spawnTimer_set.integer == -1)
         return y;
@@ -1298,6 +1317,10 @@ static float CG_DrawProRespawnTimer(float y) {
 		return y;
 	}
 
+	if (cg.showScores) {
+		return y;
+	}
+
 	if (cgs.gamestate != GS_PLAYING) {
 		return y;
 	}
@@ -1352,8 +1375,13 @@ static float CG_DrawProEnemyTimer(float y) {
 	}
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
 	if (cg_spawnTimer_set.integer == -1)
 		return y;
@@ -1406,7 +1434,13 @@ static void CG_DrawUpperRight( void ) {
 	y = 0; // JPW NERVE move team overlay below obits, even with timer on left
 
 	if ( cgs.gametype >= GT_TEAM ) {
-		y = CG_DrawTeamOverlay( y );
+		// RTCWPro - don't offset if it's not in its default position, since it's customizable
+		if (cg_teamOverlayY.integer == 0 && cg_teamOverlayX.integer == 640) {
+			y = CG_DrawTeamOverlay(y);
+		}
+		else {
+			CG_DrawTeamOverlay(0);
+		}
 	}
 	if ( cg_drawSnapshot.integer ) {
 		y = CG_DrawSnapshot( y );
@@ -1481,6 +1515,9 @@ static void CG_DrawTeamInfo( void ) {
 	int chatHeight;
 	float alphapercent;
 	float chatAlpha = (float)cg_chatAlpha.value;
+	// RTCWPro
+	int x = cg_chatX.integer;
+	int y = cg_chatY.integer;
 
 #define CHATLOC_Y 385 // bottom end
 #define CHATLOC_X 0
@@ -1551,16 +1588,15 @@ static void CG_DrawTeamInfo( void ) {
 				BG_setCrosshair(cg_chatBackgroundColor.string, hcolor, chatAlpha * alphapercent, "cg_chatBackgroundColor");
 // End
 			trap_R_SetColor( hcolor );
-			CG_DrawPic( CHATLOC_X, CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
+			CG_DrawPic( x, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt( CHATLOC_X + TINYCHAR_WIDTH,
-							  CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT,
-							  cgs.teamChatMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0 );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, cgs.teamChatMsgs[i % chatHeight], 
+				hcolor, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
 //			CG_DrawSmallString( CHATLOC_X + SMALLCHAR_WIDTH,
 //				CHATLOC_Y - (cgs.teamChatPos - i)*SMALLCHAR_HEIGHT,
 //				cgs.teamChatMsgs[i % TEAMCHAT_HEIGHT], 1.0F );
@@ -1632,6 +1668,12 @@ static void CG_DrawNotify( void ) {
 	float alphapercent;
 	char var[MAX_TOKEN_CHARS];
 	float notifytime = 1.0f;
+	// RTCWPro
+	int x = cg_notifyTextX.integer;
+	int y = cg_notifyTextY.integer;
+	qboolean shadow = cg_notifyTextShadow.integer;
+	int width = cg_notifyTextWidth.integer;
+	int height = cg_notifyTextHeight.integer;
 
 	trap_Cvar_VariableStringBuffer( "con_notifytime", var, sizeof( var ) );
 	notifytime = atof( var ) * 1000;
@@ -1680,10 +1722,13 @@ static void CG_DrawNotify( void ) {
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt( NOTIFYLOC_X + TINYCHAR_WIDTH,
-							  NOTIFYLOC_Y - ( cgs.notifyPos - i ) * TINYCHAR_HEIGHT,
-							  cgs.notifyMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
+				hcolor, qfalse, shadow, width, height, maxCharsBeforeOverlay);
+
+			/*
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
+				hcolor, qfalse, shadow, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay);
+			*/
 		}
 	}
 }
@@ -1807,7 +1852,8 @@ CG_DrawLagometer
 ==============
 */
 static void CG_DrawLagometer( void ) {
-	int a, x, y, i;
+	// RTCWPro
+	int a, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i;
 	float v;
 	float ax, ay, aw, ah, mid, range;
 	int color;
@@ -1826,8 +1872,9 @@ static void CG_DrawLagometer( void ) {
 	//
 	// draw the graph
 	//
-	x = 640 - 55;
-	y = 480 - 140;
+	// RTCWPro
+	//x = 640 - 55;
+	//y = 480 - 140;
 
 	trap_R_SetColor( NULL );
 	CG_DrawPic( x, y, 48, 48, cgs.media.lagometerShader );
@@ -2986,8 +3033,7 @@ static void CG_DrawIntermission( void ) {
 		return;
 	}
 
-// OSPx
-	// Auto Actions
+	// RTCWPro - Auto Actions
 	if (!cg.demoPlayback) {
 		static int doScreenshot = 0, doDemostop = 0;
 
@@ -3018,7 +3064,11 @@ static void CG_DrawIntermission( void ) {
 			doDemostop = 0;
 		}
 	}
-// -OSPx
+
+	trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	trap_Cvar_Set("cg_spawnTimer_period", "0");
+	// RTCWPro
+
 	cg.scoreFadeTime = cg.time;
 	CG_DrawScoreboard();
 }
@@ -3996,6 +4046,9 @@ void CG_DrawObjectiveIcons() {
 	int i, num, status,barheight;
 	vec4_t hcolor = { 0.2f, 0.2f, 0.2f, 1.f };
 	int msec, mins, seconds, tens; // JPW NERVE
+	// RTCWPro
+	playerState_t* ps;
+	clientInfo_t* ci;
 
 // JPW NERVE added round timer
 	y = 48;
@@ -4150,11 +4203,19 @@ void CG_DrawObjectiveIcons() {
 	VectorSet( hcolor, 1, 1, 1 );
 	hcolor[3] = cg_hudAlpha.value;
 	trap_R_SetColor( hcolor );
-	if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
+	// RTCWPro
+	/*if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
 		 cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_BLUEFLAG ) ) {
 		CG_DrawPic( -7, y, 48, 48, trap_R_RegisterShader( "models/multiplayer/treasure/treasure" ) );
 		y += 50;
+	}*/
+	ps = &cg.snap->ps;
+	ci = &cgs.clientinfo[ps->clientNum];
+	if (ps->powerups[PW_REDFLAG] || ps->powerups[PW_BLUEFLAG]) {
+		CG_DrawPic(-7, y, 48, 48, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+		y += 50;
 	}
+	// RTCWPro end
 }
 // -NERVE - SMF
 
@@ -4373,7 +4434,10 @@ NERVE - SMF
 =================
 */
 static void CG_DrawCompass( void ) {
-	float basex = 290, basey = 420;
+	// RTCWPro
+	float basex = cg_compassX.integer; //290 
+	float basey = cg_compassY.integer; //420;
+	// RTCWPro
 	float basew = 60, baseh = 60;
 	snapshot_t  *snap;
 	vec4_t hcolor;
@@ -4717,8 +4781,8 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_ShakeCamera();       // NERVE - SMF
 
 	// RTCWPro - draw triggers for shoutcasters
-	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus)
-	{
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus && !(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+
 		CG_DrawTriggers();
 	}
 
@@ -4733,7 +4797,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_Draw2D();
 
 	// RTCWPro
-	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus) 
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && 
+		cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus &&
+		!cg.showScores) 
 	{
 		CG_ShoutcasterItems();
 	}

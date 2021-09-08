@@ -330,6 +330,7 @@ extern cvar_t  *sv_dlRate;
 extern cvar_t  *sv_minRate;
 extern cvar_t  *sv_maxRate;
 extern cvar_t	*sv_serverIP;
+extern cvar_t	*sv_serverCountry;
 extern cvar_t  *sv_showAverageBPS;          // NERVE - SMF - net debugging
 
 // Rafael gameskill

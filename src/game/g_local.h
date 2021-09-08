@@ -620,6 +620,9 @@ typedef struct {
 	unsigned int clientFlags;           // Client settings that need server involvement
 	unsigned int clientMaxPackets;      // Client com_maxpacket settings
 	unsigned int clientTimeNudge;       // Client cl_timenudge settings
+	unsigned int hitSoundType;
+	unsigned int hitSoundBodyStyle;
+	unsigned int hitSoundHeadStyle;
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
 	int throwingKnives;
@@ -1602,10 +1605,11 @@ extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t	g_disableInv;
 extern vmCvar_t	g_axisSpawnProtectionTime;
 extern vmCvar_t	g_alliedSpawnProtectionTime;
+extern vmCvar_t g_damageRadiusKnockback;
+extern vmCvar_t	g_dropWeapons;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
-extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
 extern vmCvar_t	g_ltNades;
@@ -2103,7 +2107,7 @@ int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
 void G_jWeaponStats(void);
-
+int G_check_before_submit( char* jsonfile);
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);
 void G_writeDisconnectEvent (gentity_t* agent);

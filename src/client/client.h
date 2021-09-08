@@ -432,6 +432,8 @@ extern cvar_t  *cl_language;
 // L0
 extern cvar_t* cl_StreamingSelfSignedCert;
 // ~L0
+
+extern cvar_t* cl_activatelean; // RTCWPro
  
 
 //=================================================
@@ -576,7 +578,7 @@ void Con_PageDown( void );
 void Con_Top( void );
 void Con_Bottom( void );
 void Con_Close( void );
-void Con_SetFrac(const float conFrac);	// RTCWPro
+void Con_SetFrac(const float conFrac);	// RTCWPro con height
 
 
 //

@@ -32,10 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../client/client.h"
 #include "win_local.h"
 
-// RTCWPro - begin rinput - source: quake
-#include "in_raw.h"
-
-#ifndef DEDICATED
+// RTCWPro - raw input begin - source: quake
 // defines
 #define MAX_RI_DEVICE_SIZE 128
 #define INIT_RIBUFFER_SIZE (sizeof(RAWINPUTHEADER)+sizeof(RAWMOUSE))
@@ -50,7 +47,6 @@ typedef int 	(WINAPI* pGetRawInputDeviceInfoA)	(IN HANDLE hDevice, IN UINT uiCom
 typedef BOOL(WINAPI* pRegisterRawInputDevices)	(IN PCRAWINPUTDEVICE pRawInputDevices, IN UINT uiNumDevices, IN UINT cbSize);
 typedef int		(WINAPI* pGetLastError)				(void);
 
-
 pGetRawInputDeviceList		_GRIDL;
 pGetRawInputData			_GRID;
 pGetRawInputDeviceInfoA		_GRIDIA;
@@ -59,7 +55,6 @@ pGetLastError				_GLE;
 
 typedef struct
 {
-
 	HANDLE			rawinputhandle; // raw input, identify particular mice
 
 	int				numbuttons;
@@ -78,9 +73,7 @@ static int	rawmicecount;
 
 void		IN_DeRegisterRawMouse(void);
 int			IN_RegisterRawMouse(void);
-
-#endif // ~!DEDICATED
-
+// raw input end
 
 typedef struct {
 	int oldButtonState;
@@ -128,8 +121,6 @@ typedef struct {
 
 static joystickInfo_t joy;
 
-
-
 cvar_t  *in_midi;
 cvar_t  *in_midiport;
 cvar_t  *in_midichannel;
@@ -149,7 +140,7 @@ void IN_JoyMove( void );
 
 static void MidiInfo_f( void );
 
-#ifndef DEDICATED
+// RTCWPro - raw input begin
 /*
 =========================================================================
 
@@ -172,7 +163,6 @@ void IN_ShutdownRawMouse(void) {
 
 	rawmicecount = 0;
 }
-
 
 void IN_DeRegisterRawMouse(void)
 {
@@ -208,7 +198,8 @@ int IN_RawInput_IsRDPMouse(char* cDeviceString)
 	return 1; // is RDP mouse
 }
 
-int IN_RegisterRawMouse(void) {
+int IN_RegisterRawMouse(void)
+{
 	// This function registers to receive the WM_INPUT messages
 	RAWINPUTDEVICE Rid; // Register only for mouse messages from wm_input.  
 
@@ -240,7 +231,6 @@ void IN_RawMouse(int* mx, int* my) {
 		rawmice[x].delta[0] = rawmice[x].delta[1] = 0;
 	}
 }
-
 
 void IN_ActivateRawMouse(void) {
 	HMODULE kernel32;
@@ -405,7 +395,8 @@ qboolean IN_InitRawMouse(void)
 // raw input read functions
 //================================
 
-void IN_RawInput_MouseRead(HANDLE in_device_handle) {
+void IN_RawInput_MouseRead(HANDLE in_device_handle) 
+{
 	int i = 0, tbuttons, j;
 	int dwSize;
 
@@ -515,7 +506,7 @@ void IN_RawInput_MouseRead(HANDLE in_device_handle) {
 	rawmice[i].buttons &= ~RI_RAWBUTTON_MASK;
 	rawmice[i].buttons |= tbuttons;
 }
-#endif // ~!DEDICATED
+// raw input end
 
 /*
 ============================================================
@@ -576,8 +567,7 @@ void IN_ActivateWin32Mouse( void ) {
 	if ( !com_developer->integer ) {
 		ClipCursor( &window_rect );
 	}
-	while ( ShowCursor( FALSE ) >= 0 )
-		;
+	while ( ShowCursor( FALSE ) >= 0 );
 }
 
 /*
@@ -591,8 +581,7 @@ void IN_DeactivateWin32Mouse( void ) {
 		ClipCursor( NULL );
 	}
 	ReleaseCapture();
-	while ( ShowCursor( TRUE ) < 0 )
-		;
+	while ( ShowCursor( TRUE ) < 0 );
 }
 
 /*
@@ -706,11 +695,10 @@ void IN_ActivateMouse( void ) {
 
 	s_wmv.mouseActive = qtrue;
 
-#ifndef DEDICATED
+	// RTCWPro - raw input
 	if (in_mouse->integer > 1) {
 		IN_ActivateRawMouse();
 	}
-#endif	
 
 	IN_ActivateWin32Mouse();
 }
@@ -732,9 +720,7 @@ void IN_DeactivateMouse( void ) {
 	}
 	s_wmv.mouseActive = qfalse;
 
-#ifndef DEDICATED
-	IN_DeactivateRawMouse();
-#endif
+	IN_DeactivateRawMouse(); // RTCWPro - raw input
 	IN_DeactivateWin32Mouse();
 }
 
@@ -752,16 +738,19 @@ void IN_StartupMouse( void ) {
 	}
 
 	s_wmv.mouseInitialized = qtrue;
-#ifndef  DEDICATED
-	if (in_mouse->integer == 1) {
+
+	// RTCWPro - raw input
+	if (in_mouse->integer == 1)
+	{
 		IN_InitWin32Mouse();
-}
-	else if (in_mouse->integer > 1) {
+	}
+	else if (in_mouse->integer > 1)
+	{
 		IN_InitRawMouse();
 	}
-#else
-	IN_InitWin32Mouse();
-#endif // ! DEDICATED
+
+	//IN_InitWin32Mouse();
+	// raw mouse input end
 }
 
 /*
@@ -801,16 +790,17 @@ IN_MouseMove
 void IN_MouseMove( void ) {
 	int mx, my;
 
-#ifndef DEDICATED
-	if (rawmicecount > 0) {
+	// RTCWPro - raw input
+	//IN_Win32Mouse( &mx, &my );
+	if (rawmicecount > 0)
+	{
 		IN_RawMouse(&mx, &my);
 	}
-	else {
+	else
+	{
 		IN_Win32Mouse(&mx, &my);
 	}
-#else
-	IN_Win32Mouse(&mx, &my);
-#endif
+	// raw mouse input end
 
 	if ( !mx && !my ) {
 		return;
@@ -853,9 +843,7 @@ IN_Shutdown
 */
 void IN_Shutdown( void ) {
 	IN_DeactivateMouse();
-#ifndef DEDICATED
-	IN_ShutdownRawMouse(); 
-#endif
+	IN_ShutdownRawMouse(); // RTCWPro - raw input
 	IN_ShutdownMIDI();
 	Cmd_RemoveCommand( "midiinfo" );
 }

@@ -212,7 +212,6 @@ int G_write_match_info( void )
     char mapName[MAX_QPATH];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
-  //  char cs[MAX_STRING_CHARS];
     fileHandle_t matchfileinfo;
 	qtime_t ct;
 	trap_RealTime(&ct);
@@ -288,6 +287,35 @@ int G_read_match_info( void )
 
     return 0;
 }
+/*
+ Check if stats meet requirement for submission
+
+*/
+int G_check_before_submit( char* jsonfile)
+{
+    json_t *data = NULL;
+    json_t *json,*jstats;
+    json_error_t error;
+
+    int minPlayers = 3; // require 3 players for stats submission
+
+    json = json_load_file(jsonfile, 0, &error);
+    if (error.line != -1) {
+        G_Printf("error: unable to read json round stat file\n");
+        return 0;
+    }
+
+    if (json)
+    {
+      //  Can add more conditions but for now based only on number of players
+        jstats = json_object_get(json, "stats");
+        if (json_array_size(jstats) >= minPlayers) {
+            return 1;
+        }
+
+    }
+    return 0;
+}
 
 
 /*
@@ -295,13 +323,6 @@ int G_read_match_info( void )
 
  Currently reads in stats from round 1 but the idea is to have it reload
  stats from previous round upon a map_restart and g_currentround > 1...
-
- The idea is easy to implement but just need to do it...also dont forget to reset g_currentround (since it gets incremented with map_restart)
-
- To see that it works....simply make a function call
-		G_read_round_jstats("dummyarg");
- in g_svccmds.c or where ever you like for testing
-
 
 */
 int G_read_round_jstats( void )
@@ -842,10 +863,10 @@ void G_writeServerInfo(void){
     char* s;
     char mapName[MAX_QPATH];
     char server_ip[16];
+    char server_country[3];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
     char cs[MAX_STRING_CHARS];
-
 	qtime_t ct;
 	trap_RealTime(&ct);
 
@@ -857,22 +878,12 @@ void G_writeServerInfo(void){
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
     trap_Cvar_VariableStringBuffer( "sv_GameConfig", gameConfig, sizeof(gameConfig) );
 	trap_Cvar_VariableStringBuffer("sv_serverIP", server_ip, sizeof(server_ip));
- //   Info_SetValueForKey( cs, "roundStart", va("%ld", unixTime) );
-   // Info_SetValueForKey( cs, "round", va("%i",g_currentRound.integer));
- //   Q_strncpyz(ROUNDID,va("%s",g_currentRound.integer),sizeof(ROUNDID));
-  //  Info_SetValueForKey( cs, "timelimit", va("%s",GetLevelTime()));
-  //  trap_SetConfigstring( CS_ROUNDINFO, cs );
-  /*
-    if (g_currentRound.integer == 0) {
-        buf=va("%ld", unixTime);
-        trap_Cvar_Set( "stats_matchid", buf );
-
-    }
-*/
+    trap_Cvar_VariableStringBuffer("sv_serverCountry", server_country, sizeof(server_country));
 
     json_t *jdata = json_object();
     json_object_set_new(jdata, "serverName",    json_string(sv_hostname.string));
     json_object_set_new(jdata, "serverIP",    json_string(va("%s",server_ip)));
+    json_object_set_new(jdata, "serverCountry",    json_string(va("%s",server_country)));
     json_object_set_new(jdata, "gameVersion",    json_string(GAMEVERSION));
     json_object_set_new(jdata, "jsonGameStatVersion",    json_string(JSONGAMESTATVERSION));
     json_object_set_new(jdata, "g_gameStatslog",    json_string(va("%i", g_gameStatslog.integer)));
@@ -1054,7 +1065,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
                 json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
                 json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
                 json_object_set_new(jdata, "weapon",    json_string(weapon));
-                json_object_set_new(jdata, "other_health",    json_integer(agent->health));
+                json_object_set_new(jdata, "agent_health",    json_integer(agent->health));
                 if (g_gameStatslog.integer & JSON_KILLDATA) {
                     json_object_set_new(jdata, "agent_pos",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
                     json_object_set_new(jdata, "agent_angle",    json_string(va("%f",agent->client->ps.viewangles[1])));
@@ -1199,10 +1210,15 @@ void G_writeDisconnectEvent (gentity_t* agent){
 void G_writeClosingJson(void)
 {
     char buf[64];
+    int ret = 0;
     if (level.jsonStatInfo.gameStatslogFile) {
         trap_FS_Write( "}\n", strlen( "}\n"), level.jsonStatInfo.gameStatslogFile );
-        if (g_stats_curl_submit.integer) {
-            trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+        trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+
+        // check stats file to make sure it satisfies conditions for submission....
+        ret = G_check_before_submit(level.jsonStatInfo.gameStatslogFileName);
+        if (g_stats_curl_submit.integer && ret > 0) {
+
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
 
@@ -1227,7 +1243,6 @@ void G_writeGameLogStart(void)
     if (level.jsonStatInfo.gameStatslogFile) {
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.jsonStatInfo.gameStatslogFile );
         json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
-        //json_object_set_new(jdata, "round_id",    json_string(va("%s",va("%s",(Q_strncmp(ROUNDID,"0",1) == 0) ? "1" : "2"))));
         json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
         json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
@@ -1289,12 +1304,12 @@ void G_writeGameEarlyExit(void)
 
     trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
 
-
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
     json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "group",    json_string("server"));
     json_object_set_new(jdata, "label",    json_string("map_restart"));
+
     if (level.jsonStatInfo.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
@@ -1302,12 +1317,13 @@ void G_writeGameEarlyExit(void)
         json_decref(jdata);
         free(s);
         trap_FS_Write( "]\n}\n", strlen( "]\n}\n" ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
+       /*
+       // do not submit rounds that exit early
         if (g_stats_curl_submit.integer) {
-            trap_FS_FCloseFile(level.jsonStatInfo.gameStatslogFile );
-       //     submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
-//            trap_submit_curlPost(level.gameStatslogFileName, va("%s",level.match_id));
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
         }
+      */
     }
 
 

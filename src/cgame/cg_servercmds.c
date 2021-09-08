@@ -864,6 +864,9 @@ static void CG_MapRestart( void ) {
 #endif
 
 	trap_Cvar_Set( "cg_thirdPerson", "0" );
+	// RTCWPro
+	trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	trap_Cvar_Set("cg_spawnTimer_period", "0");
 }
 
 /*

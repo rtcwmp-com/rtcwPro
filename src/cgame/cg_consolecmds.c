@@ -726,7 +726,77 @@ void CG_dumpStats_f( void ) {
 void CG_ForceTapOut_f(void) {
 	trap_SendClientCommand("forcetapout");
 }
+
 /************ L0 - OSP dump ends here ************/
+/**
+ * @brief ETPro style enemy spawntimer
+ */
+static void CG_TimerSet_f(void) {
+
+	if (!cg_drawEnemyTimer.integer)
+	{
+		return;
+	}
+
+	if (cgs.gamestate != GS_PLAYING)
+	{
+		CG_Printf("You may only use this command during the match.\n");
+		return;
+	}
+
+	if (cg.snap->ps.pm_type == PM_INTERMISSION) {
+		return;
+	}
+
+	if (trap_Argc() == 1)
+	{
+		trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	}
+	else if (trap_Argc() == 2)
+	{
+		char buff[32] = { "" };
+		int  spawnPeriod;
+
+		trap_Argv(1, buff, sizeof(buff));
+		spawnPeriod = atoi(buff);
+
+		if (spawnPeriod == 0)
+		{
+			trap_Cvar_Set("cg_spawnTimer_period", "0");
+		}
+		else if (spawnPeriod < 1 || spawnPeriod > 60)
+		{
+			CG_Printf("Argument must be a number between 1 and 60 - no argument will disable the spawn timer.\n");
+		}
+		else
+		{
+			trap_Cvar_Set("cg_spawnTimer_period", buff);
+			trap_Cvar_Set("cg_spawnTimer_set", va("%i", (cg.time - cgs.levelStartTime)));
+		}
+	}
+	else
+	{
+		CG_Printf("Usage: timerSet [seconds]\n");
+	}
+}
+
+/**
+ * @brief ETPro style timer resetting
+ */
+static void CG_TimerReset_f(void)
+{
+	if (cgs.gamestate != GS_PLAYING)
+	{
+		CG_Printf("You may only use this command during the match.\n");
+		return;
+	}
+
+	if (cg.snap->ps.pm_type == PM_INTERMISSION) {
+		return;
+	}
+
+	trap_Cvar_Set("cg_spawnTimer_set", va("%d", cg.time - cgs.levelStartTime));
+}
 
 /*
 ================
@@ -734,13 +804,13 @@ RTCWPro - minimizer (windows only)
 Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
 ================
 */
-static void CG_Minimize_f(void) 
+static void CG_Minimize_f(void)
 {
 #ifdef _WIN32
 	HWND wnd;
 
 	wnd = GetForegroundWindow();
-	if (wnd) 
+	if (wnd)
 	{
 		ShowWindow(wnd, SW_MINIMIZE);
 	}
@@ -926,6 +996,7 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand( "ref" );
 	trap_AddCommand("scs");
 	trap_AddCommand("specspeed");
+	trap_AddCommand("draw_hitboxes");
 	trap_AddCommand( "?" );
 	trap_AddCommand( "gib" );			// Kills player and sends him/her straight to limbo
 	trap_AddCommand( "pm" );			// Private message
@@ -977,7 +1048,7 @@ Relays any client command to server.
 =================
 */
 qboolean CG_RelayCommand(char* type, int value) {
-	
+
 	if (!cg.snap) {
 		return qfalse;
 	}
@@ -988,65 +1059,4 @@ qboolean CG_RelayCommand(char* type, int value) {
 	return qfalse;
 }
 
-/**
- * @brief ETPro style enemy spawntimer
- */
-static void CG_TimerSet_f(void) {
-
-	if (!cg_drawEnemyTimer.integer)
-	{
-		return;
-	}
-
-	if (cgs.gamestate != GS_PLAYING)
-	{
-		CG_Printf("You may only use this command during the match.\n");
-		return;
-	}
-
-	if (trap_Argc() == 1)
-	{
-		trap_Cvar_Set("cg_spawnTimer_set", "-1");
-	}
-	else if (trap_Argc() == 2)
-	{
-		char buff[32] = { "" };
-		int  spawnPeriod;
-
-		trap_Argv(1, buff, sizeof(buff));
-		spawnPeriod = atoi(buff);
-
-		if (spawnPeriod == 0)
-		{
-			trap_Cvar_Set("cg_spawnTimer_period", 0);
-		}
-		else if (spawnPeriod < 1 || spawnPeriod > 60)
-		{
-			CG_Printf("Argument must be a number between 1 and 60 - no argument will disable the spawn timer.\n");
-		}
-		else
-		{
-			trap_Cvar_Set("cg_spawnTimer_period", buff);
-			trap_Cvar_Set("cg_spawnTimer_set", va("%i", (cg.time - cgs.levelStartTime)));
-		}
-	}
-	else
-	{
-		CG_Printf("Usage: timerSet [seconds]\n");
-	}
-}
-
-/**
- * @brief ETPro style timer resetting
- */
-static void CG_TimerReset_f(void)
-{
-	if (cgs.gamestate != GS_PLAYING)
-	{
-		CG_Printf("You may only use this command during the match.\n");
-		return;
-	}
-
-	trap_Cvar_Set("cg_spawnTimer_set", va("%d", cg.time - cgs.levelStartTime));
-}
 

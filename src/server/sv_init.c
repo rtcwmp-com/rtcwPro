@@ -792,6 +792,31 @@ void SV_GetIP(void) {
 
 }
 
+static size_t getCountry_response(void *ptr, size_t size, size_t nmemb, void *stream){
+    char out[3];
+    if (0<strlen(ptr)<=3) {
+        Q_strncpyz(out,ptr,3);   // quick and lazy way for dealing with the response...
+        Cvar_Set("sv_serverCountry", va("%s",out));
+    }
+    else {
+        Cvar_Set("sv_serverCountry", "??");   // bad response or unknown ip
+    }
+}
+
+void SV_GetCountry(char* serverIP) {
+  CURL *curl;
+  CURLcode res;
+
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, va("http://ipinfo.io/%s/country",serverIP));
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getCountry_response);
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
+
+}
+
 
 /*
 ===============
@@ -804,7 +829,7 @@ void SV_BotInitBotLib( void );
 
 void SV_Init( void ) {
 	SV_AddOperatorCommands();
-    SV_GetIP();
+
 	// serverinfo vars
 	Cvar_Get( "dmflags", "0", /*CVAR_SERVERINFO*/ 0 );
 	Cvar_Get( "fraglimit", "0", /*CVAR_SERVERINFO*/ 0 );
@@ -816,7 +841,13 @@ void SV_Init( void ) {
 	sv_gameskill = Cvar_Get( "g_gameskill", "3", CVAR_SERVERINFO | CVAR_LATCH );
 	// done
 
+	//ServerIP and Server Country
+	SV_GetIP();
 	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
+	SV_GetCountry(sv_serverIP->string);
+	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_SERVERINFO | CVAR_ROM);
+    // end sIP/Country
+
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
 	Cvar_Get( "protocol", va( "%i", GAME_PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
 	sv_mapname = Cvar_Get( "mapname", "nomap", CVAR_SERVERINFO | CVAR_ROM );
@@ -870,7 +901,7 @@ void SV_Init( void ) {
 	sv_zombietime = Cvar_Get( "sv_zombietime", "2", CVAR_TEMP );
 	Cvar_Get( "nextmap", "", CVAR_TEMP );
 
-	sv_allowDownload = Cvar_Get( "sv_allowDownload", "1", CVAR_ARCHIVE );
+	sv_allowDownload = Cvar_Get( "sv_allowDownload", "0", CVAR_ARCHIVE );
 	sv_master[0] = Cvar_Get( "sv_master1", "wolfmaster.idsoftware.com", CVAR_ARCHIVE );      // NERVE - SMF - wolfMP master server
 	sv_master[1] = Cvar_Get( "sv_master2", "", CVAR_ARCHIVE );
 	sv_master[2] = Cvar_Get( "sv_master3", "", CVAR_ARCHIVE );
@@ -947,7 +978,7 @@ void SV_Init( void ) {
 	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "10", CVAR_ARCHIVE);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "11", CVAR_ARCHIVE);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
