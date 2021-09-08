@@ -11,10 +11,10 @@
 
 # Client  
 #### Engine/renderer (cl/r)
-| command        | Argument type     | Default          | Description                  |
-|----------------|----------|-------------|--------------------------------------------|
-| /in_mouse | `integer`   | `1`|        Switch mouse input type between default and raw `(2)` |
-| /con_height | `float` | `0.5` | Change console height |
-| /cl_activateLean | `integer` | `1` | Toggle leaning when holding move keys and +activate |
-| /r_bloom | `integer` | `0` | Enable/disable bloom effect |
+| Command | Argument type | Value range | Default | Description |
+|---------|---------------|-------------|---------|-------------|
+| /in_mouse | `integer` | `0/1/2`| `1` | Switch mouse input type between default and raw `(2)` |
+| /con_height | `float` | `0.1/1.0` | `0.5` | Change console height |
+| /cl_activateLean | `integer` | `0/1` | `1` | Toggle leaning when holding move keys and +activate |
+| /r_bloom | `integer` | `0/1` | `0` | Enable/disable bloom effect |
 
