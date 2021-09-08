@@ -15,6 +15,6 @@
 |----------------|----------|-------------|--------------------------------------------|
 | /in_mouse | `integer`   | `1`|        Switch mouse input type between default and raw `(2)` |
 | /con_height | `float` | `0.5` | Change console height |
-| /cl_activateLean | `integer` | `1` | Toggle leaning when holding move keys |
+| /cl_activateLean | `integer` | `1` | Toggle leaning when holding move keys and +activate |
 | /r_bloom | `integer` | `0` | Enable/disable bloom effect |
 
