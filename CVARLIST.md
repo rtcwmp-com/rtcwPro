@@ -70,7 +70,18 @@
 | cg_pauseMusic | `integer` | `0-1` | `1` | Enable/disable music during pause |
 | cg_zoomedSens | `float` | `0.0-99.0` | `.3` | Change sensitivity when scoped |
 | cg_zoomedSensLock | `integer` | `0-1` | `0` | Enable/disable decreasing of sensitivity with each zoom step while scoped |
-
-
-
-
+| cg_notifyTextX | `integer` | `-999-999` | `0` | Change kill feed position in the horizontal axis |
+| cg_notifyTextY | `integer` | `-999-999` | `42` | Change kill feed position in the vertical axis |
+| cg_notifyTextWidth | `integer` | `0-99` | `8` | Change kill feed char width |
+| cg_notifyTextHeight | `integer` | `0-99` | `8` | Change kill feed char height |
+| cg_chatX | `integer` | `-999-999` | `0` | Change chat position in the horizontal axis |
+| cg_chatY | `integer` | `-999-999` | `385` | Change chat position in the vertical axis |
+| cg_teamOverlayX | `integer` | `-999-999` | `640` | Change team overlay position in the horizontal axis |
+| cg_teamOverlayY | `integer` | `-999-999` | `0` | Change team overlay position in the vertical axis |
+| cg_compassX | `integer` | `-999-999` | `290` | Change compass position in the horizontal axis |
+| cg_compassY | `integer` | `-999-999` | `420` | Change compass position in the vertical axis |
+| cg_lagometerX | `integer` | `-999-999` | `585` | Change lagometer position in the horizontal axis |
+| cg_lagometerY | `integer` | `-999-999` | `340` | Change lagometer position in the vertical axis |
+| cg_drawFrags | `integer` | `0-1` | `1` | Enable/disable "you killed" frag center prints |
+| cg_fragsY | `integer` | `-999-999` | `0` | Change frag center prints position in the vertical axis |
+| cg_fragsWidth | `integer` | `-999-999` | `16` | Change frag center prints char width |
