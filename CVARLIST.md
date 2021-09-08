@@ -35,6 +35,23 @@
 | cg_drawWeaponIconFlash | `integer` | `0-1` | `0` |  Enable/disable weapon icon flashing when empty |
 | cg_printObjectiveInfo | `integer` | `0-1` | `1` | Enable/disable printing of OBJ notifications in kill feed |
 | cg_hitsounds | `bitflag` | `0-1-2-4` | `0` | Control hitsounds. `1` - headshot only, `2` - body only, `4` - team only, `7` - all |
+| cg_noChat | `integer` | `0-1` | `0` | Draw chat messages |
+| cg_noVoice | `integer` | `0-1` | `0` | Draw and play voice chat messages |
+| cg_drawPickupItems | `integer` | `0-1` | `1` | Draw item names upon pickup |
+| cg_autoAction | `bitflag` | `0-1-2-4` | `0` | Control auto actions. `1` - record demo, `2` - take screenshot, `4` - dump stats file, `7` - all |
+| cg_chatAlpha | `float` | `0.0-1.0` | `0.33` | Change chat background opacity |
+| cg_chatBackgroundColor | `string` | `color table` | `""` | Change chat background color |
+| cg_chatBeep | `integer` | `0-1` | `0` | Enable/disable chat sound notifications |
+| cf_wstats | `float` | `0.0-99.0` | `1.2` | Change +wstats window scale |
+| cf_wtopshots | `float` | `0.0-99.0` | `1.0` | Change +wtopshots window scale |
+| cg_zoomedSens | `float` | `0.0-99.0` | `.3` | Change sensitivity when scoped |
+| cg_zoomedSensLock | `integer` | `0-1` | `0` | Enable/disable decreasing of sensitivity with each zoom step while scoped |
+| cg_drawReinforcementTime | `integer` | `0-3` | `1` | Draw respawn time. `1` - default, `2` - new, `3` - default and new |
+| cg_reinforcementTimeColor | `string` | `color table` | `red` | Change respawn time color |
+| cg_reinforcementTimeX | `integer ` | `-999-999` | `86` | Change default respawn time position in the horizontal axis |
+| cg_reinforcementTimeY | `integer ` | `-999-999` | `70` | Change default respawn time position in the vertical axis |
+| cg_reinforcementTimeProX | `integer ` | `-999-999` | `145` | Change new respawn time position in the horizontal axis |
+| cg_reinforcementTimeProY | `integer ` | `-999-999` | `445` | Change new respawn time position in the vertical axis |
 | cg_hitsoundBodyStyle | `integer` | `1-9` | `1` | Change body hit sound |
 | cg_hitsoundHeadStyle | `integer` | `1-11` | `1` | Change head hit sound |
 | cg_drawSpeed | `integer` | `0-4` | `0` | Draw speed meter. `1` - current only, `2` - current and top, `3` - current with accel color, `4` - current and top with accel color |
