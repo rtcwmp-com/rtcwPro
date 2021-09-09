@@ -1633,11 +1633,18 @@ void ClientThink_real( gentity_t *ent ) {
 	}
 
 
-	// use the precise origin for linking
-	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin ); // RTCWPro - no snap origin, see above
-
-	// use the snapped origin for linking so it matches client predicted versions
-	//VectorCopy( ent->s.pos.trBase, ent->r.currentOrigin ); // RTCWPro - nope
+	// RTCWPro
+	if (!g_thinkSnapOrigin.integer) 
+	{
+		// use the precise origin for linking
+		VectorCopy(ent->client->ps.origin, ent->r.currentOrigin);
+	}
+	else
+	{
+		// use the snapped origin for linking so it matches client predicted versions
+		VectorCopy(ent->s.pos.trBase, ent->r.currentOrigin);
+	}
+	// RTCWPro
 
 	VectorCopy( pm.mins, ent->r.mins );
 	VectorCopy( pm.maxs, ent->r.maxs );

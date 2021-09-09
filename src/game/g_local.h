@@ -1669,6 +1669,7 @@ extern vmCvar_t g_bodiesGrabFlags;
 extern vmCvar_t g_mapScriptDirectory;
 extern vmCvar_t g_thinkStateLevelTime;
 extern vmCvar_t g_endStateLevelTime;
+extern vmCvar_t g_thinkSnapOrigin;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
