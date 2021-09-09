@@ -4302,12 +4302,9 @@ BG_PlayerStateToEntityStatePro
 =====================
 */
 void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int time, qboolean snap) {
-	int		i;
+	int	i;
 
-	if (ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR) {
-		s->eType = ET_INVISIBLE;
-	}
-	else if (ps->stats[STAT_HEALTH] <= GIB_HEALTH)
+	if (ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR || ps->pm_type == PM_NOCLIP || ps->stats[STAT_HEALTH] <= GIB_HEALTH) 
 	{
 		s->eType = ET_INVISIBLE;
 	}
@@ -4340,10 +4337,16 @@ void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int tim
 		SnapVector(s->apos.trBase);
 	}
 
-	if (ps->movementDir > 128)
+	if (ps->movementDir > 128) 
+	{
 		s->angles2[YAW] = (float)ps->movementDir - 256;
+	}
 	else
+	{
 		s->angles2[YAW] = ps->movementDir;
+	}
+
+	s->angles2[PITCH] = 0;
 
 	s->legsAnim = ps->legsAnim;
 	s->torsoAnim = ps->torsoAnim;
@@ -4373,7 +4376,8 @@ void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int tim
 	}
 
 	// from MP
-	if (ps->externalEvent) {
+	if (ps->externalEvent) 
+	{
 		s->event = ps->externalEvent;
 		s->eventParm = ps->externalEventParm;
 	}
@@ -4391,7 +4395,12 @@ void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int tim
 		s->eventParm = ps->eventParms[seq];
 		ps->entityEventSequence++;
 	}
+	else if (ps->eventSequence == 0)
+	{
+		s->eventSequence = 0;
+	}
 	// end
+
 		// Ridah, now using a circular list of events for all entities
 		// add any new events that have been added to the playerState_t
 		// (possibly overwriting entityState_t events)
