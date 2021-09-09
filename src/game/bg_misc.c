@@ -4165,6 +4165,12 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
 		s->eventParm = ps->eventParms[ seq ];
 		ps->entityEventSequence++;
 	}
+	// RTCWPro
+	else if (ps->eventSequence == 0)
+	{
+		s->eventSequence = 0;
+	}
+	// RTCWPro end
 // end
 	// Ridah, now using a circular list of events for all entities
 	// add any new events that have been added to the playerState_t
@@ -4265,6 +4271,12 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 		s->eventParm = ps->eventParms[ seq ];
 		ps->entityEventSequence++;
 	}
+	// RTCWPro
+	else if (ps->eventSequence == 0)
+	{
+		s->eventSequence = 0;
+	}
+	// RTCWPro end
 
 	// Ridah, now using a circular list of events for all entities
 	// add any new events that have been added to the playerState_t
@@ -4293,6 +4305,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 	s->aiState = ps->aiState;
 }
 
+#if 0
 /*
 =====================
 RTCWPro
@@ -4428,6 +4441,7 @@ void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int tim
 	s->teamNum = ps->teamNum;
 	s->aiState = ps->aiState;		// xkan, 1/10/2003
 }
+#endif
 
 //
 // OSPx Stuff Below
