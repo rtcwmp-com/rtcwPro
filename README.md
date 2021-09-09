@@ -176,6 +176,6 @@ If you have any questions/comments/concerns then feel free to reach out to us on
 RtcwPro Dev Team
 -nihilist, KrazyKaze, Tarator
 
-Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, and Spaztik
+Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, crumbs, and Spaztik
 Additional credits for public code: Nobo, Nico, suburb, jinx, rhea, OpenJK, ETLegacy, ETpub, Jaymod, ioquake, iortcw.
 Installer powered by Advanced Installer: https://www.advancedinstaller.com/
