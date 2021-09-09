@@ -1618,7 +1618,14 @@ void ClientThink_real( gentity_t *ent ) {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 	}*/
 
-	BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qtrue);
+	if (g_thinkStateLevelTime.integer) 
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qtrue);
+	}
+	else
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+	}
 	// RTCWPro end
 
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
@@ -2239,7 +2246,14 @@ void ClientEndFrame( gentity_t *ent ) {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
 	}*/
 
-	BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qfalse);
+	if (g_endStateLevelTime.integer) 
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qfalse);
+	}
+	else
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qfalse);
+	}
 	// RTCWPro end
 
 	//SendPendingPredictableEvents( &ent->client->ps );

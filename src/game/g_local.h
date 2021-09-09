@@ -1667,6 +1667,8 @@ extern vmCvar_t	g_hsDamage;
 extern vmCvar_t g_spawnOffset; // random spawn offset for both teams, between 1 and cvar integer - 1
 extern vmCvar_t g_bodiesGrabFlags;
 extern vmCvar_t g_mapScriptDirectory;
+extern vmCvar_t g_thinkStateLevelTime;
+extern vmCvar_t g_endStateLevelTime;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
