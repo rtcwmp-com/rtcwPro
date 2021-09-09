@@ -169,13 +169,53 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
  
  - 1.2.3
    - server: fix early airstrikes bug
-   - server: add vote_allow_cointoss
+   - server: add vote_allow_cointoss  
+ 
+ - 1.2.4  
+    - server: fix callvote map matching of maps that differ by number  
+    - server: add g_damageRadiusKnockback to change explosions knockback, default 1000
+    - server: do not submit stats for early exit rounds
+    - server: do not submit stats if no more than 2 players are active
+    - server: add server country to json output
+    - server: fix bug where clients spawn with varying health instead of respecting number of team medics
+    - server: fix hitsound sequence issues
+    - client: change default for cg_reinforcementTimeColor to red
+    - client: change default for cg_enemyTimerColor to green
+    - client: add cl_activateLean to toggle leaning when holding move keys and +activate, default 1
+    - client: add cg_hitsoundBodyStyle 1-5 to change body hitsound, default 1
+    - client: add cg_hitsoundHeadStyle 1-8 to change head hitsound, default 1
+    - client: add cg_notifyTextX and cg_notifyTextY to change kill feed position
+    - client: add cg_notifyTextWidth to change kill feed char width, default 8
+    - client: add cg_notifyTextHeight to change kill feed char height, default 8
+    - client: add cg_notifyTextShadow to toggle shadowing of kill feed
+    - client: add cg_chatX and cg_chatY to change chat position
+    - client: add cg_teamOverlayX and cg_teamOverlayY to change team overlay position
+    - client: add cg_compassX and cg_compassY to change compass position
+    - client: add cg_lagometerX and cg_lagometerY to change lagometer position
+    - client: add cg_drawFrags to toggle "you killed" frag center prints
+    - client: add cg_fragsY to change frag center print position
+    - client: add cg_fragsWidth to change frag center print char width size, default 16
+    - client: add cg_zoomedSensLock to toggle zoom sens lock when zooming in
+    - client: add cg_pauseMusic
+    - client: un-hardcode cg_zoomedSens
+    - client: disable http due to overflows causing crashes
+    - client: deprecate con_color due to a possible crash
+    - client: only draw triggers in freecam
+    - client: don't draw dynamite timers when scoreboard is up
+    - client: remove unneeded delay in the default body hitsound
+    - client: fix bug where raw input will keep initializing for no reason
+    - client: fix draw obj icon not updating when it should
+    - client: fix weapon switch to pistol at dropweapon when holding ammo packs
+    - client: fix spawn shield icons not showing up
+    - client: fix player bounding box collision/sticking
+    - client: optimize events handling
+
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
 RtcwPro Dev Team
 -nihilist, KrazyKaze, Tarator
 
-Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, and Spaztik
+Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, crumbs, and Spaztik
 Additional credits for public code: Nobo, Nico, suburb, jinx, rhea, OpenJK, ETLegacy, ETpub, Jaymod, ioquake, iortcw.
 Installer powered by Advanced Installer: https://www.advancedinstaller.com/
