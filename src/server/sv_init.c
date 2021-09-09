@@ -955,7 +955,7 @@ void SV_Init( void ) {
 #endif
 
 	// HTTP downloads
-	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "1", CVAR_ARCHIVE);
+	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
 	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "https://maps.rtcwmp.com/", CVAR_ARCHIVE);
 	sv_wwwDlDisconnected = Cvar_Get("sv_wwwDlDisconnected", "0", CVAR_ARCHIVE);
 	sv_wwwFallbackURL = Cvar_Get("sv_wwwFallbackURL", "", CVAR_ARCHIVE);
@@ -978,7 +978,7 @@ void SV_Init( void ) {
 	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "11", CVAR_ARCHIVE);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "12", CVAR_ROM);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();
