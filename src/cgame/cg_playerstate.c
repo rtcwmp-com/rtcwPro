@@ -456,7 +456,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		}
 	}*/
 
-	if (cg_pauseMusic.integer) {
+	/*if (cg_pauseMusic.integer) {
 
 		if (cgs.match_paused == PAUSE_ON) {
 
@@ -466,7 +466,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 
 			trap_S_ClearLoopingSounds(qtrue);
 		}
-	}
+	}*/
 	// RTCWPro
 
 	// timelimit warnings
