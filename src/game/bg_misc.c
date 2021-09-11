@@ -4224,8 +4224,10 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 	if ( snap ) {
 		SnapVector( s->pos.trBase );
 	}
+
 	// set the trDelta for flag direction and linear prediction
 	VectorCopy( ps->velocity, s->pos.trDelta );
+
 	// set the time for linear prediction
 	s->pos.trTime = time;
 	// set maximum extra polation time
@@ -4271,12 +4273,6 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 		s->eventParm = ps->eventParms[ seq ];
 		ps->entityEventSequence++;
 	}
-	// RTCWPro
-	else if (ps->eventSequence == 0)
-	{
-		s->eventSequence = 0;
-	}
-	// RTCWPro end
 
 	// Ridah, now using a circular list of events for all entities
 	// add any new events that have been added to the playerState_t
