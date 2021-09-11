@@ -67,7 +67,6 @@
 | cg_enemyTimerProX | `integer` | `-999-999` | `185` | Change new enemy timer position in the horizontal axis |
 | cg_enemyTimerProY | `integer` | `-999-999` | `445` | Change new enemy timer position in the vertical axis |
 | cg_findMedic | `integer` | `0-1` | `1` | Enable/disable camera lock at team medics when waiting for a revive |
-| cg_pauseMusic | `integer` | `0-1` | `1` | Enable/disable music during pause |
 | cg_zoomedSens | `float` | `0.0-99.0` | `.3` | Change sensitivity when scoped |
 | cg_zoomedSensLock | `integer` | `0-1` | `0` | Enable/disable decreasing of sensitivity with each zoom step while scoped |
 | cg_notifyTextX | `integer` | `-999-999` | `0` | Change kill feed position in the horizontal axis |
