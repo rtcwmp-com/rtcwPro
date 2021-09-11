@@ -711,6 +711,13 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 		return qfalse;
 	}
 
+	// RTCWPro
+	if (!G_SpawnEnts(ent)) 
+	{
+		return qfalse;
+	}
+	// RTCWPro
+
 	// check item spawn functions
 	for ( item = bg_itemlist + 1 ; item->classname ; item++ ) {
 		if ( !strcmp( item->classname, ent->classname ) ) {
