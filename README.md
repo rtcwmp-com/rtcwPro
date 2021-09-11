@@ -6,7 +6,7 @@ Return to Castle Wolfenstein Mod/Engine - based on OSPx/xMod (created by Nate) w
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
 
-To run a RtcwPro server (Linux only) you may use Msh Docker available here: https://github.com/msh100/rtcw-config
+To run a RtcwPro server (Linux only) you may use Msh Docker available here: https://github.com/msh100/rtcw
 
 To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.htm
 
