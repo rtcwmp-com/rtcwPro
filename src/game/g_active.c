@@ -1612,25 +1612,42 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	/*if ( g_smoothClients.integer ) {
+	if ( g_smoothClients.integer ) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue );
 	} else {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
-	}*/
+	}
 
-	BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qtrue);
+	/*if (g_thinkStateLevelTime.integer) 
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qtrue);
+	}
+	else
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+	}*/
 	// RTCWPro end
 
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
 	}
 
-//
-//	// use the precise origin for linking
-//	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
-//
-//	// use the snapped origin for linking so it matches client predicted versions
-	VectorCopy( ent->s.pos.trBase, ent->r.currentOrigin );
+
+	// RTCWPro
+	/*if (!g_thinkSnapOrigin.integer) 
+	{
+		// use the precise origin for linking
+		VectorCopy(ent->client->ps.origin, ent->r.currentOrigin);
+	}
+	else
+	{
+		// use the snapped origin for linking so it matches client predicted versions
+		VectorCopy(ent->s.pos.trBase, ent->r.currentOrigin);
+	}*/
+
+	// use the snapped origin for linking so it matches client predicted versions
+	VectorCopy(ent->s.pos.trBase, ent->r.currentOrigin);
+	// RTCWPro
 
 	VectorCopy( pm.mins, ent->r.mins );
 	VectorCopy( pm.maxs, ent->r.maxs );
@@ -2233,13 +2250,20 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	/*if ( g_smoothClients.integer ) {
+	if ( g_smoothClients.integer ) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
 	} else {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
-	}*/
+	}
 
-	BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qfalse);
+	/*if (g_endStateLevelTime.integer) 
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qfalse);
+	}
+	else
+	{
+		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qfalse);
+	}*/
 	// RTCWPro end
 
 	//SendPendingPredictableEvents( &ent->client->ps );

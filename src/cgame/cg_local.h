@@ -1741,11 +1741,11 @@ typedef struct {
 	// Country Flags
 	qhandle_t countryFlags;
 	// Hitsounds
-	sfxHandle_t	headShot1;
-	sfxHandle_t	headShot2;
-	sfxHandle_t	bodyShot1;
-	sfxHandle_t	bodyShot2;
-	sfxHandle_t	teamShot;
+	//sfxHandle_t	headShot1;
+	//sfxHandle_t	headShot2;
+	//sfxHandle_t	bodyShot1;
+	//sfxHandle_t	bodyShot2;
+	//sfxHandle_t	teamShot;
 	// chats
 	sfxHandle_t normalChat;
 	sfxHandle_t teamChat;
@@ -1753,7 +1753,7 @@ typedef struct {
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
 	// pause
-	sfxHandle_t pIntermission;
+	//sfxHandle_t pIntermission;
 
 	// RTCWPro - draw triggers
 	qhandle_t transmitTrigger;

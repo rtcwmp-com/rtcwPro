@@ -691,7 +691,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_hitsoundHeadStyle, "cg_hitsoundHeadStyle", "1", CVAR_ARCHIVE },
 
 	// pause music
-	{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
+	//{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
 
 	// notify text
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
@@ -1427,7 +1427,7 @@ static void CG_RegisterSounds( void ) {
 	// L0 - sounds
 	cgs.media.countFightSound = trap_S_RegisterSound( "sound/match/fight.wav" );
 	// pause
-	cgs.media.pIntermission = trap_S_RegisterSound("sound/match/pause_m.wav");
+	//cgs.media.pIntermission = trap_S_RegisterSound("sound/match/pause_m.wav");
 	// chats
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");
