@@ -3352,7 +3352,7 @@ void CL_Init( void ) {
 
 	Cvar_Set( "cl_running", "1" );
 	// RTCWPro
-	Cvar_Set("cl_checkversion", "11");
+	Cvar_Set("cl_checkversion", "12");
 
 	// DHM - Nerve
 	autoupdateChecked = qfalse;
