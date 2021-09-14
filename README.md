@@ -121,7 +121,7 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
    - default r_mode to 6
    - add cg_tracers
 
- - 1.2.1 [changelog](changelog/1.2.1-changelog.txt)
+ - 1.2.1 [changelog](changelog/1.2.1-changelog.txt)  
    - Note for linux servers: always run the image with root permissions!
    - client: fix /map and /devmap on the client side
    - client: display current round time in warmup between rounds
@@ -156,7 +156,7 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
    - server: fix swap after map_restart on SW2
    - server: add objective captures to json events and player stats
  
- - 1.2.2
+ - 1.2.2 [changelog](changelog/1.2.2-changelog.txt)  
    - server: lowercase expected file name for map configs (linux)
    - server: lowercase expected file name for .spawns files (linux)
    - server: only exec map configs on map load (not map restart)
@@ -167,11 +167,11 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
    - server: add map name search on /callvote map
    - server: add /maps to list maps on server
  
- - 1.2.3
+ - 1.2.3 [changelog](changelog/1.2.3-changelog.txt)  
    - server: fix early airstrikes bug
    - server: add vote_allow_cointoss  
  
- - 1.2.4  
+ - 1.2.4 [changelog](changelog/1.2.4-changelog.txt)  
     - server: fix callvote map matching of maps that differ by number  
     - server: add g_damageRadiusKnockback to change explosions knockback, default 1000
     - server: do not submit stats for early exit rounds
@@ -210,7 +210,7 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
     - client: fix player bounding box collision/sticking
     - client: optimize events handling  
  
-  - 1.2.5  
+  - 1.2.5 [changelog](changelog/1.2.5-changelog.txt)  
     - client/server: revert #323 fix that 'broke' hitreg  
     - server: clean out SP entities on the server side to prevent crashes when loading SP maps  
     - server: make sv_checkversion read only  
