@@ -1,0 +1,9 @@
+- server: lowercase expected file name for map configs (linux)
+- server: lowercase expected file name for .spawns files (linux)
+- server: only exec map configs on map load (not map restart)
+- server: fix ready status being reset on client death
+- server: shoutcasters can follow other shoutcasters by /follow id
+- server: shoutcasters can /followobj to follow active obj carrier (if any)
+- server: shoutcasters can /noclip
+- server: add map name search on /callvote map
+- server: add /maps to list maps on server
