@@ -208,8 +208,14 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
     - client: fix weapon switch to pistol at dropweapon when holding ammo packs
     - client: fix spawn shield icons not showing up
     - client: fix player bounding box collision/sticking
-    - client: optimize events handling
-
+    - client: optimize events handling  
+ 
+  - 1.2.5  
+    - client/server: revert #323 fix that 'broke' hitreg  
+    - server: clean out SP entities on the server side to prevent crashes when loading SP maps  
+    - server: make sv_checkversion read only  
+    - client: revert events to 1.2.3 state  
+    - client: deprecate cg_pauseMusic due to a possible crash  
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
