@@ -31,8 +31,8 @@
 | cg_bloodFlash | `float` | `0.0-1.0` | `1.0` | Control blood flash when getting shot |
 | cg_crosshairAlpha | `float` | `0.0-1.0` | `1.0` | Control crosshair opacity |
 | cg_crosshairAlphaAlt | `float` | `0.0-1.0` | `1.0` | Control crosshair alt opacity |
-| cg_crosshairColor | `string` | Color table | `white` | Change crosshair color |
-| cg_crosshairColorAlt | `string` | Color table | `white` | Change crosshair color alt |
+| cg_crosshairColor | `string` | `Color table` | `white` | Change crosshair color |
+| cg_crosshairColorAlt | `string` | `Color table` | `white` | Change crosshair color alt |
 | ch_font | `integer` | `0-2` | `0` | Enable/disable OSP fonts |
 | cg_drawWeaponIconFlash | `integer` | `0-1` | `0` |  Enable/disable weapon icon flashing when empty |
 | cg_printObjectiveInfo | `integer` | `0-1` | `1` | Enable/disable printing of OBJ notifications in kill feed |
