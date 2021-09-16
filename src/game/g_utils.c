@@ -1134,7 +1134,7 @@ G_SpawnEnts
 ===============
 */
 qboolean G_SpawnEnts(gentity_t* ent) {
-	char mapName[32];
+	char mapName[64];
 
 	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
 

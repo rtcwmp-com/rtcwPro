@@ -912,13 +912,15 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 		mod == MOD_ROCKET ||
 		mod == MOD_ROCKET_SPLASH ||
 		mod == MOD_KNIFE ||
+		mod == MOD_KNIFE2 ||
 		mod == MOD_GRENADE ||
 		mod == MOD_AIRSTRIKE ||
 		mod == MOD_ARTY ||
 		mod == MOD_EXPLOSIVE ||
 		mod == MOD_MORTAR ||
 		mod == MOD_MORTAR_SPLASH ||
-		mod == MOD_SYRINGE)
+		mod == MOD_SYRINGE || 
+		mod == MOD_UNKNOWN)
 	{
 		return;
 	}
@@ -1246,7 +1248,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	if ( g_debugDamage.integer ) {
-		G_Printf( "client:%i health:%i damage:%i\n", targ->s.number, targ->health, take); //, asave );
+		G_Printf( "client: %i health: %i damage: %i mod: %i\n", targ->s.number, targ->health, take, mod); //, asave );
+		AP(va("print \"client:%i health:%i damage:%i mod: %i\n\"", targ->s.number, targ->health, take, mod));
 	}
 
 	// add to the damage inflicted on a player this frame
