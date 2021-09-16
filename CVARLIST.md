@@ -124,7 +124,7 @@
 | vote_allow_antilag | `integer` | `0-1` | `1` | Allow/disallow voting to enable/disable antilag |
 | vote_allow_muting | `integer` | `0-1` | `1` | Allow/disallow voting to mute clients |
 | vote_allow_cointoss | `integer` | `0-1` | `1` | Allow/disallow voting to toss a coin |
-| vote_limit | `integer` | `0-99` | `3` | Limit number of votes client could call per round |
+| vote_limit | `integer` | `0-99` | `5` | Limit number of votes client could call per round |
 | vote_percent | `integer` | `0-100` | `51` | Percent of votes needed to pass a vote |
 | g_antilag | `integer` | `0-1` | `0` | Enable/disable antilag |
 | g_screenShake | `integer` | `0-99` | `4` | Set the amount of screenshake at explosions clients will experience |
