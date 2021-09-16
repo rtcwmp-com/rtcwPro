@@ -1017,7 +1017,7 @@ void R_Register( void ) {
 	// temporary latched variables that can only change over a restart
 	//
 	r_displayRefresh = ri.Cvar_Get( "r_displayRefresh", "0", CVAR_LATCH );
-	AssertCvarRange( r_displayRefresh, 0, 200, qtrue );
+	AssertCvarRange( r_displayRefresh, 0, 240, qtrue ); // RTCWPro - increase from 200
 //	r_fullbright = ri.Cvar_Get ("r_fullbright", "0", CVAR_LATCH|CVAR_CHEAT ); // JPW NERVE removed per atvi request
 	r_mapOverBrightBits = ri.Cvar_Get( "r_mapOverBrightBits", "2", CVAR_LATCH );
 	r_intensity = ri.Cvar_Get( "r_intensity", "1", CVAR_LATCH );
