@@ -133,7 +133,7 @@
 | g_stats_curl_submit_URL | `string` | `N/A` | `https://rtcwproapi.donkanator.com/submit` | URL to submit to |
 | g_gameStatslog | `bitflag` | `0-16` | `16` | Change JSON stats output. 1 - output stats, 2 - output wstats in player stats, 4 - output player stats in categories, 8 - output player stats by team, 16 - include additional data on "kill event" |
 | refereePassword | `string` | `N/A` | `none` | Sets referee password (/ref password) |
-| shoutcastPassword | `string` | `N/A` | `none` | Sets referee password (/scs password) |
+| shoutcastPassword | `string` | `N/A` | `none` | Sets shoutcaster password (/scs password) |
 | g_drawHitboxes | `integer` | `0-1` | `0` | Enable/disable /draw_hitboxes |
 | g_hitsounds | `integer` | `0-1` | `0` | Enable/disable hitsounds globally |
 | g_disableInv | `integer` | `0-1` | `0` | Enable/disable clients losing invulnerability if they start shooting after revive |
