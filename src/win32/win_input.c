@@ -767,7 +767,7 @@ void IN_MouseEvent( int mstate ) {
 
 // perform button actions
 	//for  ( i = 0 ; i < 3 ; i++ )
-	for (i = 0; i < 6; i++) // RTCWPro - increase for extra buttons
+	for (i = 0; i < 5; i++) // RTCWPro - increase for extra buttons
 	{
 		if ( ( mstate & ( 1 << i ) ) &&
 			 !( s_wmv.oldButtonState & ( 1 << i ) ) ) {
