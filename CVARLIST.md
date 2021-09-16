@@ -23,6 +23,8 @@
 #### Mod (cg)
 | Cvar | Argument type | Value range | Default | Description |
 |---------|---------------|-------------|---------|-------------|
+| cg_teamChatTime | `integer` | `0-9999` | `8000` | How much time in ms before chat fades out |
+| cg_teamChatHeight | `integer` | `0-8` | `8` | Number of chat lines to display |
 | cg_crosshairPulse | `integer` | `0-1` | `1` | Enable/disable pulsing of the crosshair. |
 | cg_showFlags | `integer` | `0-1` | `1` | Enable/disable scoreboard coutnry flags |
 | cg_bloodDamageBlend | `float` | `0.0-1.0` | `1.0` | Control blood blends when getting shot |
