@@ -137,7 +137,6 @@
 | g_drawHitboxes | `integer` | `0-1` | `0` | Enable/disable /draw_hitboxes |
 | g_hitsounds | `integer` | `0-1` | `0` | Enable/disable hitsounds globally |
 | g_disableInv | `integer` | `0-1` | `0` | Enable/disable clients losing invulnerability if they start shooting after revive |
-| g_unlockWeapons | `integer` | `0-1` | `0` | Enable/disable medics and engineers being able to pick up SMGs |
 | g_fastStabSound | `integer` | `0-3` | `0` | 1 - (OSP's) goat sound, 2 - humiliation sound, 3 - random between 1 or 2 |
 | g_axisSpawnProtectionTime | `integer` | `0-999` | `3000` | Axis invulnerability time in ms after respawn |
 | g_alliedSpawnProtectionTime | `integer` | `0-999` | `3000` | Allied invulnerability time in ms after respawn |
