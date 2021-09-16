@@ -465,6 +465,16 @@ LONG WINAPI MainWndProc(
 			temp |= 4;
 		}
 
+		// RTCWPro - extra buttons
+		if (wParam & MK_XBUTTON1) {
+			temp |= 8;
+		}
+
+		if (wParam & MK_XBUTTON2) {
+			temp |= 16;
+		}
+		// RTCWPro end
+
 		IN_MouseEvent( temp );
 	}
 	break;
