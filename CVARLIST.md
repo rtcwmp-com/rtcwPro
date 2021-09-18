@@ -75,6 +75,7 @@
 | cg_notifyTextY | `integer` | `-999-999` | `42` | Change kill feed position in the vertical axis |
 | cg_notifyTextWidth | `integer` | `0-99` | `8` | Change kill feed char width |
 | cg_notifyTextHeight | `integer` | `0-99` | `8` | Change kill feed char height |
+| cg_notifyTextShadow | `integer` | `0-1` | `0` | Enable/disable shadowing of kill feed |
 | cg_chatX | `integer` | `-999-999` | `0` | Change chat position in the horizontal axis |
 | cg_chatY | `integer` | `-999-999` | `385` | Change chat position in the vertical axis |
 | cg_teamOverlayX | `integer` | `-999-999` | `640` | Change team overlay position in the horizontal axis |
