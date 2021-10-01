@@ -604,54 +604,78 @@ void Cmd_DisplayMaps_f(gentity_t* ent)
 	int i, mapcount;
 	const int moreCount = 100;
 	qboolean more = qfalse;
+	char mapMatch[256];
+	int exactMatch;
 
 	if (!ent->moreCalled)
 	{
 		ent->moreCalls = 0;
 	}
 
-	CP(va("print \"^7Total of ^3%d ^7maps on server\n\"", level.mapcount));
+	trap_Argv(1, mapMatch, sizeof(mapMatch));
+
+	CP(va("print \"^7Total maps: ^3%d\n\"", level.mapcount));
 	CP("print \"^3------------------------------------------------------------------------\n\"");
 
-	for (mapcount = 1, i = (ent->moreCalls * moreCount); i < level.mapcount; mapcount += 3)
+	if (strlen(mapMatch))
 	{
+		exactMatch = G_FindMatchingMaps(ent, mapMatch);
 
-		if ((i + 3) <= level.mapcount)
+		if (exactMatch)
 		{
-			CP(va("print \"^7%-24s^7%-24s^7%-23s\n\"", level.maplist + (level.mapcount - i - mapcount),
-				level.maplist + (level.mapcount - i - mapcount - 1), level.maplist + (level.mapcount - i - mapcount - 2)));
+			Q_strncpyz(mapMatch, level.maplist[exactMatch], sizeof(mapMatch));
+			CP(va("print \"^3One match found:\n"));
+			CP(va("print \"^7  %s\n\"", level.maplist[exactMatch]));
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			return;
 		}
 		else
 		{
-     		CP(va("print \"^7%s \"", level.maplist + (level.mapcount - i - mapcount)));
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			return;
 		}
-
-		if (mapcount >= moreCount && (i + 3) != level.mapcount)
-		{
-			more = qtrue;
-			break;
-		}
-		else if ((i + mapcount >= level.mapcount))
-		{
-            more = qfalse;
-            break;
-		}
-	}
-
-	if (more)
-	{
-		int remaining = level.mapcount - i - mapcount - 1;
-		CP("print \"^3------------------------------------------------------------------------\n\"");
-		CP(va("print \"^7Use ^3/more ^7to list the next %d maps\n\"", remaining >= moreCount ? moreCount : remaining));
-		ent->more = Cmd_DisplayMaps_f;
-		return;
 	}
 	else
 	{
-		ent->more = 0;
-		ent->moreCalls = 0;
-		CP("print \"^3------------------------------------------------------------------------\n\"");
-		CP("print \"^7There are no more maps to list\n\"");
+		for (mapcount = 1, i = (ent->moreCalls * moreCount); i < level.mapcount; mapcount += 3)
+		{
+			if ((i + 3) <= level.mapcount)
+			{
+				CP(va("print \"^7%-24s^7%-24s^7%-23s\n\"", level.maplist + (level.mapcount - i - mapcount),
+					level.maplist + (level.mapcount - i - mapcount - 1), level.maplist + (level.mapcount - i - mapcount - 2)));
+			}
+			else
+			{
+				CP(va("print \"^7%s \"", level.maplist + (level.mapcount - i - mapcount)));
+			}
+
+			if (mapcount >= moreCount && (i + 3) != level.mapcount)
+			{
+				more = qtrue;
+				break;
+			}
+			else if ((i + mapcount >= level.mapcount))
+			{
+				more = qfalse;
+				break;
+			}
+		}
+
+		if (more)
+		{
+			int remaining = level.mapcount - i - mapcount - 1;
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			CP(va("print \"^7Use ^3/more ^7to list the next %d maps\n\"", remaining >= moreCount ? moreCount : remaining));
+			ent->more = Cmd_DisplayMaps_f;
+			return;
+		}
+		else
+		{
+			ent->more = 0;
+			ent->moreCalls = 0;
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			CP("print \"^7There are no more maps to list\n\"");
+		}
 	}
 }
 
