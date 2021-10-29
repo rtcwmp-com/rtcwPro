@@ -350,6 +350,10 @@ void Team_CheckHurtCarrier( gentity_t *targ, gentity_t *attacker ) {
 	}
 }
 
+#ifdef OMNIBOT
+const char *_GetEntityName( gentity_t *_ent );
+void Bot_Util_SendTrigger( gentity_t *_ent, gentity_t *_activator, const char *_tagname, const char *_action );
+#endif
 
 gentity_t *Team_ResetFlag( int team ) {
 	char *c;
@@ -375,7 +379,11 @@ gentity_t *Team_ResetFlag( int team ) {
 			RespawnItem( ent );
 		}
 	}
-
+#ifdef OMNIBOT
+	{
+		Bot_Util_SendTrigger( ent, NULL, va( "Flag returned %s!", _GetEntityName( rent ) ), "returned" );
+	}
+#endif
 	return rent;
 }
 
@@ -486,6 +494,11 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				}
 				G_writeObjectiveEvent(other, objReturned  );
 				cl->sess.obj_returned++;
+#ifdef OMNIBOT
+				{
+					Bot_Util_SendTrigger( ent, NULL, va( "Axis have returned %s!", ent->message ), "returned" );
+				}
+#endif
 
 			} else {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
@@ -497,6 +510,11 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
                 G_writeObjectiveEvent(other, objReturned  );
 				cl->sess.obj_returned++;
+#ifdef OMNIBOT
+				{
+					Bot_Util_SendTrigger( ent, NULL, va( "Axis have returned %s!", ent->message ), "returned" );
+				}
+#endif
 			}
 			// dhm
 		}
@@ -631,6 +649,11 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			}
             cl->sess.obj_taken++;
             G_writeObjectiveEvent(other, objTaken  );
+#ifdef OMNIBOT
+			{
+				Bot_Util_SendTrigger( ent, NULL, va( "Axis have stolen %s!", ent->message ), "stolen" );
+			}
+#endif
 		} else {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_taken.wav" );
 			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
@@ -641,6 +664,11 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 			}
             G_writeObjectiveEvent(other, objTaken  );
             cl->sess.obj_taken++;
+#ifdef OMNIBOT
+			{
+				Bot_Util_SendTrigger( ent, NULL, va( "Allies have stolen %s!", ent->message ), "stolen" );
+			}
+#endif
 		}
 		// dhm
 // jpw
@@ -1455,6 +1483,9 @@ void checkpoint_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 // JPW NERVE -- if spawn flag is set, use this touch fn instead to turn on/off targeted spawnpoints
 void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	gentity_t   *ent = NULL;
+#ifdef OMNIBOT
+	char    *flagAction;
+#endif
 	qboolean playsound = qtrue;
 	qboolean firsttime = qfalse;
 
@@ -1486,30 +1517,52 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	// Set controlling team
 	self->count = other->client->sess.sessionTeam;
 
+#ifdef OMNIBOT
+	//get rid of a compiler warning
+	flagAction = "touched";
+#endif
 	// Set animation
 	if ( self->count == TEAM_RED ) {
 		if ( self->s.frame == WCP_ANIM_NOFLAG && !( self->spawnflags & ALLIED_ONLY ) ) {
 			self->s.frame = WCP_ANIM_RAISE_AXIS;
+#ifdef OMNIBOT
+			flagAction = "capture";
+#endif
 		} else if ( self->s.frame == WCP_ANIM_NOFLAG ) {
 			self->s.frame = WCP_ANIM_NOFLAG;
 			playsound = qfalse;
 		} else if ( self->s.frame == WCP_ANIM_AMERICAN_RAISED && !( self->spawnflags & ALLIED_ONLY ) )     {
 			self->s.frame = WCP_ANIM_AMERICAN_TO_AXIS;
+#ifdef OMNIBOT
+			flagAction = "reclaims";
+#endif
 		} else if ( self->s.frame == WCP_ANIM_AMERICAN_RAISED ) {
 			self->s.frame = WCP_ANIM_AMERICAN_FALLING;
+#ifdef OMNIBOT
+			flagAction = "neutralized";
+#endif
 		} else {
 			self->s.frame = WCP_ANIM_AXIS_RAISED;
 		}
 	} else {
 		if ( self->s.frame == WCP_ANIM_NOFLAG && !( self->spawnflags & AXIS_ONLY ) ) {
 			self->s.frame = WCP_ANIM_RAISE_AMERICAN;
+#ifdef OMNIBOT
+			flagAction = "capture";
+#endif
 		} else if ( self->s.frame == WCP_ANIM_NOFLAG ) {
 			self->s.frame = WCP_ANIM_NOFLAG;
 			playsound = qfalse;
 		} else if ( self->s.frame == WCP_ANIM_AXIS_RAISED && !( self->spawnflags & AXIS_ONLY ) )     {
 			self->s.frame = WCP_ANIM_AXIS_TO_AMERICAN;
+#ifdef OMNIBOT
+			flagAction = "reclaims";
+#endif
 		} else if ( self->s.frame == WCP_ANIM_AXIS_RAISED ) {
 			self->s.frame = WCP_ANIM_AXIS_FALLING;
+#ifdef OMNIBOT
+			flagAction = "neutralized";
+#endif
 		} else {
 			self->s.frame = WCP_ANIM_AMERICAN_RAISED;
 		}
@@ -1529,11 +1582,17 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 	// Run script trigger
 	if ( self->count == TEAM_RED ) {
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
+#ifdef OMNIBOT
+		Bot_Util_SendTrigger( self, NULL, va( "axis_%s_%s", flagAction, _GetEntityName( self ) ), flagAction );
+#endif
 
         G_writeObjectiveEvent(other, objSpawnFlag  );
         //other->client->sess.obj_checkpoint++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
+#ifdef OMNIBOT
+		Bot_Util_SendTrigger( self, NULL, va( "allies_%s_%s", flagAction, _GetEntityName( self ) ), flagAction );
+#endif
 
         G_writeObjectiveEvent(other, objSpawnFlag  );
         //other->client->sess.obj_checkpoint++;

@@ -300,9 +300,11 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
 		check->client->ps.delta_angles[YAW] += ANGLE2SHORT( amove[YAW] );
 		//
 		// RF, AI's need their ideal angle adjusted instead
+#ifndef OMNIBOT
 		if ( check->aiCharacter ) {
 			AICast_AdjustIdealYawForMover( check->s.number, ANGLE2SHORT( amove[YAW] ) );
 		}
+#endif
 	}
 
 	// figure movement due to the pusher's amove
@@ -713,6 +715,10 @@ Pos1 is "at rest", pos2 is "activated"
 SetMoverState
 ===============
 */
+#ifdef OMNIBOT
+const char *_GetEntityName( gentity_t *_ent );
+void Bot_Util_SendTrigger( gentity_t *_ent, gentity_t *_activator, const char *_tagname, const char *_action );
+#endif
 void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 	vec3_t delta;
 	float f;
@@ -765,6 +771,16 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 		f = 1000.0 / ent->s.pos.trDuration;
 		VectorScale( delta, f, ent->s.pos.trDelta );
 		ent->s.pos.trType = TR_LINEAR_STOP;
+#ifdef OMNIBOT
+		{
+			const char *pName = _GetEntityName( ent );
+			if ( Q_stricmp( pName, "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_Opening", pName ), "opening" );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "%d_Opening", ent->s.number ), "opening" );
+			}
+		}
+#endif // OMNIBOT
 		break;
 	case MOVER_2TO1:        // closing
 		VectorCopy( ent->pos2, ent->s.pos.trBase );
@@ -778,16 +794,46 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 		}
 		VectorScale( delta, f, ent->s.pos.trDelta );
 		ent->s.pos.trType = TR_LINEAR_STOP;
+#ifdef OMNIBOT
+		{
+			const char *pName = _GetEntityName( ent );
+			if ( Q_stricmp( pName, "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_Closing", pName ), "closing" );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "%d_Closing", ent->s.number ), "closing" );
+			}
+		}
+#endif // OMNIBOT
 		break;
 
 
 	case MOVER_POS1ROTATE:      // at close
 		VectorCopy( ent->r.currentAngles, ent->s.apos.trBase );
 		ent->s.apos.trType = TR_STATIONARY;
+#ifdef OMNIBOT
+		{
+			const char *pName = _GetEntityName( ent );
+			if ( Q_stricmp( pName, "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_Closed", pName ), "closed" );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "%d_Closed", ent->s.number ), "closed" );
+			}
+		}
+#endif // OMNIBOT
 		break;
 	case MOVER_POS2ROTATE:      // at open
 		VectorCopy( ent->r.currentAngles, ent->s.apos.trBase );
 		ent->s.apos.trType = TR_STATIONARY;
+#ifdef OMNIBOT
+		{
+			const char *pName = _GetEntityName( ent );
+			if ( Q_stricmp( pName, "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_Opened", pName ), "opened" );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "%d_Opened", ent->s.number ), "opened" );
+			}
+		}
+#endif // OMNIBOT
 		break;
 	case MOVER_1TO2ROTATE:      // opening
 		VectorClear( ent->s.apos.trBase );              // set base to start position {0,0,0}
@@ -805,6 +851,16 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 		}
 		VectorScale( ent->rotate, f * ent->angle, ent->s.apos.trDelta );
 		ent->s.apos.trType = TR_LINEAR_STOP;
+#ifdef OMNIBOT
+		{
+			const char *pName = _GetEntityName( ent );
+			if ( Q_stricmp( pName, "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_Opening", pName ), "opening" );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "%d_Opening", ent->s.number ), "opening" );
+			}
+		}
+#endif // OMNIBOT
 		break;
 	case MOVER_2TO1ROTATE:      // closing
 		VectorScale( ent->rotate, ent->angle, ent->s.apos.trBase );     // set base to end position
@@ -819,6 +875,16 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 		VectorScale( ent->s.apos.trBase, -f, ent->s.apos.trDelta );
 		ent->s.apos.trType = TR_LINEAR_STOP;
 		ent->active = qfalse;
+#ifdef OMNIBOT
+		{
+			const char *pName = _GetEntityName( ent );
+			if ( Q_stricmp( pName, "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_Closing", pName ), "closing" );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "%d_Closing", ent->s.number ), "closing" );
+			}
+		}
+#endif // OMNIBOT
 		break;
 
 
@@ -829,13 +895,16 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 
 	if ( !( ent->r.svFlags & SVF_NOCLIENT ) || ( ent->r.contents ) ) {    // RF, added this for bats, but this is safe for all movers, since if they aren't solid, and aren't visible to the client, they don't need to be linked
 		trap_LinkEntity( ent );
+#ifndef OMNIBOT
 		// if this entity is blocking AAS, then update it
 		if ( ent->AASblocking && ent->s.pos.trType == TR_STATIONARY ) {
+
 			// reset old blocking areas
 			G_SetAASBlockingEntity( ent, qfalse );
 			// set new areas
 			G_SetAASBlockingEntity( ent, qtrue );
 		}
+#endif
 	}
 }
 
@@ -951,8 +1020,11 @@ void ReturnToPos1Rotate( gentity_t *ent ) {
 
 	MatchTeam( ent, MOVER_2TO1ROTATE, level.time );
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
-
+#else
+    player = NULL;
+#endif
 	if ( player ) {
 		inPVS = trap_InPVS( player->r.currentOrigin, ent->r.currentOrigin );
 	}
@@ -1063,9 +1135,11 @@ void Reached_BinaryMover( gentity_t *ent ) {
 		{
 			qboolean inPVS = qfalse;
 			gentity_t *player;
-
-			player = AICast_FindEntityForName( "player" );
-
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 			if ( player ) {
 				inPVS = trap_InPVS( player->r.currentOrigin, ent->r.currentOrigin );
 			}
@@ -1415,14 +1489,18 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 		if ( !nosound ) {
 			if ( ent->flags & FL_KICKACTIVATE ) {  // kicked
 				if ( activator ) {
+#ifndef OMNIBOT
 					AICast_AudibleEvent( activator->s.number, ent->s.origin, HEAR_RANGE_DOOR_OPEN );    // "someone kicked open a door near me!"
+#endif
 				}
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundKicked );
 			} else if ( ent->flags & FL_SOFTACTIVATE ) {
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundSoftopen );
 			} else {
 				if ( activator ) {
+#ifndef OMNIBOT
 					AICast_AudibleEvent( activator->s.number, ent->s.origin, HEAR_RANGE_DOOR_KICKOPEN );    // "someone kicked open a door near me!"
+#endif
 				}
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
 			}
@@ -1487,14 +1565,18 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 		if ( !nosound ) {
 			if ( ent->flags & FL_KICKACTIVATE ) {  // kicked
 				if ( activator ) {
+#ifndef OMNIBOT
 					AICast_AudibleEvent( activator->s.number, ent->s.origin, HEAR_RANGE_DOOR_KICKOPEN );    // "someone kicked open a door near me!"
+#endif
 				}
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundKicked );
 			} else if ( ent->flags & FL_SOFTACTIVATE ) {
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundSoftopen );
 			} else {
 				if ( activator ) {
+#ifndef OMNIBOT
 					AICast_AudibleEvent( activator->s.number, ent->s.origin, HEAR_RANGE_DOOR_OPEN );    // "someone opened a door near me!"
+#endif
 				}
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
 			}
@@ -2032,11 +2114,11 @@ void finishSpawningKeyedMover( gentity_t *ent ) {
 		}
 	}
 //----(SA)	end
-
+#ifndef OMNIBOT
 	if ( ent->key ) {
 		G_SetAASBlockingEntity( ent, qtrue );
 	}
-
+#endif
 	ent->nextthink = level.time + FRAMETIME;
 
 	if ( !( ent->flags & FL_TEAMSLAVE ) ) {
@@ -2059,10 +2141,11 @@ void finishSpawningKeyedMover( gentity_t *ent ) {
 			}
 
 			slave->key = ent->key;
-
+#ifndef OMNIBOT
 			if ( slave->key ) {
 				G_SetAASBlockingEntity( slave, qtrue );
 			}
+#endif
 		}
 	}
 }
@@ -2161,7 +2244,9 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 				// only send audible event if not trying to open slowly
 				if ( !walking && activator )
 				{
+#ifndef OMNIBOT
 					AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_LOCKED );   // "someone tried locked door near me!"
+#endif
 				}
 				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos3 );
 				return;
@@ -2179,7 +2264,9 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 						// only send audible event if not trying to open slowly
 						if ( !walking )
 						{
+#ifndef OMNIBOT
 							AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_LOCKED );   // "someone tried locked door near me!"
+#endif
 						}
 						// player does not have key
 						G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos3 );
@@ -2195,7 +2282,9 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 					ent->teammaster->flags |= FL_SOFTACTIVATE;      // no noise generated
 				} else {
 					if ( activator ) {
+#ifndef OMNIBOT
 						AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_OPEN ); // "someone opened door near me!"
+#endif
 					}
 				}
 
@@ -2208,7 +2297,9 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 					ent->flags |= FL_SOFTACTIVATE;      // no noise
 				} else {
 					if ( activator ) {
+#ifndef OMNIBOT
 						AICast_AudibleEvent( activator->s.clientNum, ent->s.origin, HEAR_RANGE_DOOR_OPEN ); // "someone opened door near me!"
+#endif
 					}
 				}
 
@@ -3525,11 +3616,13 @@ void Static_Pain( gentity_t *ent, gentity_t *attacker, int damage, vec3_t point 
 }
 
 void G_BlockThink( gentity_t *ent ) {
+#ifndef OMNIBOT
 	if ( ent->r.linked ) {
 		G_SetAASBlockingEntity( ent, qtrue );
 	} else {
 		G_SetAASBlockingEntity( ent, qfalse );
 	}
+#endif
 }
 
 
@@ -4100,7 +4193,9 @@ void func_explosive_explode( gentity_t *self, gentity_t *inflictor, gentity_t *a
 
 	// RF, AAS areas are now free
 	if ( !( self->spawnflags & 16 ) ) {
+#ifndef OMNIBOT
 		G_SetAASBlockingEntity( self, qfalse );
+#endif
 	}
 
 	self->takedamage = qfalse;          // don't allow anything try to hurt me now that i'm exploding
@@ -4168,6 +4263,9 @@ void func_explosive_explode( gentity_t *self, gentity_t *inflictor, gentity_t *a
 	}
 
 	G_AddEvent( self, EV_EXPLODE, DirToByte( dir ) );
+#ifdef OMNIBOT
+	G_Script_ScriptEvent( self, "exploded", "" );
+#endif
 
 }
 
@@ -4214,7 +4312,9 @@ void func_explosive_spawn( gentity_t *self, gentity_t *other, gentity_t *activat
 
 	// RF, AAS areas are now occupied
 	if ( !( self->spawnflags & 16 ) ) {
+#ifndef OMNIBOT
 		G_SetAASBlockingEntity( self, qtrue );
+#endif
 	}
 }
 
@@ -4468,9 +4568,15 @@ void use_invisible_user( gentity_t *ent, gentity_t *other, gentity_t *activator 
 
 		if ( ent->spawnflags & 2 && !( ent->spawnflags & 1 ) ) {
 			if ( ent->aiName ) {
-				player = AICast_FindEntityForName( "player" );
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 				if ( player ) {
+#ifndef OMNIBOT
 					AICast_ScriptEvent( AICast_GetCastState( player->s.number ), "trigger", ent->target );
+#endif
 				}
 			}
 
@@ -4489,13 +4595,14 @@ void use_invisible_user( gentity_t *ent, gentity_t *other, gentity_t *activator 
 		G_Sound( ent, ent->soundPos1 );
 		return;
 	}
-
+#ifndef OMNIBOT
 	if ( ent->aiName ) {
 		player = AICast_FindEntityForName( "player" );
 		if ( player ) {
 			AICast_ScriptEvent( AICast_GetCastState( player->s.number ), "trigger", ent->target );
 		}
 	}
+#endif
 
 	G_UseTargets( ent, other ); //----(SA)	how about this so the triggered targets have an 'activator' as well as an 'other'?
 								//----(SA)	Please let me know if you forsee any problems with this.

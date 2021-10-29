@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,7 +33,11 @@ If you have questions concerning this license or the applicable additional terms
  *
 */
 
-#include "g_local.h"
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 
 //==========================================================
 
@@ -677,7 +681,9 @@ void Use_Target_Lock( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	{
 //		G_Printf("target_lock locking entity with key: %d\n", ent->count);
 		t->key = ent->key;
+#ifndef OMNIBOT
 		G_SetAASBlockingEntity( t, t->key != 0 );
+#endif
 	}
 
 }
@@ -954,16 +960,20 @@ when used it will fire its targets
 */
 void target_script_trigger_use( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	gentity_t   *player;
-
+#ifndef OMNIBOT
 	if ( ent->aiName ) {
 		player = AICast_FindEntityForName( "player" );
 		if ( player ) {
 			AICast_ScriptEvent( AICast_GetCastState( player->s.number ), "trigger", ent->target );
 		}
 	}
+#endif
 
 	// DHM - Nerve :: In multiplayer, we use the brush scripting only
 	if ( g_gametype.integer >= GT_WOLF && ent->scriptName ) {
+#ifdef OMNIBOT
+		Bot_Util_SendTrigger( ent, NULL, ent->scriptName, ent->target );
+#endif
 		G_Script_ScriptEvent( ent, "trigger", ent->target );
 	}
 

@@ -26,7 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "g_local.h"
+
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 /*
 ==================
 DeathmatchScoreboardMessage
@@ -41,6 +46,11 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 	gclient_t   *cl;
 	int numSorted;
 	int scoreFlags;
+#ifdef OMNIBOT
+	if ( ent->r.svFlags & SVF_BOT ) {
+		return;
+	}
+#endif
 
 	// send the latest information on all clients
 	string[0] = 0;
@@ -592,7 +602,7 @@ void Cmd_More_f(gentity_t* ent)
 
 /*
 ============
-RTCWPro - display list of 
+RTCWPro - display list of
 maps on the server
 Source: PubJ (nihi)
 
@@ -1063,6 +1073,12 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	int i;
 	char arg[MAX_TOKEN_CHARS];
 
+#ifdef OMNIBOT
+	// don't let bots do this
+	if ( ent->r.svFlags & SVF_BOT ) {
+		return;
+	}
+#endif
 	if ( trap_Argc() != 2 ) {
 		if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
 			StopFollowing( ent );
@@ -1192,6 +1208,12 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		if ( clientnum < 0 ) {
 			clientnum = level.maxclients - 1;
 		}
+#ifdef OMNIBOT
+		// don't let bots do this
+		if ( ent->r.svFlags & SVF_BOT ) {
+			continue;
+		}
+#endif
 
 		// can only follow connected clients
 		if ( level.clients[ clientnum ].pers.connected != CON_CONNECTED ) {
@@ -1290,6 +1312,9 @@ void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char 
 		trap_SendServerCommand( other - g_entities, va( "%s \"%s%c%c%s\" %i",
 														mode == SAY_TEAM ? "tchat" : "chat",
 														name, Q_COLOR_ESCAPE, color, message, localize ) );
+#ifdef OMNIBOT
+		Bot_Event_ChatMessage( other - g_entities, ent, mode, message );
+#endif
 	}
 }
 
@@ -1471,6 +1496,9 @@ static void G_VoiceTo( gentity_t *ent, gentity_t *other, int mode, const char *i
 
 	trap_SendServerCommand( other - g_entities, va( "%s %d %d %d %s %i %i %i", cmd, voiceonly, ent->s.number, color, id,
 													(int)ent->s.pos.trBase[0], (int)ent->s.pos.trBase[1], (int)ent->s.pos.trBase[2] ) );
+#ifdef OMNIBOT
+	Bot_Event_VoiceMacro( other - g_entities, ent, mode, id );
+#endif
 }
 
 void G_Voice( gentity_t *ent, gentity_t *target, int mode, const char *id, qboolean voiceonly ) {
@@ -2291,9 +2319,9 @@ int Cmd_WolfKick_f( gentity_t *ent ) {
 				tent = G_TempEntity( tr.endpos, EV_WOLFKICK_HIT_WALL );
 				tent->s.otherEntityNum = ent->s.number;	\
 				//----(SA)	end
-
+#ifndef OMNIBOT
 				AICast_AudibleEvent( ent->s.clientNum, tr.endpos, HEAR_RANGE_DOOR_KICKLOCKED ); // "someone kicked a locked door near me!"
-
+#endif
 				if ( traceEnt->soundPos3 ) {
 					G_AddEvent( traceEnt, EV_GENERAL_SOUND, traceEnt->soundPos3 );
 				} else {
@@ -2309,9 +2337,9 @@ int Cmd_WolfKick_f( gentity_t *ent ) {
 					tent = G_TempEntity( tr.endpos, EV_WOLFKICK_HIT_WALL );
 					tent->s.otherEntityNum = ent->s.number;	\
 					//----(SA)	end
-
+#ifndef OMNIBOT
 					AICast_AudibleEvent( ent->s.clientNum, tr.endpos, HEAR_RANGE_DOOR_KICKLOCKED ); // "someone kicked a locked door near me!"
-
+#endif
 					// player does not have key
 					if ( traceEnt->soundPos3 ) {
 						G_AddEvent( traceEnt, EV_GENERAL_SOUND, traceEnt->soundPos3 );
@@ -2690,6 +2718,33 @@ void Cmd_SetSpawnPoint_f( gentity_t *clent ) {
 	}
 }
 // -NERVE - SMF
+#ifdef OMNIBOT
+void SetPlayerSpawn( gentity_t* ent, int spawn, qboolean update ) {
+	ent->client->sess.spawnObjectiveIndex = spawn;
+	if ( ent->client->sess.spawnObjectiveIndex >= MAX_MULTI_SPAWNTARGETS || ent->client->sess.spawnObjectiveIndex < 0 ) {
+		ent->client->sess.spawnObjectiveIndex = 0;
+	}
+}
+#endif //OMNIBOT
+
+/*
+==================
+Cmd_BotTapOut_f
+
+Simple jump command for bots to tap out rather than calling limbo on the bot entity.
+The main reason for this is so tapout reports work for them ...
+==================
+*/
+void Cmd_BotTapOut_f( gentity_t *ent ) {
+	static usercmd_t cmd;
+
+	memset( &cmd, 0, sizeof( cmd ) );
+	cmd.identClient = ent - g_entities;
+	cmd.serverTime = level.time;
+	cmd.upmove += 127;
+
+	trap_BotUserCommand( ent - g_entities, &cmd );
+}
 
 /*
 =================

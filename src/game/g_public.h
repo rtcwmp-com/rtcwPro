@@ -62,7 +62,9 @@ If you have questions concerning this license or the applicable additional terms
 											// lagging clients
 #define SVF_NOTSINGLECLIENT     0x00002000  // send entity to everyone but one client
 											// (entityShared_t->singleClient)
-
+#ifdef OMNIBOT
+	#define SVF_SMOKEGRENADE		0x00004000	// so we can mark that something is a smoke grenade and not an airstrike
+#endif
 //===============================================================
 
 
@@ -479,14 +481,17 @@ typedef enum {
 	// and parameters.  Return qfalse if the game doesn't recognize it as a command.
 
 	BOTAI_START_FRAME               // ( int time );
-
+#ifndef OMNIBOT
 	// Ridah, Cast AI
 	,AICAST_VISIBLEFROMPOS
 	,AICAST_CHECKATTACKATPOS
 	// done.
-
+#endif
 	,GAME_RETRIEVE_MOVESPEEDS_FROM_CLIENT
 
+#ifdef OMNIBOT
+	,GAME_MESSAGERECEIVED
+#endif
 } gameExport_t;
 
 #endif // !__G_PUBLIC_H

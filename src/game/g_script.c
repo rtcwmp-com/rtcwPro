@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,9 +34,14 @@ If you have questions concerning this license or the applicable additional terms
 // Tab Size:		4 (real tabs)
 //===========================================================================
 
-#include "../game/g_local.h"
-#include "../game/q_shared.h"
 
+
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
+#include "../game/q_shared.h"
 /*
 Scripting that allows the designers to control the behaviour of entities
 according to each different scenario.
@@ -142,6 +147,12 @@ g_script_event_define_t gScriptEvents[] =
 	{"death",            NULL},          // RIP
 	{"activate",     G_Script_EventMatch_StringEqual},   // something has triggered us (always followed by an identifier)
 	{"stopcam",          NULL},
+#ifdef OMNIBOT
+	{"dynamited",       NULL},
+	{"defused",         NULL},
+	{"destroyed",       NULL},
+	{"exploded",        NULL},
+#endif // OMNIBOT
 
 	{NULL,              NULL}
 };
@@ -515,6 +526,9 @@ G_Script_ScriptEvent
   An event has occured, for which a script may exist
 ================
 */
+#ifdef OMNIBOT
+const char *_GetEntityName( gentity_t *_ent );
+#endif
 void G_Script_ScriptEvent( gentity_t *ent, char *eventStr, char *params ) {
 	int i, eventNum;
 
@@ -547,6 +561,50 @@ void G_Script_ScriptEvent( gentity_t *ent, char *eventStr, char *params ) {
 			}
 		}
 	}
+#ifdef OMNIBOT
+	// skip these
+	if ( !Q_stricmp( eventStr, "trigger" ) ||
+		 !Q_stricmp( eventStr, "activate" ) ||
+		 !Q_stricmp( eventStr, "spawn" ) ||
+		 !Q_stricmp( eventStr, "death" ) ||
+		 !Q_stricmp( eventStr, "pain" ) ) {
+		return;
+	}
+
+	if ( !Q_stricmp( eventStr, "defused" ) ) {
+		Bot_Util_SendTrigger( ent, NULL,
+							  va( "Defused at %s.", ent->parent ? ent->parent->track : ent->track ),
+							  eventStr );
+	}
+	if ( !Q_stricmp( eventStr, "dynamited" ) ) {
+		Bot_Util_SendTrigger( ent, NULL,
+							  va( "Planted at %s.", ent->parent ? ent->parent->track : ent->track ),
+							  eventStr );
+	}
+	if ( !Q_stricmp( eventStr, "destroyed" ) ) {
+		Bot_Util_SendTrigger( ent, NULL,
+							  va( "%s Destroyed.", ent->parent ? ent->parent->track : ent->track ),
+							  eventStr );
+	}
+	if ( !Q_stricmp( eventStr, "exploded" ) ) {
+		if ( ent->spawnflags & 32 ) {
+			if ( Q_stricmp( _GetEntityName( ent ), "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "Explode_%s Exploded.", _GetEntityName( ent ) ), eventStr );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "Explode_%d Exploded", ent->s.number ), eventStr );
+			}
+		}
+
+		// dynamite goals without an OID ... mp_tank bridge for example
+		if ( ent->spawnflags == 77 || ent->spawnflags == 104 || ( ent->spawnflags == 76 && !ent->scriptName ) ) {
+			if ( Q_stricmp( _GetEntityName( ent ), "" ) ) {
+				Bot_Util_SendTrigger( ent, NULL, va( "%s Destroyed.", _GetEntityName( ent ) ), eventStr );
+			} else {
+				Bot_Util_SendTrigger( ent, NULL, va( "DynoTarget_%d Destroyed", ent->s.number ), eventStr );
+			}
+		}
+	}
+#endif //OMNIBOT
 }
 
 /*
@@ -558,11 +616,11 @@ G_Script_ScriptRun
 */
 qboolean G_Script_ScriptRun( gentity_t *ent ) {
 	g_script_stack_t *stack;
-
+#ifndef OMNIBOT
 	if ( saveGamePending ) {
 		return qfalse;
 	}
-
+#endif
 	if ( strlen( g_missionStats.string ) > 1 ) {
 		return qfalse;
 	}

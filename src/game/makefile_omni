@@ -1,0 +1,38 @@
+CC = gcc
+CXX = g++
+COMMON_INCLUDE = Omnibot/Common/
+RTCW_INCLUDE = Omnibot/rtcw/
+#CFLAGS =  -DOMNIBOT -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -m32  \
+-fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL
+CFLAGS = -O3 -DOMNIBOT -D__linux__ -DGAMEDLL -w -fno-strict-aliasing -fPIC -m32 -I./../qcommon/jansson/
+CXXFLAGS = -I$(COMMON_INCLUDE) -I$(RTCW_INCLUDE) -fpermissive $(CFLAGS)
+LDFLAGS = -m32 -melf_i386 -I./../qcommon/jansson
+LDFLAGSS = -m32 -I./../qcommon/jansson
+
+#SOURCES = $(shell ls g_*.c q_*.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c)
+SOURCES = $(shell ls ../qcommon/jansson/*.c  g_*.c q_*.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../qcommon/crypto/sha-1/sha1.c )
+CXXSOURCES = $(shell ls *.cpp Omnibot/Common/BotLoadLibrary.cpp)
+MODULES = $(SOURCES:.c=.o)
+
+
+
+all: gameclean qagame.mp.i386.so
+
+gameclean:
+	rm -rf *.o ../botai/*.o *.oxx Omnibot/Common/*.oxx
+qagame.mp.i386.so: $(CXXSOURCES:.cpp=.oxx) $(MODULES)
+	$(CXX) -m32 -lpthread -s -shared  -Wl,-soname,$@ -ldl -lm -o $@ $? 
+#	$(CC) -shared -m32  -o $@ $? $(LDFLAGS)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGSS)
+
+%.oxx: %.cpp 
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+#.c.o:
+#	$(CC)  $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+
+clean:
+	rm -f *.o *.so ../botai/*.o *.oxx Omnibot/Common/*.oxx
+

@@ -38,7 +38,11 @@ If you have questions concerning this license or the applicable additional terms
  *
 */
 
-#include "g_local.h"
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 
 
 
@@ -425,6 +429,11 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 				}
 			}
 		}
+#ifdef OMNIBOT
+		if ( ent->parent ) {
+			Bot_Event_RecievedAmmo( other - g_entities, ent->parent );
+		}
+#endif
 
 		// everybody likes grenades -- abuse weapon var as grenade type and i as max # grenades class can carry
 		switch ( other->client->ps.stats[STAT_PLAYER_CLASS] ) {
@@ -546,6 +555,9 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 	if ( g_gametype.integer == GT_TEAM ) {
 		return g_weaponTeamRespawn.integer;
 	}
+#ifdef OMNIBOT
+	Bot_Event_AddWeapon( other->client->ps.clientNum, Bot_WeaponGameToBot( ent->item->giTag ) );
+#endif
 
 	return g_weaponRespawn.integer;
 }
@@ -578,6 +590,11 @@ int Pickup_Health( gentity_t *ent, gentity_t *other ) {
 	}
 
 // jpw
+#ifdef OMNIBOT
+	if ( ent->parent ) {
+		Bot_Event_Healed( other - g_entities, ent->parent );
+	}
+#endif
 
 
 

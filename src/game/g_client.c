@@ -26,7 +26,12 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "g_local.h"
+
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 #include <time.h>
 // g_client.c -- client functions that don't happen every frame
 
@@ -346,7 +351,9 @@ void CopyToBodyQue( gentity_t *ent ) {
 	body = level.bodyQue[ level.bodyQueIndex ];
 	level.bodyQueIndex = ( level.bodyQueIndex + 1 ) % BODY_QUEUE_SIZE;
 
+#ifndef OMNIBOT
 	trap_UnlinkEntity( body );
+#endif
 
 	body->s = ent->s;
 	body->s.eFlags = EF_DEAD;       // clear EF_TALK, etc
@@ -399,7 +406,11 @@ void CopyToBodyQue( gentity_t *ent ) {
 	}
 	// dhm
 
+#ifndef OMNIBOT
 	body->r.svFlags = ent->r.svFlags;
+#else
+	body->r.svFlags = ent->r.svFlags & ~SVF_BOT;
+#endif //OMNIBOT
 	VectorCopy( ent->r.mins, body->r.mins );
 	VectorCopy( ent->r.maxs, body->r.maxs );
 	VectorCopy( ent->r.absmin, body->r.absmin );
@@ -472,7 +483,18 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 		// dhm
 
 		ent->client->ps.pm_flags |= PMF_LIMBO;
+#ifdef OMNIBOT
+		// bots should not follow, causes problems
+		if ( !ent->r.svFlags & SVF_BOT ) {
+			ent->client->ps.pm_flags |= PMF_FOLLOW;
+		}
+
+		if ( !ent->client->sess.botSuicidePersist || g_gamestate.integer != GS_PLAYING ) {
+			ent->client->sess.botSuicide = qfalse;
+		}
+#else
 		ent->client->ps.pm_flags |= PMF_FOLLOW;
+#endif // OMNIBOT
 
 		if ( makeCorpse ) {
 			CopyToBodyQue( ent ); // make a nice looking corpse
@@ -492,6 +514,24 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 			TossClientItems( ent );
 		}
 
+#ifdef OMNIBOT
+		//bots can't follow
+		if ( ent->r.svFlags & SVF_BOT ) {
+			ent->client->sess.spectatorClient = ent->client->ps.clientNum;
+			ent->client->sess.spectatorState = SPECTATOR_FREE;
+		} else
+		{
+			ent->client->sess.spectatorClient = startclient;
+			Cmd_FollowCycle_f( ent,1 ); // get fresh spectatorClient
+
+			if ( ent->client->sess.spectatorClient == startclient ) {
+				// No one to follow, so just stay put
+				ent->client->sess.spectatorState = SPECTATOR_FREE;
+			} else {
+				ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+			}
+		}
+#else
 		ent->client->sess.spectatorClient = startclient;
 		Cmd_FollowCycle_f( ent,1 ); // get fresh spectatorClient
 
@@ -501,6 +541,7 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 		} else {
 			ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
 		}
+#endif // OMNIBOT
 
 //		ClientUserinfoChanged( ent->client - level.clients );		// NERVE - SMF - don't do this
 		if ( ent->client->sess.sessionTeam == TEAM_RED ) {
@@ -511,6 +552,14 @@ void limbo( gentity_t *ent, qboolean makeCorpse ) {
 			level.blueNumWaiting++;
 		}
 		// TODO Check this against OSPx
+#ifdef OMNIBOT
+		// one last anal check..really don't want them following
+		for ( i = 0 ; i < level.maxclients ; i++ ) {
+			if ( ( &g_entities[i] )->r.svFlags & SVF_BOT ) {
+				continue;
+			}
+		}
+#endif // OMNIBOT
 		for ( i = 0 ; i < level.maxclients ; i++ ) {
 			if ( level.clients[i].ps.pm_flags & PMF_LIMBO
 				 && level.clients[i].sess.spectatorClient == ent->s.number
@@ -573,8 +622,11 @@ void respawn( gentity_t *ent ) {
 
 	// Ridah, if single player, reload the last saved game for this player
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
-
+#ifndef OMNIBOT
 		if ( reloading || saveGamePending ) {
+#else
+        if ( reloading ) {
+#endif
 			return;
 		}
 
@@ -891,6 +943,10 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		return;
 	}
 
+#ifdef OMNIBOT
+	Bot_Event_ResetWeapons( client->ps.clientNum );
+#endif
+
 	// Reset special weapon time
 	client->ps.classWeaponTime = -999999;
 
@@ -917,6 +973,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 	client->ps.weapon = WP_KNIFE;
 	client->ps.weaponstate = WEAPON_READY;
 
+#ifdef OMNIBOT
+			Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_KNIFE ) );
+#endif
 	// Engineer gets dynamite
 	if ( pc == PC_ENGINEER ) {
 		COM_BitSet( client->ps.weapons, WP_DYNAMITE );
@@ -927,6 +986,10 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		COM_BitSet( client->ps.weapons, WP_PLIERS );
 		client->ps.ammoclip[BG_FindClipForWeapon( WP_PLIERS )] = 1;
 		client->ps.ammo[WP_PLIERS] = 1;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_DYNAMITE ) );
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_PLIERS ) );
+#endif
 	}
 
 	if ( g_knifeonly.integer != 1 ) {
@@ -946,18 +1009,39 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_SMOKE_GRENADE )] = 1;
 			client->ps.ammo[WP_SMOKE_GRENADE] = 1;
 
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_AMMO ) );
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_ARTY ) );
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_SMOKE_GRENADE ) );
+
+				// sort of a hack. bots need it for ammo table lookup so they can use the call arty goal
+				COM_BitSet( client->ps.weapons, WP_BINOCULARS );
+				client->ps.ammo[BG_FindAmmoForWeapon( WP_BINOCULARS )] = 0;
+				client->ps.ammoclip[BG_FindClipForWeapon( WP_BINOCULARS )] = 1;
+
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_BINOCULARS ) );
+#endif
 			switch ( client->sess.sessionTeam ) {
 			case TEAM_BLUE:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_PINEAPPLE );
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_PINEAPPLE )] = ltNades;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_GRENADE_PINEAPPLE ) );
+#endif
 				break;
 			case TEAM_RED:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_LAUNCHER );
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_LAUNCHER )] = ltNades;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_GRENADE_LAUNCHER ) );
+#endif
 				break;
 			default:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_PINEAPPLE );
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_PINEAPPLE )] = ltNades;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_GRENADE_PINEAPPLE ) );
+#endif
 				break;
 			}
 		}
@@ -970,12 +1054,18 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_LUGER )] += 8;
 				client->ps.ammo[BG_FindAmmoForWeapon( WP_LUGER )] += gunClips * 8;
 				client->ps.weapon = WP_LUGER;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_LUGER ) );
+#endif
 				break;
 			default: // '0' // TEAM_BLUE
 				COM_BitSet( client->ps.weapons, WP_COLT );
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_COLT )] += 8;
 				client->ps.ammo[BG_FindAmmoForWeapon( WP_COLT )] += gunClips * 8;
 				client->ps.weapon = WP_COLT;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_COLT ) );
+#endif
 				break;
 		}
 
@@ -991,6 +1081,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 				else if ( pc == PC_SOLDIER ) nades = soldNades;
 				else nades = 1;
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_PINEAPPLE )] = nades;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_GRENADE_PINEAPPLE ) );
+#endif
 				break;
 			case TEAM_RED:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_LAUNCHER );
@@ -1001,6 +1094,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 				else if ( pc == PC_SOLDIER ) nades = soldNades;
 				else nades = 1;
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_LAUNCHER )] = nades;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_GRENADE_LAUNCHER ) );
+#endif
 				break;
 			default:
 				COM_BitSet( client->ps.weapons, WP_GRENADE_PINEAPPLE );
@@ -1011,6 +1107,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 				else if ( pc == PC_SOLDIER ) nades = soldNades;
 				else nades = 1;
 				client->ps.ammoclip[BG_FindClipForWeapon( WP_GRENADE_PINEAPPLE )] = nades;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_GRENADE_PINEAPPLE ) );
+#endif
 				break;
 		}
 
@@ -1024,6 +1123,11 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			COM_BitSet( client->ps.weapons, WP_MEDKIT );
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_MEDKIT )] = 1;
 			client->ps.ammo[WP_MEDKIT] = 1;
+
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MEDIC_SYRINGE ) );
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MEDKIT ) );
+#endif
 		}
 		// jpw
 
@@ -1050,6 +1154,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
 					}
 					client->ps.weapon = WP_MP40;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MP40 ) );
+#endif
 					break;
 
 				case 4:     // WP_THOMPSON
@@ -1061,6 +1168,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
 					}
 					client->ps.weapon = WP_THOMPSON;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_THOMPSON ) );
+#endif
 					break;
 
 				case 5:     // WP_STEN
@@ -1072,6 +1182,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_STEN )] += (32 * ltClips);
 					}
 					client->ps.weapon = WP_STEN;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_STEN ) );
+#endif
 					break;
 
 
@@ -1101,6 +1214,10 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					client->ps.ammoclip[BG_FindClipForWeapon( WP_MAUSER )] = 10;
 					client->ps.ammo[BG_FindAmmoForWeapon( WP_MAUSER )] = 10;
 					client->ps.weapon = WP_MAUSER;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MAUSER ) );
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_SNIPERRIFLE ) );
+#endif
 					break;
 
 				case 8:     // WP_PANZERFAUST
@@ -1119,6 +1236,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					COM_BitSet( client->ps.weapons, WP_PANZERFAUST );
 					client->ps.ammo[BG_FindAmmoForWeapon( WP_PANZERFAUST )] = 4;
 					client->ps.weapon = WP_PANZERFAUST;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_PANZERFAUST ) );
+#endif
 					break;
 
 				case 9:     // WP_VENOM
@@ -1137,6 +1257,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					COM_BitSet( client->ps.weapons, WP_VENOM );
 					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_VENOM )] = 500;
 					client->ps.weapon = WP_VENOM;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_VENOM ) );
+#endif
 					break;
 
 				case 10:    // WP_FLAMETHROWER
@@ -1160,6 +1283,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					COM_BitSet( client->ps.weapons, WP_FLAMETHROWER );
 					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_FLAMETHROWER )] = 200;
 					client->ps.weapon = WP_FLAMETHROWER;
+#ifdef OMNIBOT
+				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_FLAMETHROWER ) );
+#endif
 					break;
 
 				default:    // give MP40 if given invalid weapon number
@@ -1172,6 +1298,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
 						}
 						client->ps.weapon = WP_MP40;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MP40 ) );
+#endif
 					} else { // TEAM_BLUE
 						COM_BitSet( client->ps.weapons, WP_THOMPSON );
 						client->ps.ammoclip[BG_FindClipForWeapon( WP_THOMPSON )] += 30;
@@ -1181,6 +1310,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
 						}
 						client->ps.weapon = WP_THOMPSON;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_THOMPSON ) );
+#endif
 					}
 					break;
 			}
@@ -1194,11 +1326,18 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		if ( pc == PC_MEDIC ) {
 			COM_BitSet( client->ps.weapons, WP_MEDIC_SYRINGE );
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_MEDIC_SYRINGE )] = 20;
-
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MEDIC_SYRINGE ) );
+#endif
 			// NERVE - SMF
 			COM_BitSet( client->ps.weapons, WP_MEDKIT );
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_MEDKIT )] = 1;
 			client->ps.ammo[WP_MEDKIT] = 1;
+#ifdef OMNIBOT
+					Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MEDKIT ) );
+#endif
+
+
 		}
 	} // End Knifeonly stuff -- Ensure that medics get their basic stuff
 
@@ -1582,10 +1721,17 @@ void ClientUserinfoChanged( int clientNum ) {
 		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
 		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
 	}
+#ifdef OMNIBOT
+	if ( ent->r.svFlags & SVF_BOT ) {
+		client->pers.autoActivate = PICKUP_TOUCH;
+		client->pmext.bAutoReload = qtrue;
+		client->pers.predictItemPickup = qfalse;
+	} else {
+#endif // OMNIBOT
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	//sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
-	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, 
+	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
 		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
 
 	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
@@ -1625,7 +1771,9 @@ void ClientUserinfoChanged( int clientNum ) {
 	else {
 		client->pers.findMedic = qtrue;
 	}
-
+#ifdef OMNIBOT
+}
+#endif
 	// set name
 	Q_strncpyz( oldname, client->pers.netname, sizeof( oldname ) );
 	s = Info_ValueForKey( userinfo, "name" );
@@ -1847,9 +1995,15 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	ent = &g_entities[clientNum];
 
+#ifndef OMNIBOT
+	if ( !isBot ) {
+#endif
 	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
 	// L0 - ASCII name bug crap..
+#ifdef OMNIBOT
+	if ( !isBot && !( ent->r.svFlags & SVF_BOT ) ) {
+#endif
 	value = Info_ValueForKey(userinfo, "name");
 	for (i = 0; i < strlen(value); i++) {
 		if (value[i] < 0) {
@@ -1889,11 +2043,17 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 	}
 	// End Xian
-
+#ifdef OMNIBOT
+}         //if ( !isBot && !( ent->r.svFlags & SVF_BOT ) )
+#endif
 	// we don't check password for bots and local client
 	// NOTE: local client <-> "ip" "localhost"
 	//   this means this client is not running in our current process
+#ifdef OMNIBOT
+	if ( !isBot && !( ent->r.svFlags & SVF_BOT ) && ( strcmp( Info_ValueForKey( userinfo, "ip" ), "localhost" ) != 0 ) ) {
+#else
 	if ( !( ent->r.svFlags & SVF_BOT ) && ( strcmp( Info_ValueForKey( userinfo, "ip" ), "localhost" ) != 0 ) ) {
+#endif
 		// check for a password
 		value = Info_ValueForKey( userinfo, "password" );
 		if ( g_password.string[0] && Q_stricmp( g_password.string, "none" ) &&
@@ -1901,6 +2061,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 			return "Invalid password";
 		}
 	}
+#ifndef OMNIBOT
+}     // <--- if(!isBot)
+#endif
 
 	// they can connect
 	ent->client = level.clients + clientNum;
@@ -1976,9 +2139,22 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		G_Printf("INSERT statement failed\n");
 	}
 #endif
+#ifdef OMNIBOT
+	if ( isBot ) {
+		ent->r.svFlags |= SVF_BOT;
+		ent->inuse = qtrue;
+	} //else {
+//		G_ReadIP( client );
+//	}
 
+	G_ReadSessionData( client );
+	G_LogPrintf( "ClientConnect: %i\n", clientNum );
+#endif //OMNIBOT
 	// get and distribute relevent paramters
 	G_LogPrintf( "ClientConnect: %i\n", clientNum );
+#ifdef OMNIBOT
+	Bot_Event_ClientConnected( clientNum, isBot );
+#endif
 	ClientUserinfoChanged( clientNum );
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
@@ -2062,6 +2238,14 @@ void ClientBegin( int clientNum ) {
 	client->pers.complaintClient = -1;
 	client->pers.complaintEndTime = -1;
 
+#ifdef OMNIBOT
+	//make sure this isn't set here
+	client->sess.botSuicide = qfalse;
+	client->sess.botSuicidePersist = qfalse;
+	if ( ent->r.svFlags & SVF_BOT ) {
+		client->sess.botPush = qtrue;
+	}
+#endif
 	// locate ent at a spawn point
 	ClientSpawn( ent, qfalse );
 
@@ -2105,7 +2289,9 @@ void ClientBegin( int clientNum ) {
 	// Ridah, trigger a spawn event
 	// DHM - Nerve :: Only in single player
 	if ( g_gametype.integer == GT_SINGLE_PLAYER && !( ent->r.svFlags & SVF_CASTAI ) ) {
+#ifndef OMNIBOT
 		AICast_ScriptEvent( AICast_GetCastState( clientNum ), "spawn", "" );
+#endif
 	}
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
@@ -2658,6 +2844,9 @@ void ClientDisconnect( int clientNum ) {
 	if ( !ent->client ) {
 		return;
 	}
+#ifdef OMNIBOT
+	Bot_Event_ClientDisConnected( clientNum );
+#endif
 
 	// stop any following clients
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
@@ -2771,10 +2960,11 @@ void ClientDisconnect( int clientNum ) {
 	CalculateRanks();
 
 	handleEmptyTeams();
-
+#ifndef OMNIBOT
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );
 	}
+#endif
 }
 
 /*

@@ -1053,9 +1053,11 @@ void brush_activate_sniper( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 	float dist;
 	vec3_t vec;
 	gentity_t *player;
-
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
-
+#else
+    player = NULL;
+#endif
 	if ( player && player != other ) {
 		// G_Printf ("other: %s\n", other->aiName);
 		return;
@@ -1420,8 +1422,11 @@ void snowInPVS( gentity_t *ent ) {
 
 	ent->nextthink = level.time + FRAMETIME;
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
-
+#else
+    player = NULL;
+#endif
 	if ( player ) {
 		inPVS = trap_InPVS( player->r.currentOrigin, ent->r.currentOrigin );
 
@@ -1589,10 +1594,11 @@ void Fire_Lead( gentity_t *ent, gentity_t *activator, float spread, int damage )
 	// RtcwPro added historical trace (unlagged)
 	//G_HistoricalTrace( ent, &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	trap_Trace(&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
-
+#ifndef OMNIBOT
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		AICast_ProcessBullet( activator, muzzle, tr.endpos );
 	}
+#endif
 
 	if ( tr.surfaceFlags & SURF_NOIMPACT ) {
 //		mg42_muzzleflash (ent);
@@ -1939,7 +1945,9 @@ void mg42_use( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 
 	trap_LinkEntity( ent );
 }
-
+#ifdef OMNIBOT
+void AddDeferredGoal( gentity_t *ent );
+#endif
 void mg42_spawn( gentity_t *ent ) {
 	gentity_t *base, *gun;
 	vec3_t offset;
@@ -2038,7 +2046,10 @@ void mg42_spawn( gentity_t *ent ) {
 		if ( !( ent->spawnflags & 2 ) ) { // no tripod
 			base->chain = gun;
 		}
-
+#ifdef OMNIBOT
+	//Add the gun as a Mount goal for Omni-bot
+	AddDeferredGoal( gun );
+#endif // OMNIBOT
 		G_FreeEntity( ent );
 	}
 }
@@ -2152,7 +2163,6 @@ void Flak_Animate( gentity_t *ent ) {
 		}
 	}
 }
-
 
 void flak_spawn( gentity_t *ent ) {
 	gentity_t *gun;
@@ -2320,12 +2330,14 @@ void miscGunnerEnemyScan( gentity_t *ent, vec3_t angles ) {
 		}
 		VectorSubtract( t->r.currentOrigin, ent->r.currentOrigin, v );
 		vectoangles( v, tang );
+#ifndef OMNIBOT
 		if ( !AICast_InFieldOfVision( angles, ent->harc, tang ) ) {
 			continue;
 		}
 		if ( !AICast_VisibleFromPos( ent->r.currentOrigin, ent->s.number, t->r.currentOrigin, t->s.number, qfalse ) ) {
 			continue;
 		}
+#endif
 		// found an enemy
 		ent->enemy = t;
 		break;
@@ -2369,9 +2381,12 @@ void miscGunnerThink( gentity_t *ent ) {
 	if ( ent->enemy ) {
 		if ( ent->enemy->health <= 0 ) {
 			ent->enemy = NULL;
-		} else if ( AICast_VisibleFromPos( ent->r.currentOrigin, ent->s.number, ent->enemy->r.currentOrigin, ent->enemy->s.number, qfalse ) ) {
+		}
+#ifndef OMNIBOT
+        else if ( AICast_VisibleFromPos( ent->r.currentOrigin, ent->s.number, ent->enemy->r.currentOrigin, ent->enemy->s.number, qfalse ) ) {
 			fire = qtrue;
 		}
+#endif
 	}
 
 	if ( !fire ) {

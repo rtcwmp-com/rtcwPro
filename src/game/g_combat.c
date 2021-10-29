@@ -33,8 +33,11 @@ If you have questions concerning this license or the applicable additional terms
  *
 */
 
-#include "g_local.h"
-
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 
 /*
 ============
@@ -438,7 +441,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			attacker->client->pers.life_kills++;		// life kills
 		} // End
 	}
-
+#ifdef OMNIBOT
+	Bot_Event_Death( self - g_entities, &g_entities[attacker - g_entities], obit );
+	Bot_Event_KilledSomeone( attacker - g_entities, &g_entities[self - g_entities], obit );
+#endif
 	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
 
 	// broadcast the death event to everyone
@@ -474,7 +480,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 			// DHM - Nerve :: Complaint lodging
 			if ( attacker != self && level.warmupTime <= 0 ) {
-				if ( attacker->client->pers.localClient ) {
+#ifdef OMNIBOT
+						if ( attacker->client->pers.localClient && !( attacker->r.svFlags & SVF_BOT ) ) {
+#else
+						if ( attacker->client->pers.localClient ) {
+#endif // OMNIBOT
 					trap_SendServerCommand( self - g_entities, "complaint -4" );
 				} else {
 					trap_SendServerCommand( self - g_entities, va( "complaint %i", attacker->s.number ) );
@@ -600,6 +610,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 						G_AddEvent( self, EV_GENERAL_SOUND, G_SoundIndex( "sound/multiplayer/allies/a-medic2.wav" ) );
 					}
 				}
+#ifdef OMNIBOT
+				// ATM: only register the goal if the target isn't in water.
+				if ( self->waterlevel <= 1 /*|| g_underwaterRevive.integer*/ ) {
+					Bot_AddFallenTeammateGoals( self, self->client->sess.sessionTeam );
+				}
+#endif
 			}
 		}
 	}
@@ -639,6 +655,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );
 
+#ifdef OMNIBOT
+	if ( !( self->r.svFlags & SVF_BOT ) )
+#endif
 	VectorCopy( self->s.angles, self->client->ps.viewangles );
 	self->s.loopSound = 0;
 
@@ -818,7 +837,7 @@ G_GetHitsoundStyle
 */
 char* G_GetHitsoundStyle(int headStyle, int bodyStyle, qboolean headshot) {
 
-	if (headshot) 
+	if (headshot)
 	{
 		switch (headStyle)
 		{
@@ -892,7 +911,7 @@ G_Hitsounds
 void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean headshot ) {
 	gentity_t* te;
 
-	if (!target || !attacker || !target->client || !attacker->client) 
+	if (!target || !attacker || !target->client || !attacker->client)
 	{
 		return;
 	}
@@ -900,9 +919,9 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 	qboolean onSameTeam = OnSameTeam(target, attacker);
 
 	// if player is hurting him self don't give any sounds
-	if (target->client == attacker->client) 
+	if (target->client == attacker->client)
 	{
-		return;  // this happens at flaming your self... just return silence...			
+		return;  // this happens at flaming your self... just return silence...
 	}
 
 	if (mod == MOD_ARTILLERY ||
@@ -923,18 +942,18 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 		return;
 	}
 
-	if (!attacker->client->pers.hitSoundType) 
+	if (!attacker->client->pers.hitSoundType)
 	{
 		return;
 	}
 
 	// if team mate
-	if (target->client && attacker->client && onSameTeam) 
+	if (target->client && attacker->client && onSameTeam)
 	{
 		//attacker->client->ps.persistant[PERS_HITBODY]--;
 		//hitEventType = HIT_TEAMSHOT;
 
-		if (attacker->client->pers.hitSoundType & HITSOUND_TEAM) 
+		if (attacker->client->pers.hitSoundType & HITSOUND_TEAM)
 		{
 			te = G_TempEntity(attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND);
 			te->s.eventParm = G_SoundIndex("sound/hitsounds/hitteam1.wav");
@@ -953,9 +972,9 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 	{
 		te = G_TempEntity(attacker->s.pos.trBase, EV_GLOBAL_CLIENT_SOUND);
 
-		if (headshot) 
+		if (headshot)
 		{
-			if (attacker->client->pers.hitSoundType & HITSOUND_HEAD) 
+			if (attacker->client->pers.hitSoundType & HITSOUND_HEAD)
 			{
 				//attacker->client->ps.persistant[PERS_HITHEAD]++;
 				//hitEventType = HIT_HEADSHOT;
@@ -964,9 +983,9 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(headStyle, 0, qtrue));
 			}
 		}
-		else 
+		else
 		{
-			if (attacker->client->pers.hitSoundType & HITSOUND_BODY) 
+			if (attacker->client->pers.hitSoundType & HITSOUND_BODY)
 			{
 				//attacker->client->ps.persistant[PERS_HITBODY]++;
 				//hitEventType = HIT_BODYSHOT;
@@ -1003,6 +1022,9 @@ dflags		these flags are used to control how T_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
+#ifdef OMNIBOT
+const char *_GetEntityName( gentity_t *_ent );
+#endif
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t   *client;
@@ -1121,11 +1143,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 
     	if (dflags & DAMAGE_RADIUS) {
-		    VectorScale( dir, g_damageRadiusKnockback.value * (float)knockback / mass, kvel );	
+		    VectorScale( dir, g_damageRadiusKnockback.value * (float)knockback / mass, kvel );
 		} else {
         	VectorScale( dir, g_knockback.value * (float)knockback / mass, kvel );
 		}
-		
+
 		VectorAdd( targ->client->ps.velocity, kvel, targ->client->ps.velocity );
 
 		if ( targ == attacker && !(  mod != MOD_ROCKET &&
@@ -1286,7 +1308,18 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			G_Hitsounds(targ, attacker, mod, isHeadShot);
 		}
 	}
-
+#ifdef OMNIBOT
+	// need to trigger the explodes filtered for health before the damage ...
+	if ( take && take > targ->health && targ->s.number >= MAX_CLIENTS && targ->health > 50 ) {
+		if ( targ->spawnflags & 16 ) {
+			if ( Q_stricmp( _GetEntityName( targ ), "" ) ) {
+				Bot_Util_SendTrigger( targ, NULL, va( "Explode_%s Exploded.", _GetEntityName( targ ) ), "exploded" );
+			} else {
+				Bot_Util_SendTrigger( targ, NULL, va( "Explode_%d Exploded", targ->s.number ), "exploded" );
+			}
+		}
+	}
+#endif
 	// do the damage
 	if ( take ) {
 		targ->health = targ->health - take;
@@ -1378,6 +1411,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		if ( targ->client ) {
 			targ->client->ps.stats[STAT_HEALTH] = targ->health;
 		}
+#ifdef OMNIBOT
+		if ( targ->s.number < MAX_CLIENTS ) {
+			// notify omni-bot framework
+			Bot_Event_TakeDamage( targ - g_entities, attacker );
+		}
+#endif // OMNIBOT
 	}
 
 }

@@ -325,6 +325,11 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->latchPlayerWeapon = sess->playerWeapon = 0;
 	sess->latchPlayerItem = sess->playerItem = 0;
 	sess->latchPlayerSkin = sess->playerSkin = 0;
+#ifdef OMNIBOT
+	sess->botSuicide = qfalse;
+	sess->botSuicidePersist = qfalse;
+	sess->botPush = qtrue;
+#endif
 
 	sess->spawnObjectiveIndex = 0;
 	// dhm - end

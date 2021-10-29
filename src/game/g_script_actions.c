@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,9 +34,13 @@ If you have questions concerning this license or the applicable additional terms
 // Tab Size:		4 (real tabs)
 //===========================================================================
 
-#include "../game/g_local.h"
-#include "../game/q_shared.h"
 
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
+#include "../game/q_shared.h"
 /*
 Contains the code to handle the various commands available with an event script.
 
@@ -56,6 +60,9 @@ G_ScriptAction_GotoMarker
   transitions
 ===============
 */
+#ifdef OMNIBOT
+const char *_GetEntityName( gentity_t *_ent );
+#endif
 qboolean G_ScriptAction_GotoMarker( gentity_t *ent, char *params ) {
 	char    *pString, *token;
 	gentity_t *target;
@@ -158,6 +165,15 @@ qboolean G_ScriptAction_GotoMarker( gentity_t *ent, char *params ) {
 			}
 			ent->reached = NULL;
 
+#ifdef OMNIBOT
+			{
+				const char *pName = _GetEntityName( ent );
+				Bot_Util_SendTrigger( ent,
+									  NULL,
+									  va( "%s_goto", pName ? pName : "<unknown>" ),
+									  va( "%.2f %.2f %.2f", ent->s.pos.trDelta[0], ent->s.pos.trDelta[1], ent->s.pos.trDelta[2] ) );
+			}
+#endif
 			if ( turntotarget ) {
 				duration = ent->s.pos.trDuration;
 				VectorCopy( target->s.angles, angles );
@@ -292,14 +308,14 @@ qboolean G_ScriptAction_Trigger( gentity_t *ent, char *params ) {
 	if ( !trigger[0] ) {
 		G_Error( "G_Scripting: trigger must have a name and an identifier\n" );
 	}
-
+#ifndef OMNIBOT
 	trent = AICast_FindEntityForName( name );
 	if ( trent ) { // we are triggering an AI
 				  //oldId = trent->scriptStatus.scriptId;
 		AICast_ScriptEvent( AICast_GetCastState( trent->s.number ), "trigger", trigger );
 		return qtrue;
 	}
-
+#endif
 	// look for an entity
 	trent = G_Find( &g_entities[MAX_CLIENTS], FOFS( scriptName ), name );
 	if ( trent ) {
@@ -626,7 +642,11 @@ G_ScriptAction_MissionFailed
 qboolean G_ScriptAction_MissionFailed( gentity_t *ent, char *params ) {
 	// todo!! (just kill the player for now)
 	gentity_t *player;
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 	if ( player ) {
 		G_Damage( player, player, player, vec3_origin, vec3_origin, 99999, DAMAGE_NO_PROTECTION, MOD_SUICIDE );
 	}
@@ -650,7 +670,11 @@ qboolean G_ScriptAction_MissionSuccess( gentity_t *ent, char *params ) {
 		G_Error( "G_Scripting: missionsuccess requires a mission_level identifier\n" );
 	}
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 	// double check that they are still alive
 	if ( player->health <= 0 ) {
 		return qfalse;  // hold the script here
@@ -760,6 +784,16 @@ qboolean G_ScriptAction_FaceAngles( gentity_t *ent, char *params ) {
 			}
 			ent->s.apos.trType = trType;
 		}
+#ifdef OMNIBOT
+		{
+			//hack: only trigger on slow moving shit
+			if ( duration && duration > 3500 ) {
+				const char *pName = _GetEntityName( ent );
+				Bot_Util_SendTrigger( ent, NULL, va( "%s_faceangle", pName ? pName : "<unknown>" ),
+									  va( "%.2f %.2f %.2f", ent->s.apos.trDelta[0], ent->s.apos.trDelta[1], ent->s.apos.trDelta[2] ) );
+			}
+		}
+#endif // OMNIBOT
 
 	} else if ( ent->s.apos.trTime + ent->s.apos.trDuration <= level.time ) {
 		// finished turning
@@ -920,7 +954,11 @@ qboolean G_ScriptAction_StartCam( gentity_t *ent, char *params ) {
 	ent->r.svFlags &= ~SVF_NOCLIENT;
 
 	// issue a start camera command to the client
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 	if ( !player ) {
 		G_Error( "player not found, perhaps you should give them more time to spawn in" );
 	}
@@ -1474,6 +1512,11 @@ qboolean G_ScriptAction_Announce( gentity_t *ent, char *params ) {
 
 	trap_SendServerCommand( -1, va( "cp \"%s\" 2", token ) );
 
+#ifdef OMNIBOT
+	{
+		Bot_Util_SendTrigger( ent, NULL, token, "announce_icon" );
+	}
+#endif
 	return qtrue;
 }
 

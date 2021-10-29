@@ -34,7 +34,11 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "g_local.h"
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 
 static float s_quadFactor;
 static vec3_t forward, right, up;
@@ -211,6 +215,9 @@ void Weapon_Medic( gentity_t *ent ) {
 		ent2->think = MagicSink;
 		ent2->timestamp = level.time + 31200;
 		ent2->parent = ent; // JPW NERVE so we can score properly later
+#ifdef OMNIBOT
+		Bot_Event_FireWeapon( ent - g_entities, Bot_WeaponGameToBot( ent->s.weapon ), ent2 );
+#endif
 	}
 }
 char testid1[] = "jfne"; // hash tables: don't touch
@@ -271,6 +278,9 @@ void Weapon_MagicAmmo( gentity_t *ent ) {
 		ent2->think = MagicSink;
 		ent2->timestamp = level.time + 31200;
 		ent2->parent = ent;
+#ifdef OMNIBOT
+		Bot_Event_FireWeapon( ent - g_entities, Bot_WeaponGameToBot( ent->s.weapon ), ent2 );
+#endif
 	}
 }
 // jpw
@@ -421,6 +431,9 @@ void Weapon_Syringe( gentity_t *ent ) {
 
 				ClientSpawn( traceEnt, qtrue );
 
+#ifdef OMNIBOT
+				Bot_Event_Revived( traceEnt - g_entities, ent );
+#endif
 				// L0 - Antilag
 				G_ResetTrail(traceEnt);
 				// end
@@ -503,6 +516,9 @@ void Weapon_Syringe( gentity_t *ent ) {
 
 void G_ExplodeMissile( gentity_t *ent );
 // DHM - Nerve
+#ifdef OMNIBOT
+const char *_GetEntityName( gentity_t *_ent );
+#endif
 void Weapon_Engineer( gentity_t *ent ) {
 	trace_t tr;
 	gentity_t   *traceEnt, *hit, *te;
@@ -657,11 +673,27 @@ void Weapon_Engineer( gentity_t *ent ) {
 // JPW NERVE
 						// TTimo gcc: suggest explicit braces to avoid ambiguous `else'
 						if ( ent->client != NULL ) {
+#ifdef OMNIBOT
+							const char *Goalname = NULL;
+#endif
 							if ( ( ent->client->sess.sessionTeam == TEAM_BLUE ) && ( hit->spawnflags & AXIS_OBJECTIVE ) ) {
 								te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-dynamite_planted.wav" );
 							} else if ( ( ent->client->sess.sessionTeam == TEAM_RED ) && ( hit->spawnflags & ALLIED_OBJECTIVE ) )         { // redundant but added for code clarity
 								te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-dynamite_planted.wav" );
 							}
+#ifdef OMNIBOT
+							G_Script_ScriptEvent( hit, "dynamited", "" );
+
+							hit->numPlanted += 1;
+
+							if ( hit->parent && hit->parent->track ) {
+								Goalname = _GetEntityName( hit->parent );
+							} else {
+								Goalname = _GetEntityName( hit );
+							}
+
+							Bot_AddDynamiteGoal( traceEnt, traceEnt->s.teamNum, va( "%s_%i", Goalname, hit->numPlanted ) );
+#endif // OMNIBOT
 						}
 
 						if ( hit->spawnflags & AXIS_OBJECTIVE ) {
@@ -756,6 +788,9 @@ void Weapon_Engineer( gentity_t *ent ) {
 								continue;
 							}
 
+#ifdef OMNIBOT
+							G_Script_ScriptEvent( hit, "defused", "" );
+#endif
 							traceEnt = G_TempEntity( ent->s.pos.trBase, EV_GLOBAL_SOUND );
 							traceEnt->r.svFlags |= SVF_BROADCAST;
 							if ( ent->client->sess.sessionTeam == TEAM_RED ) {
@@ -1175,6 +1210,10 @@ void Weapon_Artillery( gentity_t *ent ) {
 		}
 		ent->client->ps.classWeaponTime = level.time;
 	}
+
+#ifdef OMNIBOT
+	Bot_Event_FireWeapon( ent - g_entities, Bot_WeaponGameToBot( WP_ARTY ), 0 );
+#endif
 	// L0 - OSP Stats
 	if ( g_gamestate.integer == GS_PLAYING )
 		ent->client->sess.aWeaponStats[WS_ARTILLERY].atts++;
@@ -1614,10 +1653,12 @@ void SP5_Fire( gentity_t *ent, float aimSpreadScale ) {
 		} else {
 			// Ridah, don't hurt team-mates
 			// DHM - Nerve :: only in single player
+#ifndef OMNIBOT
 			if ( ent->client && traceEnt->client && g_gametype.integer == GT_SINGLE_PLAYER && ( traceEnt->r.svFlags & SVF_CASTAI ) && ( ent->r.svFlags & SVF_CASTAI ) && AICast_SameTeam( AICast_GetCastState( ent->s.number ), traceEnt->s.number ) ) {
 				// AI's don't hurt members of their own team
 				return;
 			}
+#endif
 			// done.
 			G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, 0, MOD_SILENCER );
 		}
@@ -1961,9 +2002,11 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 	// Ridah, if this is an AI shooting, apply their accuracy
 	if ( ent->r.svFlags & SVF_CASTAI ) {
 		float accuracy;
+#ifndef OMNIBOT
 		accuracy = ( 1.0 - AICast_GetAccuracy( ent->s.number ) ) * AICAST_AIM_SPREAD;
 		r += crandom() * accuracy;
 		u += crandom() * ( accuracy * 1.25 );
+#endif
 	} else {
 		if ( ent->s.weapon == WP_SNOOPERSCOPE || ent->s.weapon == WP_SNIPERRIFLE ) {
 			// aim dir already accounted for sway of scoped weapons in CalcMuzzlePoints()
@@ -2085,11 +2128,11 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		source->client->pers.life_acc_shots++;
 		source->client->sess.acc_shots++;
 	}
-
+#ifndef OMNIBOT
 	// DHM - Nerve :: only in single player
 	if (g_gametype.integer == GT_SINGLE_PLAYER)
 		AICast_ProcessBullet(attacker, start, tr.endpos);
-
+#endif
 	// bullet debugging using Q3A's railtrail
 	if (g_debugBullets.integer & 1) {
 		tent = G_TempEntity(start, EV_RAILTRAIL);
@@ -2224,7 +2267,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		}
 		else {
 			vec3_t backwards;
-
+#ifndef OMNIBOT
 			// Ridah, don't hurt team-mates
 			// DHM - Nerve :: Only in single player
 			if (attacker->client && traceEnt->client && g_gametype.integer == GT_SINGLE_PLAYER && (traceEnt->r.svFlags & SVF_CASTAI) && (attacker->r.svFlags & SVF_CASTAI) && AICast_SameTeam(AICast_GetCastState(attacker->s.number), traceEnt->s.number)) {
@@ -2232,6 +2275,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 				return;
 			}
 			// done.
+#endif
 
 			VectorSubtract(initial_start, tr.endpos, backwards);
 			VectorNormalize(backwards);
@@ -2810,8 +2854,11 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon ) {
 	vec3_t viewang;
 
 	VectorCopy( ent->client->ps.viewangles, viewang );
-
-	if ( !( ent->r.svFlags & SVF_CASTAI ) ) {   // non ai's take into account scoped weapon 'sway' (just another way aimspread is visualized/utilized)
+#ifdef OMNIBOT
+	if ( !( ent->r.svFlags & SVF_CASTAI ) && !( ent->r.svFlags & SVF_BOT ) ) {
+#else
+	if ( !( ent->r.svFlags & SVF_CASTAI ) ) { // non ai's take into account scoped weapon 'sway' (just another way aimspread is visualized/utilized)
+#endif
 		float spreadfrac, phase;
 
 		if ( weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE ) {
@@ -2847,6 +2894,10 @@ void FireWeapon( gentity_t *ent ) {
 	float aimSpreadScale;
 	vec3_t viewang;  // JPW NERVE
 	int shots = 1;	 // L0 - OSP Stats
+#ifdef OMNIBOT
+	gentity_t *pFiredShot = 0; // tell bots about projectiles
+	qboolean callEvent = qtrue; // some are called elsewhere so we can get the projectile
+#endif
 
 	// Rafael mg42
 	if ( ent->client->ps.persistant[PERS_HWEAPON_USE] && ent->active ) {
@@ -2865,6 +2916,7 @@ void FireWeapon( gentity_t *ent ) {
 	if ( g_userAim.integer ) {
 		aimSpreadScale = ent->client->currentAimSpreadScale;
 		// Ridah, add accuracy factor for AI
+#ifndef OMNIBOT
 		if ( ent->aiCharacter ) {
 			float aim_accuracy;
 			aim_accuracy = AICast_GetAccuracy( ent->s.number );
@@ -2872,7 +2924,9 @@ void FireWeapon( gentity_t *ent ) {
 				aim_accuracy = 0.0001;
 			}
 			aimSpreadScale = ( 1.0 - aim_accuracy ) * 2.0;
-		} else {
+		} else
+#endif
+		{
 			aimSpreadScale += 0.15f; // (SA) just adding a temp /maximum/ accuracy for player (this will be re-visited in greater detail :)
 			if ( aimSpreadScale > 1 ) {
 				aimSpreadScale = 1.0f;  // still cap at 1.0
@@ -2912,6 +2966,9 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 		// NERVE - SMF
 	case WP_MEDKIT:
+#ifdef OMNIBOT
+		callEvent = qfalse;
+#endif
 		Weapon_Medic( ent );
 		break;
 	case WP_PLIERS:
@@ -2923,7 +2980,11 @@ void FireWeapon( gentity_t *ent ) {
 				ent->client->ps.classWeaponTime = level.time - g_LTChargeTime.integer;
 			}
 			ent->client->ps.classWeaponTime = level.time; //+= g_LTChargeTime.integer*0.5f; FIXME later
-			weapon_grenadelauncher_fire( ent,WP_SMOKE_GRENADE );
+#ifdef OMNIBOT
+				pFiredShot = weapon_grenadelauncher_fire( ent,WP_SMOKE_GRENADE );
+#else
+				weapon_grenadelauncher_fire( ent, WP_SMOKE_GRENADE );
+#endif
 		}
 		break;
 		// -NERVE - SMF
@@ -2934,6 +2995,9 @@ void FireWeapon( gentity_t *ent ) {
 		Weapon_Syringe( ent );
 		break;
 	case WP_AMMO:
+#ifdef OMNIBOT
+		callEvent = qfalse;
+#endif
 		Weapon_MagicAmmo( ent );
 		break;
 // jpw
@@ -2989,7 +3053,11 @@ void FireWeapon( gentity_t *ent ) {
 		if ( ent->s.weapon == WP_DYNAMITE ) {
 			ent->client->ps.classWeaponTime = level.time; // JPW NERVE
 		}
+#ifdef OMNIBOT
+		pFiredShot = weapon_grenadelauncher_fire( ent, ent->s.weapon );
+#else
 		weapon_grenadelauncher_fire( ent, ent->s.weapon );
+#endif
 		break;
 	case WP_FLAMETHROWER:
 		// RF, this is done client-side only now
@@ -3000,6 +3068,11 @@ void FireWeapon( gentity_t *ent ) {
 	default:
 		break;
 	}
+#ifdef OMNIBOT
+	if ( callEvent ) {
+		Bot_Event_FireWeapon( ent - g_entities, Bot_WeaponGameToBot( ent->s.weapon ), pFiredShot );
+	}
+#endif
 	// L0 - OSP Stats
 	if ( g_gamestate.integer == GS_PLAYING )
 		ent->client->sess.aWeaponStats[BG_WeapStatForWeapon( ent->s.weapon )].atts += shots;

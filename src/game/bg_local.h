@@ -37,6 +37,9 @@ If you have questions concerning this license or the applicable additional terms
 #define TIMER_LAND      130
 #define TIMER_GESTURE   ( 34 * 66 + 50 )
 
+#ifdef OMNIBOT
+	#define MAX_WP_HEAT     1500.f
+#endif
 
 #define OVERCLIP        1.001
 

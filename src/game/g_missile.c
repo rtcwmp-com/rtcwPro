@@ -352,8 +352,11 @@ void Concussive_think( gentity_t *ent ) {
 	ent->nextthink = level.time + FRAMETIME;
 
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) { // JPW NERVE -- in multiplayer this should be handled by ground_shaker
-		player = AICast_FindEntityForName( "player" );
-
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 		if ( !player ) {
 			return;
 		}
@@ -975,6 +978,9 @@ void G_ExplodeMissile( gentity_t *ent ) {
 					G_UseTargets(hit, ent);
 					hit->think = G_FreeEntity;
 					hit->nextthink = level.time + FRAMETIME;
+#ifdef OMNIBOT
+					G_Script_ScriptEvent( hit, "destroyed", "" );
+#endif
 				}
 			}
 		}
@@ -1057,10 +1063,11 @@ void G_RunMissile( gentity_t *ent ) {
 
 	// Ridah, make AI aware of this danger
 	// DHM - Nerve :: Only in single player
+#ifndef OMNIBOT
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		AICast_CheckDangerousEntity( ent, DANGER_MISSILE, ent->splashRadius, 0.1, 0.99, qtrue );
 	}
-
+#endif
 	// get current position
 	BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
 

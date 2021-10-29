@@ -314,6 +314,47 @@ qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const ve
 	return qtrue;
 }
 
+#ifdef OMNIBOT
+/*
+===============
+RotatePointArountVertex
+
+Rotate a point around a vertex
+===============
+*/
+void RotatePointAroundVertex( vec3_t pnt, float rot_x, float rot_y, float rot_z, const vec3_t origin ) {
+	float tmp[11];
+	//float rad_x, rad_y, rad_z;
+
+	/*rad_x = DEG2RAD( rot_x );
+	rad_y = DEG2RAD( rot_y );
+	rad_z = DEG2RAD( rot_z );*/
+
+	// move pnt to rel{0,0,0}
+	VectorSubtract( pnt, origin, pnt );
+
+	// init temp values
+	tmp[0] = sin( rot_x );
+	tmp[1] = cos( rot_x );
+	tmp[2] = sin( rot_y );
+	tmp[3] = cos( rot_y );
+	tmp[4] = sin( rot_z );
+	tmp[5] = cos( rot_z );
+	tmp[6] = pnt[1] * tmp[5];
+	tmp[7] = pnt[0] * tmp[4];
+	tmp[8] = pnt[0] * tmp[5];
+	tmp[9] = pnt[1] * tmp[4];
+	tmp[10] = pnt[2] * tmp[3];
+
+	// rotate point
+	pnt[0] = ( tmp[3] * ( tmp[8] - tmp[9] ) + tmp[3] * tmp[2] );
+	pnt[1] = ( tmp[0] * ( tmp[2] * tmp[8] - tmp[2] * tmp[9] - tmp[10] ) + tmp[1] * ( tmp[7] + tmp[6] ) );
+	pnt[2] = ( tmp[1] * ( -tmp[2] * tmp[8] + tmp[2] * tmp[9] + tmp[10] ) + tmp[0] * ( tmp[7] + tmp[6] ) );
+
+	// move pnt back
+	VectorAdd( pnt, origin, pnt );
+}
+#endif // OMNIBOT
 /*
 ===============
 RotatePointAroundVector
@@ -1448,3 +1489,55 @@ float VectorDistance( vec3_t v1, vec3_t v2 ) {
 	return VectorLength( dir );
 }
 // done.
+#ifdef OMNIBOT
+/*
+==============
+AngleDifference
+==============
+*/
+float AngleDifference( float ang1, float ang2 ) {
+
+	float diff;
+
+	diff = ang1 - ang2;
+
+	if ( ang1 > ang2 ) {
+		if ( diff > 180.0 ) {
+			diff -= 360.0;
+		}
+	} else {
+		if ( diff < -180.0 ) {
+			diff += 360.0;
+		}
+	}
+
+	return diff;
+}
+
+/*
+================
+DistanceFromLineSquared
+================
+*/
+float DistanceFromLineSquared( vec3_t p, vec3_t lp1, vec3_t lp2 ) {
+	vec3_t proj, t;
+	int j;
+
+	ProjectPointOntoVector( p, lp1, lp2, proj );
+	for ( j = 0; j < 3; j++ )
+		if ( ( proj[j] > lp1[j] && proj[j] > lp2[j] ) ||
+			 ( proj[j] < lp1[j] && proj[j] < lp2[j] ) ) {
+			break;
+		}
+	if ( j < 3 ) {
+		if ( Q_fabs( proj[j] - lp1[j] ) < Q_fabs( proj[j] - lp2[j] ) ) {
+			VectorSubtract( p, lp1, t );
+		} else {
+			VectorSubtract( p, lp2, t );
+		}
+		return VectorLengthSquared( t );
+	}
+	VectorSubtract( p, proj, t );
+	return VectorLengthSquared( t );
+}
+#endif //OMNIBOT

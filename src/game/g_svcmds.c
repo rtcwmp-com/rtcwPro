@@ -26,8 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 // this file holds commands that can be executed by the server console, but not remote clients
-#include "g_local.h"
-
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 /*
 ==============================================================================
 
@@ -1047,6 +1050,12 @@ qboolean    ConsoleCommand( void ) {
 		return qtrue;
 	}
 	// RTCWPro
+#ifdef OMNIBOT
+	if ( Q_stricmp( cmd, "bot" ) == 0 ) {
+		Bot_Interface_ConsoleCommand();
+		return qtrue;
+	}
+#endif
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {
 			trap_SendServerCommand( -1, va( "print \"server:[lof] %s\n", ConcatArgs( 1 ) ) );

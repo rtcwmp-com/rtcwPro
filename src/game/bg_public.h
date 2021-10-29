@@ -112,7 +112,12 @@ typedef enum {
 	CLDMG_BOSS1LIGHTNING,
 	CLDMG_MAX
 } clientDamage_t;
-
+#ifdef OMNIBOT
+typedef enum {
+	STATE_DEFAULT,          // ent is linked, can be used and is solid
+	STATE_INVISIBLE,        // ent is unlinked, can't be used, doesn't think and is not solid
+} entState_t;
+#endif
 typedef enum popupMessageType_e {
 	PM_MESSAGE
 } popupMessageType_t;
@@ -358,6 +363,9 @@ int Pmove( pmove_t *pmove );
 #define PC_LT                   3   //	bomb stuff
 #define PC_MEDIC_CHARGETIME     30000   // FIXME just for testing, this will change to server cvars for each class
 // jpw
+#ifdef OMNIBOT
+	#define NUM_PLAYER_CLASSES      3
+#endif
 
 // player_state->stats[] indexes
 typedef enum {
@@ -453,6 +461,9 @@ typedef enum {
 #define EF_MOVER_STOP       0x10000000      // will push otherwise	// (SA) moved down to make space for one more client flag
 
 
+#ifdef OMNIBOT
+	#define BG_PlayerMounted( eFlags ) ( ( eFlags & EF_MG42_ACTIVE ) )
+#endif
 typedef enum {
 	PW_NONE,
 
@@ -664,6 +675,9 @@ typedef struct ammotable_s {
 	int coolRate;           // how fast the weapon cools down. (per second)
 //----(SA)	end
 	int mod;                // means of death
+#ifdef OMNIBOT
+	int numClips;
+#endif
 } ammotable_t;
 
 //extern ammotable_t* GetAmmoTableData(int ammoIndex);
@@ -1803,6 +1817,14 @@ int BG_GetAnimScriptEvent( playerState_t *ps, scriptAnimEventTypes_t event );
 extern animStringItem_t animStateStr[];
 extern animStringItem_t animBodyPartsStr[];
 
+
+#ifdef OMNIBOT
+qboolean BG_IsScopedWeapon( int weapon );
+
+extern ammotable_t ammoTable[WP_NUM_WEAPONS];
+	#define GetAmmoTableData( ammoIndex ) ( (ammotable_t*)( &ammoTable[ammoIndex] ) )
+	#define BG_PlayerMounted( eFlags ) ( ( eFlags & EF_MG42_ACTIVE ) )
+#endif
 // OSPx
 
 // Crosshairs

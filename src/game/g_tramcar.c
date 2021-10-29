@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -860,7 +860,11 @@ void ExplodePlaneSndFx( gentity_t *self ) {
 		gentity_t   *player;
 		vec3_t vec, ang;
 
-		player = AICast_FindEntityForName( "player" );
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 		if ( !player ) {
 			return;
@@ -992,8 +996,11 @@ void props_me109_think( gentity_t *self ) {
 
 	{
 		gentity_t *player;
-
-		player = AICast_FindEntityForName( "player" );
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 		if ( player ) {
 			in_PVS = trap_InPVS( player->r.currentOrigin, self->s.pos.trBase );
@@ -1245,7 +1252,11 @@ void SP_props_me109( gentity_t *ent ) {
 void truck_cam_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	gentity_t *player;
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 	if ( player && player != other ) {
 		// G_Printf ("other: %s\n", other->aiName);
@@ -1390,7 +1401,11 @@ void Init_Camera( gentity_t *ent ) {
 void camera_cam_think( gentity_t *ent ) {
 	gentity_t *player;
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 	if ( !player ) {
 		return;
@@ -1444,7 +1459,11 @@ void camera_cam_think( gentity_t *ent ) {
 void camera_cam_use( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	gentity_t *player;
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 	if ( !player ) {
 		return;
@@ -1567,7 +1586,11 @@ used will reset the player back to his last position
 void mark_players_pos( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 	gentity_t   *player;
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 	if ( player == other ) {
 		VectorCopy( player->r.currentOrigin, ent->s.origin2 );
@@ -1582,7 +1605,11 @@ void reset_players_pos( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
 	gentity_t *player;
 
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 	if ( !player ) {
 		return;

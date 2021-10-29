@@ -27,13 +27,50 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "g_local.h"
 
-#include "ai_cast_fight.h"   // need these for avoidance
+
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+	#include "ai_cast_fight.h"   // need these for avoidance
+#endif
 
 
 extern void G_CheckForCursorHints( gentity_t *ent );
 
+
+#ifdef OMNIBOT
+void PushBot( gentity_t *ent, gentity_t *other ) {
+	vec3_t dir, ang, f, r;
+	float oldspeed;
+
+	// dont push when scripted not to be pushed
+	if ( other->client && !other->client->sess.botPush ) {
+		return;
+	}
+
+	oldspeed = VectorLength( other->client->ps.velocity );
+	if ( oldspeed < 200 ) {
+		oldspeed = 200;
+	}
+	//
+	VectorSubtract( other->r.currentOrigin, ent->r.currentOrigin, dir );
+	VectorNormalize( dir );
+	vectoangles( dir, ang );
+	AngleVectors( ang, f, r, NULL );
+	f[2] = 0;
+	r[2] = 0;
+	//
+	VectorMA( other->client->ps.velocity, 200, f, other->client->ps.velocity );
+	VectorMA( other->client->ps.velocity, 100 * ( ( level.time + ( ent->s.number * 1000 ) ) % 4000 < 2000 ? 1.0 : -1.0 ), r, other->client->ps.velocity );
+	//
+	if ( VectorLengthSquared( other->client->ps.velocity ) > SQR( oldspeed ) ) {
+		VectorNormalize( other->client->ps.velocity );
+		VectorScale( other->client->ps.velocity, oldspeed, other->client->ps.velocity );
+	}
+}
+#endif // OMNIBOT
 
 
 /*
@@ -161,7 +198,9 @@ void P_WorldEffects( gentity_t *ent ) {
 					if ( ent->damage > 15 ) {
 						ent->damage = 15;
 					}
-
+#ifdef OMNIBOT
+					Bot_Event_Drowning( ent->client->ps.clientNum );
+#endif
 					// play a gurp sound instead of a normal pain sound
 					if ( ent->health <= ent->damage ) {
 						G_Sound( ent, G_SoundIndex( "*drown.wav" ) );
@@ -236,6 +275,11 @@ void G_SetClientSound( gentity_t *ent ) {
 	if ( ent->aiCharacter ) {
 		return;
 	}
+#ifdef OMNIBOT
+	if ( ent->r.svFlags & SVF_BOT ) {
+		return;
+	}
+#endif
 
 	if ( ent->waterlevel && ( ent->watertype & CONTENTS_LAVA ) ) { //----(SA)	modified since slime is no longer deadly
 		ent->s.loopSound = level.snd_fry;
@@ -270,10 +314,24 @@ void ClientImpacts( gentity_t *ent, pmove_t *pm ) {
 		}
 		other = &g_entities[ pm->touchents[i] ];
 
+#ifndef NO_BOT_SUPPORT
 		if ( ( ent->r.svFlags & SVF_BOT ) && ( ent->touch ) ) {
 			ent->touch( ent, other, &trace );
 		}
+#endif
+#ifdef OMNIBOT
+		// cs: modified so they push inv humans too (for annoying revives)
+		if ( ( ent->client ) &&
+			 ( ( other->r.svFlags & SVF_BOT ) || ( other->client && other->client->ps.powerups[PW_INVULNERABLE] ) ) ) {
+			PushBot( ent, other );
+		}
 
+		// if we are standing on their head, then we should be pushed also
+		if ( ( ent->r.svFlags & SVF_BOT || ( other->client && other->client->ps.powerups[PW_INVULNERABLE] ) ) &&
+			 ( ent->s.groundEntityNum == other->s.number && other->client ) ) {
+			PushBot( other, ent );
+		}
+#endif // OMNIBOT
 		if ( !other->touch ) {
 			continue;
 		}
@@ -1412,6 +1470,9 @@ void ClientThink_real( gentity_t *ent ) {
 							ent2->count = client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
 							ent2->item->quantity = client->ps.ammoclip[BG_FindClipForWeapon( weapon )];
 							client->ps.ammoclip[BG_FindClipForWeapon( weapon )] = 0;
+#ifdef OMNIBOT
+									Bot_Event_RemoveWeapon( client->ps.clientNum, Bot_WeaponGameToBot( weapon ) );
+#endif
 						}
 					}
 				}
@@ -1503,11 +1564,12 @@ void ClientThink_real( gentity_t *ent ) {
 	pm.pmove_msec = pmove_msec.integer;
 
 	pm.noWeapClips = ( g_dmflags.integer & DF_NO_WEAPRELOAD ) > 0;
+#ifndef OMNIBOT
 	if ( ent->aiCharacter && AICast_NoReload( ent->s.number ) ) {
 		pm.noWeapClips = qtrue; // ensure AI characters don't use clips if they're not supposed to.
 
 	}
-
+#endif
 	// Ridah
 //	if (ent->r.svFlags & SVF_NOFOOTSTEPS)
 //		pm.noFootsteps = qtrue;
@@ -1618,7 +1680,7 @@ void ClientThink_real( gentity_t *ent ) {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 	}
 
-	/*if (g_thinkStateLevelTime.integer) 
+	/*if (g_thinkStateLevelTime.integer)
 	{
 		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qtrue);
 	}
@@ -1634,7 +1696,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 
 	// RTCWPro
-	/*if (!g_thinkSnapOrigin.integer) 
+	/*if (!g_thinkSnapOrigin.integer)
 	{
 		// use the precise origin for linking
 		VectorCopy(ent->client->ps.origin, ent->r.currentOrigin);
@@ -1709,6 +1771,9 @@ void ClientThink_real( gentity_t *ent ) {
 		ent->client->ps.sprintTime = 20000;
 	}
 
+#ifdef OMNIBOT
+	Bot_Util_CheckForSuicide( ent );
+#endif
 
 	// check for respawning
 	if ( client->ps.stats[STAT_HEALTH] <= 0 ) {
@@ -2256,7 +2321,7 @@ void ClientEndFrame( gentity_t *ent ) {
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
 	}
 
-	/*if (g_endStateLevelTime.integer) 
+	/*if (g_endStateLevelTime.integer)
 	{
 		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, level.time, qfalse);
 	}

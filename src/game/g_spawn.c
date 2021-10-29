@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -577,7 +577,7 @@ spawn_t spawns[] = {
 // jpw
 
 	{"team_WOLF_checkpoint", SP_team_WOLF_checkpoint},       // DHM - Nerve
-
+#ifndef OMNIBOT
 	// Ridah
 	{"ai_soldier", SP_ai_soldier},
 	{"ai_american", SP_ai_american},
@@ -608,7 +608,7 @@ spawn_t spawns[] = {
 	{"ai_effect", SP_ai_effect},
 	{"ai_trigger", SP_ai_trigger},
 	// done.
-
+#endif
 	// Rafael particles
 	{"misc_snow256", SP_Snow},
 	{"misc_snow128", SP_Snow},
@@ -712,7 +712,7 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 	}
 
 	// RTCWPro
-	if (!G_SpawnEnts(ent)) 
+	if (!G_SpawnEnts(ent))
 	{
 		return qfalse;
 	}
@@ -1097,3 +1097,34 @@ void G_SpawnEntitiesFromString( void ) {
 	level.spawning = qfalse;            // any future calls to G_Spawn*() will be errors
 }
 
+#ifdef OMNIBOT
+qboolean G_SpawnStringExt( const char *key, const char *defaultString, char **out, const char* file, int line ) {
+	int i;
+
+	if ( !level.spawning ) {
+		*out = (char *)defaultString;
+		// Gordon: 26/11/02: re-enabling
+		// see InitMover
+		G_Error( "G_SpawnString() called while not spawning, file %s, line %i", file, line );
+	}
+
+	for ( i = 0 ; i < level.numSpawnVars ; i++ ) {
+		if ( !strcmp( key, level.spawnVars[i][0] ) ) {
+			*out = level.spawnVars[i][1];
+			return qtrue;
+		}
+	}
+
+	*out = (char *)defaultString;
+	return qfalse;
+}
+
+qboolean    G_SpawnVector2DExt( const char *key, const char *defaultString, float *out, const char* file, int line ) {
+	char        *s;
+	qboolean present;
+
+	present = G_SpawnStringExt( key, defaultString, &s, file, line );
+	sscanf( s, "%f %f", &out[0], &out[1] );
+	return present;
+}
+#endif //OMNIBOT

@@ -26,7 +26,11 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "g_local.h"
+#ifdef OMNIBOT
+	#include  "g_rtcwbot_interface.h"
+#else
+    #include "g_local.h"
+#endif
 
 level_locals_t level;
 
@@ -274,6 +278,14 @@ vmCvar_t g_spawnOffset;
 vmCvar_t g_bodiesGrabFlags;
 vmCvar_t g_mapScriptDirectory;
 vmCvar_t g_thinkStateLevelTime;
+#ifdef OMNIBOT
+vmCvar_t g_OmniBotEnable;
+vmCvar_t g_OmniBotPath;
+vmCvar_t g_OmniBotFlags;
+vmCvar_t g_OmniBotPlaying;
+vmCvar_t g_OmniBotGib;
+vmCvar_t g_botTeam;
+#endif
 vmCvar_t g_endStateLevelTime;
 vmCvar_t g_thinkSnapOrigin;
 
@@ -494,6 +506,14 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_maxTeamFlamer, "g_maxTeamFlamer", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qtrue },
 	{ &g_tournament, "g_tournament", "0", CVAR_ARCHIVE | CVAR_LATCH | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_dbgRevive, "g_dbgRevive", "0", 0, 0, qfalse },
+#ifdef OMNIBOT
+	{ &g_OmniBotEnable, "omnibot_enable", "1", CVAR_ARCHIVE | CVAR_NORESTART, 0, qfalse },
+	{ &g_OmniBotPath, "omnibot_path", "", CVAR_ARCHIVE | CVAR_NORESTART, 0, qfalse },
+	{ &g_OmniBotPlaying, "omnibot_playing", "0", CVAR_ROM | CVAR_SERVERINFO, 0, qfalse },   // Martin - added serverinfo to be able to see how many bots are playing.
+	{ &g_OmniBotFlags, "omnibot_flags", "32", CVAR_ARCHIVE | CVAR_NORESTART, 0, qfalse },	// Don't play sprees for bots by default
+	{ &g_OmniBotGib, "g_botGib", "1", CVAR_ARCHIVE, 0, qtrue},
+	{ &g_botTeam, "g_botTeam", "0", CVAR_SERVERINFO, qfalse},
+#endif
 	{ &g_dropWeapons, "g_dropWeapons", "9", CVAR_ARCHIVE, 0, qtrue, qtrue },
 	{ &g_hsDamage, "g_hsDamage", "50", CVAR_ARCHIVE, 0, qfalse, qtrue },
 	{ &g_pauseLimit, "g_pauseLimit", "3", CVAR_ARCHIVE, 0, qfalse, qfalse },
@@ -515,6 +535,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
 void CheckExitRules( void );
+#ifdef OMNIBOT
+void G_HandleMessage( int _clientfrom, const char *_buffer, int _messagesize, int _commandtime );
+#endif
 
 // Ridah, Cast AI
 qboolean AICast_VisibleFromPos( vec3_t srcpos, int srcnum,
@@ -542,9 +565,22 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 #endif
 	switch ( command ) {
 	case GAME_INIT:
+#ifdef OMNIBOT
+		Bot_Interface_InitHandles();
+#endif
 		G_InitGame( arg0, arg1, arg2 );
+#ifdef OMNIBOT
+		if ( !Bot_Interface_Init() ) {
+			G_Printf( S_COLOR_RED "Unable to Initialize Omni-Bot.\n" );
+		}
+#endif
 		return 0;
 	case GAME_SHUTDOWN:
+#ifdef OMNIBOT
+		if ( !Bot_Interface_Shutdown() ) {
+			G_Printf( S_COLOR_RED "Error shutting down Omni-Bot.\n" );
+		}
+#endif
 		G_ShutdownGame( arg0 );
 		return 0;
 	case GAME_CLIENT_CONNECT:
@@ -564,11 +600,26 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_CLIENT_COMMAND:
 		ClientCommand( arg0 );
 		return 0;
+#ifdef OMNIBOT
+	case GAME_MESSAGERECEIVED:
+	{
+		int iClientFrom = arg0;
+		const char *pBuffer = (const char *)arg1;
+		int iBufferLength = arg2;
+		int iCommandTime = arg3;
+		G_HandleMessage( iClientFrom, pBuffer, iBufferLength, iCommandTime );
+		return -1;
+	}
+#endif //OMNIBOT
 	case GAME_RUN_FRAME:
 		G_RunFrame( arg0 );
+#ifdef OMNIBOT
+		Bot_Interface_Update();
+#endif
 		return 0;
 	case GAME_CONSOLE_COMMAND:
 		return ConsoleCommand();
+#ifndef OMNIBOT
 	case BOTAI_START_FRAME:
 		return BotAIStartFrame( arg0 );
 		// Ridah, Cast AI
@@ -577,7 +628,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case AICAST_CHECKATTACKATPOS:
 		return AICast_CheckAttackAtPos( arg0, arg1, (float *)arg2, arg3, arg4 );
 		// done.
-
+#endif
 	case GAME_RETRIEVE_MOVESPEEDS_FROM_CLIENT:
 		G_RetrieveMoveSpeedsFromClient( arg0, (char *)arg1 );
 		return 0;
@@ -634,6 +685,80 @@ void QDECL G_Error( const char *fmt, ... ) {
 
 #define CH_MAX_DIST         256     // use the largest value from above
 #define CH_MAX_DIST_ZOOM    8192    // max dist for zooming hints
+
+#ifdef OMNIBOT
+qboolean G_EmplacedGunIsMountable( gentity_t* ent, gentity_t* other ) {
+	if ( Q_stricmp( ent->classname, "misc_mg42" ) && Q_stricmp( ent->classname, "misc_aagun" ) ) {
+		return qfalse;
+	}
+
+	if ( !other->client ) {
+		return qfalse;
+	}
+
+	if ( BG_IsScopedWeapon( other->client->ps.weapon ) ) {
+		return qfalse;
+	}
+
+	if ( other->client->ps.pm_flags & PMF_DUCKED ) {
+		return qfalse;
+	}
+
+	if ( other->client->ps.persistant[PERS_HWEAPON_USE] ) {
+		return qfalse;
+	}
+
+	if ( ent->r.currentOrigin[2] - other->r.currentOrigin[2] >= 40 ) {
+		return qfalse;
+	}
+
+	if ( ent->r.currentOrigin[2] - other->r.currentOrigin[2] < 0 ) {
+		return qfalse;
+	}
+
+	if ( ent->s.frame != 0 ) {
+		return qfalse;
+	}
+
+	if ( ent->active ) {
+		return qfalse;
+	}
+
+	if ( other->client->ps.grenadeTimeLeft ) {
+		return qfalse;
+	}
+
+	if ( infront( ent, other ) ) {
+		return qfalse;
+	}
+
+	return qtrue;
+}
+
+qboolean G_EmplacedGunIsRepairable( gentity_t* ent, gentity_t* other ) {
+	if ( Q_stricmp( ent->classname, "misc_mg42" ) && Q_stricmp( ent->classname, "misc_aagun" ) ) {
+		return qfalse;
+	}
+
+	if ( !other->client ) {
+		return qfalse;
+	}
+
+	if ( BG_IsScopedWeapon( other->client->ps.weapon ) ) {
+		return qfalse;
+	}
+
+	if ( other->client->ps.persistant[PERS_HWEAPON_USE] ) {
+		return qfalse;
+	}
+
+	if ( ent->s.frame == 0 ) {
+		return qfalse;
+	}
+
+	return qtrue;
+}
+#endif //OMNIBOT
 /*
 ==============
 G_CheckForCursorHints
@@ -664,9 +789,15 @@ void G_CheckForCursorHints( gentity_t *ent ) {
 //	if(!servercursorhints)
 //		return;
 
+#ifndef OMNIBOT
 	if ( !ent->client ) {
 		return;
 	}
+#else
+	if ( !ent->client || ent->r.svFlags & SVF_BOT ) {
+		return;
+	}
+#endif
 
 	ps = &ent->client->ps;
 
@@ -1494,6 +1625,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			char serverinfo[MAX_INFO_STRING];
 
 			trap_GetServerinfo( serverinfo, sizeof( serverinfo ) );
+#ifdef OMNIBOT
+			Q_strncpyz( level.rawmapname, Info_ValueForKey( serverinfo, "mapname" ), sizeof( level.rawmapname ) );
+#endif
 
 			G_LogPrintf( "------------------------------------------------------------\n" );
 			G_LogPrintf( "InitGame: %s\n", serverinfo );
@@ -1646,12 +1780,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 		trap_SendConsoleCommand(EXEC_APPEND, va("exec mapConfigs/%s.cfg \n", mapName));
 	} // L0 - end
+#ifndef OMNIBOT
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAISetup( restart );
 		BotAILoadMap( restart );
 		G_InitBots( restart );
 	}
-
+#endif
 	G_RemapTeamShaders();
 
 	// L0 - Pause
@@ -1704,6 +1839,9 @@ G_ShutdownGame
 =================
 */
 void G_ShutdownGame( int restart ) {
+#ifndef OMNIBOT
+	int i;
+#endif //OMNIBOT
 	if ( g_gametype.integer != GT_SINGLE_PLAYER ) {
 		G_Printf( "==== ShutdownGame ====\n" );
 	}
@@ -1719,11 +1857,13 @@ void G_ShutdownGame( int restart ) {
 
 	}
 
+#ifndef OMNIBOT
 	// Ridah, shutdown the Botlib, so weapons and things get reset upon doing a "map xxx" command
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		int i;
 
 		// Ridah, kill AI cast's
+
 		for ( i = 0 ; i < g_maxclients.integer ; i++ ) {
 			if ( g_entities[i].r.svFlags & SVF_CASTAI ) {
 				trap_DropClient( i, "Drop Cast AI" );
@@ -1731,6 +1871,7 @@ void G_ShutdownGame( int restart ) {
 		}
 		// done.
 	}
+#endif
 	// done.
 	// OSPx - Country Flags
 	GeoIP_close();
@@ -1739,9 +1880,11 @@ void G_ShutdownGame( int restart ) {
 	G_WriteSessionData();
 
 
+#ifndef NO_BOT_SUPPORT
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAIShutdown( restart );
 	}
+#endif
 }
 
 
@@ -2444,6 +2587,9 @@ void LogExit( const char *string ) {
 		trap_Cvar_Set( "g_currentRound", va( "%i", !g_currentRound.integer ) );
 	}
 	// -NERVE - SMF
+#ifdef OMNIBOT
+	Bot_Util_SendTrigger( NULL, NULL, "Round End.", "roundend" );
+#endif
 }
 
 /*
@@ -3402,11 +3548,25 @@ void G_RunFrame( int levelTime ) {
 			continue;
 		}
 
+//		if ( i < MAX_CLIENTS ) {
+//			G_RunClient( ent );
+//			continue;
+//		}
+#ifndef OMNIBOT
 		if ( i < MAX_CLIENTS ) {
+			if ( ent->isFake ) {
+				char buf[1024];
+				while ( trap_BotGetServerCommand( ent->client->ps.clientNum, buf, sizeof( buf ) ) ) {} //dont do anythng just clear servercmds so it dont boot out of server
+				ent->client->pers.cmd.serverTime = level.time;
+				ent->client->lastCmdTime = level.time;
+				trap_BotUserCommand( ent->client->ps.clientNum, &ent->client->pers.cmd ); //send a server cmd?? i think lol
+				ClientThink_real( ent ); //dont need to call this :D
+				continue;
+			}
 			G_RunClient( ent );
 			continue;
 		}
-
+#endif //OMNIBOT
 		G_RunThink( ent );
 	}
 //end = trap_Milliseconds();
@@ -3480,3 +3640,8 @@ void G_RunFrame( int levelTime ) {
 		TeamLockStatus();
 	}
 }
+#ifdef OMNIBOT
+void G_HandleMessage( int _clientfrom, const char *_buffer, int _messagesize, int _commandtime ) {
+}
+#endif
+

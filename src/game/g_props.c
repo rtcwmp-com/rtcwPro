@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -899,7 +899,11 @@ void Just_Got_Thrown( gentity_t *self ) {
 		if ( self->enemy ) {
 			gentity_t *player;
 
-			player = AICast_FindEntityForName( "player" );
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 
 			if ( player && player != self->enemy ) {
 				prop_hits = qtrue;
@@ -915,7 +919,9 @@ void Just_Got_Thrown( gentity_t *self ) {
 	} else
 	{
 		// RF, alert AI of sound event
+#ifndef OMNIBOT
 		AICast_AudibleEvent( self->s.number, self->r.currentOrigin, 384 );
+#endif
 
 		G_AddEvent( self, EV_GENERAL_SOUND, snd_chairhitground );
 		VectorSubtract( self->r.currentOrigin, self->s.origin2, vec );
@@ -935,8 +941,11 @@ void Just_Got_Thrown( gentity_t *self ) {
 			traceEnt = &g_entities[ trace.entityNum ];
 
 			if ( trace.startsolid ) {
-				player = AICast_FindEntityForName( "player" );
-
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 				if ( traceEnt == player && traceEnt->health >= 0 ) {
 					// pick the chair back up
 					self->active = qtrue;
@@ -1284,7 +1293,9 @@ void Props_Chair_Touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 
 	if ( !has_moved && ( other->r.svFlags & SVF_CASTAI ) ) {
 		// RF, alert AI of sound event
+#ifndef OMNIBOT
 		AICast_AudibleEvent( self->s.number, self->r.currentOrigin, 384 );
+#endif
 
 		// other could play kick animation here
 		Props_Chair_Die( self, other, other, 100, 0 );
@@ -1295,8 +1306,9 @@ void Props_Chair_Touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 
 	if ( level.time > self->random && has_moved ) {
 		// RF, alert AI of sound event
+#ifndef OMNIBOT
 		AICast_AudibleEvent( self->s.number, self->r.currentOrigin, 384 );
-
+#endif
 		G_AddEvent( self, EV_GENERAL_SOUND, snd_chaircreak );
 		self->random = level.time + 1000 + ( rand() % 200 );
 	}
@@ -1445,8 +1457,11 @@ void Props_Chair_Die( gentity_t *ent, gentity_t *inflictor, gentity_t *attacker,
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		gentity_t *player;
 
-		player = AICast_FindEntityForName( "player" );
-
+#ifndef OMNIBOT
+	player = AICast_FindEntityForName( "player" );
+#else
+    player = NULL;
+#endif
 		if ( player && player->melee == ent ) {
 			player->melee = NULL;
 			player->active = qfalse;
@@ -1462,7 +1477,11 @@ void Props_Chair_Die( gentity_t *ent, gentity_t *inflictor, gentity_t *attacker,
 	ent->think = Props_Chair_Animate;
 	ent->nextthink = level.time + FRAMETIME;
 
+#ifdef OMNIBOT
+	ent->health = 0; // if this is above 0, bots will still target ...
+#else
 	ent->health = ent->duration;
+#endif
 	ent->delay = damage;
 	ent->takedamage = qfalse;
 //	ent->enemy = inflictor;
@@ -1487,9 +1506,11 @@ void Props_Chair_Die( gentity_t *ent, gentity_t *inflictor, gentity_t *attacker,
 void Props_Chair_Skyboxtouch( gentity_t *ent ) {
 
 	gentity_t *player;
-
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
-
+#else
+	player = NULL;
+#endif
 	if ( player && player->melee == ent ) {
 		player->melee = NULL;
 		player->active = qfalse;
@@ -2185,9 +2206,11 @@ void Props_OilSlickSlippery( gentity_t *ent ) {
 	gentity_t *player;
 	vec3_t vec, kvel, dir;
 	float len;
-
+#ifndef OMNIBOT
 	player = AICast_FindEntityForName( "player" );
-
+#else
+    player = NULL;
+#endif
 	if ( player ) {
 		VectorSubtract( player->r.currentOrigin, ent->r.currentOrigin, vec );
 		len = VectorLength( vec );

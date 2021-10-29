@@ -443,7 +443,9 @@ void Com_Memcpy( void* dest, const void* src, const size_t count );
 #define CIN_hold    4
 #define CIN_silent  8
 #define CIN_shader  16
-
+#ifdef OMNIBOT
+	#define GAME_INIT_FRAMES	6
+#endif
 
 /*
 ==============================================================
@@ -668,6 +670,10 @@ vec_t VectorNormalize2( const vec3_t v, vec3_t out );
 void VectorInverse( vec3_t v );
 void Vector4Scale( const vec4_t in, vec_t scale, vec4_t out );
 void VectorRotate( vec3_t in, vec3_t matrix[3], vec3_t out );
+#ifdef OMNIBOT
+void RotatePointAroundVertex( vec3_t pnt, float rot_x, float rot_y, float rot_z, const vec3_t origin );
+float DistanceFromLineSquared( vec3_t p, vec3_t lp1, vec3_t lp2 );
+#endif
 int Q_log2( int val );
 
 float Q_acos( float c );
@@ -1691,6 +1697,9 @@ typedef enum _flag_status {
 #define SAY_ALL     0
 #define SAY_TEAM    1
 #define SAY_TELL    2
+#ifdef OMNIBOT
+#define PRIVATE_MESSAGE 3
+#endif
 
 #define CDKEY_LEN 16
 #define CDCHKSUM_LEN 2
@@ -1716,7 +1725,14 @@ typedef enum {
 	GS_WAITING_FOR_PLAYERS,
 	GS_RESET
 } gamestate_t;
+#ifdef OMNIBOT
+	#define SQR( a ) ( ( a ) * ( a ) )
 
+typedef struct
+{
+	int messageId;
+} UdpMessageHeader;
+#endif //OMNIBOT
 // TTimo - voting config flags
 #define VOTEFLAGS_RESTART           ( 1 << 0 )
 #define VOTEFLAGS_RESETMATCH    ( 1 << 1 )
@@ -1739,9 +1755,7 @@ typedef enum {
 #define GUID_LEN				33
 #define NO_GUID					"NO_GUID"
 
-// Indicates if client is connected or not.
-// Deals with Bloom issues as well as just identifying if extra stuff should be ran..
-qboolean clientIsConnected;
+
 
 #if defined(_WIN32) || defined(_WIN64)
 /* We are on Windows */

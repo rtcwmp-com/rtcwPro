@@ -47,6 +47,10 @@ If you have questions concerning this license or the applicable additional terms
 //#define GAMEVERSION "RtcwPro 1.0 beta"
 #define JSONGAMESTATVERSION "0.1.3"
 
+#ifdef OMNIBOT
+//exclude some of the original bot code
+	#define NO_BOT_SUPPORT
+#endif
 // done.
 
 #define BODY_QUEUE_SIZE     8
@@ -59,6 +63,9 @@ If you have questions concerning this license or the applicable additional terms
 #define REWARD_SPRITE_TIME  2000
 
 #define INTERMISSION_DELAY_TIME 1000
+#ifdef OMNIBOT
+	#define MAX_WP_HEAT         1500.f
+#endif
 
 #define MG42_MULTIPLAYER_HEALTH 350             // JPW NERVE
 
@@ -289,7 +296,11 @@ struct gentity_s {
 	int last_move_time;
 
 	int health;
+#ifdef OMNIBOT
+	int numPlanted;         // for dynamite goals
 
+	entState_t entstate;
+#endif
 	qboolean takedamage;
 
 	int damage;
@@ -426,6 +437,9 @@ struct gentity_s {
 	// RTCWPro - allowteams - ET port
 	int allowteams;
 
+	qboolean poisoned;
+
+	int poisonEnt;
 	// player ammo
 	int playerAmmo;
 	int playerAmmoClip;
@@ -440,10 +454,13 @@ struct gentity_s {
 	qboolean	headshot;
 	qboolean	is_head;
 	gentity_t*  head;
+	qboolean isFake;
 };
 
 // Ridah
-#include "ai_cast_global.h"
+#ifndef OMNIBOT
+	#include "ai_cast_global.h"
+#endif
 // done.
 
 typedef enum {
@@ -521,11 +538,13 @@ typedef struct {
 	int wins, losses;               // tournament stats
 	int playerType;                 // DHM - Nerve :: for GT_WOLF
 	int playerWeapon;               // DHM - Nerve :: for GT_WOLF
+	int playerWeapon2;               // DHM - Nerve :: for GT_WOLF
 	int playerItem;                 // DHM - Nerve :: for GT_WOLF
 	int playerSkin;                 // DHM - Nerve :: for GT_WOLF
 	int spawnObjectiveIndex;         // JPW NERVE index of objective to spawn nearest to (returned from UI)
 	int latchPlayerType;            // DHM - Nerve :: for GT_WOLF not archived
 	int latchPlayerWeapon;          // DHM - Nerve :: for GT_WOLF not archived
+	int latchPlayerWeapon2;          // DHM - Nerve :: for GT_WOLF not archived
 	int latchPlayerItem;            // DHM - Nerve :: for GT_WOLF not archived
 	int latchPlayerSkin;            // DHM - Nerve :: for GT_WOLF not archived
 
@@ -563,6 +582,11 @@ typedef struct {
 	int acc_hits;	// -||-
 	int killPeak;
 	int knifeKills;
+#ifdef OMNIBOT
+	qboolean botSuicide;            // if true, bots will /kill 2 seconds before their next spawn
+	qboolean botSuicidePersist;
+	qboolean botPush;               // CS: in some cases we don't want bots pushing
+#endif
 	int obj_captured;
 	int obj_destroyed;
 	int obj_returned;
@@ -649,6 +673,21 @@ typedef struct {
 	int restrictedWeapon;
 	qboolean drawHitBoxes;
 	qboolean findMedic;
+// temp
+//S4NDM4NN for the stats
+	int kills;
+	int teamKills;
+	int gibs;
+	int teamGibs;
+	int revives;
+	int medPacks;
+	int ammoPacks;
+	int acc_shots;
+	int acc_hits;
+	int acc_teamHits;
+	int headshots;
+	int deaths;
+
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -802,6 +841,9 @@ struct gclient_s {
 	gentity_t		*tempHead;	// Gordon: storing a temporary head for bullet head shot detection
 
 	pmoveExt_t	pmext;
+#ifdef OMNIBOT
+	int flagParent;
+#endif
 
 	// L0 - New stuff
 	int			doublekill;		// (stats) Double+ Kills
@@ -1001,6 +1043,11 @@ typedef struct {
 	int axisPF, alliedPF;
 	int axisVenom, alliedVenom;
 	int axisFlamer, alliedFlamer;
+#ifdef OMNIBOT
+	char rawmapname[MAX_QPATH];
+	qboolean twoMinute;    // two minute warning trigger
+	qboolean thirtySecond;    // thirty second warning trigger
+#endif
 
 	// Pause
 	int paused;
@@ -1067,9 +1114,17 @@ char *G_NewString( const char *string );
 qboolean G_CallSpawn( gentity_t *ent );
 // done.
 
+#ifdef OMNIBOT
+qboolean    G_SpawnStringExt( const char *key, const char *defaultString, char **out, const char* file, int line );
+	#define     G_SpawnVector2D(    key, def, out ) G_SpawnVector2DExt( key, def, out, __FILE__, __LINE__ )
+qboolean    G_SpawnVector2DExt( const char *key, const char *defaultString, float *out, const char* file, int line );
+#endif // OMNIBOT
 //
 // g_cmds.c
 //
+#ifdef OMNIBOT
+void Cmd_Kill_f( gentity_t *ent );
+#endif
 void Cmd_Score_f( gentity_t *ent );
 void StopFollowing( gentity_t *ent );
 //void BroadcastTeamChange( gclientgclient_t *client, int oldTeam );
@@ -1146,6 +1201,9 @@ qboolean infront( gentity_t *self, gentity_t *other );
 
 void G_ProcessTagConnect( gentity_t *ent );
 
+#ifdef OMNIBOT
+gentity_t* G_FindByTargetname( gentity_t *from, const char* match );
+#endif
 qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // RTCWPro - allowteams ET - port
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // RTCWPro - drop weapon stuff
 gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
@@ -1221,6 +1279,7 @@ void InitMoverRotate( gentity_t *ent );
 
 void InitMover( gentity_t *ent );
 void SetMoverState( gentity_t *ent, moverState_t moverState, int time );
+void func_explosive_explode(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
 
 //
 // g_tramcar.c
@@ -1319,6 +1378,11 @@ void DeathmatchScoreboardMessage( gentity_t *client );
 // g_cmds.c
 //
 void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message, qboolean localize ); // JPW NERVE removed static declaration so it would link
+#ifdef OMNIBOT
+void SetPlayerSpawn( gentity_t* ent, int spawn, qboolean update );
+qboolean G_EmplacedGunIsRepairable( gentity_t* ent, gentity_t* other );
+qboolean G_EmplacedGunIsMountable( gentity_t* ent, gentity_t* other );
+#endif
 qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand);
 void SanitizeString(char* in, char* out);
 
@@ -1356,6 +1420,7 @@ void ClientThink( int clientNum );
 void ClientEndFrame( gentity_t *ent );
 void G_RunClient( gentity_t *ent );
 
+void Cmd_BotTapOut_f( gentity_t *ent );
 //
 // g_team.c
 //
@@ -1611,7 +1676,14 @@ extern vmCvar_t	g_dropWeapons;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
-
+#ifdef OMNIBOT
+extern vmCvar_t g_OmniBotPath;
+extern vmCvar_t g_OmniBotEnable;
+extern vmCvar_t g_OmniBotFlags;
+extern vmCvar_t g_OmniBotPlaying;
+extern vmCvar_t g_OmniBotGib;
+extern vmCvar_t g_botTeam;
+#endif
 // Weapon/class stuff
 extern vmCvar_t	g_ltNades;
 extern vmCvar_t	g_medicNades;
@@ -1720,7 +1792,7 @@ int     trap_BotAllocateClient( void );
 void    trap_BotFreeClient( int clientNum );
 void    trap_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean    trap_GetEntityToken( char *buffer, int bufferSize );
-qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* or );
+qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* orr );
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );
@@ -1899,7 +1971,7 @@ typedef enum
 	shard_ceramic,
 	shard_rubble
 } shards_t;
-
+#define BODY_TEAM( ENT ) ENT->s.modelindex
 // Pause
 #define PAUSE_NONE		0x00	// Match is not paused..
 #define PAUSE_UNPAUSING 0x02    // Pause is about to expire

@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,6 +41,10 @@ typedef struct {
 	float timeOffset;
 } shaderRemap_t;
 
+#ifdef OMNIBOT
+void Bot_Queue_EntityCreated( gentity_t *pEnt );
+void Bot_Event_EntityDeleted( gentity_t *pEnt );
+#endif
 #define MAX_SHADER_REMAPS 128
 
 int remapCount = 0;
@@ -399,6 +403,9 @@ void G_InitGentity( gentity_t *e ) {
 
 	// RF, init scripting
 	e->scriptStatus.scriptEventIndex = -1;
+#ifdef OMNIBOT
+	Bot_Queue_EntityCreated( e );
+#endif
 }
 
 /*
@@ -492,6 +499,9 @@ Marks the entity as free
 =================
 */
 void G_FreeEntity( gentity_t *ed ) {
+#ifdef OMNIBOT
+	Bot_Event_EntityDeleted( ed );
+#endif
 	trap_UnlinkEntity( ed );     // unlink from world
 
 	if ( ed->neverFree ) {
@@ -670,7 +680,9 @@ void G_AnimScriptSound( int soundIndex, vec3_t org, int client ) {
 	gentity_t *e;
 	e = &g_entities[client];
 	G_AddEvent( e, EV_GENERAL_SOUND, soundIndex );
+#ifndef OMNIBOT
 	AICast_RecordScriptSound( client );
+#endif
 }
 
 //==============================================================================
@@ -1139,37 +1151,37 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
 
 	// Check only SP
-	if ((!Q_stricmp(mapName, "assault")) || 
-		(!Q_stricmp(mapName, "baseout")) || 
-		(!Q_stricmp(mapName, "boss1")) || 
-		(!Q_stricmp(mapName, "boss2")) || 
-		(!Q_stricmp(mapName, "castle")) || 
-		(!Q_stricmp(mapName, "chateau")) || 
-		(!Q_stricmp(mapName, "church")) || 
-		(!Q_stricmp(mapName, "crypt1")) || 
-		(!Q_stricmp(mapName, "crypt2")) || 
+	if ((!Q_stricmp(mapName, "assault")) ||
+		(!Q_stricmp(mapName, "baseout")) ||
+		(!Q_stricmp(mapName, "boss1")) ||
+		(!Q_stricmp(mapName, "boss2")) ||
+		(!Q_stricmp(mapName, "castle")) ||
+		(!Q_stricmp(mapName, "chateau")) ||
+		(!Q_stricmp(mapName, "church")) ||
+		(!Q_stricmp(mapName, "crypt1")) ||
+		(!Q_stricmp(mapName, "crypt2")) ||
 		(!Q_stricmp(mapName, "cutscene1")) ||
 		(!Q_stricmp(mapName, "cutscene6")) ||
 		(!Q_stricmp(mapName, "cutscene9")) ||
 		(!Q_stricmp(mapName, "cutscene11")) ||
 		(!Q_stricmp(mapName, "cutscene14")) ||
 		(!Q_stricmp(mapName, "cutscene19")) ||
-		(!Q_stricmp(mapName, "dam")) || 
+		(!Q_stricmp(mapName, "dam")) ||
 		(!Q_stricmp(mapName, "dark")) ||
-		(!Q_stricmp(mapName, "dig")) || 
-		(!Q_stricmp(mapName, "end")) || 
-		(!Q_stricmp(mapName, "escape1")) || 
-		(!Q_stricmp(mapName, "escape2")) || 
-		(!Q_stricmp(mapName, "factory")) || 
-		(!Q_stricmp(mapName, "forest")) || 
-		(!Q_stricmp(mapName, "norway")) || 
-		(!Q_stricmp(mapName, "rocket")) || 
-		(!Q_stricmp(mapName, "sfm")) || 
-		(!Q_stricmp(mapName, "swf")) || 
-		(!Q_stricmp(mapName, "trainyard")) || 
-		(!Q_stricmp(mapName, "tram")) || 
-		(!Q_stricmp(mapName, "village1")) || 
-		(!Q_stricmp(mapName, "village2")) || 
+		(!Q_stricmp(mapName, "dig")) ||
+		(!Q_stricmp(mapName, "end")) ||
+		(!Q_stricmp(mapName, "escape1")) ||
+		(!Q_stricmp(mapName, "escape2")) ||
+		(!Q_stricmp(mapName, "factory")) ||
+		(!Q_stricmp(mapName, "forest")) ||
+		(!Q_stricmp(mapName, "norway")) ||
+		(!Q_stricmp(mapName, "rocket")) ||
+		(!Q_stricmp(mapName, "sfm")) ||
+		(!Q_stricmp(mapName, "swf")) ||
+		(!Q_stricmp(mapName, "trainyard")) ||
+		(!Q_stricmp(mapName, "tram")) ||
+		(!Q_stricmp(mapName, "village1")) ||
+		(!Q_stricmp(mapName, "village2")) ||
 		(!Q_stricmp(mapName, "xlabs")))
 	{
 
@@ -1272,7 +1284,7 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 	}
 
 	if (!Q_stricmp(mapName, "assault")) {
-		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == -4510) && 
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == -4510) &&
 			(ent->r.currentOrigin[1] == 4616) && (ent->r.currentOrigin[2] == 664)) {
 			return qfalse;
 		}
@@ -1424,7 +1436,7 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 	}
 
 	if (!Q_stricmp(mapName, "factory")) {
-		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 1400) && 
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 1400) &&
 			(ent->r.currentOrigin[1] == 162) && (ent->r.currentOrigin[2] == 56)) {
 			return qfalse;
 		}
@@ -1463,7 +1475,7 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 		if (!strcmp("func_invisible_user", ent->classname)) {
 			return qfalse;
 		}
-		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 478) && 
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 478) &&
 			(ent->r.currentOrigin[1] == -576) && (ent->r.currentOrigin[2] == -64)) {
 			return qfalse;
 		}
@@ -1591,7 +1603,7 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 		if ((!strcmp("func_explosive", ent->classname)) && (ent->spawnflags == 4)) {
 			return qfalse;
 		}
-		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 1500) && 
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 1500) &&
 			(ent->r.currentOrigin[1] == 80) && (ent->r.currentOrigin[2] == 48)) {
 			return qfalse;
 		}
@@ -1599,4 +1611,31 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 
 	return qtrue;
 }
+#ifdef OMNIBOT
+/*
+=============
+G_FindByTargetname
+=============
+*/
+gentity_t* G_FindByTargetname( gentity_t *from, const char* match ) {
+	gentity_t* max = &g_entities[level.num_entities];
 
+	if ( !from ) {
+		from = g_entities;
+	} else {
+		from++;
+	}
+
+	for ( ; from < max ; from++ ) {
+		if ( !from->inuse ) {
+			continue;
+		}
+
+		if ( !Q_stricmp( from->targetname, match ) ) {
+			return from;
+		}
+	}
+
+	return NULL;
+}
+#endif //OMNIBOT

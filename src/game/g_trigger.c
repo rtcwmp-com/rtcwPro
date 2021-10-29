@@ -2,9 +2,9 @@
 ===========================================================================
 
 Return to Castle Wolfenstein multiplayer GPL Source Code
-Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company.
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).
 
 RTCW MP Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -103,7 +103,11 @@ void Enable_Trigger_Touch( gentity_t *ent ) {
 
 
 	// find the client number that uses this entity
+#ifndef OMNIBOT
 	targ = AICast_FindEntityForName( ent->aiName );
+#else
+    targ = NULL;
+#endif
 	if ( !targ ) {
 		return;
 	} else
@@ -727,7 +731,9 @@ void trigger_aidoor_stayopen( gentity_t * ent, gentity_t * other, trace_t * trac
 				&& ( door->moverState != MOVER_POS2ROTATE )
 				&& ( door->moverState != MOVER_POS2 ) ) {
 				// if we aren't already heading for an ai_marker, look for one we can go to
+#ifndef OMNIBOT
 				AICast_AIDoor_Touch( other, ent, door );
+#endif
 			}
 		}
 	}

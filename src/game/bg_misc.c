@@ -3667,6 +3667,12 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 			return qtrue;
 
 		case IT_TEAM: // team items, such as flags
+#ifdef OMNIBOT
+		// return false so bots don't attempt to steal docs that are already taken
+		if ( ent->eFlags & EF_NODRAW ) {
+			return qfalse;
+		}
+#endif
 
 			// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
 			// ent->modelindex2 is non-zero on items if they are dropped
@@ -4300,7 +4306,17 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 	s->teamNum = ps->teamNum;
 	s->aiState = ps->aiState;
 }
-
+#ifdef OMNIBOT
+qboolean BG_IsScopedWeapon( int weapon ) {
+	switch ( weapon ) {
+	case WP_SNIPERRIFLE:
+		return qtrue;
+	case WP_FG42SCOPE:
+		return qtrue;
+	}
+	return qfalse;
+}
+#endif
 #if 0
 /*
 =====================
