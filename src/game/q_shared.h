@@ -1399,6 +1399,8 @@ typedef struct playerState_s {
 	aistateEnum_t aiState;
 
 	int identifyClient;                 // NERVE - SMF
+	int	bobTimer; // RTCWPro
+
 } playerState_t;
 
 
