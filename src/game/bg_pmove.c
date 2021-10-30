@@ -79,6 +79,13 @@ float pm_spectatorfriction = 5.0f;
 
 int c_pmove = 0;
 
+// RTCWPro - fixed physics
+extern vmCvar_t g_fixedphysics;
+extern vmCvar_t g_fixedphysicsfps;
+
+#define PM_FIXEDPHYSICS         g_fixedphysics.integer
+#define PM_FIXEDPHYSICSFPS      g_fixedphysicsfps.integer
+
 /*
 ===============
 PM_AddEvent
@@ -4024,8 +4031,51 @@ void PmoveSingle( pmove_t *pmove ) {
 		// entering / leaving water splashes
 		PM_WaterEvents();
 
+		// RTCWPro
+		if (PM_FIXEDPHYSICS)
+		{
+			// halt if not going fast enough (0.5 units/sec)
+			if (VectorLengthSquared(pm->ps->velocity) < 0.25f)
+			{
+				VectorClear(pm->ps->velocity);
+			}
+			else
+			{
+				float fixedFrameTime, scale, decimalTest;
+				float result = 0;
+				int fps = PM_FIXEDPHYSICSFPS;
+
+				if (fps > 333)
+				{
+					fps = 333;
+				}
+				else if (fps < 30)
+				{
+					fps = 30;
+				}
+
+				fixedFrameTime = (int)(1000.0f / fps) * 0.001f;
+				decimalTest = pm->ps->gravity * fixedFrameTime;
+
+				if (rint(decimalTest) - decimalTest < 0)
+				{
+					scale = fixedFrameTime / pml.frametime;
+					result = (rint(decimalTest) - decimalTest) * -1;
+					result = result / scale;
+				}
+
+				pm->ps->velocity[2] += result;
+			}
+		}
+		else
+		{
+			// snap some parts of playerstate to save network bandwidth
+			trap_SnapVector(pm->ps->velocity);
+		}
+
 		// snap some parts of playerstate to save network bandwidth
-		trap_SnapVector( pm->ps->velocity );
+		//trap_SnapVector( pm->ps->velocity );
+		// RTCWPro end
 //		SnapVector( pm->ps->velocity );
 
 		// Ridah
