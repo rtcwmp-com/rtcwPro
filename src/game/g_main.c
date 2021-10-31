@@ -278,6 +278,7 @@ vmCvar_t g_endStateLevelTime;
 vmCvar_t g_thinkSnapOrigin;
 vmCvar_t g_fixedphysics;
 vmCvar_t g_fixedphysicsfps;
+vmCvar_t g_alternatePing;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -505,6 +506,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_damageRadiusKnockback, "g_damageRadiusKnockback", "1000", 0, 0, qtrue },
 	{ &g_fixedphysics, "g_fixedphysics", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_alternatePing, "g_alternatePing", "1", CVAR_LATCH, qfalse },
 	//{ &g_thinkStateLevelTime, "g_thinkStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_thinkSnapOrigin, "g_thinkSnapOrigin", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_endStateLevelTime, "g_endStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
@@ -2413,7 +2415,17 @@ void LogExit( const char *string ) {
 			continue;
 		}
 
-		ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+		// RTCWPro
+		//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+		if (g_alternatePing.integer) 
+		{
+			ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
+		}
+		else 
+		{
+			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+		}
+		// RTCWPro end
 
 		G_LogPrintf( "score: %i  ping: %i  client: %i %s\n",
 					 cl->ps.persistant[PERS_SCORE], ping, level.sortedClients[i],

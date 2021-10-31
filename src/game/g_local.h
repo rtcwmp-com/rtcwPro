@@ -186,6 +186,9 @@ void G_Script_ScriptEvent( gentity_t *ent, char *eventStr, char *params );
 
 #define CFOFS( x ) ( (int)&( ( (gclient_t *)0 )->x ) )
 
+// RTCWPro
+#define NUM_PING_SAMPLES 64
+
 struct gentity_s {
 	entityState_t s;                // communicated by server to clients
 	entityShared_t r;               // shared by both the server system and game
@@ -649,6 +652,10 @@ typedef struct {
 	int restrictedWeapon;
 	qboolean drawHitBoxes;
 	qboolean findMedic;
+	// g_alternatePing from rtcwPub
+	int	alternatePing;
+	int	pingsamples[NUM_PING_SAMPLES];
+	int	samplehead;
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -1674,6 +1681,7 @@ extern vmCvar_t g_endStateLevelTime;
 extern vmCvar_t g_thinkSnapOrigin;
 extern vmCvar_t g_fixedphysics;
 extern vmCvar_t g_fixedphysicsfps;
+extern vmCvar_t g_alternatePing;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
