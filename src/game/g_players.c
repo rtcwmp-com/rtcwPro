@@ -602,7 +602,7 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 		CP(va("print \"Your team is already ^3%s^7!\n\"", status[ready]));
 	}
 	else {
-		AP(va("cp \"%s ^7team is %s%s!\n\"", aTeams[team], (ready ? "^3" : "^z"), status[ready]));
+		AP(va("cp \"%s ^7team is %s%s! (%s)\n\"", aTeams[team], (ready ? "^3" : "^z"), status[ready], ent->client->pers.netname));
 		level.readyTeam[team] = ready;
 	}
 }
