@@ -938,7 +938,11 @@ void G_refGetStatus(gentity_t* ent) {
 
 				ip = cl->sess.ip;
 
-				ping = cl->ps.ping;
+				// RTCWPro
+				//ping = cl->ps.ping;
+				ping = g_alternatePing.integer ? cl->pers.alternatePing : cl->ps.ping;
+				// RTCWPro end
+
 				if (ping > 999) ping = 999;
 
 				if (cl->sess.referee)

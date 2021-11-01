@@ -76,13 +76,26 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		if ( cl->pers.connected == CON_CONNECTING ) {
 			ping = -1;
 		} else {
-			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			// RTCWPro
+			//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			if (g_alternatePing.integer) 
+			{
+				ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
+			}
+			else 
+			{
+				ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			}
+			// RTCWPro end
 		}
+
 		Com_sprintf( entry, sizeof( entry ),
 					 " %i %i %i %i %i %i %i %i", level.sortedClients[i],
 					 cl->ps.persistant[PERS_SCORE], ping, ( level.time - cl->pers.enterTime ) / 60000,
 					 scoreFlags, g_entities[level.sortedClients[i]].s.powerups, playerClass, respawnsLeft );
+
 		j = strlen( entry );
+
 		if ( stringlength + j > 1024 ) {
 			break;
 		}
