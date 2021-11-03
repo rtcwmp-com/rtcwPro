@@ -102,12 +102,20 @@ void setDefWeap(gclient_t *client, int clips) {
 		client->ps.ammo[BG_FindAmmoForWeapon(WP_MP40)] += (32 * clips);
 		client->ps.weapon = WP_MP40;
 		client->sess.playerWeapon = WP_MP40; // set this so Weapon Restrictions work
+#ifdef OMNIBOT
+        Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_MP40 ) );
+#endif
+
+
 	} else {
 		COM_BitSet(client->ps.weapons, WP_THOMPSON);
 		client->ps.ammoclip[BG_FindClipForWeapon(WP_THOMPSON)] += 30;
 		client->ps.ammo[BG_FindAmmoForWeapon(WP_THOMPSON)] += (30 * clips);
 		client->ps.weapon = WP_THOMPSON;
 		client->sess.playerWeapon = WP_THOMPSON; // set this so Weapon Restrictions work
+#ifdef OMNIBOT
+        Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_THOMPSON ) );
+#endif
 	}
 }
 
@@ -182,20 +190,20 @@ void CountDown(void) {
 		level.cnPush = level.time + 200;
 	// Otherwise, 1 second.
 	} else {
-		level.cnPush = level.time + 1000;  
-	} 
-	
+		level.cnPush = level.time + 1000;
+	}
+
 	// We're done.. restart the game
 	if (level.cnNum == 7) {
 		level.warmupTime += 10000;
 		trap_Cvar_Set( "g_restarted", "1" );
 		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-		level.restarted = qtrue;			
-		
+		level.restarted = qtrue;
+
 		return;
 	}
-		
-	level.cnNum++; 
+
+	level.cnNum++;
 }
 
 /*
