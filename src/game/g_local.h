@@ -1424,6 +1424,7 @@ void Cmd_BotTapOut_f( gentity_t *ent );
 //
 // g_team.c
 //
+void reset_numobjectives(void);
 qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 );
 qboolean G_allowFollow( gentity_t *ent, int nTeam );
 

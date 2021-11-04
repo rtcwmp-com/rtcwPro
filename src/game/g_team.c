@@ -1234,7 +1234,10 @@ key "description" is short text key for objective name that
 will appear in objective selection in limbo UI.
 */
 static int numobjectives = 0; // TTimo
-
+// fix for error SP_team_WOLF_objective: exceeded MAX_MULTI_SPAWNTARGETS
+void reset_numobjectives(void) {
+    numobjectives = 0;
+}
 void objective_Register( gentity_t *self ) {
 
 	char numspawntargets[128];
@@ -1832,8 +1835,8 @@ qboolean G_allowFollow( gentity_t *ent, int nTeam ) {
 		}
 	}
 
-	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR || 
-		ent->client->sess.referee == RL_REFEREE || ent->client->sess.shoutcaster == 1 || 
+	return( ( !teamInfo[nTeam].spec_lock || ent->client->sess.sessionTeam != TEAM_SPECTATOR ||
+		ent->client->sess.referee == RL_REFEREE || ent->client->sess.shoutcaster == 1 ||
 		( ent->client->sess.specInvited & nTeam ) == nTeam ) );
 }
 
