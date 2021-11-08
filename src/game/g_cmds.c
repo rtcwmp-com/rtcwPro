@@ -805,6 +805,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 
 		// NERVE - SMF
 		// L0 - Ready (temporary) lock
+#ifndef OMNIBOT
 		if (teamInfo[team].team_lock && !forced) {
 			CP(va("cp \"You cannot join %s team as countdown has already started!\n\"2", aTeams[team]));
 			return;
@@ -815,7 +816,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			trap_SendServerCommand( clientNum, "cp \"You cannot switch during a match, please wait until the round ends.\n\"" );
 			return; // ignore the request
 		}
-
+#endif
 		// NERVE - SMF - merge from team arena
 		if ( g_teamForceBalance.integer  ) {
 			int counts[TEAM_NUM_TEAMS];

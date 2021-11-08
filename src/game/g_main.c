@@ -3297,7 +3297,9 @@ So this deals with issue..
 ================
 */
 void TeamLockStatus(void) {
-
+#ifdef OMNIBOT
+    trap_Cvar_Set("g_gamelocked", "0"); // unlock teams for omnibot games
+#else
 	if (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP && g_gamelocked.integer != 0) {
 		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
 	}
@@ -3326,6 +3328,7 @@ void TeamLockStatus(void) {
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
 		}
 	}
+#endif
 }
 
 /*
