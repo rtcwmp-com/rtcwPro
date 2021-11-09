@@ -1000,18 +1000,21 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			COM_BitSet( client->ps.weapons, WP_AMMO );
 			client->ps.ammo[BG_FindAmmoForWeapon( WP_AMMO )] = 0;
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_AMMO )] = 1;
+#ifdef OMNIBOT
+            Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_AMMO ) );
+#endif
 			COM_BitSet( client->ps.weapons, WP_ARTY );
 			client->ps.ammo[BG_FindAmmoForWeapon( WP_ARTY )] = 0;
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_ARTY )] = 1;
-
+#ifdef OMNIBOT
+            Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_ARTY ) );
+#endif
 			// NERVE - SMF
 			COM_BitSet( client->ps.weapons, WP_SMOKE_GRENADE );
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_SMOKE_GRENADE )] = 1;
 			client->ps.ammo[WP_SMOKE_GRENADE] = 1;
 
 #ifdef OMNIBOT
-				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_AMMO ) );
-				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_ARTY ) );
 				Bot_Event_AddWeapon( client->ps.clientNum, Bot_WeaponGameToBot( WP_SMOKE_GRENADE ) );
 
 				// sort of a hack. bots need it for ammo table lookup so they can use the call arty goal
@@ -2951,7 +2954,7 @@ void ClientDisconnect( int clientNum ) {
 // JPW NERVE -- mg42 additions
 	ent->active = 0;
 // jpw
-
+	ent->r.svFlags &= ~SVF_BOT;
 	// RTCWPro - head stuff
 	FreeHeadEntity(ent);
 
