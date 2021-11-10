@@ -1534,6 +1534,18 @@ void ClientThink_real( gentity_t *ent ) {
 
 	}
 
+	// RTCWPro
+	if (g_fixedphysicsfps.integer)
+	{
+		if (g_fixedphysicsfps.integer > 333)
+		{
+			trap_Cvar_Set("g_fixedphysicsfps", "333");
+		}
+
+		pm.fixedphysicsfps = g_fixedphysicsfps.integer;
+	}
+	// RTCWPro end
+
 	// Ridah
 //	if (ent->r.svFlags & SVF_NOFOOTSTEPS)
 //		pm.noFootsteps = qtrue;
@@ -1653,6 +1665,8 @@ void ClientThink_real( gentity_t *ent ) {
 		BG_PlayerStateToEntityStatePro(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
 	}*/
 	// RTCWPro end
+
+	ent->client->ps.fixBob = g_dedicated.integer; // RTCWPro
 
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple

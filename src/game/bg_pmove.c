@@ -79,13 +79,6 @@ float pm_spectatorfriction = 5.0f;
 
 int c_pmove = 0;
 
-// RTCWPro - fixed physics
-extern vmCvar_t g_fixedphysics;
-extern vmCvar_t g_fixedphysicsfps;
-
-#define PM_FIXEDPHYSICS         g_fixedphysics.integer
-#define PM_FIXEDPHYSICSFPS      g_fixedphysicsfps.integer
-
 /*
 ===============
 PM_AddEvent
@@ -1561,12 +1554,11 @@ static void PM_Footsteps( void ) {
 	int animResult = -1;
 	// RTCWPro
 	int	maxBobTime;
-
-	extern int trap_Cvar_VariableIntegerValue(const char* var_name);
 	static qboolean is_dedicated_server = -1;
 
-	if (is_dedicated_server == -1) {
-		is_dedicated_server = trap_Cvar_VariableIntegerValue("dedicated");
+	if (is_dedicated_server == -1) 
+	{
+		is_dedicated_server = pm->ps->fixBob;
 	}
 
 	bobmove = 0.0f;
@@ -4115,8 +4107,8 @@ void PmoveSingle( pmove_t *pmove ) {
 		// entering / leaving water splashes
 		PM_WaterEvents();
 
-		// RTCWPro
-		if (PM_FIXEDPHYSICS)
+		// RTCWPro - fixed physics
+		if (pm->fixedphysicsfps)
 		{
 			// halt if not going fast enough (0.5 units/sec)
 			if (VectorLengthSquared(pm->ps->velocity) < 0.25f)
@@ -4127,7 +4119,7 @@ void PmoveSingle( pmove_t *pmove ) {
 			{
 				float fixedFrameTime, scale, decimalTest;
 				float result = 0;
-				int fps = PM_FIXEDPHYSICSFPS;
+				int fps = pm->fixedphysicsfps;
 
 				if (fps > 333)
 				{

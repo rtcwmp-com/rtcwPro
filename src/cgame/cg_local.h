@@ -2208,6 +2208,7 @@ extern vmCvar_t cg_lagometerY;
 extern vmCvar_t cg_drawFrags;
 extern vmCvar_t cg_fragsY;
 extern vmCvar_t cg_fragsWidth;
+extern vmCvar_t cg_fixedphysicsfps;
 
 //static void CG_TimerSet_f(void);
 //static void CG_TimerReset_f(void);

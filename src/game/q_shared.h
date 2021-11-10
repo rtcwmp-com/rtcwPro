@@ -1400,6 +1400,7 @@ typedef struct playerState_s {
 
 	int identifyClient;                 // NERVE - SMF
 	int	bobTimer; // RTCWPro
+	qboolean fixBob; // RTCWPro
 
 } playerState_t;
 

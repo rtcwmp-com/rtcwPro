@@ -276,7 +276,6 @@ vmCvar_t g_mapScriptDirectory;
 vmCvar_t g_thinkStateLevelTime;
 vmCvar_t g_endStateLevelTime;
 vmCvar_t g_thinkSnapOrigin;
-vmCvar_t g_fixedphysics;
 vmCvar_t g_fixedphysicsfps;
 vmCvar_t g_alternatePing;
 
@@ -504,8 +503,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_bodiesGrabFlags, "g_bodiesGrabFlags", "1", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_mapScriptDirectory, "g_mapScriptDirectory", "", 0, qfalse },
 	{ &g_damageRadiusKnockback, "g_damageRadiusKnockback", "1000", 0, 0, qtrue },
-	{ &g_fixedphysics, "g_fixedphysics", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
-	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "125", CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_SYSTEMINFO, 0, qtrue },
 	{ &g_alternatePing, "g_alternatePing", "1", CVAR_LATCH, qfalse },
 	//{ &g_thinkStateLevelTime, "g_thinkStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_thinkSnapOrigin, "g_thinkSnapOrigin", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },

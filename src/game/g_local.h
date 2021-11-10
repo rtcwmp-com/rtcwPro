@@ -1679,7 +1679,6 @@ extern vmCvar_t g_mapScriptDirectory;
 extern vmCvar_t g_thinkStateLevelTime;
 extern vmCvar_t g_endStateLevelTime;
 extern vmCvar_t g_thinkSnapOrigin;
-extern vmCvar_t g_fixedphysics;
 extern vmCvar_t g_fixedphysicsfps;
 extern vmCvar_t g_alternatePing;
 
