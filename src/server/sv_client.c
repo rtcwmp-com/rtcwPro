@@ -320,7 +320,7 @@ void SV_DirectConnect( netadr_t from ) {
 		int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
 		if (cl_checkversion != sv_checkVersion->integer)
 		{
-			NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version. " "Run updater as admin.\n");
+			NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version.\n" "Run updater as admin or download at rtcwpro.com\n");
 			return;
 		}
 	}
