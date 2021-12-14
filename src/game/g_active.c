@@ -1666,8 +1666,6 @@ void ClientThink_real( gentity_t *ent ) {
 	}*/
 	// RTCWPro end
 
-	ent->client->ps.fixBob = g_dedicated.integer; // RTCWPro
-
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
 	}
@@ -2342,4 +2340,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	if (ent->client->pers.drawHitBoxes && g_drawHitboxes.integer && ent->health > 0) {
 		G_DrawHitBoxes(ent);
 	}
+
+	ent->client->ps.fixBob = g_dedicated.integer; // RTCWPro - lame hack to make cg compile
+
 }
