@@ -1228,8 +1228,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			}
 
 			// RTCWPro - non SW exits
-			//else if (g_gametype.integer == GS_PLAYING)
-			if (g_gametype.integer == GS_PLAYING)
+			else
 			{
 				if (g_timelimit.value && !level.warmupTime)
 				{
