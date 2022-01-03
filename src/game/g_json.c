@@ -182,7 +182,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
                 pitem = json_object_get(pcat, "obj_destroyed");
                 if(json_is_integer(pitem)) {
-                    client->sess.obj_captured=json_integer_value(pitem);
+                    client->sess.obj_destroyed=json_integer_value(pitem);
 
 
                 }

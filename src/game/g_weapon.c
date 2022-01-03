@@ -705,7 +705,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-						//	G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
+							G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
+							ent->client->sess.obj_destroyed++;
 //	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
@@ -2080,7 +2081,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		traceEnt = head->parent;
 	}
 
-	if (LogAccuracyShot(traceEnt, source))
+	if (LogAccuracyShot(traceEnt, source) && g_gamestate.integer == GS_PLAYING)
 	{
 		source->client->pers.life_acc_shots++;
 		source->client->sess.acc_shots++;
@@ -2125,7 +2126,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 	if (traceEnt->takedamage && (traceEnt->client) && !(traceEnt->flags & FL_DEFENSE_GUARD)) {
 		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
 		tent->s.eventParm = traceEnt->s.number;
-		if (LogAccuracyHit(traceEnt, attacker)) {
+		if (LogAccuracyHit(traceEnt, attacker) && g_gamestate.integer == GS_PLAYING) {
 			attacker->client->ps.persistant[PERS_ACCURACY_HITS]++;
 			// L0 - Stats
 			attacker->client->pers.life_acc_hits++;
