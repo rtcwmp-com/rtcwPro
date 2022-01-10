@@ -657,6 +657,13 @@ void G_deleteStats( int nClient ) {
 	cl->sess.acc_hits = 0;
 	cl->sess.acc_shots = 0;
 	cl->sess.killPeak = 0;
+	cl->sess.dyn_defused = 0;
+	cl->sess.dyn_planted = 0;
+	cl->sess.obj_captured = 0;
+	cl->sess.obj_destroyed = 0;
+	cl->sess.obj_returned = 0;
+	cl->sess.obj_taken = 0;
+	cl->sess.knifeKills = 0;
 
 	memset( &cl->sess.aWeaponStats, 0, sizeof( cl->sess.aWeaponStats ) );
 	trap_Cvar_Set( va( "wstats%i", nClient ), va( "%d", nClient ) );
