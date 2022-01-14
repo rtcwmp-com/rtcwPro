@@ -199,6 +199,11 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
                 }
+
+                pitem = json_object_get(pcat, "obj_checkpoint");
+                if (json_is_integer(pitem)) {
+                    client->sess.obj_checkpoint = json_integer_value(pitem);
+                }
     return 1;
 }
 
@@ -519,6 +524,7 @@ void G_jstatsByPlayers(qboolean wstats) {
             json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
+            json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
 
 
             weapArray = json_array();
@@ -682,6 +688,7 @@ void G_jstatsByTeam(qboolean wstats) {
             json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
+            json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
 
             weapArray = json_array();
 

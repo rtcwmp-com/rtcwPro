@@ -571,7 +571,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 // JPW NERVE
 				if ( g_gametype.integer >= GT_WOLF ) {
 					AddScore( player, WOLF_CAPTURE_BONUS );
-					G_writeObjectiveEvent(player, objCapture  );
+					//G_writeObjectiveEvent(player, objCapture  ); // KK don't think this should be here as it's giving objCapture to players who didn't cap docs
 				} else {
 // jpw
 					AddScore( player, CTF_CAPTURE_BONUS );
@@ -1531,12 +1531,12 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 		G_Script_ScriptEvent( self, "trigger", "axis_capture" );
 
         G_writeObjectiveEvent(other, objSpawnFlag  );
-        //other->client->sess.obj_checkpoint++;
+        other->client->sess.obj_checkpoint++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
 
         G_writeObjectiveEvent(other, objSpawnFlag  );
-        //other->client->sess.obj_checkpoint++;
+        other->client->sess.obj_checkpoint++;
 	}
 
     //other->client->sess.obj_checkpoint+;

@@ -465,6 +465,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			launchspot[2] += 40;
 			fire_grenade( self, launchspot, launchvel, self->s.weapon )->damage = 0;
 			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
+			
+			// RtcwPro Issue #345 Clear out empty weapon, change to next best weapon
+			//PM_SwitchIfEmpty();
+			//if (self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] == 0)
+			//	G_AddEvent(self, EV_NOAMMO, 0);
 		}
 	}
 // jpw
@@ -556,7 +561,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
+			//G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
+			trap_SendServerCommand(-1, va("cp \"^5Allies have lost %s!\n\" 2", self->message));
 			self->client->ps.powerups[PW_REDFLAG] = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
@@ -564,7 +570,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
+			//G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
+			trap_SendServerCommand(-1, va("cp \"^5Axis have lost %s!\n\" 2", self->message));
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 		}

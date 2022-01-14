@@ -2914,9 +2914,6 @@ static const cmd_reference_t aCommandInfo[] =
     { "+wstats",         qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current weapon stats info"                                          },
 //	{ "+objectives",    qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current objectives info"                                            },
 //	{ "?",              qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
-	// copy of ?
-    { "cg_muzzleFlash",           qtrue,  qtrue,  NULL,        ":^7 1 = yours OFF, enemies ON   / 0 = yours OFF, enemies OFF"                                                               },
-    //{ "cg_tracerchance",           qtrue,  qtrue,  NULL,        ":^7 Enable/disable bullet tracers"                                                               },
 	{ "commandsHelp",           qtrue,  qtrue,  NULL,        ":^7 Gives a detailed list of commands"                                                               },
 	{ "commands",       qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
 //	{ "cstats",       qtrue,  qtrue,  NULL,        ":^7 !!!!!!!!!!!!!"                                                               },

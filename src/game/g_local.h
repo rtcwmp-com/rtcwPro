@@ -570,6 +570,7 @@ typedef struct {
 	int obj_destroyed;
 	int obj_returned;
 	int obj_taken;
+	int obj_checkpoint;
 	int dyn_planted;
 	int dyn_defused;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
