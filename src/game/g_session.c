@@ -231,10 +231,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	if ( *s ) {
 		G_parseStats( s );
 		if ( g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
-			if (g_gametype.integer == GT_WOLF_STOPWATCH)
-				client->sess.rounds = g_currentRound.integer + 1; // Bug #380
-			else
-				client->sess.rounds++;
+			client->sess.rounds++;
 		}
 	}
 	// NERVE - SMF
