@@ -957,6 +957,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->sess.spectatorClient = specClient;
 	client->pers.ready = qfalse;
 
+	// Bug #380 - set sess.rounds for late joiner or player reconnecting during a pause
+	if (g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
+		client->sess.rounds++;
+	}
+
 	// During team switching you can sometime spawn immediately
 	client->pers.lastReinforceTime = 0;
 	if ( team == TEAM_RED ) {
