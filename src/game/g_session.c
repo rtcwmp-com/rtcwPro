@@ -231,7 +231,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	if ( *s ) {
 		G_parseStats( s );
 		if ( g_gamestate.integer == GS_PLAYING ) {
-			client->sess.rounds++;
+			client->sess.rounds = g_currentRound.integer + 1; // sess.rounds++;
 		}
 	}
 	// NERVE - SMF
@@ -409,19 +409,21 @@ void G_WriteSessionData( void ) {
 
 	// L0 - OSP Stats
 	// Keep stats for all players in sync
-	for ( i = 0; !level.fResetStats && i < level.numConnectedClients; i++ ) {
-		if ( ( g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
-			   ( ( g_gametype.integer == GT_WOLF_STOPWATCH && level.clients[level.sortedClients[i]].sess.rounds >= 2 ) ||
-				 ( g_gametype.integer != GT_WOLF_STOPWATCH && level.clients[level.sortedClients[i]].sess.rounds >= 1 ) ) ) ) {
+	if (!level.fResetStats && level.numConnectedClients > 0) {
+		if ((g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
+			((g_gametype.integer == GT_WOLF_STOPWATCH && g_currentRound.integer == 0) ||
+				(g_gametype.integer != GT_WOLF_STOPWATCH && level.clients[level.sortedClients[0]].sess.rounds >= 1)))) {
 			level.fResetStats = qtrue;
 		}
-	} // End
+	}
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		if ( level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED ) {
 			G_WriteClientSessionData( &level.clients[level.sortedClients[i]]);
 			// For slow connecters and a short warmup
-		} else if ( level.fResetStats ) {
+		}
+		
+		if ( level.fResetStats ) {
 			G_deleteStats( level.sortedClients[i] );
 			if (g_currentRound.integer == 1 && g_gameStatslog.integer) G_read_round_jstats();
 		}
