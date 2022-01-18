@@ -230,8 +230,11 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( va( "wstats%i", (int)(client - level.clients) ), s, sizeof( s ) );
 	if ( *s ) {
 		G_parseStats( s );
-		if ( g_gamestate.integer == GS_PLAYING ) {
-			client->sess.rounds = g_currentRound.integer + 1; // sess.rounds++;
+		if ( g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
+			if (g_gametype.integer == GT_WOLF_STOPWATCH)
+				client->sess.rounds = g_currentRound.integer + 1; // Bug #380
+			else
+				client->sess.rounds++;
 		}
 	}
 	// NERVE - SMF
@@ -409,13 +412,13 @@ void G_WriteSessionData( void ) {
 
 	// L0 - OSP Stats
 	// Keep stats for all players in sync
-	if (!level.fResetStats && level.numConnectedClients > 0) {
+	for (i = 0; !level.fResetStats && i < level.numConnectedClients; i++) {
 		if ((g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
-			((g_gametype.integer == GT_WOLF_STOPWATCH && g_currentRound.integer == 0) ||
-				(g_gametype.integer != GT_WOLF_STOPWATCH && level.clients[level.sortedClients[0]].sess.rounds >= 1)))) {
+			((g_gametype.integer == GT_WOLF_STOPWATCH && g_currentRound.integer == 0) || // Bug #380
+				(g_gametype.integer != GT_WOLF_STOPWATCH && level.clients[level.sortedClients[i]].sess.rounds >= 1)))) {
 			level.fResetStats = qtrue;
 		}
-	}
+	} // End
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		if ( level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED ) {
