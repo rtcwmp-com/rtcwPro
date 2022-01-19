@@ -290,8 +290,13 @@ void* submit_HTTP_curlPost(void* args) {
   curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, printcurlresponse);
 
-
+  Com_DPrintf("Stats API: Calling URL with stats payload\n");
   ret = curl_easy_perform(hnd);
+
+  if (ret != CURLE_OK)
+  {
+      Com_DPrintf("Stats API: Curl Error return code: %s\n", curl_easy_strerror(ret));
+  }
 
   curl_easy_cleanup(hnd);
   hnd = NULL;
