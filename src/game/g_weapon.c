@@ -275,6 +275,100 @@ void Weapon_MagicAmmo( gentity_t *ent ) {
 }
 // jpw
 
+/*
+================
+RTCWPro
+This is taken out of Weapon_Syringe
+so it can be used for other stuff
+================
+*/
+qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
+{
+	vec3_t   org, maxs;
+	trace_t  tr;
+	int      healamt, headshot, oldweapon, oldweaponstate, oldclasstime = 0;
+	qboolean usedSyringe = qfalse;          // DHM - Nerve
+	int      ammo[MAX_WEAPONS];         // JPW NERVE total amount of ammo
+	int      ammoclip[MAX_WEAPONS];     // JPW NERVE ammo in clip
+	int      weapons[MAX_WEAPONS / (sizeof(int) * 8)];  // JPW NERVE 64 bits for weapons held
+//	gentity_t	*traceEnt,
+	gentity_t* te;
+
+	// heal the dude
+	// copy some stuff out that we'll wanna restore
+	VectorCopy(traceEnt->client->ps.origin, org);
+	headshot = traceEnt->client->ps.eFlags & EF_HEADSHOT;
+	healamt = traceEnt->client->ps.stats[STAT_MAX_HEALTH] * 0.5;
+	oldweapon = traceEnt->client->ps.weapon;
+	oldweaponstate = traceEnt->client->ps.weaponstate;
+
+	// keep class special weapon time to keep them from exploiting revives
+	oldclasstime = traceEnt->client->ps.classWeaponTime;
+
+	memcpy(ammo, traceEnt->client->ps.ammo, sizeof(int) * MAX_WEAPONS);
+	memcpy(ammoclip, traceEnt->client->ps.ammoclip, sizeof(int) * MAX_WEAPONS);
+	memcpy(weapons, traceEnt->client->ps.weapons, sizeof(int) * (MAX_WEAPONS / (sizeof(int) * 8)));
+
+	ClientSpawn(traceEnt, qtrue);
+
+	// L0 - antilag
+	G_ResetTrail(traceEnt);
+
+	memcpy(traceEnt->client->ps.ammo, ammo, sizeof(int) * MAX_WEAPONS);
+	memcpy(traceEnt->client->ps.ammoclip, ammoclip, sizeof(int) * MAX_WEAPONS);
+	memcpy(traceEnt->client->ps.weapons, weapons, sizeof(int) * (MAX_WEAPONS / (sizeof(int) * 8)));
+
+	if (headshot)
+		traceEnt->client->ps.eFlags |= EF_HEADSHOT;
+	traceEnt->client->ps.weapon = oldweapon;
+	traceEnt->client->ps.weaponstate = oldweaponstate;
+
+	traceEnt->client->ps.classWeaponTime = oldclasstime;
+
+	traceEnt->health = healamt;
+	VectorCopy(org, traceEnt->s.origin);
+	VectorCopy(org, traceEnt->r.currentOrigin);
+	VectorCopy(org, traceEnt->client->ps.origin);
+
+	trap_Trace(&tr, traceEnt->client->ps.origin, traceEnt->client->ps.mins, traceEnt->client->ps.maxs, traceEnt->client->ps.origin, traceEnt->s.number, MASK_PLAYERSOLID);
+	if (tr.allsolid) {
+		if (tr.entityNum >= MAX_CLIENTS) {
+			traceEnt->client->ps.pm_flags |= PMF_DUCKED;
+		}
+	}
+
+	trap_LinkEntity(ent);
+
+	traceEnt->s.effect3Time = level.time;
+	traceEnt->r.contents = CONTENTS_CORPSE;
+	traceEnt->props_frame_state = ent->s.number;
+
+	// DHM - Nerve :: Mark that the medicine was indeed dispensed
+	usedSyringe = qtrue;
+
+	// sound
+	te = G_TempEntity(traceEnt->r.currentOrigin, EV_GENERAL_SOUND);
+	te->s.eventParm = G_SoundIndex("sound/multiplayer/vo_revive.wav");
+
+	// Xian -- This was gay and I always hated it.
+	if (g_fastres.integer > 0)
+		BG_AnimScriptEvent(&traceEnt->client->ps, ANIM_ET_JUMP, qfalse, qtrue);
+	else
+	{
+		// NOTE(nobo): This is what the pm_time should have been set to all along..
+		// Then the invul and time lock would actually match the animation duration..
+		/*traceEnt->client->ps.pm_time = */BG_AnimScriptEvent(&traceEnt->client->ps, ANIM_ET_REVIVE, qfalse, qtrue);
+		traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
+		traceEnt->client->ps.pm_time = 2100;
+		traceEnt->client->revive_animation_playing = qtrue;
+		traceEnt->client->movement_lock_begin_time = level.time;
+	}
+
+	// Tell the caller if we actually used a syringe
+	return usedSyringe;
+
+}
+
 // JPW NERVE Weapon_Syringe:
 /*
 ======================
@@ -380,11 +474,11 @@ void Weapon_Syringe( gentity_t *ent ) {
 				// DHM - Nerve :: Play revive animation
 
 				// Xian -- This was gay and I always hated it.
-				if ( g_fastres.integer > 0 ) 
+				if ( g_fastres.integer > 0 )
 				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_JUMP, qfalse, qtrue );
-				} 
-				else 
+				}
+				else
 				{
 					BG_AnimScriptEvent( &traceEnt->client->ps, ANIM_ET_REVIVE, qfalse, qtrue );
 					traceEnt->client->ps.pm_flags |= PMF_TIME_LOCKPLAYER;
@@ -611,7 +705,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-						//	G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
+							G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
+							ent->client->sess.obj_destroyed++;
 //	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
@@ -722,9 +817,14 @@ void G_AirStrikeExplode( gentity_t *self ) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
-
+	// RTCWPro - moved here due to rogue bombs that never truly exploded
+    self->damage = 400;
+    self->splashDamage = 400;
+    self->splashRadius = 400;
+    // end addition
 	self->think = G_ExplodeMissile;
 	self->nextthink = level.time + 50;
+
 }
 
 #define NUMBOMBS 10
@@ -799,18 +899,24 @@ void weapon_callAirStrike( gentity_t *ent ) {
 	VectorScale( bombaxis,BOMBSPREAD,bombaxis ); // bomb drop direction offset
 
 	for ( i = 0; i < NUMBOMBS; i++ ) {
+
 		bomb = G_Spawn();
-		bomb->nextthink = level.time + i * 100 + crandom() * 50 + 1000; // 1000 for aircraft flyby, other term for tumble stagger
+		// value 1200 is used to delay the a/s .... needs to be adjusted slightly
+		bomb->nextthink = level.time + i * 100+  + crandom() * 50 + 1000; // + crandom() * 50 + g_asoffset.integer; // 1000 for aircraft flyby, other term for tumble stagger
 		bomb->think = G_AirStrikeExplode;
 		bomb->s.eType       = ET_MISSILE;
 		bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_NOCLIENT;
 		bomb->s.weapon      = WP_ARTY; // might wanna change this
 		bomb->r.ownerNum    = ent->s.number;
 		bomb->parent        = ent->parent;
-		bomb->damage        = 400; // maybe should un-hard-code these?
-		bomb->splashDamage  = 400;
+		// RTCWPro - moved to G_AirStrikeExplode and changed the rest to 0 due to rogue bombs that never truly explode
+		//bomb->damage = 400; // maybe should un-hard-code these?
+		//bomb->splashDamage = 400;
+		bomb->damage        = 0;//400; // maybe should un-hard-code these?
+		bomb->splashDamage  = 0; //400;
+		bomb->splashRadius	= 0;//400;
+		// RTCWPro - end
 		bomb->classname             = "air strike";
-		bomb->splashRadius          = 400;
 		bomb->methodOfDeath         = MOD_AIRSTRIKE;
 		bomb->splashMethodOfDeath   = MOD_AIRSTRIKE;
 		bomb->clipmask = MASK_MISSILESHOT;
@@ -1608,7 +1714,7 @@ void SniperSoundEFX( vec3_t pos ) {
 	sniperEnt = G_TempEntity( pos, EV_SNIPER_SOUND );
 }
 
-// sswolf - begin head stuff
+// RTCWPro - begin head stuff
 qboolean IsHeadshotWeapon(int mod)
 {
 	// players are allowed headshots from these weapons
@@ -1837,7 +1943,7 @@ void RemoveHeadEntities(gentity_t* skip)
 		RemoveHeadEntity(potential_targ);
 	}
 }
-// sswolf - head stuff end
+// RTCWPro - head stuff end
 
 /*
 ==============
@@ -1875,7 +1981,7 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 	}
 }
 
-// sswolf - begin head stuff
+// RTCWPro - begin head stuff
 /*
 ==============
 Bullet_Fire
@@ -1975,7 +2081,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		traceEnt = head->parent;
 	}
 
-	if (LogAccuracyShot(traceEnt, source))
+	if (LogAccuracyShot(traceEnt, source) && g_gamestate.integer == GS_PLAYING)
 	{
 		source->client->pers.life_acc_shots++;
 		source->client->sess.acc_shots++;
@@ -2020,7 +2126,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 	if (traceEnt->takedamage && (traceEnt->client) && !(traceEnt->flags & FL_DEFENSE_GUARD)) {
 		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
 		tent->s.eventParm = traceEnt->s.number;
-		if (LogAccuracyHit(traceEnt, attacker)) {
+		if (LogAccuracyHit(traceEnt, attacker) && g_gamestate.integer == GS_PLAYING) {
 			attacker->client->ps.persistant[PERS_ACCURACY_HITS]++;
 			// L0 - Stats
 			attacker->client->pers.life_acc_hits++;
@@ -2162,7 +2268,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		}
 	}
 }
-// sswolf - head stuff end
+// RTCWPro - head stuff end
 
 /*
 ======================================================================
@@ -2335,7 +2441,7 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 	PerpendicularVector( right, forward );
 	CrossProduct( forward, right, up );
 
-	// sswolf - leaving this intact
+	// RTCWPro - leaving this intact
 
 	// L0 Antilag
     if ( g_antilag.integer && ent->client &&
@@ -2592,7 +2698,7 @@ LogAccuracyHit
 */
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
 
-	// sswolf - patched
+	// RTCWPro - patched
 	if (!LogAccuracyShot(target, attacker)) {
 		return qfalse;
 	}

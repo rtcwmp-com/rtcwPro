@@ -86,6 +86,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #define FL_NODRAW               0x01000000
 
+
+#define MAX_NUM_MAPS 500
+#define MAX_MAP_NAMELEN 50
 // movers are things like doors, plats, buttons, etc
 typedef enum {
 	MOVER_POS1,
@@ -183,6 +186,9 @@ void G_Script_ScriptEvent( gentity_t *ent, char *eventStr, char *params );
 
 #define CFOFS( x ) ( (int)&( ( (gclient_t *)0 )->x ) )
 
+// RTCWPro
+#define NUM_PING_SAMPLES 64
+
 struct gentity_s {
 	entityState_t s;                // communicated by server to clients
 	entityShared_t r;               // shared by both the server system and game
@@ -275,6 +281,11 @@ struct gentity_s {
 	void ( *use )( gentity_t *self, gentity_t *other, gentity_t *activator );
 	void ( *pain )( gentity_t *self, gentity_t *attacker, int damage, vec3_t point );
 	void ( *die )( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
+
+	// Nobo - More  (from rtcwPub)
+	void		(*more)(gentity_t *ent);
+	int			moreCalls;
+	qboolean	moreCalled;
 
 	int pain_debounce_time;
 	int fly_sound_debounce_time;            // wind tunnel
@@ -415,7 +426,7 @@ struct gentity_s {
 	gentity_t	*dmgparent;
 	int thrownKnifeTime;
 
-	// sswolf - allowteams - ET port
+	// RTCWPro - allowteams - ET port
 	int allowteams;
 
 	// player ammo
@@ -428,7 +439,7 @@ struct gentity_s {
 	int			trType_pre_pause;
 	vec3_t		trBase_pre_pause;
 
-	// sswolf - head stuff
+	// RTCWPro - head stuff
 	qboolean	headshot;
 	qboolean	is_head;
 	gentity_t*  head;
@@ -489,11 +500,11 @@ typedef struct {
 } weapon_stat_t;
 // End
 
-// sswolf - allowteams - ET port
+// RTCWPro - allowteams - ET port
 #define ALLOW_AXIS_TEAM         1
 #define ALLOW_ALLIED_TEAM       2
 
-// sswolf - drop weapon stuff
+// RTCWPro - drop weapon stuff
 #define WEP_DROP_SOLDIER 1
 #define WEP_DROP_ENG 2
 #define WEP_DROP_MEDIC 4
@@ -559,6 +570,7 @@ typedef struct {
 	int obj_destroyed;
 	int obj_returned;
 	int obj_taken;
+	int obj_checkpoint;
 	int dyn_planted;
 	int dyn_defused;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
@@ -612,6 +624,9 @@ typedef struct {
 	unsigned int clientFlags;           // Client settings that need server involvement
 	unsigned int clientMaxPackets;      // Client com_maxpacket settings
 	unsigned int clientTimeNudge;       // Client cl_timenudge settings
+	unsigned int hitSoundType;
+	unsigned int hitSoundBodyStyle;
+	unsigned int hitSoundHeadStyle;
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
 	int throwingKnives;
@@ -637,6 +652,11 @@ typedef struct {
 	qboolean ready;
 	int restrictedWeapon;
 	qboolean drawHitBoxes;
+	qboolean findMedic;
+	// g_alternatePing from rtcwPub
+	int	alternatePing;
+	int	pingsamples[NUM_PING_SAMPLES];
+	int	samplehead;
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -1016,6 +1036,9 @@ typedef struct {
 	int spawnFloodTimer;
 	int svCvarsCount;
 
+    char maplist[MAX_NUM_MAPS][MAX_MAP_NAMELEN];
+	int mapcount;
+
 	int eventNum;  // event counter
 	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
 	char* match_id; // for stats round matching...
@@ -1131,8 +1154,8 @@ qboolean infront( gentity_t *self, gentity_t *other );
 
 void G_ProcessTagConnect( gentity_t *ent );
 
-qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // sswolf - allowteams ET - port
-qboolean AllowDropForClass(gentity_t* ent, int pclass); // sswolf - drop weapon stuff
+qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // RTCWPro - allowteams ET - port
+qboolean AllowDropForClass(gentity_t* ent, int pclass); // RTCWPro - drop weapon stuff
 gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
 char* getDateTime(void);
 char* getDate(void);
@@ -1141,6 +1164,8 @@ int getYearFromCYear(int cYear);
 int getDaysInMonth(int monthIndex);
 char* TablePrintableColorName(const char* name, int maxlength);
 qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension);
+qboolean G_SpawnEnts(gentity_t* ent);
+int G_FindMatchingMaps(gentity_t* ent, char* mapName);
 
 //
 // g_combat.c
@@ -1150,7 +1175,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientItems( gentity_t *self );
-//gentity_t* G_BuildHead( gentity_t *ent ); // sswolf - unused
+//gentity_t* G_BuildHead( gentity_t *ent ); // RTCWPro - unused
 
 // damage flags
 #define DAMAGE_RADIUS           0x00000001  // damage was indirect
@@ -1235,11 +1260,12 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon );
 void CalcMuzzlePointForActivate( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 // done.
 
-// sswolf - head stuff
+// sswolf - RTCWPro stuff
 void AddHeadEntity(gentity_t* ent);
 void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);
 void RemoveHeadEntity(gentity_t* ent);
+qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt);
 
 //
 // g_client.c
@@ -1373,7 +1399,7 @@ void Svcmd_GameMem_f( void );
 //
 void G_ReadSessionData( gclient_t *client );
 void G_InitSessionData( gclient_t *client, char *userinfo );
-
+void G_ClientSwap( gclient_t *client );
 void G_InitWorldSession( void );
 void G_WriteSessionData( void );
 
@@ -1526,6 +1552,8 @@ extern vmCvar_t g_footstepAudibleRange;
 extern vmCvar_t g_redlimbotime;
 extern vmCvar_t g_bluelimbotime;
 extern vmCvar_t g_medicChargeTime;
+//extern vmCvar_t g_asoffset; // temporary for adjusting a/s delay
+
 extern vmCvar_t g_engineerChargeTime;
 extern vmCvar_t g_LTChargeTime;
 extern vmCvar_t g_soldierChargeTime;
@@ -1587,10 +1615,11 @@ extern vmCvar_t	g_mapConfigs;
 extern vmCvar_t	g_disableInv;
 extern vmCvar_t	g_axisSpawnProtectionTime;
 extern vmCvar_t	g_alliedSpawnProtectionTime;
+extern vmCvar_t g_damageRadiusKnockback;
+extern vmCvar_t	g_dropWeapons;
 
 //S4NDM4NN - fix errors when sv_fps is adjusted
 extern vmCvar_t sv_fps;
-extern vmCvar_t	g_dropWeapons;
 
 // Weapon/class stuff
 extern vmCvar_t	g_ltNades;
@@ -1634,6 +1663,7 @@ extern vmCvar_t vote_allow_warmupdamage;
 extern vmCvar_t vote_allow_antilag;
 extern vmCvar_t vote_allow_balancedteams;
 extern vmCvar_t vote_allow_muting;
+extern vmCvar_t	vote_allow_cointoss;
 extern vmCvar_t vote_limit;
 extern vmCvar_t vote_percent;
 
@@ -1646,6 +1676,12 @@ extern vmCvar_t P; // player teams in server info
 extern vmCvar_t	g_hsDamage;
 extern vmCvar_t g_spawnOffset; // random spawn offset for both teams, between 1 and cvar integer - 1
 extern vmCvar_t g_bodiesGrabFlags;
+extern vmCvar_t g_mapScriptDirectory;
+extern vmCvar_t g_thinkStateLevelTime;
+extern vmCvar_t g_endStateLevelTime;
+extern vmCvar_t g_thinkSnapOrigin;
+extern vmCvar_t g_fixedphysicsfps;
+extern vmCvar_t g_alternatePing;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1892,7 +1928,7 @@ typedef enum
 
 
 
-// sswolf - removed unused declarations
+// RTCWPro - removed unused declarations
 
 // g_antilag.c
 //
@@ -1909,10 +1945,11 @@ void G_ResetMarkers( gentity_t* ent );
 ///////////////////////
 // g_main.c
 //
+
 void G_UpdateCvars(void);
 void G_teamReset(int, qboolean);
 void ServerPlayerInfo(void);
-
+void LoadMapList( void );
 //
 // g_match.c
 //
@@ -1939,6 +1976,7 @@ void G_scs_cmd(gentity_t* ent, qboolean fValue);
 void G_scsSpectatorSpeed(gentity_t* ent);
 void G_refLogout(gentity_t* ent);
 void G_scsLogout(gentity_t* ent);
+void G_scsFollowOBJ(gentity_t* ent);
 qboolean G_refCommandCheck( gentity_t *ent, char *cmd );
 qboolean G_scsCommandCheck(gentity_t* ent, char* cmd);
 void G_refHelp_cmd( gentity_t *ent );
@@ -2005,6 +2043,7 @@ int G_Warmupfire_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *a
 int G_Unreferee_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_AntiLag_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
 int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd );
+int G_CoinToss_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd);
 
 //
 // g_geoip.c
@@ -2083,7 +2122,7 @@ int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
 void G_jstatsByPlayers(qboolean wstats);
 void G_jWeaponStats(void);
-
+int G_check_before_submit( char* jsonfile);
 void G_writeGameInfo (int winner);
 void G_writeServerInfo (void);
 void G_writeDisconnectEvent (gentity_t* agent);

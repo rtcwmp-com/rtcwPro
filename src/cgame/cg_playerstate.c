@@ -412,16 +412,62 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		}
 	}
 
-	if (cg_hitsounds.integer) {
+	// RTCWPro - moved entirely on the server side
+	/*if (cg_hitsounds.integer) {
+
 		if (ops->persistant[PERS_HITBODY] != ps->persistant[PERS_HITBODY]) {
-			if (ps->persistant[PERS_HITBODY] < ops->persistant[PERS_HITBODY])
-				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.teamShot);
-			else if (ps->persistant[PERS_HITHEAD] > ops->persistant[PERS_HITHEAD])
-				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot);
-			else
-				trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot);
+
+			if (ps->persistant[PERS_HITBODY] < ops->persistant[PERS_HITBODY]) {
+
+				if (cg_hitsounds.integer & HITSOUND_TEAM) {
+					trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.teamShot);
+				}
+			}
+			else if (ps->persistant[PERS_HITHEAD] > ops->persistant[PERS_HITHEAD]) {
+
+				if (cg_hitsounds.integer & HITSOUND_HEAD) {
+
+					if (cg_hitsoundHeadStyle.integer == 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot1);
+					}
+					else if (cg_hitsoundHeadStyle.integer > 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot2);
+					}
+					else {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.headShot1);
+					}
+				}
+			}
+			else {
+
+				if (cg_hitsounds.integer & HITSOUND_BODY) {
+
+					if (cg_hitsoundBodyStyle.integer == 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot1);
+					}
+					else if (cg_hitsoundBodyStyle.integer > 1) {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot2);
+					}
+					else {
+						trap_S_StartSound(NULL, ps->clientNum, CHAN_AUTO, cgs.media.bodyShot1);
+					}
+				}
+			}
 		}
-	}
+	}*/
+
+	/*if (cg_pauseMusic.integer) {
+
+		if (cgs.match_paused == PAUSE_ON) {
+
+			trap_S_AddLoopingSound(cg.snap->ps.clientNum, cg.snap->ps.origin, vec3_origin, cgs.media.pIntermission, 255);
+		}
+		else if (cgs.match_paused == PAUSE_RESUMING) {
+
+			trap_S_ClearLoopingSounds(qtrue);
+		}
+	}*/
+	// RTCWPro
 
 	// timelimit warnings
 	if ( cgs.timelimit > 0 ) {

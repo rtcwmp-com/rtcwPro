@@ -133,7 +133,7 @@ void SV_GetChallenge( netadr_t from ) {
 	// look up the authorize server's IP
 	if ( !svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD ) {
 		Com_Printf( "Resolving %s\n", AUTHORIZE_SERVER_NAME );
-		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &svs.authorizeAddress, NA_UNSPEC) ) {
+		if ( !NET_StringToAdr( AUTHORIZE_SERVER_NAME, &svs.authorizeAddress ) ) {
 			Com_Printf( "Couldn't resolve address\n" );
 			return;
 		}
@@ -180,32 +180,6 @@ void SV_GetChallenge( netadr_t from ) {
 							"getIpAuthorize %i %i.%i.%i.%i %s %i",  svs.challenges[i].challenge,
 							from.ip[0], from.ip[1], from.ip[2], from.ip[3], game, fs->integer );
 	}
-}
-
-/*
-====================
-SV_IsBanned
-====================
-*/
-qboolean SV_IsBanned(netadr_t* from, qboolean isexception) {
-	int index;
-	serverBan_t* curban;
-
-	if (!isexception) {
-		// If this is a query for a ban, first check whether the client is excepted
-		if (SV_IsBanned(from, qtrue))
-			return qfalse;
-	}
-
-	for (index = 0; index < serverBansCount; index++) {
-		curban = &serverBans[index];
-
-		if (curban->isexception == isexception) {
-			if (NET_CompareBaseAdrMask(curban->ip, *from, curban->subnet))
-				return qtrue;
-		}
-	}
-	return qfalse;
 }
 
 /*
@@ -334,19 +308,23 @@ void SV_DirectConnect( netadr_t from ) {
 		return;
 	}
 
+/*
 	// Check whether this client is banned.
 	if (SV_IsBanned(&from, qfalse)) {
 		NET_OutOfBandPrint(NS_SERVER, from, "print\n^7You are ^1Banned ^7from this server^1!\n");
 		return;
 	}
-
+*/
 	// RTCWPro
-	int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
-	if (cl_checkversion != sv_checkVersion->integer)
-	{
-		NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version. " "Run updater as admin.\n");
-		return;
+	if (!NET_IsLocalAddress(from)) {
+		int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
+		if (cl_checkversion != sv_checkVersion->integer)
+		{
+			NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version.\n" "Run updater as admin or download at rtcwpro.com\n");
+			return;
+		}
 	}
+
 
 	// DHM - Nerve :: Update Server allows any protocol to connect
 #ifndef UPDATE_SERVER
@@ -409,7 +387,7 @@ void SV_DirectConnect( netadr_t from ) {
 		}
 
 		challengeptr = &svs.challenges[i];
-		
+
 		/*if (challengeptr->wasrefused) {
 			// Return silently, so that error messages written by the server keep being displayed.
 			return;
@@ -591,8 +569,8 @@ gotnewcl:
 	newcl->nextSnapshotTime = svs.time;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	//newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
-
+	newcl->clientRestValidated = (!Q_stricmp(sv_GameConfig->string, "") ? RKVALD_TIME_OFF : svs.time + RKVALD_TIME_FULL);
+    newcl->clientValidated = qfalse;
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
 	// gamestate message was not just sent, forcing a retransmit
@@ -791,8 +769,6 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 		memcpy(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
 	else
 		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
-
-	SV_ReloadRest(qfalse); // RTCWPro
 
 	// call the game begin function
 	VM_Call( gvm, GAME_CLIENT_BEGIN, client - svs.clients );
@@ -1982,7 +1958,11 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	}
 
 	Com_DPrintf( "clientCommand: %s : %i : %s\n", cl->name, seq, s );
+    // if validated then stay validated
+	if ( !Q_strncmp( "rkvald 1", s, 8 )) {
+        cl->clientValidated = qtrue;
 
+	}
 	// drop the connection if we have somehow lost commands
 	if ( seq > cl->lastClientCommand + 1 ) {
 		Com_Printf( "Client %s lost %i clientCommands\n", cl->name,
@@ -2022,11 +2002,14 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	if (!Q_strncmp(CTL_RKVALD, s, strlen(CTL_RKVALD))) {
 		if (!Q_stricmp(sv_GameConfig->string, "")) {
 			cl->clientRestValidated = RKVALD_TIME_OFF;
+			cl->clientValidated = qtrue;
 		}
 		else {
 			Cmd_TokenizeString(s);
 			if (Cmd_Argv(1) && !Q_stricmp(Cmd_Argv(1), RKVALD_OK)) {
+
 				cl->clientRestValidated = svs.time + RKVALD_TIME_FULL;
+				cl->clientValidated = qtrue;
 			}
 		}
 	}
@@ -2274,7 +2257,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
 
-	if (Q_stricmp(sv_GameConfig->string, "") &&
+	/*if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT)
@@ -2284,14 +2267,14 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		SV_ExecuteClientCommand(cl, "team s", qtrue);
 		SV_SendServerCommand(NULL, "chat \"%s ^7use /violations to correct your settings before joining\n\"", cl->name);
 		return;
-	}
+	}*/
 
-	/*if (Q_stricmp(sv_GameConfig->string, "") &&
+	if (Q_stricmp(sv_GameConfig->string, "") &&
 		cl->clientRestValidated != RKVALD_TIME_OFF &&
 		cl->clientRestValidated < svs.time &&
-		cl->netchan.remoteAddress.type != NA_BOT) 
+		cl->netchan.remoteAddress.type != NA_BOT && !cl->clientValidated)
 	{
 		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
 		return;
-	}*/
+	}
 }

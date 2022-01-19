@@ -62,7 +62,7 @@ typedef struct {
 qboolean UI_checkKeyExec( int key );        // NERVE - SMF
 qboolean CL_CGameCheckKeyExec(int key);
 
-cvar_t* con_height; // RTCWPro
+cvar_t* con_height; // RTCWPro - con height
 
 // names not in this list can either be lowercase ascii, or '0xnn' hex sequences
 keyname_t keynames[] =
@@ -1011,7 +1011,7 @@ static void PrintMatches( const char *s ) {
 
 /*
 ===============
-// sswolf - tab value expansion ala ET
+// RTCWPro - tab value expansion ala ET
 
 PrintMatches
 ===============
@@ -1116,7 +1116,7 @@ static void CompleteCommand( void ) {
 
 	// run through again, printing matches
 	Cmd_CommandCompletion( PrintMatches );
-	// sswolf - tab value expansion ala ET
+	// RTCWPro - tab value expansion ala ET
 	//Cvar_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion(PrintCvarMatches);
 }
@@ -1680,10 +1680,6 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 	char cmd[1024];
 	qboolean bypassMenu = qfalse;       // NERVE - SMF
 
-	if (!key) {
-		return;
-	}
-
 	// update auto-repeat status and BUTTON_ANY status
 	keys[key].down = down;
 
@@ -1759,10 +1755,9 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 
 		if ( !down ) {
 			return;
-
 		}
 
-		// RTCWPro
+		// RTCWPro - con height
 		con_height = Cvar_Get("con_height", "0.5", CVAR_ARCHIVE);	//called early, used as default (set by user)
 		Con_SetFrac(con_height->value);
 		if (key == (unsigned char)'`' || key == (unsigned char)'~')
@@ -1772,7 +1767,7 @@ void CL_KeyEvent( int key, qboolean down, unsigned time ) {
 			else if (keys[K_SHIFT].down)			// We use shift because CTRL doesn't want to work..
 				Con_SetFrac(.25f);
 		}
-		// RTCWPro end
+		// con height end
 
 		Con_ToggleConsole_f();
 

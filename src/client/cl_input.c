@@ -380,10 +380,15 @@ void CL_KeyMove( usercmd_t *cmd ) {
 	side -= movespeed * CL_KeyState( &kb[KB_MOVELEFT] );
 
 //----(SA)	added
-	if ( cmd->buttons & BUTTON_ACTIVATE ) {
+	if ((cmd->buttons & BUTTON_ACTIVATE) && cl_activatelean->integer) { // RTCWPro
+
 		if ( side > 0 ) {
+
 			cmd->wbuttons |= WBUTTON_LEANRIGHT;
-		} else if ( side < 0 ) {
+
+		} 
+		else if ( side < 0 ) {
+
 			cmd->wbuttons |= WBUTTON_LEANLEFT;
 		}
 

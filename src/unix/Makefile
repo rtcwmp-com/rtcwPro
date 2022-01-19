@@ -133,7 +133,7 @@ SVWINOBJS := \
 
 client: CC := gcc
 client: NASM := nasm
-client: CFLAGS := $(CFLAGSREL) -m32 -DCLWWW -DBOTLIB -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
 	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl  -lmysqlclient 
@@ -164,7 +164,7 @@ client-clean:
 client-w32: CC := i686-w64-mingw32-gcc-win32
 client-w32: CXX := i686-w64-mingw32-g++-win32
 client-w32: CFLAGS := \
-	$(CFLAGSREL) -DBOTLIB -DCLWWW -DDLL_ONLY -DCPUSTRING=\"`uname -m`\" \
+	$(CFLAGSREL) -DBOTLIB -DDLL_ONLY -DCPUSTRING=\"`uname -m`\" \
 	-U__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING \
 	-DCURL_STATICLIB
 client-w32: CPPFLAGS := $(CFLAGS)
@@ -182,10 +182,10 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32 -DCLWWW -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/include/
+	$(CFLAGSREL) -m32  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/include/
 #server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
 #server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz   -DCURL_STATICLIB  -lmysqlclient 
-server: LDFLAGS := -m32 -ldl -lm -L./../../libs/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz   -DCURL_STATICLIB  -lmysqlclient 
+server: LDFLAGS := -m32 -ldl -lm -L./../../libs/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz  -lmysqlclient 
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
 	strip -s wolfded.x86
@@ -226,7 +226,7 @@ server-w32-clean:
 CURLCONF := \
 	"CFLAGS=-m32" "CXXFLAGS=-m32" "LDFLAGS=-m32" \
 	--prefix=$(PWD)/../../libs/curl-7.75.0 \
-	--enable-shared=no --enable-static=yes --with-ssl --disable-rtsp \
+	--enable-shared=yes --enable-static=yes --with-ssl --disable-rtsp \
 	--disable-ldap --disable-dict --disable-file --disable-gopher \
 	--disable-imap --disable-pop3 --disable-smtp --disable-telnet \
 	--disable-tftp --without-ca-bundle --without-libidn \

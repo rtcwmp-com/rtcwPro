@@ -30,8 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "../client/client.h"
 #include "win_local.h"
 
-#include "in_raw.h" // rinput
-
 WinVars_t g_wv;
 
 #ifndef WM_MOUSEWHEEL
@@ -332,13 +330,13 @@ LONG WINAPI MainWndProc(
 
 	switch ( uMsg )
 	{
-		// rinput
+		// RTCWPro - raw input
 #ifndef DEDICATED
 	case WM_INPUT:
 		IN_RawInput_MouseRead((HANDLE)lParam);
 		break;
 #endif
-		// rinput end
+		// raw input end
 	case WM_MOUSEWHEEL:
 		//
 		//
@@ -466,6 +464,16 @@ LONG WINAPI MainWndProc(
 		if ( wParam & MK_MBUTTON ) {
 			temp |= 4;
 		}
+
+		// RTCWPro - extra buttons
+		if (wParam & MK_XBUTTON1) {
+			temp |= 8;
+		}
+
+		if (wParam & MK_XBUTTON2) {
+			temp |= 16;
+		}
+		// RTCWPro end
 
 		IN_MouseEvent( temp );
 	}

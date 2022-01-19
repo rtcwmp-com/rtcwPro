@@ -1254,6 +1254,27 @@ void CG_NewClientInfo( int clientNum ) {
 		}
 	}
 
+	// RTCWPro - autoexec
+	if (!cg.demoPlayback) {
+
+		if (clientNum == cg.clientNum) {
+
+			if (newInfo.team != cgs.clientinfo[cg.clientNum].team) {
+
+				// autoexec team configs
+				if (newInfo.team != TEAM_FREE) {
+					CG_execFile(va("autoexec_%s", BG_GetTeam(newInfo.team)));
+				}
+			}
+
+			// autoexec class configs
+			if (newInfo.team != TEAM_SPECTATOR) {
+
+				CG_execFile(va("autoexec_%s", BG_GetClass(mp_playerType.integer)));
+			}
+		}
+	}
+
 	// scan for an existing clientinfo that matches this modelname
 	// so we can avoid loading checks if possible
 	if ( !CG_ScanForExistingClientInfo( &newInfo ) ) {
@@ -2453,9 +2474,9 @@ static void CG_PlayerSprites( centity_t *cent ) {
 		return;
 	}
 
-	if ( cent->currentState.powerups & ( 1 << PW_INVULNERABLE )
-		 && ( ( cent->currentState.effect3Time + 3000 ) > cg.time ) ) {
-		CG_PlayerFloatSprite( cent, cgs.media.spawnInvincibleShader, 56 );
+	if (cent->currentState.powerups & (1 << PW_INVULNERABLE)) {
+		//&& ((cent->currentState.effect3Time + 3000) > cg.time)) { // RTCWPro
+		CG_PlayerFloatSprite(cent, cgs.media.spawnInvincibleShader, 56);
 		return;
 	}
 
@@ -3019,7 +3040,7 @@ void CG_Player( centity_t *cent ) {
 	VectorCopy( playerOrigin, lightorigin );
 	lightorigin[2] += 31 + (float)cg_drawFPGun.integer;
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// L0 - Keeping this in for demo preview..
 	if (cg.demoPlayback && cgs.wallhack)
 	{

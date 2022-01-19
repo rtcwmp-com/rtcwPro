@@ -2,11 +2,15 @@
 
 ![Alt tag](Assets/rtcwpro.png?raw=true "Title")
 
-Return to Castle Wolfenstein Mod - based on OSPx/xMod (created by Nate) with additions from RtcwPub, ioRtcw, Enemy Territory, ETPub, and other Q3 mods
+Return to Castle Wolfenstein Mod/Engine - based on OSPx/xMod (created by Nate) with additions from RtcwPub, ioRtcw, Enemy Territory, ETPub, and other Q3 mods
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
 
-[b]New features[/b] added that are not in OSP:
+To run a RtcwPro server (Linux only) you may use Msh Docker available here: https://github.com/msh100/rtcw
+
+To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.htm
+
+**Change Log**
  - 1.0/1.0.1
    - corrected head hitboxes (RtcwPub port)
    - faster PK3 downloads (ioRtcw port)
@@ -115,10 +119,103 @@ Main objective: create a competition mod similar to OSP with updates for tournam
    - allow join during pause
    - add custom screen shake: g_screenShake
    - default r_mode to 6
+   - add cg_tracers
 
-If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/6PHHEWr
+ - 1.2.1 [changelog](changelog/1.2.1-changelog.txt)
+   - Note for linux servers: always run the image with root permissions!
+   - client: fix /map and /devmap on the client side
+   - client: display current round time in warmup between rounds
+   - client: add new style for RT: cg_drawReinforcementTime 1 = default, 2 = new, 3 = default and new
+   - client: add new style for ERT: cg_drawEnemyTimer 1 = default, 2 = new, 3 = default and new
+   - client: change RT color: cg_reinforcementTimeColor green = default
+   - client: change ERT color: cg_enemyTimerColor red = default
+   - client: change default RT position: cg_reinforcementTimeX 95 = default, cg_reinforcementTimeY 50 = default
+   - client: change new RT position: cg_reinforcementTimeProX 145 = default, cg_reinforcementTimeProY 445 = default
+   - client: change default ERT position: cg_enemyTimerX 98 = default, cg_enemyTimerY 60 = default
+   - client: change new ERT position: cg_enemyTimerProX 185 = default, cg_enemyTimerProY 445 = default
+   - client: add autoexec_team: _axis, _allies, and _spectator
+   - client: add autoexec_class: _s _e _m _l (soldier, engineer, medic, lieutenant)
+   - client: fix a keyboard bind key issue on azerty keyboards
+   - client: split (bitflag) cg_hitsounds: 1 = hs only, 2 = body only, 4 = team only, 7 = all (1+2+4)
+   - client: add cg_findMedic 1 = default: toggle camera lock at medics when waiting for a revive
+   - client: free up the ^ char so it can be used in con notify and names
+   - client: minor draw fixes to accommodate new stuff
+   - client: add cg_drawGun 2: hide only weapons (not holdables)
+   - client: change console color: con_color -1 = default, int from 0 to 31 based on vanilla color codes/keys
+   - server: shoutcasters always noclip
+   - server: fix bug that causes abnormal cpu usage and ping
+   - server: fix a bug missed on 1.2 with obj getting lost in solids
+   - server: fix bug where medics will drop weapon on death
+   - server: include server IP in stats
+   - server: fix specinvites not being transferred between sessions
+   - server: fix sv_gameConfig not loading on startup: cvar is now read only (set from command line on startup)
+   - server: add g_mapScriptDirectory "" = default: folder needs to be in fs
+   - server: fix validaiton for cvar rest causing incorrect violation kicks
+   - server: fix end of round announcer sounds
+   - server: fix stats offset bug with map_restart on SW2
+   - server: fix swap after map_restart on SW2
+   - server: add objective captures to json events and player stats
+ 
+ - 1.2.2
+   - server: lowercase expected file name for map configs (linux)
+   - server: lowercase expected file name for .spawns files (linux)
+   - server: only exec map configs on map load (not map restart)
+   - server: fix ready status being reset on client death
+   - server: shoutcasters can follow other shoutcasters by /follow id
+   - server: shoutcasters can /followobj to follow active obj carrier (if any)
+   - server: shoutcasters can /noclip
+   - server: add map name search on /callvote map
+   - server: add /maps to list maps on server
+ 
+ - 1.2.3
+   - server: fix early airstrikes bug
+   - server: add vote_allow_cointoss  
+ 
+ - 1.2.4  
+    - server: fix callvote map matching of maps that differ by number  
+    - server: add g_damageRadiusKnockback to change explosions knockback, default 1000
+    - server: do not submit stats for early exit rounds
+    - server: do not submit stats if no more than 2 players are active
+    - server: add server country to json output
+    - server: fix bug where clients spawn with varying health instead of respecting number of team medics
+    - server: fix hitsound sequence issues
+    - client: change default for cg_reinforcementTimeColor to red
+    - client: change default for cg_enemyTimerColor to green
+    - client: add cl_activateLean to toggle leaning when holding move keys and +activate, default 1
+    - client: add cg_hitsoundBodyStyle 1-5 to change body hitsound, default 1
+    - client: add cg_hitsoundHeadStyle 1-8 to change head hitsound, default 1
+    - client: add cg_notifyTextX and cg_notifyTextY to change kill feed position
+    - client: add cg_notifyTextWidth to change kill feed char width, default 8
+    - client: add cg_notifyTextHeight to change kill feed char height, default 8
+    - client: add cg_notifyTextShadow to toggle shadowing of kill feed
+    - client: add cg_chatX and cg_chatY to change chat position
+    - client: add cg_teamOverlayX and cg_teamOverlayY to change team overlay position
+    - client: add cg_compassX and cg_compassY to change compass position
+    - client: add cg_lagometerX and cg_lagometerY to change lagometer position
+    - client: add cg_drawFrags to toggle "you killed" frag center prints
+    - client: add cg_fragsY to change frag center print position
+    - client: add cg_fragsWidth to change frag center print char width size, default 16
+    - client: add cg_zoomedSensLock to toggle zoom sens lock when zooming in
+    - client: add cg_pauseMusic
+    - client: un-hardcode cg_zoomedSens
+    - client: disable http due to overflows causing crashes
+    - client: deprecate con_color due to a possible crash
+    - client: only draw triggers in freecam
+    - client: don't draw dynamite timers when scoreboard is up
+    - client: remove unneeded delay in the default body hitsound
+    - client: fix bug where raw input will keep initializing for no reason
+    - client: fix draw obj icon not updating when it should
+    - client: fix weapon switch to pistol at dropweapon when holding ammo packs
+    - client: fix spawn shield icons not showing up
+    - client: fix player bounding box collision/sticking
+    - client: optimize events handling
+
+
+If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
 RtcwPro Dev Team
 -nihilist, KrazyKaze, Tarator
 
-Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, and Spaztik
+Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, crumbs, and Spaztik
+Additional credits for public code: Nobo, Nico, suburb, jinx, rhea, OpenJK, ETLegacy, ETpub, Jaymod, ioquake, iortcw.
+Installer powered by Advanced Installer: https://www.advancedinstaller.com/

@@ -797,11 +797,20 @@ static float CG_DrawTeamOverlay( float y ) {
 		w = ( pwidth + lwidth + 8 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
 
 	}
-	x = 640 - w - 4; // JPW was -32
+
+	// RTCWPro
+	//x = 640 - w - 4; // JPW was -32
+	x = cg_teamOverlayX.integer - w - 4;
+	y = cg_teamOverlayY.integer;
+	// RTCWPro
+
 	h = plyrs * TINYCHAR_HEIGHT;
 
+	// RTCWPro
+	if (cg_notifyTextY.integer == 42 && cg_teamOverlayY.integer == 0) {
 	// DHM - Nerve :: Set the max characters that can be printed before the left edge
-	maxCharsBeforeOverlay = ( x / TINYCHAR_WIDTH ) - 1;
+		maxCharsBeforeOverlay = (x / TINYCHAR_WIDTH) - 1;
+	}
 
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED ) {
 		hcolor[0] = 0.5f; // was 0.38 instead of 0.5 JPW NERVE
@@ -1006,6 +1015,7 @@ static float CG_DrawRespawnTimer(float y) {
 	char		*str = { 0 };
 	int			w;
 	float		x;
+	vec4_t color;
 
 	playerState_t* ps;
 
@@ -1015,16 +1025,22 @@ static float CG_DrawRespawnTimer(float y) {
 
 	ps = &cg.snap->ps;
 
-	if (ps->stats[STAT_HEALTH] <= 0) { // don't show RT when limbo message is drawn
+	/*if (ps->stats[STAT_HEALTH] <= 0) { // don't show RT when limbo message is drawn
+		return y;
+	}*/
+
+	// Don't draw timer if client is checking scoreboard
+	if (CG_DrawScoreboard()) {
 		return y;
 	}
 
-	if (!cg_drawReinforcementTime.integer)
+	if (cg.showScores) {
 		return y;
+	}
 
-	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return y;
+	}
 
 	if (cgs.gamestate != GS_PLAYING)
 		str = "";
@@ -1038,15 +1054,20 @@ static float CG_DrawRespawnTimer(float y) {
 	w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
 //	x = 46 + 6;
-	x = 46 + 40;
+	//x = 46 + 40; - supposed
 //	y = 480 - 245;
-	y = 480 - 410;
+	//y = 480 - 410; - supposed
+
+	x = cg_reinforcementTimeX.integer;
+	y = cg_reinforcementTimeY.integer;
+
+	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color);
 
 	if (cgs.gamestate != GS_PLAYING) {
 		CG_DrawStringExt((x + 4) - w, y, str, colorYellow, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 	}
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team != TEAM_SPECTATOR){
-		CG_DrawStringExt(x - w, y, str, colorRed, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+		CG_DrawStringExt(x - w, y, str, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 	}
 	return y += TINYCHAR_HEIGHT;
 }
@@ -1066,6 +1087,7 @@ static float CG_DrawEnemyTimer(float y) {
 	int    msec    = (cgs.timelimit * 60.f * 1000.f ) - (cg.time - cgs.levelStartTime);
 	int    seconds = msec / 1000;
 	int    mins    = seconds / 60;
+	vec4_t color;
 	playerState_t* ps;
 
 	seconds -= mins * 60;
@@ -1073,35 +1095,32 @@ static float CG_DrawEnemyTimer(float y) {
 	seconds -= tens * 10;
 	ps = &cg.snap->ps;
 
-	if (cgs.gametype < GT_WOLF) {
+	if (cgs.gametype < GT_WOLF) { 
 		return y;
 	}
 
 	// Don't draw timer if client is checking scoreboard
-	if (CG_DrawScoreboard())
+	if (CG_DrawScoreboard()) {
 		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
 
     if (cg_spawnTimer_set.integer == -1)
         return y;
-
 
     if (cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
         return y;
     }
 
-	if (!cg_drawEnemyTimer.integer)
-	{
-		return y;
-	}
-
-	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus)
-	{
-		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW))
-		{
+	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) { 
+		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) { 
 			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
 				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
-			if (period > 0) // prevent division by 0 for weird cases like limbtotime < 1000
-			{
+
+			if (period > 0) { // prevent division by 0 for weird cases like limbtotime < 1000
 				seconds = msec / 1000;
 				secondsThen = ((cgs.timelimit * 60000.f) - cg_spawnTimer_set.integer) / 1000;
 
@@ -1109,28 +1128,22 @@ static float CG_DrawEnemyTimer(float y) {
 				w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
 				//	x = 46 + 6;
-				x = 46 + 40;
+				//x = 46 + 40; - supposed
 				//	y = 480 - 245;
-				if (ps->stats[STAT_HEALTH] > 0)
-				{
-					y = 480 - 400;
-				}
-				else
-				{
-					y = 480 - 360;
-				}
-				CG_DrawStringExt((x + 5) - w, y, str, colorGreen, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+				x = cg_enemyTimerX.integer;
+				y = cg_enemyTimerY.integer;
+				BG_ParseColorCvar(cg_enemyTimerColor.string, color);
+				CG_DrawStringExt((x + 5) - w, y, str, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
 		}
 	}
-	else if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate != GS_PLAYING)
-	{
+	else if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate != GS_PLAYING) { 
 		// We are not playing and the timer is set so reset/disable it
 		// this happens for example when custom period is set by timerSet and map is restarted or changed
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
-	else 
-	{
+	else { 
         return y;
 	}
 
@@ -1146,14 +1159,15 @@ CG_DrawShoutcastTimer
 static float CG_DrawShoutcastTimer(float y) {
 	vec4_t color = { .6f, .6f, .6f, 1.f };
 	char* rtAllies = "", * rtAxis = "";
-	int h = 30;
-	int x = 35;
-	y = 480 - 400;
+	int h, x, w;
 
 	if (cgs.gamestate != GS_PLAYING)
 	{
 		return y;
 	}
+
+	x = 46 + 30;
+	y = 480 - 410;
 
 	int reinfTimeAx = CG_CalculateShoutcasterReinfTime(TEAM_RED);
 	int reinfTimeAl = CG_CalculateShoutcasterReinfTime(TEAM_BLUE);
@@ -1161,20 +1175,23 @@ static float CG_DrawShoutcastTimer(float y) {
 	rtAllies = va("^$%i", reinfTimeAl);
 	rtAxis = va("^1%i", reinfTimeAx);
 
+	h = CG_DrawStrlen(rtAllies) * TINYCHAR_WIDTH;
+	w = CG_DrawStrlen(rtAxis) * TINYCHAR_WIDTH;
+
 	color[3] = 1.f;
 
 	// Axis time
-	CG_DrawStringExt(x, y + h - 5, rtAxis, colorRed, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+	CG_DrawStringExt(x - w - h, y, rtAxis, colorRed, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 
 	// Allies time
-	CG_DrawStringExt(x + 20, y + h - 5, rtAllies, colorBlue, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+	CG_DrawStringExt(x - w - h + 20, y, rtAllies, colorBlue, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 
 	return y += TINYCHAR_HEIGHT;
 }
 
 /*
 ========================
-sswolf - complete OSP demo features
+RTCWPro
 OSPx
 Counts time in
 
@@ -1198,7 +1215,7 @@ void CG_startCounter(void) {
 
 /*
 ===================
-sswolf - draw speed
+RTCWPro - draw speed
 with extra features
 Source: PubJ
 
@@ -1284,6 +1301,128 @@ void CG_DrawTJSpeed(void) {
 }
 
 /*
+========================
+OSPx > rtcwPub > RTCWPro
+Respawn Timer
+========================
+*/
+static float CG_DrawProRespawnTimer(float y) {
+	int x;
+	int	val = 0;
+	float scale = 0.8f;
+	vec4_t color;
+
+	// Don't draw timer if client is checking scoreboard
+	if (CG_DrawScoreboard()) {
+		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
+
+	if (cgs.gamestate != GS_PLAYING) {
+		return y;
+	}
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus) {
+		return y;
+	}
+
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED) {
+		val = CG_CalculateReinfTime(qfalse);
+	}
+	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_BLUE) {
+		val = CG_CalculateReinfTime(qfalse);
+	}
+
+	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color);
+	trap_R_SetColor(color);
+
+	x = cg_reinforcementTimeProX.integer;
+	y = cg_reinforcementTimeProY.integer;
+
+	CG_DrawField(x, y, 3, val, 20 * scale, 32 * scale, qtrue, qfalse);
+
+	return y;
+}
+
+/*
+========================
+RTCWPro
+Enemy Timer
+========================
+*/
+static float CG_DrawProEnemyTimer(float y) {
+	int    tens;
+	int    x = 290;
+	int    secondsThen;
+	int    msec = (cgs.timelimit * 60.f * 1000.f) - (cg.time - cgs.levelStartTime);
+	int    seconds = msec / 1000;
+	int    mins = seconds / 60;
+	int val = 0;
+	float scale = 0.8f;
+	vec4_t color;
+	playerState_t* ps;
+
+	seconds -= mins * 60;
+	tens = seconds / 10;
+	seconds -= tens * 10;
+	ps = &cg.snap->ps;
+
+	if (cgs.gametype < GT_WOLF) {
+		return y;
+	}
+
+	// Don't draw timer if client is checking scoreboard
+	if (CG_DrawScoreboard()) {
+		return y;
+	}
+
+	if (cg.showScores) {
+		return y;
+	}
+
+	if (cg_spawnTimer_set.integer == -1)
+		return y;
+
+	if (cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WAITING_FOR_PLAYERS) {
+		return y;
+	}
+
+	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) {
+		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer :
+				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+
+			if (period > 0) { // prevent division by 0 for weird cases like limbtotime < 1000
+				seconds = msec / 1000;
+				secondsThen = ((cgs.timelimit * 60000.f) - cg_spawnTimer_set.integer) / 1000;
+				val = (period + (seconds - secondsThen) % period);
+
+				BG_ParseColorCvar(cg_enemyTimerColor.string, color);
+				trap_R_SetColor(color);
+
+				x = cg_enemyTimerProX.integer;
+				y = cg_enemyTimerProY.integer;
+
+				CG_DrawField(x, y, 3, val, 20 * scale, 32 * scale, qtrue, qfalse);
+			}
+		}
+	}
+	else if (cg_spawnTimer_set.integer != -1 && cg_spawnTimer_period.integer > 0 && cgs.gamestate != GS_PLAYING) {
+		// We are not playing and the timer is set so reset/disable it
+		// this happens for example when custom period is set by timerSet and map is restarted or changed
+		trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	}
+	else {
+		return y;
+	}
+
+	return y += TINYCHAR_HEIGHT;
+}
+
+/*
 =====================
 CG_DrawUpperRight
 
@@ -1295,7 +1434,13 @@ static void CG_DrawUpperRight( void ) {
 	y = 0; // JPW NERVE move team overlay below obits, even with timer on left
 
 	if ( cgs.gametype >= GT_TEAM ) {
-		y = CG_DrawTeamOverlay( y );
+		// RTCWPro - don't offset if it's not in its default position, since it's customizable
+		if (cg_teamOverlayY.integer == 0 && cg_teamOverlayX.integer == 640) {
+			y = CG_DrawTeamOverlay(y);
+		}
+		else {
+			CG_DrawTeamOverlay(0);
+		}
 	}
 	if ( cg_drawSnapshot.integer ) {
 		y = CG_DrawSnapshot( y );
@@ -1313,22 +1458,39 @@ static void CG_DrawUpperRight( void ) {
 //----(SA)	end
 
 	// OSPx - Respawn Timer
-	if (cg_drawReinforcementTime.integer) {
+	if (cg_drawReinforcementTime.integer == 1) {
 		y = CG_DrawRespawnTimer(y);
 	}
 
-	// enemy respawn timer (do not include yet)
-	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0) && (cg_drawEnemyTimer.integer)) {
-        y = CG_DrawEnemyTimer(y);
-
+	// RTCWPro - different style RT
+	if (cg_drawReinforcementTime.integer == 2) {
+		y = CG_DrawProRespawnTimer(y);
 	}
 
-	if (cgs.clientinfo[cg.clientNum].shoutStatus && cg_drawReinforcementTime.integer > 0)
-	{
+	if (cg_drawReinforcementTime.integer > 2) {
+		y = CG_DrawRespawnTimer(y);
+		y = CG_DrawProRespawnTimer(y);
+	}
+
+	// enemy respawn timer (do not include yet)
+	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) { 
+		if (cg_drawEnemyTimer.integer == 1) { 
+			y = CG_DrawEnemyTimer(y);
+		}
+		if (cg_drawEnemyTimer.integer == 2) { 
+			y = CG_DrawProEnemyTimer(y);
+		}
+		if (cg_drawEnemyTimer.integer > 2) { 
+			y = CG_DrawEnemyTimer(y);
+			y = CG_DrawProEnemyTimer(y);
+		}
+	}
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus && cg_drawReinforcementTime.integer > 0) {
 		y = CG_DrawShoutcastTimer(y);
 	}
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// OSPx - Time Counter
 	CG_startCounter();
 }
@@ -1353,6 +1515,9 @@ static void CG_DrawTeamInfo( void ) {
 	int chatHeight;
 	float alphapercent;
 	float chatAlpha = (float)cg_chatAlpha.value;
+	// RTCWPro
+	int x = cg_chatX.integer;
+	int y = cg_chatY.integer;
 
 #define CHATLOC_Y 385 // bottom end
 #define CHATLOC_X 0
@@ -1423,16 +1588,15 @@ static void CG_DrawTeamInfo( void ) {
 				BG_setCrosshair(cg_chatBackgroundColor.string, hcolor, chatAlpha * alphapercent, "cg_chatBackgroundColor");
 // End
 			trap_R_SetColor( hcolor );
-			CG_DrawPic( CHATLOC_X, CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
+			CG_DrawPic( x, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt( CHATLOC_X + TINYCHAR_WIDTH,
-							  CHATLOC_Y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT,
-							  cgs.teamChatMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0 );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, cgs.teamChatMsgs[i % chatHeight], 
+				hcolor, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
 //			CG_DrawSmallString( CHATLOC_X + SMALLCHAR_WIDTH,
 //				CHATLOC_Y - (cgs.teamChatPos - i)*SMALLCHAR_HEIGHT,
 //				cgs.teamChatMsgs[i % TEAMCHAT_HEIGHT], 1.0F );
@@ -1504,6 +1668,12 @@ static void CG_DrawNotify( void ) {
 	float alphapercent;
 	char var[MAX_TOKEN_CHARS];
 	float notifytime = 1.0f;
+	// RTCWPro
+	int x = cg_notifyTextX.integer;
+	int y = cg_notifyTextY.integer;
+	qboolean shadow = cg_notifyTextShadow.integer;
+	int width = cg_notifyTextWidth.integer;
+	int height = cg_notifyTextHeight.integer;
 
 	trap_Cvar_VariableStringBuffer( "con_notifytime", var, sizeof( var ) );
 	notifytime = atof( var ) * 1000;
@@ -1552,10 +1722,13 @@ static void CG_DrawNotify( void ) {
 			hcolor[3] = alphapercent;
 			trap_R_SetColor( hcolor );
 
-			CG_DrawStringExt( NOTIFYLOC_X + TINYCHAR_WIDTH,
-							  NOTIFYLOC_Y - ( cgs.notifyPos - i ) * TINYCHAR_HEIGHT,
-							  cgs.notifyMsgs[i % chatHeight], hcolor, qfalse, qfalse,
-							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay );
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
+				hcolor, qfalse, shadow, width, height, maxCharsBeforeOverlay);
+
+			/*
+			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - (cgs.notifyPos - i) * TINYCHAR_HEIGHT, cgs.notifyMsgs[i % chatHeight],
+				hcolor, qfalse, shadow, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, maxCharsBeforeOverlay);
+			*/
 		}
 	}
 }
@@ -1679,7 +1852,8 @@ CG_DrawLagometer
 ==============
 */
 static void CG_DrawLagometer( void ) {
-	int a, x, y, i;
+	// RTCWPro
+	int a, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i;
 	float v;
 	float ax, ay, aw, ah, mid, range;
 	int color;
@@ -1698,8 +1872,9 @@ static void CG_DrawLagometer( void ) {
 	//
 	// draw the graph
 	//
-	x = 640 - 55;
-	y = 480 - 140;
+	// RTCWPro
+	//x = 640 - 55;
+	//y = 480 - 140;
 
 	trap_R_SetColor( NULL );
 	CG_DrawPic( x, y, 48, 48, cgs.media.lagometerShader );
@@ -2858,8 +3033,7 @@ static void CG_DrawIntermission( void ) {
 		return;
 	}
 
-// OSPx
-	// Auto Actions
+	// RTCWPro - Auto Actions
 	if (!cg.demoPlayback) {
 		static int doScreenshot = 0, doDemostop = 0;
 
@@ -2890,7 +3064,11 @@ static void CG_DrawIntermission( void ) {
 			doDemostop = 0;
 		}
 	}
-// -OSPx
+
+	trap_Cvar_Set("cg_spawnTimer_set", "-1");
+	trap_Cvar_Set("cg_spawnTimer_period", "0");
+	// RTCWPro
+
 	cg.scoreFadeTime = cg.time;
 	CG_DrawScoreboard();
 }
@@ -3085,6 +3263,7 @@ static qboolean CG_DrawFollow( void ) {
 	vec4_t color;
 	const char  *name;
 	char deploytime[128];        // JPW NERVE
+	float y;
 
 	if ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) ) {
 		return qfalse;
@@ -3125,11 +3304,12 @@ static qboolean CG_DrawFollow( void ) {
 	} else {
 		// jpw
 		//CG_DrawSmallString( INFOTEXT_STARTX, 68, CG_TranslateString( "following" ), 1.0F ); // original location
-		CG_DrawSmallString( INFOTEXT_STARTX, 83, CG_TranslateString( "following" ), 1.0F ); // below respawn timer
+		if (cgs.gamestate != GS_PLAYING && cgs.currentRound) { y = 63; } else { y = 83; }
+		CG_DrawSmallString( INFOTEXT_STARTX, y, CG_TranslateString( "following" ), 1.0F ); // below respawn timer
 
 		name = cgs.clientinfo[ cg.snap->ps.clientNum ].name;
         //CG_DrawStringExt( 120, 68, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // original location
-		CG_DrawStringExt( 120, 83, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // below respawn timer
+		CG_DrawStringExt( 120, y, name, color, qtrue, qtrue, BIGCHAR_WIDTH, BIGCHAR_HEIGHT, 0 ); // below respawn timer
 	} // JPW NERVE
 	return qtrue;
 }
@@ -3198,6 +3378,7 @@ static void CG_DrawWarmup( void ) {
 	int cw = 10;
 	const char  *s, *s1, *s2, *configString;
     static qboolean announced = qfalse;
+	const char* t;
 
 	if ( cgs.gametype == GT_SINGLE_PLAYER ) {
 		return;     // (SA) don't bother with this stuff in sp
@@ -3234,11 +3415,23 @@ static void CG_DrawWarmup( void ) {
 
 		} else {
 
-			if (configString != NULL)
-			{
-				w = CG_DrawStrlen(configString);
-				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
-					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			if (cgs.currentRound) {
+				t = va(CG_TranslateString("Clock is now set to %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
+				w = CG_DrawStrlen(t);
+				CG_DrawStringExt(320 - w * cw / 2, 100, t, colorWhite, qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+
+				if (configString != NULL) {
+					w = CG_DrawStrlen(configString);
+					CG_DrawStringExt(320 - w * cw / 2, 80, configString, colorWhite,
+						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+				}
+			}
+			else {
+				if (configString != NULL) {
+					w = CG_DrawStrlen(configString);
+					CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
+						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+				}
 			}
 
 			// No need to bother with count..scoreboard gives info..
@@ -3853,6 +4046,9 @@ void CG_DrawObjectiveIcons() {
 	int i, num, status,barheight;
 	vec4_t hcolor = { 0.2f, 0.2f, 0.2f, 1.f };
 	int msec, mins, seconds, tens; // JPW NERVE
+	// RTCWPro
+	playerState_t* ps;
+	clientInfo_t* ci;
 
 // JPW NERVE added round timer
 	y = 48;
@@ -4007,11 +4203,19 @@ void CG_DrawObjectiveIcons() {
 	VectorSet( hcolor, 1, 1, 1 );
 	hcolor[3] = cg_hudAlpha.value;
 	trap_R_SetColor( hcolor );
-	if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
+	// RTCWPro
+	/*if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
 		 cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_BLUEFLAG ) ) {
 		CG_DrawPic( -7, y, 48, 48, trap_R_RegisterShader( "models/multiplayer/treasure/treasure" ) );
 		y += 50;
+	}*/
+	ps = &cg.snap->ps;
+	ci = &cgs.clientinfo[ps->clientNum];
+	if (ps->powerups[PW_REDFLAG] || ps->powerups[PW_BLUEFLAG]) {
+		CG_DrawPic(-7, y, 48, 48, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+		y += 50;
 	}
+	// RTCWPro end
 }
 // -NERVE - SMF
 
@@ -4230,7 +4434,10 @@ NERVE - SMF
 =================
 */
 static void CG_DrawCompass( void ) {
-	float basex = 290, basey = 420;
+	// RTCWPro
+	float basex = cg_compassX.integer; //290 
+	float basey = cg_compassY.integer; //420;
+	// RTCWPro
 	float basew = 60, baseh = 60;
 	snapshot_t  *snap;
 	vec4_t hcolor;
@@ -4574,8 +4781,8 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_ShakeCamera();       // NERVE - SMF
 
 	// RTCWPro - draw triggers for shoutcasters
-	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus)
-	{
+	if (cg_drawTriggers.integer && cgs.clientinfo[cg.clientNum].shoutStatus && !(cg.snap->ps.pm_flags & PMF_FOLLOW)) {
+
 		CG_DrawTriggers();
 	}
 
@@ -4590,7 +4797,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_Draw2D();
 
 	// RTCWPro
-	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus) 
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR && 
+		cgs.clientinfo[cg.snap->ps.clientNum].shoutStatus &&
+		!cg.showScores) 
 	{
 		CG_ShoutcasterItems();
 	}

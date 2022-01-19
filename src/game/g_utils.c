@@ -42,9 +42,12 @@ typedef struct {
 } shaderRemap_t;
 
 #define MAX_SHADER_REMAPS 128
+#define MAX_MAP_MATCHES 128 // RTCWPro
 
 int remapCount = 0;
 shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
+
+#define FLT_MAX          3.402823466e+38F // RTCWPro
 
 void AddRemap( const char *oldShader, const char *newShader, float timeOffset ) {
 	int i;
@@ -798,7 +801,7 @@ int DebugLine( vec3_t start, vec3_t end, int color ) {
 
 /*
 ================
-sswolf - allowteams - ET port
+RTCWPro - allowteams - ET port
 G_AllowTeamsAllowed
 ================
 */
@@ -822,7 +825,7 @@ qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator)
 
 /*
 ==============
-sswolf - determine if
+RTCWPro - determine if
 class can drop weapon
 Originally from PubJ
 ==============
@@ -1121,5 +1124,544 @@ qboolean FileExists(char* filename, char* directory, char* expected_extension, q
 	}
 
 	return qfalse;
+}
+
+/*
+===============
+RTCWPro
+Credits to S4NDMOD (with some modifications)
+
+G_SpawnEnts
+===============
+*/
+qboolean G_SpawnEnts(gentity_t* ent) {
+	char mapName[64];
+
+	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
+
+	// Check only SP
+	if ((!Q_stricmp(mapName, "assault")) || 
+		(!Q_stricmp(mapName, "baseout")) || 
+		(!Q_stricmp(mapName, "boss1")) || 
+		(!Q_stricmp(mapName, "boss2")) || 
+		(!Q_stricmp(mapName, "castle")) || 
+		(!Q_stricmp(mapName, "chateau")) || 
+		(!Q_stricmp(mapName, "church")) || 
+		(!Q_stricmp(mapName, "crypt1")) || 
+		(!Q_stricmp(mapName, "crypt2")) || 
+		(!Q_stricmp(mapName, "cutscene1")) ||
+		(!Q_stricmp(mapName, "cutscene6")) ||
+		(!Q_stricmp(mapName, "cutscene9")) ||
+		(!Q_stricmp(mapName, "cutscene11")) ||
+		(!Q_stricmp(mapName, "cutscene14")) ||
+		(!Q_stricmp(mapName, "cutscene19")) ||
+		(!Q_stricmp(mapName, "dam")) || 
+		(!Q_stricmp(mapName, "dark")) ||
+		(!Q_stricmp(mapName, "dig")) || 
+		(!Q_stricmp(mapName, "end")) || 
+		(!Q_stricmp(mapName, "escape1")) || 
+		(!Q_stricmp(mapName, "escape2")) || 
+		(!Q_stricmp(mapName, "factory")) || 
+		(!Q_stricmp(mapName, "forest")) || 
+		(!Q_stricmp(mapName, "norway")) || 
+		(!Q_stricmp(mapName, "rocket")) || 
+		(!Q_stricmp(mapName, "sfm")) || 
+		(!Q_stricmp(mapName, "swf")) || 
+		(!Q_stricmp(mapName, "trainyard")) || 
+		(!Q_stricmp(mapName, "tram")) || 
+		(!Q_stricmp(mapName, "village1")) || 
+		(!Q_stricmp(mapName, "village2")) || 
+		(!Q_stricmp(mapName, "xlabs")))
+	{
+
+		//	Turn MED on map into regular MEDpacks for players to use
+		if (!Q_strncmp(ent->classname, "item_armor_", 11) || !Q_strncmp(ent->classname, "item_health_", 12)) {
+			ent->classname = "item_health";
+			return qtrue;
+		}
+
+		//	Turn ammo on map into AMMOpacks for players to use
+		if (!Q_strncmp(ent->classname, "ammo_", 5)) {
+			ent->classname = "weapon_magicammo";
+			return qtrue;
+		}
+
+		if (!Q_strncmp(ent->classname, "holdable_", 9)) {
+			ent->classname = "item_health";
+			return qtrue;
+		}
+
+		if ((!strcmp("func_door_rotating", ent->classname)) || (!strcmp("func_door", ent->classname))) {
+			ent->wait = FLT_MAX;
+		}
+
+		if (!strcmp("trigger_aidoor", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("alarm_box", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("ai_trigger", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("ai_marker", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("ai_soldier", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("trigger_once", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("item_clipboard", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_knife2", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_grenadesmoke", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_smoketrail", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_medic_heal", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_dynamite", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_dynamite2", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_sniperScope", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_mortar", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_class_special", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_arty", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("weapon_medic_syringe", ent->classname)) {
+			return qfalse;
+		}
+
+		if (!strcmp("shooter_rocket", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "assault")) {
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == -4510) && 
+			(ent->r.currentOrigin[1] == 4616) && (ent->r.currentOrigin[2] == 664)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "baseout")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+
+			if ((ent->r.currentOrigin[0] == -2064) && (ent->r.currentOrigin[1] == 2286) && (ent->r.currentOrigin[2] == 280)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 282) && (ent->r.currentOrigin[1] == 672) && (ent->r.currentOrigin[2] == 53)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 6) && (ent->r.currentOrigin[1] == 672) && (ent->r.currentOrigin[2] == 53)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "boss1")) {
+		if (!strcmp("func_door", ent->classname)) {
+			return qfalse;
+		}
+		if ((!strcmp("func_explosive", ent->classname)) && (ent->spawnflags != 4)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "boss2")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == 574) && (ent->r.currentOrigin[1] == 968) && (ent->r.currentOrigin[2] == 88)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 514) && (ent->r.currentOrigin[1] == 1464) && (ent->r.currentOrigin[2] == 88)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "castle")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == 1232) && (ent->r.currentOrigin[1] == 1950) && (ent->r.currentOrigin[2] == 336)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1158) && (ent->r.currentOrigin[1] == 1950) && (ent->r.currentOrigin[2] == 336)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1158) && (ent->r.currentOrigin[1] == 2117) && (ent->r.currentOrigin[2] == 100)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1018) && (ent->r.currentOrigin[1] == 2117) && (ent->r.currentOrigin[2] == 100)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "chateau")) {
+		if (!strcmp("func_explosive", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "church")) {
+		if ((!strcmp("func_explosive", ent->classname)) && (ent->spawnflags == 20)) {
+			return qfalse;
+		}
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == -480) && (ent->r.currentOrigin[1] == -158) && (ent->r.currentOrigin[2] == 704)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -384) && (ent->r.currentOrigin[1] == -158) && (ent->r.currentOrigin[2] == 1152)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -384) && (ent->r.currentOrigin[1] == 734) && (ent->r.currentOrigin[2] == 1152)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "crypt1")) {
+		if (!strcmp("func_explosive", ent->classname)) {
+			return qfalse;
+		}
+		if (!strcmp("trigger_hurt", ent->classname)) {
+			return qfalse;
+		}
+		if (!strcmp("func_door", ent->classname)) {
+			return qfalse;
+		}
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "crypt2")) {
+		if (!strcmp("func_explosive", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "dam")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == -1340) && (ent->r.currentOrigin[1] == 5528) && (ent->r.currentOrigin[2] == 2404)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -1576) && (ent->r.currentOrigin[1] == 5528) && (ent->r.currentOrigin[2] == 2404)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -1604) && (ent->r.currentOrigin[1] == 5186) && (ent->r.currentOrigin[2] == 2392)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "dark")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "escape1")) {
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+		if ((!strcmp("func_door", ent->classname)) && (ent->spawnflags == 7)) {
+			return qfalse;
+		}
+		if ((!strcmp("func_explosive", ent->classname)) && (ent->spawnflags == 4)) {
+			return qfalse;
+		}
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == 264) && (ent->r.currentOrigin[1] == 129) && (ent->r.currentOrigin[2] == -504)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 432) && (ent->r.currentOrigin[1] == 513) && (ent->r.currentOrigin[2] == -504)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 600) && (ent->r.currentOrigin[1] == 575) && (ent->r.currentOrigin[2] == -504)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -190) && (ent->r.currentOrigin[1] == 416) && (ent->r.currentOrigin[2] == 536)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -190) && (ent->r.currentOrigin[1] == 416) && (ent->r.currentOrigin[2] == 752)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "factory")) {
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 1400) && 
+			(ent->r.currentOrigin[1] == 162) && (ent->r.currentOrigin[2] == 56)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "forest")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == -3492) && (ent->r.currentOrigin[1] == -434) && (ent->r.currentOrigin[2] == 264)) {
+				return qtrue;
+			}
+			else {
+				return qfalse;
+			}
+		}
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "norway")) {
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "rocket")) {
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "sfm")) {
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 478) && 
+			(ent->r.currentOrigin[1] == -576) && (ent->r.currentOrigin[2] == -64)) {
+			return qfalse;
+		}
+	}
+
+	if (!Q_stricmp(mapName, "swf")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == 1986) && (ent->r.currentOrigin[1] == -192) && (ent->r.currentOrigin[2] == 544)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 2368) && (ent->r.currentOrigin[1] == -514) && (ent->r.currentOrigin[2] == 548)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1440) && (ent->r.currentOrigin[1] == -1090) && (ent->r.currentOrigin[2] == 544)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1440) && (ent->r.currentOrigin[1] == -1214) && (ent->r.currentOrigin[2] == 544)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 354) && (ent->r.currentOrigin[1] == -1288) && (ent->r.currentOrigin[2] == 544)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -98) && (ent->r.currentOrigin[1] == 16) && (ent->r.currentOrigin[2] == 544)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -222) && (ent->r.currentOrigin[1] == 16) && (ent->r.currentOrigin[2] == 544)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 384) && (ent->r.currentOrigin[1] == -732) && (ent->r.currentOrigin[2] == 484)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 384) && (ent->r.currentOrigin[1] == -548) && (ent->r.currentOrigin[2] == 484)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 786) && (ent->r.currentOrigin[1] == 168) && (ent->r.currentOrigin[2] == 376)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "trainyard")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == -1480) && (ent->r.currentOrigin[1] == 606) && (ent->r.currentOrigin[2] == 120)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1904) && (ent->r.currentOrigin[1] == 382) && (ent->r.currentOrigin[2] == -192)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1406) && (ent->r.currentOrigin[1] == 80) && (ent->r.currentOrigin[2] == -192)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 3522) && (ent->r.currentOrigin[1] == 200) && (ent->r.currentOrigin[2] == 72)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 2120) && (ent->r.currentOrigin[1] == -610) && (ent->r.currentOrigin[2] == 72)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "tram")) {
+		if (!strcmp("trigger_hurt", ent->classname)) {
+			ent->classname = "trigger_push";
+		}
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == -252) && (ent->r.currentOrigin[1] == 318) && (ent->r.currentOrigin[2] == 504)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -2718) && (ent->r.currentOrigin[1] == 36) && (ent->r.currentOrigin[2] == -264)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -3784) && (ent->r.currentOrigin[1] == -1598) && (ent->r.currentOrigin[2] == -576)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -3784) && (ent->r.currentOrigin[1] == -1474) && (ent->r.currentOrigin[2] == -576)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "village1")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == -1040) && (ent->r.currentOrigin[1] == 130) && (ent->r.currentOrigin[2] == -128)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -880) && (ent->r.currentOrigin[1] == 130) && (ent->r.currentOrigin[2] == -128)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 610) && (ent->r.currentOrigin[1] == 1920) && (ent->r.currentOrigin[2] == 68)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 236) && (ent->r.currentOrigin[1] == 2338) && (ent->r.currentOrigin[2] == -128)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 64) && (ent->r.currentOrigin[1] == -670) && (ent->r.currentOrigin[2] == -128)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 318) && (ent->r.currentOrigin[1] == -324) && (ent->r.currentOrigin[2] == -128)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "village2")) {
+		if (!strcmp("func_door_rotating", ent->classname)) {
+			if ((ent->r.currentOrigin[0] == 2808) && (ent->r.currentOrigin[1] == -66) && (ent->r.currentOrigin[2] == 8)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == 1024) && (ent->r.currentOrigin[1] == -799) && (ent->r.currentOrigin[2] == -64)) {
+				return qfalse;
+			}
+			if ((ent->r.currentOrigin[0] == -968) && (ent->r.currentOrigin[1] == 705) && (ent->r.currentOrigin[2] == 2)) {
+				return qfalse;
+			}
+		}
+	}
+
+	if (!Q_stricmp(mapName, "xlabs")) {
+		if (!strcmp("trigger_hurt", ent->classname)) {
+			return qfalse;
+		}
+		if (!strcmp("func_invisible_user", ent->classname)) {
+			return qfalse;
+		}
+		if ((!strcmp("func_explosive", ent->classname)) && (ent->spawnflags == 4)) {
+			return qfalse;
+		}
+		if ((!strcmp("func_door_rotating", ent->classname)) && (ent->r.currentOrigin[0] == 1500) && 
+			(ent->r.currentOrigin[1] == 80) && (ent->r.currentOrigin[2] == 48)) {
+			return qfalse;
+		}
+	}
+
+	return qtrue;
+}
+
+/*
+==================
+Nihi - check for matching maps
+
+RTCWPro
+G_FindMatchingMaps
+==================
+*/
+int G_FindMatchingMaps(gentity_t* ent, char* mapName) {
+	int numMatches = 0;
+	int mapIndex = -1;
+	int i;
+
+	for (i = 0; i <= level.mapcount + 1; i++)
+	{
+		if (strstr(level.maplist[i], mapName) != NULL)
+		{
+			if (numMatches > MAX_MAP_MATCHES)
+			{
+				CP(va("print \"^3Too many matches found. Narrow your search!\n"));
+				break;
+			}
+
+			if (numMatches == 0)
+			{
+				mapIndex = i;
+			}
+			else if (numMatches == 1)
+			{
+				CP(va("print \"^3Multiple matches found:\n"));
+				CP(va("print \"^7  %s\n\"", level.maplist[mapIndex]));
+				CP(va("print \"^7  %s\n\"", level.maplist[i]));
+			}
+			else if (numMatches > 1)
+			{
+				CP(va("print \"^7  %s\n\"", level.maplist[i]));
+			}
+
+			numMatches += 1;
+		}
+
+		if (Q_stricmp(level.maplist[i], mapName) == 0)
+		{
+			mapIndex = i;
+			numMatches = 1; // found exact match...will clean this all up later
+			break;
+		}
+	}
+
+	if (numMatches == 1)
+	{
+		return mapIndex;
+	}
+	else if (numMatches > 1)
+	{
+		return 0;
+	}
+	else
+	{
+		CP(va("print \"^3%s ^7is not on the server.\n\"", mapName));
+		return 0;
+	}
 }
 

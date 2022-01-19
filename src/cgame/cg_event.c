@@ -233,8 +233,19 @@ static void CG_Obituary( entityState_t *ent ) {
 				s = va( "%s %s", CG_TranslateString( "You killed" ), targetName );
 			}
 		}
-		CG_PriorityCenterPrint( s, SCREEN_HEIGHT * 0.75, BIGCHAR_WIDTH * 0.6, 1 );
+
+		// RTCWPro
+		if (cg_drawFrags.integer) {
+			if (cg_fragsY.integer) {
+				CG_PriorityCenterPrint(s, cg_fragsY.integer * 0.75, cg_fragsWidth.integer * 0.6, 1);
+			}
+			else {
+				CG_PriorityCenterPrint(s, SCREEN_HEIGHT * 0.75, cg_fragsWidth.integer * 0.6, 1);
+			}
+		}
+		//CG_PriorityCenterPrint(s, SCREEN_HEIGHT * 0.75, BIGCHAR_WIDTH * 0.6, 1);
 		// print the text message as well
+		// RTCWPro end
 	}
 
 	// check for double client messages
@@ -1364,7 +1375,6 @@ void CG_BatDeath( centity_t *cent ) {
 	CG_ParticleExplosion( "blood", cent->lerpOrigin, vec3_origin, 400, 20, 30 );
 }
 
-
 /*
 ==============
 CG_EntityEvent
@@ -1914,7 +1924,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				 es->weapon == WP_GRENADE_PINEAPPLE ||
 				 es->weapon == WP_DYNAMITE ||
 				 es->weapon == WP_PANZERFAUST ||
-				 es->weapon == WP_AMMO ||
+				 //es->weapon == WP_AMMO || // RTCWPro
 				 es->weapon == WP_MEDKIT ||
 				 es->weapon == WP_SMOKE_GRENADE) ) {
 			CG_OutOfAmmoChange(qtrue); // event == EV_NOAMMO ? qfalse : qtrue);
@@ -1981,7 +1991,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		CG_FireWeapon( cent );
 		break;
 
-//----(SA)	added
+//----(SA)	added // RTCWPro - hijack this for hitsounds
 	case EV_FIRE_QUICKGREN:
 		// testing.  no client side effect yet
 		break;
@@ -2674,7 +2684,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	}
 }
 
-
 /*
 ==============
 CG_CheckEvents
@@ -2753,7 +2762,6 @@ skipEvent:
 	// set the event back so we don't think it's changed next frame (unless it really has)
 	cent->currentState.event = cent->previousEvent;
 }
-
 
 /*
 void CG_CheckEvents( centity_t *cent ) {

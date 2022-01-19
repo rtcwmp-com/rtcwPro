@@ -79,7 +79,7 @@ void    IN_DeactivateWin32Mouse( void );
 void    IN_Activate( qboolean active );
 void    IN_Frame( void );
 
-void	IN_RawInput_MouseRead(HANDLE in_device_handle); // rinput
+void	IN_RawInput_MouseRead(HANDLE in_device_handle); // RTCWPro - raw input
 
 // window procedure
 LONG WINAPI MainWndProc(
