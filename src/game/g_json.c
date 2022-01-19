@@ -317,6 +317,9 @@ int G_check_before_submit( char* jsonfile)
         if (json_array_size(jstats) >= minPlayers) {
             return 1;
         }
+        else {
+            G_Printf("Stats API: Skipping file submission. Number of players under minPlayers.\n");
+        }
 
     }
     return 0;
@@ -1227,6 +1230,7 @@ void G_writeClosingJson(void)
         if (g_stats_curl_submit.integer && ret > 0) {
 
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+            G_Printf("Stats API: Starting stats upload process.\n");
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
 
         }
