@@ -721,7 +721,7 @@ int SV_PointContents( const vec3_t p, int passEntityNum ) {
 		// might intersect, so do an exact clip
 		clipHandle = SV_ClipHandleForEntity( hit );
 
-		// sswolf - nihi's angles fix
+		// RTCWPro - nihi's angles fix
 		//angles = hit->s.angles;
 		angles = hit->r.currentAngles;
 
@@ -729,7 +729,7 @@ int SV_PointContents( const vec3_t p, int passEntityNum ) {
 			angles = vec3_origin;   // boxes don't rotate
 		}
 
-		// sswolf - nihi's angles fix
+		// RTCWPro - nihi's angles fix
 		//c2 = CM_TransformedPointContents( p, clipHandle, hit->s.origin, hit->s.angles );
 		c2 = CM_TransformedPointContents(p, clipHandle, hit->r.currentOrigin, angles);
 

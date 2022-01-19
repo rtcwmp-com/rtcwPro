@@ -90,6 +90,7 @@ static const vote_reference_t aVoteInfo[] = {
 	{ 0x1ff, "warmupdamage",	G_Warmupfire_v,		"Warmup Damage",				" <0|1|2>^7\n  Specifies if players can inflict damage during warmup" },
 	{ 0x1ff, "antilag",			G_AntiLag_v,		"Anti-Lag",						" <0|1>^7\n  Toggles Anti-Lag on the server" },
 	{ 0x1ff, "balancedteams",	G_BalancedTeams_v,	"Balanced Teams",				" <0|1>^7\n  Toggles team balance forcing" },
+	{ 0x1ff, "cointoss",		G_CoinToss_v,		"Coin Toss",					" ^7\n  Heads or Tails." },
 	{ 0, 0, NULL, 0 }
 };
 
@@ -268,7 +269,7 @@ void G_voteSetVoteString( const char *desc ) {
 
 // *** RTCWPro - custom config ***
 int G_Config_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd) {
-	
+
 	// Vote request (vote is being initiated)
 	if (arg) {
 
@@ -398,6 +399,12 @@ int G_Kick_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, q
 			}
 		}
 
+		if (level.clients[pid].sess.shoutcaster)
+		{
+			G_refPrintf(ent, "Can't vote to kick shoutcasters!");
+			return G_INVALID;
+		}
+
 		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%d", pid );
 		Com_sprintf( arg2, VOTE_MAXSTRING, "%s", level.clients[pid].pers.netname );
 
@@ -515,6 +522,12 @@ int G_UnMute_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
 // *** Map - simpleton: we dont verify map is allowed/exists ***
 int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qboolean fRefereeCmd ) {
+
+    int numMatches = 0;
+    int mapIndex = -1;
+    char vmapname[MAX_STRING_TOKENS]; // not necessary as we could use maplist directly...
+    int i;
+
 	// Vote request (vote is being initiated)
 	if ( arg ) {
 		char serverinfo[MAX_INFO_STRING];
@@ -529,7 +542,26 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 			return( G_INVALID );
 		}
 
-		Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", arg2 );
+		// nihi: check for matching maps
+		int mapMatch = G_FindMatchingMaps(ent, arg2);
+
+		if (mapMatch)
+		{
+			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapMatch]));
+			Q_strncpyz(vmapname, level.maplist[mapMatch], sizeof(vmapname));
+		}
+		else
+		{
+			return(G_INVALID);
+		}
+		// end matching maps code
+
+        Com_sprintf( level.voteInfo.vote_value, VOTE_MAXSTRING, "%s", vmapname );
+		if (!FileExists(vmapname, "maps", ".bsp", qfalse))
+		{
+			CP(va("print \"^3%s ^7is not on the server.\n\"", vmapname));
+			return(G_INVALID);
+		}
 
 		// Vote action (vote has passed)
 	} else {
@@ -852,6 +884,29 @@ int G_Timelimit_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *ar
 	return( G_OK );
 }
 
+int G_CoinToss_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd) {
+
+	// Vote request (vote is being initiated)
+	if (arg) {
+		if (!vote_allow_cointoss.integer &&
+			ent &&
+			!ent->client->sess.referee) {
+			G_voteDisableMessage(ent, arg);
+			return (G_INVALID);
+		}
+		// Vote action (vote has passed)
+	}
+	else {
+		char* side = rand() % 2 ? "HEADS" : "TAILS";
+
+		AP(va("cp \"Coin toss comes up^3 %s^7!\"", side));
+		AP(va("cpm \"Coin toss comes up^3 %s^7!\"", side));
+		AP(va("chat \"^zconsole: ^7Coin toss comes up^3 %s^7!\"", side));
+	}
+
+	return (G_OK);
+}
+
 // *** G_WarmupDamageTypeList ***
 char *warmupType[] = { "None", "Enemies Only", "Everyone" };
 void G_WarmupDamageTypeList( gentity_t *ent ) {
@@ -967,7 +1022,7 @@ void G_PrintConfigs(gentity_t* ent) {
 	int  numconfigs = 0, i = 0, namelen = 0;
 	char* configPointer;
 	char gameConfig[MAX_QPATH];
-	
+
 	G_Printf("Starting to read configs\n");
 	trap_Cvar_VariableStringBuffer("sv_GameConfig", gameConfig, sizeof(gameConfig));
 

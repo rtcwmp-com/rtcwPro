@@ -608,10 +608,7 @@ void respawn( gentity_t *ent ) {
 	ClientSpawn( ent, qfalse );
 
 	// L0 - antilag
-	G_ResetTrail( ent );
-#ifndef ANTILAG_REFACTOR
-    ent->client->saved.leveltime = 0;
-#endif
+	G_ResetTrail(ent);
 	// L0 - end
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
@@ -797,6 +794,74 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 	default:
 		Q_strcat( model, MAX_QPATH, "1" );
 		break;
+	}
+}
+
+/*
+===========
+RTCWPro
+Checks and potentially sets STAT_MAX_HEALTH for both teams
+Source: Nobo
+
+CheckMaxHealth
+===========
+*/
+void CheckMaxHealth() {
+	int numMedics = 0;
+	int starthealth = 100;
+	int i, team;
+	gclient_t* cl;
+
+	// check both teams
+	for (team = TEAM_RED; team <= TEAM_SPECTATOR; ++team) {
+
+		numMedics = 0;
+
+		// count up # of medics on team
+		for (i = 0; i < level.maxclients; i++) {
+
+			cl = level.clients + i;
+
+			if (cl->pers.connected != CON_CONNECTED) {
+
+				continue;
+			}
+
+			if (cl->sess.sessionTeam != team) {
+
+				continue;
+			}
+
+			if (cl->ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC) {
+
+				continue;
+			}
+
+			numMedics++;
+		}
+
+		// compute health mod
+		starthealth = 100 + 10 * numMedics;
+		if (starthealth > 125) {
+
+			starthealth = 125;
+		}
+
+		// give everybody health mod in stat_max_health
+		for (i = 0; i < level.maxclients; i++) {
+
+			cl = level.clients + i;
+
+			if (cl->pers.connected == CON_DISCONNECTED) {
+
+				continue;
+			}
+
+			if (cl->sess.sessionTeam == team) {
+
+				cl->pers.maxHealth = cl->ps.stats[STAT_MAX_HEALTH] = starthealth;
+			}
+		}
 	}
 }
 
@@ -1137,7 +1202,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		}
 	} // End Knifeonly stuff -- Ensure that medics get their basic stuff
 
-
+	// RTCWPro - moved to CheckMaxHealth
+	CheckMaxHealth();
+	/*
 	// JPW NERVE -- medics on each team make cumulative health bonus -- this gets overridden for "revived" players
 	// count up # of medics on team
 	for ( i = 0; i < level.maxclients; i++ ) {
@@ -1169,6 +1236,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 		}
 	}
 	// jpw
+	*/
 }
 // dhm - end
 
@@ -1516,10 +1584,12 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	s = Info_ValueForKey( userinfo, "cg_uinfo" );
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
-	sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
+	//sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
+	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, 
+		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
 
 	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
-        trap_DropClient(clientNum, "No GUID..");
+        trap_DropClient(clientNum, "Empty or invalid rtcwkey");
 	}
 
 	// check the item prediction
@@ -1546,6 +1616,14 @@ void ClientUserinfoChanged( int clientNum ) {
 	} else {
 		client->pers.bAutoReloadAux = qfalse;
 		client->pmext.bAutoReload = qfalse;
+	}
+
+	s = Info_ValueForKey(userinfo, "cg_findMedic");
+	if (!atoi(s)) {
+		client->pers.findMedic = qfalse;
+	}
+	else {
+		client->pers.findMedic = qtrue;
 	}
 
 	// set name
@@ -1588,12 +1666,16 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
+	// RTCWPro
 	// don't use handicap here
 	//client->pers.maxHealth = 100; atoi(Info_ValueForKey(userinfo, "handicap"));
-	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+	/*if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
 		client->pers.maxHealth = 100;
 	}
-	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
+	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;*/
+
+	CheckMaxHealth();
+	// RTCWPro
 
 	// set model
 	if ( g_forceModel.integer ) {
@@ -1603,7 +1685,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		Q_strncpyz( model, Info_ValueForKey( userinfo, "model" ), sizeof( model ) );
 	}
 
-	// sswolf - revive anim bug fix, credits: Nobo
+	// RTCWPro: revive anim bug fix, credits: Nobo
 	// RF, reset anims so client's dont freak out
 	//client->ps.legsAnim = 0;
 	//client->ps.torsoAnim = 0;
@@ -1698,10 +1780,9 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i",
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i\\scs\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1, client->sess.wins, client->sess.losses,
-				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee
-			);
+				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee, client->sess.shoutcaster);
 	}
 
 //----(SA) end
@@ -1717,9 +1798,9 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\scs\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
 			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.muted ? "yes" : "no"), client->sess.referee,
-			client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
+			client->sess.shoutcaster, client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
 	// Account for bots..
 	else {
@@ -1905,7 +1986,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 		AP(va("print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname));
 
-		// sswolf - move here from SetTeam
+		// RTCWPro - move here from SetTeam
 		CPx(clientNum, va("print \"This server is running ^3%s\n\"", GAMEVERSION));
 		CPx(clientNum, "print \"^7Type ^3/commands ^7to see the list of all available options.\n\"");
 		if (strlen(g_serverMessage.string) > 0) CPx(clientNum, va( "cp \"%s\n\"2", g_serverMessage.string));
@@ -1985,10 +2066,7 @@ void ClientBegin( int clientNum ) {
 	ClientSpawn( ent, qfalse );
 
 	// L0 - antilag
-	G_ResetTrail( ent );
-#ifndef ANTILAG_REFACTOR
-    ent->client->saved.leveltime = 0;
-#endif
+	G_ResetTrail(ent);
 	// L0 - end
 	// Xian -- Changed below for team independant maxlives
 
@@ -2512,6 +2590,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// positively link the client, even if the command times are weird
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+		//BG_PlayerStateToEntityStatePro(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 		VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 		trap_LinkEntity( ent );
 	}
@@ -2521,11 +2600,12 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 	// clear entity state values
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+	//BG_PlayerStateToEntityStatePro(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 
 	// show_bug.cgi?id=569
 	//G_ResetMarkers( ent );
 
-	// sswolf - head stuff
+	// RTCWPro - head stuff
 	// add the head entity if it already hasn't been
 	AddHeadEntity(ent);
 }
@@ -2683,7 +2763,7 @@ void ClientDisconnect( int clientNum ) {
 	ent->active = 0;
 // jpw
 
-	// sswolf - head stuff
+	// RTCWPro - head stuff
 	FreeHeadEntity(ent);
 
 	trap_SetConfigstring( CS_PLAYERS + clientNum, "" );

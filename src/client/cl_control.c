@@ -1,5 +1,5 @@
 /*
-sswolf - req SS functions.
+RTCWPro - req SS functions.
 Source: Nate (rtcwMP)
 */
 
@@ -16,7 +16,7 @@ Takes ScreenShot
 void CL_takeSS(char* name) {
 
 	//Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG sys %s %d\n", name, quality));
-	Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG silent %s\n", name));
+	Cbuf_ExecuteText(EXEC_NOW, va("8autogenerates %s\n", name));
 }
 
 /*
@@ -69,14 +69,16 @@ void CL_RequestedSS(char* ip) {
 	char* name;
 	int n;
 
-    srand(time(0));
-    n=rand() % 99;
+	if (clc.demoplaying) {
+		return;
+	}
 
+    srand(time(0));
+    n = rand() % 99;
 
 	guid = Cvar_VariableString("cl_guid");
-
-
 	name = Cvar_VariableString("name");
+
 	CL_takeSS(filename);
 	CL_actionGenerateTime();
 

@@ -2677,11 +2677,9 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		flash.hModel = 0;
 	}
 
-	// OSPx - Disable muzzleFlash if they have it off..
-	// NOTE: Patched for zoomed FOV
-
-
-	if ( isPlayer || !cg_muzzleFlash.integer || cg.zoomedFOV) {
+	// RtcwPro cg_muzzleflash
+	// cg_muzzleFlash 2 will allow muzzle flash for movie making
+	if (cg_muzzleFlash.integer < 2 && (isPlayer || !cg_muzzleFlash.integer || cg.zoomedFOV)) {
 
 		flash.hModel = 0;
 	}
@@ -2805,6 +2803,63 @@ void CG_AddPlayerFoot( refEntity_t *parent, playerState_t *ps, centity_t *cent )
 
 /*
 ==============
+RTCWPro
+
+CG_HideWeapon
+==============
+*/
+qboolean CG_HideWeapon(int weapon) {
+	qboolean hide;
+
+	if (!cg_drawGun.integer) {
+		hide = qtrue;
+	}
+	else if (cg_drawGun.integer == 1) {
+		hide = qfalse;
+	}
+	else {
+		switch (weapon) 
+		{
+		case WP_KNIFE:
+			hide = qfalse;
+			break;
+		case WP_KNIFE2:
+			hide = qfalse;
+			break;
+		case WP_GRENADE_PINEAPPLE:
+			hide = qfalse;
+			break;
+		case WP_MEDIC_SYRINGE:
+			hide = qfalse;
+			break;
+		case WP_AMMO:
+			hide = qfalse;
+			break;
+		case WP_DYNAMITE:
+			hide = qfalse;
+			break;
+		case WP_DYNAMITE2:
+			hide = qfalse;
+			break;
+		case WP_MEDKIT:
+			hide = qfalse;
+			break;
+		case WP_PLIERS:
+			hide = qfalse;
+			break;
+		case WP_SMOKE_GRENADE:
+			hide = qfalse;
+			break;
+		default:
+			hide = qtrue;
+		}
+	}
+
+	return hide;
+}
+
+/*
+==============
 CG_AddViewWeapon
 
 Add the weapon, and flash for the player's view
@@ -2834,7 +2889,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		return;
 	}
 	// allow the gun to be completely removed
-	if ( ( !cg_drawGun.integer ) || ( cg_uselessNostalgia.integer ) ) {
+	if ((CG_HideWeapon(ps->weapon)) || (cg_uselessNostalgia.integer)) {
 		vec3_t origin;
 
 		if ( cg.predictedPlayerState.eFlags & EF_FIRING ) {
@@ -4570,14 +4625,14 @@ void CG_FireWeapon( centity_t *cent ) {
 			CG_MachineGunEjectBrass( cent );
 		}
 
-		if (cg_muzzleFlash.integer)
+		// RtcwPro cg_muzzleflash
+		if (cg_muzzleFlash.integer >= 1)
 		{
 			cent->muzzleFlashTime = cg.time;
 		}
 		else
 		{
 			cent->muzzleFlashTime = 0;
-			//cent->muzzleFlashTime = cg.time;
 		}
 
 		return;
@@ -4596,7 +4651,9 @@ void CG_FireWeapon( centity_t *cent ) {
 
 	// mark the entity as muzzle flashing, so when it is added it will
 	// append the flash to the weapon model
-	if (cg_muzzleFlash.integer)
+
+	// RtcwPro cg_muzzleflash
+	if (cg_muzzleFlash.integer >= 1)
 	{
 		cent->muzzleFlashTime = cg.time;
 	}

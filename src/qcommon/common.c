@@ -47,7 +47,7 @@ If you have questions concerning this license or the applicable additional terms
 //#define DEF_COMHUNKMEGS "56" // RF, increased this, some maps are exceeding 56mb // JPW NERVE changed this for multiplayer back to 42, 56 for depot/mp_cpdepot, 42 for everything else
 //#define DEF_COMZONEMEGS "16" // JPW NERVE cut this back too was 30
 
-// sswolf - increase those
+// RTCWPro - increase those
 #define MIN_COMHUNKMEGS 128
 #define DEF_COMHUNKMEGS "256"
 #define DEF_COMZONEMEGS "32"
@@ -2316,7 +2316,7 @@ char cl_cdkey[34] = "123456789";
 Com_ReadCDKey
 =================
 */
-void Com_ReadCDKey( const char *filename ) {
+int Com_ReadCDKey( const char *filename ) {
 	fileHandle_t f;
 	char buffer[33];
 	char fbuffer[MAX_OSPATH];
@@ -2325,8 +2325,9 @@ void Com_ReadCDKey( const char *filename ) {
 
 	FS_SV_FOpenFileRead( fbuffer, &f );
 	if ( !f ) {
-		Q_strncpyz( cl_cdkey, "                ", 17 );
-		return;
+		//Com_WriteNewKey(filename);
+		//Q_strncpyz( cl_cdkey, "                ", 17 );
+		return 0;
 	}
 
 	Com_Memset( buffer, 0, sizeof( buffer ) );
@@ -2343,49 +2344,41 @@ void Com_ReadCDKey( const char *filename ) {
 	#ifndef DEDICATED
         Cvar_Set("cl_guid", Com_MD5(buffer, CDKEY_LEN, CDKEY_SALT, sizeof(CDKEY_SALT) - 1, 0));
     #endif
-
+    return 1;
 }
+
 
 /*
 =================
-Com_WriteAuthKey  ( temporary as this will change in the future)
+RTCWPro
+Com_WriteNewKey  ( temporary as this will change in the future)
 =================
 */
-void Com_WriteAuthKey(const char* filename) {
+void Com_WriteNewKey(const char* filename) {
 	fileHandle_t f;
-	char buffer[GUID_LEN];
+	char buffer[16] = { '\0' };
 	char fbuffer[MAX_OSPATH];
-    static char charset[] = "abcdefg123456789";
+    static char charset[] = "abcdefghijklmnopqrstuvwxyz123456789";
 
-	sprintf(fbuffer, "%s/authkey", filename);
+    for (int n = 0; n < 16; n++) {
+		int val = rand() % (int) (sizeof(charset) -1);
+		buffer[n] = charset[val];
+    }
 
-    f = FS_SV_FOpenFileWrite( fbuffer );
+	sprintf(fbuffer, "%s/rtcwkey", filename);
+
+    f = FS_SV_FOpenFileWrite(fbuffer);
+
 	if (!f) {
 		Com_Printf( "Couldn't write %s.\n", filename );
 		return;
 	}
 
-
-
-	buffer[0] = '0';
-    for (int n = 1;n < GUID_LEN;n++) {
-                int val = rand() % (int) (sizeof(charset) -1);
-                buffer[n] = charset[val];
-    }
-
-
-
-
-
-
-	FS_Write( buffer, GUID_LEN-1, f );
-
-	FS_FCloseFile( f );
-
+    //FS_Printf(f, "%s", buffer);
+	FS_Write(buffer, 16, f);
+	FS_FCloseFile(f);
 
 }
-
-
 
 /*
 =================
@@ -2710,9 +2703,9 @@ void Com_Init( char *commandLine ) {
 			Cvar_Set( "nextmap", "cinematic wolfintro.RoQ" );
 		}
 	}
-
+#ifdef MYSQLDEP
 	OW_Init();
-
+#endif
 	Threads_Init();
 
 	com_fullyInitialized = qtrue;
@@ -3152,8 +3145,8 @@ void Com_Frame(void) {
 	}
 
 	// L0 - Fix maxfps abuse..
-	if (com_maxfps->integer > 125)
-		Cvar_Set("com_maxfps", "125");
+	/*if (com_maxfps->integer > 125)
+		Cvar_Set("com_maxfps", "125");*/
 
 	// we may want to spin here if things are going too fast
 	if (!com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer) {
@@ -3484,9 +3477,9 @@ void Com_Shutdown( void ) {
 		FS_FCloseFile( com_journalFile );
 		com_journalFile = 0;
 	}
-
+#ifdef MYSQLDEP
 	OW_Shutdown();
-
+#endif
 }
 
 #if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD

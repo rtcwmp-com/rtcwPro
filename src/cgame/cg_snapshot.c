@@ -29,11 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 // cg_snapshot.c -- things that happen on snapshot transition,
 // not necessarily every single rendered frame
 
-
-
 #include "cg_local.h"
-
-
 
 /*
 ==================
@@ -60,6 +56,7 @@ static void CG_ResetEntity( centity_t *cent ) {
 	if ( cent->currentState.eType == ET_PLAYER ) {
 		CG_ResetPlayerEntity( cent );
 	}
+
 }
 
 
@@ -102,7 +99,6 @@ static void CG_TransitionEntity( centity_t *cent ) {
 		CG_AttachedPartChange( cent );
 	}
 
-
 	cent->currentState = cent->nextState;
 	cent->currentValid = qtrue;
 
@@ -138,6 +134,7 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 	cg.snap = snap;
 
 	BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].currentState, qfalse );
+	//BG_PlayerStateToEntityStatePro(&snap->ps, &cg_entities[snap->ps.clientNum].currentState, cg.time, qfalse); // RTCWPro
 
 	// sort out solid entities
 	CG_BuildSolidList();
@@ -191,7 +188,6 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 	}
 }
 
-
 /*
 ===================
 CG_TransitionSnapshot
@@ -199,30 +195,30 @@ CG_TransitionSnapshot
 The transition point from snap to nextSnap has passed
 ===================
 */
-static void CG_TransitionSnapshot( void ) {
-	centity_t           *cent;
-	snapshot_t          *oldFrame;
+static void CG_TransitionSnapshot(void) {
+	centity_t* cent;
+	snapshot_t* oldFrame;
 	int i;
 
-	if ( !cg.snap ) {
-		CG_Error( "CG_TransitionSnapshot: NULL cg.snap" );
+	if (!cg.snap) {
+		CG_Error("CG_TransitionSnapshot: NULL cg.snap");
 	}
-	if ( !cg.nextSnap ) {
-		CG_Error( "CG_TransitionSnapshot: NULL cg.nextSnap" );
+	if (!cg.nextSnap) {
+		CG_Error("CG_TransitionSnapshot: NULL cg.nextSnap");
 	}
 
 	// execute any server string commands before transitioning entities
-	CG_ExecuteNewServerCommands( cg.nextSnap->serverCommandSequence );
+	CG_ExecuteNewServerCommands(cg.nextSnap->serverCommandSequence);
 
 	// if we had a map_restart, set everthing with initial
 
-	if ( !( cg.snap ) || !( cg.nextSnap ) ) {
+	if (!(cg.snap) || !(cg.nextSnap)) {
 		return;
 	}
 
 	// clear the currentValid flag for all entities in the existing snapshot
-	for ( i = 0 ; i < cg.snap->numEntities ; i++ ) {
-		cent = &cg_entities[ cg.snap->entities[ i ].number ];
+	for (i = 0; i < cg.snap->numEntities; i++) {
+		cent = &cg_entities[cg.snap->entities[i].number];
 		cent->currentValid = qfalse;
 	}
 
@@ -230,37 +226,36 @@ static void CG_TransitionSnapshot( void ) {
 	oldFrame = cg.snap;
 	cg.snap = cg.nextSnap;
 
-	BG_PlayerStateToEntityState( &cg.snap->ps, &cg_entities[ cg.snap->ps.clientNum ].currentState, qfalse );
-	cg_entities[ cg.snap->ps.clientNum ].interpolate = qfalse;
+	BG_PlayerStateToEntityState(&cg.snap->ps, &cg_entities[cg.snap->ps.clientNum].currentState, qfalse);
+	//BG_PlayerStateToEntityStatePro(&cg.snap->ps, &cg_entities[cg.snap->ps.clientNum].currentState, cg.time, qfalse); // RTCWPro
+	cg_entities[cg.snap->ps.clientNum].interpolate = qfalse;
 
-	for ( i = 0 ; i < cg.snap->numEntities ; i++ ) {
-		cent = &cg_entities[ cg.snap->entities[ i ].number ];
-		CG_TransitionEntity( cent );
+	for (i = 0; i < cg.snap->numEntities; i++) {
+		cent = &cg_entities[cg.snap->entities[i].number];
+		CG_TransitionEntity(cent);
 	}
 
 	cg.nextSnap = NULL;
 
 	// check for playerstate transition events
-	if ( oldFrame ) {
-		playerState_t   *ops, *ps;
+	if (oldFrame) {
+		playerState_t* ops, * ps;
 
 		ops = &oldFrame->ps;
 		ps = &cg.snap->ps;
 		// teleporting checks are irrespective of prediction
-		if ( ( ps->eFlags ^ ops->eFlags ) & EF_TELEPORT_BIT ) {
+		if ((ps->eFlags ^ ops->eFlags) & EF_TELEPORT_BIT) {
 			cg.thisFrameTeleport = qtrue;   // will be cleared by prediction code
 		}
 
 		// if we are not doing client side movement prediction for any
 		// reason, then the client events and view changes will be issued now
-		if ( cg.demoPlayback || ( cg.snap->ps.pm_flags & PMF_FOLLOW )
-			 || cg_nopredict.integer || cg_synchronousClients.integer ) {
-			CG_TransitionPlayerState( ps, ops );
+		if (cg.demoPlayback || (cg.snap->ps.pm_flags & PMF_FOLLOW)
+			|| cg_nopredict.integer || cg_synchronousClients.integer) {
+			CG_TransitionPlayerState(ps, ops);
 		}
 	}
-
 }
-
 
 /*
 ===================
@@ -277,6 +272,7 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 	cg.nextSnap = snap;
 
 	BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].nextState, qfalse );
+	//BG_PlayerStateToEntityStatePro(&snap->ps, &cg_entities[snap->ps.clientNum].nextState, cg.time, qfalse); // RTCWPro
 	cg_entities[ cg.snap->ps.clientNum ].interpolate = qtrue;
 
 	// check for extrapolation errors

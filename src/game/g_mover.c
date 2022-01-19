@@ -2155,7 +2155,7 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 		{
 			// door force locked
 			//if ( ent->key < 0 )
-			// sswolf - allowteams ET - port
+			// RTCWPro - allowteams ET - port
 			if (ent->key < 0 || !G_AllowTeamsAllowed(ent, activator))
 			{
 				// only send audible event if not trying to open slowly
@@ -2173,7 +2173,7 @@ void G_TryDoor( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 				{  // door requires key
 					gitem_t *item = BG_FindItemForKey( ent->key, 0 );
 					//if ( !( activator->client->ps.stats[STAT_KEYS] & ( 1 << item->giTag ) ) )
-					// sswolf - allowteams - ET port
+					// RTCWPro - allowteams - ET port
 					if (!(activator->client->ps.stats[STAT_KEYS] & (1 << item->giTag)) || (!G_AllowTeamsAllowed(ent, activator)))
 					{
 						// only send audible event if not trying to open slowly
@@ -2359,7 +2359,7 @@ void SP_func_door( gentity_t *ent ) {
 
 	//ent->s.dmgFlags = HINT_DOOR;    // make it a door for cursorhints
 
-	// sswolf - allowteams - ET port
+	// RTCWPro - allowteams - ET port
 	if (!ent->allowteams)
 	{
 		ent->s.dmgFlags = HINT_DOOR;    // make it a door for cursorhints
@@ -3934,7 +3934,7 @@ void SP_func_door_rotating( gentity_t *ent ) {
 
 	//ent->s.dmgFlags = HINT_DOOR_ROTATING;
 
-	// sswolf - allowteams - ET port
+	// RTCWPro - allowteams - ET port
 	if (!ent->allowteams)
 	{
 		ent->s.dmgFlags = HINT_DOOR_ROTATING;

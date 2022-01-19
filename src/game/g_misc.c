@@ -145,6 +145,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 
 	// save results of pmove
 	BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
+	//BG_PlayerStateToEntityStatePro(&player->client->ps, &player->s, level.time, qtrue); // RTCWPro
 
 	// use the precise origin for linking
 	VectorCopy( player->client->ps.origin, player->r.currentOrigin );
@@ -1584,7 +1585,7 @@ void Fire_Lead( gentity_t *ent, gentity_t *activator, float spread, int damage )
 	VectorMA( end, r, right, end );
 	VectorMA( end, u, up, end );
 
-	// sswolf - unused
+	// RTCWPro - unused
 	// RtcwPro added historical trace (unlagged)
 	//G_HistoricalTrace( ent, &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	trap_Trace(&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
@@ -1709,6 +1710,7 @@ void clamp_playerbehindgun( gentity_t *self, gentity_t *other, vec3_t dang ) {
 
 	// save results of pmove
 	BG_PlayerStateToEntityState( &other->client->ps, &other->s, qfalse );
+	//BG_PlayerStateToEntityStatePro(&other->client->ps, &other->s, level.time, qfalse); // RTCWPro
 
 	// use the precise origin for linking
 	VectorCopy( other->client->ps.origin, other->r.currentOrigin );

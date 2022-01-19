@@ -4165,6 +4165,12 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
 		s->eventParm = ps->eventParms[ seq ];
 		ps->entityEventSequence++;
 	}
+	// RTCWPro
+	else if (ps->eventSequence == 0)
+	{
+		s->eventSequence = 0;
+	}
+	// RTCWPro end
 // end
 	// Ridah, now using a circular list of events for all entities
 	// add any new events that have been added to the playerState_t
@@ -4218,8 +4224,10 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 	if ( snap ) {
 		SnapVector( s->pos.trBase );
 	}
+
 	// set the trDelta for flag direction and linear prediction
 	VectorCopy( ps->velocity, s->pos.trDelta );
+
 	// set the time for linear prediction
 	s->pos.trTime = time;
 	// set maximum extra polation time
@@ -4292,6 +4300,144 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 	s->teamNum = ps->teamNum;
 	s->aiState = ps->aiState;
 }
+
+#if 0
+/*
+=====================
+RTCWPro
+Velocity & time
+
+BG_PlayerStateToEntityStatePro
+=====================
+*/
+void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int time, qboolean snap) {
+	int	i;
+
+	if (ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR || ps->pm_type == PM_NOCLIP || ps->stats[STAT_HEALTH] <= GIB_HEALTH) 
+	{
+		s->eType = ET_INVISIBLE;
+	}
+	else
+	{
+		s->eType = ET_PLAYER;
+	}
+
+	s->number = ps->clientNum;
+	s->pos.trType = TR_INTERPOLATE;
+	s->pos.trTime = time; // help out new synced animations.
+
+	VectorCopy(ps->origin, s->pos.trBase);
+	if (snap)
+	{
+		SnapVector(s->pos.trBase);
+	}
+
+	// this wasn't in here?! Why!? It's in Quake 3
+	VectorCopy(ps->velocity, s->pos.trDelta);
+	if (snap)
+	{
+		SnapVector(s->pos.trDelta);
+	}
+
+	s->apos.trType = TR_INTERPOLATE;
+	VectorCopy(ps->viewangles, s->apos.trBase);
+	if (snap)
+	{
+		SnapVector(s->apos.trBase);
+	}
+
+	if (ps->movementDir > 128) 
+	{
+		s->angles2[YAW] = (float)ps->movementDir - 256;
+	}
+	else
+	{
+		s->angles2[YAW] = ps->movementDir;
+	}
+
+	s->angles2[PITCH] = 0;
+
+	s->legsAnim = ps->legsAnim;
+	s->torsoAnim = ps->torsoAnim;
+	s->clientNum = ps->clientNum;	// ET_PLAYER looks here instead of at number
+										// so corpses can also reference the proper config
+	// Ridah, let clients know if this person is using a mounted weapon
+	// so they don't show any client muzzle flashes
+
+	if (ps->persistant[PERS_HWEAPON_USE])
+	{
+		ps->eFlags |= EF_MG42_ACTIVE;
+	}
+	else
+	{
+		ps->eFlags &= ~EF_MG42_ACTIVE;
+	}
+
+	s->eFlags = ps->eFlags;
+
+	if (ps->stats[STAT_HEALTH] <= 0)
+	{
+		s->eFlags |= EF_DEAD;
+	}
+	else
+	{
+		s->eFlags &= ~EF_DEAD;
+	}
+
+	// from MP
+	if (ps->externalEvent) 
+	{
+		s->event = ps->externalEvent;
+		s->eventParm = ps->externalEventParm;
+	}
+	else if (ps->entityEventSequence < ps->eventSequence)
+	{
+		int seq;
+
+		if (ps->entityEventSequence < ps->eventSequence - MAX_EVENTS)
+		{
+			ps->entityEventSequence = ps->eventSequence - MAX_EVENTS;
+		}
+
+		seq = ps->entityEventSequence & (MAX_EVENTS - 1);
+		s->event = ps->events[seq] | ((ps->entityEventSequence & 3) << 8);
+		s->eventParm = ps->eventParms[seq];
+		ps->entityEventSequence++;
+	}
+	else if (ps->eventSequence == 0)
+	{
+		s->eventSequence = 0;
+	}
+	// end
+
+		// Ridah, now using a circular list of events for all entities
+		// add any new events that have been added to the playerState_t
+		// (possibly overwriting entityState_t events)
+	for (i = ps->oldEventSequence; i != ps->eventSequence; i++)
+	{
+		s->events[s->eventSequence & (MAX_EVENTS - 1)] = ps->events[i & (MAX_EVENTS - 1)];
+		s->eventParms[s->eventSequence & (MAX_EVENTS - 1)] = ps->eventParms[i & (MAX_EVENTS - 1)];
+		s->eventSequence++;
+	}
+	ps->oldEventSequence = ps->eventSequence;
+
+	s->weapon = ps->weapon;
+	s->groundEntityNum = ps->groundEntityNum;
+
+	s->powerups = 0;
+	for (i = 0; i < MAX_POWERUPS; i++)
+	{
+		if (ps->powerups[i]) {
+			s->powerups |= 1 << i;
+		}
+	}
+
+	s->aiChar = ps->aiChar; // Ridah
+	//s->loopSound = ps->loopSound;
+	s->teamNum = ps->teamNum;
+	s->aiState = ps->aiState;		// xkan, 1/10/2003
+}
+#endif
 
 //
 // OSPx Stuff Below
@@ -4369,7 +4515,7 @@ void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
 
 /*
 ===============
-sswolf - because I'm lazy
+RTCWPro
 
 BG_ParseColorCvar
 Reads RBG(A) cvars and sets parsed color var components
@@ -4514,3 +4660,44 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 	*pszOut = 0;
 	return( pszOut - pszOutStart );
 }
+
+/*
+===============
+RTCWPro
+BG_GetTeam
+===============
+*/
+char* BG_GetTeam(int teamNum) {
+
+	switch (teamNum) {
+	case TEAM_RED:
+		return "axis";
+	case TEAM_BLUE:
+		return "allies";
+	case TEAM_SPECTATOR:
+		return "spectator";
+	}
+	return "";
+}
+
+/*
+===============
+RTCWPro
+BG_GetClass
+===============
+*/
+char* BG_GetClass(int classNum) {
+
+	switch (classNum) {
+	case PC_SOLDIER:
+		return "s";
+	case PC_MEDIC:
+		return "m";
+	case PC_LT:
+		return "l";
+	case PC_ENGINEER:
+		return "e";
+	}
+	return "";
+}
+

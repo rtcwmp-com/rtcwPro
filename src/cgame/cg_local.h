@@ -408,10 +408,18 @@ typedef struct {
 } skinModel_t;
 //----(SA) end
 
+// RTCWPro - shoutcaster
+#define MAX_SCITEMS 256
+typedef struct scItem_s {
+	char* text;
+	float	dist;
+	float	scale;
+	vec_t	position[2];
+	vec4_t	color;
+} scItem_t;
+
 
 //=================================================
-
-
 
 // centity_t have a direct corespondence with gentity_t in the game, but
 // only the entityState_t is directly communicated to the cgame
@@ -488,6 +496,9 @@ typedef struct centity_s {
 
 	int highlightTime;
 	qboolean highlighted;
+
+	// RTCWPro
+	int lastSeenTime;
 } centity_t;
 
 
@@ -739,6 +750,7 @@ typedef struct {
 
 	// RTCWPro
 	int refStatus;
+	int shoutStatus;
 	int playerAmmo;
 	int playerAmmoClip;
 	int playerWeapon;
@@ -1202,7 +1214,7 @@ typedef struct {
 	int popinPrintLines;
 	qboolean popinBlink;
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// Time Counter
 	int timein;
 	int timeCounter;
@@ -1210,11 +1222,21 @@ typedef struct {
 	qboolean serverRespawning;
 // -OSPx
 
-	// sswolf - tj stuff
+	// RTCWPro - tj stuff
 	qboolean resetmaxspeed;
 	float topSpeed;
 	float oldSpeed;
 	// tj stuff end
+
+	// RTCWPro
+	scItem_t scItems[MAX_SCITEMS];
+	int numSCItems;
+
+	// RTCWPro - draw triggers
+	int drawTriggersCount;
+	int lastGetTriggerDistancesTime;
+	int drawTriggerEntIndexes[MAX_ENTITIES + 1];
+	float drawTriggerDistances[MAX_ENTITIES + 1];
 
 	pmoveExt_t pmext;
 
@@ -1719,15 +1741,28 @@ typedef struct {
 	// Country Flags
 	qhandle_t countryFlags;
 	// Hitsounds
-	sfxHandle_t	headShot;
-	sfxHandle_t	bodyShot;
-	sfxHandle_t	teamShot;
+	//sfxHandle_t	headShot1;
+	//sfxHandle_t	headShot2;
+	//sfxHandle_t	bodyShot1;
+	//sfxHandle_t	bodyShot2;
+	//sfxHandle_t	teamShot;
 	// chats
 	sfxHandle_t normalChat;
 	sfxHandle_t teamChat;
 	// end of round
 	sfxHandle_t alliesWin;
 	sfxHandle_t axisWin;
+	// pause
+	//sfxHandle_t pIntermission;
+
+	// RTCWPro - draw triggers
+	qhandle_t transmitTrigger;
+	qhandle_t transmitTriggerEdges;
+	qhandle_t objTrigger;
+	qhandle_t objTriggerEdges;
+	qhandle_t customTrigger;
+	qhandle_t customTriggerEdges;
+
 } cgMedia_t;
 // OSPx - Pause states
 typedef enum {
@@ -1924,7 +1959,6 @@ extern vmCvar_t cg_crosshairSize;
 extern vmCvar_t cg_crosshairHealth;
 extern vmCvar_t cg_drawStatus;
 extern vmCvar_t cg_draw2D;
-extern vmCvar_t cg_drawFrags;
 extern vmCvar_t cg_animSpeed;
 extern vmCvar_t cg_debugAnim;
 extern vmCvar_t cg_debugPosition;
@@ -2080,12 +2114,10 @@ extern vmCvar_t cg_crosshairColorAlt;
 extern vmCvar_t cg_coloredCrosshairNames;
 extern vmCvar_t ch_font;
 extern vmCvar_t cg_drawWeaponIconFlash;
-extern vmCvar_t cg_printObjectiveInfo;
 extern vmCvar_t cg_muzzleFlash;
 extern vmCvar_t cg_hitsounds;
 extern vmCvar_t cg_complaintPopUp;
 extern vmCvar_t cg_drawReinforcementTime;
-extern vmCvar_t cg_reinforcementTimeColor;
 extern vmCvar_t cg_noChat;
 extern vmCvar_t cg_noVoice;
 
@@ -2139,9 +2171,47 @@ extern vmCvar_t cg_spawnTimer_set;
 
 // added from et-legacy - crumbs
 extern vmCvar_t cg_tracers;
+// draw triggers
+extern vmCvar_t cg_drawTriggers;
 
-static void CG_TimerSet_f(void);
-static void CG_TimerReset_f(void);
+// RT and ERT
+extern vmCvar_t cg_drawEnemyTimer;
+extern vmCvar_t cg_enemyTimerColor;
+extern vmCvar_t cg_enemyTimerX;
+extern vmCvar_t cg_enemyTimerY;
+extern vmCvar_t cg_enemyTimerProX;
+extern vmCvar_t cg_enemyTimerProY;
+extern vmCvar_t cg_reinforcementTimeColor;
+extern vmCvar_t cg_reinforcementTimeX;
+extern vmCvar_t cg_reinforcementTimeY;
+extern vmCvar_t cg_reinforcementTimeProX;
+extern vmCvar_t cg_reinforcementTimeProY;
+
+extern vmCvar_t cg_findMedic;
+extern vmCvar_t cg_hitsoundBodyStyle;
+extern vmCvar_t cg_hitsoundHeadStyle;
+extern vmCvar_t cg_pauseMusic;
+extern vmCvar_t cg_notifyTextX;
+extern vmCvar_t cg_notifyTextY;
+extern vmCvar_t cg_notifyTextShadow;
+extern vmCvar_t cg_notifyTextWidth;
+extern vmCvar_t cg_notifyTextHeight;
+extern vmCvar_t cg_chatX;
+extern vmCvar_t cg_chatY;
+extern vmCvar_t cg_teamOverlayX;
+extern vmCvar_t cg_teamOverlayY;
+extern vmCvar_t cg_compassX;
+extern vmCvar_t cg_compassY;
+extern vmCvar_t cg_zoomedSensLock;
+extern vmCvar_t cg_lagometerX;
+extern vmCvar_t cg_lagometerY;
+extern vmCvar_t cg_drawFrags;
+extern vmCvar_t cg_fragsY;
+extern vmCvar_t cg_fragsWidth;
+extern vmCvar_t cg_fixedphysicsfps;
+
+//static void CG_TimerSet_f(void);
+//static void CG_TimerReset_f(void);
 
 //
 // cg_main.c
@@ -2173,6 +2243,7 @@ qboolean CG_CheckCenterView();
 char* CG_generateFilename(void);		// RtcwPro clean file name - ET Port
 char *CG_generateFilename( void );		// L0 - OSP port
 void CG_printConsoleString( char *str );// L0 - OSP port
+qboolean CG_execFile(char* filename);
 
 //
 // cg_view.c
@@ -2254,9 +2325,9 @@ void CG_DrawPicST(float x, float y, float width, float height, float s0, float t
 
 // RtcwPro
 void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoClip, int playerNades);
-
-// sswolf - time
 char* CG_GetClock(void);
+void CG_ColorForPercent(float percent, vec4_t hcolor);
+void CG_DrawTriggers(void);
 
 //
 // cg_draw.c, cg_newDraw.c
@@ -2302,6 +2373,8 @@ qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 qhandle_t CG_StatusHandle( int task );
 void CG_Fade( int r, int g, int b, int a, float time );
+void CG_ShoutcasterItems();
+void CG_ShoutcasterDynamite(int num);
 
 
 // - Reinforcement offset
@@ -2602,6 +2675,7 @@ void CG_demoView(void);
 //
 qboolean CG_DrawScoreboard( void );
 void CG_DrawTourneyScoreboard( void );
+char* WM_TimeToString(float msec);
 
 //
 // cg_consolecmds.c
@@ -2637,6 +2711,8 @@ void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
 //
 void CG_Respawn( void );
 void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
+qboolean PointVisible(vec3_t point);
+qboolean VisibleToScreen(vec3_t point, vec_t world[2]);
 
 
 //

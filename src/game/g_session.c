@@ -67,7 +67,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		G_WriteWeaponStatsData(client);
 	}/// End
 
-    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
+    s = va( "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       // updated for new stat data
 		client->sess.sessionTeam,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
@@ -85,6 +85,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		client->sess.latchPlayerSkin,    // DHM - Nerve
 		// L0 - New stuff
 		client->sess.referee,			// User is ref
+		client->sess.shoutcaster,			// User is shoutcaster
 		client->sess.muted,		// User is ignored
 		client->sess.uci,			// mcwf's GeoIP
 		client->sess.ip,			// L0 - IP
@@ -120,7 +121,44 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_Set( var, s );
 }
+/*
+================
+G_ClientSwap
+Client swap handling
+================
+*/
+void G_ClientSwap( gclient_t *client ) {
+	int flags = 0;
 
+	if ( client->sess.sessionTeam == TEAM_RED ) {
+		client->sess.sessionTeam = TEAM_BLUE;
+	} else if ( client->sess.sessionTeam == TEAM_BLUE )   {
+		client->sess.sessionTeam = TEAM_RED;
+	}
+	// Swap spec invites as well
+	if ( client->sess.specInvited & TEAM_RED ) {
+		flags |= TEAM_BLUE;
+
+	}
+	if ( client->sess.specInvited & TEAM_BLUE ) {
+		flags |= TEAM_RED;
+
+	}
+
+	client->sess.specInvited = flags;
+
+	flags = 0;
+	// Swap spec follows as well
+	if ( client->sess.specLocked & TEAM_RED ) {
+		flags |= TEAM_BLUE;
+	}
+	if ( client->sess.specLocked & TEAM_BLUE ) {
+		flags |= TEAM_RED;
+	}
+
+	client->sess.specLocked = flags;
+
+}
 /*
 ================
 G_ReadSessionData
@@ -136,7 +174,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof( s ) );
 
-    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
+    sscanf( s, "%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %s %s %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",       //  updated for new stats
 			(int *)&client->sess.sessionTeam,
 			&client->sess.spectatorTime,
 			(int *)&client->sess.spectatorState,
@@ -154,6 +192,7 @@ void G_ReadSessionData( gclient_t *client ) {
 			&client->sess.latchPlayerSkin,   // DHM - Nerve
 			// L0 - New stuff
 			(int *)&client->sess.referee,
+			(int*)&client->sess.shoutcaster,
 			(int *)&client->sess.muted,
 			&client->sess.uci,
 			(char *)&client->sess.ip,
@@ -191,7 +230,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	trap_Cvar_VariableStringBuffer( va( "wstats%i", (int)(client - level.clients) ), s, sizeof( s ) );
 	if ( *s ) {
 		G_parseStats( s );
-		if ( g_gamestate.integer == GS_PLAYING ) {
+		if ( g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
 			client->sess.rounds++;
 		}
 	}
@@ -206,24 +245,29 @@ void G_ReadSessionData( gclient_t *client ) {
 		if (g_tournament.integer && level.warmupSwap ||
 			!g_tournament.integer && level.warmupTime > 0
 		) {
+		    G_ClientSwap( client );
+/*
 			if (client->sess.sessionTeam == TEAM_RED) {
 				client->sess.sessionTeam = TEAM_BLUE;
 			}
 			else if (client->sess.sessionTeam == TEAM_BLUE) {
 				client->sess.sessionTeam = TEAM_RED;
 			}
+*/
 		}
 	}
 
 	if (g_swapteams.integer) {
 		trap_Cvar_Set("g_swapteams", "0");
-
+		G_ClientSwap( client );
+/*
 		if (client->sess.sessionTeam == TEAM_RED) {
 			client->sess.sessionTeam = TEAM_BLUE;
 		}
 		else if (client->sess.sessionTeam == TEAM_BLUE) {
 			client->sess.sessionTeam = TEAM_RED;
 		}
+*/
 	}
 }
 
@@ -292,7 +336,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	G_deleteStats( client - level.clients ); // OSP - Stats
 	sess->specInvited = 0;
 	sess->specLocked = 0;
-	
+
 	G_WriteClientSessionData( client );
 }
 
@@ -365,10 +409,10 @@ void G_WriteSessionData( void ) {
 
 	// L0 - OSP Stats
 	// Keep stats for all players in sync
-	for ( i = 0; !level.fResetStats && i < level.numConnectedClients; i++ ) {
-		if ( ( g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
-			   ( ( g_gametype.integer == GT_WOLF_STOPWATCH && level.clients[level.sortedClients[i]].sess.rounds >= 2 ) ||
-				 ( g_gametype.integer != GT_WOLF_STOPWATCH && level.clients[level.sortedClients[i]].sess.rounds >= 1 ) ) ) ) {
+	for (i = 0; !level.fResetStats && i < level.numConnectedClients; i++) {
+		if ((g_gamestate.integer == GS_WARMUP_COUNTDOWN &&
+			((g_gametype.integer == GT_WOLF_STOPWATCH && g_currentRound.integer == 0) || // Bug #380
+				(g_gametype.integer != GT_WOLF_STOPWATCH && level.clients[level.sortedClients[i]].sess.rounds >= 1)))) {
 			level.fResetStats = qtrue;
 		}
 	} // End
@@ -377,9 +421,11 @@ void G_WriteSessionData( void ) {
 		if ( level.clients[level.sortedClients[i]].pers.connected == CON_CONNECTED ) {
 			G_WriteClientSessionData( &level.clients[level.sortedClients[i]]);
 			// For slow connecters and a short warmup
-		} else if ( level.fResetStats ) {
+		}
+		
+		if ( level.fResetStats ) {
 			G_deleteStats( level.sortedClients[i] );
-			if (g_currentRound.integer == 1 && g_gameStatslog.integer) G_read_round_jstats(); 
+			if (g_currentRound.integer == 1 && g_gameStatslog.integer) G_read_round_jstats();
 		}
 	}
 

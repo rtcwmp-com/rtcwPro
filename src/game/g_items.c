@@ -528,11 +528,11 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 	//----(SA)	end
 
 // JPW NERVE  prevents drop/pickup weapon "quick reload" exploit
-	if (alreadyHave) 
+	if (alreadyHave)
 	{
 		Add_Ammo(other, ent->item->giTag, quantity, !alreadyHave);
 	}
-	else 
+	else
 	{
 		other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
 	}
@@ -928,7 +928,7 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity, int ownerN
 
 	dropped->classname = item->classname;
 	dropped->item = item;
-	VectorSet( dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, 0 );            //----(SA)	so items sit on the ground
+	VectorSet( dropped->r.mins, -ITEM_RADIUS, -ITEM_RADIUS, 0);            //----(SA)	so items sit on the ground
 	VectorSet( dropped->r.maxs, ITEM_RADIUS, ITEM_RADIUS, 2 * ITEM_RADIUS );  //----(SA)	so items sit on the ground
 	dropped->r.contents = CONTENTS_TRIGGER | CONTENTS_ITEM;
 
@@ -938,27 +938,24 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity, int ownerN
 
 	trap_Trace( &tr, origin, dropped->r.mins, dropped->r.maxs, origin, ownerNum, MASK_SOLID );
 	if ( tr.startsolid ) {
-		VectorSubtract( g_entities[ownerNum].s.origin, origin, temp );
+		//VectorSubtract( g_entities[ownerNum].s.origin, origin, temp );
+		VectorSubtract( g_entities[ownerNum].r.currentOrigin, origin, temp );
 		VectorNormalize( temp );
-
 		for ( i = 16; i <= 48; i += 16 ) {
 			VectorScale( temp, i, vec );
 			VectorAdd( origin, vec, origin );
-
 			trap_Trace( &tr, origin, dropped->r.mins, dropped->r.maxs, origin, ownerNum, MASK_SOLID );
 			if ( !tr.startsolid ) {
 				break;
 			}
 		}
 	}
-
 	G_SetOrigin( dropped, origin );
 	dropped->s.pos.trType = TR_GRAVITY;
 	dropped->s.pos.trTime = level.time;
 	VectorCopy( velocity, dropped->s.pos.trDelta );
 
 	dropped->s.eFlags |= EF_BOUNCE_HALF;
-
 	if ( item->giType == IT_TEAM ) { // Special case for CTF flags
 		dropped->think = Team_DroppedFlagThink;
 		dropped->nextthink = level.time + 30000;

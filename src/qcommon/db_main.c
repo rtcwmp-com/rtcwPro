@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ===========================================================================
 */
+#ifdef MYSQLDEP
 #include "database.h"
 
 //cvars
@@ -238,3 +239,4 @@ void OW_CleanString(const char* in, char* out, int len) {
 		dbi.CleanString(in, out, len);
 	}
 }
+#endif

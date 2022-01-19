@@ -291,6 +291,11 @@ typedef struct {
 	char gameName[MAX_NAME_LENGTH];         // Arnout
 } serverInfo_t;
 
+typedef struct {
+	byte ip[4];
+	unsigned short port;
+} serverAddress_t;
+
 #define MAX_AUTOUPDATE_SERVERS  5
 typedef struct {
 	connstate_t state;              // connection status
@@ -320,12 +325,17 @@ typedef struct {
 	serverInfo_t globalServers[MAX_GLOBAL_SERVERS];
 	// additional global servers
 	int numGlobalServerAddresses;
-	netadr_t globalServerAddresses[MAX_GLOBAL_SERVERS];
+	serverAddress_t globalServerAddresses[MAX_GLOBAL_SERVERS];
 
 	int numfavoriteservers;
 	serverInfo_t favoriteServers[MAX_OTHER_SERVERS];
 
+	int nummplayerservers;
+	serverInfo_t mplayerServers[MAX_OTHER_SERVERS];
+
 	int pingUpdateSource;       // source currently pinging or updating
+
+	int masterNum;
 
 	// update server info
 	netadr_t updateServer;
@@ -333,6 +343,7 @@ typedef struct {
 	char updateInfoString[MAX_INFO_STRING];
 
 	netadr_t authorizeServer;
+	char autoupdateServerNames[MAX_AUTOUPDATE_SERVERS][MAX_QPATH];
 
 	// DHM - Nerve :: Auto-update Info
 	char* autoupdateServerName;
@@ -422,6 +433,8 @@ extern cvar_t  *cl_language;
 extern cvar_t* cl_StreamingSelfSignedCert;
 // ~L0
 
+extern cvar_t* cl_activatelean; // RTCWPro
+ 
 
 //=================================================
 
@@ -565,6 +578,7 @@ void Con_PageDown( void );
 void Con_Top( void );
 void Con_Bottom( void );
 void Con_Close( void );
+void Con_SetFrac(const float conFrac);	// RTCWPro con height
 
 
 //
@@ -643,7 +657,7 @@ void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 
 // 
-// sswolf - cl_control.c - source: Nate (rtcwMP)
+// RTCWPro - cl_control.c - source: Nate (rtcwMP)
 //
 void CL_checkSSTime(void);
 //void CL_RequestedSS(int quality);

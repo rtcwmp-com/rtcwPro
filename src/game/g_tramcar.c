@@ -1270,6 +1270,7 @@ void truck_cam_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 
 		// save results of pmove
 		BG_PlayerStateToEntityState( &other->client->ps, &other->s, qtrue );
+		//BG_PlayerStateToEntityStatePro(&other->client->ps, &other->s, level.time, qtrue); // RTCWPro
 
 		// use the precise origin for linking
 		VectorCopy( other->client->ps.origin, other->r.currentOrigin );
@@ -1407,6 +1408,7 @@ void camera_cam_think( gentity_t *ent ) {
 
 		// save results of pmove
 		BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
+		//BG_PlayerStateToEntityStatePro(&player->client->ps, &player->s, level.time, qtrue); // RTCWPro
 
 		// use the precise origin for linking
 		VectorCopy( player->client->ps.origin, player->r.currentOrigin );
@@ -1592,6 +1594,7 @@ void reset_players_pos( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
 	// save results of pmove
 	BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
+	//BG_PlayerStateToEntityStatePro(&player->client->ps, &player->s, level.time, qtrue); // RTCWPro
 
 	// use the precise origin for linking
 	VectorCopy( player->client->ps.origin, player->r.currentOrigin );

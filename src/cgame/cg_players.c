@@ -194,6 +194,36 @@ int CG_WorldToScreen(float* in, int* out)
 
 	return 0;
 }
+
+/*
+=================
+VisibleToScreen
+=================
+*/
+qboolean VisibleToScreen(vec3_t point, vec_t world[2])
+{
+	vec3_t trans;
+	vec_t xc, yc;
+	vec_t px, py;
+	vec_t z;
+
+	px = tan(cg.refdef.fov_x * M_PI / 360.0);
+	py = tan(cg.refdef.fov_y * M_PI / 360.0);
+
+	VectorSubtract(point, cg.refdef.vieworg, trans);
+
+	xc = cg.refdef.width / 2.0;
+	yc = cg.refdef.height / 2.0;
+
+	z = DotProduct(trans, cg.refdef.viewaxis[0]);
+	if (z <= 0.001)
+		return qfalse;
+
+	world[0] = xc - DotProduct(trans, cg.refdef.viewaxis[1]) * xc / (z * px);
+	world[1] = yc - DotProduct(trans, cg.refdef.viewaxis[2]) * yc / (z * py);
+	return qtrue;
+}
+
 void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
 	int skipNumber, int mask) {
 	trace_t	t;
@@ -203,6 +233,7 @@ void CG_Trace_World(trace_t *result, const vec3_t start, const vec3_t mins, cons
 
 	*result = t;
 }
+
 qboolean PointVisible(vec3_t point) {
 	trace_t trace;
 	//	vec3_t tmp;
@@ -1141,6 +1172,10 @@ void CG_NewClientInfo( int clientNum ) {
 	// ref
 	v = Info_ValueForKey(configstring, "ref");
 	newInfo.refStatus = atoi(v);
+
+	// shoutcaster
+	v = Info_ValueForKey(configstring, "scs");
+	newInfo.shoutStatus = atoi(v);
 //----(SA) modified this for head separation
 
 	// head
@@ -1216,6 +1251,27 @@ void CG_NewClientInfo( int clientNum ) {
 		else {
 			trap_Cvar_Set("cg_ui_voteFlags", "0");
 			// don't print a message as the MakeRef code already does a center print
+		}
+	}
+
+	// RTCWPro - autoexec
+	if (!cg.demoPlayback) {
+
+		if (clientNum == cg.clientNum) {
+
+			if (newInfo.team != cgs.clientinfo[cg.clientNum].team) {
+
+				// autoexec team configs
+				if (newInfo.team != TEAM_FREE) {
+					CG_execFile(va("autoexec_%s", BG_GetTeam(newInfo.team)));
+				}
+			}
+
+			// autoexec class configs
+			if (newInfo.team != TEAM_SPECTATOR) {
+
+				CG_execFile(va("autoexec_%s", BG_GetClass(mp_playerType.integer)));
+			}
 		}
 	}
 
@@ -2418,9 +2474,9 @@ static void CG_PlayerSprites( centity_t *cent ) {
 		return;
 	}
 
-	if ( cent->currentState.powerups & ( 1 << PW_INVULNERABLE )
-		 && ( ( cent->currentState.effect3Time + 3000 ) > cg.time ) ) {
-		CG_PlayerFloatSprite( cent, cgs.media.spawnInvincibleShader, 56 );
+	if (cent->currentState.powerups & (1 << PW_INVULNERABLE)) {
+		//&& ((cent->currentState.effect3Time + 3000) > cg.time)) { // RTCWPro
+		CG_PlayerFloatSprite(cent, cgs.media.spawnInvincibleShader, 56);
 		return;
 	}
 
@@ -2984,7 +3040,7 @@ void CG_Player( centity_t *cent ) {
 	VectorCopy( playerOrigin, lightorigin );
 	lightorigin[2] += 31 + (float)cg_drawFPGun.integer;
 
-	// sswolf - complete OSP demo features
+	// RTCWPro - complete OSP demo features
 	// L0 - Keeping this in for demo preview..
 	if (cg.demoPlayback && cgs.wallhack)
 	{

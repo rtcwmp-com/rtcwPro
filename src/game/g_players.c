@@ -109,6 +109,10 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 			}
 		}
 
+		if (cl->sess.shoutcaster) {
+			strcpy(ref, "SCS");
+		}
+
 		if (cl->sess.referee) {
 			strcpy(ref, "REF");
 		}
@@ -599,6 +603,7 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 	}
 	else {
 		AP(va("cp \"%s ^7team is %s%s!\n\"", aTeams[team], (ready ? "^3" : "^z"), status[ready]));
+		G_matchPrintInfo(va("%s ^7team is %s%s! ^7(%s)\n", aTeams[team], (ready ? "^3" : "^z"), status[ready], ent->client->pers.netname), qfalse);
 		level.readyTeam[team] = ready;
 	}
 }
@@ -808,6 +813,9 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 		 || !Q_stricmp(cmd, "msg"))					{ cmd_pmsg(ent);	return qtrue;}
 //	else if(!Q_stricmp(cmd, "smoke"))				{ cmd_pSmoke(ent);			return qtrue;}
 	else if (!Q_stricmp(cmd, "ref"))				{ G_ref_cmd(ent, qtrue);	return qtrue; }
+	else if (!Q_stricmp(cmd, "scs"))				{ G_scs_cmd(ent, qtrue);	return qtrue; }
+	else if (!Q_stricmp(cmd, "specspeed"))			{ G_scsSpectatorSpeed(ent);	return qtrue; }
+	else if (!Q_stricmp(cmd, "followobj"))			{ G_scsFollowOBJ(ent);	return qtrue; }
 	else if(!Q_stricmp(cmd, "readyteam"))			{ pCmd_teamReady(ent, qtrue);	return qtrue;}
 	else if(!Q_stricmp(cmd, "speclock"))			{ cmd_speclock(ent, qtrue);	return qtrue;}
 	else if(!Q_stricmp(cmd, "players"))			    { pCmd_players(ent, qfalse);	return qtrue;}

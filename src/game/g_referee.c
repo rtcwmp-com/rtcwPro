@@ -92,8 +92,32 @@ qboolean G_refCommandCheck(gentity_t *ent, char *cmd) {
 	else if (!Q_stricmp(cmd, "rename")) {
 		G_refRenameClient(ent);
 	}
+	else if (!Q_stricmp(cmd, "reqss")) {
+		G_refRequestSS(ent);
+	}
+	else if (!Q_stricmp(cmd, "makeShoutcaster") || !Q_stricmp(cmd, "makescs"))
+	{
+		G_refMakeShoutcaster_cmd(ent);
+	}
+	else if (!Q_stricmp(cmd, "removeShoutcaster") || !Q_stricmp(cmd, "removescs"))
+	{
+		G_refRemoveShoutcaster_cmd(ent);
+	}
 	else if (!Q_stricmp(cmd, "getstatus")) {
 		G_refGetStatus(ent);
+	}
+	else if (!Q_stricmp(cmd, "logout")) {
+		G_refLogout(ent);
+	}
+	else { return(qfalse); }
+
+	return(qtrue);
+}
+
+qboolean G_scsCommandCheck(gentity_t* ent, char* cmd) {
+
+	if (!Q_stricmp(cmd, "logout")) {
+		G_scsLogout(ent);
 	}
 	else { return(qfalse); }
 
@@ -192,10 +216,353 @@ void G_ref_cmd(gentity_t *ent, qboolean fValue) { //unsigned int dwCommand,
 			ent->client->ps.pm_type = PM_NORMAL;
 		}
 		AP(va("cp \"%s\n^3has become a referee\n\"", ent->client->pers.netname));
+		CP("print \"^3You have logged in as a Referee.\n\"");
 		ClientUserinfoChanged(ent - g_entities);
 	}
 }
 
+void G_refLogout(gentity_t* ent) {
+
+	if (ent) 
+	{
+		ent->client->sess.referee = 0;
+
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_FREEZE;
+		}
+
+		CP("print \"^3Logged out as referee.\n\"");
+		ClientUserinfoChanged(ent - g_entities);
+	}
+}
+
+void G_scsLogout(gentity_t* ent) {
+
+	if (ent)
+	{
+		ent->client->sess.shoutcaster = 0;
+
+		if (!ent->client->sess.referee)    // don't remove referee's invitation
+		{
+			ent->client->sess.spec_invite = 0;
+
+			// unfollow player if team is spec locked
+			if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW)
+			{
+				int spectatorClientTeam = level.clients[ent->client->sess.spectatorClient].sess.sessionTeam;
+
+				if (spectatorClientTeam == TEAM_RED && teamInfo[TEAM_RED].spec_lock)
+				{
+					StopFollowing(ent);
+				}
+				else if (spectatorClientTeam == TEAM_BLUE && teamInfo[TEAM_BLUE].spec_lock)
+				{
+					StopFollowing(ent);
+				}
+			}
+		}
+
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_FREEZE;
+		}
+
+		CP("print \"^3Logged out as shoutcaster.\n\"");
+		ClientUserinfoChanged(ent - g_entities);
+	}
+}
+
+void G_scs_cmd(gentity_t* ent, qboolean fValue) {
+	char arg[MAX_TOKEN_CHARS];
+
+	if (ent == NULL || ent->client->sess.shoutcaster) 
+	{
+		trap_Argv(1, arg, sizeof(arg));
+
+		if (G_scsCommandCheck(ent, arg)) {
+			return;
+		}
+
+		return;
+	}
+
+	if (ent) 
+	{
+		if (!Q_stricmp(shoutcastPassword.string, "none") || !shoutcastPassword.string[0]) {
+			CP("cpm \"Sorry, shoutcaster status disabled on this server.\n\"");
+			return;
+		}
+
+		if (trap_Argc() < 2) {
+			CP("cpm \"Usage: scs [password]\n\"");
+			return;
+		}
+
+		trap_Argv(1, arg, sizeof(arg));
+
+		if (Q_stricmp(arg, shoutcastPassword.string)) {
+			CP("cpm \"Invalid shoutcaster password!\n\"");
+			return;
+		}
+
+		if (ent->client->sess.shoutcaster == 1)
+		{
+			CP("cpm \"Already logged in as a shoutcaster!\n\"");
+			return;
+		}
+
+		if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+		{
+			SetTeam(ent, "spectator", qtrue);
+		}
+
+		ent->client->sess.shoutcaster = 1;
+		ent->client->sess.spec_invite = TEAM_RED | TEAM_BLUE;
+
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR && level.paused != PAUSE_NONE) {
+			ent->client->ps.pm_type = PM_NORMAL;
+		}
+
+		AP(va("cp \"%s\n^3has become a Shoutcaster\n\"", ent->client->pers.netname));
+		CP("print \"^3You have logged in as a Shoutcaster.\n\"");
+		ClientUserinfoChanged(ent - g_entities);
+	}
+}
+
+void G_MakeShoutcaster(gentity_t* ent)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	{
+		SetTeam(ent, "spectator", qtrue);
+	}
+
+	ent->client->sess.shoutcaster = 1;
+	ent->client->sess.spec_invite = TEAM_RED | TEAM_BLUE;
+
+	AP(va("cp \"%s\n^3has become a shoutcaster\n\"", ent->client->pers.netname));
+	AP(va("chat \"console: %s ^7was made a Shoutcaster by a Referee^7!\n\"", ent->client->pers.netname));
+	CP("print \"^3You were given a Shoutcaster role.\n\"");
+
+	ClientUserinfoChanged(ent - g_entities);
+}
+
+void G_RemoveShoutcaster(gentity_t* ent)
+{
+	if (!ent || !ent->client)
+	{
+		return;
+	}
+
+	ent->client->sess.shoutcaster = 0;
+
+	if (!ent->client->sess.referee)    // don't remove referee's invitation
+	{
+		ent->client->sess.spec_invite = 0;
+
+		// unfollow player if team is spec locked
+		if (ent->client->sess.spectatorState == SPECTATOR_FOLLOW)
+		{
+			int spectatorClientTeam = level.clients[ent->client->sess.spectatorClient].sess.sessionTeam;
+
+			if (spectatorClientTeam == TEAM_RED && teamInfo[TEAM_RED].spec_lock)
+			{
+				StopFollowing(ent);
+			}
+			else if (spectatorClientTeam == TEAM_BLUE && teamInfo[TEAM_BLUE].spec_lock)
+			{
+				StopFollowing(ent);
+			}
+		}
+	}
+
+	CP("print \"^3You were removed as a Shoutcaster.\n\"");
+	AP(va("chat \"console: %s ^7was removed as a Shoutcaster by a Referee^7!\n\"", ent->client->pers.netname));
+	ClientUserinfoChanged(ent - g_entities);
+}
+
+void G_scsSpectatorSpeed(gentity_t* ent) {
+
+	int speedvalue;
+	char speedvalue_arg[128];
+
+	if (ent->client->sess.shoutcaster == 0)
+	{
+		trap_SendServerCommand(ent - g_entities, va("print \"^3Login as a shoutcaster first!\n\""));
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	{
+		trap_SendServerCommand(ent - g_entities, va("print \"^3You cannot use this command as spectator!\n\""));
+		return;
+	}
+
+	trap_Argv(1, speedvalue_arg, sizeof(speedvalue_arg));
+
+	if (!strlen(speedvalue_arg))
+	{
+		CP("print \"^3Speed value must be provided!\n\"");
+		return;
+	}
+
+	speedvalue = atoi(speedvalue_arg);
+
+	if (speedvalue <= 0)
+	{
+		CP("print \"^3Speed value must be provided!\n\"");
+		return;
+	}
+
+	// don't let arbitrary large values in
+	if (speedvalue > 8000)
+	{
+		speedvalue = 8000;
+	}
+
+	ent->client->sess.specSpeed = speedvalue;
+}
+
+/*
+=================
+RTCWPro
+
+G_scsFollowOBJ
+=================
+*/
+void G_scsFollowOBJ(gentity_t* ent) {
+	gclient_t* cl;
+	int clientnum;
+	int i;
+
+	if (!ent->client->sess.shoutcaster) {
+		CP("print \"Login as a Shoutcaster first.\n\"");
+		return;
+	}
+
+	for (i = 0; i < level.numPlayingClients; i++) {
+
+		cl = &level.clients[level.sortedClients[i]];
+
+		if (cl->pers.connected != CON_CONNECTED) {
+			continue;
+		}
+
+		if (cl->sess.sessionTeam == TEAM_SPECTATOR) {
+			continue;
+		}
+
+		if (ent->client->ps.pm_flags & PMF_LIMBO)
+		{
+			if (cl->ps.pm_flags & PMF_LIMBO)
+			{
+				continue;
+			}
+		}
+
+		if (cl->ps.powerups[PW_REDFLAG] > 0 || cl->ps.powerups[PW_BLUEFLAG] > 0) {
+			clientnum = cl->ps.clientNum;
+		}
+		else {
+			continue;
+		}
+
+		ent->client->sess.spectatorClient = clientnum;
+		ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
+	}
+}
+
+void G_refMakeShoutcaster_cmd(gentity_t* ent)
+{
+	int       pid;
+	char      name[MAX_NAME_LENGTH];
+	gentity_t* player;
+
+	if (trap_Argc() != 3)
+	{
+		G_refPrintf(ent, "Usage: \\ref makeShoutcaster <pid>");
+		return;
+	}
+
+	if (!Q_stricmp(shoutcastPassword.string, "none") || !shoutcastPassword.string[0])
+	{
+		G_refPrintf(ent, "Sorry, shoutcaster status disabled on this server.");
+		return;
+	}
+
+	trap_Argv(2, name, sizeof(name));
+
+	if ((pid = ClientNumberFromString(ent, name)) == -1)
+	{
+		return;
+	}
+
+	player = g_entities + pid;
+
+	if (!player || !player->client)
+	{
+		return;
+	}
+
+	// ignore bots
+	if (player->r.svFlags & SVF_BOT)
+	{
+		G_refPrintf(ent, "Sorry, a bot can not be a shoutcaster.");
+		return;
+	}
+
+	if (player->client->sess.shoutcaster == 1)
+	{
+		G_refPrintf(ent, "Sorry, %s^7 is already a shoutcaster.", player->client->pers.netname);
+		return;
+	}
+
+	G_MakeShoutcaster(player);
+}
+
+void G_refRemoveShoutcaster_cmd(gentity_t* ent)
+{
+	int       pid;
+	char      name[MAX_NAME_LENGTH];
+	gentity_t* player;
+
+	if (trap_Argc() != 3)
+	{
+		G_refPrintf(ent, "Usage: \\ref removeShoutcaster <pid>");
+		return;
+	}
+
+	if (!Q_stricmp(shoutcastPassword.string, "none") || !shoutcastPassword.string[0])
+	{
+		G_refPrintf(ent, "Sorry, shoutcaster status disabled on this server.");
+		return;
+	}
+
+	trap_Argv(2, name, sizeof(name));
+
+	if ((pid = ClientNumberFromString(ent, name)) == -1)
+	{
+		return;
+	}
+
+	player = g_entities + pid;
+
+	if (!player || !player->client)
+	{
+		return;
+	}
+
+	if (!player->client->sess.shoutcaster)
+	{
+		G_refPrintf(ent, "Sorry, %s^7 is not a shoutcaster.", player->client->pers.netname);
+		return;
+	}
+
+	G_RemoveShoutcaster(player);
+}
 
 // Readies all players in the game.
 void G_refAllReady_cmd(gentity_t *ent) {
@@ -473,25 +840,18 @@ Rename client
 ===========
 */
 void G_refRenameClient(gentity_t* ent) {
-	char client_num[MAX_TOKEN_CHARS];
 	gentity_t* targetent;
 	char* newname;
 	char userinfo[MAX_INFO_STRING];
-	char cmd[MAX_TOKEN_CHARS];
+	int pid;
+	char arg[MAX_TOKEN_CHARS];
 
-	trap_Argv(1, cmd, sizeof(cmd));
-
-	if (!*cmd) {
-		G_Printf("usage: Rename <client id>.\n");
+	trap_Argv(2, arg, sizeof(arg));
+	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
 		return;
 	}
 
-	trap_Argv(2, client_num, sizeof(client_num));
-	if (GetClientEntity(ent, client_num, &targetent) == NULL)
-	{
-		return;
-	}
-
+	targetent = g_entities + pid;
 	newname = ConcatArgs(3);
 
 	AP(va("chat \"console: %s ^7renamed %s ^7to %s^7!\n\"", ent->client->pers.netname, targetent->client->pers.netname, newname));
@@ -504,9 +864,33 @@ void G_refRenameClient(gentity_t* ent) {
 }
 
 /*
-===========
-Getstatus
+=============
+RTCWPro
+G_refRequestSS
+=============
+*/
+void G_refRequestSS(gentity_t* ent) {
+	gentity_t* targetent;
+	int pid;
+	char arg[MAX_TOKEN_CHARS];
 
+	trap_Argv(2, arg, sizeof(arg));
+	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
+		return;
+	}
+
+	targetent = g_entities + pid;
+
+	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", pid));
+	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, pid));
+
+}
+
+/*
+===========
+RTCWPro
+
+Getstatus
 Prints IP's and some match info..
 ===========
 */
@@ -518,7 +902,6 @@ void G_refGetStatus(gentity_t* ent) {
 	int mins = (secs / 60) % 60;
 	int hours = (secs / 3600) % 24;
 	int days = (secs / (3600 * 24));
-	// sswolf - new stuff
 	char mapName[64];
 
 	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
@@ -553,9 +936,13 @@ void G_refGetStatus(gentity_t* ent) {
 				team = (cl->sess.sessionTeam == TEAM_SPECTATOR) ? "^3Spec^7" :
 					(cl->sess.sessionTeam == TEAM_RED ? "^1Axis^7" : "^4Ally^7");
 
-				ip = ent->client->sess.ip;
+				ip = cl->sess.ip;
 
-				ping = cl->ps.ping;
+				// RTCWPro
+				//ping = cl->ps.ping;
+				ping = g_alternatePing.integer ? cl->pers.alternatePing : cl->ps.ping;
+				// RTCWPro end
+
 				if (ping > 999) ping = 999;
 
 				if (cl->sess.referee)

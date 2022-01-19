@@ -1,0 +1,34 @@
+Note for linux docker servers: always run the image with sudo permissions!
+If unable to run the docker daemon on linux, try running with sudo.
+- client: fix /map and /devmap on the client side
+- client: display current round time in warmup between rounds
+- client: add new style for RT: cg_drawReinforcementTime 1 = default, 2 = new, 3 = default and new
+- client: add new style for ERT: cg_drawEnemyTimer 1 = default, 2 = new, 3 = default and new
+- client: change RT color: cg_reinforcementTimeColor green = default
+- client: change ERT color: cg_enemyTimerColor red = default
+- client: change default RT position: cg_reinforcementTimeX 95 = default, cg_reinforcementTimeY 50 = default
+- client: change new RT position: cg_reinforcementTimeProX 145 = default, cg_reinforcementTimeProY 445 = default
+- client: change default ERT position: cg_enemyTimerX 98 = default, cg_enemyTimerY 60 = default
+- client: change new ERT position: cg_enemyTimerProX 185 = default, cg_enemyTimerProY 445 = default
+- client: add autoexec_team: _axis, _allies, and _spectator
+- client: add autoexec_class: _s _e _m _l (soldier, engineer, medic, lieutenant)
+- client: fix a keyboard bind key issue on azerty keyboards
+- client: split (bitflag) cg_hitsounds: 1 = hs only, 2 = body only, 4 = team only, 7 = all (1+2+4)
+- client: add cg_findMedic 1 = default: toggle camera lock at medics when waiting for a revive
+- client: free up the ^ char so it can be used in con notify and names
+- client: minor draw fixes to accommodate new stuff
+- client: add cg_drawGun 2: hide only weapons (not holdables)
+- client: change console color: con_color -1 = default, int from 0 to 31 based on vanilla color codes/keys
+- server: shoutcasters always noclip
+- server: fix bug that causes abnormal cpu usage and ping
+- server: fix a bug missed on 1.2 with obj getting lost in solids
+- server: fix bug where medics will drop weapon on death
+- server: include server IP in stats
+- server: fix specinvites not being transferred between sessions
+- server: fix sv_gameConfig not loading on startup: cvar is now read only (set from command line on startup)
+- server: add g_mapScriptDirectory "" = default: folder needs to be in fs
+- server: fix validaiton for cvar rest causing incorrect violation kicks
+- server: fix end of round announcer sounds
+- server: fix stats offset bug with map_restart on SW2
+- server: fix swap after map_restart on SW2
+- server: add objective captures to json events and player stats

@@ -1,5 +1,5 @@
 /*
-sswolf - reqSS functions.
+RTCWPro - reqSS functions.
 Source: Nate (rtcwMP)
 */
 
@@ -22,11 +22,17 @@ void SV_SendSSRequest(int clientNum)
 	}
 
 	cl = &svs.clients[clientNum];
-	if ( !cl ) {
+	if ( !cl ) 
+	{
 		return;
 	}
-	value = Info_ValueForKey( cl->userinfo, "ip" );
 
+	if (cl->ping < 0 || cl->ping >= 999)
+	{
+		return;
+	}
+
+	value = Info_ValueForKey( cl->userinfo, "ip" );
 
 	//SV_SendServerCommand(svs.clients + clientNum, "ssreq %d", quality);
 	SV_SendServerCommand(svs.clients + clientNum, "ssreq %s", value);

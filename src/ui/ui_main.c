@@ -127,8 +127,8 @@ static const int numSortKeys = sizeof( sortKeys ) / sizeof( const char* );
 
 static char* netnames[] = {
 	"???",
-	"IPv4",
-	"IPv6",
+	"UDP",
+	"IPX",
 	NULL
 };
 
@@ -4428,7 +4428,7 @@ static void UI_Update( const char *name ) {
 			trap_Cvar_SetValue( "r_texturebits", 32 );
 			trap_Cvar_SetValue( "r_fastSky", 0 );
 			trap_Cvar_SetValue( "r_inGameVideo", 1 );
-			trap_Cvar_SetValue( "cg_shadows", 1 );
+			trap_Cvar_SetValue( "cg_shadows", 0 );
 			trap_Cvar_SetValue( "cg_brassTime", 2500 );
 			trap_Cvar_Set( "r_texturemode", "GL_LINEAR_MIPMAP_LINEAR" );
 			break;
@@ -6213,21 +6213,19 @@ static const char *UI_FeederItemText( float feederID, int index, int column, qha
 			}
 			switch ( column ) {
 			case SORT_HOST:
-				if (ping <= 0) {
-					return Info_ValueForKey(info, "addr");
-				}
-				else {
-					int nettype = atoi(Info_ValueForKey(info, "nettype"));
-
-					if (nettype < 0 || nettype >= ARRAY_LEN(netnames)) {
-						nettype = 0;
+				if ( ping <= 0 ) {
+					return Info_ValueForKey( info, "addr" );
+				} else {
+					if ( ui_netSource.integer == AS_LOCAL ) {
+						Com_sprintf( hostname, sizeof( hostname ), "%s [%s]",
+									 Info_ValueForKey( info, "hostname" ),
+									 netnames[atoi( Info_ValueForKey( info, "nettype" ) )] );
+						return hostname;
+					} else {
+						return Info_ValueForKey( info, "hostname" );
 					}
-
-					Com_sprintf(hostname, sizeof(hostname), "^7[^n%s^7]  %s",
-						netnames[nettype],
-						Info_ValueForKey(info, "hostname"));
-					return hostname;
 				}
+
 			case SORT_MAP: return Info_ValueForKey( info, "mapname" );
 			/*case SORT_MAP:
 				if (Info_ValueForKey( info, "mapname" ) != "" )
@@ -8040,6 +8038,7 @@ UI_StartServerRefresh
 =================
 */
 static void UI_StartServerRefresh( qboolean full ) {
+	int i;
 	char    *ptr;
 
 	qtime_t q;
@@ -8068,14 +8067,18 @@ static void UI_StartServerRefresh( qboolean full ) {
 	}
 
 	uiInfo.serverStatus.refreshtime = uiInfo.uiDC.realTime + 5000;
-	if (ui_netSource.integer == AS_GLOBAL) {
-
-		ptr = UI_Cvar_VariableString("debug_protocol");
-		if (strlen(ptr)) {
-			trap_Cmd_ExecuteText(EXEC_NOW, va("globalservers 0 %s full empty\n", ptr));
+	if ( ui_netSource.integer == AS_GLOBAL || ui_netSource.integer == AS_MPLAYER ) {
+		if ( ui_netSource.integer == AS_GLOBAL ) {
+			i = 0;
+		} else {
+			i = 1;
 		}
-		else {
-			trap_Cmd_ExecuteText(EXEC_NOW, va("globalservers 0 %d full empty\n", (int)trap_Cvar_VariableValue("protocol")));
+
+		ptr = UI_Cvar_VariableString( "debug_protocol" );
+		if ( strlen( ptr ) ) {
+			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %s full empty\n", i, ptr ) );
+		} else {
+			trap_Cmd_ExecuteText( EXEC_NOW, va( "globalservers %d %d full empty\n", i, (int)trap_Cvar_VariableValue( "protocol" ) ) );
 		}
 	}
 }

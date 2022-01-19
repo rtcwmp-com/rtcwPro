@@ -76,13 +76,26 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		if ( cl->pers.connected == CON_CONNECTING ) {
 			ping = -1;
 		} else {
-			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			// RTCWPro
+			//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			if (g_alternatePing.integer) 
+			{
+				ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
+			}
+			else 
+			{
+				ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			}
+			// RTCWPro end
 		}
+
 		Com_sprintf( entry, sizeof( entry ),
 					 " %i %i %i %i %i %i %i %i", level.sortedClients[i],
 					 cl->ps.persistant[PERS_SCORE], ping, ( level.time - cl->pers.enterTime ) / 60000,
 					 scoreFlags, g_entities[level.sortedClients[i]].s.powerups, playerClass, respawnsLeft );
+
 		j = strlen( entry );
+
 		if ( stringlength + j > 1024 ) {
 			break;
 		}
@@ -395,6 +408,70 @@ void Cmd_God_f( gentity_t *ent ) {
 	trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
 
+void Cmd_GetOBJ(gentity_t* ent) {
+	char team[64];
+	gentity_t* axisObj = NULL, * alliesObj = NULL;
+
+	if (!ent->client->sess.referee) {
+		return;
+	}
+
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+		return;
+	}
+
+	if (ent->client->ps.stats[STAT_HEALTH] <= 0) {
+		return;
+	}
+
+	trap_Argv(1, team, sizeof(team));
+
+	if (!strlen(team)) {
+		return;
+	}
+
+	if (Q_stricmp(team, "axis") == 0) {
+
+		axisObj = &g_entities[0];
+		axisObj = G_Find(axisObj, FOFS(classname), "team_CTF_redflag");
+
+		if (axisObj) {
+			Pickup_Team(axisObj, ent);
+		}
+	}
+	else if (Q_stricmp(team, "allies") == 0) {
+
+		alliesObj = &g_entities[0];
+		alliesObj = G_Find(alliesObj, FOFS(classname), "team_CTF_blueflag");
+
+		if (alliesObj) {
+			Pickup_Team(alliesObj, ent);
+		}
+	}
+}
+
+void Cmd_SelfRevive_f(gentity_t* ent) {
+
+	if (!ent->client->sess.referee) {
+		return;
+	}
+
+	if (g_gamestate.integer != GS_PLAYING) {
+		return;
+	}
+
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+		return;
+	}
+
+	ReviveEntity(ent, ent);
+	trap_SendServerCommand(ent - g_entities, "cp \"Selfrevived\n\"");
+}
+
 /*
 ==================
 Cmd_Nofatigue_f
@@ -459,7 +536,12 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent ) {
 	char    *msg;
 
-	if ( !CheatsOk( ent ) ) {
+	/*if ( !CheatsOk( ent ) ) {
+		return;
+	} */
+
+	if (!g_cheats.integer && !ent->client->sess.shoutcaster) {
+		trap_SendServerCommand(ent - g_entities, va("print \"Cheats are not enabled on this server.\n\""));
 		return;
 	}
 
@@ -500,6 +582,115 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 	trap_SendServerCommand( ent - g_entities, "clientLevelShot" );
 }
 
+/*
+============
+RTCWPro
+Source: rtcwPub
+
+Cmd_More_f
+============
+*/
+void Cmd_More_f(gentity_t* ent)
+{
+	if (ent->more) {
+		if (!ent->moreCalls)
+			ent->moreCalls = 1;
+
+		ent->moreCalled = qtrue;
+		ent->more(ent);
+		ent->moreCalls++;
+		ent->moreCalled = qfalse;
+	}
+}
+
+/*
+============
+RTCWPro - display list of 
+maps on the server
+Source: PubJ (nihi)
+
+Cmd_DisplayMaps_f
+============
+*/
+void Cmd_DisplayMaps_f(gentity_t* ent)
+{
+	int i, mapcount;
+	const int moreCount = 100;
+	qboolean more = qfalse;
+	char mapMatch[256];
+	int exactMatch;
+
+	if (!ent->moreCalled)
+	{
+		ent->moreCalls = 0;
+	}
+
+	trap_Argv(1, mapMatch, sizeof(mapMatch));
+
+	CP(va("print \"^7Total maps: ^3%d\n\"", level.mapcount));
+	CP("print \"^3------------------------------------------------------------------------\n\"");
+
+	if (strlen(mapMatch))
+	{
+		exactMatch = G_FindMatchingMaps(ent, mapMatch);
+
+		if (exactMatch)
+		{
+			Q_strncpyz(mapMatch, level.maplist[exactMatch], sizeof(mapMatch));
+			CP(va("print \"^3One match found:\n"));
+			CP(va("print \"^7  %s\n\"", level.maplist[exactMatch]));
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			return;
+		}
+		else
+		{
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			return;
+		}
+	}
+	else
+	{
+		for (mapcount = 1, i = (ent->moreCalls * moreCount); i < level.mapcount; mapcount += 3)
+		{
+			if ((i + 3) <= level.mapcount)
+			{
+				CP(va("print \"^7%-24s^7%-24s^7%-23s\n\"", level.maplist + (level.mapcount - i - mapcount),
+					level.maplist + (level.mapcount - i - mapcount - 1), level.maplist + (level.mapcount - i - mapcount - 2)));
+			}
+			else
+			{
+				CP(va("print \"^7%s \"", level.maplist + (level.mapcount - i - mapcount)));
+			}
+
+			if (mapcount >= moreCount && (i + 3) != level.mapcount)
+			{
+				more = qtrue;
+				break;
+			}
+			else if ((i + mapcount >= level.mapcount))
+			{
+				more = qfalse;
+				break;
+			}
+		}
+
+		if (more)
+		{
+			int remaining = level.mapcount - i - mapcount - 1;
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			CP(va("print \"^7Use ^3/more ^7to list the next %d maps\n\"", remaining >= moreCount ? moreCount : remaining));
+			ent->more = Cmd_DisplayMaps_f;
+			return;
+		}
+		else
+		{
+			ent->more = 0;
+			ent->moreCalls = 0;
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			CP("print \"^7There are no more maps to list\n\"");
+		}
+	}
+}
 
 /*
 =================
@@ -571,10 +762,10 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	spectatorState_t specState;
 	int specClient;
 
-	if (level.paused != PAUSE_NONE && !forced && !ent->client->sess.referee) {
+	/*if (level.paused != PAUSE_NONE && !forced && !ent->client->sess.referee) {
 		CP("cp \"^3You cannot switch teams during Pause!\n\"2");
 		return;
-	}
+	}*/
 
 	//
 	// see what change is requested
@@ -631,6 +822,13 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			}
 		} // end
 
+		// RTCWPro
+		if (ent->client->sess.shoutcaster && (team == TEAM_BLUE || team == TEAM_RED))
+		{
+			CP("print \"Shoutcasters may not join teams.\n\"");
+			CP("cp \"Shoutcasters may not join teams.\n\"");
+			return;
+		}
 
 		// NERVE - SMF
 		// L0 - Ready (temporary) lock
@@ -758,6 +956,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->sess.spectatorState = specState;
 	client->sess.spectatorClient = specClient;
 	client->pers.ready = qfalse;
+
+	// Bug #380 - set sess.rounds for late joiner or player reconnecting during a pause
+	if (g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
+		client->sess.rounds++;
+	}
 
 	// During team switching you can sometime spawn immediately
 	client->pers.lastReinforceTime = 0;
@@ -955,7 +1158,8 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// can't follow another spectator
-	if ( level.clients[ i ].sess.sessionTeam == TEAM_SPECTATOR ) {
+	if (level.clients[i].sess.sessionTeam == TEAM_SPECTATOR &&
+		(!level.clients[i].sess.shoutcaster || !ent->client->sess.shoutcaster)) { // RTCWPro
 		return;
 	}
 
@@ -1111,7 +1315,7 @@ void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char 
 	}
 
 	// NERVE - SMF - if spectator, no chatting to players in WolfMP
-	if (match_mutespecs.integer && (!ent->client->sess.referee) // OSPx
+	if (match_mutespecs.integer && (!ent->client->sess.referee && !ent->client->sess.shoutcaster) // OSPx
 		 && ( ( ent->client->sess.sessionTeam == TEAM_FREE && other->client->sess.sessionTeam != TEAM_FREE ) ||
 			  ( ent->client->sess.sessionTeam == TEAM_SPECTATOR && other->client->sess.sessionTeam != TEAM_SPECTATOR ) ) ) {
 		return;
@@ -1595,7 +1799,7 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	trap_Argv(1, arg1, sizeof(arg1));
 	trap_Argv(2, arg2, sizeof(arg2));
 
-	// L0 - ioquake callvote exploit fix 
+	// L0 - ioquake callvote exploit fix
 	for (c = arg2; *c; ++c) {
 		switch (*c) {
 			case '\n':
@@ -1678,7 +1882,7 @@ Cmd_Vote_f
 void Cmd_Vote_f( gentity_t *ent ) {
 	char msg[64];
 	int num;
-	
+
 	// DHM - Nerve :: Complaints supercede voting (and share command)
 	if ( ent->client->pers.complaintEndTime > level.time ) {
 
@@ -2633,6 +2837,10 @@ void ClientCommand( int clientNum ) {
 		Cmd_Give_f( ent );
 	} else if ( Q_stricmp( cmd, "god" ) == 0 )  {
 		Cmd_God_f( ent );
+	} else if (Q_stricmp(cmd, "getobj") == 0) {
+		Cmd_GetOBJ(ent);
+	} else if (Q_stricmp(cmd, "selfrevive") == 0) {
+		Cmd_SelfRevive_f(ent);
 	} else if ( Q_stricmp( cmd, "nofatigue" ) == 0 )  {
 		Cmd_Nofatigue_f( ent );
 	} else if ( Q_stricmp( cmd, "notarget" ) == 0 )  {
@@ -2651,8 +2859,12 @@ void ClientCommand( int clientNum ) {
 		Cmd_FollowCycle_f( ent, 1 );
 	} else if ( Q_stricmp( cmd, "followprev" ) == 0 )  {
 		Cmd_FollowCycle_f( ent, -1 );
+	} else if ( Q_stricmp( cmd, "maps" ) == 0 )  {
+		Cmd_DisplayMaps_f( ent );
+	} else if (Q_stricmp(cmd, "more") == 0) {
+		Cmd_More_f(ent);
 	}
-//	else if (Q_stricmp (cmd, "team") == 0)		// NERVE - SMF - moved above intermission check
+	//	else if (Q_stricmp (cmd, "team") == 0)		// NERVE - SMF - moved above intermission check
 //		Cmd_Team_f (ent);
 	else if ( Q_stricmp( cmd, "where" ) == 0 ) {
 		Cmd_Where_f( ent );
@@ -2707,9 +2919,6 @@ static const cmd_reference_t aCommandInfo[] =
     { "+wstats",         qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current weapon stats info"                                          },
 //	{ "+objectives",    qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current objectives info"                                            },
 //	{ "?",              qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
-	// copy of ?
-    { "cg_muzzleFlash",           qtrue,  qtrue,  NULL,        ":^7 1 = yours OFF, enemies ON   / 0 = yours OFF, enemies OFF"                                                               },
-    //{ "cg_tracerchance",           qtrue,  qtrue,  NULL,        ":^7 Enable/disable bullet tracers"                                                               },
 	{ "commandsHelp",           qtrue,  qtrue,  NULL,        ":^7 Gives a detailed list of commands"                                                               },
 	{ "commands",       qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
 //	{ "cstats",       qtrue,  qtrue,  NULL,        ":^7 !!!!!!!!!!!!!"                                                               },
@@ -2729,6 +2938,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "ready",          qtrue,  qtrue,  NULL,           ":^7 Sets your status to ^5ready^7 to start a match"                                         },
 	{ "readyteam",      qfalse, qtrue,  NULL,       ":^7 Sets an entire team's status to ^5ready^7 to start a match"                             },
 	{ "ref",            qtrue,  qtrue,  NULL,             " <password>:^7 Become a referee (admin access)"                                             },
+	{ "scs",            qtrue,  qtrue,  NULL,             " <password>:^7 Become a shoutcaster"                                             },
 //  { "remove",         qtrue,  qtrue,  NULL, " <player_ID>:^7 Removes a player from the team" },
 	{ "say_teamnl",     qtrue,  qtrue,  NULL,      "<msg>:^7 Sends a team chat without location info"                                           },
 	{ "scores",         qtrue,  qtrue,  NULL,          ":^7 Displays current match stat info"                                                       },
@@ -2751,6 +2961,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "unready",        qtrue,  qfalse, NULL,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
 	{ "weaponstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 Shows weapon accuracy stats for a player"                                   },
     { "wstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
+    { "maps",    qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
 	{ 0,                qfalse, qtrue,  NULL,                  0                                                                                            }
 };
 

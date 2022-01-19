@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2 Alpha" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.2.7" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -184,9 +184,11 @@ typedef enum popupMessageType_e {
 #define CS_REINFSEEDS			39
 #define CS_PAUSED				40
 #define CS_READY				41
-#define CS_SERVERTOGGLES        42		// Shows current enable/disabled settings (for voting UI)
-#define CS_MATCHID              43		// match id for stats
-#define CS_ROUNDINFO			44		// match id for stats
+#define CS_SVCVAR               42		// RTCWPro - Cvar limiting
+#define CS_SERVERTOGGLES        43      // Shows current enable/disabled settings (for voting UI)
+#define CS_MATCHID              44    // match id for stats
+#define CS_ROUNDINFO            45    // match id for stats
+
 
 #define CS_MODELS               64
 #define CS_SOUNDS               ( CS_MODELS + MAX_MODELS )
@@ -397,10 +399,11 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
+	PERS_WOLFKICK
 
-	PERS_HITHEAD,
-	PERS_HITBODY
+	// RTCWPro - unused
+	//PERS_HITHEAD,
+	//PERS_HITBODY
 
 	// Weapon Restrictions
 	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
@@ -1486,6 +1489,7 @@ void    BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, player
 
 void    BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean snap );
 void    BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, int time, qboolean snap );
+//void	BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int time, qboolean snap); // RTCWPro
 
 qboolean    BG_WeaponInWolfMP( int weapon );
 qboolean    BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
@@ -1833,5 +1837,13 @@ int BG_cleanName( const char *pszIn, char *pszOut, unsigned int dwMaxLength, qbo
 #define REINF_BLUEDELT  3       // Allies shift offset
 #define REINF_REDDELT   2       // Axis shift offset
 extern const unsigned int aReinfSeeds[MAX_REINFSEEDS];
+
+char* BG_GetTeam(int teamNum);
+char* BG_GetClass(int classNum);
+
+// RTCWPro - hitsounds
+#define HITSOUND_HEAD 1
+#define HITSOUND_BODY 2
+#define HITSOUND_TEAM 4
 
 #endif // ! ___BG_PUBLIC_H

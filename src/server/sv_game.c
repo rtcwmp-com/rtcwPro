@@ -899,7 +899,7 @@ int SV_GameSystemCalls( int *args ) {
 
 	case TRAP_CEIL:
 		return FloatAsInt( ceil( VMF( 1 ) ) );
-
+#ifdef MYSQLDEP
 	case G_SQL_RUNQUERY:
             return OW_RunQuery( (char*)VMA(1) );
 
@@ -933,7 +933,7 @@ int SV_GameSystemCalls( int *args ) {
     case G_SQL_CLEANSTRING:
             OW_CleanString( (char*)VMA(1), (char*)VMA(2), args[3] );
             return 0;
-
+#endif
 	case G_SUBMIT_STATS_CURL:
 		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );
 
