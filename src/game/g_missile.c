@@ -1558,6 +1558,13 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 	if ( self->client ) {
 		self->client->ps.grenadeTimeLeft = 0;       // reset grenade timer
 
+		// RtcwPro Issue #345 take away the ammo on fire
+		// this will work when not letting go of +attack and when getting killed
+		//self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
+		//if (!(self->client->ps.persistant[PERS_HWEAPON_USE])) {
+		//	PM_WeaponUseAmmo(self->client->ps.weapon, ammoTable[self->s.weapon].uses);
+		//}
+
 	}
 	if ( !noExplode ) {
 		bolt->think         = G_ExplodeMissile;

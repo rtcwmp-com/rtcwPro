@@ -2996,12 +2996,23 @@ static void PM_Weapon( void ) {
 
 
 	// take an ammo away if not infinite
-	if ( PM_WeaponAmmoAvailable( pm->ps->weapon ) != -1 ) {
+	if (PM_WeaponAmmoAvailable(pm->ps->weapon) != -1) {
 		// Rafael - check for being mounted on mg42
-		if ( !( pm->ps->persistant[PERS_HWEAPON_USE] ) ) {
-			PM_WeaponUseAmmo( pm->ps->weapon, ammoNeeded );
+		if (!(pm->ps->persistant[PERS_HWEAPON_USE])) {
+			PM_WeaponUseAmmo(pm->ps->weapon, ammoNeeded);
 		}
 	}
+
+	// rtcwpro issue #345 - do not take ammo away for grenades or smoke cans - we will do it in g_missle fire_grenade instead
+	//if (pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_SMOKE_GRENADE)
+	//{
+	//	if (PM_WeaponAmmoAvailable(pm->ps->weapon) != -1) {
+	//		// Rafael - check for being mounted on mg42
+	//		if (!(pm->ps->persistant[PERS_HWEAPON_USE])) {
+	//			PM_WeaponUseAmmo(pm->ps->weapon, ammoNeeded);
+	//		}
+	//	}
+	//}
 
 
 	// fire weapon

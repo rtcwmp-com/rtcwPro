@@ -182,7 +182,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
                 pitem = json_object_get(pcat, "obj_destroyed");
                 if(json_is_integer(pitem)) {
-                    client->sess.obj_captured=json_integer_value(pitem);
+                    client->sess.obj_destroyed=json_integer_value(pitem);
 
 
                 }
@@ -198,6 +198,11 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
                     client->sess.obj_taken=json_integer_value(pitem);
 
 
+                }
+
+                pitem = json_object_get(pcat, "obj_checkpoint");
+                if (json_is_integer(pitem)) {
+                    client->sess.obj_checkpoint = json_integer_value(pitem);
                 }
     return 1;
 }
@@ -311,6 +316,9 @@ int G_check_before_submit( char* jsonfile)
         jstats = json_object_get(json, "stats");
         if (json_array_size(jstats) >= minPlayers) {
             return 1;
+        }
+        else {
+            G_Printf("Stats API: Skipping file submission. Number of players under minPlayers.\n");
         }
 
     }
@@ -519,6 +527,7 @@ void G_jstatsByPlayers(qboolean wstats) {
             json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
+            json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
 
 
             weapArray = json_array();
@@ -682,6 +691,7 @@ void G_jstatsByTeam(qboolean wstats) {
             json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
+            json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
 
             weapArray = json_array();
 
@@ -1220,6 +1230,7 @@ void G_writeClosingJson(void)
         if (g_stats_curl_submit.integer && ret > 0) {
 
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+            G_Printf("Stats API: Starting stats upload process.\n");
             trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
 
         }

@@ -957,6 +957,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->sess.spectatorClient = specClient;
 	client->pers.ready = qfalse;
 
+	// Bug #380 - set sess.rounds for late joiner or player reconnecting during a pause
+	if (g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
+		client->sess.rounds++;
+	}
+
 	// During team switching you can sometime spawn immediately
 	client->pers.lastReinforceTime = 0;
 	if ( team == TEAM_RED ) {
@@ -2914,9 +2919,6 @@ static const cmd_reference_t aCommandInfo[] =
     { "+wstats",         qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current weapon stats info"                                          },
 //	{ "+objectives",    qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current objectives info"                                            },
 //	{ "?",              qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
-	// copy of ?
-    { "cg_muzzleFlash",           qtrue,  qtrue,  NULL,        ":^7 1 = yours OFF, enemies ON   / 0 = yours OFF, enemies OFF"                                                               },
-    //{ "cg_tracerchance",           qtrue,  qtrue,  NULL,        ":^7 Enable/disable bullet tracers"                                                               },
 	{ "commandsHelp",           qtrue,  qtrue,  NULL,        ":^7 Gives a detailed list of commands"                                                               },
 	{ "commands",       qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
 //	{ "cstats",       qtrue,  qtrue,  NULL,        ":^7 !!!!!!!!!!!!!"                                                               },
