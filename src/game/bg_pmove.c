@@ -1554,11 +1554,12 @@ static void PM_Footsteps( void ) {
 	int animResult = -1;
 	// RTCWPro
 	int	maxBobTime;
+	extern int trap_Cvar_VariableIntegerValue(const char* var_name);
 	static qboolean is_dedicated_server = -1;
 
 	if (is_dedicated_server == -1) 
 	{
-		is_dedicated_server = pm->ps->fixBob;
+		is_dedicated_server = trap_Cvar_VariableIntegerValue("dedicated");
 	}
 
 	bobmove = 0.0f;

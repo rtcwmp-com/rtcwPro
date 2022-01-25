@@ -586,6 +586,8 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_CVAR_VARIABLESTRINGBUFFER:
 		Cvar_VariableStringBuffer( VMA( 1 ), VMA( 2 ), args[3] );
 		return 0;
+	case CG_CVAR_VARIABLEINTEGERVALUE:
+		return Cvar_VariableIntegerValue(VMA(1));
 	case CG_ARGC:
 		return Cmd_Argc();
 	case CG_ARGV:
