@@ -655,8 +655,8 @@ void G_ExplodeMissile( gentity_t *ent ) {
 	etype = ent->s.eType;
 	ent->s.eType = ET_GENERAL;
 
-	// trajectory for grenades
-  	if (ent->classname == "grenade")
+	// trajectory for grenade and panzer
+  	if (!Q_stricmp(ent->classname, "grenade"))
 	{
 		BG_EvaluateTrajectory(&ent->s.pos, level.time, origin);
 	}
@@ -826,8 +826,8 @@ void G_ExplodeMissile( gentity_t *ent ) {
 
 	ent->freeAfterEvent = qtrue;
 
-	// splash damage for grenades
-  	if (ent->classname == "grenade")
+	// splash damage for grenade and panzer
+	if (!Q_stricmp(ent->classname, "grenade"))
 	{
 		if ( ent->splashDamage ) {
 			if ( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath ) ) {    //----(SA)
