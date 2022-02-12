@@ -958,7 +958,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->pers.ready = qfalse;
 
 	// Bug #380 - set sess.rounds for late joiner or player reconnecting during a pause
-	if (g_gamestate.integer == GS_PLAYING && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
+	if (g_gamestate.integer == GS_PLAYING && client->sess.rounds == 0 && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
 		client->sess.rounds++;
 	}
 

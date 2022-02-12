@@ -1093,14 +1093,14 @@ void G_RunItem( gentity_t *ent );
 void RespawnItem( gentity_t *ent );
 
 void UseHoldableItem( gentity_t *ent, int item );
-void PrecacheItem( gitem_t *it );
+//void PrecacheItem( gitem_t *it );
 gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle, qboolean novelocity );
 gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNum );
-void SetRespawn( gentity_t *ent, float delay );
+//void SetRespawn( gentity_t *ent, float delay );
 void G_SpawnItem( gentity_t *ent, gitem_t *item );
 void FinishSpawningItem( gentity_t *ent );
-void Think_Weapon( gentity_t *ent );
-int ArmorIndex( gentity_t *ent );
+//void Think_Weapon( gentity_t *ent );
+//int ArmorIndex( gentity_t *ent );
 void Fill_Clip( playerState_t *ps, int weapon );
 void    Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip );
 void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace );
@@ -1138,7 +1138,7 @@ void    G_FreeEntity( gentity_t *e );
 //qboolean	G_EntitiesFree( void );
 
 void    G_TouchTriggers( gentity_t *ent );
-void    G_TouchSolids( gentity_t *ent );
+//void    G_TouchSolids( gentity_t *ent );
 
 float   *tv( float x, float y, float z );
 char    *vtos( const vec3_t v );
@@ -1191,7 +1191,7 @@ void G_RunMissile( gentity_t *ent );
 int G_PredictMissile( gentity_t *ent, int duration, vec3_t endPos, qboolean allowBounce );
 
 // Rafael zombiespit
-void G_RunDebris( gentity_t *ent );
+//void G_RunDebris( gentity_t *ent );
 
 //DHM - Nerve :: server side flamethrower collision
 void G_RunFlamechunk( gentity_t *ent );
@@ -1276,8 +1276,8 @@ void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
 void respawn( gentity_t *ent );
 void BeginIntermission( void );
-void InitClientPersistant( gclient_t *client );
-void InitClientResp( gclient_t *client );
+//void InitClientPersistant( gclient_t *client );
+//void InitClientResp( gclient_t *client );
 void InitBodyQue( void );
 char* SanitizeClientIP(char* ip, qboolean printFull);
 void ClientSpawn( gentity_t *ent, qboolean revived );
@@ -1321,7 +1321,7 @@ void FireWeapon( gentity_t *ent );
 // p_hud.c
 //
 void MoveClientToIntermission( gentity_t *client );
-void G_SetStats( gentity_t *ent );
+//void G_SetStats( gentity_t *ent );
 void DeathmatchScoreboardMessage( gentity_t *client );
 
 //
@@ -1348,6 +1348,7 @@ void QDECL G_DPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
 void CheckVote(void);
 void sortedActivePlayers(void);
+void TeamLockStatus(void);
 
 //
 // g_client.c
