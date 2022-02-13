@@ -543,7 +543,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		AddScore( other, WOLF_CAPTURE_BONUS );
 		PrintMsg( NULL,"%s" S_COLOR_WHITE " captured enemy objective!\n",cl->pers.netname );
 		//G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
-		G_writeObjectiveEvent(other, objCapture  );
+		//G_writeObjectiveEvent(other, objCapture  ); // KK we do this in G_matchInfoDump
 	} else {
 		AddScore( other, CTF_CAPTURE_BONUS );
 	}
@@ -571,7 +571,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 // JPW NERVE
 				if ( g_gametype.integer >= GT_WOLF ) {
 					AddScore( player, WOLF_CAPTURE_BONUS );
-					//G_writeObjectiveEvent(player, objCapture  ); // KK don't think this should be here as it's giving objCapture to players who didn't cap docs
+					//G_writeObjectiveEvent(player, objCapture  ); // KK we do this in G_matchInfoDump
 				} else {
 // jpw
 					AddScore( player, CTF_CAPTURE_BONUS );
