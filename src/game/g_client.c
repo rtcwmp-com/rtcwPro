@@ -593,19 +593,24 @@ void respawn( gentity_t *ent ) {
 
 	ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
 
-	// DHM - Nerve :: Decrease the number of respawns left
-	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0 ) {
-		ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
-	}
-
-	G_DPrintf( "Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT] );
-
 	// DHM - Nerve :: Already handled in 'limbo()'
 	if ( g_gametype.integer < GT_WOLF ) {
 		CopyToBodyQue( ent );
 	}
 
-	ClientSpawn( ent, qfalse );
+	if (g_maxlives.integer > 0 && g_gamestate.integer == GS_PLAYING)
+	{
+		if (ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0)
+		{
+			ClientSpawn(ent, qfalse);
+			ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
+			G_DPrintf("Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT]);
+		}
+	}
+	else
+	{
+		ClientSpawn(ent, qfalse);
+	}
 
 	// L0 - antilag
 	G_ResetTrail(ent);
