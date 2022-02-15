@@ -545,7 +545,7 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 		// nihi: check for matching maps
 		int mapMatch = G_FindMatchingMaps(ent, arg2);
 
-		if (mapMatch)
+		if (mapMatch >= 0)
 		{
 			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapMatch]));
 			Q_strncpyz(vmapname, level.maplist[mapMatch], sizeof(vmapname));

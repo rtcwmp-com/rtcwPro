@@ -1656,12 +1656,12 @@ int G_FindMatchingMaps(gentity_t* ent, char* mapName) {
 	}
 	else if (numMatches > 1)
 	{
-		return 0;
+		return -1;
 	}
 	else
 	{
 		CP(va("print \"^3%s ^7is not on the server.\n\"", mapName));
-		return 0;
+		return -1;
 	}
 }
 
