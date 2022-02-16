@@ -1683,6 +1683,7 @@ extern vmCvar_t g_endStateLevelTime;
 extern vmCvar_t g_thinkSnapOrigin;
 extern vmCvar_t g_fixedphysicsfps;
 extern vmCvar_t g_alternatePing;
+extern vmCvar_t g_allowForceTapout;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

@@ -2885,6 +2885,11 @@ void ClientCommand( int clientNum ) {
 	} else if ( Q_stricmp( cmd, "setspawnpt" ) == 0 )  {
 		Cmd_SetSpawnPoint_f( ent );
 	} else if (!Q_stricmp(cmd, "forcetapout")) {
+		if (!g_allowForceTapout.integer)
+		{
+			return;
+		}
+
 		 if (!ent || !ent->client || level.paused != PAUSE_NONE) { // Do not allow forcetapout during pause
 			 return;
 		 }
