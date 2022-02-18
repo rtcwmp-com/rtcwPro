@@ -902,7 +902,8 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 // Xian -- Commented out and moved to ClientSpawn for clarity
 //	client->ps.powerups[PW_INVULNERABLE] = level.time + 3000; // JPW NERVE some time to find cover
 
-	client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS)
+		client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// Communicate it to cgame
 	client->ps.stats[STAT_PLAYER_CLASS] = pc;
@@ -2337,11 +2338,20 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// ranging doesn't count this client
 
 	if ( revived ) {
+
 		spawnPoint = ent;
 		VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
 		VectorCopy( ent->s.angles, spawn_angles );
-	} else
+
+		// fix document revive bug
+		if (client->ps.powerups)
+		{
+			ent->s.powerups = 0;
+			memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
+		}
+	}
+	else
 	{
 		ent->aiName = "player";  // needed for script AI
 		//ent->aiTeam = 1;		// member of allies

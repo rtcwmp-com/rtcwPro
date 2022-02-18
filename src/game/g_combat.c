@@ -564,6 +564,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			//G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
 			trap_SendServerCommand(-1, va("cp \"^5Allies have lost %s!\n\" 2", self->message));
 			self->client->ps.powerups[PW_REDFLAG] = 0;
+			self->s.powerups = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
 			item = BG_FindItem( "Blue Flag" );
@@ -574,6 +575,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			trap_SendServerCommand(-1, va("cp \"^5Axis have lost %s!\n\" 2", self->message));
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
+			self->s.powerups = 0;
 		}
 
 		if ( item ) {
@@ -661,8 +663,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// remove powerups
 	memset( self->client->ps.powerups, 0, sizeof( self->client->ps.powerups ) );
 
-	// RTCWPro - set this up
-	self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+	// RTCWPro - update ready status
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS) // only do this during warmup
+		self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// never gib in a nodrop
 	if ( self->health <= GIB_HEALTH && !( contents & CONTENTS_NODROP ) ) {
