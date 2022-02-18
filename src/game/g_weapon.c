@@ -813,14 +813,15 @@ void Weapon_Engineer( gentity_t *ent ) {
 // (close air support should *always* drop parallel to friendly lines, tho accidents do happen)
 extern void G_ExplodeMissile( gentity_t *ent );
 
-void G_AirStrikeExplode( gentity_t *self ) {
+void G_AirStrikeExplode(gentity_t* self) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
+
 	// RTCWPro - moved here due to rogue bombs that never truly exploded
-    self->damage = 400;
-    self->splashDamage = 400;
-    self->splashRadius = 400;
+	self->damage = 400;
+	self->splashDamage = 400;
+	self->splashRadius = 400;
     // end addition
 	self->think = G_ExplodeMissile;
 	self->nextthink = level.time + 50;
@@ -1106,8 +1107,8 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_BROADCAST;
 				bomb->classname = "props_explosion"; // was "air strike"
 				bomb->damage        = 0; // maybe should un-hard-code these?
-				bomb->splashDamage  = 90;
-				bomb->splashRadius  = 50;
+				bomb->splashDamage  = 0; // RtcwPro no damage for prop explosion
+				bomb->splashRadius  = 0; // RtcwPro no damage for prop explosion
 //		bomb->s.weapon	= WP_SMOKE_GRENADE;
 				// TTimo ambiguous else
 				if ( ent->client != NULL ) { // set team color on smoke
@@ -1121,9 +1122,9 @@ void Weapon_Artillery( gentity_t *ent ) {
 			} else {
 				bomb->nextthink = level.time + 8950 + 2000 * i + crandom() * 800;
 				bomb->classname = "air strike";
-				bomb->damage        = 0;
-				bomb->splashDamage  = 400;
-				bomb->splashRadius  = 400;
+				bomb->damage        = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashDamage  = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashRadius  = 0; // RtcwPro no damage until airstrikeexplode is called
 			}
 			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->splashMethodOfDeath   = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
