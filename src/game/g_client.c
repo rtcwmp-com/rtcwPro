@@ -598,7 +598,7 @@ void respawn( gentity_t *ent ) {
 		CopyToBodyQue( ent );
 	}
 
-	if (g_maxlives.integer > 0 && g_gamestate.integer == GS_PLAYING)
+	if ((g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0) && g_gamestate.integer == GS_PLAYING)
 	{
 		if (ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0)
 		{
