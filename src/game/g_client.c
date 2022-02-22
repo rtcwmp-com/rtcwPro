@@ -875,7 +875,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 	gclient_t* client = ent->client;
 
 	int pc = client->sess.playerType;
-	int starthealth = 100,i,numMedics = 0;   // JPW NERVE
+	int starthealth = 100, numMedics = 0;   // JPW NERVE
 	// L0 - ammoClips and NadeValues
 	//
 	// Patched this whole function but not commented it much so be aware..
@@ -2634,14 +2634,14 @@ void handleEmptyTeams(void) {
 
 	if (g_gamestate.integer != GS_INTERMISSION) {
 		if (!level.axisPlayers) {
-			G_teamReset(TEAM_RED, qtrue);
+			TeamLockStatus();
 
 			// Reset match if not paused with an empty team
 			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
 				Svcmd_ResetMatch_f(qtrue, qtrue);
 		}
 		else if (!level.alliedPlayers) {
-			G_teamReset(TEAM_BLUE, qtrue);
+			TeamLockStatus();
 
 			// Reset match if not paused with an empty team
 			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)

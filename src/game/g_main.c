@@ -3166,8 +3166,14 @@ So this deals with issue..
 */
 void TeamLockStatus(void) {
 
-	if (!level.axisPlayers && !level.alliedPlayers && (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP && g_gamelocked.integer != 0)) {
+	if (	g_gamelocked.integer != 0 // game is locked
+			&& (!level.axisPlayers || !level.alliedPlayers) // if either team is empty
+			&& (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP)) // warmup
+	{
 		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
+		trap_Cvar_Update(&g_gamelocked);
+		G_teamReset(0, qfalse, qtrue); // both teams
+		AP("chat \"^zconsole: ^7One team has no players! Server is releasing the team lock^z!\n\"");
 	}
 
 	// RtcwPro added this to avoid erroneous text at the end of the round
@@ -3175,22 +3181,32 @@ void TeamLockStatus(void) {
 		// Check now
 		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
 			trap_Cvar_Set("g_gamelocked", "0");
+			trap_Cvar_Update(&g_gamelocked);
+			G_teamReset(0, qfalse, qtrue); // both teams
 			AP("chat \"^zconsole: ^7Teams have no players! Server is releasing the team lock^z!\n\"");
 		}
 		else if (!level.axisPlayers && g_gamelocked.integer == 3) {
 			trap_Cvar_Set("g_gamelocked", "2");
+			trap_Cvar_Update(&g_gamelocked);
+			G_teamReset(TEAM_RED, qfalse, qfalse);
 			AP("chat \"^zconsole: ^1Axis ^7team has no players! Server unlocked Axis team^z!\n\"");
 		}
 		else if (!level.axisPlayers && g_gamelocked.integer == 1) {
 			trap_Cvar_Set("g_gamelocked", "0");
+			trap_Cvar_Update(&g_gamelocked);
+			G_teamReset(0, qfalse, qtrue); // both teams
 			AP("chat \"^zconsole: ^1Axis ^7team has no players! Server unlocked Axis team^z!\n\"");
 		}
 		else if (!level.alliedPlayers && g_gamelocked.integer == 2) {
 			trap_Cvar_Set("g_gamelocked", "0");
+			trap_Cvar_Update(&g_gamelocked);
+			G_teamReset(0, qfalse, qtrue); // both teams
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
 		}
 		else if (!level.alliedPlayers && g_gamelocked.integer == 3) {
 			trap_Cvar_Set("g_gamelocked", "1");
+			trap_Cvar_Update(&g_gamelocked);
+			G_teamReset(TEAM_BLUE, qfalse, qfalse);
 			AP("chat \"^zconsole: ^4Allied ^7team has no players! Server unlocked Allied team^z!\n\"");
 		}
 	}

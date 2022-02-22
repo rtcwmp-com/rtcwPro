@@ -803,7 +803,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 		}
 
 		// L0 - lock teams
-		if (g_gamelocked.integer && !forced  )
+		if (g_gamelocked.integer > 0 && !forced  )
 		{
 			if ( team == TEAM_RED && g_gamelocked.integer == 1 )
 			{
@@ -905,7 +905,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	// dhm
 	// OSPx - Handle warmup team switch nuke
 	// - In warmup without a check, one can switch teams (scripted) which floods and eventually crashes the server..
-	if (team != oldTeam && level.warmupTime && ((level.time - client->pers.connectTime) > 5000) && ((level.time - client->pers.enterTime) < 2000) && !forced) {
+	if (team != oldTeam && /*level.warmupTime &&*/ ((level.time - client->pers.connectTime) > 5000) && ((level.time - client->pers.enterTime) < 2000) && !forced) {
 		CPx(ent - g_entities, va("cp \"^3You must wait %i seconds before joining ^3a new team.\n\"3", (int)(2 - ((level.time - client->pers.enterTime) / 1000))));
 		return;
 	}

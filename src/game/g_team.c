@@ -1660,17 +1660,30 @@ OSPx - G_teamReset (et port)
 Resets a team's settings
 ===========
 */
-void G_teamReset(int team_num, qboolean fClearSpecLock) {
-	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
-	teamInfo[team_num].team_name[0] = 0;
-	teamInfo[team_num].timeouts = match_timeoutcount.integer;
+void G_teamReset(int team_num, qboolean fClearSpecLock, qboolean bothTeams) {
 
-	if (fClearSpecLock) {
-		teamInfo[team_num].spec_lock = qfalse;
+	if (bothTeams)
+	{
+		for (int i = TEAM_RED; i <= TEAM_BLUE; i++)
+		{
+			teamInfo[i].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+			teamInfo[i].team_name[0] = 0;
+			teamInfo[i].timeouts = match_timeoutcount.integer;
+
+			if (fClearSpecLock) {
+				teamInfo[i].spec_lock = qfalse;
+			}
+		}
 	}
+	else
+	{
+		teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+		teamInfo[team_num].team_name[0] = 0;
+		teamInfo[team_num].timeouts = match_timeoutcount.integer;
 
-	if (g_gamelocked.integer > 0) {
-		trap_Cvar_Set("g_gamelocked", "0");
+		if (fClearSpecLock) {
+			teamInfo[team_num].spec_lock = qfalse;
+		}
 	}
 }
 
@@ -1683,8 +1696,7 @@ void G_shuffleTeams( void ) {
 
 	gclient_t *cl;
 
-	G_teamReset( TEAM_RED, qfalse );
-	G_teamReset( TEAM_BLUE, qfalse);
+	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		aTeamCount[i] = 0;
@@ -1707,15 +1719,6 @@ void G_shuffleTeams( void ) {
 
 		cTeam = ( i % 2 ) + TEAM_RED;
 
-		if ( cl->sess.sessionTeam != cTeam ) {
-			/*G_LeaveTank( g_entities + sortClients[i], qfalse );
-			G_RemoveClientFromFireteams( sortClients[i], qtrue, qfalse );
-			if ( g_landminetimeout.integer ) {
-				G_ExplodeMines( g_entities + sortClients[i] );
-			}
-			G_FadeItems( g_entities + sortClients[i], MOD_SATCHEL );*/
-		}
-
 		cl->sess.sessionTeam = cTeam;
 
 		//G_UpdateCharacter( cl );
@@ -1731,9 +1734,7 @@ void G_swapTeams( void ) {
 	int i;
 	gclient_t *cl;
 
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		G_teamReset( i, qfalse );
-	}
+	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = level.clients + level.sortedClients[i];

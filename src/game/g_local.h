@@ -1949,7 +1949,7 @@ void G_ResetMarkers( gentity_t* ent );
 //
 
 void G_UpdateCvars(void);
-void G_teamReset(int, qboolean);
+void G_teamReset(int, qboolean, qboolean);
 void ServerPlayerInfo(void);
 void LoadMapList( void );
 //
