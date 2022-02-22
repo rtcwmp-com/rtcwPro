@@ -1019,7 +1019,7 @@ qboolean    ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-	if ( Q_stricmp( cmd, "swap_teams" ) == 0 ) {
+	if ( Q_stricmp( cmd, "swapteams" ) == 0 ) {
 		Svcmd_SwapTeams_f();
 		return qtrue;
 	}
