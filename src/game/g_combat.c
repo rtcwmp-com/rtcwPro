@@ -859,6 +859,9 @@ char* G_GetHitsoundStyle(int headStyle, int bodyStyle, qboolean headshot) {
 		case 8:
 			return "sound/hitsounds/hithead8.wav";
 			break;
+		case 9:
+			return "sound/hitsounds/hithead9.wav";
+			break;
 		default:
 			return "sound/hitsounds/hithead1.wav";
 			break;
