@@ -2944,6 +2944,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		AnglesToAxis( angles, hand.axis );
 
 		if ( cg_gun_frame.integer ) {
+			CG_WeaponAnimation(ps, weapon, &hand.oldframe, &hand.frame, &hand.backlerp); // rtcwpro
 			hand.frame = hand.oldframe = cg_gun_frame.integer;
 			hand.backlerp = 0;
 		} else {  // get the animation state
