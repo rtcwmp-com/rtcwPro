@@ -1973,11 +1973,8 @@ void CalculateRanks( void ) {
 	level.numFinalDead[0] = 0;      // NERVE - SMF
 	level.numFinalDead[1] = 0;      // NERVE - SMF
 
-	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
-		if ( i < 2 ) {
-			level.numteamVotingClients[i] = 0;
-		}
-	}
+	level.voteInfo.numVotingTeamClients[ 0 ] = 0;
+	level.voteInfo.numVotingTeamClients[ 1 ] = 0;
 
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].pers.connected != CON_DISCONNECTED ) {
@@ -1989,28 +1986,36 @@ void CalculateRanks( void ) {
 
 				// decide if this should be auto-followed
 				if ( level.clients[i].pers.connected == CON_CONNECTED ) {
+
 					level.numPlayingClients++;
-					if ( !( g_entities[i].r.svFlags & SVF_BOT ) ) {
-						level.voteInfo.numVotingClients++;
 
-						if ( level.clients[i].sess.sessionTeam == TEAM_RED ) {
-							// NERVE - SMF
-							if ( level.clients[i].ps.persistant[PERS_RESPAWNS_LEFT] == 0
-								 && g_entities[i].health <= 0 ) {
-								level.numFinalDead[0]++;
-							}
+					if (!(g_entities[i].r.svFlags & SVF_BOT)) {
+						level.voteInfo.numVotingClients++; // if not a bot they are a voting client
+					}
 
-							level.numteamVotingClients[0]++;
-						} else if ( level.clients[i].sess.sessionTeam == TEAM_BLUE )   {
-							// NERVE - SMF
-							if ( level.clients[i].ps.persistant[PERS_RESPAWNS_LEFT] == 0
-								 && g_entities[i].health <= 0 ) {
-								level.numFinalDead[1]++;
-							}
+					if ( level.clients[i].sess.sessionTeam == TEAM_RED ) {
+						// NERVE - SMF
+						if ( level.clients[i].ps.persistant[PERS_RESPAWNS_LEFT] == 0
+								&& g_entities[i].health <= 0 ) {
+							level.numFinalDead[0]++;
+						}
 
-							level.numteamVotingClients[1]++;
+						if (!(g_entities[i].r.svFlags & SVF_BOT)) { // if not a bot they are a team voting client
+							level.voteInfo.numVotingTeamClients[0]++;
+						}
+
+					} else if ( level.clients[i].sess.sessionTeam == TEAM_BLUE ) {
+						// NERVE - SMF
+						if ( level.clients[i].ps.persistant[PERS_RESPAWNS_LEFT] == 0
+								&& g_entities[i].health <= 0 ) {
+							level.numFinalDead[1]++;
+						}
+
+						if (!(g_entities[i].r.svFlags & SVF_BOT)) { // if not a bot they are a team voting client
+							level.voteInfo.numVotingTeamClients[1]++;
 						}
 					}
+
 					if ( level.follow1 == -1 ) {
 						level.follow1 = i;
 					} else if ( level.follow2 == -1 ) {
@@ -2682,21 +2687,23 @@ void CheckExitRules( void ) {
 
 	if ( g_gametype.integer >= GT_WOLF && ( g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0 ) )
 	{
-		if ( level.numFinalDead[0] >= level.numteamVotingClients[0] && level.numteamVotingClients[0] > 0 )
+		if ( level.numFinalDead[0] >= level.axisPlayers && level.axisPlayers > 0 )
 		{
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "1" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
 			// RTCWPro - moved from WM_DrawObjectives in cg
 			AAPS("sound/match/winallies.wav");
+			AAPS("sound/multiplayer/music/l_complete_2.wav");
 			LogExit( "Axis team eliminated." );
 		}
-		else if ( level.numFinalDead[1] >= level.numteamVotingClients[1] && level.numteamVotingClients[1] > 0 )
+		else if ( level.numFinalDead[1] >= level.alliedPlayers && level.alliedPlayers > 0 )
 		{
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "0" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
-			APS("sound/match/winaxis.wav");
+			AAPS("sound/match/winaxis.wav");
+			AAPS("sound/multiplayer/music/s_stinglow.wav");
 			LogExit( "Allied team eliminated." );
 		}
 	}
@@ -2707,6 +2714,7 @@ void CheckExitRules( void ) {
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the fraglimit.\n\"" );
 			AAPS("sound/match/winaxis.wav");
+			AAPS("sound/multiplayer/music/s_stinglow.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
@@ -2715,6 +2723,7 @@ void CheckExitRules( void ) {
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the fraglimit.\n\"" );
 			AAPS("sound/match/winallies.wav");
+			AAPS("sound/multiplayer/music/l_complete_2.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
@@ -2748,6 +2757,7 @@ void CheckExitRules( void ) {
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
 			AAPS("sound/match/winaxis.wav");
+			AAPS("sound/multiplayer/music/s_stinglow.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
@@ -2756,6 +2766,7 @@ void CheckExitRules( void ) {
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the capturelimit.\n\"" );
 			AAPS("sound/match/winallies.wav");
+			AAPS("sound/multiplayer/music/l_complete_2.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
@@ -2970,75 +2981,74 @@ void CheckWolfMP() {
 CheckVote
 ==================
 */
-void CheckVote( void ) {
-	if (!level.voteInfo.voteTime ||
-		level.voteInfo.vote_fn == NULL ||
-		level.time - level.voteInfo.voteTime < 1000)
+void CheckVote( void )
+{
+	if ( !level.voteInfo.voteTime || level.voteInfo.vote_fn == NULL || level.time - level.voteInfo.voteTime < 1000 )
 	{
 		return;
 	}
+
 	if ( level.time - level.voteInfo.voteTime >= VOTE_TIME ) {
-		trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
+		AP( va( "cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString ) );
 		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
-	} else {
-// OSPx - Vote percent..
-		int vCnt = (!Q_stricmp(level.voteInfo.voteString, "Start Match") ? 75 : vote_percent.integer);
+	}
+	else 
+	{
 		int total = level.voteInfo.numVotingClients;
 
-		if (vCnt > 99)
-			vCnt = 99;
-		else if (vCnt < 1)
-			vCnt = 1;
+		// issue #391 when kicking a player only do the same team's players for the total
+		if (level.voteInfo.vote_fn == G_Kick_v)
+		{
+			gentity_t* other = &g_entities[atoi(level.voteInfo.vote_value)];
+			if (!other->client || other->client->sess.sessionTeam == TEAM_SPECTATOR)
+			{
+				total = level.voteInfo.numVotingClients;
+			}
+			else
+			{
+				total = level.voteInfo.numVotingTeamClients[other->client->sess.sessionTeam == TEAM_RED ? 0 : 1];
+			}
+		}
+		else
+		{
+			total = level.voteInfo.numVotingClients;
+		}
+
+		// OSPx - Vote percent..
+		int pcnt = (!Q_stricmp(level.voteInfo.voteString, "Start Match") ? 75 : vote_percent.integer);
+
+		if (pcnt > 99)
+			pcnt = 99;
+		else if (pcnt < 1)
+			pcnt = 1;
 
 		// Vote will always pass with single client..rest is perc depended..
-		if ( (total == 1) || ( 100 * level.voteInfo.voteYes / total >= vCnt) ) {
-// -OSPx
-			// execute the command, then remove the vote
-			trap_SendServerCommand( -1, "print \"^5Vote passed.\n\"" );
-			level.voteExecuteTime = level.time + 3000;
-			level.prevVoteExecuteTime = level.time + 4000;
+		//if ((total == 1) || (100 * level.voteInfo.voteYes / total >= pcnt))
+		if ((total == 1) || (level.voteInfo.voteYes > pcnt * total / 100))
+		{
+			AP("cpm \"^5Vote passed!\n\"");
 			G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
 
-// JPW NERVE
-#ifndef PRE_RELEASE_DEMO
-			{
-				gentity_t *ent; // JPW NERVE
-				vec3_t placeHolder; // JPW NERVE
-				char str2[20];
-				int i;
+			// execute the command, then remove the vote
+			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse); // Perform the passed vote
+			level.voteExecuteTime = level.time + 3000;
+			level.prevVoteExecuteTime = level.time + 4000;
 
-				Q_strncpyz( str2,level.voteString,19 );
-				for ( i = 0; i < 20; i++ )
-					if ( str2[i] == 32 ) {
-						str2[i] = 0;
-					}
-
-				if ( !Q_stricmp( str2,testid1 ) ) {
-					ent = G_TempEntity( placeHolder, EV_TESTID1 );
-					ent->r.svFlags |= SVF_BROADCAST;
-				}
-				if ( !Q_stricmp( str2,testid2 ) ) {
-					ent = G_TempEntity( placeHolder, EV_TESTID2 );
-					ent->r.svFlags |= SVF_BROADCAST;
-				}
-				if ( !Q_stricmp( str2,testid3 ) ) {
-					ent = G_TempEntity( placeHolder, EV_ENDTEST );
-					ent->r.svFlags |= SVF_BROADCAST;
-				}
-			}
-#endif
-// jpw
-			// Perform the passed vote
-			level.voteInfo.vote_fn(NULL, 0, NULL, NULL, qfalse);
-
-		} else if ( level.voteInfo.voteNo >= level.voteInfo.numVotingClients / 2 ) {
+		}
+		else if (level.voteInfo.voteNo && level.voteInfo.voteNo >= (100 - pcnt) * total / 100)
+		{
 			// same behavior as a timeout
-			trap_SendServerCommand( -1, "print \"^5Vote failed.\n\"" );
-		} else {
+			AP( va( "cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString ) );
+			G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
+		}
+		else
+		{
 			// still waiting for a majority
 			return;
 		}
+
 	}
+
 	level.voteInfo.voteTime = 0;
 	trap_SetConfigstring( CS_VOTE_TIME, "" );
 

@@ -606,6 +606,10 @@ void respawn( gentity_t *ent ) {
 			ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
 			G_DPrintf("Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT]);
 		}
+		else
+		{
+			limbo(ent, qtrue);
+		}
 	}
 	else
 	{
