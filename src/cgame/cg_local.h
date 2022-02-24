@@ -2951,7 +2951,8 @@ void trap_Key_SetBinding( int keynum, const char *binding );
 void trap_Key_KeynumToStringBuf( int keynum, char *buf, int buflen );
 // -NERVE - SMF
 
-char* trap_TranslateString( const char *string );       // NERVE - SMF - localization
+//char* trap_TranslateString( const char *string );       // NERVE - SMF - localization
+void trap_TranslateString(const char* string, char* buf);	// ET Port
 
 int trap_CIN_PlayCinematic( const char *arg0, int xpos, int ypos, int width, int height, int bits );
 e_status trap_CIN_StopCinematic( int handle );

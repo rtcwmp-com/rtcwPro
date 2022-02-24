@@ -913,7 +913,6 @@ typedef struct {
 	int teamVoteTime[2];                // level.time vote was called
 	int teamVoteYes[2];
 	int teamVoteNo[2];
-	int numteamVotingClients[2];        // set by CalculateRanks
 
 	// spawn variables
 	qboolean spawning;                  // the G_Spawn*() functions are valid
@@ -1330,6 +1329,7 @@ void DeathmatchScoreboardMessage( gentity_t *client );
 void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message, qboolean localize ); // JPW NERVE removed static declaration so it would link
 qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand);
 void SanitizeString(char* in, char* out);
+void SanitizeStringToLower(char* in, char* out, qboolean fToLower);
 
 //
 // g_pweapon.c

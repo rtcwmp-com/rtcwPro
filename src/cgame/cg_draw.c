@@ -2936,12 +2936,12 @@ static void CG_DrawVote( void ) {
 	float color[4] = { 1, 1, 0, 1 };
 	int sec;
 
-	if ( cgs.complaintEndTime > cg.time ) {
+	if ( cgs.complaintEndTime > cg.time && !cg.demoPlayback) {
 
 		// RtcwPro exit complaint dialog if g_tournament is 1
 		const char* info = CG_ConfigString(CS_SERVERINFO);
 		char* isTournament = Info_ValueForKey(info, "g_tournament");
-		if (isTournament != NULL && strcmp(isTournament, "1") == 0)
+		if (isTournament != NULL && !Q_stricmp(isTournament, "1"))
 			return;
 
 		if ( cgs.complaintClient == -1 ) {

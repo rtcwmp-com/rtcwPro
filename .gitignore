@@ -350,3 +350,7 @@ ASALocalRun/
 *.pk3
 /src/servercache.dat
 /src/main/authkey
+/libs/libcurl/out/build/x64-Debug
+/libs/mongo-c-driver/out/build/x64-Debug
+/src/game/g_missile_vanilla.c
+/src/game/g_weapon_orig.c
