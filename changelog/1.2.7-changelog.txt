@@ -1,30 +1,36 @@
-fixed team locking during warmup/disconnects
-prevent document revive bug
-fixed artillery instant kill bug
-Add cvar to control forcetapout
-fixed map voting when loading mapindex 0
-fix knockback for fps  
-fixed maxlives so players do not respawn 
-only record obj_captured in G_matchInfoDump
-fixed vote percent for non startmatch votes 
-record filename when FS_FileForHandle is NULL
-#387 fixed grenade splash damage 
-Fix cdkey generation  
-added a few logging prints for json stats submit to API
-fix stats sync issue
+Fixed kick voting so it only looks at player count on the team that called the vote
+Added quake head hitsound
+Added proper console color
+Adjusted raw mouse input
+Fixed cg gun frame crash on team switch
+Fixed team locking during warmup/disconnects
+Prevent document revive bug
+Fixed artillery instant kill bug
+Added cvar to control forcetapout
+Fixed map voting when loading mapindex 0
+Fixed knockback for fps  
+Fixed maxlives so players do not respawn 
+Fixed objective capture stats
+Fixed vote percent for non startmatch votes 
+Record filename when FS_FileForHandle is NULL
+#387 Fixed grenade splash damage 
+Fixed cdkey generation  
+Added a few logging prints for json stats submit to API
+Fixed stats sync issue
 #345 change to next best weapon when killed with primed grenade
 Print who issued /readyteam in console 
 Center print when opponent loses objective
-fixed spawn flag stats
+Fixed spawn flag stats
 #382 reset objective and dyno stats on end of AB round
-added cg_muzzleFlash 2 to show flash on client and enemy
-Issue #379 fixed warmup stats
-Issue #372 fixed objective destroyed stats 
-fixed end of round sound duplication
+Added cg_muzzleFlash 2 to show flash on client and enemy
+Issue #379 Fixed warmup stats
+Issue #372 Fixed objective destroyed stats 
+Fixed end of round sound duplication
 Added download message for invalid client version 
 Added cg_errordecay to configs 
-added alternate medpack image for more red color
-'true' ping from rtcwPub
-Fix footstep bobbing for high FPS  
-Fix physics for FPS (1.2.61 already released to a few servers)
-added /maps command
+Added alternate medpack image for more red color
+Added 'true' ping from rtcwPub
+Fixed footstep bobbing for high FPS  
+Fixed physics for FPS (1.2.61 already released to a few servers)
+Added /maps command
+Added mouse buttons 4 and 5
