@@ -2630,31 +2630,6 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 }
 
 /*
-================
-OSPx - check for team stuff..
-================
-*/
-void handleEmptyTeams(void) {
-
-	if (g_gamestate.integer != GS_INTERMISSION) {
-		if (!level.axisPlayers) {
-			TeamLockStatus();
-
-			// Reset match if not paused with an empty team
-			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-		else if (!level.alliedPlayers) {
-			TeamLockStatus();
-
-			// Reset match if not paused with an empty team
-			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
-}
-
-/*
 ===========
 ClientDisconnect
 
@@ -2789,7 +2764,7 @@ void ClientDisconnect( int clientNum ) {
 
 	CalculateRanks();
 
-	handleEmptyTeams();
+	HandleEmptyTeams();
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );

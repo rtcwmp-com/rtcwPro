@@ -841,25 +841,26 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			team = PickTeam( clientNum );
 		}
 
-		// L0 - lock teams
-		if (g_gamelocked.integer > 0 && !forced  )
-		{
-			if ( team == TEAM_RED && g_gamelocked.integer == 1 )
-			{
-				CP("cp \"^1Axis^7 team is locked^1!\n\"2");
-				return;
-			}
-			if ( team == TEAM_BLUE && g_gamelocked.integer == 2 )
-			{
-				CP("cp \"^4Allied^7 team is locked^4!\n\"2");
-				return;
-			}
-			if ( (team == TEAM_RED || team == TEAM_BLUE) && g_gamelocked.integer == 3)
-			{
-				CP("cp \"^3Both ^7teams are locked^3!\n\"2");
-				return;
-			}
-		} // end
+		// KK commented this out this is a "referee" lock we don't need
+		//// L0 - lock teams
+		//if (g_gamelocked.integer > 0 && !forced  )
+		//{
+		//	if ( team == TEAM_RED && g_gamelocked.integer == 1 )
+		//	{
+		//		CP("cp \"^1Axis^7 team is locked^1!\n\"2");
+		//		return;
+		//	}
+		//	if ( team == TEAM_BLUE && g_gamelocked.integer == 2 )
+		//	{
+		//		CP("cp \"^4Allied^7 team is locked^4!\n\"2");
+		//		return;
+		//	}
+		//	if ( (team == TEAM_RED || team == TEAM_BLUE) && g_gamelocked.integer == 3)
+		//	{
+		//		CP("cp \"^3Both ^7teams are locked^3!\n\"2");
+		//		return;
+		//	}
+		//} // end
 
 		// RTCWPro
 		if (ent->client->sess.shoutcaster && (team == TEAM_BLUE || team == TEAM_RED))
@@ -869,41 +870,42 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			return;
 		}
 
-		// NERVE - SMF
-		// L0 - Ready (temporary) lock
-		if (teamInfo[team].team_lock && !forced) {
-			CP(va("cp \"You cannot join %s team as countdown has already started!\n\"2", aTeams[team]));
-			return;
-		}
+		// Replacement for g_gamelocked
+		if (team != TEAM_SPECTATOR && !forced) {
 
-		//if ( g_noTeamSwitching.integer && team != ent->client->sess.sessionTeam && g_gamestate.integer == GS_PLAYING ) {
-		if (g_noTeamSwitching.integer && (team != ent->client->sess.sessionTeam && ent->client->sess.sessionTeam != TEAM_SPECTATOR) && g_gamestate.integer == GS_PLAYING && !forced) {
-			trap_SendServerCommand( clientNum, "cp \"You cannot switch during a match, please wait until the round ends.\n\"" );
-			return; // ignore the request
-		}
-
-		// NERVE - SMF - merge from team arena
-		if ( g_teamForceBalance.integer  ) {
-			int counts[TEAM_NUM_TEAMS];
-
-			counts[TEAM_BLUE] = TeamCount( ent - g_entities, TEAM_BLUE );
-			counts[TEAM_RED] = TeamCount( ent - g_entities, TEAM_RED );
-
-			// We allow a spread of one
-			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] >= 1 ) {
-				trap_SendServerCommand( clientNum,
-										"cp \"The Axis has too many players.\n\"" );
-				return; // ignore the request
+			// OSPx - Ensure the player can join
+			if (!G_teamJoinCheck(team, ent)) {
+				// Leave them where they were before the command was issued			
+				return;
 			}
-			if ( team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] >= 1 ) {
-				trap_SendServerCommand( clientNum,
-										"cp \"The Allies have too many players.\n\"" );
+
+			// NERVE - SMF
+			if (g_noTeamSwitching.integer && team != ent->client->sess.sessionTeam && g_gamestate.integer == GS_PLAYING) {
+				CPx(clientNum, "cp \"You cannot switch during a match, please wait until the round ends.\n\"");
 				return; // ignore the request
 			}
 
-			// It's ok, the team we are switching to has less or same number of players
+			// NERVE - SMF - merge from team arena
+			if (g_teamForceBalance.integer) {
+				int counts[TEAM_NUM_TEAMS];
+
+				counts[TEAM_BLUE] = TeamCount(ent - g_entities, TEAM_BLUE);
+				counts[TEAM_RED] = TeamCount(ent - g_entities, TEAM_RED);
+
+				// We allow a spread of one
+				if (team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] >= 1) {
+					CPx(clientNum, "cp \"The ^1Axis ^7has too many players.\n\"");
+					return; // ignore the request
+				}
+				if (team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] >= 1) {
+					CPx(clientNum, "cp \"The ^4Allies ^7have too many players.\n\"");
+					return; // ignore the request
+				}
+
+				// It's ok, the team we are switching to has less or same number of players
+			}
 		}
-		// -NERVE - SMF
+
 	} else {
 		// force them to spectators if there aren't any spots free
 		team = TEAM_FREE;
@@ -925,10 +927,8 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	}
 
 	// NERVE - SMF - prevent players from switching to regain deployments
-	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] == 0 &&
-		 oldTeam != TEAM_SPECTATOR ) {
-		trap_SendServerCommand( clientNum,
-								"cp \"You can't switch teams because you are out of lives.\n\" 3" );
+	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] == 0 && oldTeam != TEAM_SPECTATOR && g_gamestate.integer == GS_PLAYING) {
+		CPx( clientNum, "cp \"You can't switch teams because you are out of lives.\n\" 3" );
 		return; // ignore the request
 	}
 

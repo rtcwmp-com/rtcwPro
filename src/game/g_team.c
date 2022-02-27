@@ -1952,6 +1952,6 @@ void G_readyStart( void ) {
 void G_readyTeamLock( void ) {
 	teamInfo[TEAM_RED].team_lock = qtrue;
 	teamInfo[TEAM_BLUE].team_lock = qtrue;
-	trap_Cvar_Set("g_gamelocked", "3");
+	//trap_Cvar_Set("g_gamelocked", "3");
 }
 

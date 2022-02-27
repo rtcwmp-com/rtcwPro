@@ -169,7 +169,7 @@ vmCvar_t sv_screenshake;
 vmCvar_t g_screenShake;
 vmCvar_t g_preciseHeadHitBox;
 vmCvar_t sv_fps;
-vmCvar_t g_gamelocked;	// Controls if referee locked the game so players can't join
+//vmCvar_t g_gamelocked;	// Controls if referee locked the game so players can't join
 vmCvar_t sv_hostname;	// So it's more accesible
 vmCvar_t svx_serverStreaming; // So it's more accessible
 
@@ -434,8 +434,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &match_timeoutlength, "match_timeoutlength", "180", 0, 0, qfalse, qtrue },
 	{ &match_timeoutcount, "match_timeoutcount", "3", 0, 0, qfalse, qtrue },
 	{ &g_showFlags, "g_showFlags", "1", 0 },
-//	{ &g_noTeamSwitching, "g_noTeamSwitching", "1", 0, 0, qfalse, qfalse },
-	{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
+	//{ &g_noTeamSwitching, "g_noTeamSwitching", "1", 0, 0, qfalse, qfalse },
+	//{ &g_gamelocked, "g_gamelocked", "0", CVAR_ROM, 0, qfalse },
 	{ &g_hitsounds, "g_hitsounds", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &sv_hostname, "sv_hostname", "", CVAR_SERVERINFO, 0, qfalse },
 	{ &g_drawHitboxes, "g_drawHitboxes", "0", 0, 0, qfalse },
@@ -3143,15 +3143,39 @@ void G_RunThink( gentity_t *ent ) {
 	ent->think( ent );
 }
 
+/*
+================
+OSPx - check for team stuff..
+================
+*/
+void HandleEmptyTeams(void) {
+
+	if (g_gamestate.integer != GS_INTERMISSION) {
+		if (!level.axisPlayers) {
+			G_teamReset(TEAM_RED, qtrue, qfalse);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+		else if (!level.alliedPlayers) {
+			G_teamReset(TEAM_BLUE, qtrue, qfalse);
+
+			// Reset match if not paused with an empty team
+			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
+				Svcmd_ResetMatch_f(qtrue, qtrue);
+		}
+	}
+}
 
 /*
 ================
-L0 - sortedActivePlayers
+L0 - SortedActivePlayers
 
 Sort players per teams so I can re-use this call where need it..
 ================
 */
-void sortedActivePlayers(void) {
+void SortedActivePlayers(void) {
 	int i;
 	level.axisPlayers = 0;
 	level.alliedPlayers = 0;
@@ -3167,27 +3191,63 @@ void sortedActivePlayers(void) {
 }
 
 /*
+===========
+RtcwPro - G_teamJoinCheck (et port)
+
+Checks to see if a specified team is allowing players to join.
+===========
+*/
+qboolean G_teamJoinCheck(int team_num, gentity_t* ent) {
+	int cnt = TeamCount(-1, team_num);
+
+	// Sanity check
+	if (cnt == 0) {
+		G_teamReset(team_num, qtrue, qfalse);
+		teamInfo[team_num].team_lock = qfalse;
+	}
+
+	// Check for locked teams
+	if ((team_num == TEAM_RED || team_num == TEAM_BLUE)) {
+		if (ent->client->sess.sessionTeam == team_num) {
+			return(qtrue);
+		}
+
+		// Check for full teams
+		if (team_maxplayers.integer > 0 && team_maxplayers.integer <= cnt) {
+			CP(va("cp \"The %s team is full!\n\"2", aTeams[team_num]));
+			AP(va("print \"*** ^3INFO: ^7The %s team is full.\n\"", aTeams[team_num]));
+			return(qfalse);
+		} // Check for locked teams
+		else if (teamInfo[team_num].team_lock /*&& (!(ent->client->pers.invite & team_num))*/) {
+			CP(va("cp \"The %s team is LOCKED!\n\"2", aTeams[team_num]));
+			AP(va("print \"*** ^3INFO: ^7The %s team is locked.\n\"", aTeams[team_num]));
+			return(qfalse);
+		}
+	}
+	return(qtrue);
+}
+
+/*
+KK commented this out this is a "referee" lock we don't need
 ================
 L0 - TeamLockStatus
 
 Sometimes people lock the teams and leave with callvotes off..as result game becomes unplayable..
 So this deals with issue..
 ================
-*/
+
 void TeamLockStatus(void) {
 
-	if (	g_gamelocked.integer != 0 // game is locked
-			&& (!level.axisPlayers || !level.alliedPlayers) // if either team is empty
-			&& (g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP)) // warmup
+	if ((g_gamestate.integer == GS_WAITING_FOR_PLAYERS || g_gamestate.integer == GS_WARMUP) && g_gamelocked.integer != 0)
 	{
 		trap_Cvar_Set("g_gamelocked", "0"); // unlock teams during warmup
 		trap_Cvar_Update(&g_gamelocked);
 		G_teamReset(0, qfalse, qtrue); // both teams
-		AP("chat \"^zconsole: ^7One team has no players! Server is releasing the team lock^z!\n\"");
 	}
 
 	// RtcwPro added this to avoid erroneous text at the end of the round
-	if (g_gamestate.integer != GS_INTERMISSION && g_gamelocked.integer > 0) {
+	if (g_gamestate.integer != GS_INTERMISSION && g_gamelocked.integer > 0) 
+	{
 		// Check now
 		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
 			trap_Cvar_Set("g_gamelocked", "0");
@@ -3221,6 +3281,7 @@ void TeamLockStatus(void) {
 		}
 	}
 }
+*/
 
 /*
 Player Info (port from ET)
@@ -3516,8 +3577,8 @@ void G_RunFrame( int levelTime ) {
 	qboolean isServerRestarting = trap_Cvar_VariableIntegerValue("sv_serverRestarting");
 	if (!isServerRestarting) {
 		// L0 - Count active players..
-		sortedActivePlayers();
+		SortedActivePlayers();
 		// L0 - Check Team Lock status..
-		TeamLockStatus();
+		HandleEmptyTeams();
 	}
 }

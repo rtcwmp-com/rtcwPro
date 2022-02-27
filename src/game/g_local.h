@@ -1347,8 +1347,8 @@ void QDECL G_Printf( const char *fmt, ... );
 void QDECL G_DPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
 void CheckVote(void);
-void sortedActivePlayers(void);
-void TeamLockStatus(void);
+void SortedActivePlayers(void);
+void HandleEmptyTeams(void);
 
 //
 // g_client.c
@@ -1385,6 +1385,7 @@ void G_readyReset( qboolean aForced );
 void G_readyResetOnPlayerLeave(int team);
 void G_readyStart( void );
 void G_readyTeamLock( void );
+qboolean G_teamJoinCheck(int team_num, gentity_t* ent);
 
 //
 // g_mem.c
@@ -1600,7 +1601,7 @@ extern vmCvar_t match_timeoutcount;
 // Server stuff
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
-extern vmCvar_t g_gamelocked;
+//extern vmCvar_t g_gamelocked; // KK commented this out this is a "referee" lock we don't need
 extern vmCvar_t	sv_hostname;
 extern vmCvar_t svx_serverStreaming;
 extern vmCvar_t g_bannedMSG;
