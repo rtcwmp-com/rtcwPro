@@ -571,6 +571,8 @@ typedef struct {
 	int obj_returned;
 	int obj_taken;
 	int obj_checkpoint;
+	int obj_killcarrier;
+	int obj_protectflag;
 	int dyn_planted;
 	int dyn_defused;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
@@ -2106,6 +2108,8 @@ enum eventList {
     objDynDefuse,
     objSpawnFlag,
     objDestroyed,
+	objKilledCarrier,
+	objProtectFlag,
     redRespawn,
     blueRespawn,
     teamFirstSpawn,

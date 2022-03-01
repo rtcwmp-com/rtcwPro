@@ -188,6 +188,8 @@ void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacke
 		attacker->client->pers.teamState.lastfraggedcarrier = level.time;
 		if ( g_gametype.integer >= GT_WOLF ) {
 			AddScore( attacker, WOLF_FRAG_CARRIER_BONUS );
+			G_writeObjectiveEvent(attacker, objKilledCarrier);
+			attacker->client->sess.obj_killcarrier++;
 		} else {
 			AddScore( attacker, CTF_FRAG_CARRIER_BONUS );
 			PrintMsg( NULL, "%s" S_COLOR_WHITE " fragged %s's flag carrier!\n",
@@ -313,6 +315,8 @@ void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacke
 			if ( VectorLength( v1 ) < WOLF_CP_PROTECT_RADIUS ) {
 				if ( flag->spawnflags & 1 ) {                     // protected spawnpoint
 					AddScore( attacker, WOLF_SP_PROTECT_BONUS );
+					G_writeObjectiveEvent(attacker, objProtectFlag);
+					attacker->client->sess.obj_protectflag++;
 				} else {
 					AddScore( attacker, WOLF_CP_PROTECT_BONUS );  // protected checkpoint
 				}

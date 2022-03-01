@@ -203,6 +203,22 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
                 pitem = json_object_get(pcat, "obj_checkpoint");
                 if (json_is_integer(pitem)) {
                     client->sess.obj_checkpoint = json_integer_value(pitem);
+
+
+                }
+
+                pitem = json_object_get(pcat, "obj_killcarrier");
+                if (json_is_integer(pitem)) {
+                    client->sess.obj_killcarrier = json_integer_value(pitem);
+
+
+                }
+
+                pitem = json_object_get(pcat, "obj_protectflag");
+                if (json_is_integer(pitem)) {
+                    client->sess.obj_protectflag = json_integer_value(pitem);
+
+
                 }
     return 1;
 }
@@ -528,6 +544,8 @@ void G_jstatsByPlayers(qboolean wstats) {
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
             json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
+            json_object_set_new(jcat, "obj_killcarrier", json_integer(cl->sess.obj_killcarrier));
+            json_object_set_new(jcat, "obj_protectflag", json_integer(cl->sess.obj_protectflag));
 
 
             weapArray = json_array();
@@ -692,6 +710,8 @@ void G_jstatsByTeam(qboolean wstats) {
             json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
             json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
             json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
+            json_object_set_new(jcat, "obj_killcarrier", json_integer(cl->sess.obj_killcarrier));
+            json_object_set_new(jcat, "obj_protectflag", json_integer(cl->sess.obj_protectflag));
 
             weapArray = json_array();
 
@@ -1023,6 +1043,12 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
             break;
         case objDestroyed:
             json_object_set_new(jdata, "label",    json_string("ObjDestroyed"));
+            break;
+        case objKilledCarrier:
+            json_object_set_new(jdata, "label",    json_string("ObjKilledCarrier"));
+            break;
+        case objProtectFlag:
+            json_object_set_new(jdata, "label",    json_string("ObjProtectFlag"));
             break;
         default:
             json_object_set_new(jdata, "label",    json_string("unknown_event"));
