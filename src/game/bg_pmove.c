@@ -4123,7 +4123,7 @@ void PmoveSingle( pmove_t *pmove ) {
 		PM_WaterEvents();
 
 		// RTCWPro - fixed physics
-		if (pm->fixedphysicsfps && !(pml.groundTrace.surfaceFlags & SURF_SLICK))
+		if (pm->fixedphysicsfps)
 		{
 			// halt if not going fast enough (0.5 units/sec)
 			if (VectorLengthSquared(pm->ps->velocity) < 0.25f)
