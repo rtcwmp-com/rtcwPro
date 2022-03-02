@@ -3151,14 +3151,14 @@ OSPx - check for team stuff..
 void HandleEmptyTeams(void) {
 
 	if (g_gamestate.integer != GS_INTERMISSION) {
-		if (!level.axisPlayers) {
+		if (!level.axisPlayers && match_minplayers.integer > 1) {
 			G_teamReset(TEAM_RED, qtrue, qfalse);
 
 			// Reset match if not paused with an empty team
 			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
 				Svcmd_ResetMatch_f(qtrue, qtrue);
 		}
-		else if (!level.alliedPlayers) {
+		else if (!level.alliedPlayers && match_minplayers.integer > 1) {
 			G_teamReset(TEAM_BLUE, qtrue, qfalse);
 
 			// Reset match if not paused with an empty team
