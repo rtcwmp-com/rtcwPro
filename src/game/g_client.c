@@ -1546,17 +1546,17 @@ The game can override any of the settings and call trap_SetUserinfo
 if desired.
 ============
 */
-void ClientUserinfoChanged( int clientNum ) {
-	gentity_t *ent;
-	char    *s;
+void ClientUserinfoChanged(int clientNum) {
+	gentity_t* ent;
+	char* s;
 	char model[MAX_QPATH], modelname[MAX_QPATH];
 
-//----(SA) added this for head separation
+	//----(SA) added this for head separation
 	char head[MAX_QPATH];
 
 	char oldname[MAX_STRING_CHARS];
-	gclient_t   *client;
-	char    *c1;
+	gclient_t* client;
+	char* c1;
 	char userinfo[MAX_INFO_STRING];
 
 	ent = g_entities + clientNum;
@@ -1564,41 +1564,53 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	client->ps.clientNum = clientNum;
 
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
 	// check for malformed or illegal info strings
-	if ( !Info_Validate( userinfo ) ) {
-		strcpy( userinfo, "\\name\\badinfo" );
+	if (!Info_Validate(userinfo)) {
+		strcpy(userinfo, "\\name\\badinfo");
 	}
 
 	// check for local client
-	s = Info_ValueForKey( userinfo, "ip" );
-	if ( s && !strcmp( s, "localhost" ) ) {
+	s = Info_ValueForKey(userinfo, "ip");
+	if (s && !strcmp(s, "localhost")) {
 		client->pers.localClient = qtrue;
-	//	client->sess.referee = RL_REFEREE;
+		//	client->sess.referee = RL_REFEREE;
 	}
-// L0
-	// Save IP for getstatus..
-	s = Info_ValueForKey( userinfo, "ip" );
-	if( s[0] != 0 ){
-		SaveIP_f( client, s );
+	// L0
+		// Save IP for getstatus..
+	s = Info_ValueForKey(userinfo, "ip");
+	if (s[0] != 0) {
+		SaveIP_f(client, s);
 	} // OSPx - Country Flags
 	else if (!(ent->r.svFlags & SVF_BOT) && !strlen(s)) {
 		// To solve the IP bug..
-		s =	va("%s", client->sess.ip);
+		s = va("%s", client->sess.ip);
 	}
-	// Check for "" GUID..
-	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
-		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
-		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
-	}
-	s = Info_ValueForKey( userinfo, "cg_uinfo" );
+
+	s = Info_ValueForKey(userinfo, "cg_uinfo");
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	//sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
-	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, 
+	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
 		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
 
-	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
+	// Check for "" GUID..
+	if (!Q_stricmp(client->sess.guid, "D41D8CD98F00B204E9800998ECF8427E") ||
+		!Q_stricmp(client->sess.guid, "d41d8cd98f00b204e9800998ecf8427e")) {
+		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+	}
+
+	// Check for Shared GUIDs and drop client - this is messing up stats
+	if (!Q_stricmp(client->sess.guid, "8E6A51BAF1C7E338A118D9E32472954E") ||
+		!Q_stricmp(client->sess.guid, "8e6a51baf1c7e338a118d9e32472954e") ||
+		!Q_stricmp(client->sess.guid, "58E419DE5A8B2655F6D48EAB68275DB5") ||
+		!Q_stricmp(client->sess.guid, "58e419de5a8b2655f6d48eab68275db5") ||
+		!Q_stricmp(client->sess.guid, "FBE2ED832F8415EFBAAA5DF10074484A") ||
+		!Q_stricmp(client->sess.guid, "fbe2ed832f8415efbaaa5df10074484a")) {
+		trap_DropClient(clientNum, "^3Shared GUID Violation. ^7Delete your RTCWKEY in Main and restart your game.");
+	}
+
+	if (!Q_stricmp(client->sess.guid,NO_GUID)) {
         trap_DropClient(clientNum, "Empty or invalid rtcwkey");
 	}
 
