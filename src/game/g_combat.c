@@ -562,7 +562,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				item = BG_FindItem( "Objective" );
 			}
 			//G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
-			trap_SendServerCommand(-1, va("cp \"^5Allies have lost %s!\n\" 2", self->message));
+			if (self->message != NULL)
+				trap_SendServerCommand(-1, va("cp \"^5Allies have lost %s!\n\" 2", self->message));
+
 			self->client->ps.powerups[PW_REDFLAG] = 0;
 			self->s.powerups = 0;
 		}
@@ -572,7 +574,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				item = BG_FindItem( "Objective" );
 			}
 			//G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
-			trap_SendServerCommand(-1, va("cp \"^5Axis have lost %s!\n\" 2", self->message));
+			if (self->message != NULL)
+				trap_SendServerCommand(-1, va("cp \"^5Axis have lost %s!\n\" 2", self->message));
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
 			self->s.powerups = 0;
