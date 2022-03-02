@@ -1600,15 +1600,15 @@ void ClientUserinfoChanged(int clientNum) {
 		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
 	}
 
-	// Check for Shared GUIDs and drop client - this is messing up stats
-	if (!Q_stricmp(client->sess.guid, "8E6A51BAF1C7E338A118D9E32472954E") ||
-		!Q_stricmp(client->sess.guid, "8e6a51baf1c7e338a118d9e32472954e") ||
-		!Q_stricmp(client->sess.guid, "58E419DE5A8B2655F6D48EAB68275DB5") ||
-		!Q_stricmp(client->sess.guid, "58e419de5a8b2655f6d48eab68275db5") ||
-		!Q_stricmp(client->sess.guid, "FBE2ED832F8415EFBAAA5DF10074484A") ||
-		!Q_stricmp(client->sess.guid, "fbe2ed832f8415efbaaa5df10074484a")) {
-		trap_DropClient(clientNum, "^3Shared GUID Violation. ^7Delete your RTCWKEY in Main and restart your game.");
-	}
+	//// Check for Shared GUIDs and drop client - this is messing up stats
+	//if (!Q_stricmp(client->sess.guid, "8E6A51BAF1C7E338A118D9E32472954E") ||
+	//	!Q_stricmp(client->sess.guid, "8e6a51baf1c7e338a118d9e32472954e") ||
+	//	!Q_stricmp(client->sess.guid, "58E419DE5A8B2655F6D48EAB68275DB5") ||
+	//	!Q_stricmp(client->sess.guid, "58e419de5a8b2655f6d48eab68275db5") ||
+	//	!Q_stricmp(client->sess.guid, "FBE2ED832F8415EFBAAA5DF10074484A") ||
+	//	!Q_stricmp(client->sess.guid, "fbe2ed832f8415efbaaa5df10074484a")) {
+	//	trap_DropClient(clientNum, "^3Shared GUID Violation. ^7Delete your RTCWKEY in Main and restart your game.");
+	//}
 
 	if (!Q_stricmp(client->sess.guid,NO_GUID)) {
         trap_DropClient(clientNum, "Empty or invalid rtcwkey");
