@@ -1,36 +1,42 @@
-Fixed kick voting so it only looks at player count on the team that called the vote
-Added quake head hitsound
-Added proper console color
-Adjusted raw mouse input
-Fixed cg gun frame crash on team switch
-Fixed team locking during warmup/disconnects
-Prevent document revive bug
-Fixed artillery instant kill bug
-Added cvar to control forcetapout
-Fixed map voting when loading mapindex 0
-Fixed knockback for fps  
-Fixed maxlives so players do not respawn 
-Fixed objective capture stats
-Fixed vote percent for non startmatch votes 
-Record filename when FS_FileForHandle is NULL
-#387 Fixed grenade splash damage 
-Fixed cdkey generation  
-Added a few logging prints for json stats submit to API
-Fixed stats sync issue
-#345 change to next best weapon when killed with primed grenade
-Print who issued /readyteam in console 
-Center print when opponent loses objective
-Fixed spawn flag stats
-#382 reset objective and dyno stats on end of AB round
-Added cg_muzzleFlash 2 to show flash on client and enemy
-Issue #379 Fixed warmup stats
-Issue #372 Fixed objective destroyed stats 
-Fixed end of round sound duplication
-Added download message for invalid client version 
-Added cg_errordecay to configs 
-Added alternate medpack image for more red color
-Added 'true' ping from rtcwPub
-Fixed footstep bobbing for high FPS  
-Fixed physics for FPS (1.2.61 already released to a few servers)
-Added /maps command
-Added mouse buttons 4 and 5
+Asset - Added quake head hitsound - headStyle 9
+Asset - Added new country flags
+Asset - Added alternate medpack image for more red color
+
+Config - Added cg_errordecay, r_showtris, and r_shownormals to example configs 
+
+Client - Added proper console color
+Client - Adjusted raw mouse input
+Client - Fixed cdkey generation  
+Client - Added cg_muzzleFlash 2 to show flash on client and enemy
+Client - Added mouse buttons 4 and 5
+
+Client/Server - Print who issued /readyteam in console 
+Client/Server - Center print when opponent loses objective
+Client/Server - Improved end of round sound duplication
+Client/Server - Added download message for invalid client version 
+Client/Server - Fixed footstep bobbing for high FPS  
+Client/Server - Fixed cg gun frame crash on team switch
+
+Server - Kick players with shared guids that are messing up stats
+Server - Fixed kick voting so it only looks at player count on the team that called the vote
+Server - Fixed team locking during warmup/disconnects
+Server - Prevent document revive bug
+Server - Fixed artillery instant kill bug
+Server - Added cvar to control forcetapout
+Server - Fixed map voting when loading mapindex 0
+Server - Fixed knockback for fps  
+Server - Fixed maxlives so players do not respawn 
+Server - Fixed objective capture stats
+Server - Fixed vote percent for non startmatch votes 
+Server - Record filename when FS_FileForHandle is NULL
+Server - #387 Fixed grenade splash damage 
+Server - Added a few logging prints for json stats submit to API
+Server - Fixed stats sync issue
+Server - #345 change to next best weapon when killed with primed grenade
+Server - Fixed spawn flag stats
+Server - #382 reset objective and dyno stats on end of AB round
+Server - Issue #379 Fixed warmup stats
+Server - Issue #372 Fixed objective destroyed stats 
+Server - Added 'true' ping from rtcwPub
+Server - Fixed physics for FPS (1.2.61 already released to a few servers)
+Server - Added /maps command
