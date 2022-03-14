@@ -2355,7 +2355,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 	if ( revived ) {
 		spawnPoint = ent;
-		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix client/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
+		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix document/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
 		VectorCopy( ent->r.currentAngles, spawn_angles );
 
