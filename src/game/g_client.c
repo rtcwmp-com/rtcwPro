@@ -2354,14 +2354,13 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// ranging doesn't count this client
 
 	if ( revived ) {
-
 		spawnPoint = ent;
-		VectorCopy( ent->s.origin, spawn_origin );
+		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix client/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
-		VectorCopy( ent->s.angles, spawn_angles );
+		VectorCopy( ent->r.currentAngles, spawn_angles );
 
-		// fix document revive bug
-		if (client->ps.powerups)
+		// make sure powerups get reset
+  		if (client->ps.powerups)
 		{
 			ent->s.powerups = 0;
 			memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
