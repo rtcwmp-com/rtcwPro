@@ -1257,7 +1257,13 @@ void G_writeClosingJson(void)
 
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
             G_Printf("Stats API: Starting stats upload process.\n");
-            trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
+            
+            if ( level.jsonStatInfo.gameStatslogFile && buf ) {
+                trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
+            }
+            else {
+                G_Printf("Stats API: No file to upload. Skipping.\n");
+            }
 
         }
       }
