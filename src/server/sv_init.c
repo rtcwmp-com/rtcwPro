@@ -881,13 +881,13 @@ void SV_Init( void ) {
 	Cvar_Get( "sv_referencedPakNames", "", CVAR_SYSTEMINFO | CVAR_ROM );
 
 	// Wallhack
-	wh_active = Cvar_Get("wh_active", "0", CVAR_ARCHIVE);
-	// FIXME: adjust bounding box ?
-	wh_bbox_horz = Cvar_Get("wh_bbox_horz", "30", CVAR_ARCHIVE);
-	wh_bbox_vert = Cvar_Get("wh_bbox_vert", "60", CVAR_ARCHIVE);
-	wh_add_xy = Cvar_Get("wh_add_xy", "0", CVAR_ARCHIVE);
-	wh_check_fov = Cvar_Get("wh_check_fov", "0", CVAR_ARCHIVE);
-	SV_InitWallhack();
+	//wh_active = Cvar_Get("wh_active", "0", CVAR_ARCHIVE);
+	//// FIXME: adjust bounding box ?
+	//wh_bbox_horz = Cvar_Get("wh_bbox_horz", "30", CVAR_ARCHIVE);
+	//wh_bbox_vert = Cvar_Get("wh_bbox_vert", "60", CVAR_ARCHIVE);
+	//wh_add_xy = Cvar_Get("wh_add_xy", "0", CVAR_ARCHIVE);
+	//wh_check_fov = Cvar_Get("wh_check_fov", "0", CVAR_ARCHIVE);
+	//SV_InitWallhack();
 
 	// server vars
 	sv_rconPassword = Cvar_Get( "rconPassword", "", CVAR_TEMP );
