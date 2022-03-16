@@ -371,6 +371,10 @@ int G_read_round_jstats( void )
     // TODO: Change to currentRound >= 1 and set g_currentRound -= 1
     if (g_currentRound.integer == 1) {
         trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
+        if (!buf) {
+            G_Printf("MatchID issue, not going to touch stats\n");
+            return 0;
+        }
         level.match_id = va("%s",buf);
     }
     else {
@@ -1257,7 +1261,7 @@ void G_writeClosingJson(void)
 
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
             G_Printf("Stats API: Starting stats upload process.\n");
-            
+
             if ( level.jsonStatInfo.gameStatslogFile && buf ) {
                 trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
             }

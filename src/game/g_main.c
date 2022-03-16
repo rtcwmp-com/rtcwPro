@@ -1507,6 +1507,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 char newGamestatFile[256];
                 char mapName[64];
                 char buf2[64];
+                int retval;
                 qtime_t ct;
                 trap_RealTime(&ct);
                 trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
@@ -1519,12 +1520,20 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
 
-					G_read_round_jstats(); // load stats from round 1
-                    Q_strncpyz(level.jsonStatInfo.round_id,"2",sizeof(level.jsonStatInfo.round_id) );
+					retval = G_read_round_jstats(); // load stats from round 1
 
-					trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
+                    Q_strncpyz(level.jsonStatInfo.round_id,"2",sizeof(level.jsonStatInfo.round_id) );
+                    if (retval == 0) {
+                        buf=va("%ld", unixTime);
+                        trap_Cvar_Set( "stats_matchid", buf);
+
+                    }
+                    else {
+                        trap_Cvar_VariableStringBuffer("stats_matchid",buf2,sizeof(buf2));
+                        buf = va("%s",buf2);
+                    }
 					//buf = va("%s",level.match_id);
-					buf = va("%s",buf2);
+
 					Q_strncpyz(level.jsonStatInfo.match_id,buf,sizeof(level.jsonStatInfo.match_id) );
                 }
                 else {
@@ -2421,11 +2430,11 @@ void LogExit( const char *string ) {
 
 		// RTCWPro
 		//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
-		if (g_alternatePing.integer) 
+		if (g_alternatePing.integer)
 		{
 			ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
 		}
-		else 
+		else
 		{
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
@@ -2992,7 +3001,7 @@ void CheckVote( void )
 		AP( va( "cpm \"^2Vote FAILED! ^3(%s)\n\"", level.voteInfo.voteString ) );
 		G_LogPrintf( "Vote Failed: %s\n", level.voteInfo.voteString );
 	}
-	else 
+	else
 	{
 		int total = level.voteInfo.numVotingClients;
 
@@ -3246,7 +3255,7 @@ void TeamLockStatus(void) {
 	}
 
 	// RtcwPro added this to avoid erroneous text at the end of the round
-	if (g_gamestate.integer != GS_INTERMISSION && g_gamelocked.integer > 0) 
+	if (g_gamestate.integer != GS_INTERMISSION && g_gamelocked.integer > 0)
 	{
 		// Check now
 		if (level.numPlayingClients == 0 && g_gamelocked.integer > 0) {
