@@ -34,6 +34,12 @@ If you have questions concerning this license or the applicable additional terms
 #define COUNTRY_FLAG_RENDER_SIZE 16
 #define COUNTRY_FLAG_INDIVIDUAL_SIZE 32
 #define COUNTRY_FLAG_WIDTH 512
+
+/*
+=================
+Scoreboard flags (WolfSE)
+=================
+*/
 static qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
 	float alpha[4];
 	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "cc"));
