@@ -1,10 +1,10 @@
 Asset - Added quake head hitsound - headStyle 9
 Asset - Added new country flags
-Asset - Added alternate medpack image for more red color
+Asset - Added new medpack image with more red color
 
-Config - Added cg_errordecay, r_showtris, and r_shownormals to example configs 
+Config - Added cg_errordecay, r_showtris, and r_shownormals to server template configs 
 
-Client - Added proper console color
+Client - Added custom console colors and alpha
 Client - Adjusted raw mouse input
 Client - Fixed cdkey generation  
 Client - Added cg_muzzleFlash 2 to show flash on client and enemy
