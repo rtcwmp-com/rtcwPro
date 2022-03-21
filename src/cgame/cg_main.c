@@ -413,6 +413,7 @@ vmCvar_t cg_lagometerY;
 vmCvar_t cg_drawFrags;
 vmCvar_t cg_fragsY;
 vmCvar_t cg_fragsWidth;
+vmCvar_t cg_fixedphysicsfps;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -724,6 +725,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_drawFrags, "cg_drawFrags", "1", CVAR_ARCHIVE },
 	{ &cg_fragsY, "cg_fragsY", "0", CVAR_ARCHIVE },
 	{ &cg_fragsWidth, "cg_fragsWidth", "16", CVAR_ARCHIVE },
+
+	{ &cg_fixedphysicsfps, "g_fixedphysicsfps", "0", CVAR_ROM },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

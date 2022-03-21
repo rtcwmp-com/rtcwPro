@@ -146,7 +146,8 @@
     </Link>
     <ProjectReference />
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"
+..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>

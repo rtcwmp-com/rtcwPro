@@ -705,7 +705,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-						//	G_writeObjectiveEvent(traceEnt->parent, objDestroyed  );
+							G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
+							ent->client->sess.obj_destroyed++;
 //	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
@@ -812,14 +813,15 @@ void Weapon_Engineer( gentity_t *ent ) {
 // (close air support should *always* drop parallel to friendly lines, tho accidents do happen)
 extern void G_ExplodeMissile( gentity_t *ent );
 
-void G_AirStrikeExplode( gentity_t *self ) {
+void G_AirStrikeExplode(gentity_t* self) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
+
 	// RTCWPro - moved here due to rogue bombs that never truly exploded
-    self->damage = 400;
-    self->splashDamage = 400;
-    self->splashRadius = 400;
+	self->damage = 400;
+	self->splashDamage = 400;
+	self->splashRadius = 400;
     // end addition
 	self->think = G_ExplodeMissile;
 	self->nextthink = level.time + 50;
@@ -1105,8 +1107,8 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_BROADCAST;
 				bomb->classname = "props_explosion"; // was "air strike"
 				bomb->damage        = 0; // maybe should un-hard-code these?
-				bomb->splashDamage  = 90;
-				bomb->splashRadius  = 50;
+				bomb->splashDamage  = 0; // RtcwPro no damage for prop explosion
+				bomb->splashRadius  = 0; // RtcwPro no damage for prop explosion
 //		bomb->s.weapon	= WP_SMOKE_GRENADE;
 				// TTimo ambiguous else
 				if ( ent->client != NULL ) { // set team color on smoke
@@ -1120,9 +1122,9 @@ void Weapon_Artillery( gentity_t *ent ) {
 			} else {
 				bomb->nextthink = level.time + 8950 + 2000 * i + crandom() * 800;
 				bomb->classname = "air strike";
-				bomb->damage        = 0;
-				bomb->splashDamage  = 400;
-				bomb->splashRadius  = 400;
+				bomb->damage        = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashDamage  = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashRadius  = 0; // RtcwPro no damage until airstrikeexplode is called
 			}
 			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->splashMethodOfDeath   = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
@@ -2080,7 +2082,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 		traceEnt = head->parent;
 	}
 
-	if (LogAccuracyShot(traceEnt, source))
+	if (LogAccuracyShot(traceEnt, source) && g_gamestate.integer == GS_PLAYING)
 	{
 		source->client->pers.life_acc_shots++;
 		source->client->sess.acc_shots++;
@@ -2125,7 +2127,7 @@ void Bullet_Fire_Extended(gentity_t* source, gentity_t* attacker, vec3_t start, 
 	if (traceEnt->takedamage && (traceEnt->client) && !(traceEnt->flags & FL_DEFENSE_GUARD)) {
 		tent = G_TempEntity(tr.endpos, EV_BULLET_HIT_FLESH);
 		tent->s.eventParm = traceEnt->s.number;
-		if (LogAccuracyHit(traceEnt, attacker)) {
+		if (LogAccuracyHit(traceEnt, attacker) && g_gamestate.integer == GS_PLAYING) {
 			attacker->client->ps.persistant[PERS_ACCURACY_HITS]++;
 			// L0 - Stats
 			attacker->client->pers.life_acc_hits++;

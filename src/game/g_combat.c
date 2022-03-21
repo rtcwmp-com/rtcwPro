@@ -465,6 +465,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			launchspot[2] += 40;
 			fire_grenade( self, launchspot, launchvel, self->s.weapon )->damage = 0;
 			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
+			
+			// RtcwPro Issue #345 Clear out empty weapon, change to next best weapon
+			//PM_SwitchIfEmpty();
+			if (self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] == 0)
+				G_AddEvent(self, EV_NOAMMO, 0);
 		}
 	}
 // jpw
@@ -556,17 +561,24 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
+
+			if (self->message != NULL)
+				G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
+
 			self->client->ps.powerups[PW_REDFLAG] = 0;
+			self->s.powerups = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
 			item = BG_FindItem( "Blue Flag" );
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
+			
+			if (self->message != NULL)
+				G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
+			self->s.powerups = 0;
 		}
 
 		if ( item ) {
@@ -654,8 +666,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// remove powerups
 	memset( self->client->ps.powerups, 0, sizeof( self->client->ps.powerups ) );
 
-	// RTCWPro - set this up
-	self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+	// RTCWPro - update ready status
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS) // only do this during warmup
+		self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// never gib in a nodrop
 	if ( self->health <= GIB_HEALTH && !( contents & CONTENTS_NODROP ) ) {
@@ -849,6 +862,9 @@ char* G_GetHitsoundStyle(int headStyle, int bodyStyle, qboolean headshot) {
 		case 8:
 			return "sound/hitsounds/hithead8.wav";
 			break;
+		case 9:
+			return "sound/hitsounds/hithead9.wav";
+			break;
 		default:
 			return "sound/hitsounds/hithead1.wav";
 			break;
@@ -912,13 +928,15 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 		mod == MOD_ROCKET ||
 		mod == MOD_ROCKET_SPLASH ||
 		mod == MOD_KNIFE ||
+		mod == MOD_KNIFE2 ||
 		mod == MOD_GRENADE ||
 		mod == MOD_AIRSTRIKE ||
 		mod == MOD_ARTY ||
 		mod == MOD_EXPLOSIVE ||
 		mod == MOD_MORTAR ||
 		mod == MOD_MORTAR_SPLASH ||
-		mod == MOD_SYRINGE)
+		mod == MOD_SYRINGE || 
+		mod == MOD_UNKNOWN)
 	{
 		return;
 	}
@@ -1246,7 +1264,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	if ( g_debugDamage.integer ) {
-		G_Printf( "client:%i health:%i damage:%i\n", targ->s.number, targ->health, take); //, asave );
+		G_Printf( "client: %i health: %i damage: %i mod: %i\n", targ->s.number, targ->health, take, mod); //, asave );
+		AP(va("print \"client:%i health:%i damage:%i mod: %i\n\"", targ->s.number, targ->health, take, mod));
 	}
 
 	// add to the damage inflicted on a player this frame

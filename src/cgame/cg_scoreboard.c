@@ -31,32 +31,37 @@ If you have questions concerning this license or the applicable additional terms
 
 #define SCOREBOARD_WIDTH    ( 31 * BIGCHAR_WIDTH )
 
+#define COUNTRY_FLAG_RENDER_SIZE 16
+#define COUNTRY_FLAG_INDIVIDUAL_SIZE 32
+#define COUNTRY_FLAG_WIDTH 512
+
 /*
 =================
-OSPx - Country Flags
-
-Author: mcwf
+Scoreboard flags (WolfSE)
 =================
 */
-qboolean cf_draw(float x, float y, float fade, int clientNum) {
-
+static qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
 	float alpha[4];
-	float flag_step = 32;
-	unsigned int flag_sd = 512;
-	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "country"));
+	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "cc"));
 
-	if (client_flag < 255) {
-		float x1 = (float)((client_flag * (unsigned int)flag_step) % flag_sd);
-		float y1 = (float)(floor((client_flag * flag_step) / flag_sd) * flag_step);
-		float x2 = x1 + flag_step;
-		float y2 = y1 + flag_step;
-		alpha[0] = alpha[1] = alpha[2] = 1.0; alpha[3] = fade;
+	if (client_flag < 255)
+	{
+		float x1 = (float)((client_flag * (unsigned int)COUNTRY_FLAG_INDIVIDUAL_SIZE) % COUNTRY_FLAG_WIDTH);
+		float y1 = (float)(floor((client_flag * COUNTRY_FLAG_INDIVIDUAL_SIZE) / COUNTRY_FLAG_WIDTH) * COUNTRY_FLAG_INDIVIDUAL_SIZE);
+		float x2 = x1 + COUNTRY_FLAG_INDIVIDUAL_SIZE;
+		float y2 = y1 + COUNTRY_FLAG_INDIVIDUAL_SIZE;
+		alpha[0] = alpha[1] = alpha[2] = alpha[3] = fade;
 
 		trap_R_SetColor(alpha);
-		CG_DrawPicST(x, y, flag_step, flag_step, x1 / flag_sd, y1 / flag_sd, x2 / flag_sd, y2 / flag_sd, cgs.media.countryFlags);
+
+		CG_DrawPicST(x, y - 12, COUNTRY_FLAG_RENDER_SIZE, COUNTRY_FLAG_RENDER_SIZE, x1 / COUNTRY_FLAG_WIDTH, y1 / COUNTRY_FLAG_WIDTH,
+			x2 / COUNTRY_FLAG_WIDTH, y2 / COUNTRY_FLAG_WIDTH, cgs.media.countryFlags);
+
 		trap_R_SetColor(NULL);
+
 		return qtrue;
 	}
+
 	return qfalse;
 }
 
@@ -513,13 +518,14 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 	// OSPx - Country Flags
 	if ((score->ping != -1) && (score->ping != 999) && (cg_showFlags.integer))
 	{
-		if (cf_draw(tempx - 6, y - 7, fade, ci->clientNum))
+		if (WM_SE_DrawFlags(tempx + 2, y + 13, fade, ci->clientNum)) //tempx - 6, y - 7, fade, ci->clientNum))
 		{
 			offset += 14;
 			tempx += 18;
 			maxchars -= 2;
 		}
 	}
+
 	// draw name
 	CG_DrawStringExt( tempx, y, ci->name, hcolor, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, maxchars );
 	tempx += INFO_PLAYER_WIDTH - offset;

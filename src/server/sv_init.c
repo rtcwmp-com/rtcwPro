@@ -881,13 +881,13 @@ void SV_Init( void ) {
 	Cvar_Get( "sv_referencedPakNames", "", CVAR_SYSTEMINFO | CVAR_ROM );
 
 	// Wallhack
-	wh_active = Cvar_Get("wh_active", "0", CVAR_ARCHIVE);
-	// FIXME: adjust bounding box ?
-	wh_bbox_horz = Cvar_Get("wh_bbox_horz", "30", CVAR_ARCHIVE);
-	wh_bbox_vert = Cvar_Get("wh_bbox_vert", "60", CVAR_ARCHIVE);
-	wh_add_xy = Cvar_Get("wh_add_xy", "0", CVAR_ARCHIVE);
-	wh_check_fov = Cvar_Get("wh_check_fov", "0", CVAR_ARCHIVE);
-	SV_InitWallhack();
+	//wh_active = Cvar_Get("wh_active", "0", CVAR_ARCHIVE);
+	//// FIXME: adjust bounding box ?
+	//wh_bbox_horz = Cvar_Get("wh_bbox_horz", "30", CVAR_ARCHIVE);
+	//wh_bbox_vert = Cvar_Get("wh_bbox_vert", "60", CVAR_ARCHIVE);
+	//wh_add_xy = Cvar_Get("wh_add_xy", "0", CVAR_ARCHIVE);
+	//wh_check_fov = Cvar_Get("wh_check_fov", "0", CVAR_ARCHIVE);
+	//SV_InitWallhack();
 
 	// server vars
 	sv_rconPassword = Cvar_Get( "rconPassword", "", CVAR_TEMP );
@@ -978,7 +978,7 @@ void SV_Init( void ) {
 	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "12", CVAR_ROM);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "13", CVAR_ROM);
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

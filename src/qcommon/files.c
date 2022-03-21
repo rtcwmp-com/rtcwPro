@@ -409,6 +409,9 @@ static FILE *FS_FileForHandle( fileHandle_t f ) {
 		Com_Error( ERR_DROP, "FS_FileForHandle: can't get FILE on zip file" );
 	}
 	if ( !fsh[f].handleFiles.file.o ) {
+
+		Com_Printf("FS_FileForHandle Error Filename: %s\n", fsh[f].name);
+
 		Com_Error( ERR_DROP, "FS_FileForHandle: NULL" );
 	}
 

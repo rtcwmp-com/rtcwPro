@@ -2677,11 +2677,9 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		flash.hModel = 0;
 	}
 
-	// OSPx - Disable muzzleFlash if they have it off..
-	// NOTE: Patched for zoomed FOV
-
-
-	if ( isPlayer || !cg_muzzleFlash.integer || cg.zoomedFOV) {
+	// RtcwPro cg_muzzleflash
+	// cg_muzzleFlash 2 will allow muzzle flash for movie making
+	if (cg_muzzleFlash.integer < 2 && (isPlayer || !cg_muzzleFlash.integer || cg.zoomedFOV)) {
 
 		flash.hModel = 0;
 	}
@@ -2946,6 +2944,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		AnglesToAxis( angles, hand.axis );
 
 		if ( cg_gun_frame.integer ) {
+			CG_WeaponAnimation(ps, weapon, &hand.oldframe, &hand.frame, &hand.backlerp); // rtcwpro
 			hand.frame = hand.oldframe = cg_gun_frame.integer;
 			hand.backlerp = 0;
 		} else {  // get the animation state
@@ -4627,14 +4626,14 @@ void CG_FireWeapon( centity_t *cent ) {
 			CG_MachineGunEjectBrass( cent );
 		}
 
-		if (cg_muzzleFlash.integer)
+		// RtcwPro cg_muzzleflash
+		if (cg_muzzleFlash.integer >= 1)
 		{
 			cent->muzzleFlashTime = cg.time;
 		}
 		else
 		{
 			cent->muzzleFlashTime = 0;
-			//cent->muzzleFlashTime = cg.time;
 		}
 
 		return;
@@ -4653,7 +4652,9 @@ void CG_FireWeapon( centity_t *cent ) {
 
 	// mark the entity as muzzle flashing, so when it is added it will
 	// append the flash to the weapon model
-	if (cg_muzzleFlash.integer)
+
+	// RtcwPro cg_muzzleflash
+	if (cg_muzzleFlash.integer >= 1)
 	{
 		cent->muzzleFlashTime = cg.time;
 	}

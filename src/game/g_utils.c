@@ -42,6 +42,7 @@ typedef struct {
 } shaderRemap_t;
 
 #define MAX_SHADER_REMAPS 128
+#define MAX_MAP_MATCHES 128 // RTCWPro
 
 int remapCount = 0;
 shaderRemap_t remappedShaders[MAX_SHADER_REMAPS];
@@ -1134,7 +1135,7 @@ G_SpawnEnts
 ===============
 */
 qboolean G_SpawnEnts(gentity_t* ent) {
-	char mapName[32];
+	char mapName[64];
 
 	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
 
@@ -1598,5 +1599,69 @@ qboolean G_SpawnEnts(gentity_t* ent) {
 	}
 
 	return qtrue;
+}
+
+/*
+==================
+Nihi - check for matching maps
+
+RTCWPro
+G_FindMatchingMaps
+==================
+*/
+int G_FindMatchingMaps(gentity_t* ent, char* mapName) {
+	int numMatches = 0;
+	int mapIndex = -1;
+	int i;
+
+	for (i = 0; i <= level.mapcount + 1; i++)
+	{
+		if (strstr(level.maplist[i], mapName) != NULL)
+		{
+			if (numMatches > MAX_MAP_MATCHES)
+			{
+				CP(va("print \"^3Too many matches found. Narrow your search!\n"));
+				break;
+			}
+
+			if (numMatches == 0)
+			{
+				mapIndex = i;
+			}
+			else if (numMatches == 1)
+			{
+				CP(va("print \"^3Multiple matches found:\n"));
+				CP(va("print \"^7  %s\n\"", level.maplist[mapIndex]));
+				CP(va("print \"^7  %s\n\"", level.maplist[i]));
+			}
+			else if (numMatches > 1)
+			{
+				CP(va("print \"^7  %s\n\"", level.maplist[i]));
+			}
+
+			numMatches += 1;
+		}
+
+		if (Q_stricmp(level.maplist[i], mapName) == 0)
+		{
+			mapIndex = i;
+			numMatches = 1; // found exact match...will clean this all up later
+			break;
+		}
+	}
+
+	if (numMatches == 1)
+	{
+		return mapIndex;
+	}
+	else if (numMatches > 1)
+	{
+		return -1;
+	}
+	else
+	{
+		CP(va("print \"^3%s ^7is not on the server.\n\"", mapName));
+		return -1;
+	}
 }
 
