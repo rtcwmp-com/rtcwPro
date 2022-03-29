@@ -1093,6 +1093,32 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
     endofroundinfo=va( "  .."); // plan to remove this soon.....just safety measure
 
+
+// Check winner and give credit to who captured obj
+    if (qtrue) { // for future reference as we may want to restrict this down the road
+        for ( i = 0; i < level.numConnectedClients; i++ ) {
+            ent = &g_entities[level.sortedClients[i]];
+            if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+                continue;
+            }
+            if (winner == 0 &&  (ent->client->ps.powerups[PW_BLUEFLAG])) {
+                G_writeObjectiveEvent(ent, objCapture  );
+                ent->client->sess.obj_captured++;
+                break;
+			}
+			else if (winner == 1 && (ent->client->ps.powerups[PW_REDFLAG]))
+			{
+                G_writeObjectiveEvent(ent, objCapture  );
+                ent->client->sess.obj_captured++;
+                break;
+			}
+        }
+    }
+
+
+
+
+
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
 		ref = level.sortedClients[i];
@@ -1168,15 +1194,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 
 
-					if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
-                            G_writeObjectiveEvent(ent, objCapture  );
-                            cl->sess.obj_captured++;
-					}
-					else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
-					{
-                            G_writeObjectiveEvent(ent, objCapture  );
-                            cl->sess.obj_captured++;
-					}
+
 
 
 				}
@@ -1204,16 +1222,6 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 							AAPS("sound/match/winallies.wav");
 						}
 						*/
-                        if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
-                                G_writeObjectiveEvent(ent, objCapture  );
-                                cl->sess.obj_captured++;
-                        }
-                        else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
-                        {
-                                G_writeObjectiveEvent(ent, objCapture  );
-                                cl->sess.obj_captured++;
-                        }
-
 					}
 					else
 					{
