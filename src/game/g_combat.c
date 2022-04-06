@@ -648,15 +648,17 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->limboDropWeapon = self->s.weapon; // store this so it can be dropped in limbo
 	}
 // jpw
-	self->s.angles[2] = 0;
+	//self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );
-
-	VectorCopy( self->s.angles, self->client->ps.viewangles );
+	self->client->ps.viewangles[0] = 0;
+	self->client->ps.viewangles[2] = 0;
+	//VectorCopy( self->s.angles, self->client->ps.viewangles ); // don't make the corpse look a different way
+	
+	//trap_UnlinkEntity( self );
 	self->s.loopSound = 0;
-
-	trap_UnlinkEntity( self );
-	self->r.maxs[2] = 0;
-	self->client->ps.maxs[2] = 0;
+	// ET Port
+	self->r.maxs[2] = self->client->ps.crouchMaxZ;  //%	0;			// ydnar: so bodies don't clip into world
+	self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
 	trap_LinkEntity( self );
 
 	// don't allow respawn until the death anim is done

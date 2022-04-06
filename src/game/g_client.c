@@ -2353,18 +2353,18 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
 
+	// regardless of revive or respawn clear the powerups
+	if (client->ps.powerups)
+	{
+		ent->s.powerups = 0;
+		memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
+	}
+
 	if ( revived ) {
 		spawnPoint = ent;
 		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix document/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
 		VectorCopy( ent->r.currentAngles, spawn_angles );
-
-		// make sure powerups get reset
-  		if (client->ps.powerups)
-		{
-			ent->s.powerups = 0;
-			memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
-		}
 	}
 	else
 	{
@@ -2590,7 +2590,18 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// the respawned flag will be cleared after the attack and jump keys come up
 	client->ps.pm_flags |= PMF_RESPAWNED;
 
-	SetClientViewAngle( ent, spawn_angles );
+	if ( !revived ) {
+		SetClientViewAngle( ent, spawn_angles );
+	} else {
+		// ET port - bani - #245 - we try to orient them in the freelook direction when revived
+		vec3_t newangle;
+
+		newangle[YAW] = SHORT2ANGLE( ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW] );
+		newangle[PITCH] = 0;
+		newangle[ROLL] = 0;
+
+		SetClientViewAngle( ent, newangle );
+	}
 
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		//G_KillBox( ent );
@@ -2698,37 +2709,41 @@ void ClientDisconnect( int clientNum ) {
 		TossClientItems( ent );
 
 		// New code for tossing flags
-		if ( g_gametype.integer >= GT_WOLF ) {
-			if ( ent->client->ps.powerups[PW_REDFLAG] ) {
-				item = BG_FindItem( "Red Flag" );
-				if ( !item ) {
-					item = BG_FindItem( "Objective" );
+		if (g_gametype.integer >= GT_WOLF) {
+			if (ent->client->ps.powerups[PW_REDFLAG]) {
+				item = BG_FindItem("Red Flag");
+				if (!item) {
+					item = BG_FindItem("Objective");
 				}
 
 				ent->client->ps.powerups[PW_REDFLAG] = 0;
 			}
-			if ( ent->client->ps.powerups[PW_BLUEFLAG] ) {
-				item = BG_FindItem( "Blue Flag" );
-				if ( !item ) {
-					item = BG_FindItem( "Objective" );
+			if (ent->client->ps.powerups[PW_BLUEFLAG]) {
+				item = BG_FindItem("Blue Flag");
+				if (!item) {
+					item = BG_FindItem("Objective");
 				}
 
 				ent->client->ps.powerups[PW_BLUEFLAG] = 0;
 			}
 
-			if ( item ) {
+			if (item) {
 				// OSPx - Fix documents passing exploit
 				launchvel[0] = 0;
 				launchvel[1] = 0;
 				launchvel[2] = 40;
 
-				flag = LaunchItem( item,ent->r.currentOrigin,launchvel,ent->s.number );
+				flag = LaunchItem(item, ent->r.currentOrigin, launchvel, ent->s.number);
 				flag->s.modelindex2 = ent->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
 				flag->message = ent->message;   // DHM - Nerve :: also restore item name
 				// Clear out player's temp copies
 				ent->s.otherEntityNum2 = 0;
 				ent->message = NULL;
 			}
+
+			// OSP - Log stats too
+			// Will this fix people quitting before end of round?
+			G_LogPrintf("WeaponStats: %s\n", G_createStats(ent));
 		}
 	}
 
