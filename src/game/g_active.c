@@ -81,6 +81,12 @@ void P_DamageFeedback( gentity_t *player ) {
 		client->ps.damageYaw = angles[YAW] / 360.0 * 256;
 	}
 
+	if (g_debugDamage.integer)
+	{
+		G_Printf("client: %i pitch: %i yaw: %i\n", client->ps.clientNum, client->ps.damagePitch, client->ps.damageYaw);
+		AP(va("print \"client:%i pitch: %i yaw: %i\n\"", client->ps.clientNum, client->ps.damagePitch, client->ps.damageYaw));
+	}
+
 	// play an apropriate pain sound
 	if ( ( level.time > player->pain_debounce_time ) && !( player->flags & FL_GODMODE ) && !( player->r.svFlags & SVF_CASTAI ) && !( player->s.powerups & PW_INVULNERABLE ) ) { //----(SA)
 		player->pain_debounce_time = level.time + 700;
