@@ -304,7 +304,6 @@ vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
 vmCvar_t cg_noChat;
 vmCvar_t cg_noVoice;
-vmCvar_t cg_wideScreen;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
 vmCvar_t cg_zoomedSens;
@@ -477,9 +476,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_markTime, "cg_marktime", "10000", CVAR_ARCHIVE },
 	{ &cg_lagometer, "cg_lagometer", "0", CVAR_ARCHIVE },
 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
-	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT },
-	{ &cg_gun_y, "cg_gunY", "0", CVAR_CHEAT },
-	{ &cg_gun_z, "cg_gunZ", "0", CVAR_CHEAT },
+	{ &cg_gun_x, "cg_gunX", "0", CVAR_ARCHIVE }, //CVAR_CHEAT
+	{ &cg_gun_y, "cg_gunY", "0", CVAR_ARCHIVE }, //CVAR_CHEAT
+	{ &cg_gun_z, "cg_gunZ", "0", CVAR_ARCHIVE }, //CVAR_CHEAT
 	{ &cg_centertime, "cg_centertime", "5", CVAR_CHEAT },     // DHM - Nerve :: changed from 3 to 5
 	{ &cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
 	{ &cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE },
@@ -2823,17 +2822,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// NERVE - SMF
 // JPW NERVE -- commented out 'cause this moved
 
-	// OSPx - Account for WideScreen
-	if (cg_wideScreen.integer) {
-		trap_Cvar_Set("cg_gunX", "2");
-		trap_Cvar_Set("cg_gunY", "-1");
-		trap_Cvar_Set("cg_gunZ", "1");
-	}
-	else {
-		trap_Cvar_Set("cg_gunX", "0");
-		trap_Cvar_Set("cg_gunY", "0");
-		trap_Cvar_Set("cg_gunZ", "0");
-	}
 	if ( cgs.gametype >= GT_WOLF ) {
 		trap_Cvar_Set( "cg_drawTimer", "0" ); // jpw
 	}
