@@ -3356,6 +3356,10 @@ Checks to see if a specified team is allowing players to join.
 qboolean G_teamJoinCheck(int team_num, gentity_t* ent) {
 	int cnt = TeamCount(-1, team_num);
 
+#ifdef OMNIBOT
+	return(qtrue);
+#endif
+
 	// Sanity check
 	if (cnt == 0) {
 		G_teamReset(team_num, qtrue, qfalse);
