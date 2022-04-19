@@ -490,14 +490,7 @@ void M_think( gentity_t *ent ) {
 	OSPx - Just Ported here
 */
 
-/*
-================
-G_ExplodeMissile
-
-Explode a missile without an impact
-================
-*/
-void G_AdjustedDamageVec(gentity_t *ent, vec3_t origin, vec3_t v) {
+void G_AdjustedDamageVec(gentity_t* ent, vec3_t origin, vec3_t v) {
 	int i;
 
 	if (!ent->r.bmodel) {
@@ -523,7 +516,7 @@ void G_AdjustedDamageVec(gentity_t *ent, vec3_t origin, vec3_t v) {
 AccuracyHit
 ===============
 */
-qboolean AccuracyHit(gentity_t *target, gentity_t *attacker) {
+qboolean AccuracyHit(gentity_t* target, gentity_t* attacker) {
 	if (!target->takedamage) {
 		return qfalse;
 	}
@@ -556,118 +549,6 @@ qboolean AccuracyHit(gentity_t *target, gentity_t *attacker) {
 }
 
 /*
-============
-G_ET_RadiusDamage
-
-dutch: changed the function name,
-so all other entities that doesn't have a problem with
-the orignal G_RadiusDamage can still use the old one
-============
-*/
-qboolean G_ET_RadiusDamage(vec3_t origin, gentity_t *inflictor, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod) {
-	float points, dist;
-	gentity_t   *ent;
-	int entityList[MAX_GENTITIES];
-	int numListedEntities;
-	vec3_t mins, maxs;
-	vec3_t v;
-	vec3_t dir;
-	int i, e;
-	qboolean hitClient = qfalse;
-	float boxradius;
-	vec3_t dest;
-	trace_t tr;
-	vec3_t midpoint;
-	int flags = DAMAGE_RADIUS;
-
-	if (radius < 1) {
-		radius = 1;
-	}
-
-	boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement --
-	// bounding box was checking against radius / sqrt(2) if collision is along box plane
-	for (i = 0; i < 3; i++) {
-		mins[i] = origin[i] - boxradius;
-		maxs[i] = origin[i] + boxradius;
-	}
-
-	numListedEntities = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
-
-	for (e = 0; e < level.num_entities; e++) {
-		g_entities[e].dmginloop = qfalse;
-	}
-
-	for (e = 0; e < numListedEntities; e++) {
-		ent = &g_entities[entityList[e]];
-
-		if (ent == ignore) {
-			continue;
-		}
-		if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
-			continue;
-		}
-
-		G_AdjustedDamageVec(ent, origin, v);
-
-		dist = VectorLength(v);
-		if (dist >= radius) {
-			continue;
-		}
-
-		points = damage * (1.0 - dist / radius);
-
-		if (CanDamage(ent, origin)) {
-			if (ent->dmgparent) {
-				ent = ent->dmgparent;
-			}
-
-			if (ent->dmginloop) {
-				continue;
-			}
-
-			if (AccuracyHit(ent, attacker)) {
-				hitClient = qtrue;
-			}
-			VectorSubtract(ent->r.currentOrigin, origin, dir);
-			// push the center of mass higher than the origin so players
-			// get knocked into the air more
-			dir[2] += 24;
-
-
-			G_Damage(ent, inflictor, attacker, dir, origin, (int)points, flags, mod);
-		}
-		else {
-			VectorAdd(ent->r.absmin, ent->r.absmax, midpoint);
-			VectorScale(midpoint, 0.5, midpoint);
-			VectorCopy(midpoint, dest);
-
-			trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
-			if (tr.fraction < 1.0) {
-				VectorSubtract(dest, origin, dest);
-				dist = VectorLength(dest);
-				if (dist < radius * 0.2f) { // closer than 1/4 dist
-					if (ent->dmgparent) {
-						ent = ent->dmgparent;
-					}
-
-					if (ent->dmginloop) {
-						continue;
-					}
-
-					if (AccuracyHit(ent, attacker)) {
-						hitClient = qtrue;
-					}
-					VectorSubtract(ent->r.currentOrigin, origin, dir);
-					dir[2] += 24;
-					G_Damage(ent, inflictor, attacker, dir, origin, (int)(points * 0.1f), flags, mod);
-				}
-			}
-		}
-	}
-	return hitClient;
-}
-
-/*
 ================
 BG_ET_EvaluateTrajectory
 
@@ -678,7 +559,7 @@ the oriignal BG_EvaluateTrajectory can still use the old one
 ================
 */
 
-void BG_ET_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result, qboolean isAngle, int splinePath) {
+void BG_ET_EvaluateTrajectory(const trajectory_t* tr, int atTime, vec3_t result, qboolean isAngle, int splinePath) {
 	float deltaTime;
 	float phase;
 	vec3_t v;
@@ -761,7 +642,13 @@ void BG_ET_EvaluateTrajectory(const trajectory_t *tr, int atTime, vec3_t result,
 	}
 }
 
+/*
+================
+G_ExplodeMissile
 
+Explode a missile without an impact
+================
+*/
 void G_ExplodeMissile( gentity_t *ent ) {
 	vec3_t dir;
 	vec3_t origin;
@@ -771,135 +658,142 @@ void G_ExplodeMissile( gentity_t *ent ) {
 	etype = ent->s.eType;
 	ent->s.eType = ET_GENERAL;
 
-	// splash damage
-	if (ent->splashDamage) {
-		vec3_t origin;
-		trace_t tr;
+	// trajectory for grenade
+  	if (!Q_stricmp(ent->classname, "grenade"))
+	{
+		BG_EvaluateTrajectory(&ent->s.pos, level.time, origin);
+	}
+	else // trajectory and splash damage for FFE/airstrike
+	{
+		// splash damage
+		if (ent->splashDamage)
+		{
+			vec3_t origin;
+			trace_t tr;
 
-		VectorCopy(ent->r.currentOrigin, origin);
+			VectorCopy(ent->r.currentOrigin, origin);
 
-		trap_Trace(&tr, origin, vec3_origin, vec3_origin, origin, ENTITYNUM_NONE, MASK_SHOT);
-		/*
-            Do not call G_ET_RadiusDamage but instead include it directly here (to avoid the desynchronizing of damage & bombs dropped)
-                (Time is short and so please excuse this plop-n-drop )
+			trap_Trace(&tr, origin, vec3_origin, vec3_origin, origin, ENTITYNUM_NONE, MASK_SHOT);
+			/*
+				Do not call G_ET_RadiusDamage but instead include it directly here (to avoid the desynchronizing of damage & bombs dropped)
+					(Time is short and so please excuse this plop-n-drop )
 
-        */
-        //G_ET_RadiusDamage(origin, ent, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath); //----(SA)
-
-
-        // begin: G_ET_RadiusDamage
-                float points, dist;
-                float radius=ent->splashRadius;
-                gentity_t *inflictor = ent;
-                gentity_t *attacker = ent->parent;
-                float damage =ent->splashDamage;
-                gentity_t *ignore = ent;
-                int mod = ent->splashMethodOfDeath;
-                gentity_t   *ent;
-                int entityList[MAX_GENTITIES];
-                int numListedEntities;
-                vec3_t mins, maxs;
-                vec3_t v;
-                vec3_t dir;
-                int i, e;
-                qboolean hitClient = qfalse;
-                float boxradius;
-                vec3_t dest;
-               // trace_t tr;
-                vec3_t midpoint;
-                int flags = DAMAGE_RADIUS;
-
-                if (radius < 1) {
-                    radius = 1;
-                }
-
-                boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement --
-                // bounding box was checking against radius / sqrt(2) if collision is along box plane
-                for (i = 0; i < 3; i++) {
-                    mins[i] = origin[i] - boxradius;
-                    maxs[i] = origin[i] + boxradius;
-                }
-
-                numListedEntities = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
-
-                for (e = 0; e < level.num_entities; e++) {
-                    g_entities[e].dmginloop = qfalse;
-                }
-
-                for (e = 0; e < numListedEntities; e++) {
-                    ent = &g_entities[entityList[e]];
-
-                    if (ent == ignore) {
-                        continue;
-                    }
-                    if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
-                        continue;
-                    }
-
-                    G_AdjustedDamageVec(ent, origin, v);
-
-                    dist = VectorLength(v);
-                    if (dist >= radius) {
-                        continue;
-                    }
-
-                    points = damage * (1.0 - dist / radius);
-
-                    if (CanDamage(ent, origin)) {
-                        if (ent->dmgparent) {
-                            ent = ent->dmgparent;
-                        }
-
-                        if (ent->dmginloop) {
-                            continue;
-                        }
-
-                        if (AccuracyHit(ent, attacker)) {
-                            hitClient = qtrue;
-                        }
-                        VectorSubtract(ent->r.currentOrigin, origin, dir);
-                        // push the center of mass higher than the origin so players
-                        // get knocked into the air more
-                        dir[2] += 24;
+			*/
+			//G_ET_RadiusDamage(origin, ent, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath); //----(SA)
 
 
-                        G_Damage(ent, inflictor, attacker, dir, origin, (int)points, flags, mod);
-                    }
-                    else {
-                        VectorAdd(ent->r.absmin, ent->r.absmax, midpoint);
-                        VectorScale(midpoint, 0.5, midpoint);
-                        VectorCopy(midpoint, dest);
+			// begin: G_ET_RadiusDamage
+			float points, dist;
+			float radius=ent->splashRadius;
+			gentity_t *inflictor = ent;
+			gentity_t *attacker = ent->parent;
+			float damage =ent->splashDamage;
+			gentity_t *ignore = ent;
+			int mod = ent->splashMethodOfDeath;
+			gentity_t   *ent;
+			int entityList[MAX_GENTITIES];
+			int numListedEntities;
+			vec3_t mins, maxs;
+			vec3_t v;
+			vec3_t dir;
+			int i, e;
+			qboolean hitClient = qfalse;
+			float boxradius;
+			vec3_t dest;
+			// trace_t tr;
+			vec3_t midpoint;
+			int flags = DAMAGE_RADIUS;
 
-                        trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
-                        if (tr.fraction < 1.0) {
-                            VectorSubtract(dest, origin, dest);
-                            dist = VectorLength(dest);
-                            if (dist < radius * 0.2f) { // closer than 1/4 dist
-                                if (ent->dmgparent) {
-                                    ent = ent->dmgparent;
-                                }
+			if (radius < 1) {
+				radius = 1;
+			}
 
-                                if (ent->dmginloop) {
-                                    continue;
-                                }
+			boxradius = 1.41421356 * radius; // radius * sqrt(2) for bounding box enlargement --
+			// bounding box was checking against radius / sqrt(2) if collision is along box plane
+			for (i = 0; i < 3; i++) {
+				mins[i] = origin[i] - boxradius;
+				maxs[i] = origin[i] + boxradius;
+			}
 
-                                if (AccuracyHit(ent, attacker)) {
-                                    hitClient = qtrue;
-                                }
-                                VectorSubtract(ent->r.currentOrigin, origin, dir);
-                                dir[2] += 24;
-                                G_Damage(ent, inflictor, attacker, dir, origin, (int)(points * 0.1f), flags, mod);
-                            }
-                        }
-                    }
-                }
+			numListedEntities = trap_EntitiesInBox(mins, maxs, entityList, MAX_GENTITIES);
+
+			for (e = 0; e < level.num_entities; e++) {
+				g_entities[e].dmginloop = qfalse;
+			}
+
+			for (e = 0; e < numListedEntities; e++) {
+				ent = &g_entities[entityList[e]];
+
+				if (ent == ignore) {
+					continue;
+				}
+				if (!ent->takedamage && (!ent->dmgparent || !ent->dmgparent->takedamage)) {
+					continue;
+				}
+
+				G_AdjustedDamageVec(ent, origin, v);
+
+				dist = VectorLength(v);
+				if (dist >= radius) {
+					continue;
+				}
+
+				points = damage * (1.0 - dist / radius);
+
+				if (CanDamage(ent, origin)) {
+					if (ent->dmgparent) {
+						ent = ent->dmgparent;
+					}
+
+					if (ent->dmginloop) {
+						continue;
+					}
+
+					if (AccuracyHit(ent, attacker)) {
+						hitClient = qtrue;
+					}
+					VectorSubtract(ent->r.currentOrigin, origin, dir);
+					// push the center of mass higher than the origin so players
+					// get knocked into the air more
+					dir[2] += 24;
 
 
+					G_Damage(ent, inflictor, attacker, dir, origin, (int)points, flags, mod);
+				}
+				else {
+					VectorAdd(ent->r.absmin, ent->r.absmax, midpoint);
+					VectorScale(midpoint, 0.5, midpoint);
+					VectorCopy(midpoint, dest);
 
+					trap_Trace(&tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID);
+					if (tr.fraction < 1.0) {
+						VectorSubtract(dest, origin, dest);
+						dist = VectorLength(dest);
+						if (dist < radius * 0.2f) { // closer than 1/4 dist
+							if (ent->dmgparent) {
+								ent = ent->dmgparent;
+							}
+
+							if (ent->dmginloop) {
+								continue;
+							}
+
+							if (AccuracyHit(ent, attacker)) {
+								hitClient = qtrue;
+							}
+							VectorSubtract(ent->r.currentOrigin, origin, dir);
+							dir[2] += 24;
+							G_Damage(ent, inflictor, attacker, dir, origin, (int)(points * 0.1f), flags, mod);
+						}
+					}
+				}
+			}
+		}
+
+		BG_ET_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse, ent->s.effect2Time);
         //end G_ET_RadiusDamage
 	}
 
-	BG_ET_EvaluateTrajectory(&ent->s.pos, level.time, origin, qfalse, ent->s.effect2Time);
 	SnapVector(origin);
 	G_SetOrigin(ent, origin);
 
@@ -935,6 +829,18 @@ void G_ExplodeMissile( gentity_t *ent ) {
 
 	ent->freeAfterEvent = qtrue;
 
+	// splash damage for grenade
+	if (!Q_stricmp(ent->classname, "grenade"))
+	{
+		if ( ent->splashDamage ) {
+			if ( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath ) ) {    //----(SA)
+				if ( g_entities[ent->r.ownerNum].client ) {
+					g_entities[ent->r.ownerNum].client->ps.persistant[PERS_ACCURACY_HITS]++;
+				}
+			}
+		}
+	}
+			
 	trap_LinkEntity(ent);
 
 	if (etype == ET_MISSILE) {
@@ -996,7 +902,6 @@ void G_ExplodeMissile( gentity_t *ent ) {
 		return;
 	}
 }
-
 
 /*
 ================
@@ -1564,6 +1469,13 @@ gentity_t *fire_grenade( gentity_t *self, vec3_t start, vec3_t dir, int grenadeW
 	// no self->client for shooter_grenade's
 	if ( self->client ) {
 		self->client->ps.grenadeTimeLeft = 0;       // reset grenade timer
+
+		// RtcwPro Issue #345 take away the ammo on fire
+		// this will work when not letting go of +attack and when getting killed
+		//self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
+		//if (!(self->client->ps.persistant[PERS_HWEAPON_USE])) {
+		//	PM_WeaponUseAmmo(self->client->ps.weapon, ammoTable[self->s.weapon].uses);
+		//}
 
 	}
 	if ( !noExplode ) {

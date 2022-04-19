@@ -341,11 +341,11 @@ extern cvar_t  *sv_gameskill;
 extern cvar_t *sv_dl_maxRate;
 
 // Anti wallhack
-extern cvar_t* wh_active;
-extern cvar_t* wh_bbox_horz;
-extern cvar_t* wh_bbox_vert;
-extern cvar_t* wh_add_xy;
-extern cvar_t* wh_check_fov;
+//extern cvar_t* wh_active;
+//extern cvar_t* wh_bbox_horz;
+//extern cvar_t* wh_bbox_vert;
+//extern cvar_t* wh_add_xy;
+//extern cvar_t* wh_check_fov;
 
 // HTTP Downloads
 extern cvar_t* sv_wwwDownload;	// general flag to enable/disable www download redirects

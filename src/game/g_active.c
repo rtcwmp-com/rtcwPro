@@ -1294,6 +1294,32 @@ void ClientThink_real( gentity_t *ent ) {
 
 	ent->client->ps.identifyClient = ucmd->identClient;     // NERVE - SMF
 
+	// RTCWPro
+	if (g_alternatePing.integer) 
+	{
+		int sum = 0;
+		client->pers.pingsamples[client->pers.samplehead] = level.previousTime - ucmd->serverTime;
+		client->pers.samplehead++;
+
+		if (client->pers.samplehead >= NUM_PING_SAMPLES) 
+		{
+			client->pers.samplehead -= NUM_PING_SAMPLES;
+		}
+
+		for (i = 0; i < NUM_PING_SAMPLES; i++) 
+		{
+			sum += client->pers.pingsamples[i];
+		}
+
+		client->pers.alternatePing = sum / NUM_PING_SAMPLES;
+
+		if (client->pers.alternatePing < 0) 
+		{
+			client->pers.alternatePing = 0;
+		}
+	}
+	// RTCWPro end
+
 // JPW NERVE -- update counter for capture & hold display
 	if ( g_gametype.integer == GT_WOLF_CPH ) {
 		client->ps.stats[STAT_CAPTUREHOLD_RED] = level.capturetimes[TEAM_RED];
@@ -1570,6 +1596,18 @@ void ClientThink_real( gentity_t *ent ) {
 
 	}
 #endif
+
+	// RTCWPro
+	if (g_fixedphysicsfps.integer)
+	{
+		if (g_fixedphysicsfps.integer > 333)
+		{
+			trap_Cvar_Set("g_fixedphysicsfps", "333");
+		}
+
+		pm.fixedphysicsfps = g_fixedphysicsfps.integer;
+	}
+
 	// Ridah
 //	if (ent->r.svFlags & SVF_NOFOOTSTEPS)
 //		pm.noFootsteps = qtrue;
@@ -2221,6 +2259,16 @@ while a slow client may have multiple ClientEndFrame between ClientThink.
 */
 void ClientEndFrame( gentity_t *ent ) {
 	int i;
+
+	// RTCWPro
+	if (g_alternatePing.integer) 
+	{
+		if (ent->client->ps.ping >= 999) 
+		{
+			ent->client->pers.alternatePing = ent->client->ps.ping;
+		}
+	}
+	// RTCWPro end
 
 	// used for informing of speclocked teams.
 	// Zero out here and set only for certain specs

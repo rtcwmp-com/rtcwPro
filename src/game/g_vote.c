@@ -542,40 +542,16 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 			return( G_INVALID );
 		}
 
-		// RTCWPro - check for matching maps
-            // nihi : done quickly and will clean this up later
-		for (i = 0; i <= level.mapcount + 1; i++) {
-			if (strstr(level.maplist[i], arg2) != NULL) {
-				if (numMatches == 0) {
-					mapIndex = i;
+		// nihi: check for matching maps
+		int mapMatch = G_FindMatchingMaps(ent, arg2);
 
-				}
-				else if (numMatches == 1) {
-					CP(va("print \"^3Multiple matches found:\n"));
-					CP(va("print \"^3  %s\n\"", level.maplist[mapIndex]));
-					CP(va("print \"^3  %s\n\"", level.maplist[i]));
-				}
-				else if (numMatches > 1) {
-					CP(va("print \"^3  %s\n\"", level.maplist[i]));
-				}
-				numMatches += 1;
-			}
-            if (Q_stricmp(level.maplist[i], arg2) == 0) {
-                mapIndex=i;
-                numMatches = 1; // found exact match...there are better ways but it works for now
-                break;
-			}
+		if (mapMatch >= 0)
+		{
+			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapMatch]));
+			Q_strncpyz(vmapname, level.maplist[mapMatch], sizeof(vmapname));
 		}
-
-		if (numMatches == 1) {
-			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapIndex]));
-			Q_strncpyz(vmapname, level.maplist[mapIndex], sizeof(vmapname));
-		}
-		else if (numMatches > 1) {
-			return(G_INVALID);
-		}
-		else {
-			CP(va("print \"^3%s ^7is not on the server.\n\"", arg2));
+		else
+		{
 			return(G_INVALID);
 		}
 		// end matching maps code

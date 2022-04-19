@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
 //#define GAMEVERSION "RtcwPro 1.0 beta"
-#define JSONGAMESTATVERSION "0.1.3"
+#define JSONGAMESTATVERSION "0.1.4"
 
 #ifdef OMNIBOT
 //exclude some of the original bot code
@@ -192,6 +192,9 @@ void G_Script_ScriptEvent( gentity_t *ent, char *eventStr, char *params );
 
 
 #define CFOFS( x ) ( (int)&( ( (gclient_t *)0 )->x ) )
+
+// RTCWPro
+#define NUM_PING_SAMPLES 64
 
 struct gentity_s {
 	entityState_t s;                // communicated by server to clients
@@ -591,6 +594,9 @@ typedef struct {
 	int obj_destroyed;
 	int obj_returned;
 	int obj_taken;
+	int obj_checkpoint;
+	int obj_killcarrier;
+	int obj_protectflag;
 	int dyn_planted;
 	int dyn_defused;
 	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
@@ -673,6 +679,10 @@ typedef struct {
 	int restrictedWeapon;
 	qboolean drawHitBoxes;
 	qboolean findMedic;
+	// g_alternatePing from rtcwPub
+	int	alternatePing;
+	int	pingsamples[NUM_PING_SAMPLES];
+	int	samplehead;
 // temp
 //S4NDM4NN for the stats
 	int kills;
@@ -947,7 +957,6 @@ typedef struct {
 	int teamVoteTime[2];                // level.time vote was called
 	int teamVoteYes[2];
 	int teamVoteNo[2];
-	int numteamVotingClients[2];        // set by CalculateRanks
 
 	// spawn variables
 	qboolean spawning;                  // the G_Spawn*() functions are valid
@@ -1140,14 +1149,14 @@ void G_RunItem( gentity_t *ent );
 void RespawnItem( gentity_t *ent );
 
 void UseHoldableItem( gentity_t *ent, int item );
-void PrecacheItem( gitem_t *it );
+//void PrecacheItem( gitem_t *it );
 gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle, qboolean novelocity );
 gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity, int ownerNum );
-void SetRespawn( gentity_t *ent, float delay );
+//void SetRespawn( gentity_t *ent, float delay );
 void G_SpawnItem( gentity_t *ent, gitem_t *item );
 void FinishSpawningItem( gentity_t *ent );
-void Think_Weapon( gentity_t *ent );
-int ArmorIndex( gentity_t *ent );
+//void Think_Weapon( gentity_t *ent );
+//int ArmorIndex( gentity_t *ent );
 void Fill_Clip( playerState_t *ps, int weapon );
 void    Add_Ammo( gentity_t *ent, int weapon, int count, qboolean fillClip );
 void Touch_Item( gentity_t *ent, gentity_t *other, trace_t *trace );
@@ -1185,7 +1194,7 @@ void    G_FreeEntity( gentity_t *e );
 //qboolean	G_EntitiesFree( void );
 
 void    G_TouchTriggers( gentity_t *ent );
-void    G_TouchSolids( gentity_t *ent );
+//void    G_TouchSolids( gentity_t *ent );
 
 float   *tv( float x, float y, float z );
 char    *vtos( const vec3_t v );
@@ -1215,6 +1224,7 @@ int getDaysInMonth(int monthIndex);
 char* TablePrintableColorName(const char* name, int maxlength);
 qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension);
 qboolean G_SpawnEnts(gentity_t* ent);
+int G_FindMatchingMaps(gentity_t* ent, char* mapName);
 
 //
 // g_combat.c
@@ -1240,7 +1250,7 @@ void G_RunMissile( gentity_t *ent );
 int G_PredictMissile( gentity_t *ent, int duration, vec3_t endPos, qboolean allowBounce );
 
 // Rafael zombiespit
-void G_RunDebris( gentity_t *ent );
+//void G_RunDebris( gentity_t *ent );
 
 //DHM - Nerve :: server side flamethrower collision
 void G_RunFlamechunk( gentity_t *ent );
@@ -1326,8 +1336,8 @@ void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint( vec3_t avoidPoint, vec3_t origin, vec3_t angles );
 void respawn( gentity_t *ent );
 void BeginIntermission( void );
-void InitClientPersistant( gclient_t *client );
-void InitClientResp( gclient_t *client );
+//void InitClientPersistant( gclient_t *client );
+//void InitClientResp( gclient_t *client );
 void InitBodyQue( void );
 char* SanitizeClientIP(char* ip, qboolean printFull);
 void ClientSpawn( gentity_t *ent, qboolean revived );
@@ -1371,7 +1381,7 @@ void FireWeapon( gentity_t *ent );
 // p_hud.c
 //
 void MoveClientToIntermission( gentity_t *client );
-void G_SetStats( gentity_t *ent );
+//void G_SetStats( gentity_t *ent );
 void DeathmatchScoreboardMessage( gentity_t *client );
 
 //
@@ -1385,6 +1395,7 @@ qboolean G_EmplacedGunIsMountable( gentity_t* ent, gentity_t* other );
 #endif
 qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand);
 void SanitizeString(char* in, char* out);
+void SanitizeStringToLower(char* in, char* out, qboolean fToLower);
 
 //
 // g_pweapon.c
@@ -1402,7 +1413,8 @@ void QDECL G_Printf( const char *fmt, ... );
 void QDECL G_DPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
 void CheckVote(void);
-void sortedActivePlayers(void);
+void SortedActivePlayers(void);
+void HandleEmptyTeams(void);
 
 //
 // g_client.c
@@ -1441,6 +1453,7 @@ void G_readyReset( qboolean aForced );
 void G_readyResetOnPlayerLeave(int team);
 void G_readyStart( void );
 void G_readyTeamLock( void );
+qboolean G_teamJoinCheck(int team_num, gentity_t* ent);
 
 //
 // g_mem.c
@@ -1656,7 +1669,7 @@ extern vmCvar_t match_timeoutcount;
 // Server stuff
 extern vmCvar_t	g_unlockWeapons;
 extern vmCvar_t	g_disableSMGPickup;
-extern vmCvar_t g_gamelocked;
+//extern vmCvar_t g_gamelocked; // KK commented this out this is a "referee" lock we don't need
 extern vmCvar_t	sv_hostname;
 extern vmCvar_t svx_serverStreaming;
 extern vmCvar_t g_bannedMSG;
@@ -1744,6 +1757,9 @@ extern vmCvar_t g_mapScriptDirectory;
 extern vmCvar_t g_thinkStateLevelTime;
 extern vmCvar_t g_endStateLevelTime;
 extern vmCvar_t g_thinkSnapOrigin;
+extern vmCvar_t g_fixedphysicsfps;
+extern vmCvar_t g_alternatePing;
+extern vmCvar_t g_allowForceTapout;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -2009,7 +2025,7 @@ void G_ResetMarkers( gentity_t* ent );
 //
 
 void G_UpdateCvars(void);
-void G_teamReset(int, qboolean);
+void G_teamReset(int, qboolean, qboolean);
 void ServerPlayerInfo(void);
 void LoadMapList( void );
 //
@@ -2165,6 +2181,8 @@ enum eventList {
     objDynDefuse,
     objSpawnFlag,
     objDestroyed,
+	objKilledCarrier,
+	objProtectFlag,
     redRespawn,
     blueRespawn,
     teamFirstSpawn,

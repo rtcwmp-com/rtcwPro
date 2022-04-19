@@ -188,6 +188,8 @@ void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacke
 		attacker->client->pers.teamState.lastfraggedcarrier = level.time;
 		if ( g_gametype.integer >= GT_WOLF ) {
 			AddScore( attacker, WOLF_FRAG_CARRIER_BONUS );
+			G_writeObjectiveEvent(attacker, objKilledCarrier);
+			attacker->client->sess.obj_killcarrier++;
 		} else {
 			AddScore( attacker, CTF_FRAG_CARRIER_BONUS );
 			PrintMsg( NULL, "%s" S_COLOR_WHITE " fragged %s's flag carrier!\n",
@@ -313,6 +315,8 @@ void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacke
 			if ( VectorLength( v1 ) < WOLF_CP_PROTECT_RADIUS ) {
 				if ( flag->spawnflags & 1 ) {                     // protected spawnpoint
 					AddScore( attacker, WOLF_SP_PROTECT_BONUS );
+					G_writeObjectiveEvent(attacker, objProtectFlag);
+					attacker->client->sess.obj_protectflag++;
 				} else {
 					AddScore( attacker, WOLF_CP_PROTECT_BONUS );  // protected checkpoint
 				}
@@ -561,7 +565,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		AddScore( other, WOLF_CAPTURE_BONUS );
 		PrintMsg( NULL,"%s" S_COLOR_WHITE " captured enemy objective!\n",cl->pers.netname );
 		//G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
-		G_writeObjectiveEvent(other, objCapture  );
+		//G_writeObjectiveEvent(other, objCapture  ); // KK we do this in G_matchInfoDump
 	} else {
 		AddScore( other, CTF_CAPTURE_BONUS );
 	}
@@ -589,7 +593,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 // JPW NERVE
 				if ( g_gametype.integer >= GT_WOLF ) {
 					AddScore( player, WOLF_CAPTURE_BONUS );
-					G_writeObjectiveEvent(player, objCapture  );
+					//G_writeObjectiveEvent(player, objCapture  ); // KK we do this in G_matchInfoDump
 				} else {
 // jpw
 					AddScore( player, CTF_CAPTURE_BONUS );
@@ -1590,7 +1594,7 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 #endif
 
         G_writeObjectiveEvent(other, objSpawnFlag  );
-        //other->client->sess.obj_checkpoint++;
+        other->client->sess.obj_checkpoint++;
 	} else {
 		G_Script_ScriptEvent( self, "trigger", "allied_capture" );
 #ifdef OMNIBOT
@@ -1598,7 +1602,7 @@ void checkpoint_spawntouch( gentity_t *self, gentity_t *other, trace_t *trace ) 
 #endif
 
         G_writeObjectiveEvent(other, objSpawnFlag  );
-        //other->client->sess.obj_checkpoint++;
+        other->client->sess.obj_checkpoint++;
 	}
 
     //other->client->sess.obj_checkpoint+;
@@ -1722,17 +1726,30 @@ OSPx - G_teamReset (et port)
 Resets a team's settings
 ===========
 */
-void G_teamReset(int team_num, qboolean fClearSpecLock) {
-	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
-	teamInfo[team_num].team_name[0] = 0;
-	teamInfo[team_num].timeouts = match_timeoutcount.integer;
+void G_teamReset(int team_num, qboolean fClearSpecLock, qboolean bothTeams) {
 
-	if (fClearSpecLock) {
-		teamInfo[team_num].spec_lock = qfalse;
+	if (bothTeams)
+	{
+		for (int i = TEAM_RED; i <= TEAM_BLUE; i++)
+		{
+			teamInfo[i].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+			teamInfo[i].team_name[0] = 0;
+			teamInfo[i].timeouts = match_timeoutcount.integer;
+
+			if (fClearSpecLock) {
+				teamInfo[i].spec_lock = qfalse;
+			}
+		}
 	}
+	else
+	{
+		teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+		teamInfo[team_num].team_name[0] = 0;
+		teamInfo[team_num].timeouts = match_timeoutcount.integer;
 
-	if (g_gamelocked.integer > 0) {
-		trap_Cvar_Set("g_gamelocked", "0");
+		if (fClearSpecLock) {
+			teamInfo[team_num].spec_lock = qfalse;
+		}
 	}
 }
 
@@ -1745,8 +1762,7 @@ void G_shuffleTeams( void ) {
 
 	gclient_t *cl;
 
-	G_teamReset( TEAM_RED, qfalse );
-	G_teamReset( TEAM_BLUE, qfalse);
+	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		aTeamCount[i] = 0;
@@ -1769,15 +1785,6 @@ void G_shuffleTeams( void ) {
 
 		cTeam = ( i % 2 ) + TEAM_RED;
 
-		if ( cl->sess.sessionTeam != cTeam ) {
-			/*G_LeaveTank( g_entities + sortClients[i], qfalse );
-			G_RemoveClientFromFireteams( sortClients[i], qtrue, qfalse );
-			if ( g_landminetimeout.integer ) {
-				G_ExplodeMines( g_entities + sortClients[i] );
-			}
-			G_FadeItems( g_entities + sortClients[i], MOD_SATCHEL );*/
-		}
-
 		cl->sess.sessionTeam = cTeam;
 
 		//G_UpdateCharacter( cl );
@@ -1793,9 +1800,7 @@ void G_swapTeams( void ) {
 	int i;
 	gclient_t *cl;
 
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		G_teamReset( i, qfalse );
-	}
+	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = level.clients + level.sortedClients[i];
@@ -2013,6 +2018,6 @@ void G_readyStart( void ) {
 void G_readyTeamLock( void ) {
 	teamInfo[TEAM_RED].team_lock = qtrue;
 	teamInfo[TEAM_BLUE].team_lock = qtrue;
-	trap_Cvar_Set("g_gamelocked", "3");
+	//trap_Cvar_Set("g_gamelocked", "3");
 }
 

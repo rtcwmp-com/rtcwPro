@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwMP-Pro 1.2.5.12"  // RTCWPro
+#define Q3_VERSION      "RtcwPro 1.2.7.13"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -1405,6 +1405,8 @@ typedef struct playerState_s {
 	aistateEnum_t aiState;
 
 	int identifyClient;                 // NERVE - SMF
+	int	bobTimer; // RTCWPro
+
 } playerState_t;
 
 

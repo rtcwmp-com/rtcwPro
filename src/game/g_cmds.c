@@ -86,13 +86,26 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		if ( cl->pers.connected == CON_CONNECTING ) {
 			ping = -1;
 		} else {
-			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			// RTCWPro
+			//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			if (g_alternatePing.integer) 
+			{
+				ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
+			}
+			else 
+			{
+				ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			}
+			// RTCWPro end
 		}
+
 		Com_sprintf( entry, sizeof( entry ),
 					 " %i %i %i %i %i %i %i %i", level.sortedClients[i],
 					 cl->ps.persistant[PERS_SCORE], ping, ( level.time - cl->pers.enterTime ) / 60000,
 					 scoreFlags, g_entities[level.sortedClients[i]].s.powerups, playerClass, respawnsLeft );
+
 		j = strlen( entry );
+
 		if ( stringlength + j > 1024 ) {
 			break;
 		}
@@ -194,6 +207,34 @@ void SanitizeString( char *in, char *out ) {
 
 /*
 ==================
+SanitizeString with tolower option
+
+Remove case and control characters
+==================
+*/
+void SanitizeStringToLower(char* in, char* out, qboolean fToLower) {
+	while (*in) {
+		if (*in == 27 || *in == '^') {
+			in++;       // skip color code
+			if (*in) {
+				in++;
+			}
+			continue;
+		}
+
+		if (*in < 32) {
+			in++;
+			continue;
+		}
+
+		*out++ = (fToLower) ? tolower(*in++) : *in++;
+	}
+
+	*out = 0;
+}
+
+/*
+==================
 ClientNumberFromString
 
 Returns a player number for either a number or name string
@@ -205,38 +246,49 @@ int ClientNumberFromString( gentity_t *to, char *s ) {
 	int idnum;
 	char s2[MAX_STRING_CHARS];
 	char n2[MAX_STRING_CHARS];
+	qboolean fIsNumber = qtrue;
+
+	// See if its a number or string
+	for ( idnum = 0; idnum < strlen( s ) && s[idnum] != 0; idnum++ ) {
+		if ( s[idnum] < '0' || s[idnum] > '9' ) {
+			fIsNumber = qfalse;
+			break;
+		}
+	}
+
+	// check for a name match
+	SanitizeStringToLower( s, s2, qtrue );
+	for ( idnum = 0, cl = level.clients; idnum < level.maxclients; idnum++, cl++ ) {
+		if ( cl->pers.connected != CON_CONNECTED ) {
+			continue;
+		}
+
+		SanitizeStringToLower( cl->pers.netname, n2, qtrue );
+		if ( !strcmp( n2, s2 ) ) {
+			return( idnum );
+		}
+	}
 
 	// numeric values are just slot numbers
-	if ( s[0] >= '0' && s[0] <= '9' ) {
+	if ( fIsNumber ) {
 		idnum = atoi( s );
 		if ( idnum < 0 || idnum >= level.maxclients ) {
-			trap_SendServerCommand( to - g_entities, va( "print \"Bad client slot: [lof]%i\n\"", idnum ) );
+			CPx( to - g_entities, va( "print \"Bad client slot: [lof]%i\n\"", idnum ) );
 			return -1;
 		}
 
 		cl = &level.clients[idnum];
 		if ( cl->pers.connected != CON_CONNECTED ) {
-			trap_SendServerCommand( to - g_entities, va( "print \"Client[lof] %i [lon]is not active\n\"", idnum ) );
+			CPx( to - g_entities, va( "print \"Client[lof] %i [lon]is not active\n\"", idnum ) );
 			return -1;
 		}
-		return idnum;
+		return( idnum );
 	}
 
-	// check for a name match
-	SanitizeString( s, s2 );
-	for ( idnum = 0,cl = level.clients ; idnum < level.maxclients ; idnum++,cl++ ) {
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		SanitizeString( cl->pers.netname, n2 );
-		if ( !strcmp( n2, s2 ) ) {
-			return idnum;
-		}
-	}
-
-	trap_SendServerCommand( to - g_entities, va( "print \"User [lof]%s [lon]is not on the server\n\"", s ) );
-	return -1;
+	CPx( to - g_entities, va( "print \"User [lof]%s [lon]is not on the server\n\"", s ) );
+	return( -1 );
 }
+
 
 /*
 ==================
@@ -614,54 +666,78 @@ void Cmd_DisplayMaps_f(gentity_t* ent)
 	int i, mapcount;
 	const int moreCount = 100;
 	qboolean more = qfalse;
+	char mapMatch[256];
+	int exactMatch;
 
 	if (!ent->moreCalled)
 	{
 		ent->moreCalls = 0;
 	}
 
-	CP(va("print \"^7Total of ^3%d ^7maps on server\n\"", level.mapcount));
+	trap_Argv(1, mapMatch, sizeof(mapMatch));
+
+	CP(va("print \"^7Total maps: ^3%d\n\"", level.mapcount));
 	CP("print \"^3------------------------------------------------------------------------\n\"");
 
-	for (mapcount = 1, i = (ent->moreCalls * moreCount); i < level.mapcount; mapcount += 3)
+	if (strlen(mapMatch))
 	{
+		exactMatch = G_FindMatchingMaps(ent, mapMatch);
 
-		if ((i + 3) <= level.mapcount)
+		if (exactMatch)
 		{
-			CP(va("print \"^7%-24s^7%-24s^7%-23s\n\"", level.maplist + (level.mapcount - i - mapcount),
-				level.maplist + (level.mapcount - i - mapcount - 1), level.maplist + (level.mapcount - i - mapcount - 2)));
+			Q_strncpyz(mapMatch, level.maplist[exactMatch], sizeof(mapMatch));
+			CP(va("print \"^3One match found:\n"));
+			CP(va("print \"^7  %s\n\"", level.maplist[exactMatch]));
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			return;
 		}
 		else
 		{
-     		CP(va("print \"^7%s \"", level.maplist + (level.mapcount - i - mapcount)));
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			return;
 		}
-
-		if (mapcount >= moreCount && (i + 3) != level.mapcount)
-		{
-			more = qtrue;
-			break;
-		}
-		else if ((i + mapcount >= level.mapcount))
-		{
-            more = qfalse;
-            break;
-		}
-	}
-
-	if (more)
-	{
-		int remaining = level.mapcount - i - mapcount - 1;
-		CP("print \"^3------------------------------------------------------------------------\n\"");
-		CP(va("print \"^7Use ^3/more ^7to list the next %d maps\n\"", remaining >= moreCount ? moreCount : remaining));
-		ent->more = Cmd_DisplayMaps_f;
-		return;
 	}
 	else
 	{
-		ent->more = 0;
-		ent->moreCalls = 0;
-		CP("print \"^3------------------------------------------------------------------------\n\"");
-		CP("print \"^7There are no more maps to list\n\"");
+		for (mapcount = 1, i = (ent->moreCalls * moreCount); i < level.mapcount; mapcount += 3)
+		{
+			if ((i + 3) <= level.mapcount)
+			{
+				CP(va("print \"^7%-24s^7%-24s^7%-23s\n\"", level.maplist + (level.mapcount - i - mapcount),
+					level.maplist + (level.mapcount - i - mapcount - 1), level.maplist + (level.mapcount - i - mapcount - 2)));
+			}
+			else
+			{
+				CP(va("print \"^7%s \"", level.maplist + (level.mapcount - i - mapcount)));
+			}
+
+			if (mapcount >= moreCount && (i + 3) != level.mapcount)
+			{
+				more = qtrue;
+				break;
+			}
+			else if ((i + mapcount >= level.mapcount))
+			{
+				more = qfalse;
+				break;
+			}
+		}
+
+		if (more)
+		{
+			int remaining = level.mapcount - i - mapcount - 1;
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			CP(va("print \"^7Use ^3/more ^7to list the next %d maps\n\"", remaining >= moreCount ? moreCount : remaining));
+			ent->more = Cmd_DisplayMaps_f;
+			return;
+		}
+		else
+		{
+			ent->more = 0;
+			ent->moreCalls = 0;
+			CP("print \"^3------------------------------------------------------------------------\n\"");
+			CP("print \"^7There are no more maps to list\n\"");
+		}
 	}
 }
 
@@ -775,25 +851,26 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			team = PickTeam( clientNum );
 		}
 
-		// L0 - lock teams
-		if (g_gamelocked.integer && !forced  )
-		{
-			if ( team == TEAM_RED && g_gamelocked.integer == 1 )
-			{
-				CP("cp \"^1Axis^7 team is locked^1!\n\"2");
-				return;
-			}
-			if ( team == TEAM_BLUE && g_gamelocked.integer == 2 )
-			{
-				CP("cp \"^4Allied^7 team is locked^4!\n\"2");
-				return;
-			}
-			if ( (team == TEAM_RED || team == TEAM_BLUE) && g_gamelocked.integer == 3)
-			{
-				CP("cp \"^3Both ^7teams are locked^3!\n\"2");
-				return;
-			}
-		} // end
+		// KK commented this out this is a "referee" lock we don't need
+		//// L0 - lock teams
+		//if (g_gamelocked.integer > 0 && !forced  )
+		//{
+		//	if ( team == TEAM_RED && g_gamelocked.integer == 1 )
+		//	{
+		//		CP("cp \"^1Axis^7 team is locked^1!\n\"2");
+		//		return;
+		//	}
+		//	if ( team == TEAM_BLUE && g_gamelocked.integer == 2 )
+		//	{
+		//		CP("cp \"^4Allied^7 team is locked^4!\n\"2");
+		//		return;
+		//	}
+		//	if ( (team == TEAM_RED || team == TEAM_BLUE) && g_gamelocked.integer == 3)
+		//	{
+		//		CP("cp \"^3Both ^7teams are locked^3!\n\"2");
+		//		return;
+		//	}
+		//} // end
 
 		// RTCWPro
 		if (ent->client->sess.shoutcaster && (team == TEAM_BLUE || team == TEAM_RED))
@@ -803,42 +880,42 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 			return;
 		}
 
-		// NERVE - SMF
-		// L0 - Ready (temporary) lock
+		// Replacement for g_gamelocked
+		if (team != TEAM_SPECTATOR && !forced) {
 #ifndef OMNIBOT
-		if (teamInfo[team].team_lock && !forced) {
-			CP(va("cp \"You cannot join %s team as countdown has already started!\n\"2", aTeams[team]));
-			return;
-		}
+			// OSPx - Ensure the player can join
+			if (!G_teamJoinCheck(team, ent)) {
+				// Leave them where they were before the command was issued			
+				return;
+			}
 
-		//if ( g_noTeamSwitching.integer && team != ent->client->sess.sessionTeam && g_gamestate.integer == GS_PLAYING ) {
-		if (g_noTeamSwitching.integer && (team != ent->client->sess.sessionTeam && ent->client->sess.sessionTeam != TEAM_SPECTATOR) && g_gamestate.integer == GS_PLAYING && !forced) {
-			trap_SendServerCommand( clientNum, "cp \"You cannot switch during a match, please wait until the round ends.\n\"" );
-			return; // ignore the request
-		}
+			// NERVE - SMF
+			if (g_noTeamSwitching.integer && team != ent->client->sess.sessionTeam && g_gamestate.integer == GS_PLAYING) {
+				CPx(clientNum, "cp \"You cannot switch during a match, please wait until the round ends.\n\"");
+				return; // ignore the request
+			}
 #endif
-		// NERVE - SMF - merge from team arena
-		if ( g_teamForceBalance.integer  ) {
-			int counts[TEAM_NUM_TEAMS];
+			// NERVE - SMF - merge from team arena
+			if (g_teamForceBalance.integer) {
+				int counts[TEAM_NUM_TEAMS];
 
-			counts[TEAM_BLUE] = TeamCount( ent - g_entities, TEAM_BLUE );
-			counts[TEAM_RED] = TeamCount( ent - g_entities, TEAM_RED );
+				counts[TEAM_BLUE] = TeamCount(ent - g_entities, TEAM_BLUE);
+				counts[TEAM_RED] = TeamCount(ent - g_entities, TEAM_RED);
 
-			// We allow a spread of one
-			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] >= 1 ) {
-				trap_SendServerCommand( clientNum,
-										"cp \"The Axis has too many players.\n\"" );
-				return; // ignore the request
+				// We allow a spread of one
+				if (team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] >= 1) {
+					CPx(clientNum, "cp \"The ^1Axis ^7has too many players.\n\"");
+					return; // ignore the request
+				}
+				if (team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] >= 1) {
+					CPx(clientNum, "cp \"The ^4Allies ^7have too many players.\n\"");
+					return; // ignore the request
+				}
+
+				// It's ok, the team we are switching to has less or same number of players
 			}
-			if ( team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] >= 1 ) {
-				trap_SendServerCommand( clientNum,
-										"cp \"The Allies have too many players.\n\"" );
-				return; // ignore the request
-			}
-
-			// It's ok, the team we are switching to has less or same number of players
 		}
-		// -NERVE - SMF
+
 	} else {
 		// force them to spectators if there aren't any spots free
 		team = TEAM_FREE;
@@ -860,10 +937,8 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	}
 
 	// NERVE - SMF - prevent players from switching to regain deployments
-	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] == 0 &&
-		 oldTeam != TEAM_SPECTATOR ) {
-		trap_SendServerCommand( clientNum,
-								"cp \"You can't switch teams because you are out of lives.\n\" 3" );
+	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] == 0 && oldTeam != TEAM_SPECTATOR && g_gamestate.integer == GS_PLAYING) {
+		CPx( clientNum, "cp \"You can't switch teams because you are out of lives.\n\" 3" );
 		return; // ignore the request
 	}
 
@@ -879,7 +954,7 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	// dhm
 	// OSPx - Handle warmup team switch nuke
 	// - In warmup without a check, one can switch teams (scripted) which floods and eventually crashes the server..
-	if (team != oldTeam && level.warmupTime && ((level.time - client->pers.connectTime) > 5000) && ((level.time - client->pers.enterTime) < 2000) && !forced) {
+	if (team != oldTeam && /*level.warmupTime &&*/ ((level.time - client->pers.connectTime) > 5000) && ((level.time - client->pers.enterTime) < 2000) && !forced) {
 		CPx(ent - g_entities, va("cp \"^3You must wait %i seconds before joining ^3a new team.\n\"3", (int)(2 - ((level.time - client->pers.enterTime) / 1000))));
 		return;
 	}
@@ -930,6 +1005,11 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	client->sess.spectatorState = specState;
 	client->sess.spectatorClient = specClient;
 	client->pers.ready = qfalse;
+
+	// Bug #380 - set sess.rounds for late joiner or player reconnecting during a pause
+	if (g_gamestate.integer == GS_PLAYING && client->sess.rounds == 0 && (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)) {
+		client->sess.rounds++;
+	}
 
 	// During team switching you can sometime spawn immediately
 	client->pers.lastReinforceTime = 0;
@@ -2899,6 +2979,11 @@ void ClientCommand( int clientNum ) {
 	} else if ( Q_stricmp( cmd, "setspawnpt" ) == 0 )  {
 		Cmd_SetSpawnPoint_f( ent );
 	} else if (!Q_stricmp(cmd, "forcetapout")) {
+		if (!g_allowForceTapout.integer)
+		{
+			return;
+		}
+
 		 if (!ent || !ent->client || level.paused != PAUSE_NONE) { // Do not allow forcetapout during pause
 			 return;
 		 }
@@ -2933,9 +3018,6 @@ static const cmd_reference_t aCommandInfo[] =
     { "+wstats",         qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current weapon stats info"                                          },
 //	{ "+objectives",    qtrue,  qtrue,  NULL,                  ":^7 HUD overlay showing current objectives info"                                            },
 //	{ "?",              qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
-	// copy of ?
-    { "cg_muzzleFlash",           qtrue,  qtrue,  NULL,        ":^7 1 = yours OFF, enemies ON   / 0 = yours OFF, enemies OFF"                                                               },
-    //{ "cg_tracerchance",           qtrue,  qtrue,  NULL,        ":^7 Enable/disable bullet tracers"                                                               },
 	{ "commandsHelp",           qtrue,  qtrue,  NULL,        ":^7 Gives a detailed list of commands"                                                               },
 	{ "commands",       qtrue,  qtrue,  NULL,        ":^7 Gives a list of commands"                                                               },
 //	{ "cstats",       qtrue,  qtrue,  NULL,        ":^7 !!!!!!!!!!!!!"                                                               },

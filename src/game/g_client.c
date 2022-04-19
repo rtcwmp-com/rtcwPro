@@ -645,19 +645,28 @@ void respawn( gentity_t *ent ) {
 
 	ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
 
-	// DHM - Nerve :: Decrease the number of respawns left
-	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0 ) {
-		ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
-	}
-
-	G_DPrintf( "Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT] );
-
 	// DHM - Nerve :: Already handled in 'limbo()'
 	if ( g_gametype.integer < GT_WOLF ) {
 		CopyToBodyQue( ent );
 	}
 
-	ClientSpawn( ent, qfalse );
+	if ((g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0) && g_gamestate.integer == GS_PLAYING)
+	{
+		if (ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0)
+		{
+			ClientSpawn(ent, qfalse);
+			ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
+			G_DPrintf("Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT]);
+		}
+		else
+		{
+			limbo(ent, qtrue);
+		}
+	}
+	else
+	{
+		ClientSpawn(ent, qfalse);
+	}
 
 	// L0 - antilag
 	G_ResetTrail(ent);
@@ -922,7 +931,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 	gclient_t* client = ent->client;
 
 	int pc = client->sess.playerType;
-	int starthealth = 100,i,numMedics = 0;   // JPW NERVE
+	int starthealth = 100, numMedics = 0;   // JPW NERVE
 	// L0 - ammoClips and NadeValues
 	//
 	// Patched this whole function but not commented it much so be aware..
@@ -953,7 +962,8 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 // Xian -- Commented out and moved to ClientSpawn for clarity
 //	client->ps.powerups[PW_INVULNERABLE] = level.time + 3000; // JPW NERVE some time to find cover
 
-	client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS)
+		client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// Communicate it to cgame
 	client->ps.stats[STAT_PLAYER_CLASS] = pc;
@@ -1678,17 +1688,17 @@ The game can override any of the settings and call trap_SetUserinfo
 if desired.
 ============
 */
-void ClientUserinfoChanged( int clientNum ) {
-	gentity_t *ent;
-	char    *s;
+void ClientUserinfoChanged(int clientNum) {
+	gentity_t* ent;
+	char* s;
 	char model[MAX_QPATH], modelname[MAX_QPATH];
 
-//----(SA) added this for head separation
+	//----(SA) added this for head separation
 	char head[MAX_QPATH];
 
 	char oldname[MAX_STRING_CHARS];
-	gclient_t   *client;
-	char    *c1;
+	gclient_t* client;
+	char* c1;
 	char userinfo[MAX_INFO_STRING];
 
 	ent = g_entities + clientNum;
@@ -1696,33 +1706,28 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	client->ps.clientNum = clientNum;
 
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
 	// check for malformed or illegal info strings
-	if ( !Info_Validate( userinfo ) ) {
-		strcpy( userinfo, "\\name\\badinfo" );
+	if (!Info_Validate(userinfo)) {
+		strcpy(userinfo, "\\name\\badinfo");
 	}
 
 	// check for local client
-	s = Info_ValueForKey( userinfo, "ip" );
-	if ( s && !strcmp( s, "localhost" ) ) {
+	s = Info_ValueForKey(userinfo, "ip");
+	if (s && !strcmp(s, "localhost")) {
 		client->pers.localClient = qtrue;
-	//	client->sess.referee = RL_REFEREE;
+		//	client->sess.referee = RL_REFEREE;
 	}
-// L0
-	// Save IP for getstatus..
-	s = Info_ValueForKey( userinfo, "ip" );
-	if( s[0] != 0 ){
-		SaveIP_f( client, s );
+	// L0
+		// Save IP for getstatus..
+	s = Info_ValueForKey(userinfo, "ip");
+	if (s[0] != 0) {
+		SaveIP_f(client, s);
 	} // OSPx - Country Flags
 	else if (!(ent->r.svFlags & SVF_BOT) && !strlen(s)) {
 		// To solve the IP bug..
-		s =	va("%s", client->sess.ip);
-	}
-	// Check for "" GUID..
-	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
-		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
-		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+		s = va("%s", client->sess.ip);
 	}
 #ifdef OMNIBOT
 	if ( ent->r.svFlags & SVF_BOT ) {
@@ -1737,7 +1742,23 @@ void ClientUserinfoChanged( int clientNum ) {
 	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
 		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
 
-	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
+	// Check for "" GUID..
+	if (!Q_stricmp(client->sess.guid, "D41D8CD98F00B204E9800998ECF8427E") ||
+		!Q_stricmp(client->sess.guid, "d41d8cd98f00b204e9800998ecf8427e")) {
+		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+	}
+
+	//// Check for Shared GUIDs and drop client - this is messing up stats
+	if (!Q_stricmp(client->sess.guid, "8E6A51BAF1C7E338A118D9E32472954E") ||
+		!Q_stricmp(client->sess.guid, "8e6a51baf1c7e338a118d9e32472954e") ||
+		!Q_stricmp(client->sess.guid, "58E419DE5A8B2655F6D48EAB68275DB5") ||
+		!Q_stricmp(client->sess.guid, "58e419de5a8b2655f6d48eab68275db5") ||
+		!Q_stricmp(client->sess.guid, "FBE2ED832F8415EFBAAA5DF10074484A") ||
+		!Q_stricmp(client->sess.guid, "fbe2ed832f8415efbaaa5df10074484a")) {
+		trap_DropClient(clientNum, "^3Shared GUID Violation. ^7Delete your RTCWKEY in Main and restart your game.");
+	}
+
+	if (!Q_stricmp(client->sess.guid,NO_GUID)) {
         trap_DropClient(clientNum, "Empty or invalid rtcwkey");
 	}
 
@@ -1923,7 +1944,7 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 
-		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\country\\255\\mu\\%i",
+		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\cc\\255\\mu\\%i",
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
@@ -1931,7 +1952,7 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i\\scs\\%i",
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\cc\\%i\\mu\\%i\\ref\\%i\\scs\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1, client->sess.wins, client->sess.losses,
 				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee, client->sess.shoutcaster);
 	}
@@ -1949,7 +1970,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\scs\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+		s = va("name\\%s\\team\\%s\\IP\\%s\\cc\\%i\\muted\\%s\\status\\%i\\scs\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
 			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.muted ? "yes" : "no"), client->sess.referee,
 			client->sess.shoutcaster, client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
@@ -2522,10 +2543,18 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 
 	if ( revived ) {
 		spawnPoint = ent;
-		VectorCopy( ent->s.origin, spawn_origin );
+		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix document/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
-		VectorCopy( ent->s.angles, spawn_angles );
-	} else
+		VectorCopy( ent->r.currentAngles, spawn_angles );
+
+		// make sure powerups get reset
+  		if (client->ps.powerups)
+		{
+			ent->s.powerups = 0;
+			memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
+		}
+	}
+	else
 	{
 		ent->aiName = "player";  // needed for script AI
 		//ent->aiTeam = 1;		// member of allies
@@ -2800,31 +2829,6 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 }
 
 /*
-================
-OSPx - check for team stuff..
-================
-*/
-void handleEmptyTeams(void) {
-
-	if (g_gamestate.integer != GS_INTERMISSION) {
-		if (!level.axisPlayers) {
-			G_teamReset(TEAM_RED, qtrue);
-
-			// Reset match if not paused with an empty team
-			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-		else if (!level.alliedPlayers) {
-			G_teamReset(TEAM_BLUE, qtrue);
-
-			// Reset match if not paused with an empty team
-			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
-}
-
-/*
 ===========
 ClientDisconnect
 
@@ -2962,7 +2966,7 @@ void ClientDisconnect( int clientNum ) {
 
 	CalculateRanks();
 
-	handleEmptyTeams();
+	HandleEmptyTeams();
 #ifndef OMNIBOT
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );

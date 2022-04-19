@@ -1015,7 +1015,10 @@ static void PM_DeadMove( void ) {
 	// extra friction
 
 	forward = VectorLength( pm->ps->velocity );
-	forward -= 20;
+	// RTCWPro
+	//forward -= 20;
+	forward -= 2000 * pml.frametime;
+	// RTCWPro end
 	if ( forward <= 0 ) {
 		VectorClear( pm->ps->velocity );
 	} else {
@@ -1246,6 +1249,7 @@ static void PM_CrashLand( void ) {
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;
+	pm->ps->bobTimer = 0; // RTCWPro
 }
 
 
@@ -1551,6 +1555,18 @@ static void PM_Footsteps( void ) {
 	qboolean footstep;
 	qboolean iswalking;
 	int animResult = -1;
+	// RTCWPro
+	int	maxBobTime;
+	extern int trap_Cvar_VariableIntegerValue(const char* var_name);
+	static qboolean is_dedicated_server = -1;
+
+	if (is_dedicated_server == -1) 
+	{
+		is_dedicated_server = trap_Cvar_VariableIntegerValue("dedicated");
+	}
+
+	bobmove = 0.0f;
+	// RTCWPro end
 
 	if ( pm->ps->eFlags & EF_DEAD ) {
 
@@ -1627,7 +1643,18 @@ static void PM_Footsteps( void ) {
 	footstep = qfalse;
 
 	if ( pm->ps->pm_flags & PMF_DUCKED ) {
-		bobmove = 0.5;  // ducked characters bob much faster
+		// RTCWPro
+		//bobmove = 0.5;  // ducked characters bob much faster
+		if (is_dedicated_server) 
+		{
+			maxBobTime = 504;
+		}
+		else 
+		{
+			bobmove = 0.5;  // ducked characters bob much faster
+		}
+		// RTCWPro end
+
 		if ( pm->ps->pm_flags & PMF_BACKWARDS_RUN ) {
 			animResult = BG_AnimScriptAnimation( pm->ps, pm->ps->aiState, ANIM_MT_WALKCRBK, qtrue );
 		} else {
@@ -1636,7 +1663,18 @@ static void PM_Footsteps( void ) {
 		// ducked characters never play footsteps
 	} else if ( pm->ps->pm_flags & PMF_BACKWARDS_RUN ) {
 		if ( !( pm->cmd.buttons & BUTTON_WALKING ) ) {
-			bobmove = 0.4;  // faster speeds bob faster
+			// RTCWPro
+			//bobmove = 0.4;  // faster speeds bob faster
+			if (is_dedicated_server) 
+			{
+				maxBobTime = 680;
+			}
+			else 
+			{
+				bobmove = 0.4;  // faster speeds bob faster
+			}
+			// RTCWPro end
+
 			footstep = qtrue;
 			// check for strafing
 			if ( pm->cmd.rightmove && !pm->cmd.forwardmove ) {
@@ -1650,7 +1688,18 @@ static void PM_Footsteps( void ) {
 				animResult = BG_AnimScriptAnimation( pm->ps, pm->ps->aiState, ANIM_MT_RUNBK, qtrue );
 			}
 		} else {
-			bobmove = 0.3;
+			// RTCWPro
+			//bobmove = 0.3;
+			if (is_dedicated_server) 
+			{
+				maxBobTime = 1016;
+			}
+			else 
+			{
+				bobmove = 0.3;
+			}
+			// RTCWPro end
+
 			// check for strafing
 			if ( pm->cmd.rightmove && !pm->cmd.forwardmove ) {
 				if ( pm->cmd.rightmove > 0 ) {
@@ -1667,7 +1716,18 @@ static void PM_Footsteps( void ) {
 	} else {
 
 		if ( !( pm->cmd.buttons & BUTTON_WALKING ) ) {
-			bobmove = 0.4;  // faster speeds bob faster
+			// RTCWPro
+			//bobmove = 0.4;  // faster speeds bob faster
+			if (is_dedicated_server) 
+			{
+				maxBobTime = 680;
+			}
+			else 
+			{
+				bobmove = 0.4;
+			}
+			// RTCWPro end
+
 			footstep = qtrue;
 			// check for strafing
 			if ( pm->cmd.rightmove && !pm->cmd.forwardmove ) {
@@ -1681,7 +1741,17 @@ static void PM_Footsteps( void ) {
 				animResult = BG_AnimScriptAnimation( pm->ps, pm->ps->aiState, ANIM_MT_RUN, qtrue );
 			}
 		} else {
-			bobmove = 0.3;  // walking bobs slow
+			// RTCWPro
+			//bobmove = 0.3;  // walking bobs slow
+			if (is_dedicated_server) 
+			{
+				maxBobTime = 1016;
+			}
+			else {
+				bobmove = 0.3;
+			}
+			// RTCWPro end
+
 			if ( pm->ps->aiChar != AICHAR_NONE ) {
 				footstep = qtrue;
 				iswalking = qtrue;
@@ -1704,9 +1774,26 @@ static void PM_Footsteps( void ) {
 		animResult = BG_AnimScriptAnimation( pm->ps, pm->ps->aiState, ANIM_MT_IDLE, qtrue );
 	}
 
+	// RTCWPro
 	// check for footstep / splash sounds
-	old = pm->ps->bobCycle;
-	pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
+	//old = pm->ps->bobCycle;
+	//pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
+	if (is_dedicated_server) 
+	{
+		pm->ps->bobTimer += pml.msec;
+		float bobScale = (float)pm->ps->bobTimer / (float)maxBobTime;
+
+		// check for footstep / splash sounds
+		old = pm->ps->bobCycle;
+		pm->ps->bobCycle = (int)(255 * bobScale) & 255;
+	}
+	else 
+	{
+		// check for footstep / splash sounds
+		old = pm->ps->bobCycle;
+		pm->ps->bobCycle = (int)(old + bobmove * pml.msec) & 255;
+	}
+	// RTCWPro end
 
 	// if we just crossed a cycle boundary, play an apropriate footstep event
 	if ( iswalking ) {
@@ -2913,12 +3000,23 @@ static void PM_Weapon( void ) {
 
 
 	// take an ammo away if not infinite
-	if ( PM_WeaponAmmoAvailable( pm->ps->weapon ) != -1 ) {
+	if (PM_WeaponAmmoAvailable(pm->ps->weapon) != -1) {
 		// Rafael - check for being mounted on mg42
-		if ( !( pm->ps->persistant[PERS_HWEAPON_USE] ) ) {
-			PM_WeaponUseAmmo( pm->ps->weapon, ammoNeeded );
+		if (!(pm->ps->persistant[PERS_HWEAPON_USE])) {
+			PM_WeaponUseAmmo(pm->ps->weapon, ammoNeeded);
 		}
 	}
+
+	// rtcwpro issue #345 - do not take ammo away for grenades or smoke cans - we will do it in g_missle fire_grenade instead
+	//if (pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_SMOKE_GRENADE)
+	//{
+	//	if (PM_WeaponAmmoAvailable(pm->ps->weapon) != -1) {
+	//		// Rafael - check for being mounted on mg42
+	//		if (!(pm->ps->persistant[PERS_HWEAPON_USE])) {
+	//			PM_WeaponUseAmmo(pm->ps->weapon, ammoNeeded);
+	//		}
+	//	}
+	//}
 
 
 	// fire weapon
@@ -4024,8 +4122,51 @@ void PmoveSingle( pmove_t *pmove ) {
 		// entering / leaving water splashes
 		PM_WaterEvents();
 
+		// RTCWPro - fixed physics
+		if (pm->fixedphysicsfps)
+		{
+			// halt if not going fast enough (0.5 units/sec)
+			if (VectorLengthSquared(pm->ps->velocity) < 0.25f)
+			{
+				VectorClear(pm->ps->velocity);
+			}
+			else
+			{
+				float fixedFrameTime, scale, decimalTest;
+				float result = 0;
+				int fps = pm->fixedphysicsfps;
+
+				if (fps > 333)
+				{
+					fps = 333;
+				}
+				else if (fps < 30)
+				{
+					fps = 30;
+				}
+
+				fixedFrameTime = (int)(1000.0f / fps) * 0.001f;
+				decimalTest = pm->ps->gravity * fixedFrameTime;
+
+				if (rint(decimalTest) - decimalTest < 0)
+				{
+					scale = fixedFrameTime / pml.frametime;
+					result = (rint(decimalTest) - decimalTest) * -1;
+					result = result / scale;
+				}
+
+				pm->ps->velocity[2] += result;
+			}
+		}
+		else
+		{
+			// snap some parts of playerstate to save network bandwidth
+			trap_SnapVector(pm->ps->velocity);
+		}
+
 		// snap some parts of playerstate to save network bandwidth
-		trap_SnapVector( pm->ps->velocity );
+		//trap_SnapVector( pm->ps->velocity );
+		// RTCWPro end
 //		SnapVector( pm->ps->velocity );
 
 		// Ridah

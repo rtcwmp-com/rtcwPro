@@ -133,31 +133,22 @@ void G_refHelp_cmd(gentity_t *ent) {
 			return;
 		}
 
-		CP("print \"\n^3Referee commands:^7\n\"");
+		CP("print \"\n^3Voting commands:^7\n\"");
 		CP("print \"------------------------------------------\n\"");
 
 		G_voteHelp(ent, qfalse);
 
-		/*CP("print \"\n^5allready         putallies^7 <pid>  ^5speclock          warmup\n\"");
-		CP("print \"^5lock             putaxis^7 <pid>    ^5specunlock        warn ^7<pid>\n\"");
-		CP("print \"^5help             remove           unlock            mute ^7<pid>\n\"");
-		CP("print \"^5pause            maprestart          unpause           unmute ^7<pid>\n\"");
-		*/
-		CP("print \"Usage: ^3\\ref <cmd> [params]\n\n\"");
-
-		// Help for the console
-	}
-	else {
-		G_Printf("\nAdditional console commands:\n");
+		G_Printf("^3Ref console commands:^7\n");
 		G_Printf("----------------------------------------------\n");
 		G_Printf("allready    putallies <pid>     unlock\n");
 		G_Printf("lock        putaxis <pid>       unpause\n");
-		G_Printf("help        restart             warmup [value]\n");
+		G_Printf("help        warmup [value]      rename\n");
 		G_Printf("pause       speclock            warn <pid>\n");
-		G_Printf("remove      specunlock		  rename\n");
-		G_Printf("cancelvote  passvote\n\n");
+		G_Printf("remove      specunlock          reqss\n");
+		G_Printf("cancelvote  passvote            getstatus\n");
+		G_Printf("makescs     removescs\n\n");
 
-		G_Printf("Usage: <cmd> [params]\n\n");
+		G_Printf("^3Usage: <cmd> [params]\n\n");
 	}
 }
 
@@ -597,10 +588,10 @@ void G_refLockTeams_cmd(gentity_t *ent, qboolean fLock) {
 	teamInfo[TEAM_RED].team_lock = (TeamCount(-1, TEAM_RED)) ? fLock : qfalse;
 	teamInfo[TEAM_BLUE].team_lock = (TeamCount(-1, TEAM_BLUE)) ? fLock : qfalse;
 
-	if (fLock)
-		trap_Cvar_Set("g_gamelocked", "3"); // This actually locks the teams based on logic from xMod
-	else
-		trap_Cvar_Set("g_gamelocked", "0"); // This actually unlocks the teams based on logic from xMod
+	//if (fLock)
+	//	trap_Cvar_Set("g_gamelocked", "3"); // This actually locks the teams based on logic from xMod
+	//else
+	//	trap_Cvar_Set("g_gamelocked", "0"); // This actually unlocks the teams based on logic from xMod
 
 	status = va("Referee has ^3%sLOCKED^7 teams", ((fLock) ? "" : "UN"));
 
@@ -908,7 +899,8 @@ void G_refGetStatus(gentity_t* ent) {
 
 	CP(va("print \"\n^3Mod: ^7%s \n^3Server: ^7%s\n\"", GAMEVERSION, sv_hostname.string));
 	CP(va("print \"^3Map: ^7%s\n\"", mapName));
-	if (g_gamelocked.integer == 3) { CP("print \n\"^3Teams are locked^1!\n\""); }
+	if (teamInfo[TEAM_RED].team_lock == qtrue) CP("print \n\"^1Axis is locked^1!\n\"");
+	if (teamInfo[TEAM_BLUE].team_lock == qtrue) CP("print \n\"^4Allied is locked^1!\n\"");
 	CP("print \"^3--------------------------------------------------------------------------\n\"");
 	CP("print \"^7CN : Team : Name            : ^3IP              ^7: Ping ^7: Status\n\"");
 	CP("print \"^3--------------------------------------------------------------------------\n\"");
@@ -917,7 +909,7 @@ void G_refGetStatus(gentity_t* ent) {
 
 		if (g_entities[j].client && !(ent->r.svFlags & SVF_BOT)) {
 			char* team, * slot, * ip, * status, * adminTag, * ignoreStatus;
-			int ping, fps;
+			int ping; // , fps;
 			cl = g_entities[j].client;
 
 			// player is connecting
@@ -938,7 +930,11 @@ void G_refGetStatus(gentity_t* ent) {
 
 				ip = cl->sess.ip;
 
-				ping = cl->ps.ping;
+				// RTCWPro
+				//ping = cl->ps.ping;
+				ping = g_alternatePing.integer ? cl->pers.alternatePing : cl->ps.ping;
+				// RTCWPro end
+
 				if (ping > 999) ping = 999;
 
 				if (cl->sess.referee)
