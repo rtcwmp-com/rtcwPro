@@ -467,9 +467,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
 			
 			// RtcwPro Issue #345 Clear out empty weapon, change to next best weapon
-			//PM_SwitchIfEmpty();
-			if (self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] == 0)
-				G_AddEvent(self, EV_NOAMMO, 0);
+			if (!self->client->ps.ammo[BG_FindClipForWeapon(self->client->ps.weapon)])
+			{
+				// remove nade from weapon bank
+				COM_BitClear(self->client->ps.weapons, self->client->ps.weapon);
+			}
 		}
 	}
 // jpw
