@@ -830,7 +830,7 @@ static void CG_MapRestart( void ) {
 	trap_S_ClearLoopingSounds( qtrue );
 
 	cg.latchAutoActions = qfalse;			// OSPx - Auto Actions
-	cg.latchVictorySound = qfalse;          // NERVE - SMF
+
 // JPW NERVE -- reset render flags
 	cg_fxflags = 0;
 // jpw

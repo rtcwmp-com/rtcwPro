@@ -1152,7 +1152,6 @@ typedef struct {
 	float cameraShakeScale;
 	float cameraShakeLength;
 
-	qboolean latchVictorySound;
 	// -NERVE - SMF
 
 	// spawn variables
