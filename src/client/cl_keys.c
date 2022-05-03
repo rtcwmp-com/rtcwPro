@@ -1925,7 +1925,7 @@ Normal keyboard characters, already shifted / capslocked / etc
 void CL_CharEvent( int key ) {
 
 	// the console key should never be used as a char
-	if (key == (unsigned char)'`' || key == (unsigned char)'~' || key == (unsigned char)'\xAC') {
+	if (key == (unsigned char)'`' || key == (unsigned char)'~') { // || key == (unsigned char)'\xAC') {
 		return;
 	}
 
