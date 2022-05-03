@@ -647,6 +647,7 @@ typedef struct {
 	int team;
 	int playerClass;                    // NERVE - SMF
 	int respawnsLeft;                   // NERVE - SMF
+	int isReady;
 } score_t;
 
 
