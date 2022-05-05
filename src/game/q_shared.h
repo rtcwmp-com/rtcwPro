@@ -1741,6 +1741,9 @@ typedef enum {
 #define GUID_LEN				33
 #define NO_GUID					"NO_GUID"
 
+// ET Legacy Port
+#define GAME_INIT_FRAMES    6 // help us determine when round is actually starting
+
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
 qboolean clientIsConnected;

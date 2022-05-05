@@ -828,7 +828,6 @@ struct gclient_s {
 	// revive anim bug fix
 	qboolean revive_animation_playing;
 	int movement_lock_begin_time;
-
 };
 
 //
@@ -1287,6 +1286,12 @@ void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 void limbo(gentity_t* ent, qboolean makeCorpse);
+char* ClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+void ClientUserinfoChanged(int clientNum);
+void ClientDisconnect(int clientNum);
+void ClientBegin(int clientNum);
+void ClientCommand(int clientNum);
+void AddMedicTeamBonus(gclient_t* client);
 
 //void RemoveWeaponRestrictions(gentity_t *ent);
 //void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
@@ -1351,15 +1356,6 @@ void QDECL G_Error( const char *fmt, ... );
 void CheckVote(void);
 void SortedActivePlayers(void);
 void HandleEmptyTeams(void);
-
-//
-// g_client.c
-//
-char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );
-void ClientUserinfoChanged( int clientNum );
-void ClientDisconnect( int clientNum );
-void ClientBegin( int clientNum );
-void ClientCommand( int clientNum );
 
 //
 // g_active.c
@@ -1504,6 +1500,7 @@ extern vmCvar_t g_debugMove;
 extern vmCvar_t g_debugAlloc;
 extern vmCvar_t g_debugDamage;
 extern vmCvar_t g_debugBullets;     //----(SA)	added
+extern vmCvar_t g_debugMode;
 extern vmCvar_t g_preciseHeadHitBox;
 extern vmCvar_t g_weaponRespawn;
 extern vmCvar_t g_synchronousClients;
@@ -2080,6 +2077,7 @@ unsigned int G_weapStatIndex_MOD( int iWeaponMOD );
 void G_statsPrint( gentity_t *ent, int nType );
 void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod );
 void G_addStatsHeadShot( gentity_t *attacker, int mod );
+char *G_createStats(gentity_t* refEnt);
 void G_deleteStats( int nClient );
 void G_parseStats( char *pszStatsInfo );
 char *G_writeStats( gclient_t* client );

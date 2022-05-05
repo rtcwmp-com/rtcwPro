@@ -566,69 +566,53 @@ qboolean ClientInactivityTimer( gclient_t *client ) {
 ClientTimerActions
 
 Actions that happen once a second
+
+Modifed Source: ET Legacy
 ==================
 */
-void ClientTimerActions( gentity_t *ent, int msec ) {
-	gclient_t *client;
+void ClientTimerActions(gentity_t *ent, int msec)
+{
+	gclient_t *client = ent->client;
 
-	client = ent->client;
 	client->timeResidual += msec;
 
-	while ( client->timeResidual >= 1000 ) {
+	while (client->timeResidual >= 1000)
+	{
 		client->timeResidual -= 1000;
 
 		// regenerate
-		// JPW NERVE, split these completely
-		if ( g_gametype.integer < GT_WOLF ) {
-			if ( client->ps.powerups[PW_REGEN] ) {
-				if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] ) {
-					ent->health += 15;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 1.1 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 1.1;
-					}
-					G_AddEvent( ent, EV_POWERUP_REGEN, 0 );
-				} else if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] * 2 ) {
+		if (ent->health < client->ps.stats[STAT_MAX_HEALTH])
+		{
+			// medic only
+			if (client->sess.playerType == PC_MEDIC)
+			{
+				if (ent->health > client->ps.stats[STAT_MAX_HEALTH] / 1.11)
+				{
 					ent->health += 2;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 2 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 2;
+
+					if (ent->health > client->ps.stats[STAT_MAX_HEALTH])
+					{
+						ent->health = client->ps.stats[STAT_MAX_HEALTH];
 					}
-					G_AddEvent( ent, EV_POWERUP_REGEN, 0 );
 				}
-			} else {
-				// count down health when over max
-				if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] ) {
-					ent->health--;
-				}
-			}
-		}
-// JPW NERVE
-		else { // GT_WOLF
-			if ( client->ps.powerups[PW_REGEN] ) {
-				if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] ) {
+				else
+				{
 					ent->health += 3;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 1.1 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 1.1;
+					if (ent->health > client->ps.stats[STAT_MAX_HEALTH] / 1.1)
+					{
+						ent->health = client->ps.stats[STAT_MAX_HEALTH] / 1.1;
 					}
-				} else if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] * 1.12 ) {
-					ent->health += 2;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 1.12 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 1.12;
-					}
-				}
-			} else {
-				// count down health when over max
-				if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] ) {
-					ent->health--;
 				}
 			}
+
 		}
-// jpw
-		// count down armor when over max
-		if ( client->ps.stats[STAT_ARMOR] > client->ps.stats[STAT_MAX_HEALTH] ) {
-			client->ps.stats[STAT_ARMOR]--;
+		else if (ent->health > client->ps.stats[STAT_MAX_HEALTH])               // count down health when over max
+		{
+			ent->health--;
 		}
 	}
 }
+
 
 /*
 ====================
@@ -2288,6 +2272,30 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// apply all the damage taken this frame
 	P_DamageFeedback( ent );
+
+	// ET Legacy port
+	// increases stats[STAT_MAX_HEALTH] based on # of medics in game
+	// AddMedicTeamBonus() now adds medic team bonus and stores in ps.stats[STAT_MAX_HEALTH].
+	AddMedicTeamBonus(ent->client);
+
+	// all players are init in game, we can set properly starting health
+	if (level.startTime == level.time - (GAME_INIT_FRAMES * FRAMETIME))
+	{
+		ent->health = ent->client->ps.stats[STAT_HEALTH] = ent->client->ps.stats[STAT_MAX_HEALTH];
+
+		if (ent->client->sess.playerType == PC_MEDIC)
+		{
+			ent->health = ent->client->ps.stats[STAT_HEALTH] /= 1.12;
+			if (ent->health > 140)
+				ent->health = 140;
+		}
+	}
+	else
+	{
+		ent->client->ps.stats[STAT_HEALTH] = ent->health;
+	}
+	// End ETL port
+
 
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
 	if ( level.time - ent->client->lastCmdTime > 1000 ) {

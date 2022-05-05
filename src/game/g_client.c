@@ -810,68 +810,81 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 ===========
 RTCWPro
 Checks and potentially sets STAT_MAX_HEALTH for both teams
-Source: Nobo
-
-CheckMaxHealth
+Source: ET
 ===========
 */
-void CheckMaxHealth() {
+int G_CountTeamMedics(team_t team, qboolean alivecheck)
+{
 	int numMedics = 0;
-	int starthealth = 100;
-	int i, team;
-	gclient_t* cl;
+	int i, j;
 
-	// check both teams
-	for (team = TEAM_RED; team <= TEAM_SPECTATOR; ++team) {
+	for (i = 0; i < level.numConnectedClients; i++)
+	{
+		j = level.sortedClients[i];
 
-		numMedics = 0;
-
-		// count up # of medics on team
-		for (i = 0; i < level.maxclients; i++) {
-
-			cl = level.clients + i;
-
-			if (cl->pers.connected != CON_CONNECTED) {
-
-				continue;
-			}
-
-			if (cl->sess.sessionTeam != team) {
-
-				continue;
-			}
-
-			if (cl->ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC) {
-
-				continue;
-			}
-
-			numMedics++;
+		if (level.clients[j].sess.sessionTeam != team)
+		{
+			continue;
 		}
 
-		// compute health mod
-		starthealth = 100 + 10 * numMedics;
-		if (starthealth > 125) {
-
-			starthealth = 125;
+		if (level.clients[j].sess.playerType != PC_MEDIC)
+		{
+			continue;
 		}
 
-		// give everybody health mod in stat_max_health
-		for (i = 0; i < level.maxclients; i++) {
-
-			cl = level.clients + i;
-
-			if (cl->pers.connected == CON_DISCONNECTED) {
-
+		if (alivecheck)
+		{
+			if (g_entities[j].health <= 0)
+			{
 				continue;
 			}
 
-			if (cl->sess.sessionTeam == team) {
-
-				cl->pers.maxHealth = cl->ps.stats[STAT_MAX_HEALTH] = starthealth;
+			if (level.clients[j].ps.pm_type == PM_DEAD || (level.clients[j].ps.pm_flags & PMF_LIMBO))
+			{
+				continue;
 			}
 		}
+
+		numMedics++;
 	}
+
+	return numMedics;
+}
+
+/*
+===========
+RTCWPro
+Sets health based on number of medics
+Source: ET Legacy
+===========
+*/
+void AddMedicTeamBonus(gclient_t* client)
+{
+	if (!(client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE))
+		return;
+
+	//gclient_t* cl;
+	int i, startHealth;
+
+	int numMedics = G_CountTeamMedics(client->sess.sessionTeam, qfalse);
+
+	// compute health mod
+	client->pers.maxHealth = 100 + 10 * numMedics;
+
+	if (client->pers.maxHealth > 125)
+	{
+		client->pers.maxHealth = 125;
+	}
+
+	if (client->sess.playerType == PC_MEDIC)
+	{
+		client->pers.maxHealth *= 1.12;
+
+		if (client->pers.maxHealth > 140)
+			client->pers.maxHealth = 140;
+	}
+
+	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 }
 
 void SetWolfSpawnWeapons( gentity_t *ent ) {
@@ -905,9 +918,6 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 
 // Xian -- Commented out and moved to ClientSpawn for clarity
 //	client->ps.powerups[PW_INVULNERABLE] = level.time + 3000; // JPW NERVE some time to find cover
-
-	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS)
-		client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// Communicate it to cgame
 	client->ps.stats[STAT_PLAYER_CLASS] = pc;
@@ -1211,42 +1221,6 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			client->ps.ammo[WP_MEDKIT] = 1;
 		}
 	} // End Knifeonly stuff -- Ensure that medics get their basic stuff
-
-	// RTCWPro - moved to CheckMaxHealth
-	CheckMaxHealth();
-	/*
-	// JPW NERVE -- medics on each team make cumulative health bonus -- this gets overridden for "revived" players
-	// count up # of medics on team
-	for ( i = 0; i < level.maxclients; i++ ) {
-		if ( level.clients[i].pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		if ( level.clients[i].sess.sessionTeam != client->sess.sessionTeam ) {
-			continue;
-		}
-		if ( level.clients[i].ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC ) {
-			continue;
-		}
-		numMedics++;
-	}
-
-	// compute health mod
-	starthealth = 100 + 10 * numMedics;
-	if ( starthealth > 125 ) {
-		starthealth = 125;
-	}
-
-	// give everybody health mod in stat_max_health
-	for ( i = 0; i < level.maxclients; i++ ) {
-		if ( level.clients[i].pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		if ( level.clients[i].sess.sessionTeam == client->sess.sessionTeam ) {
-			client->ps.stats[STAT_MAX_HEALTH] = starthealth;
-		}
-	}
-	// jpw
-	*/
 }
 // dhm - end
 
@@ -1696,7 +1670,12 @@ void ClientUserinfoChanged(int clientNum) {
 	}
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;*/
 
-	CheckMaxHealth();
+	if (g_debugMode.integer)
+	{
+		AP(va("print \"ClientUserinfoChanged:%i class: %i\n\"", client->ps.clientNum, client->ps.teamNum));
+	}
+
+	AddMedicTeamBonus(client);
 	// RTCWPro
 
 	// set model
@@ -2580,9 +2559,17 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	}
 	// dhm - end
 
+	AddMedicTeamBonus(client);
+
 	// JPW NERVE ***NOTE*** the following line is order-dependent and must *FOLLOW* SetWolfSpawnWeapons() in multiplayer
 	// SetWolfSpawnWeapons() now adds medic team bonus and stores in ps.stats[STAT_MAX_HEALTH].
 	ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
+
+	if (g_debugMode.integer)
+	{
+		G_Printf("Player spawned with StartHealth: %i MaxHealth: %i STAT_MAX_HEALTH: %i\n", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]);
+		AP(va("print \"Player spawned with StartHealth:%i MaxHealth: %i STAT_MAX_HEALTH: %i\n\"", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]));
+	}
 
 	G_SetOrigin( ent, spawn_origin );
 	VectorCopy( spawn_origin, client->ps.origin );
@@ -2758,7 +2745,7 @@ void ClientDisconnect( int clientNum ) {
 
 	// if a player disconnects during warmup make sure the team's ready status doesn't start the match
 	if (g_tournament.integer
-		&& g_gamestate.integer == GS_WARMUP
+		&& (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN)
 		&& (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
 	{
 		G_readyResetOnPlayerLeave(ent->client->sess.sessionTeam);
