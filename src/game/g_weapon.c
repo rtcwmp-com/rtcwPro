@@ -682,20 +682,28 @@ void Weapon_Engineer( gentity_t *ent ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
 								G_matchPrintInfo(va("^5Dynamite planted near %s!", hit->track), qfalse);
-								ent->client->sess.dyn_planted++;
-								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
-                                    G_writeObjectiveEvent(ent, objDynPlant  );
 
+								if (g_gamestate.integer == GS_PLAYING)
+								{
+									ent->client->sess.dyn_planted++;
+									if (g_gameStatslog.integer) {
+										//G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+										G_writeObjectiveEvent(ent, objDynPlant);
+
+									}
 								}
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
 								G_matchPrintInfo(va("^5Dynamite planted near objective #%d!", hit->count), qfalse);
-								ent->client->sess.dyn_planted++;
-								if (g_gameStatslog.integer) {
-                                   //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
-                                   G_writeObjectiveEvent(ent, objDynPlant  );
+								
+								if (g_gamestate.integer == GS_PLAYING)
+								{
+									ent->client->sess.dyn_planted++;
+									if (g_gameStatslog.integer) {
+										//G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+										G_writeObjectiveEvent(ent, objDynPlant);
 
+									}
 								}
 							}
 						}
@@ -705,9 +713,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-							G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
-							ent->client->sess.obj_destroyed++;
-//	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
+
+							if (g_gamestate.integer == GS_PLAYING)
+							{
+								G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
+								ent->client->sess.obj_destroyed++;
+							}
+
+//	jpw pulled				hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
 					}
