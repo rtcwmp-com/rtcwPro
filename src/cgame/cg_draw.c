@@ -1618,6 +1618,9 @@ static void CG_DrawPickupItem( void ) {
 	float color[4];
 	const char *s;
 
+	if (cg_gameType.integer != GT_SINGLE_PLAYER)
+		cg_gameSkill.integer = 3; // RTCWPro if a player has g_gameskill set in wolfconfig_mp it could show "50 health" so set this to 3 to get default value of "20 health"
+
 	value = cg.itemPickup;
 	if ( value ) {
 		fadeColor = CG_FadeColor( cg.itemPickupTime, 3000 );
