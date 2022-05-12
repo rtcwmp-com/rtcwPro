@@ -1736,6 +1736,7 @@ void G_swapTeams( void ) {
 	int i;
 	gclient_t *cl;
 
+	G_swapTeamLocks();
 	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
@@ -1915,6 +1916,9 @@ void G_readyReset( qboolean aForced ) {
 // if a player leaves a team (disconnect to change teams) reset the team's ready status by setting one player to not ready
 void G_readyResetOnPlayerLeave( int team ) {
 	if (g_gamestate.integer == GS_WARMUP && g_tournament.integer) {
+
+		trap_Cvar_Set("g_swapteams", "0"); // make sure we don't swap teams with our fubar swap teams logic
+
 		int i, randomPlayer = -1;
 		qboolean resetStatus = qfalse;
 
