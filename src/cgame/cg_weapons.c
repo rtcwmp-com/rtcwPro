@@ -6206,7 +6206,7 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 // jpw
 
 	// Arnout: snap tracers for MG42 to viewangle of client when antilag is enabled
-	if ( cgs.antilag && otherEntNum2 == cg.snap->ps.clientNum && cg_entities[otherEntNum2].currentState.eFlags & EF_MG42_ACTIVE ) {
+	if ( cgs.antilag && cg_antilag.integer && otherEntNum2 == cg.snap->ps.clientNum && cg_entities[otherEntNum2].currentState.eFlags & EF_MG42_ACTIVE ) {
 		vec3_t muzzle, forward, right, up;
 		float r, u;
 		trace_t tr;

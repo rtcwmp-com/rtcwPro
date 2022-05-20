@@ -629,6 +629,7 @@ typedef struct {
 	unsigned int hitSoundType;
 	unsigned int hitSoundBodyStyle;
 	unsigned int hitSoundHeadStyle;
+	unsigned int antilag;				// Client antilag
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
 	int throwingKnives;

@@ -372,6 +372,18 @@ void CG_SetConfigValues( void ) {
 	cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
 	cg.warmup = atoi( CG_ConfigString( CS_WARMUP ) );
 
+	// voting - Source ETL
+	// set all of this crap in cgs - it won't be set if it doesn't
+	// change, otherwise.  consider:
+	// vote was called 5 minutes ago for 'Match Reset'.  you connect.
+	// you're sent that value for CS_VOTE_STRING, but ignore it, so
+	// you have nothing to use if another 'Match Reset' vote is called
+	// (no update will be sent because the string will be the same.)
+	cgs.voteTime = atoi(CG_ConfigString(CS_VOTE_TIME));
+	cgs.voteYes = atoi(CG_ConfigString(CS_VOTE_YES));
+	cgs.voteNo = atoi(CG_ConfigString(CS_VOTE_NO));
+	Q_strncpyz(cgs.voteString, CG_ConfigString(CS_VOTE_STRING), sizeof(cgs.voteString));
+
 	CG_ParseReinforcementTimes( CG_ConfigString( CS_REINFSEEDS ) );
 	CG_ParseReady(CG_ConfigString(CS_READY) );
 }

@@ -614,8 +614,6 @@ cvarTable_t cvarTable[] = {
 
 	{ &cg_autoReload, "cg_autoReload", "1", CVAR_ARCHIVE },
 
-	{ &cg_antilag, "g_antilag", "0", 0 },
-
 	// OSPx
 	{ &cg_showFlags, "cg_showFlags", "1", CVAR_ARCHIVE }, //mcwf GeoIP
 	{ &cg_crosshairPulse, "cg_crosshairPulse", "1", CVAR_ARCHIVE },
@@ -658,7 +656,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_chatAlpha, "cg_chatAlpha", "0.33", CVAR_ARCHIVE },
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
-	{ &cg_antilag, "g_antilag", "0", 0 },
+	{ &cg_antilag, "cg_antilag", "0", 0 }, // RTCWPro
 
 	// draw speed
 	{ &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },
@@ -810,7 +808,7 @@ void CG_UpdateCvars( void ) {
 		if (cv->modificationCount != cv->vmCvar->modificationCount) {
 			cv->modificationCount = cv->vmCvar->modificationCount;
 
-			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
+			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload || cv->vmCvar == &cg_antilag ||
 				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
 				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &cg_hitsounds || 
 				cv->vmCvar == &cg_hitsoundBodyStyle || cv->vmCvar == &cg_hitsoundHeadStyle || cv->vmCvar == &str_cl_guid) {
@@ -859,7 +857,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d %d %s",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d %d %s %d",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -878,7 +876,9 @@ void CG_setClientFlags(void) {
 		cg_hitsoundBodyStyle.integer,
 		cg_hitsoundHeadStyle.integer,
 		// GUID
-		str_cl_guid.string
+		str_cl_guid.string,
+		// Antilag
+		cg_antilag.integer
 	));
 }
 

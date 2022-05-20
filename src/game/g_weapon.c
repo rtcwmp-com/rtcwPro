@@ -280,6 +280,7 @@ void Weapon_MagicAmmo( gentity_t *ent ) {
 RTCWPro
 This is taken out of Weapon_Syringe
 so it can be used for other stuff
+NOTE: this is only used for testing and user has to be a referee
 ================
 */
 qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
@@ -2012,7 +2013,8 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	if (ent->client)
 	{
 		// antilag lerp if enough delay between client and server.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		// RTCWPro added cg_antilag client check (RtCW pub port)
+		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
 		}
@@ -2027,7 +2029,8 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	if (ent->client)
 	{
 		// restore all client positions to before the antilag lerp.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		// RTCWPro added cg_antilag client check (RtCW pub port)
+		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_UnTimeShiftAllClients(ent);
 		}

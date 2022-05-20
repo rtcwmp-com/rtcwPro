@@ -1015,6 +1015,14 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 		AP(va( "print \"[lof]%s" S_COLOR_WHITE " [lon]joined the ^2battle^7.\n\"", client->pers.netname ) );
 	}
 
+	if (team == TEAM_RED || team == TEAM_BLUE)
+	{
+		if (client->pers.antilag)
+			CPx(clientNum, "popin \"^3Your client antilag is turned ^4ON^3. ^3Use cg_antilag 0 to disable.\n\"");
+		else 
+			CPx(clientNum, "popin \"^3Your client antilag is turned ^4OFF^3. ^3Use cg_antilag 1 to enable.\n\"");
+	}
+
 	// L0 - connect message
 	//CP(va( "cp \"%s\n\"2", g_serverMessage.string));  // moved to g_client
 
@@ -1807,29 +1815,43 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	int i;
 	char arg1[MAX_STRING_TOKENS];
 	char arg2[MAX_STRING_TOKENS];
-	char* c;
+	char voteDesc[VOTE_MAXSTRING];
+	char* voteStringFormat;
 	char* strCmdBase = (!fRefCommand)?"vote":"ref command";
 
 	// Normal checks, if its not being issued as a referee command
-	if (!fRefCommand) {
-		if (level.voteInfo.voteTime) {
+	if (!fRefCommand)
+	{
+		// added mute check
+		if (ent->client->sess.muted)
+		{
+			CP("cpm \"You cannot call a vote while muted.\"");
+			return qfalse;
+		}
+		else if (level.voteInfo.voteTime)
+		{
 			CP("cpm \"A vote is already in progress.\n\"");
 			return qfalse;
 		}
-		else if (level.intermissiontime) {
+		else if (level.intermissiontime)
+		{
 			CP("cpm \"Cannot callvote during intermission.\n\"");
 			return qfalse;
 		}
-		else if (!ent->client->sess.referee) {
-			if (g_voteFlags.integer == VOTING_DISABLED) {
+		else if (!ent->client->sess.referee)
+		{
+			if (g_voteFlags.integer == VOTING_DISABLED)
+			{
 				CP("cpm \"Voting not enabled on this server.\n\"");
 				return qfalse;
 			}
-			else if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer) {
+			else if (vote_limit.integer > 0 && ent->client->pers.voteCount >= vote_limit.integer)
+			{
 				CP(va("cpm \"You have already called the maximum number of votes (%d).\n\"", vote_limit.integer));
 				return qfalse;
 			}
-			else if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+			else if (ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+			{
 				CP("cpm \"Not allowed to call a vote as a spectator.\n\"");
 				return qfalse;
 			}
@@ -1840,35 +1862,40 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	trap_Argv(1, arg1, sizeof(arg1));
 	trap_Argv(2, arg2, sizeof(arg2));
 
-	// L0 - ioquake callvote exploit fix
-	for (c = arg2; *c; ++c) {
-		switch (*c) {
-			case '\n':
-			case '\r':
-			case ';':
-			G_refPrintf(ent, "Invalid %s string.", strCmdBase);
-			return(qfalse);
-			break;
-		}
+	// quake3 engine callvote bug fix from Luigi Auriemma and/or /dev/humancontroller
+	// http://bugzilla.icculus.org/show_bug.cgi?id=3593
+	// also see http://aluigi.freeforums.org/quake3-engine-callvote-bug-t686-30.html
+	if (strchr(arg1, ';') || strchr(arg2, ';') ||
+	    strchr(arg1, '\r') || strchr(arg2, '\r') ||
+	    strchr(arg1, '\n') || strchr(arg2, '\n'))
+	{
+		char *strCmdBase = (!fRefCommand) ? "vote" : "ref command";
+
+		G_refPrintf(ent, "Invalid %s string", strCmdBase);
+		return qfalse;
 	}
 
-	if (trap_Argc() > 1 && (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND) {   //  --OSP
-		if (i != G_OK) {
-			if (i == G_NOTFOUND) {
-				return(qfalse);               // Command error
-			}
-			else { return(qtrue); }
+
+	if (trap_Argc() > 1 && (i = G_voteCmdCheck(ent, arg1, arg2, fRefCommand)) != G_NOTFOUND)
+	{
+		if (i != G_OK)
+		{
+			// no output here
+			return qfalse;                  // Command error
 		}
 	}
-	else {
-		if (!fRefCommand) {
+	else
+	{
+		if (!fRefCommand) 
+		{
 			CP(va("print \"\n^3>>> Unknown vote command: ^7%s %s\n\"", arg1, arg2));
 			G_voteHelp(ent, qtrue);
 		}
 		return(qfalse);
 	}
 
-	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), "%s %s", arg1, arg2);
+	voteStringFormat = arg2[0] ? "%s %s" : "%s";
+	Com_sprintf(level.voteInfo.voteString, sizeof(level.voteInfo.voteString), voteStringFormat, arg1, arg2);
 
 	// start the voting, the caller automatically votes yes
 	// If a referee, vote automatically passes.	// OSP
@@ -1877,7 +1904,8 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 				// Don't announce some votes, as in comp mode, it is generally a ref
 				// who is policing people who shouldn't be joining and players don't want
 				// this sort of spam in the console
-		if (level.voteInfo.vote_fn != G_Kick_v && level.voteInfo.vote_fn != G_Mute_v) {
+		if (level.voteInfo.vote_fn != G_Kick_v && level.voteInfo.vote_fn != G_Mute_v)
+		{
 			AP("cp \"^1** Referee Server Setting Change **\n\"");
 		}
 
@@ -1886,7 +1914,8 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 
 		G_globalSound("sound/match/klaxon2.wav");
 	}
-	else {
+	else
+	{
 		level.voteInfo.voteYes = 1;
 		AP(va("print \"[lof]%s^7 [lon]called a vote.[lof]  Voting for: %s\n\"", ent->client->pers.netname, level.voteInfo.voteString));
 		AP(va("cp \"[lof]%s\n^7[lon]called a vote.\n\"", ent->client->pers.netname));
@@ -1898,8 +1927,10 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 	level.voteInfo.voteNo = 0;
 
 	// Don't send the vote info if a ref initiates (as it will automatically pass)
-	if (!fRefCommand) {
-		for (i = 0; i < level.numConnectedClients; i++) {
+	if (!fRefCommand)
+	{
+		for (i = 0; i < level.numConnectedClients; i++)
+		{
 			level.clients[level.sortedClients[i]].ps.eFlags &= ~EF_VOTED;
 		}
 
@@ -1908,7 +1939,8 @@ qboolean Cmd_CallVote_f(gentity_t *ent, qboolean fRefCommand) { // unsigned int 
 
 		trap_SetConfigstring(CS_VOTE_YES, va("%i", level.voteInfo.voteYes));
 		trap_SetConfigstring(CS_VOTE_NO, va("%i", level.voteInfo.voteNo));
-		trap_SetConfigstring(CS_VOTE_STRING, level.voteInfo.voteString);
+		Q_strncpyz(voteDesc, level.voteInfo.voteString, sizeof(voteDesc));
+		trap_SetConfigstring(CS_VOTE_STRING, voteDesc);
 		trap_SetConfigstring(CS_VOTE_TIME, va("%i", level.voteInfo.voteTime));
 	}
 
@@ -1925,7 +1957,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 	int num;
 
 	// DHM - Nerve :: Complaints supercede voting (and share command)
-	if ( ent->client->pers.complaintEndTime > level.time ) {
+	if ( ent->client->pers.complaintEndTime > level.time && g_gamestate.integer == GS_PLAYING) {
 
 		// exit out for comp settings
 		if (g_tournament.integer == 1 || g_complaintlimit.integer == 0)

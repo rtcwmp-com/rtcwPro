@@ -1565,8 +1565,8 @@ void ClientUserinfoChanged(int clientNum) {
 	s = Info_ValueForKey(userinfo, "cg_uinfo");
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	//sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
-	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
-		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
+	sscanf(s, "%i %i %i %i %i %i %s %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
+		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid, &client->pers.antilag);
 
 	// Check for "" GUID..
 	if (!Q_stricmp(client->sess.guid, "D41D8CD98F00B204E9800998ECF8427E") ||
