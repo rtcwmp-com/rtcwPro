@@ -1709,8 +1709,14 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		}
 
 		// These sometimes goes off so make sure..
-		teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
-		teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+		if (g_tournament.integer && g_gamestate.integer == GS_PLAYING)
+		{
+			teamInfo[TEAM_RED].timeouts = match_timeoutcount.integer;
+			teamInfo[TEAM_RED].team_lock = qtrue;
+
+			teamInfo[TEAM_BLUE].timeouts = match_timeoutcount.integer;
+			teamInfo[TEAM_BLUE].team_lock = qtrue;
+		}
 	}
 }
 
@@ -3206,7 +3212,7 @@ qboolean G_teamJoinCheck(int team_num, gentity_t* ent) {
 	int cnt = TeamCount(-1, team_num);
 
 	// Sanity check
-	if (cnt == 0) {
+	if (cnt == 0 && g_gamestate.integer != GS_PLAYING && g_gamestate.integer != GS_WARMUP_COUNTDOWN) { // only reset if we aren't playing/countdown
 		G_teamReset(team_num, qtrue, qfalse);
 		teamInfo[team_num].team_lock = qfalse;
 	}
@@ -3220,12 +3226,12 @@ qboolean G_teamJoinCheck(int team_num, gentity_t* ent) {
 		// Check for full teams
 		if (team_maxplayers.integer > 0 && team_maxplayers.integer <= cnt) {
 			CP(va("cp \"The %s team is full!\n\"2", aTeams[team_num]));
-			AP(va("print \"*** ^3INFO: ^7The %s team is full.\n\"", aTeams[team_num]));
+			//AP(va("print \"*** ^3INFO: ^7The %s team is full.\n\"", aTeams[team_num]));
 			return(qfalse);
 		} // Check for locked teams
 		else if (teamInfo[team_num].team_lock /*&& (!(ent->client->pers.invite & team_num))*/) {
 			CP(va("cp \"The %s team is LOCKED!\n\"2", aTeams[team_num]));
-			AP(va("print \"*** ^3INFO: ^7The %s team is locked.\n\"", aTeams[team_num]));
+			//AP(va("print \"*** ^3INFO: ^7The %s team is locked.\n\"", aTeams[team_num]));
 			return(qfalse);
 		}
 	}
