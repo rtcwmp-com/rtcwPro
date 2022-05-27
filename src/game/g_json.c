@@ -240,8 +240,6 @@ int G_write_match_info( void )
     Q_strncpyz(level.jsonStatInfo.round_start,va("%ld", unixTime),sizeof(level.jsonStatInfo.round_start));
     Q_strncpyz(level.jsonStatInfo.round_timelimit,va("%s",GetLevelTime()),sizeof(level.jsonStatInfo.round_timelimit));
 
-
-
     json_t *jdata = json_object();
     json_object_set_new(jdata, "matchID",    json_string(MATCHID));
     json_object_set_new(jdata, "roundID",    json_string(level.jsonStatInfo.round_id));
@@ -959,7 +957,7 @@ void G_writeGameInfo (int winner ){
     char *buf4;
  //   char cs[MAX_STRING_CHARS];
 
-    time_t unixTime = time(NULL);
+    //time_t unixTime = time(NULL);
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
 
 
@@ -973,8 +971,12 @@ void G_writeGameInfo (int winner ){
 
     json_object_set_new(jdata, "round",    json_string(va("%s",ROUNDID)));
 
+    int roundStart = atoi(level.jsonStatInfo.round_start);
+    int roundTotalSeconds = ((level.timeCurrent - level.startTime) / 60000.0f) * 60;
+    int roundEnd = roundStart + roundTotalSeconds;
+
     json_object_set_new(jdata, "round_start",    json_string(va("%s",level.jsonStatInfo.round_start)));
-    json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
+    json_object_set_new(jdata, "round_end",    json_string(va("%ld", roundEnd))); // KK unixTime doesn't account for pause time
     json_object_set_new(jdata, "map",    json_string(mapName));
 
     json_object_set_new(jdata, "time_limit",    json_string(va("%s",level.jsonStatInfo.round_timelimit)));
