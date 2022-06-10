@@ -3394,61 +3394,36 @@ static void CG_DrawWarmup( void ) {
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
 
-		// Account for g_minGameClients if it's present
-		if (cgs.readyState == CREADY_PENDING) {
+		if (cgs.currentRound) {
+			t = va(CG_TranslateString("Clock is now set to %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
+			w = CG_DrawStrlen(t);
+			CG_DrawStringExt(320 - w * cw / 2, 100, t, colorWhite, qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 
-			if (configString != NULL)
-			{
+			if (configString != NULL) {
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 80, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
+		}
+		else {
+			if (configString != NULL) {
 				w = CG_DrawStrlen(configString);
 				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
 					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 			}
+		}
 
-			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );
+		// No need to bother with count..scoreboard gives info..
+		s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), cgs.minclients, cgs.minclients == 1 ? "player" : "players");
+		w = CG_DrawStrlen( s );
+		CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
 
-			s2 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
-
+		if ( !cg.demoPlayback && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR &&
+			( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
+			s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
 			w = CG_DrawStrlen( s1 );
-			CG_DrawStringExt( 320 - w * cw / 2, 120, s1, colorWhite,
-							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
-
-			w = CG_DrawStrlen( s2 );
-			CG_DrawStringExt( 320 - w * cw / 2, 140, s2, colorWhite,
-							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
-
-		} else {
-
-			if (cgs.currentRound) {
-				t = va(CG_TranslateString("Clock is now set to %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
-				w = CG_DrawStrlen(t);
-				CG_DrawStringExt(320 - w * cw / 2, 100, t, colorWhite, qfalse, qtrue, cw, (int)(cw * 1.5), 0);
-
-				if (configString != NULL) {
-					w = CG_DrawStrlen(configString);
-					CG_DrawStringExt(320 - w * cw / 2, 80, configString, colorWhite,
-						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
-				}
-			}
-			else {
-				if (configString != NULL) {
-					w = CG_DrawStrlen(configString);
-					CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
-						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
-				}
-			}
-
-			// No need to bother with count..scoreboard gives info..
-			s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), cgs.minclients, cgs.minclients == 1 ? "player" : "players");
-			w = CG_DrawStrlen( s );
-			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
-
-			if ( !cg.demoPlayback && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR &&
-			   ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
-				s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
-				w = CG_DrawStrlen( s1 );
-				CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
-								  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
-			}
+			CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
+								qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 		}
 
 		return;
