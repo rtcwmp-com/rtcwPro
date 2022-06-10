@@ -2875,8 +2875,8 @@ void CheckGameState( void ) {
 		return;
 	}
 
-	if ( g_noTeamSwitching.integer && !trap_Cvar_VariableIntegerValue( "sv_serverRestarting" ) ) {
-		if ( current_gs != GS_WAITING_FOR_PLAYERS && level.numPlayingClients <= 1 && level.lastRestartTime + 1000 < level.time ) {
+	if ( g_tournament.integer && !trap_Cvar_VariableIntegerValue( "sv_serverRestarting" ) ) {
+		if ( current_gs != GS_WAITING_FOR_PLAYERS && g_minGameClients.integer > 1 && level.numPlayingClients <= 1 && level.lastRestartTime + 1000 < level.time ) {
 			level.lastRestartTime = level.time;
 
 			if (g_tournament.integer) {
