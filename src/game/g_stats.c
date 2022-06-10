@@ -1066,6 +1066,7 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 				tot_gp ) );
 
 	}
+
 	// temp for printing clock & end of round sounds
 	if (fDump && ( g_gametype.integer == GT_WOLF_STOPWATCH ))
     {
@@ -1176,44 +1177,11 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			// Don't dump score table for users with stats dump enabled
 			if (!(cl->pers.clientFlags & CGF_STATSDUMP))
 			{
-				G_printMatchInfo(ent,qtrue);
-			}
-			// sounds moved to G_matchClockDump due to cg_autoaction issue
-			if ( g_gametype.integer == GT_WOLF_STOPWATCH )
-			{
-				// We've already missed the switch
-				if ( g_currentRound.integer == 1 )
-				{
-                    endofroundinfo=va( "Clock set to: %d:%02d",
-							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
-					//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
-				}
-				else
-				{
-
-					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-					if ( val < g_timelimit.value )
-					{
-					    endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
-								(int)val,
-								(int)( 60.0 * ( val - (int)val ) ),
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
-						//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
-					}
-					else
-					{
-					    endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
-						//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
-					}
-				}
+				G_printMatchInfo(ent, qtrue); // this will call MatchClockDump for Stopwatch
 			}
 
-			// RTCWPro - non Stopwatch exits
-			else
+			// non Stopwatch exits
+			if (g_gametype.integer != GT_WOLF_STOPWATCH)
 			{
 				if (g_timelimit.value && !level.warmupTime && !latchVictorySound)
 				{
