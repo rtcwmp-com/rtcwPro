@@ -148,7 +148,7 @@ void G_refHelp_cmd(gentity_t *ent) {
 		G_Printf("cancelvote  passvote            getstatus\n");
 		G_Printf("makescs     removescs\n\n");
 
-		G_Printf("^3Usage: <cmd> [params]\n\n");
+		G_Printf("^3Usage: \\ref <cmd> [params]\n");
 	}
 }
 
@@ -190,7 +190,7 @@ void G_ref_cmd(gentity_t *ent, qboolean fValue) { //unsigned int dwCommand,
 		}
 
 		if (trap_Argc() < 2) {
-			CP("cpm \"Usage: ref [password]\n\"");
+			CP("cpm \"Usage: ^3\\ref [password]\n\"");
 			return;
 		}
 
@@ -284,7 +284,7 @@ void G_scs_cmd(gentity_t* ent, qboolean fValue) {
 		}
 
 		if (trap_Argc() < 2) {
-			CP("cpm \"Usage: scs [password]\n\"");
+			CP("cpm \"Usage: ^3\\ref scs [password]\n\"");
 			return;
 		}
 
@@ -474,7 +474,7 @@ void G_refMakeShoutcaster_cmd(gentity_t* ent)
 
 	if (trap_Argc() != 3)
 	{
-		G_refPrintf(ent, "Usage: \\ref makeShoutcaster <pid>");
+		G_refPrintf(ent, "Usage: ^3\\ref makeShoutcaster <pid>");
 		return;
 	}
 
@@ -522,7 +522,7 @@ void G_refRemoveShoutcaster_cmd(gentity_t* ent)
 
 	if (trap_Argc() != 3)
 	{
-		G_refPrintf(ent, "Usage: \\ref removeShoutcaster <pid>");
+		G_refPrintf(ent, "Usage: ^3\\ref removeShoutcaster <pid>");
 		return;
 	}
 
@@ -769,7 +769,7 @@ void G_refWarning_cmd(gentity_t* ent) {
 	trap_Argv(2, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_refPrintf(ent, "usage: ref warn <clientname> [reason].");
+		G_refPrintf(ent, "Usage: ^3\\ref warn <clientname> [reason].");
 		return;
 	}
 
@@ -1008,7 +1008,7 @@ void G_PlayerBan() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: ban <clientname>.");
+		G_Printf("Usage: ^3\\ref ban <clientname>.");
 		return;
 	}
 
@@ -1036,7 +1036,7 @@ void G_MakeReferee() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: MakeReferee <clientname>.");
+		G_Printf("Usage: ^3\\ref MakeReferee <clientname>.");
 		return;
 	}
 
@@ -1061,7 +1061,7 @@ void G_RemoveReferee() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: RemoveReferee <clientname>.");
+		G_Printf("Usage: ^3\\ref RemoveReferee <clientname>.");
 		return;
 	}
 
@@ -1089,7 +1089,7 @@ void G_MuteClient() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: Mute <clientname>.");
+		G_Printf("Usage: ^3\\ref Mute <clientname>.");
 		return;
 	}
 
@@ -1115,7 +1115,7 @@ void G_UnMuteClient() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: Unmute <clientname>.\n");
+		G_Printf("Usage: ^3\\ref Unmute <clientname>.\n");
 		return;
 	}
 
