@@ -280,6 +280,7 @@ vmCvar_t g_thinkSnapOrigin;
 vmCvar_t g_fixedphysicsfps;
 vmCvar_t g_alternatePing;
 vmCvar_t g_allowForceTapout;
+vmCvar_t g_allowEnemySpawnTimer;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -508,6 +509,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "125", CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_SYSTEMINFO, 0, qtrue },
 	{ &g_alternatePing, "g_alternatePing", "1", CVAR_LATCH, qfalse },
 	{ &g_allowForceTapout, "g_allowForceTapout", "1", CVAR_ARCHIVE, qtrue },
+	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, qtrue },
 	//{ &g_thinkStateLevelTime, "g_thinkStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_thinkSnapOrigin, "g_thinkSnapOrigin", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_endStateLevelTime, "g_endStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },

@@ -1472,17 +1472,23 @@ static void CG_DrawUpperRight( void ) {
 		y = CG_DrawProRespawnTimer(y);
 	}
 
-	// enemy respawn timer (do not include yet)
-	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) { 
-		if (cg_drawEnemyTimer.integer == 1) { 
-			y = CG_DrawEnemyTimer(y);
-		}
-		if (cg_drawEnemyTimer.integer == 2) { 
-			y = CG_DrawProEnemyTimer(y);
-		}
-		if (cg_drawEnemyTimer.integer > 2) { 
-			y = CG_DrawEnemyTimer(y);
-			y = CG_DrawProEnemyTimer(y);
+	// enemy respawn timer
+	const char* info = CG_ConfigString(CS_SERVERINFO);
+	char* allowErt = Info_ValueForKey(info, "g_allowEnemySpawnTimer");
+
+	if (allowErt != NULL && !Q_stricmp(allowErt, "1"))
+	{
+		if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
+			if (cg_drawEnemyTimer.integer == 1) {
+				y = CG_DrawEnemyTimer(y);
+			}
+			if (cg_drawEnemyTimer.integer == 2) {
+				y = CG_DrawProEnemyTimer(y);
+			}
+			if (cg_drawEnemyTimer.integer > 2) {
+				y = CG_DrawEnemyTimer(y);
+				y = CG_DrawProEnemyTimer(y);
+			}
 		}
 	}
 
@@ -2203,7 +2209,7 @@ static void CG_DrawPopinString(void) {
 		return;
 	}
 
-	color = CG_FadeColor(cg.popinPrintTime, 1000 * 3);
+	color = CG_FadeColor(cg.popinPrintTime, 1000 * 5);
 	if (!color) {
 		cg.popinPrintTime = 0;
 		return;
