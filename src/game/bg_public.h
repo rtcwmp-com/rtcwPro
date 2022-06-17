@@ -373,7 +373,7 @@ typedef enum {
 	STAT_MAX_HEALTH,                // health / armor limit, changable by handicap
 	STAT_PLAYER_CLASS,              // DHM - Nerve :: player class in multiplayer
 	STAT_CAPTUREHOLD_RED,           // JPW NERVE - red team score
-	STAT_CAPTUREHOLD_BLUE           // JPW NERVE - blue team score
+	STAT_CAPTUREHOLD_BLUE          // JPW NERVE - blue team score
 } statIndex_t;
 
 
@@ -399,14 +399,8 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK
-
-	// RTCWPro - unused
-	//PERS_HITHEAD,
-	//PERS_HITBODY
-
-	// Weapon Restrictions
-	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
+	PERS_WOLFKICK,
+	PERS_DEATH_YAW			// RtcwPro store yaw for value on death
 } persEnum_t;
 
 
