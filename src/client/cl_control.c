@@ -16,7 +16,7 @@ Takes ScreenShot
 void CL_takeSS(char* name) {
 
 	//Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG sys %s %d\n", name, quality));
-	Cbuf_ExecuteText(EXEC_NOW, va("8autogenerates %s\n", name));
+	Cbuf_ExecuteText(EXEC_NOW, va("screenshotJPEG reqss %s\n", name));
 }
 
 /*

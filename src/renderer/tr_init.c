@@ -693,6 +693,18 @@ void R_ScreenShot_f( void ) {
 	}
 }
 
+/*
+================
+RTCWPro - reqSS
+================
+*/
+void R_GenerateSS_f(char* filename) {
+	char* filepath[MAX_OSPATH];
+
+	Com_sprintf(filepath, sizeof(filepath), "screenshots/%s.jpg", filename);
+	R_TakeScreenshotJPEG(0, 0, glConfig.vidWidth, glConfig.vidHeight, filepath);
+}
+
 void R_ScreenShotJPEG_f(void) {
 	char checkname[MAX_OSPATH];
 	int len;
@@ -709,6 +721,14 @@ void R_ScreenShotJPEG_f(void) {
 	}
 	else {
 		silent = qfalse;
+	}
+
+	// sswolf - make a turn here coz the code below is just brain dead
+	if (!strcmp(ri.Cmd_Argv(1), "reqss")) {
+		if (strlen(ri.Cmd_Argv(2))) {
+			R_GenerateSS_f(ri.Cmd_Argv(2));
+		}
+		return;
 	}
 
 	if (ri.Cmd_Argc() == 2 && !silent) {
@@ -748,20 +768,6 @@ void R_ScreenShotJPEG_f(void) {
 	if (!silent) {
 		ri.Printf(PRINT_ALL, "Wrote %s\n", checkname);
 	}
-}
-
-void R_ScreenShotJPEG2_f(void) {
-	char checkname[MAX_OSPATH];
-
-	if (!strlen(ri.Cmd_Argv(1))) {
-		return;
-	}
-
-	// explicit filename
-	Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(1));
-
-	R_TakeScreenshotJPEG(0, 0, glConfig.vidWidth, glConfig.vidHeight, checkname);
-
 }
 
 //============================================================================
@@ -1141,7 +1147,6 @@ void R_Register( void ) {
 	ri.Cmd_AddCommand( "modelist", R_ModeList_f );
 	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );
 	ri.Cmd_AddCommand( "screenshotJPEG", R_ScreenShotJPEG_f );
-	ri.Cmd_AddCommand("8autogenerates", R_ScreenShotJPEG2_f);
 	ri.Cmd_AddCommand( "gfxinfo", GfxInfo_f );
 	ri.Cmd_AddCommand( "taginfo", R_TagInfo_f );
 
