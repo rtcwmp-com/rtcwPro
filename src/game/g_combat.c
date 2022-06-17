@@ -650,6 +650,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->limboDropWeapon = self->s.weapon; // store this so it can be dropped in limbo
 	}
 // jpw
+
+	// RtcwPro - store the value for player YAW so we can restore on revive
+	// the value STAT_DEAD_YAW can change with lookatkiller etc
+	self->client->ps.persistant[PERS_DEATH_YAW] = SHORT2ANGLE(self->client->pers.cmd.angles[YAW] + self->client->ps.delta_angles[YAW]);
+
 	//self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );
 	self->client->ps.viewangles[0] = 0;

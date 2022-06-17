@@ -2343,7 +2343,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		spawnPoint = ent;
 		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix document/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
-		VectorCopy( ent->r.currentAngles, spawn_angles );
+		VectorCopy( ent->s.angles, spawn_angles );
 	}
 	else
 	{
@@ -2580,14 +2580,22 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	if ( !revived ) {
 		SetClientViewAngle( ent, spawn_angles );
 	} else {
-		// ET port - bani - #245 - we try to orient them in the freelook direction when revived
 		vec3_t newangle;
 
-		newangle[YAW] = SHORT2ANGLE( ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW] );
+		/*
+		// ET port - bani - #245 - we try to orient them in the freelook direction when revived
+		// this allows players to look around and get revived in that direction - not what I wanted
+		newangle[YAW] = SHORT2ANGLE(ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW]);
+		newangle[PITCH] = 0;
+		newangle[ROLL] = 0;
+		*/
+
+		// RtcwPro - restore the value for the client's view before death
+		newangle[YAW] = client->ps.persistant[PERS_DEATH_YAW];
 		newangle[PITCH] = 0;
 		newangle[ROLL] = 0;
 
-		SetClientViewAngle( ent, newangle );
+		SetClientViewAngle(ent, newangle);
 	}
 
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
