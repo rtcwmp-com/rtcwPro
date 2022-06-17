@@ -715,12 +715,6 @@ void Weapon_Engineer( gentity_t *ent ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
 
-							if (g_gamestate.integer == GS_PLAYING)
-							{
-								G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
-								ent->client->sess.obj_destroyed++;
-							}
-
 //	jpw pulled				hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
@@ -782,11 +776,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 									trap_SendServerCommand(-1, "cp \"Axis engineer disarmed the Dynamite!\n\"");
 									G_matchPrintInfo(va("^5Axis defused dynamite near %s!", hit->track), qfalse);
 
-									ent->client->sess.dyn_defused++;
+									if (g_gamestate.integer == GS_PLAYING)
+									{
+										ent->client->sess.dyn_defused++;
 
-									if (g_gameStatslog.integer) {
-										G_writeObjectiveEvent(ent, objDynDefuse);
-										//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										if (g_gameStatslog.integer) {
+											G_writeObjectiveEvent(ent, objDynDefuse);
+											//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										}
 									}
 
 									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/axis/g-dynamite_defused.wav");
@@ -802,11 +799,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 									trap_SendServerCommand(-1, "cp \"Allied engineer disarmed the Dynamite!\n\"");
 									G_matchPrintInfo(va("^5Allies defused dynamite near %s!", hit->track), qfalse);
 
-									ent->client->sess.dyn_defused++;
+									if (g_gamestate.integer == GS_PLAYING)
+									{
+										ent->client->sess.dyn_defused++;
 
-									if (g_gameStatslog.integer) {
-										G_writeObjectiveEvent(ent, objDynDefuse);
-										// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										if (g_gameStatslog.integer) {
+											G_writeObjectiveEvent(ent, objDynDefuse);
+											// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										}
 									}
 
 									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/allies/a-dynamite_defused.wav");

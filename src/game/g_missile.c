@@ -881,6 +881,12 @@ void G_ExplodeMissile( gentity_t *ent ) {
 					G_UseTargets(hit, ent);
 					hit->think = G_FreeEntity;
 					hit->nextthink = level.time + FRAMETIME;
+
+					if (g_gamestate.integer == GS_PLAYING)
+					{
+						G_writeObjectiveEvent(ent->parent, objDestroyed); // ent->parent = attacker
+						ent->parent->client->sess.obj_destroyed++;
+					}
 				}
 			}
 		}

@@ -9,7 +9,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
     <LocalDebuggerCommand>$(RTCWBASE)\$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+set sv_AuthEnabled 1 +set dedicated 2 +set sv_pure 1 +set fs_game $(RTCW_MOD_NAME) +set g_debugMode 0 +map mp_base +exec server.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+set sv_AuthEnabled 1 +set dedicated 2 +set sv_pure 1 +set fs_game $(RTCW_MOD_NAME) +set g_developer 1 +map mp_base +exec server.cfg</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(RTCWBASE)\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
