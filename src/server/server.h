@@ -340,6 +340,9 @@ extern cvar_t  *sv_gameskill;
 // TTimo - autodl
 extern cvar_t *sv_dl_maxRate;
 
+
+// Start RtcwPro
+
 // Anti wallhack
 //extern cvar_t* wh_active;
 //extern cvar_t* wh_bbox_horz;
@@ -374,7 +377,9 @@ extern cvar_t* sv_ssMaxTime;
 
 extern cvar_t* sv_checkVersion;
 extern cvar_t* sv_restRunning;
+extern cvar_t* sv_serverTimeReset;	// ET Legacy port reset svs.time on map load to fix knockback bug
 
+// End RtcwPro
 //===========================================================
 
 //

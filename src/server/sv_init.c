@@ -560,6 +560,12 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// to load during actual gameplay
 	sv.state = SS_LOADING;
 
+	// ET Legacy port reset svs.time on map load to fix knockback bug
+	if (sv_serverTimeReset->integer)
+	{
+		svs.time = 0;
+	}
+
 	Cvar_Set( "sv_serverRestarting", "1" );
 
 	// load and spawn all other entities
@@ -954,6 +960,8 @@ void SV_Init( void ) {
 	sv_dl_maxRate = Cvar_Get( "sv_dl_maxRate", "60000", CVAR_ARCHIVE );
 #endif
 
+	// Start RtcwPro
+
 	// HTTP downloads
 	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
 	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "https://maps.rtcwmp.com/", CVAR_ARCHIVE);
@@ -979,6 +987,12 @@ void SV_Init( void ) {
 	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
 	sv_checkVersion = Cvar_Get("sv_checkVersion", "13", CVAR_ROM);
+
+	// ET Legacy port reset svs.time on map load to fix knockback bug
+	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "1", CVAR_ARCHIVE); // default to 1
+
+	// End RtcwPro
+	
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

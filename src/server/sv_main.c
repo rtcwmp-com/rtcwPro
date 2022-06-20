@@ -79,6 +79,8 @@ cvar_t  *sv_gameskill;
 
 cvar_t  *sv_showAverageBPS;     // NERVE - SMF - net debugging
 
+// Start RtcwPro
+
 // Anti-Wallhack
 //cvar_t* wh_active;
 //cvar_t* wh_bbox_horz;
@@ -113,6 +115,9 @@ cvar_t* sv_ssMaxTime;
 
 cvar_t* sv_checkVersion;
 cvar_t* sv_restRunning;
+cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix knockback bug
+
+// End RtcwPro
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
