@@ -677,6 +677,7 @@ typedef struct {
 #define LAG_MAX_DROP_THRESHOLD 800
 #define LAG_MIN_DROP_THRESHOLD ( LAG_MAX_DROP_THRESHOLD - 200 )
 #define LAG_DECAY 1.02f
+#define LAG_SPEED_THRESHOLD 80
 // End
 
 typedef struct {

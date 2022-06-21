@@ -403,7 +403,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_enableBreath, "g_enableBreath", "1", CVAR_SERVERINFO, 0, qtrue},
 	{ &g_testPain, "g_testPain", "0", CVAR_CHEAT, 0, qfalse },
 	{ &g_missionStats, "g_missionStats", "0", CVAR_ROM, 0, qfalse },
-	{ &g_developer, "developer", "0", CVAR_TEMP, 0, qfalse },
+	{ &g_developer, "developer", "0", CVAR_CHEAT, 0, qfalse },
 	{ &g_rankings, "g_rankings", "0", 0, 0, qfalse},
 	{ &g_userAim, "g_userAim", "1", CVAR_CHEAT, 0, qfalse },
 
