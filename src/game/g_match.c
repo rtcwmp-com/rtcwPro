@@ -231,7 +231,7 @@ void G_delayPrint(gentity_t *dpent) {
 		break;
 	case DP_UNPAUSING:
 		if (level.paused == PAUSE_UNPAUSING) {
-			int cSeconds = 11 * 1000 - (level.time - dpent->timestamp);
+			int cSeconds = 12 * 1000 - (level.time - dpent->timestamp);
 
 			if (cSeconds > 1000) {
 				think_next = level.time + 1000;
