@@ -497,7 +497,7 @@ void Cmd_GetOBJ(gentity_t* ent) {
 
 void Cmd_SelfRevive_f(gentity_t* ent) {
 
-	if (!ent->client->sess.referee) {
+	if (!ent->client->sess.referee && !trap_Cvar_VariableIntegerValue("developer")) {
 		return;
 	}
 
@@ -2975,7 +2975,15 @@ void ClientCommand( int clientNum ) {
 	}
 
 	else {
-		trap_SendServerCommand( clientNum, va( "print \"unknown cmd[lof] %s\n\"", cmd ) );
+		// RtcwPro - log client input (source RtcwPubJ)
+		// this will catch unknown commands as well as +vstr
+		if (g_logClientInput.integer && g_clientLogFile.string[0])
+		{
+			char* clientIp = va("%s", ent->client->sess.ip);
+			LogEntry(g_clientLogFile.string, va("%.99s\t%s\t%s\t%s", cmd, clientIp, ent->client->pers.netname, getDateTime()));
+		}
+		else
+			trap_SendServerCommand(clientNum, va("print \"unknown cmd[lof] %s\n\"", cmd));
 	}
 
 }

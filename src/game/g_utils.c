@@ -1665,3 +1665,24 @@ int G_FindMatchingMaps(gentity_t* ent, char* mapName) {
 	}
 }
 
+/*
+==================
+LogEntry
+
+log to a file
+==================
+*/
+void LogEntry(char* filename, char* info) {
+	fileHandle_t    f;
+	char* varLine;
+
+	strcat(info, "\r");
+	trap_FS_FOpenFile(filename, &f, FS_APPEND);
+
+	varLine = va("%s\n", info);
+
+	trap_FS_Write(varLine, strlen(varLine), f);
+	trap_FS_FCloseFile(f);
+	return;
+}
+

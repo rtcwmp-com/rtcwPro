@@ -1686,6 +1686,9 @@ extern vmCvar_t g_thinkSnapOrigin;
 extern vmCvar_t g_fixedphysicsfps;
 extern vmCvar_t g_alternatePing;
 extern vmCvar_t g_allowForceTapout;
+extern vmCvar_t g_allowEnemySpawnTimer;
+extern vmCvar_t g_clientLogFile;
+extern vmCvar_t g_logClientInput;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -2201,6 +2204,9 @@ qboolean G_DoAntiwarp(gentity_t* ent);
 void AW_AddUserCmd(int clientNum, usercmd_t* cmd);
 static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd);
 void DoClientThinks(gentity_t* ent);
+
+// log entry
+void LogEntry(char* filename, char* info);
 
 /**
  * @enum enum_t_dp

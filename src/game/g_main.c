@@ -282,6 +282,9 @@ vmCvar_t g_alternatePing;
 vmCvar_t g_allowForceTapout;
 vmCvar_t g_allowEnemySpawnTimer;
 
+vmCvar_t g_clientLogFile;  // log filename for client input
+vmCvar_t g_logClientInput; // log unknown commands from client i.e. hacks
+
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -510,6 +513,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_alternatePing, "g_alternatePing", "1", CVAR_LATCH, qfalse },
 	{ &g_allowForceTapout, "g_allowForceTapout", "1", CVAR_ARCHIVE, qtrue },
 	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, qtrue },
+	{ &g_clientLogFile, "g_clientLogFile", "logs/clientInput.log", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_logClientInput, "g_logClientInput", "0", CVAR_ARCHIVE, qtrue },
 	//{ &g_thinkStateLevelTime, "g_thinkStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_thinkSnapOrigin, "g_thinkSnapOrigin", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_endStateLevelTime, "g_endStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },

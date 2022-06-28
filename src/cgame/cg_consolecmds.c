@@ -533,13 +533,6 @@ static void CG_DumpLocation_f( void ) {
 			   (int) cg.snap->ps.origin[0], (int) cg.snap->ps.origin[1], (int) cg.snap->ps.origin[2] );
 }
 
-/*
-===================
-OSPx
-
-+vstr
-===================
-*/
 
 /************ L0 - OSP dump ************/
 const char *aMonths[12] = {
@@ -563,9 +556,19 @@ void CG_autoRecord_f(void) {	// Due rtcw bug we need to sync"h" first..but to av
 void CG_autoScreenShot_f(void) {
 	trap_SendConsoleCommand(va("screenshot%s %s\n", ((cg_useScreenshotJPEG.integer) ? "JPEG" : ""), CG_generateFilename()));
 }
+
+/*
+===================
+OSPx
+
++vstr
+===================
+*/
 void CG_vstrDown_f(void) {
 	if (trap_Argc() == 5) {
 		trap_SendConsoleCommand(va("vstr %s;", CG_Argv(1)));
+		trap_SendClientCommand(va("%s", CG_Argv(0))); // client input logging
+		trap_SendClientCommand(va("%s", CG_Argv(1))); // client input logging
 	}
 	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
 }
