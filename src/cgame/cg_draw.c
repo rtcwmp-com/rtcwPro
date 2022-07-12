@@ -1448,7 +1448,7 @@ static void CG_DrawUpperRight( void ) {
 	if ( cg_drawFPS.integer ) {
 		y = CG_DrawFPS( y );
 	}
-	if ( cg_drawTimer.integer ) {
+	if ( cg_drawTimer.integer && cgs.gamestate == GS_PLAYING) {
 		y = CG_DrawTimer( y );
 	}
 // (SA) disabling drawattacker for the time being
