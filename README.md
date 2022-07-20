@@ -2,7 +2,7 @@
 
 ![Alt tag](Assets/rtcwpro.png?raw=true "Title")
 
-Return to Castle Wolfenstein Mod/Engine - based on OSPx/xMod (created by Nate) with additions from RtcwPub, ioRtcw, Enemy Territory, ETPub, and other Q3 mods
+Return to Castle Wolfenstein Mod/Engine - based on OSPx/xMod (created by Nate) with additions from RtcwPub, ioRtcw, Enemy Territory, ET Legacy, ETPub, and other Q3 mods
 
 Main objective: create a competition mod similar to OSP with updates for tournaments and pugs
 
@@ -216,6 +216,47 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
     - server: make sv_checkversion read only  
     - client: revert events to 1.2.3 state  
     - client: deprecate cg_pauseMusic due to a possible crash  
+    
+  - 1.2.7 [changelog](changelog/1.2.7-changelog.txt)  
+    - asset: Added quake head hitsound - headStyle 9
+    - asset: Added new country flags
+    - asset: Added new medpack image with more red color
+    - config: Added cg_errordecay, r_showtris, and r_shownormals to server template configs 
+    - client: Added custom console colors and alpha
+    - client: Adjusted raw mouse input
+    - client: Fixed cdkey generation  
+    - client: Added cg_muzzleFlash 2 to show flash on client and enemy
+    - client: Added mouse buttons 4 and 5
+    - client/server: Print who issued /readyteam in console 
+    - client/server: Center print when opponent loses objective
+    - client/server: Improved end of round sound duplication
+    - client/server: Added download message for invalid client version 
+    - client/server: Fixed footstep bobbing for high FPS  
+    - client/server: Fixed cg gun frame crash on team switch
+    - server: Kick players with shared guids that are messing up stats
+    - server: Fixed kick voting so it only looks at player count on the team that called the vote
+    - server: Fixed team locking during warmup/disconnects
+    - server: Prevent document revive bug
+    - server: Fixed artillery instant kill bug
+    - server: Added cvar to control forcetapout
+    - server: Fixed map voting when loading mapindex 0
+    - server: Fixed knockback for fps  
+    - server: Fixed maxlives so players do not respawn 
+    - server: Fixed objective capture stats
+    - server: Fixed vote percent for non startmatch votes 
+    - server: Record filename when FS_FileForHandle is NULL
+    - server: #387 Fixed grenade splash damage 
+    - server: Added a few logging prints for json stats submit to API
+    - server: Fixed stats sync issue
+    - server: #345 change to next best weapon when killed with primed grenade
+    - server: Fixed spawn flag stats
+    - server: #382 reset objective and dyno stats on end of AB round
+    - server: Issue #379 Fixed warmup stats
+    - server: Issue #372 Fixed objective destroyed stats 
+    - server: Added 'true' ping from rtcwPub
+    - server: Fixed physics for FPS (1.2.61 already released to a few servers)
+    - server: Added /maps command
+
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 
