@@ -2299,7 +2299,7 @@ GRENADE LAUNCHER
 extern void G_ExplodeMissilePoisonGas( gentity_t *ent );
 
 gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenType ) {
-	gentity_t   *m, *te; // JPW NERVE
+	gentity_t   *m; // JPW NERVE
 	trace_t tr;
 	vec3_t viewpos;
 	float upangle = 0, pitch;               //	start with level throwing and adjust based on angle
@@ -2391,9 +2391,7 @@ gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenType ) {
 		m->nextthink = level.time + 4000;
 		m->think = weapon_callAirStrike;
 
-		te = G_TempEntity( m->s.pos.trBase, EV_GLOBAL_SOUND );
-		te->s.eventParm = G_SoundIndex( "sound/multiplayer/airstrike_01.wav" );
-		te->r.svFlags |= SVF_BROADCAST | SVF_USE_CURRENT_ORIGIN;
+		APS("sound/multiplayer/airstrike_01.wav");
 	}
 	// jpw
 
