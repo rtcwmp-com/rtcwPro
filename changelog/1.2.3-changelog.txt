@@ -1,0 +1,2 @@
+- server: fix early airstrikes bug
+- server: add vote_allow_cointoss
