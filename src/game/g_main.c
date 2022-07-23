@@ -281,6 +281,7 @@ vmCvar_t g_fixedphysicsfps;
 vmCvar_t g_alternatePing;
 vmCvar_t g_allowForceTapout;
 vmCvar_t g_allowEnemySpawnTimer;
+vmCvar_t g_reviveSameDirection;
 
 vmCvar_t g_clientLogFile;  // log filename for client input
 vmCvar_t g_logClientInput; // log unknown commands from client i.e. hacks
@@ -515,6 +516,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, qtrue },
 	{ &g_clientLogFile, "g_clientLogFile", "logs/clientInput.log", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_logClientInput, "g_logClientInput", "0", CVAR_ARCHIVE, qtrue },
+	{ &g_reviveSameDirection, "g_reviveSameDirection", "0", CVAR_ARCHIVE, 0, qfalse },
 	//{ &g_thinkStateLevelTime, "g_thinkStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_thinkSnapOrigin, "g_thinkSnapOrigin", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_endStateLevelTime, "g_endStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },

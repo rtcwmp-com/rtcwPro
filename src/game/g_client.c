@@ -2577,18 +2577,15 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// the respawned flag will be cleared after the attack and jump keys come up
 	client->ps.pm_flags |= PMF_RESPAWNED;
 
-	if ( !revived ) {
+	// if spawning at spawn point do default view
+	if (!revived)
+	{
 		SetClientViewAngle( ent, spawn_angles );
-	} else {
+	}
+	// else if g_reviveSameDirection is enabled spawn them in the direction they were killed
+	else if (g_reviveSameDirection.integer)
+	{
 		vec3_t newangle;
-
-		/*
-		// ET port - bani - #245 - we try to orient them in the freelook direction when revived
-		// this allows players to look around and get revived in that direction - not what I wanted
-		newangle[YAW] = SHORT2ANGLE(ent->client->pers.cmd.angles[YAW] + ent->client->ps.delta_angles[YAW]);
-		newangle[PITCH] = 0;
-		newangle[ROLL] = 0;
-		*/
 
 		// RtcwPro - restore the value for the client's view before death
 		newangle[YAW] = client->ps.persistant[PERS_DEATH_YAW];
@@ -2596,6 +2593,11 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		newangle[ROLL] = 0;
 
 		SetClientViewAngle(ent, newangle);
+	}
+	// else do default view
+	else
+	{
+		SetClientViewAngle(ent, spawn_angles);
 	}
 
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {

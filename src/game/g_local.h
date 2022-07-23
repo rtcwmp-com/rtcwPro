@@ -1689,6 +1689,7 @@ extern vmCvar_t g_allowForceTapout;
 extern vmCvar_t g_allowEnemySpawnTimer;
 extern vmCvar_t g_clientLogFile;
 extern vmCvar_t g_logClientInput;
+extern vmCvar_t g_reviveSameDirection;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
