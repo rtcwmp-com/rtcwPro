@@ -2274,7 +2274,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT && !cl->clientValidated)
 	{
-		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+		SV_DropClient(cl, "^5Failure to comply with server restrictions rules.\n^5Correct your settings before rejoning.");
 		return;
 	}
 }

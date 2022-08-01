@@ -546,8 +546,10 @@ void CL_CheckRestStatus(void) {
 			int violations = Cvar_ValidateRest();
 
 			if (violations > 0) {
-				Com_Printf(">> ^3You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
-				Com_Printf(">> ^3Please use /violations and correct them.\n");
+				Com_Printf("^5CVAR >>>>>\n");
+				Com_Printf("^5CVAR >>>>> You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
+				Com_Printf("^5CVAR >>>>> Please use /violations and correct them.\n");
+				Com_Printf("^5CVAR >>>>>\n");
 			}
 			cl.handle.warnedTime = cls.realtime + (violations < 1 ? RKVALD_TIME_PING_L : RKVALD_TIME_PING_S);
 			CL_AddReliableCommand(va("%s %s", CTL_RKVALD, violations < 1 ? RKVALD_OK : RKVALD_NOT_OK));
