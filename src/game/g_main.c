@@ -459,7 +459,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_fastStabSound, "g_fastStabSound", "0", CVAR_ARCHIVE, 0, qfalse },
 
 	// voting
-	{ &vote_limit, "vote_limit", "3", CVAR_ARCHIVE, qfalse, qfalse },
+	{ &vote_limit, "vote_limit", "5", CVAR_ARCHIVE, qfalse, qfalse },
 	{ &vote_percent, "vote_percent", "51", CVAR_ARCHIVE, qfalse, qfalse },
 	{ &vote_allow_comp, "vote_allow_comp", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_gametype,     "vote_allow_gametype", "1", 0, 0, qfalse, qfalse },
@@ -470,7 +470,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_nextmap,      "vote_allow_nextmap", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_pub,          "vote_allow_pub", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_referee,      "vote_allow_referee", "0", 0, 0, qfalse, qfalse },
-	{ &vote_allow_shuffleteamsxp,   "vote_allow_shuffleteamsxp", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_swapteams,    "vote_allow_swapteams", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_friendlyfire, "vote_allow_friendlyfire", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_timelimit,    "vote_allow_timelimit", "0", 0, 0, qfalse, qfalse },
@@ -479,7 +478,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_balancedteams,"vote_allow_balancedteams", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_muting,       "vote_allow_muting", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_cointoss,		"vote_allow_cointoss", "1", 0, 0, qfalse, qfalse },
-	{ &vote_limit,      "vote_limit", "5", 0, 0, qfalse, qfalse },
 
 	// RTCWPro
 	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
