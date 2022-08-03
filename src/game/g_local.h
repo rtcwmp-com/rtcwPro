@@ -1474,6 +1474,7 @@ extern vmCvar_t g_gametype;
 extern vmCvar_t g_gameskill;
 // done
 extern vmCvar_t g_gameStatslog; // temp cvar for event logging
+extern vmCvar_t g_statsDebug;
 extern vmCvar_t g_stats_curl_submit;
 extern vmCvar_t g_stats_curl_submit_URL;
 extern vmCvar_t g_stats_curl_submit_headers;
@@ -2008,7 +2009,6 @@ void G_MakeReferee(void);
 void G_RemoveReferee(void);
 void G_MuteClient(void);
 void G_UnMuteClient(void);
-void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
 
 // g_shared.c
@@ -2146,7 +2146,8 @@ void G_writeClosingJson(void);
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
 void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
 int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
-
+void DebugLogEntry(char* str);
+char* LookupEventType(int eventyType);
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 
@@ -2161,7 +2162,7 @@ qboolean G_commandHelp(gentity_t *ent, const char *pszCommand, unsigned int dwCo
 qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
-qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
+//qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
 // now residing in g_utils.c  (previous declaration in g_admin.h)
 //
