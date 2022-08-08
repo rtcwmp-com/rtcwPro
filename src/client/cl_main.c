@@ -35,6 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/stat.h>
 #endif
 
+// RTCWPro - moved from cg
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 cvar_t  *cl_wavefilerecord;
 cvar_t  *cl_nodelta;
 cvar_t  *cl_debugMove;
@@ -3057,6 +3062,27 @@ void CL_modSource_f(void) {
 	Sys_OpenURL("https://github.com/rtcwmp-com/rtcwPro", qtrue);
 }
 
+/*
+================
+RTCWPro - minimizer (windows only)
+Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
+================
+*/
+static void CL_Minimize_f(void)
+{
+#ifdef _WIN32
+	HWND wnd;
+
+	wnd = GetForegroundWindow();
+	if (wnd)
+	{
+		ShowWindow(wnd, SW_MINIMIZE);
+	}
+#else
+	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
+#endif
+}
+
 #if !defined( __MACOS__ )
 
 /*
@@ -3343,6 +3369,7 @@ void CL_Init( void ) {
 
 	Cmd_AddCommand("openModURL", CL_modURL_f); // RTCWPro
 	Cmd_AddCommand("openModSource", CL_modSource_f); // RTCWPro
+	Cmd_AddCommand("minimize", CL_Minimize_f); // RTCWPro - moved from cg
 
 	//bani - we eat these commands to prevent exploits
 	Cmd_AddCommand("userinfo", CL_EatMe_f);
