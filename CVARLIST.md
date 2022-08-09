@@ -162,7 +162,12 @@
 | g_spawnOffset | `integer` | `0-99` | `9` | Maximum spawn offset variance between teams (-1) |
 | g_bodiesGrabFlags | `integer` | `0-1` | `1` | Enable/disable dead clients grabbing flags |
 | g_mapScriptDirectory | `string` | `N/A` | `""` | Directory to load map scripts from (must be in fs) |
-| g_allowForceTapout | `integer` | `0-1` | `"1"` | Allow forcetapout globally |
-| g_alternatePing | `integer` | `0-1` | `"1"` | Display alternate ping - calculated from ps commands in mod instead of engine |
-| g_fixedphysicsfps | `integer` | `0-333` | `"125"` | Simulate framerate behavior for all clients |
+| g_allowForceTapout | `integer` | `0-1` | `1` | Allow forcetapout globally |
+| g_alternatePing | `integer` | `0-1` | `1` | Display alternate ping - calculated from ps commands in mod instead of engine |
+| g_fixedphysicsfps | `integer` | `0-333` | `125` | Simulate framerate behavior for all clients |
+| g_allowSS | `integer` | `0-1` | `0` | Allow clients to use `/reqss id` | 
+| g_ssAddress | `string` | `N/A` | `none` | Remote address for SS e.g. hostname or ip:port | 
+| g_ssWebhookId | `string` | `N/A` | `none` | id contained in the discord webhook link (numbers only) e.g. `webhooks/id/` | 
+| g_ssWebhookToken | `string` | `N/A` | `none` | token contained in the discord webhook link (chars) e.g. `webhooks/id/token` | 
+| g_ssWaitTime | `integer` | `0-9999` | `30` | wait time between reqss cmds to prevent spam | 
 
