@@ -723,7 +723,7 @@ void R_ScreenShotJPEG_f(void) {
 		silent = qfalse;
 	}
 
-	// sswolf - make a turn here coz the code below is just brain dead
+	// RTCWPro - make a turn here coz the code below is just brain dead
 	if (!strcmp(ri.Cmd_Argv(1), "reqss")) {
 		if (strlen(ri.Cmd_Argv(2))) {
 			R_GenerateSS_f(ri.Cmd_Argv(2));

@@ -229,7 +229,7 @@ typedef enum {
 	CG_R_BUILD,
 	// -NERVE - SMF
 
-	CG_REQ_SS // reqSS
+	CG_REQUEST_SS // reqSS
 } cgameImport_t;
 
 

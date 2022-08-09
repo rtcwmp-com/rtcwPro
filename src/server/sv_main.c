@@ -107,12 +107,6 @@ cvar_t* sv_AuthStrictMode;
 // Cvar Restrictions
 cvar_t* sv_GameConfig;
 
-// reqSS
-cvar_t* sv_ssEnable;
-cvar_t* sv_ssMinTime;
-cvar_t* sv_ssMaxTime;
-//cvar_t* sv_ssQuality;
-
 cvar_t* sv_checkVersion;
 cvar_t* sv_restRunning;
 cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix knockback bug
@@ -1304,9 +1298,6 @@ void SV_Frame( int msec ) {
 
 	// send a heartbeat to the master if needed
 	SV_MasterHeartbeat( HEARTBEAT_GAME );
-
-	// reqSS
-	autoSSTime();
 }
 /*
 ==================

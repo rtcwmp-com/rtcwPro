@@ -2059,6 +2059,89 @@ void Cmd_Vote_f( gentity_t *ent ) {
 	// for players entering or leaving
 }
 
+/*
+=================
+RTCWPro
+Request screenshot from client
+=================
+*/
+void Cmd_RequestSS(gentity_t* ent) {
+	char client_arg[256];
+	int	clientNum;
+	gentity_t* targetent;
+	int remainingTime = (int)(g_ssWaitTime.integer - ((level.time - level.lastSSTime) / 1000));
+
+	if (!g_allowSS.integer)
+	{
+		CP("print \"Client SS not enabled on this server^1!\n\"");
+		return;
+	}
+
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
+	{
+		CP("print \"Client SS not enabled on this server^1!\n\"");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
+	{
+		CP("print \"Client SS not enabled on this server^1!\n\"");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
+	{
+		CP("print \"Client SS not enabled on this server^1!\n\"");
+		return;
+	}
+
+	if (level.time - level.lastSSTime < g_ssWaitTime.integer * 1000)
+	{
+		CP(va("print \"Wait ^3%i ^7%s before requesting SS^1!\n\"", remainingTime, remainingTime == 1 ? "second" : "seconds"));
+		return;
+	}
+
+	trap_Argv(1, client_arg, sizeof(client_arg));
+
+	if (!strlen(client_arg))
+	{
+		CP("print \"Invalid client id!\n\"");
+		return;
+	}
+
+	clientNum = atoi(client_arg);
+	targetent = &g_entities[clientNum];
+
+	if (!targetent->client || targetent->client->pers.connected != CON_CONNECTED)
+	{
+		CP("print \"Invalid client id!\n\"");
+		return;
+	}
+
+#ifdef OMNIBOT
+	if (targetent->r.svFlags & SVF_BOT)
+	{
+		CP("print \"Cannot use this command on bots^1!\n\"");
+		return;
+	}
+#endif
+
+	if (targetent == ent)
+	{
+		CP("print \"Cannot use this command on yourself^1!\n\"");
+		return;
+	}
+
+	if (!Q_stricmp(ent->client->sess.ip, targetent->client->sess.ip))
+	{
+		CP("print \"Cannot use this command on yourself^1!\n\"");
+		return;
+	}
+
+	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", clientNum));
+	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, clientNum));
+	CP(va("print \"Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
+}
 
 qboolean G_canPickupMelee( gentity_t *ent ) {
 
@@ -2934,6 +3017,8 @@ void ClientCommand( int clientNum ) {
 		Cmd_FollowCycle_f( ent, -1 );
 	} else if ( Q_stricmp( cmd, "maps" ) == 0 )  {
 		Cmd_DisplayMaps_f( ent );
+	} else if (Q_stricmp(cmd, "reqss") == 0) {
+		Cmd_RequestSS(ent);
 	} else if (Q_stricmp(cmd, "more") == 0) {
 		Cmd_More_f(ent);
 	}
@@ -2973,8 +3058,8 @@ void ClientCommand( int clientNum ) {
 
 		 return;
 	}
-
-	else {
+	else 
+	{
 		// RtcwPro - log client input (source RtcwPubJ)
 		// this will catch unknown commands as well as +vstr
 		if (g_logClientInput.integer && g_clientLogFile.string[0])
@@ -2982,10 +3067,9 @@ void ClientCommand( int clientNum ) {
 			char* clientIp = va("%s", ent->client->sess.ip);
 			LogEntry(g_clientLogFile.string, va("%.99s\t%s\t%s\t%s", cmd, clientIp, ent->client->pers.netname, getDateTime()));
 		}
-		else
-			trap_SendServerCommand(clientNum, va("print \"unknown cmd[lof] %s\n\"", cmd));
-	}
 
+		trap_SendServerCommand(clientNum, va("print \"unknown cmd[lof] %s\n\"", cmd));
+	}
 }
 
 typedef struct
@@ -3048,6 +3132,7 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "weaponstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 Shows weapon accuracy stats for a player"                                   },
     { "wstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
     { "maps",    qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
+	{ "reqss",    qtrue,  qtrue, NULL,     " Request screenshot from client id"                                   },
 	{ 0,                qfalse, qtrue,  NULL,                  0                                                                                            }
 };
 
