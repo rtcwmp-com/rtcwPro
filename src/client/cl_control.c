@@ -9,7 +9,7 @@ Source: Nate (rtcwMP)
 
 /*
 ===============
-sswolf - this is taken from bg,
+RTCWPro - this is taken from bg,
 but it should be somewhere in engine
 like qc or qs or some sh*t coz it's just lame to
 copy it around from place to place
@@ -51,7 +51,7 @@ void CL_TakeSS(char* name) {
 
 /*
 ===============
-sswolf - lazy way
+RTCWPro - lazy way
 to get path to ss
 CL_GetFilePath
 ===============

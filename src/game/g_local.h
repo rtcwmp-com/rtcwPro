@@ -1264,7 +1264,7 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon );
 void CalcMuzzlePointForActivate( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 // done.
 
-// sswolf - RTCWPro stuff
+// RTCWPro - head box stuff
 void AddHeadEntity(gentity_t* ent);
 void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);

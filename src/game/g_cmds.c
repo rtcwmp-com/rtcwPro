@@ -2061,7 +2061,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 
 /*
 =================
-sswolf
+RTCWPro
 Request screenshot from client
 =================
 */
