@@ -656,6 +656,6 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 // 
 // RTCWPro - cl_control.c - source: Nate (rtcwMP)
 //
-void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime);
+void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
 #endif // !__CLIENT_H
 

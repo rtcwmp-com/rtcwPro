@@ -3006,5 +3006,5 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 #define CPriP( x ) CG_PriorityCenterPrint(CG_LocalizeServerCommand( x ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.2 ), SMALLCHAR_WIDTH, -1 );
 
 // reqSS
-void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime);
+void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
 

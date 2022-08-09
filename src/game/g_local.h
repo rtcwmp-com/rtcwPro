@@ -1162,6 +1162,7 @@ qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // RTCWPro -
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // RTCWPro - drop weapon stuff
 gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
 char* getDateTime(void);
+char* Delim_GetDateTime(void);
 char* getDate(void);
 const char* getMonthString(int monthIndex);
 int getYearFromCYear(int cYear);

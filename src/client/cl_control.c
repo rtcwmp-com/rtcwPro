@@ -68,7 +68,7 @@ char* CL_GetFilePath(char* filename) {
 ScreenShot request from server
 ================
 */
-void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime) {
+void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime) {
 	char* filename;
 	char* filepath;
 	char* clientName, cleanName[16];
@@ -103,9 +103,10 @@ void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime)
 
 	if (SS_info) {
 		SS_info->address = address;
-		SS_info->hookid = va("ID: %s", hookid);;
-		SS_info->hooktoken = va("TOK: %s", hooktoken);;
-		SS_info->waittime = va("WAIT: %s", waittime);;
+		SS_info->hookid = va("ID: %s", hookid);
+		SS_info->hooktoken = va("TOK: %s", hooktoken);
+		SS_info->waittime = va("WAIT: %s", waittime);
+		SS_info->datetime = va("TIME: %s", datetime);
 		SS_info->name = va("NAME: %s", cleanName);
 		SS_info->guid = va("GUID: %s", guid);
 		SS_info->filepath = filepath;

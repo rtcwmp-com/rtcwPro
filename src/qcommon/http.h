@@ -97,6 +97,7 @@ typedef struct {
 	char* hookid;
 	char* hooktoken;
 	char* waittime;
+	char* datetime;
 	char* name;
 	char* guid;
 	char* filepath;

@@ -2303,8 +2303,9 @@ static void CG_ServerCommand( void ) {
 		char* hookid = va("%s", CG_Argv(2));
 		char* hooktoken = va("%s", CG_Argv(3));
 		char* waittime = va("%s", CG_Argv(4));
+		char* datetime = va("%s", CG_Argv(5));
 
-		trap_RequestSS(address, hookid, hooktoken, waittime);
+		trap_RequestSS(address, hookid, hooktoken, waittime, datetime);
 		return;
 	}
 

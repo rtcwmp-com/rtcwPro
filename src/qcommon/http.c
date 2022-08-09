@@ -142,6 +142,7 @@ void* CL_HTTP_SSUpload(void* args) {
 	headerlist = curl_slist_append(headerlist, SS_info->name);
     headerlist = curl_slist_append(headerlist, SS_info->guid);
 	headerlist = curl_slist_append(headerlist, SS_info->waittime);
+	headerlist = curl_slist_append(headerlist, SS_info->datetime);
     //headerlist = curl_slist_append(headerlist, SS_info->ip);
 	//headerlist = curl_slist_append(headerlist, va("IND: %s", GAMESTR));
 
