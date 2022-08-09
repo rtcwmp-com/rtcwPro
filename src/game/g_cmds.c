@@ -2077,19 +2077,19 @@ void Cmd_RequestSS(gentity_t* ent) {
 		return;
 	}
 
-	if (!strlen(g_ssAddress.string))
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
 	{
 		CP("print \"Client SS not enabled on this server^1!\n\"");
 		return;
 	}
 
-	if (!strlen(g_ssWebhookId.string))
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
 	{
 		CP("print \"Client SS not enabled on this server^1!\n\"");
 		return;
 	}
 
-	if (!strlen(g_ssWebhookToken.string))
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
 	{
 		CP("print \"Client SS not enabled on this server^1!\n\"");
 		return;

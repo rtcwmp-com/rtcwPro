@@ -866,19 +866,19 @@ void G_refRequestSS(gentity_t* ent) {
 	char arg[MAX_TOKEN_CHARS];
 	int remainingTime = (int)(g_ssWaitTime.integer - ((level.time - level.lastSSTime) / 1000));
 
-	if (!strlen(g_ssAddress.string))
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
 	{
 		G_refPrintf(ent, "g_ssAddress is not set!");
 		return;
 	}
 
-	if (!strlen(g_ssWebhookId.string))
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
 	{
 		G_refPrintf(ent, "g_ssWebhookId is not set!");
 		return;
 	}
 
-	if (!strlen(g_ssWebhookToken.string))
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
 	{
 		G_refPrintf(ent, "g_ssWebhookToken is not set!");
 		return;

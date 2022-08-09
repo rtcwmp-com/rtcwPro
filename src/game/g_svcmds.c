@@ -973,19 +973,19 @@ void Svcmd_RequestSS_f(void) {
 		return;
 	}
 
-	if (!strlen(g_ssAddress.string))
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
 	{
 		G_Printf("g_ssAddress is not set!\n");
 		return;
 	}
 
-	if (!strlen(g_ssWebhookId.string))
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
 	{
 		G_Printf("g_ssWebhookId is not set!\n");
 		return;
 	}
 
-	if (!strlen(g_ssWebhookToken.string))
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
 	{
 		G_Printf("g_ssWebhookToken is not set!\n");
 		return;

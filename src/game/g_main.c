@@ -530,10 +530,10 @@ cvarTable_t gameCvarTable[] = {
 	//{ &g_endStateLevelTime, "g_endStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
 	{ &g_allowSS, "g_allowSS", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
-	{ &g_ssAddress, "g_ssAddress", "", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssAddress, "g_ssAddress", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssWebhookId, "g_ssWebhookId", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssWebhookToken, "g_ssWebhookToken", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_ssWaitTime, "g_ssWaitTime", "30", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
-	{ &g_ssWebhookId, "g_ssWebhookId", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_ssWebhookToken, "g_ssWebhookToken", "", CVAR_ARCHIVE, 0, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
