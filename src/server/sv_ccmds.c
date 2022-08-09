@@ -956,70 +956,6 @@ static void SV_DumpUser_f( void ) {
 	Info_Print( cl->userinfo );
 }
 
-/* RTCWPro - reqSS
-===========
-L0 - SV_RequestSS
-
-Requests ScreenShot from client
-===========
-*/
-static void SV_RequestSS_f(void) {
-	client_t* cl;
-	//int quality = 45;
-
-	if (!com_sv_running->integer)
-	{
-		Com_Printf("Server is not running.\n");
-		return;
-	}
-
-	/*
-	if (!sv_pure->integer) {
-		Com_Printf("SS can only be requested when server is running as pure.\n");
-		return;
-	}
-	*/
-
-	/*if (Cmd_Argc() < 2)
-	{
-		Com_Printf("Usage: reqss <slot> <optional: jpeg quality[30-100]>\n");
-		return;
-	}*/
-
-	if (Cmd_Argc() < 1)
-	{
-		Com_Printf("Usage: reqss <slot>\n");
-		return;
-	}
-
-	/*if (Cmd_Argv(2))
-	{
-		quality = atoi(Cmd_Argv(2));
-
-		if (quality > 100)
-			quality = 100;
-		else if (quality < 30)
-			quality = 30;
-	}*/
-
-	cl = SV_GetPlayerByNum();
-
-	if (!cl)
-	{
-		Com_Printf("Invalid client id!\n");
-		return;
-	}
-
-	if (cl->ping < 0 || cl->ping >= 999)
-	{
-		Com_Printf("Invalid client id!\n");
-		return;
-	}
-
-	//SV_SendSSRequest(cl->gentity->s.clientNum, quality);
-	SV_SendSSRequest(cl->gentity->s.clientNum);
-}
-
 /*
 =================
 SV_KillServer
@@ -1134,8 +1070,6 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand("exceptdel", SV_ExceptDel_f);
 	Cmd_AddCommand("flushbans", SV_FlushBans_f);
 */
-	// reqSS
-	Cmd_AddCommand("reqss", SV_RequestSS_f);
 
 }
 

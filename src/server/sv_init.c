@@ -680,9 +680,6 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// send a heartbeat now so the master will get up to date info
 	SV_Heartbeat_f();
 
-	// reqSS
-	svs.ssTime = svs.time + sv_ssMinTime->integer;
-
 	if (com_dedicated->integer && !sv_restRunning->integer) {
 		SV_SetCvarRestrictions();
 	}
@@ -979,12 +976,6 @@ void SV_Init( void ) {
 	// Cvar Restrictions
 	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
 	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
-
-	// reqSS
-	sv_ssEnable = Cvar_Get("sv_ssEnable", "0", CVAR_ARCHIVE);
-	sv_ssMinTime = Cvar_Get("sv_ssMinTime", "600", CVAR_ARCHIVE);
-	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
-	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
 
 	sv_checkVersion = Cvar_Get("sv_checkVersion", "13", CVAR_ROM);
 
