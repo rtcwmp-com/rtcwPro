@@ -88,7 +88,7 @@ typedef struct {
 
 /*
 ============
-Lazy way for submitting SS... char* hostname, char* hostport, char* hookid, char* hooktoken, char* waittime)
+Lazy way for submitting SS..
 eventually use struct above
 ============
 */

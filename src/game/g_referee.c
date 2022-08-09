@@ -907,6 +907,8 @@ void G_refRequestSS(gentity_t* ent) {
 	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, pid));
 	CP(va("print \"Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
 
+	level.lastSSTime = level.time;
+
 }
 
 /*
