@@ -561,11 +561,7 @@ void trap_Rest_Build(const char *data) {
 }
 
 // reqSS
-/*void trap_ReqSS(int quality) {
-	syscall(CG_REQ_SS, quality);
-}*/
-
-void trap_ReqSS(char *ip) {
-	syscall(CG_REQ_SS,ip);
+void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime) {
+	syscall(CG_REQUEST_SS, address, hookid, hooktoken, waittime);
 }
 

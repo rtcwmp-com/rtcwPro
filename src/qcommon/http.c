@@ -121,33 +121,37 @@ void* CL_HTTP_SSUpload(void* args) {
 	FILE* fd;
 	static const char buf[] = "Expect:";
 
-	fd = fopen(SS_info->filename, "rb");
+	fd = fopen(SS_info->filepath, "rb");
 
 	if (!fd)
 	{
 		Com_DPrintf("HTTP[fu]: cannot o/r\n");
-		return qfalse;
+		return;
 	}
 
 	if (fstat(fileno(fd), &file_info) != 0)
 	{
 		Com_DPrintf("HTTP[fs]: cannot o/r\n");
-		return qfalse;
+		return;
 	}
 
 	curl = curl_easy_init();
 
+	headerlist = curl_slist_append(headerlist, SS_info->hookid);
+	headerlist = curl_slist_append(headerlist, SS_info->hooktoken);
 	headerlist = curl_slist_append(headerlist, SS_info->name);
     headerlist = curl_slist_append(headerlist, SS_info->guid);
-    headerlist = curl_slist_append(headerlist, SS_info->ip);
-	headerlist = curl_slist_append(headerlist, va("IND: %s", GAMESTR));
+	headerlist = curl_slist_append(headerlist, SS_info->waittime);
+    //headerlist = curl_slist_append(headerlist, SS_info->ip);
+	//headerlist = curl_slist_append(headerlist, va("IND: %s", GAMESTR));
 
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
 
 		//curl_easy_setopt(curl, CURLOPT_URL, "http://rtcwpro.com:8118//files/0.jpg");
-		curl_easy_setopt(curl, CURLOPT_URL, va("http://rtcwpro.com:8118//files/%s.jpg",SS_info->upfname));
+		//curl_easy_setopt(curl, CURLOPT_URL, va("http://rtcwpro.com:8118//files/%s.jpg",SS_info->upfname));
+		curl_easy_setopt(curl, CURLOPT_URL, va("http://%s/%s.jpg", SS_info->address, SS_info->filename));
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -155,6 +159,9 @@ void* CL_HTTP_SSUpload(void* args) {
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 		res = curl_easy_perform(curl);
+
+		//Com_Printf("CL_HTTP_SSUpload:\n address: %s\n hookid: %s\n hooktoken: %s\n waittime: %s\n cleanName: %s\n guid: %s\n filepath: %s\n filename: %s\n",
+			//SS_info->address, SS_info->hookid, SS_info->hooktoken, SS_info->waittime, SS_info->name, SS_info->guid, SS_info->filepath, SS_info->filename);
 
 		if (res != CURLE_OK)
 		{
@@ -174,8 +181,7 @@ void* CL_HTTP_SSUpload(void* args) {
 
 	fclose(fd);
 	remove(SS_info->filename);
-    return;
-
+	return;
 }
 
 

@@ -1045,6 +1045,8 @@ typedef struct {
 	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
 	char* match_id; // for stats round matching...
     char* round_id; //
+
+	int lastSSTime;
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1691,6 +1693,11 @@ extern vmCvar_t g_allowEnemySpawnTimer;
 extern vmCvar_t g_clientLogFile;
 extern vmCvar_t g_logClientInput;
 extern vmCvar_t g_reviveSameDirection;
+extern vmCvar_t	g_allowSS;
+extern vmCvar_t	g_ssAddress;
+extern vmCvar_t	g_ssWebhookId;
+extern vmCvar_t	g_ssWebhookToken;
+extern vmCvar_t	g_ssWaitTime;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

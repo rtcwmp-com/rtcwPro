@@ -968,10 +968,8 @@ int CL_CgameSystemCalls( int *args ) {
 		CL_SetRestStatus();
 		return 0;
 		// reqSS
-	case CG_REQ_SS:
-		//CL_RequestedSS(args[1]);
-		//CL_RequestedSS();
-		CL_RequestedSS( VMA(1));
+	case CG_REQUEST_SS:
+		CL_GenerateSS(VMA(1), VMA(2), VMA(3), VMA(4));
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
