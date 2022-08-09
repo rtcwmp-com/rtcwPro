@@ -864,6 +864,31 @@ void G_refRequestSS(gentity_t* ent) {
 	gentity_t* targetent;
 	int pid;
 	char arg[MAX_TOKEN_CHARS];
+	int remainingTime = (int)(g_ssWaitTime.integer - ((level.time - level.lastSSTime) / 1000));
+
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
+	{
+		G_refPrintf(ent, "g_ssAddress is not set!");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
+	{
+		G_refPrintf(ent, "g_ssWebhookId is not set!");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
+	{
+		G_refPrintf(ent, "g_ssWebhookToken is not set!");
+		return;
+	}
+
+	if (level.time - level.lastSSTime < g_ssWaitTime.integer * 1000)
+	{
+		CP(va("print \"Wait ^3%i ^7%s before requesting SS^1!\n\"", remainingTime, remainingTime == 1 ? "second" : "seconds"));
+		return;
+	}
 
 	trap_Argv(2, arg, sizeof(arg));
 	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
@@ -872,9 +897,15 @@ void G_refRequestSS(gentity_t* ent) {
 
 	targetent = g_entities + pid;
 
+	if (!targetent->client || targetent->client->pers.connected != CON_CONNECTED)
+	{
+		G_refPrintf(ent, "Invalid client id!");
+		return;
+	}
+
 	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", pid));
 	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, pid));
-
+	CP(va("print \"Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
 }
 
 /*

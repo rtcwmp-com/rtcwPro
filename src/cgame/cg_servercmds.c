@@ -2296,10 +2296,16 @@ static void CG_ServerCommand( void ) {
 	}
 
 	// reqSS
-	if (!strcmp(cmd, "ssreq"))
+	if (!strcmp(cmd, "reqss"))
 	{
-//		CG_Printf("^nServer requested screenshot..sending.\n");
-		trap_ReqSS(CG_Argv(1));
+		//CG_Printf("^nServer requested screenshot.. sending.\n");
+		char* address = va("%s", CG_Argv(1));
+		char* hookid = va("%s", CG_Argv(2));
+		char* hooktoken = va("%s", CG_Argv(3));
+		char* waittime = va("%s", CG_Argv(4));
+		char* datetime = va("%s", CG_Argv(5));
+
+		trap_RequestSS(address, hookid, hooktoken, waittime, datetime);
 		return;
 	}
 

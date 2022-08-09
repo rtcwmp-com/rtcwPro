@@ -88,17 +88,20 @@ typedef struct {
 
 /*
 ============
-Lazy way for submitting SS...
+Lazy way for submitting SS..
 eventually use struct above
 ============
 */
 typedef struct {
-	char*	ip;
+	char* address;
+	char* hookid;
+	char* hooktoken;
+	char* waittime;
+	char* datetime;
+	char* name;
+	char* guid;
+	char* filepath;
 	char* filename;
-	char*	guid;
-	char*	name;
-	char* upfname;
-	FILE* fd;
 	void (*callback)(char* fmt, ...);
 } SS_info_t;
 
@@ -116,7 +119,6 @@ typedef struct {
 void* HTTP_Post(void* args);
 void* HTTP_Get(void* args);
 char* getCurrentPath(char* file);
-char* getFilePath(char* file); // reqSS
 
 //
 // http.c

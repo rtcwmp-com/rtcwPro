@@ -1045,6 +1045,8 @@ typedef struct {
 	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
 	char* match_id; // for stats round matching...
     char* round_id; //
+
+	int lastSSTime;
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1160,6 +1162,7 @@ qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // RTCWPro -
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // RTCWPro - drop weapon stuff
 gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
 char* getDateTime(void);
+char* Delim_GetDateTime(void);
 char* getDate(void);
 const char* getMonthString(int monthIndex);
 int getYearFromCYear(int cYear);
@@ -1262,7 +1265,7 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon );
 void CalcMuzzlePointForActivate( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 // done.
 
-// sswolf - RTCWPro stuff
+// RTCWPro - head box stuff
 void AddHeadEntity(gentity_t* ent);
 void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);
@@ -1691,6 +1694,11 @@ extern vmCvar_t g_allowEnemySpawnTimer;
 extern vmCvar_t g_clientLogFile;
 extern vmCvar_t g_logClientInput;
 extern vmCvar_t g_reviveSameDirection;
+extern vmCvar_t	g_allowSS;
+extern vmCvar_t	g_ssAddress;
+extern vmCvar_t	g_ssWebhookId;
+extern vmCvar_t	g_ssWebhookToken;
+extern vmCvar_t	g_ssWaitTime;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

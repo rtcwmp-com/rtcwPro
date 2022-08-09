@@ -287,6 +287,12 @@ vmCvar_t g_reviveSameDirection;
 vmCvar_t g_clientLogFile;  // log filename for client input
 vmCvar_t g_logClientInput; // log unknown commands from client i.e. hacks
 
+vmCvar_t g_allowSS; // allow /reqss
+vmCvar_t g_ssAddress; // e.g. hostname or ip:port
+vmCvar_t g_ssWebhookId; // id contained in the discord webhook link (numbers only) e.g. webhooks/id/
+vmCvar_t g_ssWebhookToken; // token contained in the discord webhook link (chars) e.g. webhooks/id/token
+vmCvar_t g_ssWaitTime; // wait time between reqss cmds to prevent spam
+
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -521,6 +527,11 @@ cvarTable_t gameCvarTable[] = {
 	//{ &g_thinkSnapOrigin, "g_thinkSnapOrigin", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	//{ &g_endStateLevelTime, "g_endStateLevelTime", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{&stats_matchid, "stats_matchid", "None", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse},
+	{ &g_allowSS, "g_allowSS", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssAddress, "g_ssAddress", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssWebhookId, "g_ssWebhookId", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssWebhookToken, "g_ssWebhookToken", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_ssWaitTime, "g_ssWaitTime", "30", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
 };
 
@@ -1274,6 +1285,12 @@ void G_RegisterCvars( void ) {
 	if (match_timeoutcount.integer > 999) {
 		trap_Cvar_Set("match_timeoutcount", "999");
 	}
+
+	if (g_ssWaitTime.integer < 30)
+	{
+		G_Printf("g_ssWaitTime %i is out of range, defaulting to 30\n", g_ssWaitTime.integer);
+		trap_Cvar_Set("g_ssWaitTime", "30");
+	}
 	// -OSPx
 }
 
@@ -1342,15 +1359,30 @@ void G_UpdateCvars( void ) {
 					fToggles = (G_checkServerToggle(cv->vmCvar) || fToggles);
 				}
 
-				if (g_antiWarp.integer)
+				if (cv->vmCvar == &g_antiWarp)
 				{
-					trap_Cvar_Set("g_synchronousClients", "0");
+					if (g_antiWarp.integer)
+					{
+						trap_Cvar_Set("g_synchronousClients", "0");
+					}
 				}
 
-				if (g_spawnOffset.integer < 1)
+				if (cv->vmCvar == &g_spawnOffset) 
 				{
-					G_Printf("g_spawnOffset %i is out of range, defaulting to 9\n", g_spawnOffset.integer);
-					trap_Cvar_Set("g_spawnOffset", "9");
+					if (g_spawnOffset.integer < 1)
+					{
+						G_Printf("g_spawnOffset %i is out of range, defaulting to 9\n", g_spawnOffset.integer);
+						trap_Cvar_Set("g_spawnOffset", "9");
+					}
+				}
+
+				if (cv->vmCvar == &g_ssWaitTime)
+				{
+					if (g_ssWaitTime.integer < 30)
+					{
+						G_Printf("g_ssWaitTime %i is out of range, defaulting to 30\n", g_ssWaitTime.integer);
+						trap_Cvar_Set("g_ssWaitTime", "30");
+					}
 				}
 			}
 		}

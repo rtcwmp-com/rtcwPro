@@ -37,11 +37,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
-// RTCWPro - minimizer
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 void CG_TargetCommand_f( void ) {
 	int targetNum;
 	char test[4];
@@ -801,27 +796,6 @@ static void CG_TimerReset_f(void)
 	trap_Cvar_Set("cg_spawnTimer_set", va("%d", cg.time - cgs.levelStartTime));
 }
 
-/*
-================
-RTCWPro - minimizer (windows only)
-Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
-================
-*/
-static void CG_Minimize_f(void)
-{
-#ifdef _WIN32
-	HWND wnd;
-
-	wnd = GetForegroundWindow();
-	if (wnd)
-	{
-		ShowWindow(wnd, SW_MINIMIZE);
-	}
-#else
-	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
-#endif
-}
-
 typedef struct {
 	char    *cmd;
 	void ( *function )( void );
@@ -893,7 +867,6 @@ static consoleCommand_t commands[] = {
 	{ "timerSet", CG_TimerSet_f },
 	{ "timerReset", CG_TimerReset_f },
 	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
-	{ "minimize", CG_Minimize_f },
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
 	// RTCWPro
 
