@@ -238,9 +238,6 @@
     <ClCompile Include="client\cl_control.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\sv_control.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
