@@ -1004,7 +1004,6 @@ void Svcmd_RequestSS_f(void) {
 
 	clientNum = atoi(client_arg);
 	targetent = &g_entities[clientNum];
-	datetime = Delim_GetDateTime();
 
 	if (!targetent->client || targetent->client->pers.connected != CON_CONNECTED)
 	{
@@ -1012,21 +1011,15 @@ void Svcmd_RequestSS_f(void) {
 		return;
 	}
 
-	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
-		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
-
+	datetime = Delim_GetDateTime();
 	BG_cleanName(targetent->client->pers.netname, cleanName, 16, qfalse);
 	Q_strncpyz(guid, targetent->client->sess.guid, sizeof(guid));
 	memmove(guid, guid + 24, strlen(guid));
 
-	if (g_allowSS.integer)
-	{
-		AP(va("chat \"^zconsole: ^7Requested %s_%s_%s.jpg from id %d\"", cleanName, datetime, guid, clientNum));
-	}
+	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
+		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
 
 	G_LogPrintf("Requested %s_%s_%s.jpg from id %d\n", cleanName, datetime, guid, clientNum);
-
-	level.lastSSTime = level.time;
 }
 
 /*

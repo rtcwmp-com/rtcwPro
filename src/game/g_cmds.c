@@ -2069,6 +2069,9 @@ void Cmd_RequestSS(gentity_t* ent) {
 	char client_arg[256];
 	int	clientNum;
 	gentity_t* targetent;
+	char* datetime;
+	char cleanName[16];
+	char guid[64];
 	int remainingTime = (int)(g_ssWaitTime.integer - ((level.time - level.lastSSTime) / 1000));
 
 	if (!g_allowSS.integer)
@@ -2138,9 +2141,20 @@ void Cmd_RequestSS(gentity_t* ent) {
 		return;
 	}
 
-	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", clientNum));
-	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, clientNum));
-	CP(va("print \"Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
+	datetime = Delim_GetDateTime();
+	BG_cleanName(targetent->client->pers.netname, cleanName, 16, qfalse);
+	Q_strncpyz(guid, targetent->client->sess.guid, sizeof(guid));
+	memmove(guid, guid + 24, strlen(guid));
+
+	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
+		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
+
+	CP(va("print \"^7Requested %s_%s_%s.jpg from id %d\"", cleanName, datetime, guid, clientNum));
+	CP(va("print \"^7Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
+
+	G_LogPrintf("%s requested %s_%s_%s.jpg from id %d\n", ent->client->pers.netname, cleanName, datetime, guid, clientNum);
+
+	level.lastSSTime = level.time;
 }
 
 qboolean G_canPickupMelee( gentity_t *ent ) {
