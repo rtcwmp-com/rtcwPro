@@ -2098,6 +2098,12 @@ void Cmd_RequestSS(gentity_t* ent) {
 		return;
 	}
 
+	if (level.intermissiontime)
+	{
+		CP("print \"Cannot use this command during intermission^1!\n\"");
+		return;
+	}
+
 	if (level.time - level.lastSSTime < g_ssWaitTime.integer * 1000)
 	{
 		CP(va("print \"Wait ^3%i ^7%s before requesting SS^1!\n\"", remainingTime, remainingTime == 1 ? "second" : "seconds"));

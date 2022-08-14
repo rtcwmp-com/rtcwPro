@@ -893,6 +893,12 @@ void G_refRequestSS(gentity_t* ent) {
 		return;
 	}
 
+	if (level.intermissiontime)
+	{
+		CP("print \"Cannot use this command during intermission^1!\n\"");
+		return;
+	}
+
 	trap_Argv(2, arg, sizeof(arg));
 	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
 		return;

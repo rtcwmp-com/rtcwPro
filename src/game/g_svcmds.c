@@ -994,6 +994,12 @@ void Svcmd_RequestSS_f(void) {
 		return;
 	}
 
+	if (level.intermissiontime)
+	{
+		G_Printf("Cannot use this command during intermission!\n");
+		return;
+	}
+
 	trap_Argv(1, client_arg, sizeof(client_arg));
 
 	if (!strlen(client_arg))
