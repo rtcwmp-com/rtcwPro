@@ -969,8 +969,8 @@ char* Delim_GetDateTime(void) {
 	qtime_t		ct;
 	trap_RealTime(&ct);
 
-	return va("%02d-%d-%02d-%02d-%02d",
-		ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+	return va("%s%02d-%d-%02d-%02d-%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
 }
 
 // Returns current date
