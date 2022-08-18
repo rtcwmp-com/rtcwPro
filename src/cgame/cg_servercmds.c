@@ -1998,7 +1998,20 @@ static void CG_ServerCommand( void ) {
 		if (args >= 3) {
 			fade = qtrue;
 		}
-		CG_PopinPrint(CG_LocalizeServerCommand(CG_Argv(1)), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH, fade);
+		CG_PopinPrint(CG_LocalizeServerCommand(CG_Argv(1)), SMALLCHAR_HEIGHT, fade);
+		return;
+	}
+	if (!Q_stricmp(cmd, "prioritypopin")) {
+		if (cg_showPriorityText.integer)
+		{
+			int args = trap_Argc();
+			qboolean fade = qfalse;
+
+			if (args >= 3) {
+				fade = qtrue;
+			}
+			CG_PopinPrint(CG_LocalizeServerCommand(CG_Argv(1)), SMALLCHAR_HEIGHT, fade);
+		}
 		return;
 	}
 // L0 - OSP's stats dump

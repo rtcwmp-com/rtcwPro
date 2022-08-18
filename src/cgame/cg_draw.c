@@ -2155,10 +2155,13 @@ Pops in messages
 ===================
 */
 #define CP_PMWIDTH 84
-void CG_PopinPrint(const char *str, int y, int charWidth, qboolean blink) {
+void CG_PopinPrint(const char *str, int charWidth, qboolean blink) {
 	char    *s;
 	int i, len;                         // NERVE - SMF
 	qboolean neednewline = qfalse;      // NERVE - SMF
+
+	int x = cg_priorityTextX.integer;
+	int y = cg_priorityTextY.integer;
 
 	Q_strncpyz(cg.popinPrint, str, sizeof(cg.popinPrint));
 
@@ -2178,7 +2181,8 @@ void CG_PopinPrint(const char *str, int y, int charWidth, qboolean blink) {
 	// -NERVE - SMF
 
 	cg.popinPrintTime = cg.time;
-	cg.popinPrintY = y + 45;
+	cg.popinPrintX = x;
+	cg.popinPrintY = y;
 	cg.popinPrintCharWidth = charWidth;
 	cg.popinBlink = blink;
 
@@ -2200,16 +2204,17 @@ L0 - CG_DrawPopinString
 */
 static void CG_DrawPopinString(void) {
 	char    *start;
-	int l;
-	int y;
-	int x;
+	int l, x, y;
 	float   *color;
 
 	if (!cg.popinPrintTime) {
 		return;
 	}
 
-	color = CG_FadeColor(cg.popinPrintTime, 1000 * 5);
+	/*int x = cg_priorityTextX.integer;
+	int y = cg_priorityTextY.integer;*/
+
+	color = CG_FadeColor(cg.popinPrintTime, 1000 * 7);
 	if (!color) {
 		cg.popinPrintTime = 0;
 		return;
@@ -2222,12 +2227,12 @@ static void CG_DrawPopinString(void) {
 	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
 	{
 		y = (cg.popinPrintY + 75) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
-		x = 3 + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
+		x = cg.popinPrintX + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
 	}
 	else
 	{
 		y = (cg.popinPrintY - 7) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
-		x = 25 + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
+		x = cg.popinPrintX + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
 	}
 
 	if (cg.popinBlink)

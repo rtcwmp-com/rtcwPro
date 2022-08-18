@@ -1206,9 +1206,11 @@ typedef struct {
 	// Demo
 	qboolean revertToDefaultKeys;
 	qboolean advertisementDone;
-	// Pop In prints
+
+	// Priority Prints (Pop In prints)
 	int popinPrintTime;
 	int popinPrintCharWidth;
+	int popinPrintX;
 	int popinPrintY;
 	char popinPrint[1024];
 	int popinPrintLines;
@@ -2191,6 +2193,9 @@ extern vmCvar_t cg_findMedic;
 extern vmCvar_t cg_hitsoundBodyStyle;
 extern vmCvar_t cg_hitsoundHeadStyle;
 extern vmCvar_t cg_pauseMusic;
+extern vmCvar_t cg_showPriorityText;
+extern vmCvar_t cg_priorityTextX;
+extern vmCvar_t cg_priorityTextY;
 extern vmCvar_t cg_notifyTextX;
 extern vmCvar_t cg_notifyTextY;
 extern vmCvar_t cg_notifyTextShadow;
@@ -2383,7 +2388,7 @@ void CG_ShoutcasterDynamite(int num);
 int CG_CalculateReinfTime(qboolean menu);
 float CG_CalculateReinfTime_Float(qboolean menu);
 // PopIn
-void CG_PopinPrint(const char *str, int y, int charWidth, qboolean blink);
+void CG_PopinPrint(const char *str, int charWidth, qboolean blink);
 // - Announcer
 void CG_AddAnnouncer(char *text, sfxHandle_t sound, float scale, int duration, float r, float g, float b, int mode);
 void CG_DrawAnnouncer(void);

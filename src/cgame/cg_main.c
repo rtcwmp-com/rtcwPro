@@ -395,6 +395,9 @@ vmCvar_t cg_findMedic; // lock camera on medic at death
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
 vmCvar_t cg_pauseMusic;
+vmCvar_t cg_showPriorityText;
+vmCvar_t cg_priorityTextX;
+vmCvar_t cg_priorityTextY;
 vmCvar_t cg_notifyTextX;
 vmCvar_t cg_notifyTextY;
 vmCvar_t cg_notifyTextShadow;
@@ -690,6 +693,11 @@ cvarTable_t cvarTable[] = {
 
 	// pause music
 	//{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
+
+	// priority text (shows objective pickups as a popup)
+	{ &cg_showPriorityText, "cg_showPriorityText", "1", CVAR_ARCHIVE },
+	{ &cg_priorityTextX, "cg_priorityTextX", "0", CVAR_ARCHIVE },
+	{ &cg_priorityTextY, "cg_priorityTextY", "350", CVAR_ARCHIVE },
 
 	// notify text
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
