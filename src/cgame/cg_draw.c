@@ -2223,17 +2223,8 @@ static void CG_DrawPopinString(void) {
 	trap_R_SetColor(color);
 	start = cg.popinPrint;
 
-	// Specs see prints at different possition...
-	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
-	{
-		y = (cg.popinPrintY + 75) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
-		x = cg.popinPrintX + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
-	}
-	else
-	{
-		y = (cg.popinPrintY - 7) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
-		x = cg.popinPrintX + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
-	}
+	y = (cg.popinPrintY - 7) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
+	x = cg.popinPrintX + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
 
 	if (cg.popinBlink)
 		color[3] = Q_fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
