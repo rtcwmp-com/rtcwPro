@@ -1021,9 +1021,10 @@ void Svcmd_RequestSS_f(void) {
 	BG_cleanName(targetent->client->pers.netname, cleanName, 16, qfalse);
 	Q_strncpyz(guid, targetent->client->sess.guid, sizeof(guid));
 	memmove(guid, guid + 24, strlen(guid));
+	int waittime = 1;
 
 	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
-		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
+		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, waittime, datetime));
 
 	G_LogPrintf("Rcon requested %s_%s_%s.jpg from id %d\n", cleanName, datetime, guid, clientNum);
 }
