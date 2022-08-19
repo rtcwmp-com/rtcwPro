@@ -2158,7 +2158,7 @@ void Cmd_RequestSS(gentity_t* ent) {
 	CP(va("print \"^7Requested %s_%s_%s.jpg from id %d\n\"", cleanName, datetime, guid, clientNum));
 	CP(va("print \"^7Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
 
-	G_LogPrintf("%s requested %s_%s_%s.jpg from id %d\n", ent->client->pers.netname, cleanName, datetime, guid, clientNum);
+	G_LogPrintf("Player %s requested %s_%s_%s.jpg from id %d\n", ent->client->pers.netname, cleanName, datetime, guid, clientNum);
 
 	level.lastSSTime = level.time;
 }

@@ -1025,7 +1025,7 @@ void Svcmd_RequestSS_f(void) {
 	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
 		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
 
-	G_LogPrintf("Requested %s_%s_%s.jpg from id %d\n", cleanName, datetime, guid, clientNum);
+	G_LogPrintf("Rcon requested %s_%s_%s.jpg from id %d\n", cleanName, datetime, guid, clientNum);
 }
 
 /*
