@@ -716,6 +716,14 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	}
 #endif
 
+	if (sv_serverTimeReset->integer)
+	{
+		if (svs.time < 2000)
+		{
+			return qfalse;
+		}
+	}
+
 	exactFrom = from;
 	if (from.type == NA_IP) {
 		from.ip[3] = 0; // xx.xx.xx.0
@@ -764,7 +772,7 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	oldest = 0;
 	oldestTime = 0x7fffffff;
 	for (i = 0; i < MAX_INFO_RECEIPTS; i++, receipt++) {
-		if (receipt->time + 1400 > svs.time) {
+		if (receipt->time + 2000 > svs.time) {
 			if (receipt->time) {
 				// When the server starts, all receipt times are at zero.  Furthermore,
 				// svs.time is close to zero.  We check that the receipt time is already
