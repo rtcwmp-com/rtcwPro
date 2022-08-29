@@ -860,8 +860,8 @@ Source: ET Legacy
 */
 void AddMedicTeamBonus(gclient_t* client)
 {
-	if (!(client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE))
-		return;
+	//if (!(client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE))
+	//	return;
 
 	//gclient_t* cl;
 	int i, startHealth;
