@@ -1743,6 +1743,7 @@ typedef enum {
 
 // ET Legacy Port
 #define GAME_INIT_FRAMES    6 // help us determine when round is actually starting
+#define FRAMETIME           100 // msec // moved from g local
 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..

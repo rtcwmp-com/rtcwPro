@@ -574,12 +574,21 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// don't allow a map_restart if game is modified
 	sv_gametype->modified = qfalse;
 
+	// RTCWPro
 	// run a few frames to allow everything to settle
-	for ( i = 0 ; i < 3 ; i++ ) {
+	for (i = 0; i < GAME_INIT_FRAMES; i++)
+	{
+		svs.time += FRAMETIME;
+		SV_BotFrame(svs.time);
+		VM_Call(gvm, GAME_RUN_FRAME, svs.time);
+	}
+
+	/*for ( i = 0 ; i < 3 ; i++ ) {
 		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
 		SV_BotFrame( svs.time );
 		svs.time += 100;
-	}
+	}*/
+	// RTCWPro end
 
 	// create a baseline for more efficient communications
 	SV_CreateBaseline();

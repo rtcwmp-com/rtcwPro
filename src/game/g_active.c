@@ -2278,7 +2278,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	AddMedicTeamBonus(ent->client);
 
 	// all players are init in game, we can set properly starting health
-	if (level.startTime == level.time - (GAME_INIT_FRAMES * FRAMETIME))
+	if (level.startTime == level.time - ((GAME_INIT_FRAMES + 1) * FRAMETIME))
 	{
 		ent->health = ent->client->ps.stats[STAT_HEALTH] = ent->client->ps.stats[STAT_MAX_HEALTH];
 

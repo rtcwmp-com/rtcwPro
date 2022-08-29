@@ -53,7 +53,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define INFINITE            1000000
 
-#define FRAMETIME           100                 // msec
 #define EVENT_VALID_MSEC    300
 #define CARNAGE_REWARD_TIME 3000
 #define REWARD_SPRITE_TIME  2000

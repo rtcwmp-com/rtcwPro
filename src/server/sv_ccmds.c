@@ -399,11 +399,19 @@ static void SV_MapRestart_f( void ) {
 
 	SV_RestartGameProgs();
 
+	// RTCWPro
 	// run a few frames to allow everything to settle
-	for ( i = 0 ; i < 3 ; i++ ) {
+	for (i = 0; i < GAME_INIT_FRAMES; i++)
+	{
+		svs.time += FRAMETIME;
+		VM_Call(gvm, GAME_RUN_FRAME, svs.time);
+	}
+	
+	/*for ( i = 0 ; i < 3 ; i++ ) {
 		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
 		svs.time += 100;
-	}
+	}*/
+	// RTCWPro end
 
 	sv.state = SS_GAME;
 	sv.restarting = qfalse;
