@@ -655,7 +655,7 @@ typedef struct ammotable_s {
 	int nextShotTime;       //
 //----(SA)	added
 	int maxHeat;            // max active firing time before weapon 'overheats' (at which point the weapon will fail)
-	int coolRate;           // how fast the weapon cools down. (per second)
+	float coolRate;           // how fast the weapon cools down. (per second)
 //----(SA)	end
 	int mod;                // means of death
 } ammotable_t;
