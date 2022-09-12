@@ -38,7 +38,7 @@ Last Updated: 09. Apr / 2013
 //static qboolean firstheadshot;
 //static qboolean firstblood;
 
-static qboolean latchVictorySound =	qfalse;
+//static qboolean latchVictorySound =	qfalse;
 
 /*
 ===========
@@ -1183,30 +1183,29 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			// non Stopwatch exits
 			if (g_gametype.integer != GT_WOLF_STOPWATCH)
 			{
-				if (g_timelimit.value && !level.warmupTime && !latchVictorySound)
+				if (g_timelimit.value && !level.warmupTime)
 				{
-					latchVictorySound = qtrue;
 				
 					if (level.time - level.startTime >= g_timelimit.value * 60000)
 					{
 						if (winner == 0)
 						{
-							AAPS("sound/match/winaxis_pro.wav");
+							CPS(ent, "sound/match/winaxis_pro.wav");
 						}
 						else if (winner == 1)
 						{
-							AAPS("sound/match/winallies_pro.wav");
+							CPS(ent, "sound/match/winallies_pro.wav");
 						}
 					}
 					else
 					{
 						if (winner == 0)
 						{
-							AAPS("sound/match/winaxis_pro.wav");
+							CPS(ent, "sound/match/winaxis_pro.wav");
 						}
 						else if (winner == 1)
 						{
-							AAPS("sound/match/winallies_pro.wav");
+							CPS(ent, "sound/match/winallies_pro.wav");
 						}
 					}
 				}
@@ -1278,18 +1277,13 @@ void G_matchClockDump(gentity_t *ent ) {
 		}
 	}
 
-	if (!latchVictorySound)
+	if (winner == 0)
 	{
-		latchVictorySound = qtrue;
-
-		if (winner == 0)
-		{
-			AAPS("sound/match/winaxis_pro.wav");
-		}
-		else if (winner == 1)
-		{
-			AAPS("sound/match/winallies_pro.wav");
-		}
+		CPS(ent, "sound/match/winaxis_pro.wav");
+	}
+	else if (winner == 1)
+	{
+		CPS(ent, "sound/match/winallies_pro.wav");
 	}
 
 
