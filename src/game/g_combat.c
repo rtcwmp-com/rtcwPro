@@ -663,9 +663,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	
 	//trap_UnlinkEntity( self );
 	self->s.loopSound = 0;
+	
+	self->r.maxs[2] = 0;
+	self->client->ps.maxs[2] = 0; 
+
 	// ET Port
-	self->r.maxs[2] = self->client->ps.crouchMaxZ;  //%	0;			// ydnar: so bodies don't clip into world
-	self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
+	//self->r.maxs[2] = self->client->ps.crouchMaxZ;  //%	0;			// ydnar: so bodies don't clip into world
+	//self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
+	
 	trap_LinkEntity( self );
 
 	// don't allow respawn until the death anim is done
