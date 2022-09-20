@@ -1836,9 +1836,12 @@ static void CG_DrawDisconnect( void ) {
 	}
 
 	// also add text in center of screen
-	s = CG_TranslateString( "Connection Interrupted" ); // bk 010215 - FIXME
+	s = CG_TranslateString( "CI" ); // bk 010215 - FIXME
 	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-	CG_DrawBigString( 320 - w / 2, 80, s, 1.0F );
+	
+	//320 - w / 2, 80
+	if (cg_lagometer.integer)
+		CG_DrawBigString(cg_lagometerX.integer + 10, cg_lagometerY.integer, s, 1.0F );
 
 	// blink the icon
 	if ( ( cg.time >> 9 ) & 1 ) {
