@@ -919,6 +919,10 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 // Xian -- Commented out and moved to ClientSpawn for clarity
 //	client->ps.powerups[PW_INVULNERABLE] = level.time + 3000; // JPW NERVE some time to find cover
 
+	// RTCWPro - update ready status
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS)
+		client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+
 	// Communicate it to cgame
 	client->ps.stats[STAT_PLAYER_CLASS] = pc;
 

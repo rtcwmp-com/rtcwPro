@@ -75,8 +75,8 @@ int is_ready( int clientNum ) {
 
 	for ( i = 0 ; i < cgs.maxclients ; i++ ) {
 		if (cgs.clientinfo[i].team != TEAM_SPECTATOR && cgs.clientinfo[i].clientNum == clientNum) {
-			//rdy = cgs.clientinfo[clientNum].isReady;
-			rdy = player_ready_status[clientNum].isReady;
+			rdy = (cgs.clientinfo[clientNum].powerups & (1 << PW_READY)) ? 1 : 0;
+			//rdy = player_ready_status[clientNum].isReady;
 			return rdy;
 		}
 	}

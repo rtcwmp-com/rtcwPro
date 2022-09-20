@@ -994,13 +994,13 @@ Format:
 
 ==================
 */
-void TeamplayInfoMessage( gentity_t *ent ) {
+void TeamplayInfoMessage(gentity_t* ent) {
 	int identClientNum, identHealth;                // NERVE - SMF
 	char entry[1024];
 	char string[1400];
 	int stringlength;
 	int i, j;
-	gentity_t   *player;
+	gentity_t* player;
 	int cnt;
 	int actualHealth, displayHealth, playerLimbo;
 
@@ -1040,9 +1040,11 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i",
+				" %i %i %i %i %i %i %i %i %i %i %i",
 				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo);
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
+
+			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 
 			j = strlen(entry);
 			if (stringlength + j > sizeof(string)) {

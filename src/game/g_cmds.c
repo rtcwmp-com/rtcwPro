@@ -38,7 +38,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 	char string[1400];
 	int stringlength;
 	int i, j;
-	gclient_t   *cl;
+	gclient_t* cl;
 	int numSorted;
 	int scoreFlags;
 
@@ -49,11 +49,11 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 
 	// don't send more than 32 scores (FIXME?)
 	numSorted = level.numConnectedClients;
-	if ( numSorted > 32 ) {
+	if (numSorted > 32) {
 		numSorted = 32;
 	}
 
-	for ( i = 0 ; i < numSorted ; i++ ) {
+	for (i = 0; i < numSorted; i++) {
 		int ping;
 		int playerClass;
 		int respawnsLeft;
@@ -61,53 +61,55 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		cl = &level.clients[level.sortedClients[i]];
 
 		// NERVE - SMF - if on same team, send across player class
-		if ( cl->ps.persistant[PERS_TEAM] == ent->client->ps.persistant[PERS_TEAM] ) {
+		if (cl->ps.persistant[PERS_TEAM] == ent->client->ps.persistant[PERS_TEAM]) {
 			playerClass = cl->ps.stats[STAT_PLAYER_CLASS];
-		} else {
+		}
+		else
+		{
 			playerClass = 0;
 		}
 
 		// NERVE - SMF - number of respawns left
 		respawnsLeft = cl->ps.persistant[PERS_RESPAWNS_LEFT];
-		if ( respawnsLeft == 0 && ( ( cl->ps.pm_flags & PMF_LIMBO ) || ( level.intermissiontime && g_entities[level.sortedClients[i]].health <= 0 ) ) ) {
+		if (respawnsLeft == 0 && ((cl->ps.pm_flags & PMF_LIMBO) || (level.intermissiontime && g_entities[level.sortedClients[i]].health <= 0))) {
 			respawnsLeft = -2;
 		}
 
-		if ( cl->pers.connected == CON_CONNECTING ) {
+		if (cl->pers.connected == CON_CONNECTING) {
 			ping = -1;
-		} else {
+		}
+		else
+		{
 			// RTCWPro
 			//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
-			if (g_alternatePing.integer) 
+			if (g_alternatePing.integer)
 			{
 				ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
 			}
-			else 
+			else
 			{
 				ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 			}
 			// RTCWPro end
 		}
 
-		Com_sprintf( entry, sizeof( entry ),
-					 " %i %i %i %i %i %i %i %i %i", level.sortedClients[i],
-					 cl->ps.persistant[PERS_SCORE], ping, ( level.time - cl->pers.enterTime ) / 60000,
-					 scoreFlags, g_entities[level.sortedClients[i]].s.powerups, playerClass, respawnsLeft, cl->pers.ready );
+		Com_sprintf(entry, sizeof(entry),
+					" %i %i %i %i %i %i %i %i", level.sortedClients[i],
+					cl->ps.persistant[PERS_SCORE], ping, (level.time - cl->pers.enterTime) / 60000,
+					scoreFlags, g_entities[level.sortedClients[i]].s.powerups, playerClass, respawnsLeft);
 
-		player_ready_status[level.sortedClients[i]].isReady = cl->pers.ready;
+		j = strlen(entry);
 
-		j = strlen( entry );
-
-		if ( stringlength + j > 1024 ) {
+		if (stringlength + j > 1024) {
 			break;
 		}
-		strcpy( string + stringlength, entry );
+		strcpy(string + stringlength, entry);
 		stringlength += j;
 	}
 
-	trap_SendServerCommand( ent - g_entities, va( "scores %i %i %i%s", i,
-												  level.teamScores[TEAM_RED], level.teamScores[TEAM_BLUE],
-												  string ) );
+	trap_SendServerCommand(ent - g_entities, va("scores %i %i %i%s", i,
+							level.teamScores[TEAM_RED], level.teamScores[TEAM_BLUE],
+							string));
 }
 
 
