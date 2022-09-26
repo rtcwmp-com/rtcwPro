@@ -2949,7 +2949,7 @@ void ClientCommand( int clientNum ) {
 
 	if ( Q_stricmp( cmd, "say_team" ) == 0 ) {
 		// OSPx - Ignored
-		if (!ent->client->sess.muted) {
+		if (!ent->client->sess.muted || g_tournament.integer) {
 			Cmd_Say_f(ent, SAY_TEAM, qfalse);
 			return;
 		}
@@ -2962,7 +2962,7 @@ void ClientCommand( int clientNum ) {
 	// Team chat with no location..
 	if (Q_stricmp(cmd, "say_teamnl") == 0) {
 		// Ignored
-		if (!ent->client->sess.muted) {
+		if (!ent->client->sess.muted || g_tournament.integer) {
 			Cmd_Say_f(ent, SAY_TEAMNL, qfalse);
 			return;
 		}
