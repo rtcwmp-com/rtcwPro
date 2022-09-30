@@ -989,7 +989,7 @@ void SV_Init( void ) {
 	sv_checkVersion = Cvar_Get("sv_checkVersion", "15", CVAR_ROM);
 
 	// ET Legacy port reset svs.time on map load to fix knockback bug
-	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "1", CVAR_ARCHIVE); // default to 1
+	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "0", CVAR_ARCHIVE); // default to 0 - 1 is causing a bug on map change
 
 	// End RtcwPro
 	
