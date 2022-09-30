@@ -3079,7 +3079,7 @@ static void CL_Minimize_f(void)
 		ShowWindow(wnd, SW_MINIMIZE);
 	}
 #else
-	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
+	Com_Printf("ERROR: minimize command is not supported on this operating system.\n");
 #endif
 }
 
