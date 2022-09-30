@@ -560,6 +560,12 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// to load during actual gameplay
 	sv.state = SS_LOADING;
 
+	// ET Legacy port reset svs.time on map load to fix knockback bug
+	if (sv_serverTimeReset->integer)
+	{
+		svs.time = 0;
+	}
+
 	Cvar_Set( "sv_serverRestarting", "1" );
 
 	// load and spawn all other entities
@@ -568,12 +574,21 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// don't allow a map_restart if game is modified
 	sv_gametype->modified = qfalse;
 
+	// RTCWPro
 	// run a few frames to allow everything to settle
-	for ( i = 0 ; i < 3 ; i++ ) {
+	for (i = 0; i < GAME_INIT_FRAMES; i++)
+	{
+		svs.time += FRAMETIME;
+		SV_BotFrame(svs.time);
+		VM_Call(gvm, GAME_RUN_FRAME, svs.time);
+	}
+
+	/*for ( i = 0 ; i < 3 ; i++ ) {
 		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
 		SV_BotFrame( svs.time );
 		svs.time += 100;
-	}
+	}*/
+	// RTCWPro end
 
 	// create a baseline for more efficient communications
 	SV_CreateBaseline();
@@ -673,9 +688,6 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	// send a heartbeat now so the master will get up to date info
 	SV_Heartbeat_f();
-
-	// reqSS
-	svs.ssTime = svs.time + sv_ssMinTime->integer;
 
 	if (com_dedicated->integer && !sv_restRunning->integer) {
 		SV_SetCvarRestrictions();
@@ -954,6 +966,8 @@ void SV_Init( void ) {
 	sv_dl_maxRate = Cvar_Get( "sv_dl_maxRate", "60000", CVAR_ARCHIVE );
 #endif
 
+	// Start RtcwPro
+
 	// HTTP downloads
 	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
 	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "https://maps.rtcwmp.com/", CVAR_ARCHIVE);
@@ -972,13 +986,13 @@ void SV_Init( void ) {
 	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
 	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
 
-	// reqSS
-	sv_ssEnable = Cvar_Get("sv_ssEnable", "0", CVAR_ARCHIVE);
-	sv_ssMinTime = Cvar_Get("sv_ssMinTime", "600", CVAR_ARCHIVE);
-	sv_ssMaxTime = Cvar_Get("sv_ssMaxTime", "1200", CVAR_ARCHIVE);
-	//sv_ssQuality = Cvar_Get("sv_ssQuality", "45", CVAR_ARCHIVE);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "15", CVAR_ROM);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "13", CVAR_ROM);
+	// ET Legacy port reset svs.time on map load to fix knockback bug
+	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "0", CVAR_ARCHIVE); // default to 0 - 1 is causing a bug on map change
+
+	// End RtcwPro
+	
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

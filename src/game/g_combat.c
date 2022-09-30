@@ -467,9 +467,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
 			
 			// RtcwPro Issue #345 Clear out empty weapon, change to next best weapon
-			//PM_SwitchIfEmpty();
-			if (self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] == 0)
-				G_AddEvent(self, EV_NOAMMO, 0);
+			if (!self->client->ps.ammo[BG_FindClipForWeapon(self->client->ps.weapon)])
+			{
+				// remove nade from weapon bank
+				COM_BitClear(self->client->ps.weapons, self->client->ps.weapon);
+			}
 		}
 	}
 // jpw
@@ -648,15 +650,27 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->limboDropWeapon = self->s.weapon; // store this so it can be dropped in limbo
 	}
 // jpw
-	self->s.angles[2] = 0;
+
+	// RtcwPro - store the value for player YAW so we can restore on revive
+	// the value STAT_DEAD_YAW can change with lookatkiller etc
+	self->client->ps.persistant[PERS_DEATH_YAW] = SHORT2ANGLE(self->client->pers.cmd.angles[YAW] + self->client->ps.delta_angles[YAW]);
+
+	//self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );
-
-	VectorCopy( self->s.angles, self->client->ps.viewangles );
+	self->client->ps.viewangles[0] = 0;
+	self->client->ps.viewangles[2] = 0;
+	//VectorCopy( self->s.angles, self->client->ps.viewangles ); // don't make the corpse look a different way
+	
+	//trap_UnlinkEntity( self );
 	self->s.loopSound = 0;
-
-	trap_UnlinkEntity( self );
+	
 	self->r.maxs[2] = 0;
-	self->client->ps.maxs[2] = 0;
+	self->client->ps.maxs[2] = 0; 
+
+	// ET Port
+	//self->r.maxs[2] = self->client->ps.crouchMaxZ;  //%	0;			// ydnar: so bodies don't clip into world
+	//self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
+	
 	trap_LinkEntity( self );
 
 	// don't allow respawn until the death anim is done
@@ -669,6 +683,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// RTCWPro - update ready status
 	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS) // only do this during warmup
 		self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+
 
 	// never gib in a nodrop
 	if ( self->health <= GIB_HEALTH && !( contents & CONTENTS_NODROP ) ) {
@@ -1168,6 +1183,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 			targ->client->ps.pm_time = t;
 			targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+
+			if (g_debugDamage.integer) {
+				AP(va("print \"knockback: %i\n\"", t));
+			}
 		}
 	}
 
@@ -1261,11 +1280,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-	}
-
-	if ( g_debugDamage.integer ) {
-		G_Printf( "client: %i health: %i damage: %i mod: %i\n", targ->s.number, targ->health, take, mod); //, asave );
-		AP(va("print \"client:%i health:%i damage:%i mod: %i\n\"", targ->s.number, targ->health, take, mod));
 	}
 
 	// add to the damage inflicted on a player this frame

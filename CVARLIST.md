@@ -92,14 +92,14 @@
 | cg_drawFrags | `integer` | `0-1` | `1` | Enable/disable "you killed" frag center prints |
 | cg_fragsY | `integer` | `-999-999` | `0` | Change frag center prints position in the vertical axis |
 | cg_fragsWidth | `integer` | `-999-999` | `16` | Change frag center prints char width |
+| cg_showPriorityText| `integer` | `0-1` | `1` | Enable/disable objective taken/returned prints |
+| cg_priorityTextX | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the horizontal axis |
+| cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
 
 # Server  
 #### Engine (sv)
 | Cvar | Argument type | Value range | Default | Description |
 |---------|---------------|-------------|---------|-------------|
-| wh_active | `integer` | `0-1` | `0` | Enable/disable wallhack prevention code. [See here](https://github.com/lrq3000/ioquake3-anti-cheat) |
-| wh_bbox_horz | `integer` | `0-99` | `30` | Change horizontal dimensions of the player's bbox when tracing for visibility |
-| wh_bbox_vert | `integer` | `0-99` | `60` | Change vertical dimensions of the player's bbox when tracing for visibility |
 | sv_wwwDownload | `integer` | `0-1` | `0` | Enable/disable http downloads (currently disabled) |
 | sv_wwwBaseURL | `string` | `N/A` | `https://maps.rtcwmp.com/` | URL to redirect clients to for HTTP downloads |
 | sv_GameConfig | `string` | `N/A` | `""` | Game fs/configs/name.config (server settings and cvar restrictions) to load at startup |
@@ -162,7 +162,15 @@
 | g_spawnOffset | `integer` | `0-99` | `9` | Maximum spawn offset variance between teams (-1) |
 | g_bodiesGrabFlags | `integer` | `0-1` | `1` | Enable/disable dead clients grabbing flags |
 | g_mapScriptDirectory | `string` | `N/A` | `""` | Directory to load map scripts from (must be in fs) |
-| g_allowForceTapout | `integer` | `0-1` | `"1"` | Allow forcetapout globally |
-| g_alternatePing | `integer` | `0-1` | `"1"` | Display alternate ping - calculated from ps commands in mod instead of engine |
-| g_fixedphysicsfps | `integer` | `0-333` | `"125"` | Simulate framerate behavior for all clients |
+| g_allowForceTapout | `integer` | `0-1` | `1` | Allow forcetapout globally |
+| g_alternatePing | `integer` | `0-1` | `1` | Display alternate ping - calculated from ps commands in mod instead of engine |
+| g_fixedphysicsfps | `integer` | `0-333` | `125` | Simulate framerate behavior for all clients |
+| g_allowSS | `integer` | `0-1` | `0` | Allow clients to use `/reqss id` | 
+| g_ssAddress | `string` | `N/A` | `none` | Remote address for SS e.g. hostname or ip:port | 
+| g_ssWebhookId | `string` | `N/A` | `none` | id contained in the discord webhook link (numbers only) e.g. `webhooks/id/` | 
+| g_ssWebhookToken | `string` | `N/A` | `none` | token contained in the discord webhook link (chars) e.g. `webhooks/id/token` | 
+| g_ssWaitTime | `integer` | `0-9999` | `30` | wait time between reqss cmds to prevent spam | 
+| g_reviveSameDirection | `integer` | `0-1` | `0` | when player is revived they will have same viewangle as death | 
+| g_logClientInput | `integer` | `0-1` | `0` | turn on to log unknown client commands
+| g_clientLogFile | `integer` | `0-1` | `logs/clientInput.log` | log file for unknown client commands
 

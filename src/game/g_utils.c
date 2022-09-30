@@ -964,6 +964,15 @@ char* getDateTime(void) {
 		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
 }
 
+// RTCWPro -deliminated date-time
+char* Delim_GetDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s%02d-%d-%02d-%02d-%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
 // Returns current date
 char* getDate(void) {
 	qtime_t		ct;
@@ -1663,5 +1672,26 @@ int G_FindMatchingMaps(gentity_t* ent, char* mapName) {
 		CP(va("print \"^3%s ^7is not on the server.\n\"", mapName));
 		return -1;
 	}
+}
+
+/*
+==================
+LogEntry
+
+log to a file
+==================
+*/
+void LogEntry(char* filename, char* info) {
+	fileHandle_t    f;
+	char* varLine;
+
+	strcat(info, "\r");
+	trap_FS_FOpenFile(filename, &f, FS_APPEND);
+
+	varLine = va("%s\n", info);
+
+	trap_FS_Write(varLine, strlen(varLine), f);
+	trap_FS_FCloseFile(f);
+	return;
 }
 

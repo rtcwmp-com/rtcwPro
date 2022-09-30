@@ -320,7 +320,7 @@ void SV_DirectConnect( netadr_t from ) {
 		int cl_checkversion = atoi(Info_ValueForKey(userinfo, "cl_checkversion"));
 		if (cl_checkversion != sv_checkVersion->integer)
 		{
-			NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version.\n" "Run updater as admin or download at rtcwpro.com\n");
+			NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid client version. Server running version %s.%i. Run updater as admin or download at rtcwpro.com\n", GAMEVERSION, sv_checkVersion->integer);
 			return;
 		}
 	}
@@ -2274,7 +2274,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 		cl->clientRestValidated < svs.time &&
 		cl->netchan.remoteAddress.type != NA_BOT && !cl->clientValidated)
 	{
-		SV_DropClient(cl, "Failure to comply with server restrictions rules.\n^zCorrect your settings before rejoning.");
+		SV_DropClient(cl, "^5Failure to comply with server restrictions rules.\n^5Correct your settings before rejoning.");
 		return;
 	}
 }

@@ -545,7 +545,7 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 	} else {
 		ent->client->pers.ready = state;
 		if ( !level.intermissiontime ) {
-			if ( state ) {
+			if (state) {
 				ent->client->pers.ready = qtrue;
 				ent->client->ps.powerups[PW_READY] = INT_MAX;
 			}
@@ -600,7 +600,6 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 
 		if ((cl->client->pers.ready != ready) && !level.intermissiontime) {
 			cl->client->pers.ready = ready;
-			cl->client->ps.powerups[PW_READY] = (ready ? INT_MAX : 0);
 			++p;
 		}
 	}

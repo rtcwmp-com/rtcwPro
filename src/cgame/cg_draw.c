@@ -1448,7 +1448,7 @@ static void CG_DrawUpperRight( void ) {
 	if ( cg_drawFPS.integer ) {
 		y = CG_DrawFPS( y );
 	}
-	if ( cg_drawTimer.integer ) {
+	if ( cg_drawTimer.integer && cgs.gamestate == GS_PLAYING) {
 		y = CG_DrawTimer( y );
 	}
 // (SA) disabling drawattacker for the time being
@@ -1472,17 +1472,23 @@ static void CG_DrawUpperRight( void ) {
 		y = CG_DrawProRespawnTimer(y);
 	}
 
-	// enemy respawn timer (do not include yet)
-	if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) { 
-		if (cg_drawEnemyTimer.integer == 1) { 
-			y = CG_DrawEnemyTimer(y);
-		}
-		if (cg_drawEnemyTimer.integer == 2) { 
-			y = CG_DrawProEnemyTimer(y);
-		}
-		if (cg_drawEnemyTimer.integer > 2) { 
-			y = CG_DrawEnemyTimer(y);
-			y = CG_DrawProEnemyTimer(y);
+	// enemy respawn timer
+	const char* info = CG_ConfigString(CS_SERVERINFO);
+	char* allowErt = Info_ValueForKey(info, "g_allowEnemySpawnTimer");
+
+	if (allowErt != NULL && !Q_stricmp(allowErt, "1"))
+	{
+		if ((cg_spawnTimer_set.integer != -1) && (cg_spawnTimer_period.integer > 0)) {
+			if (cg_drawEnemyTimer.integer == 1) {
+				y = CG_DrawEnemyTimer(y);
+			}
+			if (cg_drawEnemyTimer.integer == 2) {
+				y = CG_DrawProEnemyTimer(y);
+			}
+			if (cg_drawEnemyTimer.integer > 2) {
+				y = CG_DrawEnemyTimer(y);
+				y = CG_DrawProEnemyTimer(y);
+			}
 		}
 	}
 
@@ -1617,6 +1623,9 @@ static void CG_DrawPickupItem( void ) {
 	char pickupText[256];
 	float color[4];
 	const char *s;
+
+	if (cg_gameType.integer != GT_SINGLE_PLAYER)
+		cg_gameSkill.integer = 3; // RTCWPro if a player has g_gameskill set in wolfconfig_mp it could show "50 health" so set this to 3 to get default value of "20 health"
 
 	value = cg.itemPickup;
 	if ( value ) {
@@ -1827,9 +1836,12 @@ static void CG_DrawDisconnect( void ) {
 	}
 
 	// also add text in center of screen
-	s = CG_TranslateString( "Connection Interrupted" ); // bk 010215 - FIXME
+	s = CG_TranslateString( "CI" ); // bk 010215 - FIXME
 	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-	CG_DrawBigString( 320 - w / 2, 80, s, 1.0F );
+	
+	//320 - w / 2, 80
+	if (cg_lagometer.integer)
+		CG_DrawBigString(cg_lagometerX.integer + 10, cg_lagometerY.integer, s, 1.0F );
 
 	// blink the icon
 	if ( ( cg.time >> 9 ) & 1 ) {
@@ -2146,10 +2158,13 @@ Pops in messages
 ===================
 */
 #define CP_PMWIDTH 84
-void CG_PopinPrint(const char *str, int y, int charWidth, qboolean blink) {
+void CG_PopinPrint(const char *str, int charWidth, qboolean blink) {
 	char    *s;
 	int i, len;                         // NERVE - SMF
 	qboolean neednewline = qfalse;      // NERVE - SMF
+
+	int x = cg_priorityTextX.integer;
+	int y = cg_priorityTextY.integer;
 
 	Q_strncpyz(cg.popinPrint, str, sizeof(cg.popinPrint));
 
@@ -2169,7 +2184,8 @@ void CG_PopinPrint(const char *str, int y, int charWidth, qboolean blink) {
 	// -NERVE - SMF
 
 	cg.popinPrintTime = cg.time;
-	cg.popinPrintY = y + 45;
+	cg.popinPrintX = x;
+	cg.popinPrintY = y;
 	cg.popinPrintCharWidth = charWidth;
 	cg.popinBlink = blink;
 
@@ -2191,16 +2207,17 @@ L0 - CG_DrawPopinString
 */
 static void CG_DrawPopinString(void) {
 	char    *start;
-	int l;
-	int y;
-	int x;
+	int l, x, y;
 	float   *color;
 
 	if (!cg.popinPrintTime) {
 		return;
 	}
 
-	color = CG_FadeColor(cg.popinPrintTime, 1000 * 3);
+	/*int x = cg_priorityTextX.integer;
+	int y = cg_priorityTextY.integer;*/
+
+	color = CG_FadeColor(cg.popinPrintTime, 1000 * 7);
 	if (!color) {
 		cg.popinPrintTime = 0;
 		return;
@@ -2209,17 +2226,8 @@ static void CG_DrawPopinString(void) {
 	trap_R_SetColor(color);
 	start = cg.popinPrint;
 
-	// Specs see prints at different possition...
-	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
-	{
-		y = (cg.popinPrintY + 75) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
-		x = 3 + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
-	}
-	else
-	{
-		y = (cg.popinPrintY - 7) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
-		x = 25 + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
-	}
+	y = (cg.popinPrintY - 7) - cg.popinPrintLines * TINYCHAR_HEIGHT / 2;
+	x = cg.popinPrintX + (cg.popinPrintLines * TINYCHAR_HEIGHT / 2);
 
 	if (cg.popinBlink)
 		color[3] = Q_fabs(sin(cg.time * 0.001)) * cg_hudAlpha.value;
@@ -3391,61 +3399,36 @@ static void CG_DrawWarmup( void ) {
 	// L0 - Ready
 	if (cgs.gamestate == GS_WARMUP && cgs.readyState != CREADY_NONE) {
 
-		// Account for g_minGameClients if it's present
-		if (cgs.readyState == CREADY_PENDING) {
+		if (cgs.currentRound) {
+			t = va(CG_TranslateString("Clock is now set to %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
+			w = CG_DrawStrlen(t);
+			CG_DrawStringExt(320 - w * cw / 2, 100, t, colorWhite, qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 
-			if (configString != NULL)
-			{
+			if (configString != NULL) {
+				w = CG_DrawStrlen(configString);
+				CG_DrawStringExt(320 - w * cw / 2, 80, configString, colorWhite,
+					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
+			}
+		}
+		else {
+			if (configString != NULL) {
 				w = CG_DrawStrlen(configString);
 				CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
 					qfalse, qtrue, cw, (int)(cw * 1.5), 0);
 			}
+		}
 
-			s1 = va( CG_TranslateString( "^3WARMUP:^7 Waiting on ^2%i ^7%s" ), cgs.minclients, cgs.minclients == 1 ? "player" : "players" );
+		// No need to bother with count..scoreboard gives info..
+		s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), cgs.minclients, cgs.minclients == 1 ? "player" : "players");
+		w = CG_DrawStrlen( s );
+		CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
 
-			s2 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString( "Type ^3\\ready ^7in the console to start" );
-
+		if ( !cg.demoPlayback && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR &&
+			( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
+			s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
 			w = CG_DrawStrlen( s1 );
-			CG_DrawStringExt( 320 - w * cw / 2, 120, s1, colorWhite,
-							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
-
-			w = CG_DrawStrlen( s2 );
-			CG_DrawStringExt( 320 - w * cw / 2, 140, s2, colorWhite,
-							  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
-
-		} else {
-
-			if (cgs.currentRound) {
-				t = va(CG_TranslateString("Clock is now set to %s!"), WM_TimeToString(cgs.nextTimeLimit * 60.f * 1000.f));
-				w = CG_DrawStrlen(t);
-				CG_DrawStringExt(320 - w * cw / 2, 100, t, colorWhite, qfalse, qtrue, cw, (int)(cw * 1.5), 0);
-
-				if (configString != NULL) {
-					w = CG_DrawStrlen(configString);
-					CG_DrawStringExt(320 - w * cw / 2, 80, configString, colorWhite,
-						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
-				}
-			}
-			else {
-				if (configString != NULL) {
-					w = CG_DrawStrlen(configString);
-					CG_DrawStringExt(320 - w * cw / 2, 100, configString, colorWhite,
-						qfalse, qtrue, cw, (int)(cw * 1.5), 0);
-				}
-			}
-
-			// No need to bother with count..scoreboard gives info..
-			s = va(CG_TranslateString("^3WARMUP:^7 Waiting on ^2%i ^7%s"), cgs.minclients, cgs.minclients == 1 ? "player" : "players");
-			w = CG_DrawStrlen( s );
-			CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
-
-			if ( !cg.demoPlayback && cg.snap->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR &&
-			   ( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) || ( cg.snap->ps.pm_flags & PMF_LIMBO ) ) ) {
-				s1 = (player_ready_status[cg.clientNum].isReady) ? "^3You are ready" : CG_TranslateString("Type ^3\\ready ^7in the console to start");
-				w = CG_DrawStrlen( s1 );
-				CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
-								  qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
-			}
+			CG_DrawStringExt( 320 - w * cw / 2, 140, s1, colorWhite,
+								qfalse, qtrue, cw, (int)( cw * 1.5 ), 0 );
 		}
 
 		return;

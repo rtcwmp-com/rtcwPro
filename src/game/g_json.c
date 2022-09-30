@@ -18,220 +18,225 @@
 */
 
 int getPstats(json_t *jsonData, char *id, gclient_t *client) {
+
+    DebugLogEntry("Stats: get pstats");
+
     json_t *pcat, *pitem, *pstats;
     int i=0;
     pstats = json_object();
     pcat = json_object();
     pstats = json_object_get(jsonData, id);
-                pcat = json_object_get(pstats, "categories");
+    pcat = json_object_get(pstats, "categories");
 
-                pitem = json_object_get(pcat, "kills");
-                if(!(json_is_object(pstats)))
-                {
-                    G_Printf("error reading player data\n");
-                    json_decref(jsonData);
-                    return 0;
-                }
-                /*
-                  - Use switch or iterate over categories...new struct with data type need tho
-                  - Put an else clause that resets stats to zero if error
-                */
+    pitem = json_object_get(pcat, "kills");
+    if(!(json_is_object(pstats)))
+    {
+        G_Printf("error reading player data\n");
+        json_decref(jsonData);
+        return 0;
+    }
+    /*
+        - Use switch or iterate over categories...new struct with data type need tho
+        - Put an else clause that resets stats to zero if error
+    */
 
-                if(json_is_integer(pitem)) {
-                    client->sess.kills=json_integer_value(pitem);
+    if(json_is_integer(pitem)) {
+        client->sess.kills=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "deaths");
-                if(json_is_integer(pitem)) {
-                    client->sess.deaths=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "deaths");
+    if(json_is_integer(pitem)) {
+        client->sess.deaths=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "gibs");
-                if(json_is_integer(pitem)) {
-                    client->sess.gibs=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "gibs");
+    if(json_is_integer(pitem)) {
+        client->sess.gibs=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "suicides");
-                if(json_is_integer(pitem)) {
-                    client->sess.suicides=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "suicides");
+    if(json_is_integer(pitem)) {
+        client->sess.suicides=json_integer_value(pitem);
 
-                }
+    }
 
-                pitem = json_object_get(pcat, "teamkills");
-                if(json_is_integer(pitem)) {
-                    client->sess.team_kills=json_integer_value(pitem);
+    pitem = json_object_get(pcat, "teamkills");
+    if(json_is_integer(pitem)) {
+        client->sess.team_kills=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "damagegiven");
-                if(json_is_integer(pitem)) {
-                    client->sess.damage_given=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "damagegiven");
+    if(json_is_integer(pitem)) {
+        client->sess.damage_given=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "damagereceived");
-                if(json_is_integer(pitem)) {
-                    client->sess.damage_received=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "damagereceived");
+    if(json_is_integer(pitem)) {
+        client->sess.damage_received=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "damageteam");
-                if(json_is_integer(pitem)) {
-                    client->sess.team_damage=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "damageteam");
+    if(json_is_integer(pitem)) {
+        client->sess.team_damage=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "hits");
-                if(json_is_integer(pitem)) {
-                    client->sess.acc_hits=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "hits");
+    if(json_is_integer(pitem)) {
+        client->sess.acc_hits=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "shots");
-                if(json_is_integer(pitem)) {
-                    client->sess.acc_shots=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "shots");
+    if(json_is_integer(pitem)) {
+        client->sess.acc_shots=json_integer_value(pitem);
 
 
-                }
-                /*
-                pitem = json_object_get(pcat, "accuracy");
-                if(json_is_number(pitem)) {
-                    // calculate this elsewhere...
+    }
+    /*
+    pitem = json_object_get(pcat, "accuracy");
+    if(json_is_number(pitem)) {
+        // calculate this elsewhere...
 
 
-                }
-                */
-                pitem = json_object_get(pcat, "revives");
-                if(json_is_integer(pitem)) {
-                        client->sess.revives=json_integer_value(pitem);
+    }
+    */
+    pitem = json_object_get(pcat, "revives");
+    if(json_is_integer(pitem)) {
+            client->sess.revives=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "ammogiven");
-                if(json_is_integer(pitem)) {
-                    client->sess.ammo_given=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "ammogiven");
+    if(json_is_integer(pitem)) {
+        client->sess.ammo_given=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "healthgiven");
-                if(json_is_integer(pitem)) {
-                    client->sess.med_given=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "healthgiven");
+    if(json_is_integer(pitem)) {
+        client->sess.med_given=json_integer_value(pitem);
 
 
-                }
+    }
 
 
-                pitem = json_object_get(pcat, "poisoned");
-                if(json_is_integer(pitem)) {
-                    client->sess.poisoned=json_integer_value(pitem);
+    pitem = json_object_get(pcat, "poisoned");
+    if(json_is_integer(pitem)) {
+        client->sess.poisoned=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "knifekills");
-                if(json_is_integer(pitem)) {
-                    client->sess.knifeKills=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "knifekills");
+    if(json_is_integer(pitem)) {
+        client->sess.knifeKills=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "killpeak");
-                if(json_is_integer(pitem)) {
-                    client->sess.killPeak=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "killpeak");
+    if(json_is_integer(pitem)) {
+        client->sess.killPeak=json_integer_value(pitem);
 
 
-                }
+    }
 
-/*
-                pitem = json_object_get(pcat, "efficiency");
-                if(json_is_number(pitem)) {  // might want to simply calculate this outside of here
+    /*
+    pitem = json_object_get(pcat, "efficiency");
+    if(json_is_number(pitem)) {  // might want to simply calculate this outside of here
 
 
-                }
-                */
-                /*
-                pitem = json_object_get(pcat, "score");
-                if(json_is_integer(pitem)) {
-                    client->sess.score=json_integer_value(pitem);
-                    G_Printf("score: %llu\n",json_integer_value(pitem));
+    }
+    */
+    /*
+    pitem = json_object_get(pcat, "score");
+    if(json_is_integer(pitem)) {
+        client->sess.score=json_integer_value(pitem);
+        G_Printf("score: %llu\n",json_integer_value(pitem));
 
-                }
-                */
+    }
+    */
 
 
-                pitem = json_object_get(pcat, "dyn_planted");
-                if(json_is_integer(pitem)) {
-                    client->sess.dyn_planted=json_integer_value(pitem);
+    pitem = json_object_get(pcat, "dyn_planted");
+    if(json_is_integer(pitem)) {
+        client->sess.dyn_planted=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "dyn_defused");
-                if(json_is_integer(pitem)) {
-                    client->sess.dyn_defused=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "dyn_defused");
+    if(json_is_integer(pitem)) {
+        client->sess.dyn_defused=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "obj_captured");
-                if(json_is_integer(pitem)) {
-                    client->sess.obj_captured=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "obj_captured");
+    if(json_is_integer(pitem)) {
+        client->sess.obj_captured=json_integer_value(pitem);
 
 
-                }
+    }
 
 
-                pitem = json_object_get(pcat, "obj_destroyed");
-                if(json_is_integer(pitem)) {
-                    client->sess.obj_destroyed=json_integer_value(pitem);
+    pitem = json_object_get(pcat, "obj_destroyed");
+    if(json_is_integer(pitem)) {
+        client->sess.obj_destroyed=json_integer_value(pitem);
 
 
-                }
-                pitem = json_object_get(pcat, "obj_returned");
-                if(json_is_integer(pitem)) {
-                    client->sess.obj_returned=json_integer_value(pitem);
+    }
+    pitem = json_object_get(pcat, "obj_returned");
+    if(json_is_integer(pitem)) {
+        client->sess.obj_returned=json_integer_value(pitem);
 
 
-                }
+    }
 
-                pitem = json_object_get(pcat, "obj_taken");
-                if(json_is_integer(pitem)) {
-                    client->sess.obj_taken=json_integer_value(pitem);
+    pitem = json_object_get(pcat, "obj_taken");
+    if(json_is_integer(pitem)) {
+        client->sess.obj_taken=json_integer_value(pitem);
 
 
-                }
+    }
 
-                pitem = json_object_get(pcat, "obj_checkpoint");
-                if (json_is_integer(pitem)) {
-                    client->sess.obj_checkpoint = json_integer_value(pitem);
+    pitem = json_object_get(pcat, "obj_checkpoint");
+    if (json_is_integer(pitem)) {
+        client->sess.obj_checkpoint = json_integer_value(pitem);
 
 
-                }
+    }
 
-                pitem = json_object_get(pcat, "obj_killcarrier");
-                if (json_is_integer(pitem)) {
-                    client->sess.obj_killcarrier = json_integer_value(pitem);
+    pitem = json_object_get(pcat, "obj_killcarrier");
+    if (json_is_integer(pitem)) {
+        client->sess.obj_killcarrier = json_integer_value(pitem);
 
 
-                }
+    }
 
-                pitem = json_object_get(pcat, "obj_protectflag");
-                if (json_is_integer(pitem)) {
-                    client->sess.obj_protectflag = json_integer_value(pitem);
+    pitem = json_object_get(pcat, "obj_protectflag");
+    if (json_is_integer(pitem)) {
+        client->sess.obj_protectflag = json_integer_value(pitem);
 
 
-                }
+    }
     return 1;
 }
 
 int G_write_match_info( void )
 {
+    DebugLogEntry("Stats: writing match info");
+
     json_t *data = NULL;
-    json_t *json,*object,*jstattype, *jstats;
-    json_error_t error;
-    char* buf;
+    //json_t* json, *object, *jstattype, *jstats;
+    //json_error_t error;
+    //char* buf;
     char* s;
-    char mapName[MAX_QPATH];
-    char gameConfig[MAX_QPATH];
+    //char mapName[MAX_QPATH];
+    //char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
     fileHandle_t matchfileinfo;
 	qtime_t ct;
@@ -239,8 +244,6 @@ int G_write_match_info( void )
 
     Q_strncpyz(level.jsonStatInfo.round_start,va("%ld", unixTime),sizeof(level.jsonStatInfo.round_start));
     Q_strncpyz(level.jsonStatInfo.round_timelimit,va("%s",GetLevelTime()),sizeof(level.jsonStatInfo.round_timelimit));
-
-
 
     json_t *jdata = json_object();
     json_object_set_new(jdata, "matchID",    json_string(MATCHID));
@@ -259,12 +262,16 @@ int G_write_match_info( void )
 
         trap_FS_FCloseFile( matchfileinfo);
     }
+
+    return 0;
 }
 
 int G_read_match_info( void )
 {
+    DebugLogEntry("Stats: reading match info");
+
     json_t *data = NULL;
-    json_t *json,*object,*jstattype, *jstats;
+    json_t* json, *object, *jstattype; // , * jstats;
     json_error_t error;
 
     json = json_load_file("stats/matchinfo.json", 0, &error);
@@ -314,6 +321,8 @@ int G_read_match_info( void )
 */
 int G_check_before_submit( char* jsonfile)
 {
+    DebugLogEntry("Stats: check before submit");
+
     json_t *data = NULL;
     json_t *json,*jstats;
     json_error_t error;
@@ -351,7 +360,9 @@ int G_check_before_submit( char* jsonfile)
 */
 int G_read_round_jstats( void )
 {
-     json_t *data = NULL;
+    DebugLogEntry("Stats: reading round stats");
+
+    json_t *data = NULL;
     json_t *json,*object,*jstattype, *jstats;
     json_error_t error;
     gclient_t *cl;
@@ -471,6 +482,8 @@ Output the end of round stats in Json format with player array...
 
 void G_jstatsByPlayers(qboolean wstats) {
 
+    DebugLogEntry("Stats: writing stats by players");
+
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
 	char* s;
@@ -491,135 +504,134 @@ void G_jstatsByPlayers(qboolean wstats) {
 
     jstats =  json_array();
 
+    for ( j = 0; j < level.numPlayingClients; j++ ) {
+        jplayer = json_object();
+		cl = level.clients + level.sortedClients[j];
 
-        for ( j = 0; j < level.numPlayingClients; j++ ) {
-            jplayer = json_object();
-			cl = level.clients + level.sortedClients[j];
+		if ( cl->pers.connected != CON_CONNECTED ) {
+			continue;
+		}
+		DecolorString(cl->pers.netname, n1);
+		SanitizeString(n1, n2);
+		Q_CleanStr(n2);
+		n2[15] = 0;
 
-			if ( cl->pers.connected != CON_CONNECTED ) {
-				continue;
-			}
-			DecolorString(cl->pers.netname, n1);
-			SanitizeString(n1, n2);
-			Q_CleanStr(n2);
-			n2[15] = 0;
+		eff = ( cl->sess.deaths + cl->sess.kills == 0 ) ? 0 : 100 * cl->sess.kills / ( cl->sess.deaths + cl->sess.kills );
+		if ( eff < 0 ) {
+			eff = 0;
+		}
+		sprintf(pGUID,"%s",cl->sess.guid);
+        i = cl->sess.sessionTeam;
+        jdata = json_object();
+        // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
+        json_object_set_new(jdata, "alias", json_string(n2));
+        json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
+        json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
+        // json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
+        json_object_set_new(jdata, "num_rounds", json_integer(cl->sess.rounds));
 
-			eff = ( cl->sess.deaths + cl->sess.kills == 0 ) ? 0 : 100 * cl->sess.kills / ( cl->sess.deaths + cl->sess.kills );
-			if ( eff < 0 ) {
-				eff = 0;
-			}
-			sprintf(pGUID,"%s",cl->sess.guid);
-            i = cl->sess.sessionTeam;
-            jdata = json_object();
-           // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
-            json_object_set_new(jdata, "alias", json_string(n2));
-            json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
-            json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
-           // json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
-            json_object_set_new(jdata, "num_rounds", json_integer(cl->sess.rounds));
+        jcat = json_object();
 
-            jcat = json_object();
-
-            json_object_set_new(jcat, "kills", json_integer(cl->sess.kills));
-            json_object_set_new(jcat, "deaths", json_integer(cl->sess.deaths));
-            json_object_set_new(jcat, "gibs", json_integer(cl->sess.gibs));
-            json_object_set_new(jcat, "suicides", json_integer(cl->sess.suicides));
-            json_object_set_new(jcat, "teamkills", json_integer(cl->sess.team_kills));
-            json_object_set_new(jcat, "headshots", json_integer(cl->sess.headshots));
-            json_object_set_new(jcat, "damagegiven", json_integer(cl->sess.damage_given));
-            json_object_set_new(jcat, "damagereceived", json_integer(cl->sess.damage_received));
-            json_object_set_new(jcat, "damageteam", json_integer(cl->sess.team_damage));
-            json_object_set_new(jcat, "hits", json_integer(cl->sess.acc_hits));
-            json_object_set_new(jcat, "shots", json_integer(cl->sess.acc_shots));
-            json_object_set_new(jcat, "accuracy", json_real(((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f)));
-            json_object_set_new(jcat, "revives", json_integer(cl->sess.revives));
-            json_object_set_new(jcat, "ammogiven", json_integer(cl->sess.ammo_given));
-            json_object_set_new(jcat, "healthgiven", json_integer(cl->sess.med_given));
-            json_object_set_new(jcat, "poisoned", json_integer(cl->sess.poisoned));
-            json_object_set_new(jcat, "knifekills", json_integer(cl->sess.knifeKills));
-            json_object_set_new(jcat, "killpeak", json_integer(cl->sess.killPeak));
-            json_object_set_new(jcat, "efficiency", json_real(eff));
-            // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
-            json_object_set_new(jcat, "score", json_integer(cl->ps.persistant[PERS_SCORE]));
-            json_object_set_new(jcat, "dyn_planted", json_integer(cl->sess.dyn_planted));
-            json_object_set_new(jcat, "dyn_defused", json_integer(cl->sess.dyn_defused));
-            json_object_set_new(jcat, "obj_captured", json_integer(cl->sess.obj_captured));
-            json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
-            json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
-            json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
-            json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
-            json_object_set_new(jcat, "obj_killcarrier", json_integer(cl->sess.obj_killcarrier));
-            json_object_set_new(jcat, "obj_protectflag", json_integer(cl->sess.obj_protectflag));
+        json_object_set_new(jcat, "kills", json_integer(cl->sess.kills));
+        json_object_set_new(jcat, "deaths", json_integer(cl->sess.deaths));
+        json_object_set_new(jcat, "gibs", json_integer(cl->sess.gibs));
+        json_object_set_new(jcat, "suicides", json_integer(cl->sess.suicides));
+        json_object_set_new(jcat, "teamkills", json_integer(cl->sess.team_kills));
+        json_object_set_new(jcat, "headshots", json_integer(cl->sess.headshots));
+        json_object_set_new(jcat, "damagegiven", json_integer(cl->sess.damage_given));
+        json_object_set_new(jcat, "damagereceived", json_integer(cl->sess.damage_received));
+        json_object_set_new(jcat, "damageteam", json_integer(cl->sess.team_damage));
+        json_object_set_new(jcat, "hits", json_integer(cl->sess.acc_hits));
+        json_object_set_new(jcat, "shots", json_integer(cl->sess.acc_shots));
+        json_object_set_new(jcat, "accuracy", json_real(((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f)));
+        json_object_set_new(jcat, "revives", json_integer(cl->sess.revives));
+        json_object_set_new(jcat, "ammogiven", json_integer(cl->sess.ammo_given));
+        json_object_set_new(jcat, "healthgiven", json_integer(cl->sess.med_given));
+        json_object_set_new(jcat, "poisoned", json_integer(cl->sess.poisoned));
+        json_object_set_new(jcat, "knifekills", json_integer(cl->sess.knifeKills));
+        json_object_set_new(jcat, "killpeak", json_integer(cl->sess.killPeak));
+        json_object_set_new(jcat, "efficiency", json_real(eff));
+        // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
+        json_object_set_new(jcat, "score", json_integer(cl->ps.persistant[PERS_SCORE]));
+        json_object_set_new(jcat, "dyn_planted", json_integer(cl->sess.dyn_planted));
+        json_object_set_new(jcat, "dyn_defused", json_integer(cl->sess.dyn_defused));
+        json_object_set_new(jcat, "obj_captured", json_integer(cl->sess.obj_captured));
+        json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
+        json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
+        json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
+        json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
+        json_object_set_new(jcat, "obj_killcarrier", json_integer(cl->sess.obj_killcarrier));
+        json_object_set_new(jcat, "obj_protectflag", json_integer(cl->sess.obj_protectflag));
 
 
-            weapArray = json_array();
-            i = cl->sess.sessionTeam;
-            for (m = WS_KNIFE; m < WS_MAX; m++) {
-                if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
-                    cl->sess.aWeaponStats[m].deaths) {
-                        dwWeaponMask |= (1 << i);
-                        weapOb = json_object();
-                        json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX ) ? aWeaponInfo[m].pszName : "UNKNOWN" ));
-                        json_object_set_new(weapOb, "kills", json_integer(cl->sess.aWeaponStats[m].kills));
-                        json_object_set_new(weapOb, "deaths", json_integer(cl->sess.aWeaponStats[m].deaths));
-                        json_object_set_new(weapOb, "headshots", json_integer(cl->sess.aWeaponStats[m].headshots));
-                        json_object_set_new(weapOb, "hits", json_integer(cl->sess.aWeaponStats[m].hits));
-                        json_object_set_new(weapOb, "shots", json_integer(cl->sess.aWeaponStats[m].atts));
-                        json_array_append(weapArray, weapOb);
-                        json_decref(weapOb);
-                }
+        weapArray = json_array();
+        i = cl->sess.sessionTeam;
+        for (m = WS_KNIFE; m < WS_MAX; m++) {
+            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
+                cl->sess.aWeaponStats[m].deaths) {
+                    dwWeaponMask |= (1 << i);
+                    weapOb = json_object();
+                    json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX ) ? aWeaponInfo[m].pszName : "UNKNOWN" ));
+                    json_object_set_new(weapOb, "kills", json_integer(cl->sess.aWeaponStats[m].kills));
+                    json_object_set_new(weapOb, "deaths", json_integer(cl->sess.aWeaponStats[m].deaths));
+                    json_object_set_new(weapOb, "headshots", json_integer(cl->sess.aWeaponStats[m].headshots));
+                    json_object_set_new(weapOb, "hits", json_integer(cl->sess.aWeaponStats[m].hits));
+                    json_object_set_new(weapOb, "shots", json_integer(cl->sess.aWeaponStats[m].atts));
+                    json_array_append(weapArray, weapOb);
+                    json_decref(weapOb);
             }
-
-            if (g_gameStatslog.integer & JSON_CATEGORIES) {
-                json_object_update(jdata, jcat);
-            }
-            else {
-                json_object_set(jdata, "categories", jcat);
-            }
-
-            if (wstats) {
-                json_object_set(jdata, "wstats", weapArray);
-                json_object_set(jplayer, pGUID, jdata);
-                json_decref(weapArray);
-            }
-            else {
-                json_object_set(jplayer, pGUID, jdata);
-            }
-
-
-            json_decref(jcat);
-            json_decref(jdata);
-            json_array_append(jstats, jplayer);
-            json_decref(jplayer);
-
         }
+
+        if (g_gameStatslog.integer & JSON_CATEGORIES) {
+            json_object_update(jdata, jcat);
+        }
+        else {
+            json_object_set(jdata, "categories", jcat);
+        }
+
+        if (wstats) {
+            json_object_set(jdata, "wstats", weapArray);
+            json_object_set(jplayer, pGUID, jdata);
+            json_decref(weapArray);
+        }
+        else {
+            json_object_set(jplayer, pGUID, jdata);
+        }
+
+
+        json_decref(jcat);
+        json_decref(jdata);
+        json_array_append(jstats, jplayer);
+        json_decref(jplayer);
+
+    }
 
 //        json_array_append_new(jstats, jplayer);
 
 
 
-        s = json_dumps( jstats, 1 ); // for a pretty print form
-        //s = json_dumps( jstats, 0 );
+    s = json_dumps( jstats, 1 ); // for a pretty print form
+    //s = json_dumps( jstats, 0 );
 
-        if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
-            trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.jsonStatInfo.gameStatslogFile );
-            trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
-            trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );  // for writing weapon stats after
-            //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile ); // for keeping weapon stats in playerstats
-            free( s );
+    if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
+        trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );  // for writing weapon stats after
+        //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile ); // for keeping weapon stats in playerstats
+        free( s );
+    }
+    else {   // forget the comments above and write it to original test json file :)
+        rc = json_dump_file(root, "./test.json", 0);
+        if (rc) {
+            fprintf(stderr, "cannot save json to file\n");
         }
-        else {   // forget the comments above and write it to original test json file :)
-            rc = json_dump_file(root, "./test.json", 0);
-            if (rc) {
-                fprintf(stderr, "cannot save json to file\n");
-            }
-        }
+    }
 
 
-        json_decref( root );
-        if (!wstats) {// write weapon stats separately
-            G_jWeaponStats();
-        }
+    json_decref( root );
+    if (!wstats) {// write weapon stats separately
+        G_jWeaponStats();
+    }
 }
 
 /*
@@ -631,6 +643,8 @@ Output the end of round stats in Json format with team array ...
 */
 
 void G_jstatsByTeam(qboolean wstats) {
+
+    DebugLogEntry("Stats: writing stats by team");
 
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
@@ -802,6 +816,8 @@ Output the weapon stats for each player
 
 void G_jWeaponStats(void) {
 
+    DebugLogEntry("Stats: writing weapon stats");
+
     int i, j, rc;
 	char* s;
 	gclient_t *cl;
@@ -824,62 +840,60 @@ void G_jWeaponStats(void) {
 		}
 		*/
 
+    for ( j = 0; j < level.numPlayingClients; j++ ) {
+        jplayer = json_object();
+		cl = level.clients + level.sortedClients[j];
 
-
-        for ( j = 0; j < level.numPlayingClients; j++ ) {
-            jplayer = json_object();
-			cl = level.clients + level.sortedClients[j];
-
-			if ( cl->pers.connected != CON_CONNECTED ) {
-				continue;
-			}
-			sprintf(pGUID,"%s",cl->sess.guid);
-            weapArray = json_array();
-            i = cl->sess.sessionTeam;
-            for (m = WS_KNIFE; m < WS_MAX; m++) {
-                if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
-                    cl->sess.aWeaponStats[m].deaths) {
-                        dwWeaponMask |= (1 << i);
-                        weapOb = json_object();
-                        json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX ) ? aWeaponInfo[m].pszName : "UNKNOWN" ));
-                        json_object_set_new(weapOb, "kills", json_integer(cl->sess.aWeaponStats[m].kills));
-                        json_object_set_new(weapOb, "deaths", json_integer(cl->sess.aWeaponStats[m].deaths));
-                        json_object_set_new(weapOb, "headshots", json_integer(cl->sess.aWeaponStats[m].headshots));
-                        json_object_set_new(weapOb, "hits", json_integer(cl->sess.aWeaponStats[m].hits));
-                        json_object_set_new(weapOb, "shots", json_integer(cl->sess.aWeaponStats[m].atts));
-                        json_array_append(weapArray, weapOb);
-                        json_decref(weapOb);
-                }
-            }
-            json_object_set(jplayer, pGUID, weapArray);
-            json_array_append(jwstat, jplayer);
-            json_decref(weapArray);
-            json_decref(jplayer);
-
-        }
-
-
-
-
-        //s = json_dumps( jwstat, 0 ); // for a pretty print form
-        s = json_dumps( jwstat, 1 ); // for a pretty print form
-
-        if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
-            trap_FS_Write( "\"wstats\": ", strlen( "\"wstats\": " ), level.jsonStatInfo.gameStatslogFile );
-            trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
-
-            trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile );
-            free( s );
-        }
-        else {   // forget the comments above and write it to original test json file :)
-            rc = json_dump_file(root, "./test.json", 0);
-            if (rc) {
-                fprintf(stderr, "cannot save json to file\n");
+		if ( cl->pers.connected != CON_CONNECTED ) {
+			continue;
+		}
+		sprintf(pGUID,"%s",cl->sess.guid);
+        weapArray = json_array();
+        i = cl->sess.sessionTeam;
+        for (m = WS_KNIFE; m < WS_MAX; m++) {
+            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
+                cl->sess.aWeaponStats[m].deaths) {
+                    dwWeaponMask |= (1 << i);
+                    weapOb = json_object();
+                    json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX ) ? aWeaponInfo[m].pszName : "UNKNOWN" ));
+                    json_object_set_new(weapOb, "kills", json_integer(cl->sess.aWeaponStats[m].kills));
+                    json_object_set_new(weapOb, "deaths", json_integer(cl->sess.aWeaponStats[m].deaths));
+                    json_object_set_new(weapOb, "headshots", json_integer(cl->sess.aWeaponStats[m].headshots));
+                    json_object_set_new(weapOb, "hits", json_integer(cl->sess.aWeaponStats[m].hits));
+                    json_object_set_new(weapOb, "shots", json_integer(cl->sess.aWeaponStats[m].atts));
+                    json_array_append(weapArray, weapOb);
+                    json_decref(weapOb);
             }
         }
+        json_object_set(jplayer, pGUID, weapArray);
+        json_array_append(jwstat, jplayer);
+        json_decref(weapArray);
+        json_decref(jplayer);
+
+    }
 
 
-        json_decref( root );
+
+
+    //s = json_dumps( jwstat, 0 ); // for a pretty print form
+    s = json_dumps( jwstat, 1 ); // for a pretty print form
+
+    if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
+        trap_FS_Write( "\"wstats\": ", strlen( "\"wstats\": " ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
+
+        trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile );
+        free( s );
+    }
+    else {   // forget the comments above and write it to original test json file :)
+        rc = json_dump_file(root, "./test.json", 0);
+        if (rc) {
+            fprintf(stderr, "cannot save json to file\n");
+        }
+    }
+
+
+    json_decref( root );
 }
 
 
@@ -892,15 +906,18 @@ writeServerInfo
 Output server related information
 ===========
 */
-void G_writeServerInfo(void){
-    char* buf;
+void G_writeServerInfo(void) {
+
+    DebugLogEntry("Stats: writing server info");
+
+    //char* buf;
     char* s;
     char mapName[MAX_QPATH];
     char server_ip[16];
     char server_country[3];
     char gameConfig[MAX_QPATH];
     time_t unixTime = time(NULL);
-    char cs[MAX_STRING_CHARS];
+    //char cs[MAX_STRING_CHARS];
 	qtime_t ct;
 	trap_RealTime(&ct);
 
@@ -950,16 +967,19 @@ Output end of info (i.e. round, winner, etc)
 ===========
 */
 
-void G_writeGameInfo (int winner ){
+void G_writeGameInfo (int winner ) {
+
+    DebugLogEntry("Stats: writing game info");
+
 	char* s;
 	char mapName[64];
-    char buf[64];
+    /*char buf[64];
     char *buf2;
     char *buf3;
     char *buf4;
- //   char cs[MAX_STRING_CHARS];
+    char cs[MAX_STRING_CHARS];*/
 
-    time_t unixTime = time(NULL);
+    //time_t unixTime = time(NULL);
     trap_Cvar_VariableStringBuffer( "mapname", mapName, sizeof(mapName) );
 
 
@@ -973,8 +993,12 @@ void G_writeGameInfo (int winner ){
 
     json_object_set_new(jdata, "round",    json_string(va("%s",ROUNDID)));
 
+    int roundStart = atoi(level.jsonStatInfo.round_start);
+    int roundTotalSeconds = ((level.timeCurrent - level.startTime) / 60000.0f) * 60;
+    int roundEnd = roundStart + roundTotalSeconds;
+
     json_object_set_new(jdata, "round_start",    json_string(va("%s",level.jsonStatInfo.round_start)));
-    json_object_set_new(jdata, "round_end",    json_string(va("%ld", unixTime)));
+    json_object_set_new(jdata, "round_end",    json_string(va("%ld", roundEnd))); // KK unixTime doesn't account for pause time
     json_object_set_new(jdata, "map",    json_string(mapName));
 
     json_object_set_new(jdata, "time_limit",    json_string(va("%s",level.jsonStatInfo.round_timelimit)));
@@ -1007,9 +1031,12 @@ void G_writeGameInfo (int winner ){
 
 // Probably should have just made an array of all events to loop over.....bah will do that when more events are added
 
-void G_writeObjectiveEvent (gentity_t* agent,int objType){
+void G_writeObjectiveEvent (gentity_t* agent,int objType) {
+
+    DebugLogEntry("Stats: writing Objective event");
+
     char* s;
-    char buf[64];
+    //char buf[64];
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
         // additional safety check
@@ -1062,13 +1089,13 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
     json_object_set_new(jdata, "agent",    json_string(agent->client->sess.guid));
 
     if (level.jsonStatInfo.gameStatslogFile) {
-         s = json_dumps( jdata, 0 );
-         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
-         trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
-         free(s);
+        s = json_dumps( jdata, 0 );
+        trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
+        free(s);
 
     }
-         json_decref(jdata);
+    json_decref(jdata);
 
 
     level.eventNum++;
@@ -1076,9 +1103,12 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType){
 
 
 
-void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType){
+void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType) {
+
+    DebugLogEntry(va("Stats: writing %s event", LookupEventType(eventType)));
+
     char* s;
-    char buf[64];
+    //char buf[64];
     char* pclass;
     json_t *jdata = json_object();
     json_t *event = json_object();
@@ -1093,98 +1123,98 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
     json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
-        switch ( eventType ) {
-			case eventSuicide:
-                json_object_set_new(jdata, "group",    json_string("player"));
-                json_object_set_new(jdata, "label",    json_string("suicide"));
-                json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
-                break;
-			case eventKill:
-                json_object_set_new(jdata, "group",    json_string("player"));
-                json_object_set_new(jdata, "label",    json_string("kill"));
-                json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
-                json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
-                json_object_set_new(jdata, "weapon",    json_string(weapon));
-                json_object_set_new(jdata, "agent_health",    json_integer(agent->health));
-                if (g_gameStatslog.integer & JSON_KILLDATA) {
-                    json_object_set_new(jdata, "agent_pos",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
-                    json_object_set_new(jdata, "agent_angle",    json_string(va("%f",agent->client->ps.viewangles[1])));
-                    json_object_set_new(jdata, "other_pos",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
-                    json_object_set_new(jdata, "other_angle",    json_string(va("%f",other->client->ps.viewangles[1])));
-                    // straight up stupid way to do this...
-                    int axisAlive, alliedAlive;
-                    axisAlive=G_teamAlive(TEAM_RED);
-                    alliedAlive=G_teamAlive(TEAM_BLUE);
-                    json_object_set_new(jdata, "allies_alive",    json_string(va("%i",alliedAlive)));
-                    json_object_set_new(jdata, "axis_alive",    json_string(va("%i",axisAlive)));
+    switch ( eventType ) {
+	    case eventSuicide:
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",    json_string("suicide"));
+            json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+            break;
+	    case eventKill:
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",    json_string("kill"));
+            json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "weapon",    json_string(weapon));
+            json_object_set_new(jdata, "agent_health",    json_integer(agent->health));
+            if (g_gameStatslog.integer & JSON_KILLDATA) {
+                json_object_set_new(jdata, "agent_pos",    json_string(va("%f,%f,%f",agent->client->ps.origin[0],agent->client->ps.origin[1],agent->client->ps.origin[2])));
+                json_object_set_new(jdata, "agent_angle",    json_string(va("%f",agent->client->ps.viewangles[1])));
+                json_object_set_new(jdata, "other_pos",    json_string(va("%f,%f,%f",other->client->ps.origin[0],other->client->ps.origin[1],other->client->ps.origin[2])));
+                json_object_set_new(jdata, "other_angle",    json_string(va("%f",other->client->ps.viewangles[1])));
+                // straight up stupid way to do this...
+                int axisAlive, alliedAlive;
+                axisAlive = G_teamAlive(TEAM_RED);
+                alliedAlive = G_teamAlive(TEAM_BLUE);
+                json_object_set_new(jdata, "allies_alive",    json_string(va("%i",alliedAlive)));
+                json_object_set_new(jdata, "axis_alive",    json_string(va("%i",axisAlive)));
 
-                }
-                break;
-			case eventTeamkill:
-                json_object_set_new(jdata, "group",    json_string("player"));
-                json_object_set_new(jdata, "label",    json_string("teamkill"));
-                json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
-                json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
-                json_object_set_new(jdata, "weapon",    json_string(weapon));
-                json_object_set_new(jdata, "other_health",    json_integer(agent->health));
-                break;
-			case eventRevive:
-                json_object_set_new(jdata, "group",    json_string("player"));
-                json_object_set_new(jdata, "label",   json_string("revive"));
-                json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
-                json_object_set_new(jdata, "other",  json_string(va("%s",other->client->sess.guid)));
-                break;
-			case eventPause:
-                json_object_set_new(jdata, "group",    json_string("server"));
-                json_object_set_new(jdata, "label",   json_string("pause"));
-                json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->sess.guid)));
-                break;
-			case eventUnpause:
-                json_object_set_new(jdata, "group",    json_string("server"));
-                json_object_set_new(jdata, "label",   json_string("unpause"));
-                json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->sess.guid)));
-                break;
-			case teamFirstSpawn:
-                //json_object_set_new(jdata, "event",   json_string("respawnTimer"));
-                json_object_set_new(jdata, "group",    json_string("server"));
-                json_object_set_new(jdata, "label",   json_string("firstRespawn"));
-                int redRespawnTime = (g_redlimbotime.integer - level.dwRedReinfOffset) / 1000;
-                int blueRespawnTime = (g_bluelimbotime.integer - level.dwBlueReinfOffset) / 1000;
-                json_object_set_new(jdata, "Axis",  json_string(va("%ld",unixTime +redRespawnTime)));
-                json_object_set_new(jdata, "Allied",  json_string(va("%ld",unixTime +blueRespawnTime)));
-                break;
-			case eventClassChange:
-                if (agent->client->sess.playerType == PC_MEDIC) {pclass = "M";}
-                else if (agent->client->sess.playerType == PC_SOLDIER) {pclass = "S";}
-                else if (agent->client->sess.playerType == PC_LT) {pclass = "L";}
-                else if (agent->client->sess.playerType == PC_ENGINEER) {pclass = "E";}
-                else {pclass="X";}
-                json_object_set_new(jdata, "group",    json_string("player"));
-                json_object_set_new(jdata, "label",   json_string("class_change"));
-                json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
-                //json_object_set_new(jdata, "other",  json_string(va("%i",agent->client->sess.playerType)));
-                json_object_set_new(jdata, "other",  json_string(va("%s",pclass)));
-                break;
-			case eventNameChange:
-			    json_object_set_new(jdata, "group",    json_string("player"));
-                json_object_set_new(jdata, "label",   json_string("name_change"));
-                json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
-                json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->pers.netname)));
-                break;
-            default:
-                json_object_set_new(jdata, "group",    json_string("server"));
-                json_object_set_new(jdata, "label",   json_string("unknown event"));
-                break;
-			}
+            }
+            break;
+	    case eventTeamkill:
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",    json_string("teamkill"));
+            json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
+            json_object_set_new(jdata, "weapon",    json_string(weapon));
+            json_object_set_new(jdata, "other_health",    json_integer(agent->health));
+            break;
+	    case eventRevive:
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",   json_string("revive"));
+            json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",  json_string(va("%s",other->client->sess.guid)));
+            break;
+	    case eventPause:
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("pause"));
+            json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->sess.guid)));
+            break;
+	    case eventUnpause:
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("unpause"));
+            json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->sess.guid)));
+            break;
+	    case teamFirstSpawn:
+            //json_object_set_new(jdata, "event",   json_string("respawnTimer"));
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("firstRespawn"));
+            int redRespawnTime = (g_redlimbotime.integer - level.dwRedReinfOffset) / 1000;
+            int blueRespawnTime = (g_bluelimbotime.integer - level.dwBlueReinfOffset) / 1000;
+            json_object_set_new(jdata, "Axis",  json_string(va("%ld",unixTime +redRespawnTime)));
+            json_object_set_new(jdata, "Allied",  json_string(va("%ld",unixTime +blueRespawnTime)));
+            break;
+	    case eventClassChange:
+            if (agent->client->sess.playerType == PC_MEDIC) {pclass = "M";}
+            else if (agent->client->sess.playerType == PC_SOLDIER) {pclass = "S";}
+            else if (agent->client->sess.playerType == PC_LT) {pclass = "L";}
+            else if (agent->client->sess.playerType == PC_ENGINEER) {pclass = "E";}
+            else {pclass="X";}
+            json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",   json_string("class_change"));
+            json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
+            //json_object_set_new(jdata, "other",  json_string(va("%i",agent->client->sess.playerType)));
+            json_object_set_new(jdata, "other",  json_string(va("%s",pclass)));
+            break;
+	    case eventNameChange:
+		    json_object_set_new(jdata, "group",    json_string("player"));
+            json_object_set_new(jdata, "label",   json_string("name_change"));
+            json_object_set_new(jdata, "agent",  json_string(va("%s",agent->client->sess.guid)));
+            json_object_set_new(jdata, "other",  json_string(va("%s",agent->client->pers.netname)));
+            break;
+        default:
+            json_object_set_new(jdata, "group",    json_string("server"));
+            json_object_set_new(jdata, "label",   json_string("unknown event"));
+            break;
+	}
 
-        if (level.jsonStatInfo.gameStatslogFile) {
-                s = json_dumps( jdata, 0 );
-                trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
-                trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
+    if (level.jsonStatInfo.gameStatslogFile) {
+        s = json_dumps( jdata, 0 );
+        trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
+        trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
 
-                free(s);
-        }
-        json_decref(jdata);
+        free(s);
+    }
+    json_decref(jdata);
     level.eventNum++;
 }
 
@@ -1192,7 +1222,7 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
     Unused at the moment.....plan to remove once set on formating and such
      dir is direction from which the attack occured
 */
-void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
+void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir) {
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
@@ -1204,11 +1234,11 @@ void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
     json_object_set_new(jdata, "group",    json_string("combat"));
     json_object_set_new(jdata, "label",    json_string("kill"));
     json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
-    json_object_set_new(jdata, "agent_loc",    json_string(va("%f,%f,%f",agent->client->ps.origin[1],agent->client->ps.origin[2],agent->client->ps.origin[3])));
-    json_object_set_new(jdata, "agent_angles",    json_string(va("%f,%f,%f",agent->client->ps.viewangles[1],agent->client->ps.viewangles[2],agent->client->ps.viewangles[3])));
+    json_object_set_new(jdata, "agent_loc",    json_string(va("%f,%f,%f",agent->client->ps.origin[0],agent->client->ps.origin[1],agent->client->ps.origin[2])));
+    json_object_set_new(jdata, "agent_angles",    json_string(va("%f,%f,%f",agent->client->ps.viewangles[0],agent->client->ps.viewangles[1],agent->client->ps.viewangles[2])));
     json_object_set_new(jdata, "other",    json_string(va("%s",other->client->sess.guid)));
-    json_object_set_new(jdata, "other_loc",    json_string(va("%f,%f,%f",other->client->ps.origin[1],other->client->ps.origin[2],other->client->ps.origin[3])));
-    json_object_set_new(jdata, "other_angles",    json_string(va("%f,%f,%f",other->client->ps.viewangles[1],other->client->ps.viewangles[2],other->client->ps.viewangles[3])));
+    json_object_set_new(jdata, "other_loc",    json_string(va("%f,%f,%f",other->client->ps.origin[0],other->client->ps.origin[1],other->client->ps.origin[2])));
+    json_object_set_new(jdata, "other_angles",    json_string(va("%f,%f,%f",other->client->ps.viewangles[0],other->client->ps.viewangles[1],other->client->ps.viewangles[2])));
     json_object_set_new(jdata, "attack_dir",    json_string(va("%f,%f,%f",dir[1],dir[2],dir[3])));
     if (level.jsonStatInfo.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
@@ -1220,9 +1250,12 @@ void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir){
 }
 
 
-void G_writeDisconnectEvent (gentity_t* agent){
+void G_writeDisconnectEvent (gentity_t* agent) {
+
+    DebugLogEntry("Stats: writing disconnect event");
+
     char* s;
-    char buf[64];
+    //char buf[64];
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
     // additional safety check
@@ -1236,6 +1269,7 @@ void G_writeDisconnectEvent (gentity_t* agent){
     json_object_set_new(jdata, "group",    json_string("player"));
     json_object_set_new(jdata, "label",    json_string("disconnect"));
     json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
+
     if (level.jsonStatInfo.gameStatslogFile) {
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
@@ -1249,6 +1283,8 @@ void G_writeDisconnectEvent (gentity_t* agent){
 
 void G_writeClosingJson(void)
 {
+    DebugLogEntry("Stats: writing closing json");
+
     char buf[64];
     int ret = 0;
     if (level.jsonStatInfo.gameStatslogFile) {
@@ -1257,8 +1293,8 @@ void G_writeClosingJson(void)
 
         // check stats file to make sure it satisfies conditions for submission....
         ret = G_check_before_submit(level.jsonStatInfo.gameStatslogFileName);
-        if (g_stats_curl_submit.integer && ret > 0) {
 
+        if (g_stats_curl_submit.integer && ret > 0) {
             trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
             G_Printf("Stats API: Starting stats upload process.\n");
 
@@ -1279,12 +1315,14 @@ void G_writeClosingJson(void)
 
 void G_writeGameLogStart(void)
 {
+    DebugLogEntry("Stats: writing game log start");
+
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
-    char *buf3;
+    //char *buf3;
     char buf[64];
-    char cs[MAX_STRING_CHARS];
+    //char cs[MAX_STRING_CHARS];
     trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
 
     if (level.jsonStatInfo.gameStatslogFile) {
@@ -1313,8 +1351,10 @@ void G_writeGameLogStart(void)
 
 void G_writeGameLogEnd(void)
 {
+    DebugLogEntry("Stats: writing game log end");
+
     char* s;
-     char buf[64];
+    //char buf[64];
     json_t *jdata = json_object();
     json_t *event = json_object();
     time_t unixTime = time(NULL);
@@ -1341,6 +1381,7 @@ void G_writeGameLogEnd(void)
 
 void G_writeGameEarlyExit(void)
 {
+    DebugLogEntry("Stats: writing game early exit");
 
     char* s;
     char buf[64];
@@ -1383,6 +1424,9 @@ void G_writeGameEarlyExit(void)
   level.axisalive and level.alliedalive then increment/decrement where needed
 */
 int G_teamAlive(int team ) {
+
+    DebugLogEntry("Stats: checking for alive players");
+
     int  j;
 	gclient_t *cl;
     int numAlive = 0;
@@ -1402,4 +1446,44 @@ int G_teamAlive(int team ) {
 
 }
 
+char* LookupEventType(int eventType)
+{
+    switch (eventType) {
+    case eventSuicide:
+        return "Suicide";
+        break;
+    case eventKill:
+        return "Kill";
+        break;
+    case eventTeamkill:
+        return "TeamKill";
+        break;
+    case eventRevive:
+        return "Revive";
+        break;
+    case eventPause:
+        return "Pause";
+        break;
+    case eventUnpause:
+        return "Unpause";
+        break;
+    case teamFirstSpawn:
+        return "FirstSpawn";
+        break;
+    case eventClassChange:
+        return "Class";
+        break;
+    case eventNameChange:
+        return "NameChange";
+        break;
+    default:
+        return "Unknown event";
+        break;
+    }
+}
 
+void DebugLogEntry(char* str)
+{
+    if (g_gameStatslog.integer && g_statsDebug.integer)
+        G_LogPrintf("%s\n", str);
+}

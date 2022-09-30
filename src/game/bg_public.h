@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2.7" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.2.8" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -373,7 +373,7 @@ typedef enum {
 	STAT_MAX_HEALTH,                // health / armor limit, changable by handicap
 	STAT_PLAYER_CLASS,              // DHM - Nerve :: player class in multiplayer
 	STAT_CAPTUREHOLD_RED,           // JPW NERVE - red team score
-	STAT_CAPTUREHOLD_BLUE           // JPW NERVE - blue team score
+	STAT_CAPTUREHOLD_BLUE          // JPW NERVE - blue team score
 } statIndex_t;
 
 
@@ -399,14 +399,8 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK
-
-	// RTCWPro - unused
-	//PERS_HITHEAD,
-	//PERS_HITBODY
-
-	// Weapon Restrictions
-	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
+	PERS_WOLFKICK,
+	PERS_DEATH_YAW			// RtcwPro store yaw for value on death
 } persEnum_t;
 
 
@@ -661,7 +655,7 @@ typedef struct ammotable_s {
 	int nextShotTime;       //
 //----(SA)	added
 	int maxHeat;            // max active firing time before weapon 'overheats' (at which point the weapon will fail)
-	int coolRate;           // how fast the weapon cools down. (per second)
+	float coolRate;           // how fast the weapon cools down. (per second)
 //----(SA)	end
 	int mod;                // means of death
 } ammotable_t;
@@ -1808,6 +1802,7 @@ extern animStringItem_t animBodyPartsStr[];
 // Crosshairs
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
 void BG_ParseColorCvar(char* cvarString, float* color);
+
 // Client flags for server processing
 #define CGF_AUTORELOAD      0x01
 #define CGF_STATSDUMP       0x02

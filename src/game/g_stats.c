@@ -35,8 +35,10 @@ Last Updated: 09. Apr / 2013
 #include "g_local.h"
 #include "g_stats.h"
 
-static qboolean firstheadshot;
-static qboolean firstblood;
+//static qboolean firstheadshot;
+//static qboolean firstblood;
+
+//static qboolean latchVictorySound =	qfalse;
 
 /*
 ===========
@@ -1064,10 +1066,11 @@ void G_printMatchInfo( gentity_t *ent, qboolean fDump ) { // fDump is bad name b
 				tot_gp ) );
 
 	}
+
 	// temp for printing clock & end of round sounds
 	if (fDump && ( g_gametype.integer == GT_WOLF_STOPWATCH ))
     {
-        G_matchClockDump( ent );
+        G_matchClockDump(ent);
     }
 
 
@@ -1092,6 +1095,28 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 	winner = atoi(buf);
 
     endofroundinfo=va( "  .."); // plan to remove this soon.....just safety measure
+
+
+	// Check winner and give credit to who captured obj
+    if (qtrue) { // for future reference as we may want to restrict this down the road
+        for ( i = 0; i < level.numConnectedClients; i++ ) {
+            ent = &g_entities[level.sortedClients[i]];
+            if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR ) {
+                continue;
+            }
+            if (winner == 0 &&  (ent->client->ps.powerups[PW_BLUEFLAG])) {
+                G_writeObjectiveEvent(ent, objCapture  );
+                ent->client->sess.obj_captured++;
+                break;
+			}
+			else if (winner == 1 && (ent->client->ps.powerups[PW_REDFLAG]))
+			{
+                G_writeObjectiveEvent(ent, objCapture  );
+                ent->client->sess.obj_captured++;
+                break;
+			}
+        }
+    }
 
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
@@ -1152,128 +1177,41 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			// Don't dump score table for users with stats dump enabled
 			if (!(cl->pers.clientFlags & CGF_STATSDUMP))
 			{
-				G_printMatchInfo(ent,qtrue);
-			}
-        // moved to G_matchClockDump due to cg_autoaction issue
-
-			if ( g_gametype.integer == GT_WOLF_STOPWATCH )
-			{
-				// We've already missed the switch
-				if ( g_currentRound.integer == 1 )
-				{
-                    endofroundinfo=va( "Clock set to: %d:%02d",
-							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
-					//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
-
-
-
-					if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
-                            G_writeObjectiveEvent(ent, objCapture  );
-                            cl->sess.obj_captured++;
-					}
-					else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
-					{
-                            G_writeObjectiveEvent(ent, objCapture  );
-                            cl->sess.obj_captured++;
-					}
-
-
-				}
-				else
-				{
-
-					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-					if ( val < g_timelimit.value )
-					{
-					    endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
-								(int)val,
-								(int)( 60.0 * ( val - (int)val ) ),
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
-						//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
-
-
-                        /*
-						if (winner == 0)
-						{
-							AAPS("sound/match/winaxis.wav");
-						}
-						else if (winner == 1)
-						{
-							AAPS("sound/match/winallies.wav");
-						}
-						*/
-                        if (winner == 0 && (cl->ps.powerups[PW_BLUEFLAG])) {
-                                G_writeObjectiveEvent(ent, objCapture  );
-                                cl->sess.obj_captured++;
-                        }
-                        else if (winner == 1 && (cl->ps.powerups[PW_REDFLAG]))
-                        {
-                                G_writeObjectiveEvent(ent, objCapture  );
-                                cl->sess.obj_captured++;
-                        }
-
-					}
-					else
-					{
-					    endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
-						//CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
-
-
-                        /*
-						if (winner == 0)
-						{
-							AAPS("sound/match/winaxis.wav");
-						}
-						else if (winner == 1)
-						{
-							AAPS("sound/match/winallies.wav");
-						}
-						*/
-					}
-				}
+				G_printMatchInfo(ent, qtrue); // this will call MatchClockDump for Stopwatch
 			}
 
-			// RTCWPro - non SW exits
-			else
+			// non Stopwatch exits
+			if (g_gametype.integer != GT_WOLF_STOPWATCH)
 			{
 				if (g_timelimit.value && !level.warmupTime)
 				{
+				
 					if (level.time - level.startTime >= g_timelimit.value * 60000)
 					{
 						if (winner == 0)
 						{
-
-							AAPS("sound/match/winaxis.wav");
-							AAPS("sound/multiplayer/music/s_stinglow.wav");
+							CPS(ent, "sound/match/winaxis_pro.wav");
 						}
 						else if (winner == 1)
 						{
-							AAPS("sound/match/winallies.wav");
-							AAPS("sound/multiplayer/music/l_complete_2.wav");
+							CPS(ent, "sound/match/winallies_pro.wav");
 						}
 					}
 					else
 					{
 						if (winner == 0)
 						{
-							AAPS("sound/match/winaxis.wav");
-							AAPS("sound/multiplayer/music/s_stinglow.wav");
+							CPS(ent, "sound/match/winaxis_pro.wav");
 						}
 						else if (winner == 1)
 						{
-							AAPS("sound/match/winallies.wav");
-							AAPS("sound/multiplayer/music/l_complete_2.wav");
+							CPS(ent, "sound/match/winallies_pro.wav");
 						}
 					}
 				}
 			}
 		}
 	}
-   // if (qtrue) {  // may want to use different cvar for event log vs. gamestat log
 
    // this will all be redone in a much more efficient way but since time is limited and with no real direction...it is done the lazy way
     if (g_gameStatslog.integer) {
@@ -1295,8 +1233,9 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 
 }
 // temp fix for cg_autoaction issue
-void G_matchClockDump( gentity_t *ent ) {
+void G_matchClockDump(gentity_t *ent ) {
 
+	gclient_t* cl;
 	char cs[MAX_STRING_CHARS];
 	char* buf;
 	int winner;
@@ -1304,72 +1243,48 @@ void G_matchClockDump( gentity_t *ent ) {
 	buf = Info_ValueForKey(cs, "winner");
 	winner = atoi(buf);
 	char* endofroundinfo;
+	cl = ent->client;
 
     if ( !level.intermissiontime ) {
 		return;
 	}
 
-               if ( g_currentRound.integer == 1 )
-			   {
-                    endofroundinfo=va( "Clock set to: %d:%02d",
-							g_nextTimeLimit.integer,
-							(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
-					CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
+    if ( g_currentRound.integer == 1 )
+	{
+        endofroundinfo=va( "Clock set to: %d:%02d",
+				g_nextTimeLimit.integer,
+				(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
+		CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
+	}
+	else
+	{
+		float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
+		if ( val < g_timelimit.value )
+		{
+			endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
+					(int)val,
+					(int)( 60.0 * ( val - (int)val ) ),
+					g_timelimit.integer,
+					(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
+			CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
+		}
+		else
+		{
+			endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
+					g_timelimit.integer,
+					(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
+			CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
+		}
+	}
 
-					if (winner == 0)
-					{
-						AAPS("sound/match/winaxis.wav");
-						AAPS("sound/multiplayer/music/s_stinglow.wav");
-					}
-					else if (winner == 1)
-					{
-						AAPS("sound/match/winallies.wav");
-						AAPS("sound/multiplayer/music/l_complete_2.wav");
-					}
-
-				}
-				else
-				{
-					float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-					if ( val < g_timelimit.value )
-					{
-					    endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
-								(int)val,
-								(int)( 60.0 * ( val - (int)val ) ),
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
-						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
-
-						if (winner == 0)
-						{
-							AAPS("sound/match/winaxis.wav");
-							AAPS("sound/multiplayer/music/s_stinglow.wav");
-						}
-						else if (winner == 1)
-						{
-							AAPS("sound/match/winallies.wav");
-							AAPS("sound/multiplayer/music/l_complete_2.wav");
-						}
-					}
-					else
-					{
-					    endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
-								g_timelimit.integer,
-								(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
-						CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
-
-						if (winner == 0)
-						{
-							AAPS("sound/match/winaxis.wav");
-							AAPS("sound/multiplayer/music/s_stinglow.wav");
-						}
-						else if (winner == 1)
-						{
-							AAPS("sound/match/winallies.wav");
-							AAPS("sound/multiplayer/music/l_complete_2.wav");
-						}
-					}
-				}
+	if (winner == 0)
+	{
+		CPS(ent, "sound/match/winaxis_pro.wav");
+	}
+	else if (winner == 1)
+	{
+		CPS(ent, "sound/match/winallies_pro.wav");
+	}
 
 
 }

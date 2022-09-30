@@ -53,7 +53,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define INFINITE            1000000
 
-#define FRAMETIME           100                 // msec
 #define EVENT_VALID_MSEC    300
 #define CARNAGE_REWARD_TIME 3000
 #define REWARD_SPRITE_TIME  2000
@@ -629,6 +628,7 @@ typedef struct {
 	unsigned int hitSoundType;
 	unsigned int hitSoundBodyStyle;
 	unsigned int hitSoundHeadStyle;
+	unsigned int antilag;				// Client antilag
 	int cmd_debounce;                   // Dampening of command spam
 	unsigned int invite;                // Invitation to a team to join
 	int throwingKnives;
@@ -676,6 +676,7 @@ typedef struct {
 #define LAG_MAX_DROP_THRESHOLD 800
 #define LAG_MIN_DROP_THRESHOLD ( LAG_MAX_DROP_THRESHOLD - 200 )
 #define LAG_DECAY 1.02f
+#define LAG_SPEED_THRESHOLD 80
 // End
 
 typedef struct {
@@ -828,7 +829,6 @@ struct gclient_s {
 	// revive anim bug fix
 	qboolean revive_animation_playing;
 	int movement_lock_begin_time;
-
 };
 
 //
@@ -1044,6 +1044,8 @@ typedef struct {
 	jsonStatInfo_t jsonStatInfo;  // for stats match/round info
 	char* match_id; // for stats round matching...
     char* round_id; //
+
+	int lastSSTime;
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1159,6 +1161,7 @@ qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // RTCWPro -
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // RTCWPro - drop weapon stuff
 gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
 char* getDateTime(void);
+char* Delim_GetDateTime(void);
 char* getDate(void);
 const char* getMonthString(int monthIndex);
 int getYearFromCYear(int cYear);
@@ -1261,7 +1264,7 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon );
 void CalcMuzzlePointForActivate( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 // done.
 
-// sswolf - RTCWPro stuff
+// RTCWPro - head box stuff
 void AddHeadEntity(gentity_t* ent);
 void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);
@@ -1287,6 +1290,12 @@ void AddScore( gentity_t *ent, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 void limbo(gentity_t* ent, qboolean makeCorpse);
+char* ClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+void ClientUserinfoChanged(int clientNum);
+void ClientDisconnect(int clientNum);
+void ClientBegin(int clientNum);
+void ClientCommand(int clientNum);
+void AddMedicTeamBonus(gclient_t* client);
 
 //void RemoveWeaponRestrictions(gentity_t *ent);
 //void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);
@@ -1351,15 +1360,6 @@ void QDECL G_Error( const char *fmt, ... );
 void CheckVote(void);
 void SortedActivePlayers(void);
 void HandleEmptyTeams(void);
-
-//
-// g_client.c
-//
-char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );
-void ClientUserinfoChanged( int clientNum );
-void ClientDisconnect( int clientNum );
-void ClientBegin( int clientNum );
-void ClientCommand( int clientNum );
 
 //
 // g_active.c
@@ -1476,6 +1476,7 @@ extern vmCvar_t g_gametype;
 extern vmCvar_t g_gameskill;
 // done
 extern vmCvar_t g_gameStatslog; // temp cvar for event logging
+extern vmCvar_t g_statsDebug;
 extern vmCvar_t g_stats_curl_submit;
 extern vmCvar_t g_stats_curl_submit_URL;
 extern vmCvar_t g_stats_curl_submit_headers;
@@ -1504,6 +1505,7 @@ extern vmCvar_t g_debugMove;
 extern vmCvar_t g_debugAlloc;
 extern vmCvar_t g_debugDamage;
 extern vmCvar_t g_debugBullets;     //----(SA)	added
+extern vmCvar_t g_debugMode;
 extern vmCvar_t g_preciseHeadHitBox;
 extern vmCvar_t g_weaponRespawn;
 extern vmCvar_t g_synchronousClients;
@@ -1687,6 +1689,15 @@ extern vmCvar_t g_thinkSnapOrigin;
 extern vmCvar_t g_fixedphysicsfps;
 extern vmCvar_t g_alternatePing;
 extern vmCvar_t g_allowForceTapout;
+extern vmCvar_t g_allowEnemySpawnTimer;
+extern vmCvar_t g_clientLogFile;
+extern vmCvar_t g_logClientInput;
+extern vmCvar_t g_reviveSameDirection;
+extern vmCvar_t	g_allowSS;
+extern vmCvar_t	g_ssAddress;
+extern vmCvar_t	g_ssWebhookId;
+extern vmCvar_t	g_ssWebhookToken;
+extern vmCvar_t	g_ssWaitTime;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -2005,7 +2016,6 @@ void G_MakeReferee(void);
 void G_RemoveReferee(void);
 void G_MuteClient(void);
 void G_UnMuteClient(void);
-void AddIPBan(const char *str);
 void DecolorString( char *in, char *out);
 
 // g_shared.c
@@ -2080,6 +2090,7 @@ unsigned int G_weapStatIndex_MOD( int iWeaponMOD );
 void G_statsPrint( gentity_t *ent, int nType );
 void G_addStats( gentity_t *targ, gentity_t *attacker, int dmg_ref, int mod );
 void G_addStatsHeadShot( gentity_t *attacker, int mod );
+char *G_createStats(gentity_t* refEnt);
 void G_deleteStats( int nClient );
 void G_parseStats( char *pszStatsInfo );
 char *G_writeStats( gclient_t* client );
@@ -2142,7 +2153,8 @@ void G_writeClosingJson(void);
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
 void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
 int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
-
+void DebugLogEntry(char* str);
+char* LookupEventType(int eventyType);
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 
@@ -2157,7 +2169,7 @@ qboolean G_commandHelp(gentity_t *ent, const char *pszCommand, unsigned int dwCo
 qboolean G_cmdDebounce(gentity_t *ent, const char *pszCommand);
 void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
-qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
+//qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
 // now residing in g_utils.c  (previous declaration in g_admin.h)
 //
@@ -2201,6 +2213,9 @@ qboolean G_DoAntiwarp(gentity_t* ent);
 void AW_AddUserCmd(int clientNum, usercmd_t* cmd);
 static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd);
 void DoClientThinks(gentity_t* ent);
+
+// log entry
+void LogEntry(char* filename, char* info);
 
 /**
  * @enum enum_t_dp

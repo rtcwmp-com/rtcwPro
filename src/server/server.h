@@ -264,8 +264,6 @@ typedef struct {
 
 	receipt_t infoReceipts[MAX_INFO_RECEIPTS];
 	floodBan_t infoFloodBans[MAX_INFO_FLOOD_BANS];
-
-	int ssTime; // reqSS
 } serverStatic_t;
 
 //================
@@ -340,6 +338,9 @@ extern cvar_t  *sv_gameskill;
 // TTimo - autodl
 extern cvar_t *sv_dl_maxRate;
 
+
+// Start RtcwPro
+
 // Anti wallhack
 //extern cvar_t* wh_active;
 //extern cvar_t* wh_bbox_horz;
@@ -366,15 +367,11 @@ extern cvar_t* sv_AuthStrictMode;
 // Cvar restrictions
 extern cvar_t* sv_GameConfig;
 
-// reqSS
-extern cvar_t* sv_ssEnable;
-extern cvar_t* sv_ssMinTime;
-extern cvar_t* sv_ssMaxTime;
-//extern cvar_t* sv_ssQuality;
-
 extern cvar_t* sv_checkVersion;
 extern cvar_t* sv_restRunning;
+extern cvar_t* sv_serverTimeReset;	// ET Legacy port reset svs.time on map load to fix knockback bug
 
+// End RtcwPro
 //===========================================================
 
 //
@@ -573,13 +570,6 @@ qboolean SV_CheckDRDoS(netadr_t from);
 #define DLNOTIFY_REDIRECT   0x00000001  // "Redirecting client ..."
 #define DLNOTIFY_BEGIN      0x00000002  // "clientDownload: 4 : beginning ..."
 #define DLNOTIFY_ALL        ( DLNOTIFY_REDIRECT | DLNOTIFY_BEGIN )
-
-//
-// RTCWPro - sv_controls.c - source: Nate (rtcwMP)
-//
-//void SV_SendSSRequest(int clientNum, int quality);
-void SV_SendSSRequest(int clientNum);
-void autoSSTime(void);
 
 #endif // !___SERVER_H
 

@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwPro 1.2.7.13"  // RTCWPro
+#define Q3_VERSION      "RtcwPro 1.2.8.15"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -906,7 +906,7 @@ cheats is zero, force all unspecified variables to their
 default values.
 ==========================================================
 */
-#define MAX_CVARS				1024
+#define MAX_CVARS				2048
 #define MAX_CVAR_VALUE_STRING   256
 
 #define CVAR_ARCHIVE        1   // set to cause it to be saved to vars.rc
@@ -1390,8 +1390,8 @@ typedef struct playerState_s {
 
 	// seems like heat and aimspread could be tied together somehow, however, they (appear to) change at different rates and
 	// I can't currently see how to optimize this to one server->client transmission "weapstatus" value.
-	int weapHeat[MAX_WEAPONS];          // some weapons can overheat.  this tracks (server-side) how hot each weapon currently is.
-	int curWeapHeat;                    // value for the currently selected weapon (for transmission to client)
+	float weapHeat[MAX_WEAPONS];          // some weapons can overheat.  this tracks (server-side) how hot each weapon currently is.
+	float curWeapHeat;                    // value for the currently selected weapon (for transmission to client)
 
 	int venomTime;          //----(SA)	added
 //----(SA)	end
@@ -1740,6 +1740,10 @@ typedef enum {
 #define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 #define GUID_LEN				33
 #define NO_GUID					"NO_GUID"
+
+// ET Legacy Port
+#define GAME_INIT_FRAMES    6 // help us determine when round is actually starting
+#define FRAMETIME           100 // msec // moved from g local
 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
