@@ -1,0 +1,34 @@
+client - only draw timer during round when using cg_drawTimer 1
+client - allow changes to cg_gun[xyz]
+client - added cg_antilag so users can turn antilag on/off
+client - move connection interrupted out of the center to small text on lagometer
+client - added priority objective status prints using cg_showPriorityText 1
+
+render - #408 - fixed MAX_SHADERS on radar
+
+server - added client command logging
+server - fixed unpause so it counts down to 0 before restarting match
+server - minor change for antiwarp for warping player that has stopped but still has velocity
+server - fixed objDestroyed stats
+server - correctly restore players view angle on revive
+server - added g_allowEnemySpawnTimer to control ERT on server level
+server - always show Clock Set To message in warmup regardless of value for g_noTeamSwitching
+server - use g_tournament instead of g_noTeamSwitching in checkgamestate
+server - update ref option messages
+server - removed unncessary code in round-end logic
+server - #375 changed json round_end to exclude pause time
+server - fixed team locks after round starts
+server - #324 fixed voting information so it is not empty
+server - #390 fixed speclock swapping on swapteams vote
+server - fixed invalid health pickup notifications i.e. "50 health" picked up
+server - #397 fixed engineer objPlanted and objDestroyed stats
+server - fixed end of round sound duplication
+server - fixed starting health based on # of medics
+server - updated template configs and GeoIP dat file
+server - combined round end sounds into one file
+server - removed old latchvictorysound code
+server - #345 Correct fix for player killed holding primed grenade
+server - fix for the multiple objective captures in end of round stats
+server - increased max_cvars to avoid max cvars error
+server - corrected sten number of bullets shot with com_maxfps 250
+server - updated GeoIP database
