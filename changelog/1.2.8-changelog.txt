@@ -3,6 +3,7 @@ client - allow changes to cg_gun[xyz]
 client - added cg_antilag so users can turn antilag on/off
 client - move connection interrupted out of the center to small text on lagometer
 client - added priority objective status prints using cg_showPriorityText 1
+client - move /minimize to engine so it works in main menu
 
 render - #408 - fixed MAX_SHADERS on radar
 
