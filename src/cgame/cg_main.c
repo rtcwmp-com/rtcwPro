@@ -1442,8 +1442,8 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");
 	// end of round
-	cgs.media.alliesWin = trap_S_RegisterSound("sound/match/winallies.wav");
-	cgs.media.axisWin = trap_S_RegisterSound("sound/match/winaxis.wav");
+	cgs.media.alliesWin = trap_S_RegisterSound("sound/match/winallies_pro.wav");
+	cgs.media.axisWin = trap_S_RegisterSound("sound/match/winaxis_pro.wav");
 	// End
 }
 

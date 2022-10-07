@@ -1179,37 +1179,6 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
 			{
 				G_printMatchInfo(ent, qtrue); // this will call MatchClockDump for Stopwatch
 			}
-
-			// non Stopwatch exits
-			if (g_gametype.integer != GT_WOLF_STOPWATCH)
-			{
-				if (g_timelimit.value && !level.warmupTime)
-				{
-				
-					if (level.time - level.startTime >= g_timelimit.value * 60000)
-					{
-						if (winner == 0)
-						{
-							CPS(ent, "sound/match/winaxis_pro.wav");
-						}
-						else if (winner == 1)
-						{
-							CPS(ent, "sound/match/winallies_pro.wav");
-						}
-					}
-					else
-					{
-						if (winner == 0)
-						{
-							CPS(ent, "sound/match/winaxis_pro.wav");
-						}
-						else if (winner == 1)
-						{
-							CPS(ent, "sound/match/winallies_pro.wav");
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -1276,15 +1245,4 @@ void G_matchClockDump(gentity_t *ent ) {
 			CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
 		}
 	}
-
-	if (winner == 0)
-	{
-		CPS(ent, "sound/match/winaxis_pro.wav");
-	}
-	else if (winner == 1)
-	{
-		CPS(ent, "sound/match/winallies_pro.wav");
-	}
-
-
 }
