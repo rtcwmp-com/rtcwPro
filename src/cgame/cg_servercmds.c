@@ -1925,6 +1925,20 @@ void CG_dumpStats( void ) {
 	if ( fDoScores ) {
 		trap_SendClientCommand( "scoresdump" );
 	}
+
+	const char* buf;
+
+	s = CG_ConfigString(CS_MULTI_MAPWINNER);
+	buf = Info_ValueForKey(s, "winner");
+
+	if (atoi(buf))
+	{
+		trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_LOCAL_SOUND);
+	}
+	else
+	{
+		trap_S_StartLocalSound(cgs.media.axisWin, CHAN_LOCAL_SOUND);
+	}
 }
 /**************** L0 - OSP Stats dump ends here *****************/
 void CG_ForceTapOut_f(void); // OSPx - Tapout

@@ -169,7 +169,7 @@
 | g_ssAddress | `string` | `N/A` | `none` | Remote address for SS e.g. hostname or ip:port | 
 | g_ssWebhookId | `string` | `N/A` | `none` | id contained in the discord webhook link (numbers only) e.g. `webhooks/id/` | 
 | g_ssWebhookToken | `string` | `N/A` | `none` | token contained in the discord webhook link (chars) e.g. `webhooks/id/token` | 
-| g_ssWaitTime | `integer` | `0-9999` | `30` | wait time between reqss cmds to prevent spam | 
+| g_ssWaitTime | `integer` | `30-9999` | `30` | wait time between reqss cmds to prevent spam | 
 | g_reviveSameDirection | `integer` | `0-1` | `0` | when player is revived they will have same viewangle as death | 
 | g_logClientInput | `integer` | `0-1` | `0` | turn on to log unknown client commands
 | g_clientLogFile | `integer` | `0-1` | `logs/clientInput.log` | log file for unknown client commands

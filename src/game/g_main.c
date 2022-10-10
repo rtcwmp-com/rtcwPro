@@ -2751,7 +2751,7 @@ void CheckExitRules( void ) {
 			Info_SetValueForKey( cs, "winner", "1" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
 			// RTCWPro - moved from WM_DrawObjectives in cg
-			AAPS("sound/match/winallies_pro.wav");
+			//AAPS("sound/match/winallies_pro.wav");
 			LogExit( "Axis team eliminated." );
 		}
 		else if ( level.numFinalDead[1] >= level.alliedPlayers && level.alliedPlayers > 0 )
@@ -2759,7 +2759,7 @@ void CheckExitRules( void ) {
 			trap_GetConfigstring( CS_MULTI_MAPWINNER, cs, sizeof( cs ) );
 			Info_SetValueForKey( cs, "winner", "0" );
 			trap_SetConfigstring( CS_MULTI_MAPWINNER, cs );
-			AAPS("sound/match/winaxis_pro.wav");
+			//AAPS("sound/match/winaxis_pro.wav");
 			LogExit( "Allied team eliminated." );
 		}
 	}
@@ -2769,7 +2769,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the fraglimit.\n\"" );
-			AAPS("sound/match/winaxis_pro.wav");
+			//AAPS("sound/match/winaxis_pro.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
@@ -2777,7 +2777,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_BLUE] >= g_fraglimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the fraglimit.\n\"" );
-			AAPS("sound/match/winallies_pro.wav");
+			//AAPS("sound/match/winallies_pro.wav");
 			LogExit( "Fraglimit hit." );
 			return;
 		}
@@ -2810,7 +2810,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
-			AAPS("sound/match/winaxis_pro.wav");
+			//AAPS("sound/match/winaxis_pro.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
@@ -2818,7 +2818,7 @@ void CheckExitRules( void ) {
 		if ( level.teamScores[TEAM_BLUE] >= g_capturelimit.integer )
 		{
 			trap_SendServerCommand( -1, "print \"Blue hit the capturelimit.\n\"" );
-			AAPS("sound/match/winallies_pro.wav");
+			//AAPS("sound/match/winallies_pro.wav");
 			LogExit( "Capturelimit hit." );
 			return;
 		}
