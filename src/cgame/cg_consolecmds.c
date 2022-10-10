@@ -562,8 +562,8 @@ OSPx
 void CG_vstrDown_f(void) {
 	if (trap_Argc() == 5) {
 		trap_SendConsoleCommand(va("vstr %s;", CG_Argv(1)));
-		trap_SendClientCommand(va("%s", CG_Argv(0))); // client input logging
-		trap_SendClientCommand(va("%s", CG_Argv(1))); // client input logging
+		//trap_SendClientCommand(va("%s", CG_Argv(0))); // client input logging
+		//trap_SendClientCommand(va("%s", CG_Argv(1))); // client input logging
 	}
 	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
 }
