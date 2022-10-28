@@ -230,7 +230,7 @@ vmCvar_t cg_medicChargeTime;
 vmCvar_t cg_engineerChargeTime;
 vmCvar_t cg_LTChargeTime;
 vmCvar_t cg_soldierChargeTime;
-vmCvar_t cg_redlimbitime;
+vmCvar_t cg_redlimbotime;
 vmCvar_t cg_bluelimbotime;
 // jpw
 
@@ -276,13 +276,6 @@ vmCvar_t cg_quickMessageAlt;
 vmCvar_t cg_popupLimboMenu;
 vmCvar_t cg_descriptiveText;
 // -NERVE - SMF
-
-vmCvar_t cg_medicChargeTime;
-vmCvar_t cg_engineerChargeTime;
-vmCvar_t cg_LTChargeTime;
-vmCvar_t cg_soldierChargeTime;
-vmCvar_t cg_redlimbotime;
-vmCvar_t cg_bluelimbotime;
 
 vmCvar_t cg_autoReload;
 vmCvar_t cg_antilag;
