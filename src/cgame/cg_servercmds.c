@@ -1890,7 +1890,7 @@ void CG_printFile( char *str ) {
 	}
 }
 // Dump stats in file
-void CG_dumpStats( void ) {
+void CG_dumpStats(qboolean endOfRound) {
 	qtime_t ct;
 	qboolean fDoScores = qfalse;
 	const char *info = CG_ConfigString( CS_SERVERINFO );
@@ -1926,18 +1926,22 @@ void CG_dumpStats( void ) {
 		trap_SendClientCommand( "scoresdump" );
 	}
 
-	const char* buf;
-
-	s = CG_ConfigString(CS_MULTI_MAPWINNER);
-	buf = Info_ValueForKey(s, "winner");
-
-	if (atoi(buf))
+	// if intermission play the end of round sounds
+	if (cgs.gamestate == GS_PLAYING && endOfRound)
 	{
-		trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_LOCAL_SOUND);
-	}
-	else
-	{
-		trap_S_StartLocalSound(cgs.media.axisWin, CHAN_LOCAL_SOUND);
+		const char* buf;
+
+		s = CG_ConfigString(CS_MULTI_MAPWINNER);
+		buf = Info_ValueForKey(s, "winner");
+
+		if (atoi(buf))
+		{
+			trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_LOCAL_SOUND);
+		}
+		else
+		{
+			trap_S_StartLocalSound(cgs.media.axisWin, CHAN_LOCAL_SOUND);
+		}
 	}
 }
 /**************** L0 - OSP Stats dump ends here *****************/
@@ -2038,7 +2042,9 @@ static void CG_ServerCommand( void ) {
 	// Weapon stats (console dump)
 	if ( !Q_stricmp( cmd, "ws" ) ) {
 		if ( cgs.dumpStatsTime > cg.time ) {
-			CG_dumpStats();
+			qboolean endOfRound = qfalse;
+			if (cg.predictedPlayerState.pm_type == PM_INTERMISSION) endOfRound = qtrue;
+			CG_dumpStats(endOfRound);
 		} else {
 			CG_parseWeaponStats_cmd( CG_printConsoleString );
 			cgs.dumpStatsTime = 0;
