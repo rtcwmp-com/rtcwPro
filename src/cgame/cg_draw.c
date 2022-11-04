@@ -1903,6 +1903,43 @@ static void CG_DrawLagometer( void ) {
 
 	vscale = range / MAX_LAGOMETER_RANGE;
 
+	// rtcwpro - speed
+	if (cg_lagometer.integer > 1)
+	{
+		static vec_t speed;
+		float vscale2, range2, v2;
+
+		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] +
+			cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+
+		if (speed != speed)
+		{
+			speed = 0;
+		}
+
+		range2 = ah;
+		vscale2 = range2 / 2048;
+
+		for (a = 0; a < aw; a++)
+		{
+			v2 = speed;
+
+			if (v2 > 0)
+			{
+				trap_R_SetColor(g_color_table[ColorIndex(COLOR_LTGREY)]);
+
+				v2 = v2 * vscale2;
+
+				if (v2 > range2)
+				{
+					v2 = range2;
+				}
+
+				trap_R_DrawStretchPic(ax + aw - a, ay + ah - v2, 1, v2, 0, 0, 0, 0, cgs.media.whiteShader);
+			}
+		}
+	}
+
 	// draw the frame interpoalte / extrapolate graph
 	for ( a = 0 ; a < aw ; a++ ) {
 		i = ( lagometer.frameCount - 1 - a ) & ( LAG_SAMPLES - 1 );
