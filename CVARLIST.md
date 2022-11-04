@@ -95,7 +95,6 @@
 | cg_showPriorityText| `integer` | `0-1` | `1` | Enable/disable objective taken/returned prints |
 | cg_priorityTextX | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the horizontal axis |
 | cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
-| cg_lagometer | `integer` | `0-2` | `0` | 1 - normal, 2 - draw speed |
 
 # Server  
 #### Engine (sv)
