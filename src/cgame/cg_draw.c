@@ -1061,7 +1061,7 @@ static float CG_DrawRespawnTimer(float y) {
 	x = cg_reinforcementTimeX.integer;
 	y = cg_reinforcementTimeY.integer;
 
-	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color);
+	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color, cg_hudAlpha.value);
 
 	if (cgs.gamestate != GS_PLAYING) {
 		CG_DrawStringExt((x + 4) - w, y, str, colorYellow, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
@@ -1133,7 +1133,7 @@ static float CG_DrawEnemyTimer(float y) {
 
 				x = cg_enemyTimerX.integer;
 				y = cg_enemyTimerY.integer;
-				BG_ParseColorCvar(cg_enemyTimerColor.string, color);
+				BG_ParseColorCvar(cg_enemyTimerColor.string, color, cg_hudAlpha.value);
 				CG_DrawStringExt((x + 5) - w, y, str, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 			}
 		}
@@ -1280,16 +1280,16 @@ void CG_DrawTJSpeed(void) {
 	}
 
 	w = CG_Text_Width_Ext(status, sizex, sizey, &cgDC.Assets.textFont) / 2;
-	BG_ParseColorCvar("white", color);
+	BG_ParseColorCvar("white", color, cg_hudAlpha.value);
 
 	if (cg_drawSpeed.integer > 2 && speed > cg.oldSpeed + 0.001f * 100)
 	{
-		BG_ParseColorCvar("green", color);
+		BG_ParseColorCvar("green", color, cg_hudAlpha.value);
 		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
 	}
 	else if (cg_drawSpeed.integer > 2 && speed < cg.oldSpeed - 0.001f * 100)
 	{
-		BG_ParseColorCvar("red", color);
+		BG_ParseColorCvar("red", color, cg_hudAlpha.value);
 		CG_Text_Paint_Ext(x - w, y, sizex, sizey, color, status, 0, 0, ITEM_TEXTSTYLE_SHADOWED, &cgDC.Assets.textFont);
 	}
 	else
@@ -1336,7 +1336,7 @@ static float CG_DrawProRespawnTimer(float y) {
 		val = CG_CalculateReinfTime(qfalse);
 	}
 
-	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color);
+	BG_ParseColorCvar(cg_reinforcementTimeColor.string, color, cg_hudAlpha.value);
 	trap_R_SetColor(color);
 
 	x = cg_reinforcementTimeProX.integer;
@@ -1400,7 +1400,7 @@ static float CG_DrawProEnemyTimer(float y) {
 				secondsThen = ((cgs.timelimit * 60000.f) - cg_spawnTimer_set.integer) / 1000;
 				val = (period + (seconds - secondsThen) % period);
 
-				BG_ParseColorCvar(cg_enemyTimerColor.string, color);
+				BG_ParseColorCvar(cg_enemyTimerColor.string, color, cg_hudAlpha.value);
 				trap_R_SetColor(color);
 
 				x = cg_enemyTimerProX.integer;
@@ -1910,7 +1910,7 @@ static void CG_DrawLagometer( void ) {
 		float vscale2, range2, v2;
 		vec4_t color2;
 
-		BG_ParseColorCvar("ltgrey", color2, 0.6);
+		BG_ParseColorCvar("ltgrey", color2, 0.8);
 
 		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] +
 			cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);

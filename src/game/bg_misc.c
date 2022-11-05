@@ -4521,12 +4521,22 @@ BG_ParseColorCvar
 Reads RBG(A) cvars and sets parsed color var components
 ===============
 */
-void BG_ParseColorCvar(char* cvarString, float* color) {
+void BG_ParseColorCvar(char* cvarString, float* color, float alpha) {
 	char* s = cvarString;
 	unsigned int i = 0;
 
+	if (alpha > 1.0f)
+	{
+		alpha = 1.0f;
+	}
+	else if (alpha < 0.f)
+	{
+		alpha = 0.f;
+	}
+
 	// white in case we have no good format
 	Vector4Copy(colorWhite, color);
+	color[3] = alpha; // rtcwpro - split this up
 
 	// hex format
 	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
