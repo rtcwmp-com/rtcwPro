@@ -1908,6 +1908,9 @@ static void CG_DrawLagometer( void ) {
 	{
 		static vec_t speed;
 		float vscale2, range2, v2;
+		vec4_t color2;
+
+		BG_ParseColorCvar("ltgrey", color2, 0.6);
 
 		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] +
 			cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
@@ -1926,7 +1929,7 @@ static void CG_DrawLagometer( void ) {
 
 			if (v2 > 0)
 			{
-				trap_R_SetColor(g_color_table[ColorIndex(COLOR_LTGREY)]);
+				trap_R_SetColor(color2);
 
 				v2 = v2 * vscale2;
 
