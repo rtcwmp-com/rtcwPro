@@ -10,4 +10,5 @@ Users are encouraged to upgrade their server or client version to the latest rel
 If you have discovered an issue that you believe is a vulnerability, please reach us by using one of the resources below:
 
 Post issue on Github https://github.com/rtcwmp-com/rtcwPro/issues
-RtcwMP Discord discord.gg/fn9JVWnbTx
+
+RtcwMP Discord http://discord.gg/fn9JVWnbTx
