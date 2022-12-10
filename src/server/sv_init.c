@@ -854,11 +854,16 @@ void SV_Init( void ) {
 	// done
 
 	//ServerIP and Server Country
+#ifdef DEDICATED
 	SV_GetIP();
 	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
 	SV_GetCountry(sv_serverIP->string);
 	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_SERVERINFO | CVAR_ROM);
     // end sIP/Country
+#else
+	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
+	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_SERVERINFO | CVAR_ROM);
+#endif
 
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
 	Cvar_Get( "protocol", va( "%i", GAME_PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
