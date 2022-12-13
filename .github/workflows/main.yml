@@ -1,2 +1,0 @@
-- name: Automatic Changelog Generator
-  uses: CharMixer/auto-changelog-action@v1.1
