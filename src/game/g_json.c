@@ -8,10 +8,37 @@
 #endif // _WIN32
 */
 #include <time.h>
-
+#include <io.h>
 
 #define MATCHID level.jsonStatInfo.match_id
 #define ROUNDID level.jsonStatInfo.round_id
+
+typedef enum {
+    ModeExists = 0,
+    ModeExecute = 1,
+    ModeWrite = 2,
+    ModeRead = 4
+} FileAccessMode;
+
+// possible values for filename
+// stats/matchinfo.json OR level.jsonStatInfo.gameStatslogFileName
+int CanAccessFile(char* str, char* filename)
+{
+    if (g_gameStatslog.integer)
+    {
+        if (g_statsDebug.integer)
+            G_LogPrintf("%s\n", str);
+
+        int result = _access(filename, ModeWrite);
+
+        if (result != 0)
+            G_LogPrintf(va("Stats: COULD NOT ACCESS FILE %s", filename));
+
+        return result;
+    }
+
+    return -1;
+}
 
 /*
   Retrieve player stats from json data and use it to set player session data
@@ -19,7 +46,8 @@
 
 int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
-    DebugLogEntry("Stats: get pstats");
+    if (!CanAccessFile("Stats: get pstats", level.jsonStatInfo.gameStatslogFileName))
+        return 0;
 
     json_t *pcat, *pitem, *pstats;
     int i=0;
@@ -228,8 +256,6 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 int G_write_match_info( void )
 {
-    DebugLogEntry("Stats: writing match info");
-
     json_t *data = NULL;
     //json_t* json, *object, *jstattype, *jstats;
     //json_error_t error;
@@ -252,7 +278,11 @@ int G_write_match_info( void )
     json_object_set_new(jdata, "roundstart",    json_string(level.jsonStatInfo.round_start));
 
     trap_FS_FOpenFile("stats/matchinfo.json", &matchfileinfo, FS_WRITE );
-    if (matchfileinfo) {
+    if (matchfileinfo)
+    {
+        if (!CanAccessFile("Stats: writing match info", "stats/matchinfo.json"))
+            return 0;
+
         s = json_dumps( jdata, 1 );
         trap_FS_Write( "{\n \"matchinfo\": \n", strlen( "{\n \"matchinfo\": \n" ), matchfileinfo);
         trap_FS_Write( s, strlen( s ), matchfileinfo );
@@ -268,7 +298,8 @@ int G_write_match_info( void )
 
 int G_read_match_info( void )
 {
-    DebugLogEntry("Stats: reading match info");
+    if (!CanAccessFile("Stats: reading match info", "stats/matchinfo.json"))
+        return 0;
 
     json_t *data = NULL;
     json_t* json, *object, *jstattype; // , * jstats;
@@ -321,7 +352,8 @@ int G_read_match_info( void )
 */
 int G_check_before_submit( char* jsonfile)
 {
-    DebugLogEntry("Stats: check before submit");
+    if (!CanAccessFile("Stats: check before submit", jsonfile))
+        return 0;
 
     json_t *data = NULL;
     json_t *json,*jstats;
@@ -360,8 +392,6 @@ int G_check_before_submit( char* jsonfile)
 */
 int G_read_round_jstats( void )
 {
-    DebugLogEntry("Stats: reading round stats");
-
     json_t *data = NULL;
     json_t *json,*object,*jstattype, *jstats;
     json_error_t error;
@@ -400,6 +430,10 @@ int G_read_round_jstats( void )
 
     char* jfile = va("%s/%s/stats/%d_%d_%d/gameStats_match_%s_round_%d_%s.json", hpath, game,ct.tm_mday, ct.tm_mon+1, 1900+ct.tm_year, buf,g_currentRound.integer,mapName);
     json = json_load_file(jfile, 0, &error);
+
+    if (!CanAccessFile("Stats: reading round stats", jfile))
+        return 0;
+
     if (error.line != -1) {
         G_Printf("error: unable to read json round stat file\n");
         return 0;
@@ -482,7 +516,8 @@ Output the end of round stats in Json format with player array...
 
 void G_jstatsByPlayers(qboolean wstats) {
 
-    DebugLogEntry("Stats: writing stats by players");
+    if (!CanAccessFile("Stats: writing stats by players", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
@@ -644,7 +679,8 @@ Output the end of round stats in Json format with team array ...
 
 void G_jstatsByTeam(qboolean wstats) {
 
-    DebugLogEntry("Stats: writing stats by team");
+    if (!CanAccessFile("Stats: writing stats by team", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
@@ -816,7 +852,8 @@ Output the weapon stats for each player
 
 void G_jWeaponStats(void) {
 
-    DebugLogEntry("Stats: writing weapon stats");
+    if (!CanAccessFile("Stats: writing weapon stats", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     int i, j, rc;
 	char* s;
@@ -908,7 +945,8 @@ Output server related information
 */
 void G_writeServerInfo(void) {
 
-    DebugLogEntry("Stats: writing server info");
+    if (!CanAccessFile("Stats: writing server info", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     //char* buf;
     char* s;
@@ -969,7 +1007,8 @@ Output end of info (i.e. round, winner, etc)
 
 void G_writeGameInfo (int winner ) {
 
-    DebugLogEntry("Stats: writing game info");
+    if (!CanAccessFile("Stats: writing game info", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
 	char* s;
 	char mapName[64];
@@ -1033,7 +1072,8 @@ void G_writeGameInfo (int winner ) {
 
 void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 
-    DebugLogEntry("Stats: writing Objective event");
+    if (!CanAccessFile("Stats: writing Objective event", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     char* s;
     //char buf[64];
@@ -1105,7 +1145,8 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType) {
 
-    DebugLogEntry(va("Stats: writing %s event", LookupEventType(eventType)));
+    if (CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     char* s;
     //char buf[64];
@@ -1252,7 +1293,8 @@ void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir) {
 
 void G_writeDisconnectEvent (gentity_t* agent) {
 
-    DebugLogEntry("Stats: writing disconnect event");
+    if (!CanAccessFile("Stats: writing disconnect event", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     char* s;
     //char buf[64];
@@ -1283,7 +1325,8 @@ void G_writeDisconnectEvent (gentity_t* agent) {
 
 void G_writeClosingJson(void)
 {
-    DebugLogEntry("Stats: writing closing json");
+    if (!CanAccessFile("Stats: writing closing json", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     char buf[64];
     int ret = 0;
@@ -1315,7 +1358,8 @@ void G_writeClosingJson(void)
 
 void G_writeGameLogStart(void)
 {
-    DebugLogEntry("Stats: writing game log start");
+    if (!CanAccessFile("Stats: writing game log start", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     char* s;
     json_t *jdata = json_object();
@@ -1351,7 +1395,8 @@ void G_writeGameLogStart(void)
 
 void G_writeGameLogEnd(void)
 {
-    DebugLogEntry("Stats: writing game log end");
+    if (!CanAccessFile("Stats: writing game log end", level.jsonStatInfo.gameStatslogFileName))
+        return;;
 
     char* s;
     //char buf[64];
@@ -1381,7 +1426,8 @@ void G_writeGameLogEnd(void)
 
 void G_writeGameEarlyExit(void)
 {
-    DebugLogEntry("Stats: writing game early exit");
+    if (!CanAccessFile("Stats: writing game early exit", level.jsonStatInfo.gameStatslogFileName))
+        return;
 
     char* s;
     char buf[64];
@@ -1425,7 +1471,8 @@ void G_writeGameEarlyExit(void)
 */
 int G_teamAlive(int team ) {
 
-    DebugLogEntry("Stats: checking for alive players");
+    if (!CanAccessFile("Stats: checking for alive players", level.jsonStatInfo.gameStatslogFileName))
+        return 0;
 
     int  j;
 	gclient_t *cl;
@@ -1480,10 +1527,4 @@ char* LookupEventType(int eventType)
         return "Unknown event";
         break;
     }
-}
-
-void DebugLogEntry(char* str)
-{
-    if (g_gameStatslog.integer && g_statsDebug.integer)
-        G_LogPrintf("%s\n", str);
 }
