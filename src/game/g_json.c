@@ -22,7 +22,7 @@ typedef enum {
 
 // possible values for filename
 // stats/matchinfo.json OR level.jsonStatInfo.gameStatslogFileName
-int CanAccessFile(char* str, char* filename)
+qboolean CanAccessFile(char* str, char* filename)
 {
     if (g_gameStatslog.integer)
     {
@@ -31,13 +31,18 @@ int CanAccessFile(char* str, char* filename)
 
         int result = _access(filename, ModeWrite);
 
-        if (result != 0)
+        if (result == 0)
+            return qtrue;
+        else
+        {
             G_LogPrintf(va("Stats: COULD NOT ACCESS FILE %s", filename));
+            return qfalse;
+        }
 
-        return result;
+        return qfalse;
     }
 
-    return -1;
+    return qfalse;
 }
 
 /*
