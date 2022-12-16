@@ -26,6 +26,9 @@ qboolean CanAccessFile(char* str, char* filename)
 {
     if (g_gameStatslog.integer)
     {
+        if (!strcmp(filename, "")) // if filename hasn't been initialized just return
+            return qfalse;
+
         if (g_statsDebug.integer)
             G_LogPrintf("%s\n", str);
 
@@ -35,7 +38,7 @@ qboolean CanAccessFile(char* str, char* filename)
             return qtrue;
         else
         {
-            G_LogPrintf(va("Stats: COULD NOT ACCESS FILE %s", filename));
+            G_LogPrintf(va("Stats: COULD NOT ACCESS FILE %s\n", filename));
             return qfalse;
         }
 
@@ -1147,10 +1150,39 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 }
 
 
+void G_writeChatEvent(gentity_t* agent, char* chatText)
+{
+    if (!CanAccessFile("Stats: writing global chat event", level.jsonStatInfo.gameStatslogFileName))
+        return;
+
+    char* s;
+    json_t* jdata = json_object();
+    json_t* event = json_object();
+    time_t unixTime = time(NULL);
+
+    json_object_set_new(jdata, "match_id", json_string(va("%s", MATCHID)));
+    json_object_set_new(jdata, "round_id", json_string(va("%s", ROUNDID)));
+    json_object_set_new(jdata, "unixtime", json_string(va("%ld", unixTime)));
+    json_object_set_new(jdata, "group", json_string("server"));
+    json_object_set_new(jdata, "label", json_string("global_chat"));
+    json_object_set_new(jdata, "agent", json_string(va("%s", agent->client->sess.guid)));
+    json_object_set_new(jdata, "text", json_string(va("%s", chatText)));
+
+    if (level.jsonStatInfo.gameStatslogFile) {
+        s = json_dumps(jdata, 0);
+        trap_FS_Write(s, strlen(s), level.jsonStatInfo.gameStatslogFile);
+        trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.gameStatslogFile);
+
+        free(s);
+    }
+    json_decref(jdata);
+    level.eventNum++;
+}
+
 
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType) {
 
-    if (CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName))
+    if (!CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName))
         return;
 
     char* s;
