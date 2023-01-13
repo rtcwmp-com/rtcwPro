@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>$(RTCWBASE)\$(TargetName)$(TargetExt)</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>+set fs_game rtcwpro +set g_debugMode 0 +exec server.cfg</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>+set fs_game rtcwpro +set g_debugMode 0 +exec server.cfg +exec debug.cfg</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(RTCWBASE)\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
