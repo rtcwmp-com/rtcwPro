@@ -32,6 +32,16 @@ qboolean CanAccessFile(char* str, char* filename)
         if (g_statsDebug.integer)
             G_LogPrintf("%s\n", str);
 
+        if (!strcmp(filename, "stats/matchinfo.json"))
+        {
+            char hpath[256];
+            char game[60];
+            trap_Cvar_VariableStringBuffer("fs_homepath", hpath, sizeof(hpath));
+            trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
+
+            filename = va("%s/%s/stats/matchinfo.json", hpath, game);
+        }
+
         int result = _access(filename, ModeWrite);
 
         if (result == 0)
@@ -1053,15 +1063,19 @@ void G_writeGameInfo (int winner ) {
     json_object_set_new(jdata, "allies_cycle",    json_string(va("%i",g_bluelimbotime.integer / 1000)));
     json_object_set_new(jdata, "axis_cycle",    json_string(va("%i",g_redlimbotime.integer / 1000)));
 
+    json_object_set_new(jdata, "winner", json_string(va("%s", (winner == 0) ? "Axis" : "Allied")));
 
     // note we want to write the winner on the second round but since this is called at
     // the end of each round we only write out when g_currentRound = 0
+    /*
     if (g_currentRound.integer == 0) {
         json_object_set_new(jdata, "winner",    json_string(va("%s", (winner == 0) ? "Axis" : "Allied")));
     }
     else {
         json_object_set_new(jdata, "winner",    json_string(" "));
     }
+    */
+
     if (level.jsonStatInfo.gameStatslogFile) {
         //s = json_dumps( jdata, 0 );
         s = json_dumps( jdata, 1 );
