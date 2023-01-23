@@ -957,6 +957,7 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity, int ownerN
 
 	dropped->s.eFlags |= EF_BOUNCE_HALF;
 	if ( item->giType == IT_TEAM ) { // Special case for CTF flags
+		dropped->s.density = 1;
 		dropped->think = Team_DroppedFlagThink;
 		dropped->nextthink = level.time + 30000;
 	} else { // auto-remove after 30 seconds
@@ -1281,6 +1282,11 @@ void G_SpawnItem( gentity_t *ent, gitem_t *item ) {
 
 	if ( ent->model ) {
 		ent->s.modelindex2 = G_ModelIndex( ent->model );
+	}
+	
+	if ( item->giType == IT_TEAM ) {
+		G_SpawnInt( "count", "1", &ent->s.density );
+		G_matchPrintInfo(va("Item density is %d", ent->s.density), qfalse);
 	}
 
 	if ( item->giType == IT_CLIPBOARD ) {

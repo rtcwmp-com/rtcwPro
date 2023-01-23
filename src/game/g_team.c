@@ -372,11 +372,25 @@ gentity_t *Team_ResetFlag( int team ) {
 
 	ent = NULL;
 	while ( ( ent = G_Find( ent, FOFS( classname ), c ) ) != NULL ) {
+
+		G_matchPrintInfo(va("Reset Flag Density is %d", ent->s.density), qfalse);
+
 		if ( ent->flags & FL_DROPPED_ITEM ) {
+			//Team_ResetFlag( &g_entities[ent->s.otherEntityNum] );  // what does this do?
 			G_FreeEntity( ent );
 		} else {
 			rent = ent;
-			RespawnItem( ent );
+			
+			// ET Port for mulitple document objectives
+			ent->s.density++;
+
+			G_matchPrintInfo(va("Flag Density changed to %d", ent->s.density), qfalse);
+
+			// do we need to respawn?
+			if ( ent->s.density == 1 ) {
+				RespawnItem( ent );
+			}
+
 		}
 	}
 
@@ -500,6 +514,9 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
                 G_writeObjectiveEvent(other, objReturned  );
 				cl->sess.obj_returned++;
 			}
+
+			G_matchPrintInfo(va("Touch our density is %d", ent->s.density), qfalse);
+
 			// dhm
 		}
 // jpw 800 672 2420
@@ -512,6 +529,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		other->client->pers.teamState.lastreturnedflag = level.time;
 		//ResetFlag will remove this entity!  We must return zero
 		Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+
 		return 0;
 	}
 
@@ -520,6 +538,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		return 0;
 	}
 
+	// Only CTF below
+	
 	// the flag is at home base.  if the player has the enemy
 	// flag, he's just won!
 	if ( !cl->ps.powerups[enemy_flag] ) {
@@ -613,6 +633,11 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	gclient_t *cl = other->client;
 	gentity_t *te, *gm;
 
+	ent->s.density--; // ET Port for multiple document objectives
+	
+	// ET Port for mulitple document objectives
+	G_matchPrintInfo(va("Touch Enemy density changed to %d", ent->s.density), qfalse);
+	
 	// hey, its not our flag, pick it up
 	if ( g_gametype.integer >= GT_WOLF ) {
 // JPW NERVE
@@ -660,7 +685,11 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 	cl->pers.teamState.flagsince = level.time;
 
-	return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	if ( ent->s.density > 0 ) {
+		return 1; // We have more flags to give out, spawn back quickly
+	} else {
+		return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	}
 }
 
 int Pickup_Team( gentity_t *ent, gentity_t *other ) {

@@ -864,6 +864,7 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 
 	if ( ent->spawnflags & RED_FLAG && other->client->ps.powerups[ PW_REDFLAG ] ) {
 
+		other->client->ps.powerups[PW_REDFLAG] = 0; // set to 0 as this objective has been captured
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
 
 		G_Script_ScriptEvent( ent, "death", "" );
@@ -874,6 +875,7 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		ent->think = G_FreeEntity;
 	} else if ( ent->spawnflags & BLUE_FLAG && other->client->ps.powerups[ PW_BLUEFLAG ] )   {
 
+		other->client->ps.powerups[PW_BLUEFLAG] = 0; // set to 0 as this objective has been captured
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
 
 		G_Script_ScriptEvent( ent, "death", "" );
