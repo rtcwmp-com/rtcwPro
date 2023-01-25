@@ -3668,6 +3668,11 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 
 		case IT_TEAM: // team items, such as flags
 
+			// density tracks how many uses left
+			if ( ( ent->density < 1 ) || ( ( ( ps->persistant[PERS_TEAM] == TEAM_RED ) ? ps->powerups[PW_BLUEFLAG] : ps->powerups[PW_REDFLAG] ) != 0 ) ) {
+				return qfalse;
+			}
+		
 			// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
 			// ent->modelindex2 is non-zero on items if they are dropped
 			// we need to know this because we can pick up our dropped flag (and return it)

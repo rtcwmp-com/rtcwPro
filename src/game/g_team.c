@@ -355,51 +355,36 @@ void Team_CheckHurtCarrier( gentity_t *targ, gentity_t *attacker ) {
 }
 
 
-gentity_t *Team_ResetFlag( int team ) {
-	char *c;
-	gentity_t *ent, *rent = NULL;
+void Team_ResetFlag(gentity_t* ent) {
 
-	switch ( team ) {
-	case TEAM_RED:
-		c = "team_CTF_redflag";
-		break;
-	case TEAM_BLUE:
-		c = "team_CTF_blueflag";
-		break;
-	default:
-		return NULL;
-	}
-
-	ent = NULL;
-	while ( ( ent = G_Find( ent, FOFS( classname ), c ) ) != NULL ) {
-
-		G_matchPrintInfo(va("Reset Flag Density is %d", ent->s.density), qfalse);
-
-		if ( ent->flags & FL_DROPPED_ITEM ) {
-			//Team_ResetFlag( &g_entities[ent->s.otherEntityNum] );  // what does this do?
-			G_FreeEntity( ent );
-		} else {
-			rent = ent;
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		Team_ResetFlag( &g_entities[ent->s.otherEntityNum] );
+		G_FreeEntity( ent );
+	} else {
 			
-			// ET Port for mulitple document objectives
-			ent->s.density++;
+		// ET Port for mulitple document objectives
+		ent->s.density++;
 
-			G_matchPrintInfo(va("Flag Density changed to %d", ent->s.density), qfalse);
-
-			// do we need to respawn?
-			if ( ent->s.density == 1 ) {
-				RespawnItem( ent );
-			}
-
+		// do we need to respawn?
+		if ( ent->s.density == 1 ) {
+			RespawnItem( ent );
 		}
-	}
 
-	return rent;
+	}
 }
 
 void Team_ResetFlags( void ) {
-	Team_ResetFlag( TEAM_RED );
-	Team_ResetFlag( TEAM_BLUE );
+	gentity_t   *ent;
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_redflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_blueflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
 }
 
 void Team_ReturnFlagSound( gentity_t *ent, int team ) {
@@ -418,8 +403,10 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 	te->r.svFlags |= SVF_BROADCAST;
 }
 
-void Team_ReturnFlag( int team ) {
-	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+void Team_ReturnFlag( gentity_t *ent ) {
+	int team = ent->item->giTag == PW_REDFLAG ? TEAM_RED : TEAM_BLUE;
+	Team_ReturnFlagSound( ent, team );
+	Team_ResetFlag( ent );
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
 }
 
@@ -449,14 +436,18 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 	}
 
 	if ( ent->item->giTag == PW_REDFLAG ) {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_RED ), TEAM_RED );
+		Team_ReturnFlagSound( ent, TEAM_RED );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
 			trap_SendServerCommand( -1, "cp \"^5Axis have returned the objective!\" 2" );
 			AP("prioritypopin \"^5Axis have returned the objective!\n\"");
 			G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 		}
 	} else if ( ent->item->giTag == PW_BLUEFLAG )     {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_BLUE ), TEAM_BLUE );
+		Team_ReturnFlagSound( ent, TEAM_BLUE );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
 			trap_SendServerCommand( -1, "cp \"^5Allies have returned the objective!\" 2" );
 			AP("prioritypopin \"^5Allies have returned the objective!\n\"");
@@ -515,8 +506,6 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 				cl->sess.obj_returned++;
 			}
 
-			G_matchPrintInfo(va("Touch our density is %d", ent->s.density), qfalse);
-
 			// dhm
 		}
 // jpw 800 672 2420
@@ -528,8 +517,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		other->client->pers.teamState.flagrecovery++;
 		other->client->pers.teamState.lastreturnedflag = level.time;
 		//ResetFlag will remove this entity!  We must return zero
-		Team_ReturnFlagSound( Team_ResetFlag( team ), team );
-
+		Team_ReturnFlagSound( ent, team );
+		Team_ResetFlag( ent );
 		return 0;
 	}
 
@@ -635,9 +624,6 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 	ent->s.density--; // ET Port for multiple document objectives
 	
-	// ET Port for mulitple document objectives
-	G_matchPrintInfo(va("Touch Enemy density changed to %d", ent->s.density), qfalse);
-	
 	// hey, its not our flag, pick it up
 	if ( g_gametype.integer >= GT_WOLF ) {
 // JPW NERVE
@@ -678,10 +664,16 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 
 	if ( team == TEAM_RED ) {
-		cl->ps.powerups[PW_REDFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_REDFLAG] = INT_MAX;
 	} else {
-		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX;
+	} // flags never expire
 
+	// store the entitynum of our original flag spawner
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		cl->flagParent = ent->s.otherEntityNum;
+	} else {
+		cl->flagParent = ent->s.number;
 	}
 	cl->pers.teamState.flagsince = level.time;
 

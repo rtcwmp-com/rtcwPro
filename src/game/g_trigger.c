@@ -857,6 +857,7 @@ BLUE_FLAG -- only trigger if player is carrying blue flag
 */
 
 void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
+	gentity_t* tmp;
 
 	if ( !other->client ) {
 		return;
@@ -867,7 +868,12 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		other->client->ps.powerups[PW_REDFLAG] = 0; // set to 0 as this objective has been captured
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
 
+		tmp = ent->parent;
+		ent->parent = other;
+
 		G_Script_ScriptEvent( ent, "death", "" );
+
+		ent->parent = tmp;
 
 		// Removes itself
 		ent->touch = NULL;
@@ -878,7 +884,13 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		other->client->ps.powerups[PW_BLUEFLAG] = 0; // set to 0 as this objective has been captured
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
 
+
+		tmp = ent->parent;
+		ent->parent = other;
+
 		G_Script_ScriptEvent( ent, "death", "" );
+
+		ent->parent = tmp;
 
 		// Removes itself
 		ent->touch = NULL;
