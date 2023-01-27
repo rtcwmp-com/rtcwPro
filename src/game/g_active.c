@@ -2206,10 +2206,10 @@ void ClientEndFrame( gentity_t *ent ) {
 		// turn off any expired powerups
 		for ( i = 0; i < PW_NUM_POWERUPS; i++ ) {
 
-			if ( i == PW_FIRE ||             // these aren't dependant on level.time
-				 i == PW_ELECTRIC ||
+			if ( i == PW_ELECTRIC || // these aren't dependant on level.time
 				 i == PW_BREATHER ||
 				 i == PW_NOFATIGUE ||
+				 i == PW_CAPPEDOBJ || // RtcwPro added for double objective map like radar
 				  ent->client->ps.powerups[i] == 0  // L0 - Pause dump
 				 ) {
 

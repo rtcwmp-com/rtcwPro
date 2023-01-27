@@ -1097,7 +1097,9 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
     endofroundinfo=va( "  .."); // plan to remove this soon.....just safety measure
 
 
-	// Check winner and give credit to who captured obj
+	/*
+	// Removed this - logic is now in g_trigger.Touch_flagonly
+	//Check winner and give credit to who captured obj
     if (qtrue) { // for future reference as we may want to restrict this down the road
         for ( i = 0; i < level.numConnectedClients; i++ ) {
             ent = &g_entities[level.sortedClients[i]];
@@ -1116,7 +1118,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
                 break;
 			}
         }
-    }
+    }*/
 
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{

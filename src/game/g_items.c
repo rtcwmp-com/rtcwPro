@@ -229,7 +229,7 @@ void UseHoldableItem( gentity_t *ent, int item ) {
 		break;
 
 	case HI_FIRE:           // protection from fire attacks - absorbs 500 points of fire damage
-		ent->client->ps.powerups[PW_FIRE] = 500;
+		//ent->client->ps.powerups[PW_FIRE] = 500;
 		break;
 
 	case HI_STAMINA:        // restores fatigue bar and sets "nofatigue" for a time period (currently forced to 60 sec)
