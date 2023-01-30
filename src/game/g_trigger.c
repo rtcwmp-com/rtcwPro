@@ -870,6 +870,7 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		other->client->ps.powerups[PW_CAPPEDOBJ]++; // fix map scoreboard showing icon on doc carrier
 		// end two document maps
 
+		G_writeObjectiveEvent(other, objCapture);
 		other->client->sess.obj_captured++; // correctly keep track of user that capped documents
 
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
@@ -892,6 +893,7 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		other->client->ps.powerups[PW_CAPPEDOBJ]++; // fix map scoreboard showing icon on doc carrier
 		// end two document maps
 
+		G_writeObjectiveEvent(other, objCapture);
 		other->client->sess.obj_captured++; // correctly keep track of user that capped documents
 
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
