@@ -455,6 +455,9 @@ void Cmd_GetOBJ(gentity_t* ent) {
 	char team[64];
 	gentity_t* axisObj = NULL, * alliesObj = NULL;
 
+	if (!CheatsOk(ent)) // devmap only
+		return;
+
 	if (!ent->client->sess.referee) {
 		return;
 	}
@@ -463,7 +466,7 @@ void Cmd_GetOBJ(gentity_t* ent) {
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || ent->client->sess.sessionTeam == TEAM_FREE) {
 		return;
 	}
 
@@ -471,25 +474,19 @@ void Cmd_GetOBJ(gentity_t* ent) {
 		return;
 	}
 
-	trap_Argv(1, team, sizeof(team));
-
-	if (!strlen(team)) {
-		return;
-	}
-
-	if (Q_stricmp(team, "axis") == 0) {
+	if (ent->client->sess.sessionTeam == TEAM_RED) {
 
 		axisObj = &g_entities[0];
-		axisObj = G_Find(axisObj, FOFS(classname), "team_CTF_redflag");
+		axisObj = G_Find(axisObj, FOFS(classname), "team_CTF_blueflag");
 
 		if (axisObj) {
 			Pickup_Team(axisObj, ent);
 		}
 	}
-	else if (Q_stricmp(team, "allies") == 0) {
+	else if (ent->client->sess.sessionTeam == TEAM_BLUE) {
 
 		alliesObj = &g_entities[0];
-		alliesObj = G_Find(alliesObj, FOFS(classname), "team_CTF_blueflag");
+		alliesObj = G_Find(alliesObj, FOFS(classname), "team_CTF_redflag");
 
 		if (alliesObj) {
 			Pickup_Team(alliesObj, ent);
@@ -499,7 +496,10 @@ void Cmd_GetOBJ(gentity_t* ent) {
 
 void Cmd_SelfRevive_f(gentity_t* ent) {
 
-	if (!ent->client->sess.referee && !trap_Cvar_VariableIntegerValue("developer")) {
+	if (!CheatsOk(ent)) // devmap only
+		return;
+
+	if (!ent->client->sess.referee) {
 		return;
 	}
 
@@ -507,7 +507,7 @@ void Cmd_SelfRevive_f(gentity_t* ent) {
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || ent->client->sess.sessionTeam == TEAM_FREE) {
 		return;
 	}
 

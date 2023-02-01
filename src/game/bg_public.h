@@ -446,7 +446,7 @@ typedef enum {
 #define EF_BOUNCE_HALF      0x08000000      // for missiles
 #define EF_MOVER_STOP       0x10000000      // will push otherwise	// (SA) moved down to make space for one more client flag
 
-
+// RtcwPro removed 	PW_BALL and PW_FIRE to keep 16 powerups for msg.c
 typedef enum {
 	PW_NONE,
 
@@ -459,17 +459,15 @@ typedef enum {
 
 	// (SA) for Wolf
 	PW_INVULNERABLE,
-	PW_FIRE,            //----(SA)
 	PW_ELECTRIC,        //----(SA)
 	PW_BREATHER,        //----(SA)
 	PW_NOFATIGUE,       //----(SA)
 
 	PW_REDFLAG,
 	PW_BLUEFLAG,
-	PW_BALL,
+	PW_CAPPEDOBJ,		// PlayerCappedDocuments
 	PW_READY,			// Ready
-	PW_BLACKOUT,		// Specklock
-
+	PW_BLACKOUT,		// Speclock
 	PW_NUM_POWERUPS
 } powerup_t;
 

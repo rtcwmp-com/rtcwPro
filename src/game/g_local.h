@@ -812,6 +812,7 @@ struct gclient_s {
 
 	gentity_t		*tempHead;	// Gordon: storing a temporary head for bullet head shot detection
 
+	int flagParent; // ET Port for multiple docs on a map
 	pmoveExt_t	pmext;
 
 	// L0 - New stuff
