@@ -2343,6 +2343,14 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// apiQuery
+	if (!strcmp(cmd, "api"))
+	{
+		char* command = va("%s", CG_Argv(1));
+		trap_APIQuery(command);
+		return;
+	}
+
 	CG_Printf( "Unknown client game command: %s\n", cmd );
 }
 

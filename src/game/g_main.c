@@ -180,6 +180,7 @@ vmCvar_t g_stats_curl_submit_URL;
 vmCvar_t g_stats_curl_submit_headers;
 vmCvar_t g_gameStatslog; // temp cvar for event logging
 vmCvar_t g_statsDebug; // write in logfile to debug crashes
+vmCvar_t g_apiquery_curl_URL;
 
 // Match
 vmCvar_t team_maxplayers;
@@ -371,6 +372,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_stats_curl_submit, "g_stats_curl_submit", "0", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_URL, "g_stats_curl_submit_URL", "https://rtcwproapi.donkanator.com/submit", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_headers, "g_stats_curl_submit_headers", "0", CVAR_ARCHIVE, 0, qfalse  }, // not used at the moment, headers are currently hardcoded
+	{ &g_apiquery_curl_URL, "g_apiquery_curl_URL", "https://rtcwproapi.donkanator.com/serverquery", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
 	// show_bug.cgi?id=500

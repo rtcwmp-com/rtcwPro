@@ -129,6 +129,7 @@ void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
 #endif
 void* CL_HTTP_SSUpload(void* args);
+void* CL_HTTP_apiQuery(void* args);
 //qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2); // reqSS
 
 #endif // ~_S_HTTP

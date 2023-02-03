@@ -3012,4 +3012,6 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 
 // reqSS
 void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
+// apiQuery
+void trap_APIQuery(char* command);
 

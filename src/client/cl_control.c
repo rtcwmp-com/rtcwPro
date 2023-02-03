@@ -116,3 +116,67 @@ void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime,
 	}
 }
 
+/*
+================
+// RtcwPro API Server Query
+================
+*/
+static size_t CL_APIMessageRead(void* ptr, size_t size, size_t nmemb, void* stream) {
+	Com_Printf("%s\n", ptr);
+}
+
+void CL_APIQuery(char* commandText, char* arg1, char* arg2) {
+
+	HTTP_Inquiry_t* query_info = (HTTP_Inquiry_t*)malloc(sizeof(HTTP_Inquiry_t));
+
+	if (query_info) {
+		query_info->url = "";
+		query_info->param = va("command: %s %s %s", commandText, arg1, arg2);
+		//query_info->callback = CL_APIMessage;
+
+		Threads_Create(CL_HTTP_apiQuery, query_info);
+	}
+
+	HTTP_Inquiry_t* http_inquiry = (HTTP_Inquiry_t*)malloc(sizeof(HTTP_Inquiry_t));
+}
+
+// post the data to specified server (currently it is fixed but will make customizable via cvar)
+void* CL_HTTP_apiQuery(void* args) {
+	HTTP_Inquiry_t* query_info = (HTTP_Inquiry_t*)args;
+	CURLcode ret;
+	CURL* hnd;
+	struct curl_slist* slist1;
+	char url[256];
+
+	Cvar_VariableStringBuffer("g_apiquery_curl_URL", url, sizeof(url));
+
+	slist1 = NULL;
+	//slist1 = curl_slist_append(slist1, query_info->matchid);
+	slist1 = curl_slist_append(slist1, "x-api-key: rtcwproapikeythatisjustforbasicauthorization");
+
+	hnd = curl_easy_init();
+	curl_easy_setopt(hnd, CURLOPT_URL, url);
+	curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+
+	// THIS DISABLES VERIFICATION OF CERTIFICATE AND IS INSECURE
+	//   INCLUDE CERTIFICATE AND CHANGE VALUE TO 1!
+	curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
+
+	curl_easy_setopt(hnd, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
+	curl_easy_setopt(hnd, CURLOPT_READFUNCTION, CL_APIMessageRead);
+
+	Com_Printf(va("Pro API: Client issued API Command %s\n", query_info->param));
+	ret = curl_easy_perform(hnd);
+
+	if (ret != CURLE_OK)
+	{
+		Com_Printf("Query API: Curl Error return code: %s\n", curl_easy_strerror(ret));
+	}
+
+	curl_easy_cleanup(hnd);
+	hnd = NULL;
+	curl_slist_free_all(slist1);
+	slist1 = NULL;
+
+}

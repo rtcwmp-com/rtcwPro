@@ -73,9 +73,6 @@
     <ClCompile Include="qcommon\net_chan.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="qcommon\net_ip.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="null\null_client.c">
       <Filter>Source Files</Filter>
     </ClCompile>

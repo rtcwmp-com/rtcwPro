@@ -1481,6 +1481,7 @@ extern vmCvar_t g_statsDebug;
 extern vmCvar_t g_stats_curl_submit;
 extern vmCvar_t g_stats_curl_submit_URL;
 extern vmCvar_t g_stats_curl_submit_headers;
+extern vmCvar_t g_apiquery_curl_URL;
 
 extern vmCvar_t g_dedicated;
 extern vmCvar_t g_cheats;

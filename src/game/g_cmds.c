@@ -2166,6 +2166,24 @@ void Cmd_RequestSS(gentity_t* ent) {
 	level.lastSSTime = level.time;
 }
 
+/*
+=================
+RTCWPro
+Call RtcwPro API
+=================
+*/
+void Cmd_APIQuery(gentity_t* ent) {
+
+	char command[256], arg1[256], arg2[256];
+
+	// support up to 1 command 2 arguments initially
+	trap_Argv(1, command, sizeof(command));
+	trap_Argv(2, arg1, sizeof(arg1));
+	trap_Argv(3, arg2, sizeof(arg2));
+
+	trap_SendServerCommand(ent - g_entities, va("api %s %s %s", command, arg1, arg2));
+}
+
 qboolean G_canPickupMelee( gentity_t *ent ) {
 
 // JPW NERVE -- no "melee" weapons in net play
@@ -3042,6 +3060,9 @@ void ClientCommand( int clientNum ) {
 		Cmd_DisplayMaps_f( ent );
 	} else if (Q_stricmp(cmd, "reqss") == 0) {
 		Cmd_RequestSS(ent);
+	}
+	else if (Q_stricmp(cmd, "api") == 0) {
+		Cmd_APIQuery(ent);
 	} else if (Q_stricmp(cmd, "more") == 0) {
 		Cmd_More_f(ent);
 	}
@@ -3153,10 +3174,11 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "unpause",        qfalse, qfalse, NULL,           ":^7 Unpauses a match (if initiated by the issuing team)"                                    },
 	{ "unready",        qtrue,  qfalse, NULL,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
 	{ "weaponstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 Shows weapon accuracy stats for a player"                                   },
-    { "wstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
-    { "maps",    qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
-	{ "reqss",    qtrue,  qtrue, NULL,     " Request screenshot from client id"                                   },
-	{ 0,                qfalse, qtrue,  NULL,                  0                                                                                            }
+    { "wstats",			qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
+    { "maps",			qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
+	{ "reqss",			qtrue,  qtrue, NULL,     " Request screenshot from client id"                                   },
+	{ "api",			qtrue,	qtrue, NULL,	"Execute RtcwPro API commands"																},
+	{ 0,                qfalse, qtrue,  NULL,    0                                                                                            }
 };
 
 /**
