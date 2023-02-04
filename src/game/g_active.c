@@ -1213,6 +1213,13 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
+	// RTCWPro
+	if (g_broadcastClients.integer)
+	{
+		ent->r.svFlags |= SVF_BROADCAST;
+	}
+	// RTCWPro - end
+
 	if ( client->cameraPortal ) {
 		G_SetOrigin( client->cameraPortal, client->ps.origin );
 		trap_LinkEntity( client->cameraPortal );
