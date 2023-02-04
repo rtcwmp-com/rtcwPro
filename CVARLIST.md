@@ -174,4 +174,5 @@
 | g_reviveSameDirection | `integer` | `0-1` | `0` | when player is revived they will have same viewangle as death | 
 | g_logClientInput | `integer` | `0-1` | `0` | turn on to log unknown client commands
 | g_clientLogFile | `integer` | `0-1` | `logs/clientInput.log` | log file for unknown client commands
+| g_broadcastClients | `integer` | `0-1` | `0` | fix clients appearing from thin air on some maps
 
