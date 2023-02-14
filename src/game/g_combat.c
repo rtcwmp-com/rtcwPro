@@ -653,7 +653,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	// RtcwPro - store the value for player YAW so we can restore on revive
 	// the value STAT_DEAD_YAW can change with lookatkiller etc
-	self->client->ps.persistant[PERS_DEATH_YAW] = SHORT2ANGLE(self->client->pers.cmd.angles[YAW] + self->client->ps.delta_angles[YAW]);
+	self->client->pers.deathYaw = SHORT2ANGLE(self->client->pers.cmd.angles[YAW] + self->client->ps.delta_angles[YAW]);
 
 	//self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );

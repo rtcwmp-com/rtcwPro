@@ -658,6 +658,5 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 //
 void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
 
-void CL_APIQuery(char* commandText, char* arg1, char* arg2);
 #endif // !__CLIENT_H
 

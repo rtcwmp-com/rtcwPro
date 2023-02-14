@@ -496,7 +496,7 @@ void Cmd_GetOBJ(gentity_t* ent) {
 
 void Cmd_SelfRevive_f(gentity_t* ent) {
 
-	if (!CheatsOk(ent)) // devmap only
+	if (!g_cheats.integer) // devmap only
 		return;
 
 	if (!ent->client->sess.referee) {
@@ -2164,24 +2164,6 @@ void Cmd_RequestSS(gentity_t* ent) {
 	G_LogPrintf("Player %s requested %s_%s_%s.jpg from id %d\n", ent->client->pers.netname, cleanName, datetime, guid, clientNum);
 
 	level.lastSSTime = level.time;
-}
-
-/*
-=================
-RTCWPro
-Call RtcwPro API
-=================
-*/
-void Cmd_APIQuery(gentity_t* ent) {
-
-	char command[256], arg1[256], arg2[256];
-
-	// support up to 1 command 2 arguments initially
-	trap_Argv(1, command, sizeof(command));
-	trap_Argv(2, arg1, sizeof(arg1));
-	trap_Argv(3, arg2, sizeof(arg2));
-
-	trap_SendServerCommand(ent - g_entities, va("api %s %s %s", command, arg1, arg2));
 }
 
 qboolean G_canPickupMelee( gentity_t *ent ) {

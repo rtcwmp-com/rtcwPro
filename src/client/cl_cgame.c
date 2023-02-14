@@ -971,9 +971,6 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_REQUEST_SS:
 		CL_GenerateSS(VMA(1), VMA(2), VMA(3), VMA(4), VMA(5));
 		return 0;
-	case CG_APIQUERY:
-		CL_APIQuery(VMA(1), VMA(2), VMA(3));
-		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
 	}

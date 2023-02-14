@@ -20,6 +20,15 @@ typedef enum {
     ModeRead = 4
 } FileAccessMode;
 
+static char* GetHomePath()
+{
+    char hpath[256];
+    char game[60];
+    trap_Cvar_VariableStringBuffer("fs_homepath", hpath, sizeof(hpath));
+    trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
+    return va("%s/%s", hpath, game);
+    
+}
 // possible values for filename
 // stats/matchinfo.json OR level.jsonStatInfo.gameStatslogFileName
 qboolean CanAccessFile(char* str, char* filename)
@@ -34,12 +43,8 @@ qboolean CanAccessFile(char* str, char* filename)
 
         if (!strcmp(filename, "stats/matchinfo.json"))
         {
-            char hpath[256];
-            char game[60];
-            trap_Cvar_VariableStringBuffer("fs_homepath", hpath, sizeof(hpath));
-            trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
-
-            filename = va("%s/%s/stats/matchinfo.json", hpath, game);
+            char* homePath = GetHomePath();
+            filename = va("%s/stats/matchinfo.json", homePath);
         }
 
         int result = _access(filename, ModeWrite);
@@ -532,12 +537,12 @@ Output the end of round stats in Json format with player array...
 ===========
 */
 
-void G_jstatsByPlayers(qboolean wstats) {
+void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientId) {
 
     if (!CanAccessFile("Stats: writing stats by players", level.jsonStatInfo.gameStatslogFileName))
         return;
 
-    int i, j, eff,rc;
+    int i, j, eff;
 	float tot_acc = 0.00f;
 	char* s;
 	gclient_t *cl;
@@ -561,9 +566,12 @@ void G_jstatsByPlayers(qboolean wstats) {
         jplayer = json_object();
 		cl = level.clients + level.sortedClients[j];
 
-		if ( cl->pers.connected != CON_CONNECTED ) {
+        if (clientDisconnected && clientId != j) continue;
+
+		/*if ( cl->pers.connected != CON_CONNECTED ) {
 			continue;
-		}
+		}*/
+
 		DecolorString(cl->pers.netname, n1);
 		SanitizeString(n1, n2);
 		Q_CleanStr(n2);
@@ -666,20 +674,26 @@ void G_jstatsByPlayers(qboolean wstats) {
     s = json_dumps( jstats, 1 ); // for a pretty print form
     //s = json_dumps( jstats, 0 );
 
-    if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
-        trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.jsonStatInfo.gameStatslogFile );
-        trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
-        trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );  // for writing weapon stats after
+    if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer && !clientDisconnected)
+    {
+        trap_FS_Write("\"stats\": ", strlen("\"stats\": "), level.jsonStatInfo.gameStatslogFile);
+        trap_FS_Write(s, strlen(s), level.jsonStatInfo.gameStatslogFile);
+        trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.gameStatslogFile);  // for writing weapon stats after
         //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile ); // for keeping weapon stats in playerstats
-        free( s );
     }
-    else {   // forget the comments above and write it to original test json file :)
-        rc = json_dump_file(root, "./test.json", 0);
-        if (rc) {
-            fprintf(stderr, "cannot save json to file\n");
-        }
+    else if (clientDisconnected)
+    {
+        char* disconnectFile = "stats/disconnect.json";
+
+        trap_FS_FOpenFile(disconnectFile, &level.jsonStatInfo.disconnectFile, FS_WRITE);
+        if (level.jsonStatInfo.disconnectFile)
+        {
+            trap_FS_Write(s, strlen(s), level.jsonStatInfo.disconnectFile);
+            trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.disconnectFile);
+        }   
     }
 
+    free(s);
 
     json_decref( root );
     if (!wstats) {// write weapon stats separately
@@ -727,7 +741,8 @@ void G_jstatsByTeam(qboolean wstats) {
 		}
         sprintf(teamname,"%s",(i == TEAM_RED) ? "Axis" : "Allied"  );
 
-         jplayer = json_object();
+        jplayer = json_object();
+
         for ( j = 0; j < level.numPlayingClients; j++ ) {
 			cl = level.clients + level.sortedClients[j];
 
@@ -838,14 +853,16 @@ void G_jstatsByTeam(qboolean wstats) {
         s = json_dumps( jteam, 1 ); // for a pretty print form
         //s = json_dumps( jteam, 0 );
 
-        if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
+        if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer)
+        {
             trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.jsonStatInfo.gameStatslogFile );
             trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
             trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );  // for writing weapon stats after
             //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile ); // for keeping weapon stats in playerstats
             free( s );
         }
-        else {   // forget the comments above and write it to original test json file :)
+        else
+        {
             rc = json_dump_file(root, "./test.json", 0);
             if (rc) {
                 fprintf(stderr, "cannot save json to file\n");

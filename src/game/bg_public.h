@@ -399,8 +399,7 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
-	PERS_DEATH_YAW			// RtcwPro store yaw for value on death
+	PERS_WOLFKICK
 } persEnum_t;
 
 
@@ -781,7 +780,7 @@ typedef enum {
 	EV_USE_ITEM12,
 	EV_USE_ITEM13,
 	EV_USE_ITEM14,
-	EV_USE_ITEM15,
+	EV_USE_ITEM15,			// hijacked for EV_ANNOUNCER_SOUND
 	EV_ITEM_RESPAWN,
 	EV_ITEM_POP,
 	EV_PLAYER_TELEPORT_IN,
@@ -790,9 +789,6 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
-	// OSPx
-	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
-	// -OSPx
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,

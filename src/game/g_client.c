@@ -2592,7 +2592,7 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		vec3_t newangle;
 
 		// RtcwPro - restore the value for the client's view before death
-		newangle[YAW] = client->ps.persistant[PERS_DEATH_YAW];
+		newangle[YAW] = client->pers.deathYaw; //ps.persistant[PERS_DEATH_YAW];
 		newangle[PITCH] = 0;
 		newangle[ROLL] = 0;
 
@@ -2742,9 +2742,15 @@ void ClientDisconnect( int clientNum ) {
 				ent->message = NULL;
 			}
 
-			// OSP - Log stats too
-			// Will this fix people quitting before end of round?
-			G_LogPrintf("WeaponStats: %s\n", G_createStats(ent));
+			// Record the players stats into the JSON if they are /quit with timelimit under 30 seconds
+			//G_LogPrintf("WeaponStats: %s\n", G_createStats(ent));
+			if (1)
+			{
+				if (g_gameStatslog.integer)
+				{
+					G_jstatsByPlayers(qtrue, qtrue, clientNum);
+				}
+			}
 		}
 	}
 

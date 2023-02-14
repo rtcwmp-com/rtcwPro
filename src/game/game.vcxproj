@@ -275,6 +275,7 @@
     <ClCompile Include="g_alarm.c" />
     <ClCompile Include="g_antilag.c" />
     <ClCompile Include="g_antiwarp.c" />
+    <ClCompile Include="g_apiquery.c" />
     <ClCompile Include="g_bot.c" />
     <ClCompile Include="g_client.c" />
     <ClCompile Include="g_cmds.c" />
@@ -325,6 +326,7 @@
     <ClInclude Include="..\botai\syn.h" />
     <ClInclude Include="..\qcommon\crypto\sha-1\sha1.h" />
     <ClInclude Include="..\qcommon\jansson_win\jansson.h" />
+    <ClInclude Include="..\qcommon\threads.h" />
     <ClInclude Include="ai_cast.h" />
     <ClInclude Include="ai_cast_fight.h" />
     <ClInclude Include="ai_cast_global.h" />

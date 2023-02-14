@@ -217,7 +217,7 @@ void QDECL Com_Printf( const char *fmt, ... ) {
 				char buffer[26];
 				strftime(buffer, 26, "%Y-%m-%d_%H.%M.%S", newtime);
 
-				char *filename = va("rtcwconsole_%s.log", buffer);
+				char *filename = va("logs\\rtcwconsole_%s.log", buffer);
 				logfile = FS_FOpenFileWrite(filename);
 			}
 			else {

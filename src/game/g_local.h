@@ -51,7 +51,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define BODY_QUEUE_SIZE     8
 
-#define INFINITE            1000000
+//#define INFINITE            1000000
 
 #define EVENT_VALID_MSEC    300
 #define CARNAGE_REWARD_TIME 3000
@@ -659,6 +659,7 @@ typedef struct {
 	int	alternatePing;
 	int	pingsamples[NUM_PING_SAMPLES];
 	int	samplehead;
+	int deathYaw;
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -857,6 +858,7 @@ typedef struct jsonStatInfo_s {
    char  round_timelimit[MAX_STRING_CHARS];
    char  gameStatslogFileName[256];
    fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
+   fileHandle_t disconnectFile;
 } jsonStatInfo_t;
 
 
@@ -1755,6 +1757,9 @@ int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );
 
 int     trap_submit_curlPost( char* jsonfile, char* matchid );
+// api query
+int		trap_HTTP_apiQuery(char* param, char* jsonText);
+char*	G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGuid);
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );
@@ -2141,7 +2146,7 @@ int G_write_match_info( void );
 int G_read_match_info( void );
 int G_read_round_jstats( void );
 void G_jstatsByTeam(qboolean wstats);
-void G_jstatsByPlayers(qboolean wstats);
+void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientId);
 void G_jWeaponStats(void);
 int G_check_before_submit( char* jsonfile);
 void G_writeGameInfo (int winner);

@@ -174,7 +174,7 @@ void AAPSound(char *sound) {
 
 	ent = g_entities;
 
-	te = G_TempEntity(ent->s.pos.trBase, EV_ANNOUNCER_SOUND);
+	te = G_TempEntity(ent->s.pos.trBase, EV_USE_ITEM15);
 	te->s.eventParm = G_SoundIndex(sound);
 	te->r.svFlags |= SVF_BROADCAST;
 }
