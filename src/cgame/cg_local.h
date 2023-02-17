@@ -2939,6 +2939,8 @@ int         trap_Key_GetKey( const char *binding );
 // RF
 void trap_SendMoveSpeedsToGame( int entnum, char *movespeeds );
 
+void trap_HandleApiResponse(int clientNum, char* response);
+
 typedef enum {
 	SYSTEM_PRINT,
 	CHAT_PRINT,

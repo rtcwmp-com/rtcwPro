@@ -55,8 +55,6 @@ If you have questions concerning this license or the applicable additional terms
 #define AUTH_INVALID_GUID	"0"		// sv_AuthStrictMode = 1 or 3
 #define AUTH_OK				"1"
 
-
-
 /*
 ===============
 HTTP_Reply
@@ -118,6 +116,7 @@ typedef struct {
 //
 void* HTTP_Post(void* args);
 void* HTTP_Get(void* args);
+size_t HTTP_ParseReply(void* ptr, size_t size, size_t nmemb, struct HTTP_Reply_t* s);
 char* getCurrentPath(char* file);
 
 //

@@ -49,7 +49,9 @@ void Cmd_APIQuery(gentity_t* ent)
 	// get JSON text for the command
 	jsonText = G_CreateAPIJson(command, arg1, arg2, ent->client->sess.guid);
 
-	trap_HTTP_apiQuery(command, jsonText);
+	int clientNum = ent->client - level.clients;
+
+	trap_HTTP_apiQuery(command, jsonText, clientNum);
 }
 
 /*

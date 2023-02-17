@@ -293,6 +293,8 @@ typedef enum {
 
 	CG_RELAY_COMMAND,
 //	qboolean(*CG_RelayCommand)(const char type, int value);
+
+	RETURN_API_QUERY_RESPONSE
 } cgameExport_t;
 
 //----------------------------------------------

@@ -28,7 +28,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include "../qcommon/threads.h"
+#include "http.h"
+//#include "../qcommon/threads.h"
 
 /*
 ============
@@ -41,16 +42,31 @@ typedef struct {
 	char* url;
 	char* param;
 	char* jsonText;
+	int clientNumber;
 
 	void (*callback)(char* fmt, ...);
 } HTTP_APIInquiry_t;
+
+
+size_t APIResultMessage(char* ptr, size_t size, size_t nmemb, void* userdata) {
+	/* Cast the user data to an integer */
+	int clientNumber = *((int*)userdata);
+
+	/* Print the response along with the integer */
+	printf("Received response (integer=%d): %.*s\n", clientNumber, (int)(size * nmemb), ptr);
+
+	VM_Call(cgvm, RETURN_API_QUERY_RESPONSE, clientNumber, ptr);
+
+	/* Return the number of bytes processed */
+	return size * nmemb;
+}
 
 /*
 ================
  RtcwPro API Server Query
 ================
 */
-int API_Query(char* param, char* jsonText) {
+int API_Query(char* param, char* jsonText, int clientNumber) {
 
 	HTTP_APIInquiry_t* query_info = (HTTP_APIInquiry_t*)malloc(sizeof(HTTP_APIInquiry_t));
 
@@ -59,11 +75,15 @@ int API_Query(char* param, char* jsonText) {
 		query_info->url = "";
 		query_info->param = va("%s", param);
 		query_info->jsonText = va("%s", jsonText);
+		query_info->clientNumber = clientNumber;
+		//query_info->callback = APIResultMessage;
 
 		Threads_Create(API_HTTP_Query, query_info);
 	}
 
 	HTTP_APIInquiry_t* http_inquiry = (HTTP_APIInquiry_t*)malloc(sizeof(HTTP_APIInquiry_t));
+
+	return 0;
 }
 
 /*
@@ -71,10 +91,6 @@ int API_Query(char* param, char* jsonText) {
 serverQuery
 ===============
 */
-static size_t APIResultMessage(void* ptr, size_t size, size_t nmemb, void* stream) {
-	Com_Printf("%s", ptr);
-}
-
 void* API_HTTP_Query(void* args) {
 	HTTP_APIInquiry_t* query_info = (HTTP_APIInquiry_t*)args;
 	CURLcode ret;
@@ -100,6 +116,7 @@ void* API_HTTP_Query(void* args) {
 	curl_easy_setopt(hnd, CURLOPT_USE_SSL, CURLUSESSL_TRY);
 	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
 	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, APIResultMessage);
+	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &query_info->clientNumber);
 
 	//Com_Printf(va("Pro API: Client issued API Command %s\n", query_info->param));
 	ret = curl_easy_perform(hnd);

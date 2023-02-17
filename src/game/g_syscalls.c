@@ -124,8 +124,8 @@ int trap_submit_curlPost( char* jsonfile, char* matchid ) {
 	return syscall( G_SUBMIT_STATS_CURL, jsonfile, matchid );
 }
 
-int trap_HTTP_apiQuery(char* param, char* jsonText) {
-	return syscall(G_API_QUERY, param, jsonText);
+int trap_HTTP_apiQuery(char* param, char* jsonText, int clientNumber) {
+	return syscall(G_API_QUERY, param, jsonText, clientNumber);
 }
 
 void trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize ) {
