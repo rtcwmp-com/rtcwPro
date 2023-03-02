@@ -1034,35 +1034,3 @@ qboolean CG_RelayCommand(char* type, int value) {
 	//}
 	return qfalse;
 }
-
-void trap_HandleApiResponse(int clientNum, char* response)
-{
-	/*gentity_t* match;
-	match = g_entities + clientNum;
-	if (!match->inuse || match->client->pers.connected != CON_CONNECTED)
-	{
-		G_Printf("Cmd_HandleApiResponse: Invalid client number: %i\n", clientNum);
-		return;
-	}
-
-	if (g_alternatePing.integer)
-	{
-		if (match->client->pers.alternatePing < 0 || match->client->pers.alternatePing >= 999)
-		{
-			G_Printf("Cmd_HandleApiResponse: Invalid client number: %i\n", clientNum);
-			return;
-		}
-	}
-	else
-	{
-		if (match->client->ps.ping < 0 || match->client->ps.ping >= 999)
-		{
-			G_Printf("Cmd_HandleApiResponse: Invalid client number: %i\n", clientNum);
-			return;
-		}
-	}*/
-
-	//Com_Printf(response);
-	Com_Printf(va("%s", response));
-}
-

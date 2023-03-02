@@ -2343,17 +2343,26 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-	/*// apiQuery
+	// apiQuery
 	if (!strcmp(cmd, "api"))
 	{
-		char* command = va("%s", CG_Argv(1));
-		char* arg1 = va("%s", CG_Argv(2));
-		char* arg2 = va("%s", CG_Argv(3));
-		trap_APIQuery(command, arg1, arg2);
+		char* result = (char*)CG_Argv(1);
+		PrintApiResponse(result); // CG_printConsoleString);
 		return;
-	}*/
+	}
 
 	CG_Printf( "Unknown client game command: %s\n", cmd );
+}
+
+void PrintApiResponse(char* result) //void(txt_dump)(char*)
+{
+	result = Q_StrReplace(result, "[NL]", "\n");
+
+	CG_Printf("%s", result);
+
+	//char* result = va("%s", (char*)CG_Argv(1));
+	//txt_dump(result);
+	//txt_dump("\n");
 }
 
 /*

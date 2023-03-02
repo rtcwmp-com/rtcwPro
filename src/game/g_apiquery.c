@@ -30,7 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 
 /*
 ============
-RTCWPro
 Cmd_APIQuery
 Call RtcwPro API
 ============
@@ -55,13 +54,60 @@ void Cmd_APIQuery(gentity_t* ent)
 }
 
 /*
-curl --location --request POST 'https://rtcwproapi.donkanator.com/serverquery' \
---header "Content-Type: application/json" \
---data '{"format": "v1", "server_name": "Virginia RtCWPro na", "map": "mp_beach", "caller": "1177bf7dcacebac3885a56d01524df3c", "current_round": "2", "unix_time": "1674973932100",
-"players": {"1177bf7dcacebac3885a56d01524df3c": {"alias": "donkey", "team": "Axis"},
-			"4a91611dcf6771487449f1e100d2a295": {"alias": "nigel", "team": "Allied"},
-			"41e30e5dd230f4469712df0f4c3e60c3": {"alias": "blethr", "team": "Allied"},
-			"18a519162abddc7638d3c44a50b124dc": {"alias": "fistermiagi", "team": "Allied"}}, "command": "whois"}'
+============
+trap_HandleApiResponse
+Handle API Response
+============
+*/
+void trap_HandleApiResponse(int clientNum, char* response)
+{
+	gentity_t* ent;
+	ent = g_entities + clientNum;
+	if (!ent->inuse || ent->client->pers.connected != CON_CONNECTED)
+	{
+		G_Printf("Cmd_HandleApiResponse: Invalid client number: %i\n", clientNum);
+		return;
+	}
+
+	if (g_alternatePing.integer)
+	{
+		if (ent->client->pers.alternatePing < 0 || ent->client->pers.alternatePing >= 999)
+		{
+			G_Printf("Cmd_HandleApiResponse: Invalid client number: %i\n", clientNum);
+			return;
+		}
+	}
+	else
+	{
+		if (ent->client->ps.ping < 0 || ent->client->ps.ping >= 999)
+		{
+			G_Printf("Cmd_HandleApiResponse: Invalid client number: %i\n", clientNum);
+			return;
+		}
+	}
+
+	if (ReadApiResultJson(response))
+	{
+		// response is a json string so let's just strip off the special characters and add new lines
+		response = Q_StrReplace(response, "[", "");
+		response = Q_StrReplace(response, "\"", "");
+		response = Q_StrReplace(response, "\\", "");
+		response = Q_StrReplace(response, "]", "");
+		response = Q_StrReplace(response, ",", "[NL]"); // [NL] will get replaced with \n on the CG side - syscalls don't seem to like \n sent across
+		response = Q_StrReplace(response, "[NL] ", "[NL]");
+
+		CP(va("api \"%s\n\n\n\"", response));
+	}
+	else
+		CP("api \"Invalid response from api.\n\n\n\"");
+}
+
+
+/*
+============
+G_CreateAPIJson
+Create JSON to send to the API
+============
 */
 char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGuid)
 {
@@ -69,14 +115,18 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 	gclient_t* cl;
 	gentity_t* cl_ent;
 	char alias[MAX_NETNAME];
+	char mapName[MAX_QPATH];
 	char userinfo[MAX_INFO_STRING];
 	char *s, *uinfo = "", *guid = "", *team, *jsonCommand = "";
+
+	trap_Cvar_VariableStringBuffer("mapname", mapName, sizeof(mapName));
 
 	json_t* jdata = json_object(); // json for all queries
 	
 	json_object_set_new(jdata, "format", json_string(va("%s", "v1")));
 	json_object_set_new(jdata, "command", json_string(va("%s", commandText))); // set the command
 	json_object_set_new(jdata, "server_name", json_string(sv_hostname.string));
+	json_object_set_new(jdata, "map", json_string(mapName));
 	json_object_set_new(jdata, "caller", json_string(va("%s", callerGuid)));
 	json_object_set_new(jdata, "matchid", json_string(va("%s", level.jsonStatInfo.match_id))); // same as MATCHID in g_json
 
@@ -143,15 +193,8 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 		char* replaceStrings = Q_StrReplace(json_dumps(jdata, 1), "\\", "");
 		replaceStrings = Q_StrReplace(replaceStrings, "\"{\"", "{\"");
 		replaceStrings = Q_StrReplace(replaceStrings, "\"}\"}\"", "\"}}");
+		replaceStrings = Q_StrReplace(replaceStrings, "\"}\",", "\"},");
 		return replaceStrings;
-
-	}
-	else if (!Q_stricmp(commandText, "matchstats"))
-	{
-
-	}
-	else if (!Q_stricmp(commandText, "mystats"))
-	{
 
 	}
 	else
@@ -160,4 +203,37 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 	}
 
 	return jsonCommand;
+}
+
+/*
+============
+ReadApiResultJson
+Check that the API response is a valid JSON
+============
+*/
+int ReadApiResultJson(char* data)
+{
+	json_t* root;
+	json_error_t error;
+
+	data = Q_StrReplace(data, "\"[", "[");
+	data = Q_StrReplace(data, "]\"", "]");
+	data = Q_StrReplace(data, "\\", "");
+
+	root = json_loads(data, 0, &error);
+	if (!root)
+	{
+		fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+		return 0;
+	}
+	if (!json_is_array(root))
+	{
+		fprintf(stderr, "error: root is not an array\n");
+		json_decref(root);
+		return 0;
+	}
+
+	json_decref(root);
+
+	return 1;
 }

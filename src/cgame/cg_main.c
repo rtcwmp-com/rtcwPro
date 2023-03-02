@@ -93,9 +93,6 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_CheckExecKey(arg0);
 	case CG_RELAY_COMMAND:
 		return CG_RelayCommand((char*)arg0, arg1);
-	case RETURN_API_QUERY_RESPONSE:
-		trap_HandleApiResponse(arg0, (char*)arg1);
-		return 0;
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;

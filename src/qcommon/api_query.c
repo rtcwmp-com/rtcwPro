@@ -55,7 +55,7 @@ size_t APIResultMessage(char* ptr, size_t size, size_t nmemb, void* userdata) {
 	/* Print the response along with the integer */
 	printf("Received response (integer=%d): %.*s\n", clientNumber, (int)(size * nmemb), ptr);
 
-	VM_Call(cgvm, RETURN_API_QUERY_RESPONSE, clientNumber, ptr);
+	VM_Call(gvm, G_RETURN_API_QUERY_RESPONSE, clientNumber, ptr);
 
 	/* Return the number of bytes processed */
 	return size * nmemb;

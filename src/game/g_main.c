@@ -610,6 +610,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_RETRIEVE_MOVESPEEDS_FROM_CLIENT:
 		G_RetrieveMoveSpeedsFromClient( arg0, (char *)arg1 );
 		return 0;
+
+	case G_RETURN_API_QUERY_RESPONSE:
+		trap_HandleApiResponse(arg0, (char*)arg1);
+		return 0;
 	}
 
 	return -1;

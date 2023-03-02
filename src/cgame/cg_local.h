@@ -2939,7 +2939,7 @@ int         trap_Key_GetKey( const char *binding );
 // RF
 void trap_SendMoveSpeedsToGame( int entnum, char *movespeeds );
 
-void trap_HandleApiResponse(int clientNum, char* response);
+void PrintApiResponse(char* result);
 
 typedef enum {
 	SYSTEM_PRINT,
