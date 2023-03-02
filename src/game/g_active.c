@@ -1213,6 +1213,13 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
+	// RTCWPro
+	if (g_broadcastClients.integer)
+	{
+		ent->r.svFlags |= SVF_BROADCAST;
+	}
+	// RTCWPro - end
+
 	if ( client->cameraPortal ) {
 		G_SetOrigin( client->cameraPortal, client->ps.origin );
 		trap_LinkEntity( client->cameraPortal );
@@ -1259,13 +1266,13 @@ void ClientThink_real( gentity_t *ent ) {
 // jpw
 
 	// sanity check the command time to prevent speedup cheating
-	if (ucmd->serverTime > level.time + 200)
+	if (ucmd->serverTime > level.time + 200 && !G_DoAntiwarp(ent)) // RTCWPro
 	{
 		ucmd->serverTime = level.time + 200;
 //		G_Printf("serverTime <<<<<\n" );
 	}
 
-	if (ucmd->serverTime < level.time - 1000)
+	if (ucmd->serverTime < level.time - 1000 && !G_DoAntiwarp(ent)) // RTCWPro
 	{
 		ucmd->serverTime = level.time - 1000;
 //		G_Printf("serverTime >>>>>\n" );

@@ -681,6 +681,9 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
 		AP(va("print \"^z>> ^7%s ^zUnpaused the match.\n\"", ent->client->pers.netname));
+		// lock the teams after unpausing
+		teamInfo[TEAM_RED].team_lock = qtrue;
+		teamInfo[TEAM_BLUE].team_lock = qtrue;
 	}
 
     if (g_gameStatslog.integer) {

@@ -1702,6 +1702,7 @@ extern vmCvar_t	g_ssAddress;
 extern vmCvar_t	g_ssWebhookId;
 extern vmCvar_t	g_ssWebhookToken;
 extern vmCvar_t	g_ssWaitTime;
+extern vmCvar_t	g_broadcastClients;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
