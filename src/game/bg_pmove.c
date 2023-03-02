@@ -1249,7 +1249,7 @@ static void PM_CrashLand( void ) {
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;
-	pm->ps->bobTimer = 0; // RTCWPro
+	pm->ps->quickGrenTime = 0; // RTCWPro hijack for bobtimer
 }
 
 
@@ -1780,8 +1780,8 @@ static void PM_Footsteps( void ) {
 	//pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
 	if (is_dedicated_server) 
 	{
-		pm->ps->bobTimer += pml.msec;
-		float bobScale = (float)pm->ps->bobTimer / (float)maxBobTime;
+		pm->ps->quickGrenTime += pml.msec; // RTCWPro hijack for bobtimer
+		float bobScale = (float)pm->ps->quickGrenTime / (float)maxBobTime;
 
 		// check for footstep / splash sounds
 		old = pm->ps->bobCycle;

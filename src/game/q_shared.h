@@ -1382,7 +1382,7 @@ typedef struct playerState_s {
 	int aimSpreadScale;         // 0 - 255 increases with angular movement
 	int lastFireTime;           // used by server to hold last firing frame briefly when randomly releasing trigger (AI)
 
-	int quickGrenTime;
+	int quickGrenTime;			// RtcwPro hijacking for bobtimer
 
 	int leanStopDebounceTime;
 
@@ -1399,7 +1399,6 @@ typedef struct playerState_s {
 	aistateEnum_t aiState;
 
 	int identifyClient;                 // NERVE - SMF
-	int	bobTimer; // RTCWPro
 
 } playerState_t;
 
