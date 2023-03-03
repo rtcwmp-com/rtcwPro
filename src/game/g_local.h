@@ -672,7 +672,7 @@ typedef struct {
 
 // L0 - AntiWarp
 #define LAG_MAX_COMMANDS 512
-#define LAG_MAX_DELTA 75
+#define LAG_MAX_DELTA 25
 #define LAG_MAX_DROP_THRESHOLD 800
 #define LAG_MIN_DROP_THRESHOLD ( LAG_MAX_DROP_THRESHOLD - 200 )
 #define LAG_DECAY 1.02f
@@ -2207,15 +2207,11 @@ extern extWeaponStats_t BG_WeapStatForWeapon(weapon_t iWeaponID);
 #define HELP_COLUMNS    4
 
 //
-// - Config
-#define ZSF_COMP        0x01    // Have comp settings loaded for current gametype?
-
-//
 // g_antiwarp.c
 //
 qboolean G_DoAntiwarp(gentity_t* ent);
 void AW_AddUserCmd(int clientNum, usercmd_t* cmd);
-static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd);
+static float G_CmdScale(gentity_t* ent, usercmd_t* cmd);
 void DoClientThinks(gentity_t* ent);
 
 // log entry
