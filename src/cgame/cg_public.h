@@ -229,8 +229,7 @@ typedef enum {
 	CG_R_BUILD,
 	// -NERVE - SMF
 
-	CG_REQUEST_SS, // reqSS
-	CG_APIQUERY // ProAPi Query
+	CG_REQUEST_SS // reqSS
 } cgameImport_t;
 
 

@@ -565,8 +565,3 @@ void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime
 	syscall(CG_REQUEST_SS, address, hookid, hooktoken, waittime, datetime);
 }
 
-// apiQuery
-void trap_APIQuery(char* command, char* arg1, char* arg2) {
-	syscall(CG_APIQUERY, command, arg1, arg2);
-}
-
