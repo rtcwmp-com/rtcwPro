@@ -8,7 +8,14 @@
 #endif // _WIN32
 */
 #include <time.h>
-#include <io.h>
+
+#ifdef _WIN32 
+inline int access(const char* pathname, int mode) {
+    return _access(pathname, mode);
+}
+#else
+#include <unistd.h>
+#endif
 
 #define MATCHID level.jsonStatInfo.match_id
 #define ROUNDID level.jsonStatInfo.round_id
@@ -47,7 +54,7 @@ qboolean CanAccessFile(char* str, char* filename)
             filename = va("%s/stats/matchinfo.json", homePath);
         }
 
-        int result = _access(filename, ModeWrite);
+        int result = access(filename, ModeWrite);
 
         if (result == 0)
             return qtrue;
