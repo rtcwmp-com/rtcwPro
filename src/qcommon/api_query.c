@@ -26,26 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include "../game/q_shared.h"
+#include "../game/g_shared.h"
+#include "qcommon.h"
 #include "http.h"
-//#include "../qcommon/threads.h"
-
-/*
-============
-HTTP_APIInquiry_t
-
-Structure for issuing inquiries and invoking callbacks.
-============
-*/
-typedef struct {
-	char* url;
-	char* param;
-	char* jsonText;
-	int clientNumber;
-
-	void (*callback)(char* fmt, ...);
-} HTTP_APIInquiry_t;
 
 
 size_t APIResultMessage(char* ptr, size_t size, size_t nmemb, void* userdata) {

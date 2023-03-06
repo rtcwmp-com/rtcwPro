@@ -104,12 +104,36 @@ typedef struct {
 } SS_info_t;
 
 
+/*
+============
+http_stats_t
+
+Structure for API stats
+============
+*/
 typedef struct {
     char* url;
 	char* filename;
     char* matchid;
 	void (*callback)(char* fmt, ...);
 } http_stats_t;
+
+
+/*
+============
+HTTP_APIInquiry_t
+
+Structure for issuing inquiries and invoking callbacks.
+============
+*/
+typedef struct {
+	char* url;
+	char* param;
+	char* jsonText;
+	int clientNumber;
+
+	void (*callback)(char* fmt, ...);
+} HTTP_APIInquiry_t;
 
 //
 // http_main.c

@@ -131,78 +131,68 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 	json_object_set_new(jdata, "matchid", json_string(va("%s", level.jsonStatInfo.match_id))); // same as MATCHID in g_json
 
 
-	if (!Q_stricmp(commandText, "whois"))
-	{
-		json_t* players = json_object();
-		json_t* playerGuid = json_object();
+	json_t* players = json_object();
+	json_t* playerGuid = json_object();
 
-		time_t unixTime = time(NULL);
-		s = "";
+	time_t unixTime = time(NULL);
+	s = "";
 		
-		for (int i = 0; i < level.numConnectedClients; i++)
+	for (int i = 0; i < level.numConnectedClients; i++)
+	{
+		idnum = level.sortedClients[i];
+		cl = &level.clients[idnum];
+		cl_ent = g_entities + idnum;
+
+		SanitizeString(cl->pers.netname, alias);
+		Q_CleanStr(alias);
+		alias[26] = 0;
+
+		trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
+
+		uinfo = Info_ValueForKey(userinfo, "cg_uinfo");
+
+		char* array[10];
+		int i = 0;
+		array[i] = strtok(uinfo, " ");
+		while (array[i] != NULL)
+			array[++i] = strtok(NULL, " ");
+		guid = array[6];
+
+		tteam = cl->sess.sessionTeam;
+
+		if (tteam == TEAM_SPECTATOR || tteam == TEAM_FREE) team = "Spec";
+		else if (tteam == TEAM_RED) team = "Axis";
+		else team = "Allied";
+
+		json_object_set_new(players, "alias", json_string(va("%s", alias)));
+		json_object_set_new(players, "team", json_string(va("%s", team)));
+		s = json_dumps(players, 0);
+		json_object_set(playerGuid, guid, json_string(s));
+
+		s = json_dumps(playerGuid, 0);
+		json_object_set(jdata, "players", json_string(s));
+		/*
 		{
-			idnum = level.sortedClients[i];
-			cl = &level.clients[idnum];
-			cl_ent = g_entities + idnum;
-
-			SanitizeString(cl->pers.netname, alias);
-			Q_CleanStr(alias);
-			alias[26] = 0;
-
-			trap_GetUserinfo(idnum, userinfo, sizeof(userinfo));
-
-			uinfo = Info_ValueForKey(userinfo, "cg_uinfo");
-
-			char* array[10];
-			int i = 0;
-			array[i] = strtok(uinfo, " ");
-			while (array[i] != NULL)
-				array[++i] = strtok(NULL, " ");
-			guid = array[6];
-
-			tteam = cl->sess.sessionTeam;
-
-			if (tteam == TEAM_SPECTATOR || tteam == TEAM_FREE) team = "Spec";
-			else if (tteam == TEAM_RED) team = "Axis";
-			else team = "Allied";
-
-			json_object_set_new(players, "alias", json_string(va("%s", alias)));
-			json_object_set_new(players, "team", json_string(va("%s", team)));
-			s = json_dumps(players, 0);
-			json_object_set(playerGuid, guid, json_string(s));
-
-			s = json_dumps(playerGuid, 0);
-			json_object_set(jdata, "players", json_string(s));
-			/*
-			{
-			 "format": "v1",
-			 "command": "whois",
-			 "players": {"c7594c502fdaa397f84bf7f00d3708e4": {"alias": "kk1", "team": "Spec}}"
-			}
-
-			json_t* root = json_pack("{s:s, s:s, s:{s:s: {s:s, s:s}}",
-				"format", "v1", "command", commandText, "players", "properties",
-				"geometry", "type", "LineString", "coordinates", jdata);
-
-			s = json_dumps(root, JSON_INDENT(2)); 
-			*/
-
-			free(s);
+			"format": "v1",
+			"command": "whois",
+			"players": {"c7594c502fdaa397f84bf7f00d3708e4": {"alias": "kk1", "team": "Spec}}"
 		}
 
-		char* replaceStrings = Q_StrReplace(json_dumps(jdata, 1), "\\", "");
-		replaceStrings = Q_StrReplace(replaceStrings, "\"{\"", "{\"");
-		replaceStrings = Q_StrReplace(replaceStrings, "\"}\"}\"", "\"}}");
-		replaceStrings = Q_StrReplace(replaceStrings, "\"}\",", "\"},");
-		return replaceStrings;
+		json_t* root = json_pack("{s:s, s:s, s:{s:s: {s:s, s:s}}",
+			"format", "v1", "command", commandText, "players", "properties",
+			"geometry", "type", "LineString", "coordinates", jdata);
 
-	}
-	else
-	{
-		jsonCommand = va("{\"command\":\"%s\"}", commandText);
+		s = json_dumps(root, JSON_INDENT(2)); 
+		*/
+
+		free(s);
 	}
 
-	return jsonCommand;
+	char* replaceStrings = Q_StrReplace(json_dumps(jdata, 1), "\\", "");
+	replaceStrings = Q_StrReplace(replaceStrings, "\"{\"", "{\"");
+	replaceStrings = Q_StrReplace(replaceStrings, "\"}\"}\"", "\"}}");
+	replaceStrings = Q_StrReplace(replaceStrings, "\"}\",", "\"},");
+	return replaceStrings;
 }
 
 /*
