@@ -147,7 +147,7 @@ char* getCurrentPath(char* file);
 // http.c
 //
 void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]);
-#ifndef DEDICATED
+#if 0 //#ifndef DEDICATED
 void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
 #endif

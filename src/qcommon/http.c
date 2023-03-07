@@ -49,7 +49,7 @@ void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]) {
 	return;
 }
 
-#ifndef DEDICATED
+#if 0 //#ifndef DEDICATED
 /*
 ===============
 HTTP_ClientNeedsUpdate
