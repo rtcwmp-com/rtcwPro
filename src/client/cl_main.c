@@ -970,7 +970,7 @@ void CL_infoRequestMotd(void) {
 		return;
 	}
 
-	HTTP_ClientGetMOTD();
+	//HTTP_ClientGetMOTD();
 }
 
 /*
