@@ -402,7 +402,7 @@ static int s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
 qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode, int dw, int dh) {
 	vidmode_t   *vm;
-	int pixelAspect;
+	float pixelAspect;
 
 	if (mode < -2) // rtcwpro - r_mode -2
 	{
