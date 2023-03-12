@@ -400,17 +400,46 @@ vidmode_t r_vidModes[] =
 };
 static int s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
-qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode ) {
+qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode, int dw, int dh) {
 	vidmode_t   *vm;
+	int pixelAspect;
 
-	if ( mode < -1 ) {
+	if (mode < -2) // rtcwpro - r_mode -2
+	{
 		return qfalse;
 	}
-	if ( mode >= s_numVidModes ) {
+
+	if (mode >= s_numVidModes) 
+	{
 		return qfalse;
 	}
 
-	if ( mode == -1 ) {
+#ifdef _WIN32
+	if (mode == -2)
+	{
+		*width = dw;
+		*height = dh;
+		pixelAspect = r_customaspect->value;
+	}
+	else if (mode == -1)
+	{
+		*width = r_customwidth->integer;
+		*height = r_customheight->integer;
+		pixelAspect = r_customaspect->value;
+	}
+	else
+	{
+		vm = &r_vidModes[mode];
+		*width = vm->width;
+		*height = vm->height;
+		pixelAspect = vm->pixelAspect;
+	}
+
+	*windowAspect = (float)*width / (*height * pixelAspect);
+	return qtrue;
+#else
+	if (mode == -1) 
+	{
 		*width = r_customwidth->integer;
 		*height = r_customheight->integer;
 		*windowAspect = r_customaspect->value;
@@ -419,11 +448,13 @@ qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode )
 
 	vm = &r_vidModes[mode];
 
-	*width  = vm->width;
+	*width = vm->width;
 	*height = vm->height;
-	*windowAspect = (float)vm->width / ( vm->height * vm->pixelAspect );
+	*windowAspect = (float)vm->width / (vm->height * vm->pixelAspect);
 
 	return qtrue;
+#endif
+	// rtcwpro - end
 }
 
 /*

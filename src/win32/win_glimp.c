@@ -688,12 +688,15 @@ static rserr_t GLW_SetMode( const char *drivername,
 	//
 	// print out informational messages
 	//
-	ri.Printf( PRINT_ALL, "...setting mode %d:", mode );
-	if ( !R_GetModeInfo( &glConfig.vidWidth, &glConfig.vidHeight, &glConfig.windowAspect, mode ) ) {
-		ri.Printf( PRINT_ALL, " invalid mode\n" );
+	ri.Printf(PRINT_ALL, "...setting mode %d:", mode);
+	//if (!R_GetModeInfo(&glConfig.vidWidth, &glConfig.vidHeight, &glConfig.windowAspect, mode)) 
+	if (!R_GetModeInfo(&glConfig.vidWidth, &glConfig.vidHeight, &glConfig.windowAspect,
+		mode, glw_state.desktopWidth, glw_state.desktopHeight)) // rtcwpro - r_mode -2
+	{
+		ri.Printf(PRINT_ALL, " invalid mode\n");
 		return RSERR_INVALID_MODE;
 	}
-	ri.Printf( PRINT_ALL, " %d %d %s\n", glConfig.vidWidth, glConfig.vidHeight, win_fs[cdsFullscreen] );
+	ri.Printf(PRINT_ALL, " %d %d %s\n", glConfig.vidWidth, glConfig.vidHeight, win_fs[cdsFullscreen]);
 
 	//
 	// check our desktop attributes
