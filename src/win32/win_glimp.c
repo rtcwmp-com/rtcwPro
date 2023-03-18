@@ -520,7 +520,6 @@ static qboolean GLW_InitDriver( const char *drivername, int colorbits ) {
 **
 ** Responsible for creating the Win32 window and initializing the OpenGL driver.
 */
-#define WINDOW_STYLE    ( WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_VISIBLE )
 static qboolean GLW_CreateWindow( const char *drivername, int width, int height, int colorbits, qboolean cdsFullscreen ) {
 	RECT r;
 	cvar_t          *vid_xpos, *vid_ypos;
@@ -566,14 +565,27 @@ static qboolean GLW_CreateWindow( const char *drivername, int width, int height,
 		r.right  = width;
 		r.bottom = height;
 
-		if ( cdsFullscreen || !Q_stricmp( _3DFX_DRIVER_NAME, drivername ) ) {
+		if (cdsFullscreen || !Q_stricmp(_3DFX_DRIVER_NAME, drivername)) 
+		{
 			exstyle = WS_EX_TOPMOST;
 			stylebits = WS_POPUP | WS_VISIBLE | WS_SYSMENU;
-		} else
+		}
+		else
 		{
 			exstyle = 0;
-			stylebits = WINDOW_STYLE | WS_SYSMENU;
-			AdjustWindowRect( &r, stylebits, FALSE );
+			// rtcwpro - borderless window
+			//stylebits = WINDOW_STYLE | WS_SYSMENU;
+			g_wv.noborder = r_noborder->integer;
+			if (g_wv.noborder)
+			{
+				stylebits = WINDOW_STYLE_NOBORDER | WS_SYSMENU;
+			}
+			else
+			{
+				stylebits = WINDOW_STYLE_NORMAL | WS_SYSMENU;
+			}
+			// borderless window - end
+			AdjustWindowRect(&r, stylebits, FALSE);
 		}
 
 		w = r.right - r.left;

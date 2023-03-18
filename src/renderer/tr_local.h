@@ -1202,6 +1202,9 @@ extern cvar_t   *r_wolffog;
 // done
 
 extern cvar_t  *r_highQualityVideo;
+
+extern cvar_t	*r_noborder; // rtcwpro - borderless window
+
 //====================================================================
 
 float R_NoiseGet4f( float x, float y, float z, float t );

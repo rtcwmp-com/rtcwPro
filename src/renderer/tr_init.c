@@ -200,6 +200,8 @@ int max_polys;
 cvar_t  *r_maxpolyverts;
 int max_polyverts;
 
+cvar_t	*r_noborder; // rtcwpro - borderless window
+
 void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
@@ -1164,11 +1166,12 @@ void R_Register( void ) {
 	r_shadows = ri.Cvar_Get( "cg_shadows", "1", 0 );
 	r_shadows = ri.Cvar_Get( "cg_shadows", "1", 0 );
 	r_portalsky = ri.Cvar_Get( "cg_skybox", "1", 0 );
-
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va( "%d", MAX_POLYS ), 0 );
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va( "%d", MAX_POLYVERTS ), 0 );
-
 	r_highQualityVideo = ri.Cvar_Get( "r_highQualityVideo", "1", CVAR_ARCHIVE );
+
+	r_noborder = ri.Cvar_Get("r_noborder", "0", CVAR_ARCHIVE | CVAR_LATCH); // rtcwpro - borderless window
+
 	// make sure all the commands added here are also
 	// removed in R_Shutdown
 	ri.Cmd_AddCommand( "imagelist", R_ImageList_f );

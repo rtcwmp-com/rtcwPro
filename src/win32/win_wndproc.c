@@ -506,6 +506,14 @@ LONG WINAPI MainWndProc(
 	case WM_CHAR:
 		Sys_QueEvent( g_wv.sysMsgTime, SE_CHAR, wParam, 0, 0, NULL );
 		break;
+
+		// rtcwpro - borderless window - move window with mouse
+	case WM_NCHITTEST:
+		if (g_wv.noborder)
+		{
+			return HTCAPTION;
+		}
+		break;
 	}
 
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );
