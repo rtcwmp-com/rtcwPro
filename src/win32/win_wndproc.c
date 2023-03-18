@@ -454,7 +454,7 @@ LONG WINAPI MainWndProc(
 			rr.right = pos->x + pos->cx;
 			rr.top = pos->y;
 			rr.bottom = pos->y + pos->cy;
-			hMonitor = MonitorFromRect(&rr, MONITOR_DEFAULTTONEAREST);
+			hMonitor = MonitorFromRect(&rr, MONITOR_DEFAULTTOPRIMARY);
 
 			if (hMonitor)
 			{
