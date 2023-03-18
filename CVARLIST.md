@@ -24,6 +24,8 @@
 | con_colorGreen | `float` | `0.0-1.0` | `0.5` | Change console color in the green range |
 | con_colorBlue | `float` | `0.0-1.0` | `0.5` | Change console color in the blue range |
 | con_colorAlpha | `float` | `0.0-1.0` | `1` | Change console color opacity |
+| r_mode | `integer` | `-2-21` | `6` | `-2` - Use desktop resolution, `-1` - custom |
+| r_noborder | `integer` | `0-1` | `0` | Borderless window |
 
 #### Mod (cg)
 | Cvar | Argument type | Value range | Default | Description |
