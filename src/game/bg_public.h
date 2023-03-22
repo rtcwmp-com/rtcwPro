@@ -789,6 +789,7 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
+	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this in place so old demo sounds work
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,
