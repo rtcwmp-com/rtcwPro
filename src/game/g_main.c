@@ -1566,7 +1566,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 time_t unixTime = time(NULL);  // come back and make globally available
                 //char cs[MAX_STRING_CHARS];
 
-
+				// reset disconnect stats for each half round
+				memset(level.disconnectStats, 0, sizeof(level.disconnectStats));
 
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
@@ -3209,6 +3210,10 @@ OSPx - check for team stuff..
 ================
 */
 void HandleEmptyTeams(void) {
+
+	// if there is a live Tournament Stopwatch round going do not reset the match if the other team rage quits
+	if (g_gamestate.integer == GS_PLAYING && g_tournament.integer == 1 && g_gametype.integer == GT_WOLF_STOPWATCH)
+		return;
 
 	if (g_gamestate.integer != GS_INTERMISSION) {
 		if (!level.axisPlayers && match_minplayers.integer > 1) {

@@ -71,6 +71,96 @@ qboolean CanAccessFile(char* str, char* filename)
 }
 
 /*
+  Build player stats objects
+  This will allow us to access stats for players who quit before the round is finished
+*/
+void BuildPlayerStats(int clientSlot, qboolean clientDisconnected)
+{
+    gclient_t* cl;
+    int i, j, eff;
+    char n1[MAX_NETNAME];
+    char n2[MAX_NETNAME];
+    unsigned int m, dwWeaponMask = 0;
+
+    // loop for amount of players playing and how many have already quit
+    for (i = 0; i < (level.numPlayingClients + ArrayLength(level.disconnectStats)); i++)
+    {
+        if (level.playerStats[i].guid != NULL)
+            continue; // this means player disconnected and stats are already written
+
+        cl = level.clients + level.sortedClients[i];
+
+        if ((clientSlot >= 0 && i != clientSlot) || cl->pers.connected != CON_CONNECTED )
+        {
+            continue;
+        }
+
+        DecolorString(cl->pers.netname, n1);
+        SanitizeString(n1, n2);
+        Q_CleanStr(n2);
+        n2[15] = 0;
+        
+        Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
+
+        eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+        if (eff < 0)
+        {
+            eff = 0;
+        }
+       
+        level.playerStats[i].guid = cl->sess.guid;
+        //level.playerStats[i].alias = n2;
+        level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
+        level.playerStats[i].start_time = cl->sess.start_time;
+        level.playerStats[i].rounds = cl->sess.rounds;
+        level.playerStats[i].kills = cl->sess.kills;
+        level.playerStats[i].deaths = cl->sess.deaths;
+        level.playerStats[i].gibs = cl->sess.gibs;
+        level.playerStats[i].suicides = cl->sess.suicides;
+        level.playerStats[i].team_kills = cl->sess.team_kills;
+        level.playerStats[i].headshots = cl->sess.headshots;
+        level.playerStats[i].damage_given = cl->sess.damage_given;
+        level.playerStats[i].damage_received = cl->sess.damage_received;
+        level.playerStats[i].team_damage = cl->sess.team_damage;
+        level.playerStats[i].acc_hits = cl->sess.acc_hits;
+        level.playerStats[i].acc_shots = cl->sess.acc_shots;
+        level.playerStats[i].efficiency = eff;
+        level.playerStats[i].revives = cl->sess.revives;
+        level.playerStats[i].ammo_given = cl->sess.ammo_given;
+        level.playerStats[i].med_given = cl->sess.med_given;
+        level.playerStats[i].knifeKills = cl->sess.knifeKills;
+        level.playerStats[i].killPeak = cl->sess.killPeak;
+        level.playerStats[i].score = cl->ps.persistant[PERS_SCORE];
+        level.playerStats[i].dyn_planted = cl->sess.dyn_planted;
+        level.playerStats[i].dyn_defused = cl->sess.dyn_defused;
+        level.playerStats[i].obj_captured = cl->sess.obj_captured;
+        level.playerStats[i].obj_destroyed = cl->sess.obj_destroyed;
+        level.playerStats[i].obj_returned = cl->sess.obj_returned;
+        level.playerStats[i].obj_taken = cl->sess.obj_taken;
+        level.playerStats[i].obj_checkpoint = cl->sess.obj_checkpoint;
+        level.playerStats[i].obj_killcarrier = cl->sess.obj_killcarrier;
+        level.playerStats[i].obj_protectflag = cl->sess.obj_protectflag;
+
+        if (clientDisconnected)
+            AddQuitPlayerStats(cl->sess.guid);
+
+        j = cl->sess.sessionTeam;
+        for (m = WS_KNIFE; m < WS_MAX; m++)
+        {
+            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+            {
+                dwWeaponMask |= (1 << j);
+                level.playerStats[i].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
+                level.playerStats[i].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
+                level.playerStats[i].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
+                level.playerStats[i].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
+                level.playerStats[i].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+            }
+        }
+    }
+}
+
+/*
   Retrieve player stats from json data and use it to set player session data
 */
 
@@ -80,7 +170,7 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
         return 0;
 
     json_t *pcat, *pitem, *pstats;
-    int i=0;
+    int i = 0;
     pstats = json_object();
     pcat = json_object();
     pstats = json_object_get(jsonData, id);
@@ -183,14 +273,6 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
     }
-
-
-    pitem = json_object_get(pcat, "poisoned");
-    if(json_is_integer(pitem)) {
-        client->sess.poisoned=json_integer_value(pitem);
-
-
-    }
     pitem = json_object_get(pcat, "knifekills");
     if(json_is_integer(pitem)) {
         client->sess.knifeKills=json_integer_value(pitem);
@@ -203,7 +285,6 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
     }
-
     /*
     pitem = json_object_get(pcat, "efficiency");
     if(json_is_number(pitem)) {  // might want to simply calculate this outside of here
@@ -219,8 +300,6 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
     }
     */
-
-
     pitem = json_object_get(pcat, "dyn_planted");
     if(json_is_integer(pitem)) {
         client->sess.dyn_planted=json_integer_value(pitem);
@@ -239,8 +318,6 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
     }
-
-
     pitem = json_object_get(pcat, "obj_destroyed");
     if(json_is_integer(pitem)) {
         client->sess.obj_destroyed=json_integer_value(pitem);
@@ -253,28 +330,24 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
 
     }
-
     pitem = json_object_get(pcat, "obj_taken");
     if(json_is_integer(pitem)) {
         client->sess.obj_taken=json_integer_value(pitem);
 
 
     }
-
     pitem = json_object_get(pcat, "obj_checkpoint");
     if (json_is_integer(pitem)) {
         client->sess.obj_checkpoint = json_integer_value(pitem);
 
 
     }
-
     pitem = json_object_get(pcat, "obj_killcarrier");
     if (json_is_integer(pitem)) {
         client->sess.obj_killcarrier = json_integer_value(pitem);
 
 
     }
-
     pitem = json_object_get(pcat, "obj_protectflag");
     if (json_is_integer(pitem)) {
         client->sess.obj_protectflag = json_integer_value(pitem);
@@ -549,162 +622,162 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     if (!CanAccessFile("Stats: writing stats by players", level.jsonStatInfo.gameStatslogFileName))
         return;
 
-    int i, j, eff;
+    int i, j;
 	float tot_acc = 0.00f;
-	char* s;
+	char* statString = "";
 	gclient_t *cl;
-	char n1[MAX_NETNAME];
-	char n2[MAX_NETNAME];
 	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
 	time_t unixTime = time(NULL);
-    json_t* jdata;
+    json_t* jdata = json_object();
     json_t* jstats;
     json_t* jplayer;
     json_t* jcat;
     json_t* weapOb;
-    json_t *root = json_object();
     json_t* weapArray;
 
-    jstats =  json_array();
+    // build player stats for players still on the server
+    if (!clientDisconnected)
+    {
+        for (j = 0; j < level.numPlayingClients; j++)
+        {
+            cl = level.clients + level.sortedClients[j];
+            BuildPlayerStats(cl->ps.clientNum, qfalse);
+        }
 
-    for ( j = 0; j < level.numPlayingClients; j++ ) {
-        jplayer = json_object();
-		cl = level.clients + level.sortedClients[j];
+        jstats = json_array();
 
-        if (clientDisconnected && clientId != j) continue;
+        for (j = 0; j < ArrayLength(level.playerStats); j++)
+        {
+            if (level.playerStats[j].guid == NULL) // if array index is empty continue
+                continue;
 
-		/*if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}*/
+            jplayer = json_object();
+            jdata = json_object();
 
-		DecolorString(cl->pers.netname, n1);
-		SanitizeString(n1, n2);
-		Q_CleanStr(n2);
-		n2[15] = 0;
+            sprintf(pGUID, "%s", level.playerStats[j].guid);
 
-		eff = ( cl->sess.deaths + cl->sess.kills == 0 ) ? 0 : 100 * cl->sess.kills / ( cl->sess.deaths + cl->sess.kills );
-		if ( eff < 0 ) {
-			eff = 0;
-		}
-		sprintf(pGUID,"%s",cl->sess.guid);
-        i = cl->sess.sessionTeam;
-        jdata = json_object();
-        // json_object_set_new(jdata, "GUID", json_string(cl->sess.guid));
-        json_object_set_new(jdata, "alias", json_string(n2));
-        json_object_set_new(jdata, "team", json_string((i == TEAM_RED) ? "Axis" : "Allied"  ));
-        json_object_set_new(jdata, "start_time", json_integer(cl->sess.start_time));   // need to fix
-        // json_object_set_new(jdata, "end_time", json_integer(cl->sess.end_time));   // need to fix
-        json_object_set_new(jdata, "num_rounds", json_integer(cl->sess.rounds));
+            json_object_set_new(jdata, "alias", json_string(level.playerStats[j].alias));
+            json_object_set_new(jdata, "team", json_string((level.playerStats[j].sessionTeam == TEAM_RED) ? "Axis" : "Allied"));
+            json_object_set_new(jdata, "start_time", json_integer(level.playerStats[j].start_time));
 
-        jcat = json_object();
+            json_object_set_new(jdata, "num_rounds", json_integer(level.playerStats[j].rounds));
 
-        json_object_set_new(jcat, "kills", json_integer(cl->sess.kills));
-        json_object_set_new(jcat, "deaths", json_integer(cl->sess.deaths));
-        json_object_set_new(jcat, "gibs", json_integer(cl->sess.gibs));
-        json_object_set_new(jcat, "suicides", json_integer(cl->sess.suicides));
-        json_object_set_new(jcat, "teamkills", json_integer(cl->sess.team_kills));
-        json_object_set_new(jcat, "headshots", json_integer(cl->sess.headshots));
-        json_object_set_new(jcat, "damagegiven", json_integer(cl->sess.damage_given));
-        json_object_set_new(jcat, "damagereceived", json_integer(cl->sess.damage_received));
-        json_object_set_new(jcat, "damageteam", json_integer(cl->sess.team_damage));
-        json_object_set_new(jcat, "hits", json_integer(cl->sess.acc_hits));
-        json_object_set_new(jcat, "shots", json_integer(cl->sess.acc_shots));
-        json_object_set_new(jcat, "accuracy", json_real(((cl->sess.acc_shots == 0) ? 0.00 : ((float)cl->sess.acc_hits / (float)cl->sess.acc_shots) * 100.00f)));
-        json_object_set_new(jcat, "revives", json_integer(cl->sess.revives));
-        json_object_set_new(jcat, "ammogiven", json_integer(cl->sess.ammo_given));
-        json_object_set_new(jcat, "healthgiven", json_integer(cl->sess.med_given));
-        json_object_set_new(jcat, "poisoned", json_integer(cl->sess.poisoned));
-        json_object_set_new(jcat, "knifekills", json_integer(cl->sess.knifeKills));
-        json_object_set_new(jcat, "killpeak", json_integer(cl->sess.killPeak));
-        json_object_set_new(jcat, "efficiency", json_real(eff));
-        // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
-        json_object_set_new(jcat, "score", json_integer(cl->ps.persistant[PERS_SCORE]));
-        json_object_set_new(jcat, "dyn_planted", json_integer(cl->sess.dyn_planted));
-        json_object_set_new(jcat, "dyn_defused", json_integer(cl->sess.dyn_defused));
-        json_object_set_new(jcat, "obj_captured", json_integer(cl->sess.obj_captured));
-        json_object_set_new(jcat, "obj_destroyed", json_integer(cl->sess.obj_destroyed));
-        json_object_set_new(jcat, "obj_returned", json_integer(cl->sess.obj_returned));
-        json_object_set_new(jcat, "obj_taken", json_integer(cl->sess.obj_taken));
-        json_object_set_new(jcat, "obj_checkpoint", json_integer(cl->sess.obj_checkpoint));
-        json_object_set_new(jcat, "obj_killcarrier", json_integer(cl->sess.obj_killcarrier));
-        json_object_set_new(jcat, "obj_protectflag", json_integer(cl->sess.obj_protectflag));
+            jcat = json_object();
+
+            json_object_set_new(jcat, "kills", json_integer(level.playerStats[j].kills));
+            json_object_set_new(jcat, "deaths", json_integer(level.playerStats[j].deaths));
+            json_object_set_new(jcat, "gibs", json_integer(level.playerStats[j].gibs));
+            json_object_set_new(jcat, "suicides", json_integer(level.playerStats[j].suicides));
+            json_object_set_new(jcat, "teamkills", json_integer(level.playerStats[j].team_kills));
+            json_object_set_new(jcat, "headshots", json_integer(level.playerStats[j].headshots));
+            json_object_set_new(jcat, "damagegiven", json_integer(level.playerStats[j].damage_given));
+            json_object_set_new(jcat, "damagereceived", json_integer(level.playerStats[j].damage_received));
+            json_object_set_new(jcat, "damageteam", json_integer(level.playerStats[j].team_damage));
+            json_object_set_new(jcat, "hits", json_integer(level.playerStats[j].acc_hits));
+            json_object_set_new(jcat, "shots", json_integer(level.playerStats[j].acc_shots));
+            json_object_set_new(jcat, "accuracy", json_real(((level.playerStats[j].acc_shots == 0) ? 0.00 : ((float)level.playerStats[j].acc_hits / (float)level.playerStats[j].acc_shots) * 100.00f)));
+            json_object_set_new(jcat, "revives", json_integer(level.playerStats[j].revives));
+            json_object_set_new(jcat, "ammogiven", json_integer(level.playerStats[j].ammo_given));
+            json_object_set_new(jcat, "healthgiven", json_integer(level.playerStats[j].med_given));
+            json_object_set_new(jcat, "knifekills", json_integer(level.playerStats[j].knifeKills));
+            json_object_set_new(jcat, "killpeak", json_integer(level.playerStats[j].killPeak));
+            json_object_set_new(jcat, "efficiency", json_real(level.playerStats[j].efficiency));
+            // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
+            json_object_set_new(jcat, "score", json_integer(level.playerStats[j].score));
+            json_object_set_new(jcat, "dyn_planted", json_integer(level.playerStats[j].dyn_planted));
+            json_object_set_new(jcat, "dyn_defused", json_integer(level.playerStats[j].dyn_defused));
+            json_object_set_new(jcat, "obj_captured", json_integer(level.playerStats[j].obj_captured));
+            json_object_set_new(jcat, "obj_destroyed", json_integer(level.playerStats[j].obj_destroyed));
+            json_object_set_new(jcat, "obj_returned", json_integer(level.playerStats[j].obj_returned));
+            json_object_set_new(jcat, "obj_taken", json_integer(level.playerStats[j].obj_taken));
+            json_object_set_new(jcat, "obj_checkpoint", json_integer(level.playerStats[j].obj_checkpoint));
+            json_object_set_new(jcat, "obj_killcarrier", json_integer(level.playerStats[j].obj_killcarrier));
+            json_object_set_new(jcat, "obj_protectflag", json_integer(level.playerStats[j].obj_protectflag));
 
 
-        weapArray = json_array();
-        i = cl->sess.sessionTeam;
-        for (m = WS_KNIFE; m < WS_MAX; m++) {
-            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
-                cl->sess.aWeaponStats[m].deaths) {
+            weapArray = json_array();
+            i = level.playerStats[j].sessionTeam;
+
+            for (m = WS_KNIFE; m < WS_MAX; m++) {
+                if (level.playerStats[j].aWeaponStats[m].atts || level.playerStats[j].aWeaponStats[m].hits ||
+                    level.playerStats[j].aWeaponStats[m].deaths) {
                     dwWeaponMask |= (1 << i);
                     weapOb = json_object();
-                    json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX ) ? aWeaponInfo[m].pszName : "UNKNOWN" ));
-                    json_object_set_new(weapOb, "kills", json_integer(cl->sess.aWeaponStats[m].kills));
-                    json_object_set_new(weapOb, "deaths", json_integer(cl->sess.aWeaponStats[m].deaths));
-                    json_object_set_new(weapOb, "headshots", json_integer(cl->sess.aWeaponStats[m].headshots));
-                    json_object_set_new(weapOb, "hits", json_integer(cl->sess.aWeaponStats[m].hits));
-                    json_object_set_new(weapOb, "shots", json_integer(cl->sess.aWeaponStats[m].atts));
+                    json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX) ? aWeaponInfo[m].pszName : "UNKNOWN"));
+                    json_object_set_new(weapOb, "kills", json_integer(level.playerStats[j].aWeaponStats[m].kills));
+                    json_object_set_new(weapOb, "deaths", json_integer(level.playerStats[j].aWeaponStats[m].deaths));
+                    json_object_set_new(weapOb, "headshots", json_integer(level.playerStats[j].aWeaponStats[m].headshots));
+                    json_object_set_new(weapOb, "hits", json_integer(level.playerStats[j].aWeaponStats[m].hits));
+                    json_object_set_new(weapOb, "shots", json_integer(level.playerStats[j].aWeaponStats[m].atts));
                     json_array_append(weapArray, weapOb);
                     json_decref(weapOb);
+                }
             }
+
+            if (g_gameStatslog.integer & JSON_CATEGORIES) {
+                json_object_update(jdata, jcat);
+            }
+            else {
+                json_object_set(jdata, "categories", jcat);
+            }
+
+            if (wstats) {
+                json_object_set(jdata, "wstats", weapArray);
+                json_object_set(jplayer, pGUID, jdata);
+                json_decref(weapArray);
+            }
+            else {
+                json_object_set(jplayer, pGUID, jdata);
+            }
+
+
+            json_decref(jcat);
+            json_array_append(jstats, jplayer);
+            json_decref(jplayer);
         }
 
-        if (g_gameStatslog.integer & JSON_CATEGORIES) {
-            json_object_update(jdata, jcat);
-        }
-        else {
-            json_object_set(jdata, "categories", jcat);
-        }
-
-        if (wstats) {
-            json_object_set(jdata, "wstats", weapArray);
-            json_object_set(jplayer, pGUID, jdata);
-            json_decref(weapArray);
-        }
-        else {
-            json_object_set(jplayer, pGUID, jdata);
-        }
-
-
-        json_decref(jcat);
         json_decref(jdata);
-        json_array_append(jstats, jplayer);
-        json_decref(jplayer);
 
+        statString = json_dumps(jstats, 1);
     }
-
-//        json_array_append_new(jstats, jplayer);
-
-
-
-    s = json_dumps( jstats, 1 ); // for a pretty print form
-    //s = json_dumps( jstats, 0 );
 
     if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer && !clientDisconnected)
     {
         trap_FS_Write("\"stats\": ", strlen("\"stats\": "), level.jsonStatInfo.gameStatslogFile);
-        trap_FS_Write(s, strlen(s), level.jsonStatInfo.gameStatslogFile);
+        trap_FS_Write(statString, strlen(statString), level.jsonStatInfo.gameStatslogFile);
         trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.gameStatslogFile);  // for writing weapon stats after
-        //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile ); // for keeping weapon stats in playerstats
+        //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile );
+        free(statString);
     }
     else if (clientDisconnected)
     {
-        char* disconnectFile = "stats/disconnect.json";
-
-        trap_FS_FOpenFile(disconnectFile, &level.jsonStatInfo.disconnectFile, FS_WRITE);
-        if (level.jsonStatInfo.disconnectFile)
-        {
-            trap_FS_Write(s, strlen(s), level.jsonStatInfo.disconnectFile);
-            trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.disconnectFile);
-        }   
+        BuildPlayerStats(clientId, clientDisconnected);
     }
 
-    free(s);
-
-    json_decref( root );
     if (!wstats) {// write weapon stats separately
         G_jWeaponStats();
+    }
+}
+
+void AddQuitPlayerStats(char *guid)
+{
+    int i = 0;
+
+    // find the first available index in the array
+    while (i < 32 && level.disconnectStats[i][0] != '\0')
+    {        
+        i++;
+    }
+
+    if (i < 32)
+    {
+        Q_strncpyz(level.disconnectStats[i], guid, sizeof(level.disconnectStats[i]));
+    }
+    else
+    {
+        G_Printf(va("Disconnect stats array is full. Cannot add player guid: %s", guid));
     }
 }
 
@@ -791,7 +864,6 @@ void G_jstatsByTeam(qboolean wstats) {
             json_object_set_new(jcat, "revives", json_integer(cl->sess.revives));
             json_object_set_new(jcat, "ammogiven", json_integer(cl->sess.ammo_given));
             json_object_set_new(jcat, "healthgiven", json_integer(cl->sess.med_given));
-            json_object_set_new(jcat, "poisoned", json_integer(cl->sess.poisoned));
             json_object_set_new(jcat, "knifekills", json_integer(cl->sess.knifeKills));
             json_object_set_new(jcat, "killpeak", json_integer(cl->sess.killPeak));
             json_object_set_new(jcat, "efficiency", json_real(eff));
@@ -899,8 +971,7 @@ void G_jWeaponStats(void) {
 
     int i, j, rc;
 	char* s;
-	gclient_t *cl;
-	char pGUID[64];
+    char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
 	time_t unixTime = time(NULL);
@@ -913,33 +984,29 @@ void G_jWeaponStats(void) {
 
     jwstat =  json_array();
 
-	/*for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		if ( !TeamCount( -1, i ) ) {
-			continue;
-		}
-		*/
+    for (j = 0; j < ArrayLength(level.playerStats); j++)
+    {
+        if (level.playerStats[j].guid == NULL) // if array index is empty continue
+            continue;
 
-    for ( j = 0; j < level.numPlayingClients; j++ ) {
         jplayer = json_object();
-		cl = level.clients + level.sortedClients[j];
 
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		sprintf(pGUID,"%s",cl->sess.guid);
+		sprintf(pGUID,"%s", level.playerStats[j].guid);
         weapArray = json_array();
-        i = cl->sess.sessionTeam;
+
+        i = level.playerStats[j].sessionTeam;
+
         for (m = WS_KNIFE; m < WS_MAX; m++) {
-            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits ||
-                cl->sess.aWeaponStats[m].deaths) {
+            if (level.playerStats[j].aWeaponStats[m].atts || level.playerStats[j].aWeaponStats[m].hits ||
+                level.playerStats[j].aWeaponStats[m].deaths) {
                     dwWeaponMask |= (1 << i);
                     weapOb = json_object();
                     json_object_set_new(weapOb, "weapon", json_string((m >= WS_KNIFE && m < WS_MAX ) ? aWeaponInfo[m].pszName : "UNKNOWN" ));
-                    json_object_set_new(weapOb, "kills", json_integer(cl->sess.aWeaponStats[m].kills));
-                    json_object_set_new(weapOb, "deaths", json_integer(cl->sess.aWeaponStats[m].deaths));
-                    json_object_set_new(weapOb, "headshots", json_integer(cl->sess.aWeaponStats[m].headshots));
-                    json_object_set_new(weapOb, "hits", json_integer(cl->sess.aWeaponStats[m].hits));
-                    json_object_set_new(weapOb, "shots", json_integer(cl->sess.aWeaponStats[m].atts));
+                    json_object_set_new(weapOb, "kills", json_integer(level.playerStats[j].aWeaponStats[m].kills));
+                    json_object_set_new(weapOb, "deaths", json_integer(level.playerStats[j].aWeaponStats[m].deaths));
+                    json_object_set_new(weapOb, "headshots", json_integer(level.playerStats[j].aWeaponStats[m].headshots));
+                    json_object_set_new(weapOb, "hits", json_integer(level.playerStats[j].aWeaponStats[m].hits));
+                    json_object_set_new(weapOb, "shots", json_integer(level.playerStats[j].aWeaponStats[m].atts));
                     json_array_append(weapArray, weapOb);
                     json_decref(weapOb);
             }

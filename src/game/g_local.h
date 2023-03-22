@@ -88,6 +88,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #define MAX_NUM_MAPS 500
 #define MAX_MAP_NAMELEN 50
+
 // movers are things like doors, plats, buttons, etc
 typedef enum {
 	MOVER_POS1,
@@ -861,6 +862,42 @@ typedef struct jsonStatInfo_s {
    fileHandle_t disconnectFile;
 } jsonStatInfo_t;
 
+// struct to hold player stats so we can print rage quit stats also
+typedef struct {
+	team_t sessionTeam;
+	char *guid;
+	char alias[MAX_NETNAME];
+	int start_time;
+	int damage_given;
+	int damage_received;
+	int deaths;
+	int kills;
+	int rounds;
+	int suicides;
+	int team_damage;
+	int team_kills;
+	int headshots;
+	int med_given;
+	int ammo_given;
+	int gibs;
+	int revives;
+	int acc_shots;
+	int acc_hits;
+	int efficiency;
+	int score;
+	int killPeak;
+	int knifeKills;
+	int obj_captured;
+	int obj_destroyed;
+	int obj_returned;
+	int obj_taken;
+	int obj_checkpoint;
+	int obj_killcarrier;
+	int obj_protectflag;
+	int dyn_planted;
+	int dyn_defused;
+	weapon_stat_t aWeaponStats[WS_MAX + 1];   // Weapon stats.  +1 to avoid invalid weapon check
+} jsonPlayerStats_t;
 
 typedef struct {
 	struct gclient_s    *clients;       // [maxclients]
@@ -1049,6 +1086,10 @@ typedef struct {
     char* round_id; //
 
 	int lastSSTime;
+
+	jsonPlayerStats_t playerStats[32];
+	char disconnectStats[32][GUID_LEN];
+
 } level_locals_t;
 
 // OSPx - Team extras
@@ -2169,6 +2210,7 @@ int G_teamAlive(int team ) ;  // temp addition for calculating number of alive..
 void G_writeChatEvent(gentity_t* agent, char* chatText);
 qboolean CanAccessFile(char* str, char* filename);
 char* LookupEventType(int eventyType);
+void AddQuitPlayerStats(char* guid);
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 

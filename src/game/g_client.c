@@ -2742,13 +2742,20 @@ void ClientDisconnect( int clientNum ) {
 				ent->message = NULL;
 			}
 
-			// Record the players stats into the JSON if they are /quit with timelimit under 30 seconds
+			// Record the players stats into the JSON if they /quit with timelimit under 15 seconds
 			//G_LogPrintf("WeaponStats: %s\n", G_createStats(ent));
-			if (1)
+			if (g_gamestate.integer == GS_PLAYING)
 			{
 				if (g_gameStatslog.integer)
 				{
-					G_jstatsByPlayers(qtrue, qtrue, clientNum);
+					if (g_timelimit.value && level.paused == PAUSE_NONE)
+					{
+						// if time left in the round is less than 15 secs
+						int roundTimeLeft = (((g_timelimit.value * 60 * 1000) - ((level.time - level.startTime))) / 1000);
+
+						if (roundTimeLeft <= 15)
+							G_jstatsByPlayers(qtrue, qtrue, clientNum);
+					}
 				}
 			}
 		}
