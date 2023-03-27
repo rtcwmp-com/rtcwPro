@@ -334,6 +334,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		return;
 	}
 
+#ifdef UNLAGGED
+	//unlagged - backward reconciliation #2
+		// make sure the body shows up in the client's current position
+	G_UnTimeShiftClient(self);
+	//unlagged - backward reconciliation #2
+#endif // UNLAGGED
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );

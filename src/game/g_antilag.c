@@ -11,6 +11,8 @@ Created: 24. Mar / 2014
 
 #include "g_local.h"
 
+#ifndef UNLAGGED
+
 /*
 RTCWPro - antilag refactor
 Credits: Nobo
@@ -303,6 +305,9 @@ void G_UnTimeShiftAllClients(gentity_t* skip) {
 		}
 	}
 }
+
+#endif // !UNLAGGED
+
 
 // RTCWPro - unused for now
 #if 0

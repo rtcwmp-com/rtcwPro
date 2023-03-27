@@ -616,9 +616,11 @@ void respawn( gentity_t *ent ) {
 		ClientSpawn(ent, qfalse);
 	}
 
+#ifndef UNLAGGED
 	// L0 - antilag
 	G_ResetTrail(ent);
 	// L0 - end
+#endif // UNLAGGED
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
 	// add a teleportation effect
@@ -2070,9 +2072,12 @@ void ClientBegin( int clientNum ) {
 	// locate ent at a spawn point
 	ClientSpawn( ent, qfalse );
 
+#ifndef UNLAGGED
 	// L0 - antilag
 	G_ResetTrail(ent);
 	// L0 - end
+#endif // UNLAGGED
+
 	// Xian -- Changed below for team independant maxlives
 
 	if ( g_maxlives.integer > 0 ) {
@@ -2399,6 +2404,15 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	flags ^= EF_TELEPORT_BIT;
 	flags |= (client->ps.eFlags & EF_VOTED); // L0 - Fixes vote abuse by suicide and vote override..
 
+#ifdef UNLAGGED
+	//unlagged - backward reconciliation #3
+	// we don't want players being backward-reconciled to the place they died
+	G_ResetHistory(ent);
+	// and this is as good a time as any to clear the saved state
+	ent->client->saved.leveltime = 0;
+	//unlagged - backward reconciliation #3
+#endif // UNLAGGED
+
 	// clear everything but the persistant data
 
 	saved = client->pers;
@@ -2641,7 +2655,12 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	ClientEndFrame( ent );
 
 	// clear entity state values
+#ifndef UNLAGGED
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+#else
+	BG_PlayerStateToEntityState(&client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+#endif // UNLAGGED
+
 	//BG_PlayerStateToEntityStatePro(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 
 	// show_bug.cgi?id=569

@@ -312,8 +312,14 @@ qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
 
 	ClientSpawn(traceEnt, qtrue);
 
-	// L0 - antilag
-	G_ResetTrail(traceEnt);
+	// Antilag
+	#ifdef UNLAGGED
+		G_ResetHistory(traceEnt);
+	#else
+		G_ResetTrail(traceEnt);
+	#endif
+	// end
+
 
 	memcpy(traceEnt->client->ps.ammo, ammo, sizeof(int) * MAX_WEAPONS);
 	memcpy(traceEnt->client->ps.ammoclip, ammoclip, sizeof(int) * MAX_WEAPONS);
@@ -422,8 +428,12 @@ void Weapon_Syringe( gentity_t *ent ) {
 
 				ClientSpawn( traceEnt, qtrue );
 
-				// L0 - Antilag
-				G_ResetTrail(traceEnt);
+				// Antilag
+				#ifdef UNLAGGED
+					G_ResetHistory(traceEnt);
+				#else
+					G_ResetTrail(traceEnt);
+				#endif
 				// end
 
 				memcpy( traceEnt->client->ps.ammo,ammo,sizeof( int ) * MAX_WEAPONS );
@@ -1505,142 +1515,6 @@ float G_GetWeaponSpread( int weapon ) {
 #define SNOOPER_SPREAD  G_GetWeaponSpread( WP_SNOOPERSCOPE )
 #define SNOOPER_DAMAGE  G_GetWeaponDamage( WP_SNOOPERSCOPE ) // JPW
 
-/*
-==============
-SP5_Fire
-
-  dead code
-==============
-*/
-void SP5_Fire( gentity_t *ent, float aimSpreadScale ) {
-	// TTimo unused
-//	static int	seed = 0x92;
-
-	float spread = 400;         // these used to be passed in
-	int damage;
-
-	trace_t tr;
-	vec3_t end;
-	float r;
-	float u;
-	gentity_t       *tent;
-	gentity_t       *traceEnt;
-
-/*
-	// first do a very short, high-accuracy trace
-	VectorMA (muzzleTrace, 128, forward, end);
-	trap_Trace (&tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT);
-	// then if that fails do a longer wild shot
-	if ( tr.fraction == 1 )	// didn't hit anything
-	{
-		{
-			vec3_t	vec;
-			float	len;
-
-			VectorMA (muzzleTrace, 4096, forward, end);
-			trap_Trace (&tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT);
-			VectorSubtract (muzzleTrace, tr.endpos, vec);
-			len = VectorLength (vec);
-
-			if (len > 400)
-				spread = 400;
-			else
-				spread = len;
-
-			VectorClear (end);
-		}
-*/
-	spread *= aimSpreadScale;
-
-	r = crandom() * spread;
-	u = crandom() * spread;
-	VectorMA( muzzleTrace, 4096, forward, end );
-	VectorMA( end, r, right, end );
-	VectorMA( end, u, up, end );
-
-	trap_Trace( &tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT );
-	if ( tr.surfaceFlags & SURF_NOIMPACT ) {
-		return;
-	}
-//	}
-
-	traceEnt = &g_entities[ tr.entityNum ];
-
-	// snap the endpos to integers, but nudged towards the line
-	SnapVectorTowards( tr.endpos, muzzleTrace );
-
-	// send bullet impact
-	if ( traceEnt->takedamage && traceEnt->client && !( traceEnt->flags & ( FL_DEFENSE_GUARD | FL_WARZOMBIECHARGE ) ) ) {
-		tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
-		tent->s.eventParm = traceEnt->s.number;
-		if ( LogAccuracyHit( traceEnt, ent ) ) {
-			ent->client->ps.persistant[PERS_ACCURACY_HITS]++;
-		}
-	} else if ( ( traceEnt->flags & FL_WARZOMBIECHARGE ) && ( rand() % 3 ) == 0 ) {   // hit every other bullet when charging
-		tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
-		tent->s.eventParm = traceEnt->s.number;
-		if ( LogAccuracyHit( traceEnt, ent ) ) {
-			ent->client->ps.persistant[PERS_ACCURACY_HITS]++;
-		}
-	} else {
-		// Ridah, bullet impact should reflect off surface
-		vec3_t reflect;
-		float dot;
-
-		if ( traceEnt->flags & ( FL_DEFENSE_GUARD | FL_WARZOMBIECHARGE ) ) {
-			// reflect off sheild
-			VectorSubtract( tr.endpos, traceEnt->r.currentOrigin, reflect );
-			VectorNormalize( reflect );
-			VectorMA( traceEnt->r.currentOrigin, 15, reflect, reflect );
-			tent = G_TempEntity( reflect, EV_BULLET_HIT_WALL );
-		} else {
-			tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_WALL );
-		}
-
-		dot = DotProduct( forward, tr.plane.normal );
-		VectorMA( forward, -2 * dot, tr.plane.normal, reflect );
-		VectorNormalize( reflect );
-
-		tent->s.eventParm = DirToByte( reflect );
-		// done.
-	}
-	tent->s.otherEntityNum = ent->s.number;
-
-	if ( traceEnt->takedamage ) {
-		qboolean reflectBool = qfalse;
-		vec3_t trDir;
-
-		if ( traceEnt->flags & FL_DEFENSE_GUARD ) {
-			// if we are facing the direction the bullet came from, then reflect it
-			AngleVectors( traceEnt->s.apos.trBase, trDir, NULL, NULL );
-			if ( DotProduct( forward, trDir ) < 0.6 ) {
-				reflectBool = qtrue;
-			}
-		}
-
-		//----(SA)	moved these up so damage sent in Bullet_Fire() will be valid
-		damage = G_GetWeaponDamage( WP_SILENCER ) + ( random() * 15 );  // JPW giving 40-55
-		damage *= s_quadFactor;
-
-		if ( reflectBool ) {
-			// reflect this bullet
-			G_AddEvent( traceEnt, EV_GENERAL_SOUND, level.bulletRicochetSound );
-			CalcMuzzlePoints( traceEnt, traceEnt->s.weapon );
-			Bullet_Fire( traceEnt, 1000, damage );
-		} else {
-			// Ridah, don't hurt team-mates
-			// DHM - Nerve :: only in single player
-			if ( ent->client && traceEnt->client && g_gametype.integer == GT_SINGLE_PLAYER && ( traceEnt->r.svFlags & SVF_CASTAI ) && ( ent->r.svFlags & SVF_CASTAI ) && AICast_SameTeam( AICast_GetCastState( ent->s.number ), traceEnt->s.number ) ) {
-				// AI's don't hurt members of their own team
-				return;
-			}
-			// done.
-			G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, 0, MOD_SILENCER );
-		}
-	}
-}
-
-
 void RubbleFlagCheck( gentity_t *ent, trace_t tr ) {
 	qboolean is_valid = qfalse;
 	int type = 0;
@@ -2016,7 +1890,11 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		// RTCWPro added cg_antilag client check (RtCW pub port)
 		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
-			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
+			#ifdef UNLAGGED
+				G_DoTimeShiftFor(ent); // Unlagged
+			#else
+				G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
+			#endif
 		}
 
 		// update head entitiy positions and link them into the world (for headshots).
@@ -2032,7 +1910,11 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		// RTCWPro added cg_antilag client check (RtCW pub port)
 		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
-			G_UnTimeShiftAllClients(ent);
+			#ifdef UNLAGGED
+				G_UndoTimeShiftFor(ent); // Unlagged
+			#else
+				G_UnTimeShiftAllClients(ent);
+			#endif
 		}
 
 		// unlink all head entities so they don't collide with players.
@@ -3022,14 +2904,3 @@ void FireWeapon( gentity_t *ent ) {
 	if ( g_gamestate.integer == GS_PLAYING )
 		ent->client->sess.aWeaponStats[BG_WeapStatForWeapon( ent->s.weapon )].atts += shots;
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -295,6 +295,11 @@ vmCvar_t g_ssWebhookToken; // token contained in the discord webhook link (chars
 vmCvar_t g_ssWaitTime; // wait time between reqss cmds to prevent spam
 vmCvar_t g_broadcastClients; // fix clients appearing from thin air on some maps
 
+ // unlagged
+vmCvar_t g_floatPlayerPosition;
+vmCvar_t g_delagHitscan;
+vmCvar_t g_maxExtrapolatedFrames;
+
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -536,7 +541,12 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_ssWebhookToken, "g_ssWebhookToken", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_ssWaitTime, "g_ssWaitTime", "30", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_broadcastClients, "g_broadcastClients", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
-	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
+	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse }, // ET Port Players server info
+
+	// unlagged
+	{ &g_floatPlayerPosition, "g_floatPlayerPosition", "1", CVAR_ARCHIVE, 0, qfalse},
+	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -3581,6 +3591,34 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, move the AI
 	//AICast_StartServerFrame ( level.time );
 
+#ifdef UNLAGGED
+	//unlagged - backward reconciliation #2
+	// NOW run the missiles, with all players backward-reconciled
+	// to the positions they were in exactly 50ms ago, at the end
+	// of the last server frame
+	G_TimeShiftAllClients(level.previousTime, NULL);
+
+	ent = &g_entities[0];
+	for (i = 0; i < level.num_entities; i++, ent++) {
+		if (!ent->inuse) {
+			continue;
+		}
+
+		// temporary entities don't think
+		if (ent->freeAfterEvent) {
+			continue;
+		}
+
+		if (ent->s.eType == ET_MISSILE) {
+			G_RunMissile(ent);
+		}
+	}
+
+	G_UnTimeShiftAllClients(NULL);
+	//unlagged - backward reconciliation #2
+#endif // UNLAGGED
+
+
 //start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];
@@ -3646,4 +3684,14 @@ void G_RunFrame( int levelTime ) {
 		// L0 - Check Team Lock status..
 		HandleEmptyTeams();
 	}
+
+#ifdef UNLAGGED
+	//unlagged - backward reconciliation #4
+		// record the time at the end of this frame - it should be about
+		// the time the next frame begins - when the server starts
+		// accepting commands from connected clients
+	level.frameStartTime = trap_Milliseconds();
+	//unlagged - backward reconciliation #4
+#endif // UNLAGGED
+
 }

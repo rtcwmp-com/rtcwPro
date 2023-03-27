@@ -661,6 +661,10 @@ typedef struct {
 	int	pingsamples[NUM_PING_SAMPLES];
 	int	samplehead;
 	int deathYaw;
+
+	//unlagged - client options
+	// these correspond with variables in the userinfo string
+	int			delag;
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -698,6 +702,20 @@ typedef struct {
 #define MEDIC_SPECIAL_PICKUP_MOD    4   // JPW NERVE same thing for medic
 #define CMD_DEBOUNCE    5000    // 5s between cmds
 
+
+//unlagged - backward reconciliation #1
+// the size of history we'll keep
+#define NUM_CLIENT_HISTORY 17
+
+// everything we need to know to backward reconcile
+typedef struct {
+	vec3_t		mins, maxs;
+	vec3_t		currentOrigin;
+	int			leveltime;
+} clientHistory_t;
+//unlagged - backward reconciliation #1
+// 
+// 
 // this structure is cleared on each ClientSpawn(),
 // except for 'client->pers' and 'client->sess'
 struct gclient_s {
@@ -832,6 +850,30 @@ struct gclient_s {
 	// revive anim bug fix
 	qboolean revive_animation_playing;
 	int movement_lock_begin_time;
+
+	//unlagged - backward reconciliation #1
+	// the serverTime the button was pressed
+	// (stored before pmove_fixed changes serverTime)
+	int attackTime;
+	// the head of the history queue
+	int	historyHead;
+	// the history queue
+	clientHistory_t	history[NUM_CLIENT_HISTORY];
+	// the client's saved position
+	clientHistory_t	saved;			// used to restore after time shift
+	// an approximation of the actual server time we received this
+	// command (not in 50ms increments)
+	int	frameOffset;
+
+	// the level.time to which this client was shifted, or 0 if it isn't timeshifted
+	int timeshiftTime;
+	//unlagged - backward reconciliation #1
+
+	//unlagged - smooth clients #1
+	// the last frame number we got an update from this client
+	int			lastUpdateFrame;
+	//unlagged - smooth clients #1
+	qboolean        spawnprotected;
 };
 
 //
@@ -1745,6 +1787,11 @@ extern vmCvar_t	g_ssWebhookToken;
 extern vmCvar_t	g_ssWaitTime;
 extern vmCvar_t	g_broadcastClients;
 
+// unlagged
+extern vmCvar_t g_floatPlayerPosition;
+extern vmCvar_t	g_delagHitscan;
+extern vmCvar_t g_maxExtrapolatedFrames;
+
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
 int     trap_Milliseconds( void );
@@ -2001,15 +2048,24 @@ typedef enum
 
 // g_antilag.c
 //
+#ifndef UNLAGGED
 void G_ResetTrail(gentity_t* ent);
 void G_StoreTrail(gentity_t* ent);
 void G_TimeShiftAllClients(int time, gentity_t* skip);
 void G_UnTimeShiftAllClients(gentity_t* skip);
 //void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
+#else
+void G_ResetHistory(gentity_t* ent);
+void G_StoreHistory(gentity_t* ent);
+void G_TimeShiftAllClients(int time, gentity_t* skip);
+void G_UnTimeShiftAllClients(gentity_t* skip);
+void G_DoTimeShiftFor(gentity_t* ent);
+void G_UndoTimeShiftFor(gentity_t* ent);
+void G_UnTimeShiftClient(gentity_t* client);
+void G_TimeShiftClient(gentity_t* ent, int time, qboolean debug, gentity_t* debugger);
+void G_PredictPlayerMove(gentity_t* ent, float frametime);
+#endif
 
-// End
-
-void G_ResetMarkers( gentity_t* ent );
 
 ///////////////////////
 // g_main.c
