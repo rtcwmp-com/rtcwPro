@@ -144,12 +144,12 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 	// save results of pmove
-#ifndef UNLAGGED
-	BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
+	if (g_antilag.integer < 2) // Nobo antilag or off
+		BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
 	//BG_PlayerStateToEntityStatePro(&player->client->ps, &player->s, level.time, qtrue); // RTCWPro
-#else
-	BG_PlayerStateToEntityState(&player->client->ps, &player->s, (qboolean)!g_floatPlayerPosition.integer);
-#endif // UNLAGGED
+	
+	else if (g_antilag.integer == 2) // unlagged
+		BG_PlayerStateToEntityState(&player->client->ps, &player->s, (qboolean)!g_floatPlayerPosition.integer);
 
 	// use the precise origin for linking
 	VectorCopy( player->client->ps.origin, player->r.currentOrigin );
@@ -159,14 +159,11 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 
-#ifndef UNLAGGED
-	// Nobo Antilag
-	G_ResetTrail(player);
-#else
-	//unlagged - backward reconciliation #3
-	G_ResetHistory(player);
-	//unlagged - backward reconciliation #3
-#endif // UNLAGGED
+	if (g_antilag.integer < 2) // Nobo antilag or off
+		G_ResetTrail(player);
+	else if (g_antilag.integer == 2) // unlagged
+		//unlagged - backward reconciliation #3
+		G_ResetHistory(player);
 
 }
 

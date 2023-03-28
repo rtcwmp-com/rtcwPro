@@ -11,8 +11,6 @@ Created: 24. Mar / 2014
 
 #include "g_local.h"
 
-#ifndef UNLAGGED
-
 /*
 RTCWPro - antilag refactor
 Credits: Nobo
@@ -140,7 +138,7 @@ Interpolate
 Interpolates along two vectors (start -> end).
 =================
 */
-void Interpolate(float frac, vec3_t start, vec3_t end, vec3_t out) {
+void InterpolateNobo(float frac, vec3_t start, vec3_t end, vec3_t out) {
 	float comp = 1.0f - frac;
 
 	out[0] = start[0] * frac + end[0] * comp;
@@ -150,12 +148,12 @@ void Interpolate(float frac, vec3_t start, vec3_t end, vec3_t out) {
 
 /*
 =================
-G_TimeShiftClient
+G_TimeShiftClientNobo
 
 Shifts a client back to where he was at the specified "time"
 =================
 */
-void G_TimeShiftClient(gentity_t* ent, int time) {
+void G_TimeShiftClientNobo(gentity_t* ent, int time) {
 	int	j, k;
 	qboolean found_trail_nodes_that_sandwich_time;
 
@@ -202,7 +200,7 @@ void G_TimeShiftClient(gentity_t* ent, int time) {
 		float frac = (float)(time - ent->client->trail[j].time) / (float)(ent->client->trail[k].time - ent->client->trail[j].time);
 
 		// find the "best" origin between the sandwiching trail nodes via interpolation
-		Interpolate(frac, ent->client->trail[j].currentOrigin, ent->client->trail[k].currentOrigin, ent->r.currentOrigin);
+		InterpolateNobo(frac, ent->client->trail[j].currentOrigin, ent->client->trail[k].currentOrigin, ent->r.currentOrigin);
 		// find the "best" mins & maxs (crouching/standing).
 		// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
 		// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
@@ -222,13 +220,13 @@ void G_TimeShiftClient(gentity_t* ent, int time) {
 
 /*
 =====================
-G_TimeShiftAllClients
+G_TimeShiftAllClientsNobo
 
 Move ALL clients back to where they were at the specified "time",
 except for "skip"
 =====================
 */
-void G_TimeShiftAllClients(int time, gentity_t* skip) {
+void G_TimeShiftAllClientsNobo(int time, gentity_t* skip) {
 	int			i;
 	gentity_t* ent;
 
@@ -248,7 +246,7 @@ void G_TimeShiftAllClients(int time, gentity_t* skip) {
 		{
 			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
 			{
-				G_TimeShiftClient(ent, time);
+				G_TimeShiftClientNobo(ent, time);
 			}
 		}
 	}
@@ -257,12 +255,12 @@ void G_TimeShiftAllClients(int time, gentity_t* skip) {
 
 /*
 ===================
-G_UnTimeShiftClient
+G_UnTimeShiftClientNobo
 
 Move a client back to where he was before the time shift
 ===================
 */
-void G_UnTimeShiftClient(gentity_t* ent) {
+void G_UnTimeShiftClientNobo(gentity_t* ent) {
 
 	// if ent was time shifted
 	if (ent->client->saved_trail_node.mins[0])
@@ -280,13 +278,13 @@ void G_UnTimeShiftClient(gentity_t* ent) {
 
 /*
 =======================
-G_UnTimeShiftAllClients
+G_UnTimeShiftAllClientsNobo
 
 Move ALL the clients back to where they were before the time shift,
 except for "skip"
 =======================
 */
-void G_UnTimeShiftAllClients(gentity_t* skip) {
+void G_UnTimeShiftAllClientsNobo(gentity_t* skip) {
 	int			i;
 	gentity_t* ent;
 
@@ -300,13 +298,11 @@ void G_UnTimeShiftAllClients(gentity_t* skip) {
 		{
 			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
 			{
-				G_UnTimeShiftClient(ent);
+				G_UnTimeShiftClientNobo(ent);
 			}
 		}
 	}
 }
-
-#endif // !UNLAGGED
 
 
 // RTCWPro - unused for now

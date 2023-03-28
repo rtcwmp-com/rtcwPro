@@ -23,10 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //Sago: For some reason the Niels version must use a different char set.
 #include "g_local.h"
 
-//#include "g_local.h"
-
-#ifdef UNLAGGED
-
 /*
 ============
 G_ResetHistory
@@ -44,6 +40,7 @@ void G_ResetHistory( gentity_t *ent ) {
 		VectorCopy( ent->r.maxs, ent->client->history[i].maxs );
 		VectorCopy( ent->r.currentOrigin, ent->client->history[i].currentOrigin );
 		ent->client->history[i].leveltime = time;
+		ent->client->history[i].animInfo = ent->client->animationInfo;
 	}
 }
 
@@ -76,6 +73,7 @@ void G_StoreHistory( gentity_t *ent ) {
 		SnapVector( ent->client->history[head].currentOrigin );
 	}
 	ent->client->history[head].leveltime = level.time;
+	ent->client->history[head].animInfo = ent->client->animationInfo;
 }
 
 
@@ -104,6 +102,21 @@ static void TimeShiftLerp( float frac, vec3_t start, vec3_t end, vec3_t result )
 
 /*
 =================
+Interpolate
+
+Interpolates along two vectors (start -> end).
+=================
+*/
+void Interpolate(float frac, vec3_t start, vec3_t end, vec3_t out) {
+	float comp = 1.0f - frac;
+
+	out[0] = start[0] * frac + end[0] * comp;
+	out[1] = start[1] * frac + end[1] * comp;
+	out[2] = start[2] * frac + end[2] * comp;
+}
+
+/*
+=================
 G_TimeShiftClient
 
 Move a client back to where he was at the specified "time"
@@ -114,8 +127,8 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 	//char msg[2048];
 
 	// this will dump out the head index, and the time for all the stored positions
-/*
-	if ( debug ) {
+
+	/*if (g_debugMode.integer) {
 		char	str[MAX_STRING_CHARS];
 
 		Com_sprintf(str, sizeof(str), "print \"head: %d, %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n\"",
@@ -138,9 +151,9 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			ent->client->history[15].leveltime,
 			ent->client->history[16].leveltime);
 
-		trap_SendServerCommand( debugger - g_entities, str );
+		trap_SendServerCommand(ent - g_entities, str);
 	}
-*/
+	*/
 
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
@@ -166,6 +179,7 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			VectorCopy( ent->r.maxs, ent->client->saved.maxs );
 			VectorCopy( ent->r.currentOrigin, ent->client->saved.currentOrigin );
 			ent->client->saved.leveltime = level.time;
+			ent->client->saved.animInfo = ent->client->animationInfo;
 		}
 
 		// if we haven't wrapped back to the head, we've sandwiched, so
@@ -216,6 +230,20 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 
 			// some of the code needs to know that this entity was time shifted
 			ent->client->timeshiftTime = ent->client->history[j].leveltime;
+
+			// ported from nobo antilag for custom head animations
+			// find the "best" origin between the sandwiching trail nodes via interpolation
+			Interpolate(frac, ent->client->history[j].currentOrigin, ent->client->history[k].currentOrigin, ent->r.currentOrigin);
+			// find the "best" mins & maxs (crouching/standing).
+			// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
+			// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
+			int nearest_trail_node_index = frac < 0.5 ? j : k;
+			VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
+			VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
+			// use the trail node's animation info that's nearest "time" (for head hitbox).
+			// the current server animation code used for head hitboxes doesn't support interpolating
+			// between two different animation frames (i.e. crouch -> standing animation), so can't interpolate here either.
+			ent->client->animationInfo = ent->client->history[nearest_trail_node_index].animInfo;
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->r.currentOrigin );
@@ -227,6 +255,7 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 
 			// some of the code needs to know that this entity was time shifted
 			ent->client->timeshiftTime = ent->client->history[k].leveltime;
+			ent->client->animationInfo = ent->client->history[k].animInfo;
 		}
 	}
 	else {
@@ -323,6 +352,7 @@ void G_UnTimeShiftClient( gentity_t *ent ) {
 		VectorCopy( ent->client->saved.maxs, ent->r.maxs );
 		VectorCopy( ent->client->saved.currentOrigin, ent->r.currentOrigin );
 		ent->client->saved.leveltime = 0;
+		ent->client->animationInfo = ent->client->saved.animInfo;
 
 		// this will recalculate absmin and absmax
 		trap_LinkEntity( ent );
@@ -636,5 +666,3 @@ This is the entry point to the server-side-only prediction code
 void G_PredictPlayerMove( gentity_t *ent, float frametime ) {
 	G_PredictPlayerStepSlideMove( ent, frametime );
 }
-
-#endif // UNLAGGED

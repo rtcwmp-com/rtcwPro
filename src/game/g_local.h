@@ -712,6 +712,7 @@ typedef struct {
 	vec3_t		mins, maxs;
 	vec3_t		currentOrigin;
 	int			leveltime;
+	clientAnimationInfo_t animInfo;
 } clientHistory_t;
 //unlagged - backward reconciliation #1
 // 
@@ -805,16 +806,6 @@ struct gclient_s {
 	int lastBurnTime;         // JPW NERVE last time index for flamethrower burn
 	int PCSpecialPickedUpCount;         // JPW NERVE used to count # of times somebody's picked up this LTs ammo (or medic health) (for scoring)
 	int saved_persistant[MAX_PERSISTANT];           // DHM - Nerve :: Save ps->persistant here during Limbo
-/*
-	// g_antilag.c
-	int topMarker;
-	clientMarker_t clientMarkers[MAX_CLIENT_MARKERS];
-	clientMarker_t backupMarker;
-
-	gentity_t       *tempHead;  // Gordon: storing a temporary head for bullet head shot detection
-
-	pmoveExt_t pmext;
-*/
 
 	clientAnimationInfo_t animationInfo;
 	float legsYawAngle, torsoYawAngle, torsoPitchAngle;
@@ -2046,15 +2037,15 @@ typedef enum
 
 // RTCWPro - removed unused declarations
 
-// g_antilag.c
+// g_antilag.c (g_antilag 1)
 //
-#ifndef UNLAGGED
 void G_ResetTrail(gentity_t* ent);
 void G_StoreTrail(gentity_t* ent);
-void G_TimeShiftAllClients(int time, gentity_t* skip);
-void G_UnTimeShiftAllClients(gentity_t* skip);
+void G_TimeShiftAllClientsNobo(int time, gentity_t* skip);
+void G_UnTimeShiftAllClientsNobo(gentity_t* skip);
 //void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
-#else
+
+// g_unlagged.c (g_antilag 2)
 void G_ResetHistory(gentity_t* ent);
 void G_StoreHistory(gentity_t* ent);
 void G_TimeShiftAllClients(int time, gentity_t* skip);
@@ -2064,7 +2055,7 @@ void G_UndoTimeShiftFor(gentity_t* ent);
 void G_UnTimeShiftClient(gentity_t* client);
 void G_TimeShiftClient(gentity_t* ent, int time, qboolean debug, gentity_t* debugger);
 void G_PredictPlayerMove(gentity_t* ent, float frametime);
-#endif
+
 
 
 ///////////////////////

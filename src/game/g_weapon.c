@@ -313,11 +313,10 @@ qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
 	ClientSpawn(traceEnt, qtrue);
 
 	// Antilag
-	#ifdef UNLAGGED
-		G_ResetHistory(traceEnt);
-	#else
+	if (g_antilag.integer == 1) // Nobo antilag
 		G_ResetTrail(traceEnt);
-	#endif
+	else if (g_antilag.integer == 2) // unlagged
+		G_ResetHistory(traceEnt);
 	// end
 
 
@@ -429,11 +428,10 @@ void Weapon_Syringe( gentity_t *ent ) {
 				ClientSpawn( traceEnt, qtrue );
 
 				// Antilag
-				#ifdef UNLAGGED
-					G_ResetHistory(traceEnt);
-				#else
+				if (g_antilag.integer == 1) // Nobo antilag
 					G_ResetTrail(traceEnt);
-				#endif
+				else if (g_antilag.integer == 2) // unlagged
+					G_ResetHistory(traceEnt);
 				// end
 
 				memcpy( traceEnt->client->ps.ammo,ammo,sizeof( int ) * MAX_WEAPONS );
@@ -1890,11 +1888,10 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		// RTCWPro added cg_antilag client check (RtCW pub port)
 		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
-			#ifdef UNLAGGED
-				G_DoTimeShiftFor(ent); // Unlagged
-			#else
-				G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
-			#endif
+			if (g_antilag.integer == 1) // Nobo antilag
+				G_TimeShiftAllClientsNobo(ent->client->pers.cmd.serverTime, ent);
+			else if (g_antilag.integer == 2) // Unlagged
+				G_DoTimeShiftFor(ent);
 		}
 
 		// update head entitiy positions and link them into the world (for headshots).
@@ -1910,11 +1907,10 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		// RTCWPro added cg_antilag client check (RtCW pub port)
 		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
-			#ifdef UNLAGGED
-				G_UndoTimeShiftFor(ent); // Unlagged
-			#else
-				G_UnTimeShiftAllClients(ent);
-			#endif
+			if (g_antilag.integer == 1) // Nobo antilag
+				G_UnTimeShiftAllClientsNobo(ent);
+			else if (g_antilag.integer == 2) // Unlagged
+				G_DoTimeShiftFor(ent);
 		}
 
 		// unlink all head entities so they don't collide with players.
@@ -2342,11 +2338,14 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 
 	// RTCWPro - leaving this intact
 
-	// L0 Antilag
-    if ( g_antilag.integer && ent->client &&
-        !(ent->r.svFlags & SVF_BOT) ) {
-        G_TimeShiftAllClients( ent->client->pers.cmd.serverTime, ent );
-    } // end
+	// Antilag
+    if ( g_antilag.integer && ent->client && !(ent->r.svFlags & SVF_BOT) )
+	{
+		if (g_antilag.integer == 1) // Nobo antilag
+			G_TimeShiftAllClientsNobo(ent->client->pers.cmd.serverTime, ent);
+		else if (g_antilag.integer == 2) // Unlagged
+			G_DoTimeShiftFor(ent);
+	} // end
 
 	oldScore = ent->client->ps.persistant[PERS_SCORE];
 
@@ -2369,12 +2368,14 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 
 	}
 
-
-	// L0 - Antilag
-    if ( g_antilag.integer && ent->client &&
-        !(ent->r.svFlags & SVF_BOT) ) {
-        G_UnTimeShiftAllClients( ent );
-    } // end
+	// Antilag
+	if (g_antilag.integer && ent->client && !(ent->r.svFlags & SVF_BOT))
+	{
+		if (g_antilag.integer == 1) // Nobo antilag
+			G_UnTimeShiftAllClientsNobo(ent);
+		else if (g_antilag.integer == 2) // Unlagged
+			G_UndoTimeShiftFor(ent);
+	} // end
 }
 
 /*

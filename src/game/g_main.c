@@ -3591,32 +3591,33 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, move the AI
 	//AICast_StartServerFrame ( level.time );
 
-#ifdef UNLAGGED
-	//unlagged - backward reconciliation #2
-	// NOW run the missiles, with all players backward-reconciled
-	// to the positions they were in exactly 50ms ago, at the end
-	// of the last server frame
-	G_TimeShiftAllClients(level.previousTime, NULL);
+	if (g_antilag.integer == 2) // unlagged
+	{
+		//unlagged - backward reconciliation #2
+		// NOW run the missiles, with all players backward-reconciled
+		// to the positions they were in exactly 50ms ago, at the end
+		// of the last server frame
+		G_TimeShiftAllClients(level.previousTime, NULL);
 
-	ent = &g_entities[0];
-	for (i = 0; i < level.num_entities; i++, ent++) {
-		if (!ent->inuse) {
-			continue;
+		ent = &g_entities[0];
+		for (i = 0; i < level.num_entities; i++, ent++) {
+			if (!ent->inuse) {
+				continue;
+			}
+
+			// temporary entities don't think
+			if (ent->freeAfterEvent) {
+				continue;
+			}
+
+			if (ent->s.eType == ET_MISSILE) {
+				G_RunMissile(ent);
+			}
 		}
 
-		// temporary entities don't think
-		if (ent->freeAfterEvent) {
-			continue;
-		}
-
-		if (ent->s.eType == ET_MISSILE) {
-			G_RunMissile(ent);
-		}
+		G_UnTimeShiftAllClients(NULL);
+		//unlagged - backward reconciliation #2
 	}
-
-	G_UnTimeShiftAllClients(NULL);
-	//unlagged - backward reconciliation #2
-#endif // UNLAGGED
 
 
 //start = trap_Milliseconds();
@@ -3685,13 +3686,14 @@ void G_RunFrame( int levelTime ) {
 		HandleEmptyTeams();
 	}
 
-#ifdef UNLAGGED
-	//unlagged - backward reconciliation #4
+	if (g_antilag.integer == 2) // unlagged
+	{
+		//unlagged - backward reconciliation #4
 		// record the time at the end of this frame - it should be about
 		// the time the next frame begins - when the server starts
 		// accepting commands from connected clients
-	level.frameStartTime = trap_Milliseconds();
-	//unlagged - backward reconciliation #4
-#endif // UNLAGGED
+		level.frameStartTime = trap_Milliseconds();
+		//unlagged - backward reconciliation #4
+	}
 
 }

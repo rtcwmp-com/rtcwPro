@@ -1232,82 +1232,82 @@ void ClientThink_real( gentity_t *ent ) {
 
 	ent->client->ps.identifyClient = ucmd->identClient;     // NERVE - SMF
 
-	#ifdef UNLAGGED
+	if (g_antilag.integer == 2) // Unlagged
+	{
+		//Here comes the unlagged bit!
+		//unlagged - backward reconciliation #4
+			// frameOffset should be about the number of milliseconds into a frame 
+			// this command packet was received, depending on how fast the server
+			// does a G_RunFrame()
+		client->frameOffset = trap_Milliseconds() - level.frameStartTime;
+		//unlagged - backward reconciliation #4
 
-	//Here comes the unlagged bit!
-	//unlagged - backward reconciliation #4
-		// frameOffset should be about the number of milliseconds into a frame 
-		// this command packet was received, depending on how fast the server
-		// does a G_RunFrame()
-	client->frameOffset = trap_Milliseconds() - level.frameStartTime;
-	//unlagged - backward reconciliation #4
 
-
-	//unlagged - lag simulation #3
-		// if the client wants to simulate outgoing packet loss
-	/*	if ( client->pers.plOut ) {
-			// see if a random value is below the threshhold
-			float thresh = (float)client->pers.plOut / 100.0f;
-			if ( random() < thresh ) {
-				// do nothing at all if it is - this is a lost command
-				return;
-			}
-		}*/
 		//unlagged - lag simulation #3
+			// if the client wants to simulate outgoing packet loss
+		/*	if ( client->pers.plOut ) {
+				// see if a random value is below the threshhold
+				float thresh = (float)client->pers.plOut / 100.0f;
+				if ( random() < thresh ) {
+					// do nothing at all if it is - this is a lost command
+					return;
+				}
+			}*/
+			//unlagged - lag simulation #3
 
-	//unlagged - lag simulation #2
-	// keep a queue of past commands
-/*	client->pers.cmdqueue[client->pers.cmdhead] = client->pers.cmd;
-	client->pers.cmdhead++;
-	if ( client->pers.cmdhead >= MAX_LATENT_CMDS ) {
-		client->pers.cmdhead -= MAX_LATENT_CMDS;
-	}
-
-	// if the client wants latency in commands (client-to-server latency)
-	if ( client->pers.latentCmds ) {
-		// save the actual command time
-		int time = ucmd->serverTime;
-
-		// find out which index in the queue we want
-		int cmdindex = client->pers.cmdhead - client->pers.latentCmds - 1;
-		while ( cmdindex < 0 ) {
-			cmdindex += MAX_LATENT_CMDS;
+		//unlagged - lag simulation #2
+		// keep a queue of past commands
+	/*	client->pers.cmdqueue[client->pers.cmdhead] = client->pers.cmd;
+		client->pers.cmdhead++;
+		if ( client->pers.cmdhead >= MAX_LATENT_CMDS ) {
+			client->pers.cmdhead -= MAX_LATENT_CMDS;
 		}
 
-		// read in the old command
-		client->pers.cmd = client->pers.cmdqueue[cmdindex];
+		// if the client wants latency in commands (client-to-server latency)
+		if ( client->pers.latentCmds ) {
+			// save the actual command time
+			int time = ucmd->serverTime;
 
-		// adjust the real ping to reflect the new latency
-		client->pers.realPing += time - ucmd->serverTime;
-	}*/
-	//unlagged - lag simulation #2
+			// find out which index in the queue we want
+			int cmdindex = client->pers.cmdhead - client->pers.latentCmds - 1;
+			while ( cmdindex < 0 ) {
+				cmdindex += MAX_LATENT_CMDS;
+			}
 
+			// read in the old command
+			client->pers.cmd = client->pers.cmdqueue[cmdindex];
 
-	//unlagged - backward reconciliation #4
-		// save the command time *before* pmove_fixed messes with the serverTime,
-		// and *after* lag simulation messes with it :)
-		// attackTime will be used for backward reconciliation later (time shift)
-	client->attackTime = ucmd->serverTime;
-	//unlagged - backward reconciliation #4
-
-
-	//unlagged - smooth clients #1
-		// keep track of this for later - we'll use this to decide whether or not
-		// to send extrapolated positions for this client
-	client->lastUpdateFrame = level.framenum;
-	//unlagged - smooth clients #1
-
-
-	//unlagged - lag simulation #1
-		// if the client is adding latency to received snapshots (server-to-client latency)
-		/*if ( client->pers.latentSnaps ) {
-			// adjust the real ping
-			client->pers.realPing += client->pers.latentSnaps * (1000 / sv_fps.integer);
-			// adjust the attack time so backward reconciliation will work
-			client->attackTime -= client->pers.latentSnaps * (1000 / sv_fps.integer);
+			// adjust the real ping to reflect the new latency
+			client->pers.realPing += time - ucmd->serverTime;
 		}*/
+		//unlagged - lag simulation #2
+
+
+		//unlagged - backward reconciliation #4
+			// save the command time *before* pmove_fixed messes with the serverTime,
+			// and *after* lag simulation messes with it :)
+			// attackTime will be used for backward reconciliation later (time shift)
+		client->attackTime = ucmd->serverTime;
+		//unlagged - backward reconciliation #4
+
+
+		//unlagged - smooth clients #1
+			// keep track of this for later - we'll use this to decide whether or not
+			// to send extrapolated positions for this client
+		client->lastUpdateFrame = level.framenum;
+		//unlagged - smooth clients #1
+
+
 		//unlagged - lag simulation #1
-	#endif
+			// if the client is adding latency to received snapshots (server-to-client latency)
+			/*if ( client->pers.latentSnaps ) {
+				// adjust the real ping
+				client->pers.realPing += client->pers.latentSnaps * (1000 / sv_fps.integer);
+				// adjust the attack time so backward reconciliation will work
+				client->attackTime -= client->pers.latentSnaps * (1000 / sv_fps.integer);
+			}*/
+			//unlagged - lag simulation #1
+	}
 
 	// RTCWPro
 	if (g_alternatePing.integer) 
@@ -1723,16 +1723,19 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-#ifndef  UNLAGGED
-	if (g_smoothClients.integer) {
-		BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+	if (g_antilag.integer < 2) // Nobo antilag or off
+	{
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
+		}
 	}
-	else {
-		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
+	else if (g_antilag.integer == 2) // Unlagged
+	{
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
 	}
-#else
-	BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
-#endif // ! UNLAGGED
 
 	/*if (g_thinkStateLevelTime.integer) 
 	{
@@ -1792,9 +1795,8 @@ void ClientThink_real( gentity_t *ent ) {
 	// store the client's current position for antilag traces
 
 	// Nobo antilag
-#ifndef UNLAGGED
-	G_StoreTrail(ent);
-#endif // !UNLAGGED
+	if (g_antilag.integer == 1)
+		G_StoreTrail(ent);
 
 	// touch other objects
 	ClientImpacts( ent, &pm );
@@ -2403,51 +2405,54 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// set the latest infor
 
-#ifndef UNLAGGED
-	// RTCWPro
-	// Ridah, fixes jittery zombie movement
-	if (g_smoothClients.integer) {
-		BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, ((ent->r.svFlags & SVF_CASTAI) == 0));
-	}
-	else {
-		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, ((ent->r.svFlags & SVF_CASTAI) == 0));
-	}
-#else
-	BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
-
-	//unlagged - smooth clients #1
-		// mark as not missing updates initially
-	ent->client->ps.eFlags &= ~EF_CONNECTION;
-
-	// see how many frames the client has missed
-	frames = level.framenum - ent->client->lastUpdateFrame - 1;
-
-	// don't extrapolate more than two frames
-	if (frames > g_maxExtrapolatedFrames.integer) {
-		frames = g_maxExtrapolatedFrames.integer;
-
-		// if they missed more than two in a row, show the phone jack
-		ent->client->ps.eFlags |= EF_CONNECTION;
-		ent->s.eFlags |= EF_CONNECTION;
-	}
-
-	// did the client miss any frames?
-	if (frames > 0 && g_smoothClients.integer) {
-		// yep, missed one or more, so extrapolate the player's movement
-		G_PredictPlayerMove(ent, (float)frames / sv_fps.integer);
-		// save network bandwidth
-		if (!g_floatPlayerPosition.integer) {
-			SnapVector(ent->s.pos.trBase);
+	if (g_antilag.integer < 2) // Nobo antilag or off
+	{
+		// RTCWPro
+		// Ridah, fixes jittery zombie movement
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, ((ent->r.svFlags & SVF_CASTAI) == 0));
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, ((ent->r.svFlags & SVF_CASTAI) == 0));
 		}
 	}
-	//unlagged - smooth clients #1
+	else if (g_antilag.integer == 2) // Unlagged
+	{
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
 
-	//unlagged - backward reconciliation #1
-	// store the client's position for backward reconciliation later
-	G_StoreHistory(ent);
-	//unlagged - backward reconciliation #1
+		//unlagged - smooth clients #1
+			// mark as not missing updates initially
+		ent->client->ps.eFlags &= ~EF_CONNECTION;
 
-#endif // UNLAGGED
+		// see how many frames the client has missed
+		frames = level.framenum - ent->client->lastUpdateFrame - 1;
+
+		// don't extrapolate more than two frames
+		if (frames > g_maxExtrapolatedFrames.integer) {
+			frames = g_maxExtrapolatedFrames.integer;
+
+			// if they missed more than two in a row, show the phone jack
+			ent->client->ps.eFlags |= EF_CONNECTION;
+			ent->s.eFlags |= EF_CONNECTION;
+		}
+
+		// did the client miss any frames?
+		if (frames > 0 && g_smoothClients.integer) {
+			// yep, missed one or more, so extrapolate the player's movement
+			G_PredictPlayerMove(ent, (float)frames / sv_fps.integer);
+			// save network bandwidth
+			if (!g_floatPlayerPosition.integer) {
+				SnapVector(ent->s.pos.trBase);
+			}
+		}
+		//unlagged - smooth clients #1
+
+		//unlagged - backward reconciliation #1
+		// store the client's position for backward reconciliation later
+		G_StoreHistory(ent);
+		//unlagged - backward reconciliation #1
+
+	}
 
 
 

@@ -616,11 +616,8 @@ void respawn( gentity_t *ent ) {
 		ClientSpawn(ent, qfalse);
 	}
 
-#ifndef UNLAGGED
-	// L0 - antilag
-	G_ResetTrail(ent);
-	// L0 - end
-#endif // UNLAGGED
+	if (g_antilag.integer == 1) // Nobo antilag
+		G_ResetTrail(ent);
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
 	// add a teleportation effect
@@ -866,7 +863,7 @@ void AddMedicTeamBonus(gclient_t* client)
 	//	return;
 
 	//gclient_t* cl;
-	int i, startHealth;
+	//int i, startHealth;
 
 	int numMedics = G_CountTeamMedics(client->sess.sessionTeam, qfalse);
 
@@ -1676,10 +1673,10 @@ void ClientUserinfoChanged(int clientNum) {
 	}
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;*/
 
-	if (g_debugMode.integer)
-	{
-		AP(va("print \"ClientUserinfoChanged:%i class: %i\n\"", client->ps.clientNum, client->ps.teamNum));
-	}
+	//if (g_debugMode.integer)
+	//{
+	//	AP(va("print \"ClientUserinfoChanged:%i class: %i\n\"", client->ps.clientNum, client->ps.teamNum));
+	//}
 
 	AddMedicTeamBonus(client);
 	// RTCWPro
@@ -2072,11 +2069,8 @@ void ClientBegin( int clientNum ) {
 	// locate ent at a spawn point
 	ClientSpawn( ent, qfalse );
 
-#ifndef UNLAGGED
-	// L0 - antilag
-	G_ResetTrail(ent);
-	// L0 - end
-#endif // UNLAGGED
+	if (g_antilag.integer == 1) // Nobo antilag
+		G_ResetTrail(ent);
 
 	// Xian -- Changed below for team independant maxlives
 
@@ -2320,15 +2314,15 @@ after the first ClientBegin, and after each respawn
 Initializes all non-persistant parts of playerState
 ============
 */
-void ClientSpawn( gentity_t *ent, qboolean revived ) {
+void ClientSpawn(gentity_t *ent, qboolean revived) {
 	int index;
 	vec3_t spawn_origin, spawn_angles;
-	gclient_t   *client;
+	gclient_t *client;
 	int i;
 	clientPersistant_t saved;
 	clientSession_t savedSess;
 	int persistant[MAX_PERSISTANT];
-	gentity_t   *spawnPoint;
+	gentity_t *spawnPoint;
 	int flags;
 	int savedPing;
 	int savedTeam;
@@ -2348,11 +2342,11 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
 	}
 
-	if ( revived ) {
+	if (revived) {
 		spawnPoint = ent;
 		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix document/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
-		VectorCopy( ent->s.angles, spawn_angles );
+		VectorCopy(ent->s.angles, spawn_angles);
 	}
 	else
 	{
@@ -2362,38 +2356,41 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 		//AICast_ScriptParse( AICast_GetCastState(ent->s.number) );
 		// done.
 
-		if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
+		if (client->sess.sessionTeam == TEAM_SPECTATOR) {
 			spawnPoint = SelectSpectatorSpawnPoint(
-				spawn_origin, spawn_angles );
-		} else if ( g_gametype.integer >= GT_TEAM ) {
+				spawn_origin, spawn_angles);
+		}
+		else if (g_gametype.integer >= GT_TEAM) {
 			spawnPoint = SelectCTFSpawnPoint(
 				client->sess.sessionTeam,
 				client->pers.teamState.state,
-				spawn_origin, spawn_angles, client->sess.spawnObjectiveIndex );
-		} else {
+				spawn_origin, spawn_angles, client->sess.spawnObjectiveIndex);
+		}
+		else {
 			do {
 				// the first spawn should be at a good looking spot
-				if ( !client->pers.initialSpawn && client->pers.localClient ) {
+				if (!client->pers.initialSpawn && client->pers.localClient) {
 					client->pers.initialSpawn = qtrue;
-					spawnPoint = SelectInitialSpawnPoint( spawn_origin, spawn_angles );
-				} else {
+					spawnPoint = SelectInitialSpawnPoint(spawn_origin, spawn_angles);
+				}
+				else {
 					// don't spawn near existing origin if possible
 					spawnPoint = SelectSpawnPoint(
 						client->ps.origin,
-						spawn_origin, spawn_angles );
+						spawn_origin, spawn_angles);
 				}
 
-				if ( ( spawnPoint->flags & FL_NO_BOTS ) && ( ent->r.svFlags & SVF_BOT ) ) {
+				if ((spawnPoint->flags & FL_NO_BOTS) && (ent->r.svFlags & SVF_BOT)) {
 					continue;   // try again
 				}
 				// just to be symetric, we have a nohumans option...
-				if ( ( spawnPoint->flags & FL_NO_HUMANS ) && !( ent->r.svFlags & SVF_BOT ) ) {
+				if ((spawnPoint->flags & FL_NO_HUMANS) && !(ent->r.svFlags & SVF_BOT)) {
 					continue;   // try again
 				}
 
 				break;
 
-			} while ( 1 );
+			} while (1);
 		}
 	}
 
@@ -2404,14 +2401,15 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	flags ^= EF_TELEPORT_BIT;
 	flags |= (client->ps.eFlags & EF_VOTED); // L0 - Fixes vote abuse by suicide and vote override..
 
-#ifdef UNLAGGED
-	//unlagged - backward reconciliation #3
-	// we don't want players being backward-reconciled to the place they died
-	G_ResetHistory(ent);
-	// and this is as good a time as any to clear the saved state
-	ent->client->saved.leveltime = 0;
-	//unlagged - backward reconciliation #3
-#endif // UNLAGGED
+	if (g_antilag.integer == 2) // Unlagged
+	{
+		//unlagged - backward reconciliation #3
+		// we don't want players being backward-reconciled to the place they died
+		G_ResetHistory(ent);
+		// and this is as good a time as any to clear the saved state
+		ent->client->saved.leveltime = 0;
+		//unlagged - backward reconciliation #3
+	}
 
 	// clear everything but the persistant data
 
@@ -2583,11 +2581,11 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// SetWolfSpawnWeapons() now adds medic team bonus and stores in ps.stats[STAT_MAX_HEALTH].
 	ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
 
-	if (g_debugMode.integer)
-	{
-		G_Printf("Player spawned with StartHealth: %i MaxHealth: %i STAT_MAX_HEALTH: %i\n", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]);
-		AP(va("print \"Player spawned with StartHealth:%i MaxHealth: %i STAT_MAX_HEALTH: %i\n\"", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]));
-	}
+	//if (g_debugMode.integer)
+	//{
+	//	G_Printf("Player spawned with StartHealth: %i MaxHealth: %i STAT_MAX_HEALTH: %i\n", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]);
+	//	AP(va("print \"Player spawned with StartHealth:%i MaxHealth: %i STAT_MAX_HEALTH: %i\n\"", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]));
+	//}
 
 	G_SetOrigin( ent, spawn_origin );
 	VectorCopy( spawn_origin, client->ps.origin );
@@ -2655,11 +2653,11 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	ClientEndFrame( ent );
 
 	// clear entity state values
-#ifndef UNLAGGED
-	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
-#else
-	BG_PlayerStateToEntityState(&client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
-#endif // UNLAGGED
+	if (g_antilag.integer < 2) // Nobo antilag or off
+		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+
+	else if (g_antilag.integer == 2) // Unlagged
+		BG_PlayerStateToEntityState(&client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
 
 	//BG_PlayerStateToEntityStatePro(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 

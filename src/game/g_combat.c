@@ -314,32 +314,32 @@ player_die
 */
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 
-void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
-	gentity_t   *ent;
+void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int damage, int meansOfDeath) {
+	gentity_t* ent;
 	// TTimo might be used uninitialized
 	int contents = 0;
 	int killer;
 	int i;
-	char        *killerName, *obit;
+	char* killerName, * obit;
 	qboolean nogib = qtrue;
-	gitem_t     *item = NULL; // JPW NERVE for flag drop
-	vec3_t launchvel,launchspot;      // JPW NERVE
-	gentity_t   *flag; // JPW NERVE
+	gitem_t* item = NULL; // JPW NERVE for flag drop
+	vec3_t launchvel, launchspot;      // JPW NERVE
+	gentity_t* flag; // JPW NERVE
 
-	if ( self->client->ps.pm_type == PM_DEAD ) {
+	if (self->client->ps.pm_type == PM_DEAD) {
 		return;
 	}
 
-	if ( level.intermissiontime ) {
+	if (level.intermissiontime) {
 		return;
 	}
 
-#ifdef UNLAGGED
-	//unlagged - backward reconciliation #2
+	if (g_antilag.integer == 2)
+	{	
+		// Unlagged - backward reconciliation #2
 		// make sure the body shows up in the client's current position
-	G_UnTimeShiftClient(self);
-	//unlagged - backward reconciliation #2
-#endif // UNLAGGED
+		G_UnTimeShiftClient(self);
+	}
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );
