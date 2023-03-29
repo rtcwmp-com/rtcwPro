@@ -1910,7 +1910,7 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 			if (g_antilag.integer == 1) // Nobo antilag
 				G_UnTimeShiftAllClientsNobo(ent);
 			else if (g_antilag.integer == 2) // Unlagged
-				G_DoTimeShiftFor(ent);
+				G_UndoTimeShiftFor(ent);
 		}
 
 		// unlink all head entities so they don't collide with players.
