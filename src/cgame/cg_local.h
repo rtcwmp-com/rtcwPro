@@ -2028,7 +2028,7 @@ extern vmCvar_t cg_noVoiceText;                     // NERVE - SMF
 extern vmCvar_t cg_enableBreath;
 extern vmCvar_t cg_autoactivate;
 extern vmCvar_t cg_emptyswitch;
-extern vmCvar_t cg_smoothClients;
+//extern vmCvar_t cg_smoothClients;
 extern vmCvar_t pmove_fixed;
 extern vmCvar_t pmove_msec;
 

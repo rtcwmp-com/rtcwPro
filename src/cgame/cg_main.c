@@ -207,7 +207,7 @@ vmCvar_t cg_enableBreath;
 vmCvar_t cg_autoactivate;
 vmCvar_t cg_blinktime;      //----(SA)	added
 
-vmCvar_t cg_smoothClients;
+//vmCvar_t cg_smoothClients;
 vmCvar_t pmove_fixed;
 vmCvar_t pmove_msec;
 
