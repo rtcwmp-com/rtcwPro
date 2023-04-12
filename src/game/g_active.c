@@ -1236,28 +1236,27 @@ void ClientThink_real( gentity_t *ent ) {
 	{
 		//Here comes the unlagged bit!
 		//unlagged - backward reconciliation #4
-			// frameOffset should be about the number of milliseconds into a frame 
-			// this command packet was received, depending on how fast the server
-			// does a G_RunFrame()
+		// frameOffset should be about the number of milliseconds into a frame 
+		// this command packet was received, depending on how fast the server
+		// does a G_RunFrame()
 		client->frameOffset = trap_Milliseconds() - level.frameStartTime;
-		//unlagged - backward reconciliation #4
 
 
 		//unlagged - lag simulation #3
 			// if the client wants to simulate outgoing packet loss
-		/*	if ( client->pers.plOut ) {
-				// see if a random value is below the threshhold
-				float thresh = (float)client->pers.plOut / 100.0f;
-				if ( random() < thresh ) {
-					// do nothing at all if it is - this is a lost command
-					return;
-				}
-			}*/
-			//unlagged - lag simulation #3
+		/*if ( client->pers.plOut ) {
+			// see if a random value is below the threshhold
+			float thresh = (float)client->pers.plOut / 100.0f;
+			if ( random() < thresh ) {
+				// do nothing at all if it is - this is a lost command
+				return;
+			}
+		}*/
+		//unlagged - lag simulation #3
 
 		//unlagged - lag simulation #2
 		// keep a queue of past commands
-	/*	client->pers.cmdqueue[client->pers.cmdhead] = client->pers.cmd;
+		/*client->pers.cmdqueue[client->pers.cmdhead] = client->pers.cmd;
 		client->pers.cmdhead++;
 		if ( client->pers.cmdhead >= MAX_LATENT_CMDS ) {
 			client->pers.cmdhead -= MAX_LATENT_CMDS;
@@ -1280,53 +1279,48 @@ void ClientThink_real( gentity_t *ent ) {
 			// adjust the real ping to reflect the new latency
 			client->pers.realPing += time - ucmd->serverTime;
 		}*/
-		//unlagged - lag simulation #2
 
 
 		//unlagged - backward reconciliation #4
-			// save the command time *before* pmove_fixed messes with the serverTime,
-			// and *after* lag simulation messes with it :)
-			// attackTime will be used for backward reconciliation later (time shift)
+		// save the command time *before* pmove_fixed messes with the serverTime,
+		// and *after* lag simulation messes with it :)
+		// attackTime will be used for backward reconciliation later (time shift)
 		client->attackTime = ucmd->serverTime;
-		//unlagged - backward reconciliation #4
 
 
 		//unlagged - smooth clients #1
-			// keep track of this for later - we'll use this to decide whether or not
-			// to send extrapolated positions for this client
+		// keep track of this for later - we'll use this to decide whether or not
+		// to send extrapolated positions for this client
 		client->lastUpdateFrame = level.framenum;
-		//unlagged - smooth clients #1
-
 
 		//unlagged - lag simulation #1
-			// if the client is adding latency to received snapshots (server-to-client latency)
-			/*if ( client->pers.latentSnaps ) {
-				// adjust the real ping
-				client->pers.realPing += client->pers.latentSnaps * (1000 / sv_fps.integer);
-				// adjust the attack time so backward reconciliation will work
-				client->attackTime -= client->pers.latentSnaps * (1000 / sv_fps.integer);
-			}*/
-			//unlagged - lag simulation #1
+		// if the client is adding latency to received snapshots (server-to-client latency)
+		/*if ( client->pers.latentSnaps ) {
+			// adjust the real ping
+			client->pers.realPing += client->pers.latentSnaps * (1000 / sv_fps.integer);
+			// adjust the attack time so backward reconciliation will work
+			client->attackTime -= client->pers.latentSnaps * (1000 / sv_fps.integer);
+		}*/
 	}
 
 	// RTCWPro
 	if (g_alternatePing.integer) 
 	{
-		int sum = 0;
-		client->pers.pingsamples[client->pers.samplehead] = level.previousTime - ucmd->serverTime;
-		client->pers.samplehead++;
+		// ratmod trueping port
+		// we use level.previousTime to account for 50ms lag correction
+		// besides, this will turn out numbers more like what players are used to
+		client->pers.pingsamples[client->pers.pingsample_counter % NUM_PING_SAMPLES] = level.previousTime + client->frameOffset - ucmd->serverTime;
+		client->pers.pingsample_counter++;
 
-		if (client->pers.samplehead >= NUM_PING_SAMPLES) 
-		{
-			client->pers.samplehead -= NUM_PING_SAMPLES;
-		}
+		int i, sum = 0;
+		int num = client->pers.pingsample_counter > NUM_PING_SAMPLES ? NUM_PING_SAMPLES : client->pers.pingsample_counter;
 
-		for (i = 0; i < NUM_PING_SAMPLES; i++) 
-		{
+		// get an average of the samples we saved up
+		for (i = 0; i < num; i++) {
 			sum += client->pers.pingsamples[i];
 		}
 
-		client->pers.alternatePing = sum / NUM_PING_SAMPLES;
+		client->pers.alternatePing = sum / num;
 
 		if (client->pers.alternatePing < 0) 
 		{
@@ -1927,7 +1921,8 @@ void ClientThink( int clientNum ) {
 
 	// mark the time we got info, so we can display the
 	// phone jack if they don't get any for a while
-	ent->client->lastCmdTime = level.time;
+	if (g_antilag.integer < 2)
+		ent->client->lastCmdTime = level.time;  // don't do this for unlagged
 
 	if (G_DoAntiwarp(ent))
 	{
@@ -2393,10 +2388,14 @@ void ClientEndFrame( gentity_t *ent ) {
 
 
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
-	if ( level.time - ent->client->lastCmdTime > 1000 ) {
-		ent->s.eFlags |= EF_CONNECTION;
-	} else {
-		ent->s.eFlags &= ~EF_CONNECTION;
+	if (g_antilag.integer < 2)
+	{
+		if (level.time - ent->client->lastCmdTime > 1000) {   // don't do this for unlagged
+			ent->s.eFlags |= EF_CONNECTION;
+		}
+		else {
+			ent->s.eFlags &= ~EF_CONNECTION;
+		}
 	}
 
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;   // FIXME: get rid of ent->health...

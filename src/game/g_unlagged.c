@@ -225,25 +225,26 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 				trap_SendServerCommand( debugger - g_entities, msg );
 			}*/
 
-			// this will recalculate absmin and absmax
-			trap_LinkEntity( ent );
-
-			// some of the code needs to know that this entity was time shifted
-			ent->client->timeshiftTime = ent->client->history[j].leveltime;
-
 			// ported from nobo antilag for custom head animations
 			// find the "best" origin between the sandwiching trail nodes via interpolation
-			Interpolate(frac, ent->client->history[j].currentOrigin, ent->client->history[k].currentOrigin, ent->r.currentOrigin);
+			//Interpolate(frac, ent->client->history[j].currentOrigin, ent->client->history[k].currentOrigin, ent->r.currentOrigin);
 			// find the "best" mins & maxs (crouching/standing).
 			// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
 			// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
 			int nearest_trail_node_index = frac < 0.5 ? j : k;
-			VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
-			VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
+			//VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
+			//VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
 			// use the trail node's animation info that's nearest "time" (for head hitbox).
 			// the current server animation code used for head hitboxes doesn't support interpolating
 			// between two different animation frames (i.e. crouch -> standing animation), so can't interpolate here either.
 			ent->client->animationInfo = ent->client->history[nearest_trail_node_index].animInfo;
+
+			// this will recalculate absmin and absmax
+			trap_LinkEntity(ent);
+
+			// some of the code needs to know that this entity was time shifted
+			ent->client->timeshiftTime = ent->client->history[j].leveltime;
+
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->r.currentOrigin );
@@ -322,7 +323,7 @@ void G_DoTimeShiftFor( gentity_t *ent ) {
 
 	// if it's enabled server-side and the client wants it
 	// or wants it for this weapon (not doing this for Rtcw as we have pistol and SMG)
-	if ( g_delagHitscan.integer && ( ent->client->pers.delag & 1)) { // || ent->client->pers.delag & wpflag ) ) {
+	if ( g_delagHitscan.integer && ( ent->client->pers.antilag & 1)) { // || ent->client->pers.delag & wpflag ) ) {
 		// do the full lag compensation, except what the client nudges
 		//time = ent->client->attackTime + ent->client->pers.cmdTimeNudge;
 		// don't allow the client to nudge anything

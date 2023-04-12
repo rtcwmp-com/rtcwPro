@@ -660,11 +660,8 @@ typedef struct {
 	int	alternatePing;
 	int	pingsamples[NUM_PING_SAMPLES];
 	int	samplehead;
+	unsigned int pingsample_counter;
 	int deathYaw;
-
-	//unlagged - client options
-	// these correspond with variables in the userinfo string
-	int			delag;
 } clientPersistant_t;
 
 // L0 - antilag port
