@@ -580,7 +580,7 @@ void CG_DrawTeamBackground( int x, int y, int w, int h, float alpha, int team ) 
 ===========================================================================================
 */
 
-#define UPPERRIGHT_X 500
+#define UPPERRIGHT_X 640  // RtcwPro move this all the way to the right
 /*
 ==================
 CG_DrawSnapshot
@@ -594,7 +594,7 @@ static float CG_DrawSnapshot( float y ) {
 			cg.latestSnapshotNum, cgs.serverCommandSequence );
 	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
 
-	CG_DrawBigString( UPPERRIGHT_X - w, y + 2, s, 1.0F );
+	CG_DrawBigString(UPPERRIGHT_X - w, y + 2, s, 1.0F);
 
 	return y + BIGCHAR_HEIGHT + 4;
 }
@@ -637,7 +637,7 @@ static float CG_DrawFPS( float y ) {
 		s = va( "%ifps", fps );
 		w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
 
-		CG_DrawBigString( 640 - w, y + 2, s, 1.0F );
+		CG_DrawBigString(UPPERRIGHT_X - w, y + 2, s, 1.0F);
 	}
 
 	return y + BIGCHAR_HEIGHT + 4;
@@ -676,7 +676,7 @@ static float CG_DrawTimer( float y ) {
 
 	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
 
-	CG_DrawBigString( UPPERRIGHT_X - w, y + 2, s, 1.0F );
+	CG_DrawBigString(UPPERRIGHT_X - w, y + 2, s, 1.0F);
 
 
 
@@ -1594,7 +1594,7 @@ static void CG_DrawTeamInfo( void ) {
 				BG_setCrosshair(cg_chatBackgroundColor.string, hcolor, chatAlpha * alphapercent, "cg_chatBackgroundColor");
 // End
 			trap_R_SetColor( hcolor );
-			CG_DrawPic( x, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, 640, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
+			CG_DrawPic( x, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, UPPERRIGHT_X, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
 
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = alphapercent;
