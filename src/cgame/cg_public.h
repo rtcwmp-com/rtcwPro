@@ -223,11 +223,13 @@ typedef enum {
 
 	CG_TRANSLATE_STRING,
 
+	CG_CVAR_VARIABLEINTEGERVALUE,
+
 	CG_R_VALIDATE,
 	CG_R_BUILD,
 	// -NERVE - SMF
 
-	CG_REQ_SS // reqSS
+	CG_REQUEST_SS // reqSS
 } cgameImport_t;
 
 
@@ -290,6 +292,7 @@ typedef enum {
 
 	CG_RELAY_COMMAND,
 //	qboolean(*CG_RelayCommand)(const char type, int value);
+
 } cgameExport_t;
 
 //----------------------------------------------

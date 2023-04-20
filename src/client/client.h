@@ -163,8 +163,6 @@ typedef struct {
 	// -NERVE - SMF
 
 	clientHandle_t handle;
-
-	int clientSSAction; // reqSS
 } clientActive_t;
 
 extern clientActive_t cl;
@@ -487,7 +485,6 @@ const char* CL_TranslateStringBuf( const char *string ); // TTimo
 // -NERVE - SMF
 
 void CL_OpenURL( const char *url ); // TTimo
-void CL_ActionGenerateTime(qboolean useFixedTime);
 
 //
 // cl_input
@@ -659,9 +656,7 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 // 
 // RTCWPro - cl_control.c - source: Nate (rtcwMP)
 //
-void CL_checkSSTime(void);
-//void CL_RequestedSS(int quality);
-//void CL_RequestedSS();
-void CL_RequestedSS(char* ip);
+void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
+
 #endif // !__CLIENT_H
 

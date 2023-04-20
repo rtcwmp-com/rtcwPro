@@ -16,22 +16,23 @@ rather they (in a sense) are penalized for it, while all the other players on th
 qboolean G_DoAntiwarp(gentity_t* ent) {
 
 	// only antiwarp if requested
-	if (!g_antiWarp.integer)
+	if (!g_antiWarp.integer || g_gamestate.integer == GS_INTERMISSION)
 	{
 		return qfalse;
 	}
 
-	//dont use for intermission to fix high ping on results screen
-	if (level.intermissiontime)
-	{
-		return qfalse;
-	}
 
 	if (ent && ent->client)
 	{
-		// don't antiwarp spectators
-		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR ||
-			ent->client->ps.pm_flags & PMF_LIMBO) {
+		// don't antiwarp spectators and players that are in limbo
+		if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.pm_flags & PMF_LIMBO))
+		{
+			return qfalse;
+		}
+
+		// don't antiwarp bots - ET Legacy port
+		if (ent->r.svFlags & SVF_BOT)
+		{
 			return qfalse;
 		}
 
@@ -69,20 +70,11 @@ void AW_AddUserCmd(int clientNum, usercmd_t* cmd) {
 }
 
 // zinx - G_CmdScale is a hack :x
-extern float pm_proneSpeedScale;
-static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd) {
+static float G_CmdScale(gentity_t *ent, usercmd_t *cmd)
+{
 
-	float scale;
 
-#ifdef CGAMEDLL
-	int gametype = cg_gameType.integer;
-	int movespeed = cg_movespeed.integer;
-#elif GAMEDLL
-	int gametype = g_gametype.integer;
-	int movespeed = g_speed.integer;
-#endif
-
-	scale = abs(cmd->forwardmove);
+	float scale = abs(cmd->forwardmove);
 	if (abs(cmd->rightmove) > scale)
 	{
 		scale = abs(cmd->rightmove);
@@ -95,60 +87,20 @@ static float AW_CmdScale(gentity_t* ent, usercmd_t* cmd) {
 
 	scale /= 127.f;
 
-	// JPW NERVE -- half move speed if heavy weapon is carried
-	// this is the counterstrike way of doing it -- ie you can switch to a non-heavy weapon and move at
-	// full speed.  not completely realistic (well, sure, you can run faster with the weapon strapped to your
-	// back than in carry position) but more fun to play.  If it doesn't play well this way we'll bog down the
-	// player if the own the weapon at all.
-	//
-#if 0   // zinx - not letting them go at sprint speed for now.
-	if ((ent->client->ps.weapon == WP_PANZERFAUST) ||
-		(ent->client->ps.weapon == WP_MOBILE_MG42) ||
-		(ent->client->ps.weapon == WP_MOBILE_MG42_SET) ||
-		(ent->client->ps.weapon == WP_MORTAR)) {
-		if (ent->client->sess.skill[SK_HEAVY_WEAPONS] >= 3) {
-			scale *= 0.75;
-		}
-		else {
-			scale *= 0.5;
-		}
-	}
-
-	if (ent->client->ps.weapon == WP_FLAMETHROWER) { // trying some different balance for the FT
-		if (!(ent->client->sess.skill[SK_HEAVY_WEAPONS] >= 3) || cmd->buttons & BUTTON_ATTACK) {
-			scale *= 0.7;
-		}
-	}
-#endif
-
-	/*if (gametype == GT_SINGLE_PLAYER)
-	{
-		// Adjust the movespeed
-		scale *= (((float)movespeed) / (float)127);
-
-	} // if (gametype == GT_SINGLE_PLAYER)...*/
-
-#if 0   // zinx - not letting them go at sprint speed for now.
-	if (ent->client->ps.eFlags & EF_PRONE) {
-		scale *= pm_proneSpeedScale;
-	}
-	else if (ent->client->ps.eFlags & PMF_DUCKED) {
-		scale *= ent->client->ps.crouchSpeedScale;
-	}
-#endif
 
 	return scale;
 }
 
 void ClientThink_cmd(gentity_t* ent, usercmd_t* cmd);
 
-void DoClientThinks(gentity_t* ent) {
-
-	int lastCmd, lastTime;
-	int latestTime;
+void DoClientThinks(gentity_t *ent)
+{
+	usercmd_t *cmd;
+	float     speed, delta, scale;
+	int       lastCmd, lastTime, latestTime, serverTime, totalDelta, timeDelta, savedTime;
 	int drop_threshold = LAG_MAX_DROP_THRESHOLD;
 	int startPackets = ent->client->cmdcount;
-	//	usercmd_t newcmd;
+	qboolean  deltahax;
 
 	if (ent->client->cmdcount <= 0)
 	{
@@ -180,16 +132,14 @@ void DoClientThinks(gentity_t* ent) {
 
 	while (ent->client->cmdcount > 0)
 	{
-		usercmd_t* cmd = &ent->client->cmds[ent->client->cmdhead];
-		float speed, delta, scale;
-		int savedTime;
-		qboolean deltahax = qfalse;
+		cmd = &ent->client->cmds[ent->client->cmdhead];
 
-		int serverTime = cmd->serverTime;
-		int totalDelta = latestTime - cmd->serverTime;
-		int timeDelta;
+		deltahax = qfalse;
 
-		if (ent->client->pers.pmoveFixed)
+		serverTime = cmd->serverTime;
+		totalDelta = latestTime - cmd->serverTime;
+
+		if (pmove_fixed.integer || ent->client->pers.pmoveFixed)
 		{
 			serverTime = ((serverTime + pmove_msec.integer - 1) / pmove_msec.integer) * pmove_msec.integer;
 		}
@@ -218,9 +168,13 @@ void DoClientThinks(gentity_t* ent) {
 
 		scale = 1.f / LAG_DECAY;
 
-		speed = AW_CmdScale(ent, cmd);
-		delta = (speed * (float)timeDelta);
-		delta *= scale;
+		speed = G_CmdScale(ent, cmd);
+
+		// if the warping player stopped but still has some speed keep antiwarping
+		if (speed == 0 && VectorLength(ent->client->ps.velocity) > LAG_SPEED_THRESHOLD)
+		{
+			speed = 1.0f;
+		}
 
 		if (timeDelta > 50)
 		{
@@ -228,6 +182,11 @@ void DoClientThinks(gentity_t* ent) {
 			delta = (speed * (float)timeDelta);
 			delta *= scale;
 			deltahax = qtrue;
+		}
+		else
+		{
+			delta = (speed * (float)timeDelta);
+			delta *= scale;
 		}
 
 		if ((ent->client->cmddelta + delta) >= LAG_MAX_DELTA)
@@ -244,7 +203,7 @@ void DoClientThinks(gentity_t* ent) {
 			// try to split it up in to smaller commands
 
 			delta = ((float)LAG_MAX_DELTA - ent->client->cmddelta);
-			timeDelta = ceil(delta / speed); // prefer speedup
+			timeDelta = (int)(ceil((double)(delta / speed))); // prefer speedup
 			delta = (float)timeDelta * speed;
 
 			if (timeDelta < 1)
@@ -308,6 +267,7 @@ void DoClientThinks(gentity_t* ent) {
 		);
 	}
 
+#ifdef ANTIWARP_DEBUG
 	// zinx - debug; size is added lag (amount above player's network lag)
 	// rotation is time
 	if ((g_antiWarp.integer & 16) && ent->client->cmdcount)
@@ -327,6 +287,7 @@ void DoClientThinks(gentity_t* ent) {
 
 		//etpro_AddDebugLine( org, parms, ((ent - g_entities) % 32), LINEMODE_SPOKES, LINESHADER_RAILCORE, 0, qfalse );
 	}
+#endif
 
 	//ent->client->ps.stats[STAT_ANTIWARP_DELAY] = latestTime - ent->client->ps.commandTime;
 	//if (ent->client->ps.stats[STAT_ANTIWARP_DELAY] < 0)

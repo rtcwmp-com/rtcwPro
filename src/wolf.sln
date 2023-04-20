@@ -208,7 +208,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "old", "old", "{5D9883F6-91A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{B0BAA294-50FC-46AE-8279-B0D3E9F272A8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "..\libs\libcurl\lib\libcurl.vcxproj", "{DFB320DF-A095-3FA7-87D3-A77507483089}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "libcurl\lib\libcurl.vcxproj", "{DFB320DF-A095-3FA7-87D3-A77507483089}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

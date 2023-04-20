@@ -188,6 +188,8 @@ void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacke
 		attacker->client->pers.teamState.lastfraggedcarrier = level.time;
 		if ( g_gametype.integer >= GT_WOLF ) {
 			AddScore( attacker, WOLF_FRAG_CARRIER_BONUS );
+			G_writeObjectiveEvent(attacker, objKilledCarrier);
+			attacker->client->sess.obj_killcarrier++;
 		} else {
 			AddScore( attacker, CTF_FRAG_CARRIER_BONUS );
 			PrintMsg( NULL, "%s" S_COLOR_WHITE " fragged %s's flag carrier!\n",
@@ -313,6 +315,8 @@ void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacke
 			if ( VectorLength( v1 ) < WOLF_CP_PROTECT_RADIUS ) {
 				if ( flag->spawnflags & 1 ) {                     // protected spawnpoint
 					AddScore( attacker, WOLF_SP_PROTECT_BONUS );
+					G_writeObjectiveEvent(attacker, objProtectFlag);
+					attacker->client->sess.obj_protectflag++;
 				} else {
 					AddScore( attacker, WOLF_CP_PROTECT_BONUS );  // protected checkpoint
 				}
@@ -351,37 +355,36 @@ void Team_CheckHurtCarrier( gentity_t *targ, gentity_t *attacker ) {
 }
 
 
-gentity_t *Team_ResetFlag( int team ) {
-	char *c;
-	gentity_t *ent, *rent = NULL;
+void Team_ResetFlag(gentity_t* ent) {
 
-	switch ( team ) {
-	case TEAM_RED:
-		c = "team_CTF_redflag";
-		break;
-	case TEAM_BLUE:
-		c = "team_CTF_blueflag";
-		break;
-	default:
-		return NULL;
-	}
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		Team_ResetFlag( &g_entities[ent->s.otherEntityNum] );
+		G_FreeEntity( ent );
+	} else {
+			
+		// ET Port for mulitple document objectives
+		ent->s.density++;
 
-	ent = NULL;
-	while ( ( ent = G_Find( ent, FOFS( classname ), c ) ) != NULL ) {
-		if ( ent->flags & FL_DROPPED_ITEM ) {
-			G_FreeEntity( ent );
-		} else {
-			rent = ent;
+		// do we need to respawn?
+		if ( ent->s.density == 1 ) {
 			RespawnItem( ent );
 		}
-	}
 
-	return rent;
+	}
 }
 
 void Team_ResetFlags( void ) {
-	Team_ResetFlag( TEAM_RED );
-	Team_ResetFlag( TEAM_BLUE );
+	gentity_t   *ent;
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_redflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_blueflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
 }
 
 void Team_ReturnFlagSound( gentity_t *ent, int team ) {
@@ -400,8 +403,10 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 	te->r.svFlags |= SVF_BROADCAST;
 }
 
-void Team_ReturnFlag( int team ) {
-	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+void Team_ReturnFlag( gentity_t *ent ) {
+	int team = ent->item->giTag == PW_REDFLAG ? TEAM_RED : TEAM_BLUE;
+	Team_ReturnFlagSound( ent, team );
+	Team_ResetFlag( ent );
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
 }
 
@@ -431,19 +436,21 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 	}
 
 	if ( ent->item->giTag == PW_REDFLAG ) {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_RED ), TEAM_RED );
+		Team_ReturnFlagSound( ent, TEAM_RED );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
-			//G_matchPrintInfo( "Axis have returned the objective!", qfalse);
-			trap_SendServerCommand( -1, "cp \"Axis have returned the objective!\" 2" );
-			//G_writeObjectiveEvent("Axis", "Axis have returned the objective", ".."  );
+			trap_SendServerCommand( -1, "cp \"^5Axis have returned the objective!\" 2" );
+			AP("prioritypopin \"^5Axis have returned the objective!\n\"");
 			G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 		}
 	} else if ( ent->item->giTag == PW_BLUEFLAG )     {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_BLUE ), TEAM_BLUE );
+		Team_ReturnFlagSound( ent, TEAM_BLUE );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
-			//G_matchPrintInfo("Allies have returned the objective!", qfalse);
-			trap_SendServerCommand( -1, "cp \"Allies have returned the objective!\" 2" );
-			//G_writeObjectiveEvent("Allied", "Allies have returned the objective", ".."  );
+			trap_SendServerCommand( -1, "cp \"^5Allies have returned the objective!\" 2" );
+			AP("prioritypopin \"^5Allies have returned the objective!\n\"");
 			G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 		}
 	}
@@ -479,8 +486,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 			if ( cl->sess.sessionTeam == TEAM_RED ) {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_secure.wav" );
-				//G_matchPrintInfo(va("Axis have returned %s!", ent->message), qfalse);
-				trap_SendServerCommand( -1, va( "cp \"Axis have returned %s!\n\" 2", ent->message ) );
+				trap_SendServerCommand( -1, va( "cp \"^5Axis have returned %s!\n\" 2", ent->message ) );
+				AP(va("prioritypopin \"^5Axis have returned %s!\n\"", ent->message));
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 				}
@@ -489,8 +496,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 			} else {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
-				//G_matchPrintInfo(va("Allies have returned %s!", ent->message), qfalse);
-				trap_SendServerCommand( -1, va( "cp \"Allies have returned %s!\n\" 2", ent->message ) );
+				trap_SendServerCommand( -1, va( "cp \"^5Allies have returned %s!\n\" 2", ent->message ) );
+				AP(va("prioritypopin \"^5Allies have returned %s!\n\"", ent->message));
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 				}
@@ -498,6 +505,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
                 G_writeObjectiveEvent(other, objReturned  );
 				cl->sess.obj_returned++;
 			}
+
 			// dhm
 		}
 // jpw 800 672 2420
@@ -509,7 +517,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		other->client->pers.teamState.flagrecovery++;
 		other->client->pers.teamState.lastreturnedflag = level.time;
 		//ResetFlag will remove this entity!  We must return zero
-		Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+		Team_ReturnFlagSound( ent, team );
+		Team_ResetFlag( ent );
 		return 0;
 	}
 
@@ -518,6 +527,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		return 0;
 	}
 
+	// Only CTF below
+	
 	// the flag is at home base.  if the player has the enemy
 	// flag, he's just won!
 	if ( !cl->ps.powerups[enemy_flag] ) {
@@ -543,7 +554,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		AddScore( other, WOLF_CAPTURE_BONUS );
 		PrintMsg( NULL,"%s" S_COLOR_WHITE " captured enemy objective!\n",cl->pers.netname );
 		//G_writeObjectiveEvent((team == TEAM_RED ? "Axis" : "Allied"), va("%s captured objective!", cl->pers.netname), va("%s", cl->pers.netname)   );
-		G_writeObjectiveEvent(other, objCapture  );
+		//G_writeObjectiveEvent(other, objCapture  ); // KK we do this in G_matchInfoDump
 	} else {
 		AddScore( other, CTF_CAPTURE_BONUS );
 	}
@@ -571,7 +582,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 // JPW NERVE
 				if ( g_gametype.integer >= GT_WOLF ) {
 					AddScore( player, WOLF_CAPTURE_BONUS );
-					//G_writeObjectiveEvent(player, objCapture  ); // KK don't think this should be here as it's giving objCapture to players who didn't cap docs
+					//G_writeObjectiveEvent(player, objCapture  ); // KK we do this in G_matchInfoDump
 				} else {
 // jpw
 					AddScore( player, CTF_CAPTURE_BONUS );
@@ -611,6 +622,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	gclient_t *cl = other->client;
 	gentity_t *te, *gm;
 
+	ent->s.density--; // ET Port for multiple document objectives
+	
 	// hey, its not our flag, pick it up
 	if ( g_gametype.integer >= GT_WOLF ) {
 // JPW NERVE
@@ -624,8 +637,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 		if ( cl->sess.sessionTeam == TEAM_RED ) {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_taken.wav" );
-			//G_matchPrintInfo(va("Axis have stolen %s!", ent->message), qfalse);
-			trap_SendServerCommand( -1, va( "cp \"Axis have stolen %s!\n\" 2", ent->message ) );
+			AP(va("prioritypopin \"^1Axis have stolen %s!\n\"", ent->message));
+			trap_SendServerCommand( -1, va( "cp \"^5Axis have stolen %s!\n\" 2", ent->message ) );
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "allied_object_stolen" );
 			}
@@ -633,8 +646,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
             G_writeObjectiveEvent(other, objTaken  );
 		} else {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_taken.wav" );
-			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
-			trap_SendServerCommand( -1, va( "cp \"Allies have stolen %s!\n\" 2", ent->message ) );
+			AP(va("prioritypopin \"^1Allies have stolen %s!\n\"", ent->message));
+			trap_SendServerCommand( -1, va( "cp \"^5Allies have stolen %s!\n\" 2", ent->message ) );
 
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "axis_object_stolen" );
@@ -651,14 +664,24 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 
 	if ( team == TEAM_RED ) {
-		cl->ps.powerups[PW_REDFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_REDFLAG] = INT_MAX;
 	} else {
-		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX;
+	} // flags never expire
 
+	// store the entitynum of our original flag spawner
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		cl->flagParent = ent->s.otherEntityNum;
+	} else {
+		cl->flagParent = ent->s.number;
 	}
 	cl->pers.teamState.flagsince = level.time;
 
-	return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	if ( ent->s.density > 0 ) {
+		return 1; // We have more flags to give out, spawn back quickly
+	} else {
+		return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	}
 }
 
 int Pickup_Team( gentity_t *ent, gentity_t *other ) {
@@ -992,13 +1015,13 @@ Format:
 
 ==================
 */
-void TeamplayInfoMessage( gentity_t *ent ) {
+void TeamplayInfoMessage(gentity_t* ent) {
 	int identClientNum, identHealth;                // NERVE - SMF
 	char entry[1024];
 	char string[1400];
 	int stringlength;
 	int i, j;
-	gentity_t   *player;
+	gentity_t* player;
 	int cnt;
 	int actualHealth, displayHealth, playerLimbo;
 
@@ -1660,17 +1683,30 @@ OSPx - G_teamReset (et port)
 Resets a team's settings
 ===========
 */
-void G_teamReset(int team_num, qboolean fClearSpecLock) {
-	teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
-	teamInfo[team_num].team_name[0] = 0;
-	teamInfo[team_num].timeouts = match_timeoutcount.integer;
+void G_teamReset(int team_num, qboolean fClearSpecLock, qboolean bothTeams) {
 
-	if (fClearSpecLock) {
-		teamInfo[team_num].spec_lock = qfalse;
+	if (bothTeams)
+	{
+		for (int i = TEAM_RED; i <= TEAM_BLUE; i++)
+		{
+			teamInfo[i].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+			teamInfo[i].team_name[0] = 0;
+			teamInfo[i].timeouts = match_timeoutcount.integer;
+
+			if (fClearSpecLock) {
+				teamInfo[i].spec_lock = qfalse;
+			}
+		}
 	}
+	else
+	{
+		teamInfo[team_num].team_lock = (match_latejoin.integer == 0 && g_gamestate.integer == GS_PLAYING);
+		teamInfo[team_num].team_name[0] = 0;
+		teamInfo[team_num].timeouts = match_timeoutcount.integer;
 
-	if (g_gamelocked.integer > 0) {
-		trap_Cvar_Set("g_gamelocked", "0");
+		if (fClearSpecLock) {
+			teamInfo[team_num].spec_lock = qfalse;
+		}
 	}
 }
 
@@ -1683,8 +1719,7 @@ void G_shuffleTeams( void ) {
 
 	gclient_t *cl;
 
-	G_teamReset( TEAM_RED, qfalse );
-	G_teamReset( TEAM_BLUE, qfalse);
+	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < TEAM_NUM_TEAMS; i++ ) {
 		aTeamCount[i] = 0;
@@ -1707,15 +1742,6 @@ void G_shuffleTeams( void ) {
 
 		cTeam = ( i % 2 ) + TEAM_RED;
 
-		if ( cl->sess.sessionTeam != cTeam ) {
-			/*G_LeaveTank( g_entities + sortClients[i], qfalse );
-			G_RemoveClientFromFireteams( sortClients[i], qtrue, qfalse );
-			if ( g_landminetimeout.integer ) {
-				G_ExplodeMines( g_entities + sortClients[i] );
-			}
-			G_FadeItems( g_entities + sortClients[i], MOD_SATCHEL );*/
-		}
-
 		cl->sess.sessionTeam = cTeam;
 
 		//G_UpdateCharacter( cl );
@@ -1731,9 +1757,8 @@ void G_swapTeams( void ) {
 	int i;
 	gclient_t *cl;
 
-	for ( i = TEAM_RED; i <= TEAM_BLUE; i++ ) {
-		G_teamReset( i, qfalse );
-	}
+	G_swapTeamLocks();
+	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		cl = level.clients + level.sortedClients[i];
@@ -1912,6 +1937,9 @@ void G_readyReset( qboolean aForced ) {
 // if a player leaves a team (disconnect to change teams) reset the team's ready status by setting one player to not ready
 void G_readyResetOnPlayerLeave( int team ) {
 	if (g_gamestate.integer == GS_WARMUP && g_tournament.integer) {
+
+		trap_Cvar_Set("g_swapteams", "0"); // make sure we don't swap teams with our fubar swap teams logic
+
 		int i, randomPlayer = -1;
 		qboolean resetStatus = qfalse;
 
@@ -1931,7 +1959,6 @@ void G_readyResetOnPlayerLeave( int team ) {
 
 		if (resetStatus && randomPlayer > 0) {
 			level.clients[randomPlayer].pers.ready = qfalse;
-			level.clients[randomPlayer].ps.powerups[PW_READY] = 0;
 			player_ready_status[randomPlayer].isReady = qfalse;
 			CPx(randomPlayer, "print \"^3Team count changed. Please READY your self once more.\n\"");
 		}
@@ -1951,6 +1978,6 @@ void G_readyStart( void ) {
 void G_readyTeamLock( void ) {
 	teamInfo[TEAM_RED].team_lock = qtrue;
 	teamInfo[TEAM_BLUE].team_lock = qtrue;
-	trap_Cvar_Set("g_gamelocked", "3");
+	//trap_Cvar_Set("g_gamelocked", "3");
 }
 

@@ -19,6 +19,13 @@
 | con_height | `float` | `0.1-1.0` | `0.5` | Change console height |
 | cl_activateLean | `integer` | `0-1` | `1` | Toggle leaning when holding move keys and +activate |
 | r_bloom | `integer` | `0-1` | `0` | Enable/disable bloom effect |
+| con_type | `integer` | `0-1` | `0` | Enable/disable con_color |
+| con_colorRed | `float` | `0.0-1.0` | `0.5` | Change console color in the red range |
+| con_colorGreen | `float` | `0.0-1.0` | `0.5` | Change console color in the green range |
+| con_colorBlue | `float` | `0.0-1.0` | `0.5` | Change console color in the blue range |
+| con_colorAlpha | `float` | `0.0-1.0` | `1` | Change console color opacity |
+| r_mode | `integer` | `-2-21` | `6` | `-2` - Use desktop resolution, `-1` - custom |
+| r_noborder | `integer` | `0-1` | `0` | Borderless window |
 
 #### Mod (cg)
 | Cvar | Argument type | Value range | Default | Description |
@@ -52,8 +59,8 @@
 | cg_tracers | `integer` | `0-3` | `1` | Draw bullet tracers. `1` - all, `2` - own only, `3` - other's only |
 | cg_drawTriggers | `integer` | `0-1` | `1` | Draw objeective triggers (for Shoutcasters only) |
 | cg_hitsounds | `bitflag` | `0-1-2-4` | `0` | Control hitsounds. `1` - headshot only, `2` - body only, `4` - team only, `7` - all |
-| cg_hitsoundBodyStyle | `integer` | `1-9` | `1` | Change body hit sound |
-| cg_hitsoundHeadStyle | `integer` | `1-11` | `1` | Change head hit sound |
+| cg_hitsoundBodyStyle | `integer` | `1-5` | `1` | Change body hit sound |
+| cg_hitsoundHeadStyle | `integer` | `1-9` | `1` | Change head hit sound |
 | cg_spawnTimer_period | `integer` | `0-60` | `0` | [See here (use /timerset seconds)](https://www.youtube.com/watch?v=_NNYI8VbFyY) |
 | cg_spawnTimer_set | `integer` | `-1-60` | `-1` | [See here (use /timerset seconds)](https://www.youtube.com/watch?v=_NNYI8VbFyY) |
 | cg_drawReinforcementTime | `integer` | `0-3` | `1` | Draw respawn time. `1` - default, `2` - new, `3` - default and new |
@@ -87,14 +94,15 @@
 | cg_drawFrags | `integer` | `0-1` | `1` | Enable/disable "you killed" frag center prints |
 | cg_fragsY | `integer` | `-999-999` | `0` | Change frag center prints position in the vertical axis |
 | cg_fragsWidth | `integer` | `-999-999` | `16` | Change frag center prints char width |
+| cg_showPriorityText| `integer` | `0-1` | `1` | Enable/disable objective taken/returned prints |
+| cg_priorityTextX | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the horizontal axis |
+| cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
+| cg_lagometer | `integer` | `0-2` | `0` | 1 - normal, 2 - draw speed |
 
 # Server  
 #### Engine (sv)
 | Cvar | Argument type | Value range | Default | Description |
 |---------|---------------|-------------|---------|-------------|
-| wh_active | `integer` | `0-1` | `0` | Enable/disable wallhack prevention code. [See here](https://github.com/lrq3000/ioquake3-anti-cheat) |
-| wh_bbox_horz | `integer` | `0-99` | `30` | Change horizontal dimensions of the player's bbox when tracing for visibility |
-| wh_bbox_vert | `integer` | `0-99` | `60` | Change vertical dimensions of the player's bbox when tracing for visibility |
 | sv_wwwDownload | `integer` | `0-1` | `0` | Enable/disable http downloads (currently disabled) |
 | sv_wwwBaseURL | `string` | `N/A` | `https://maps.rtcwmp.com/` | URL to redirect clients to for HTTP downloads |
 | sv_GameConfig | `string` | `N/A` | `""` | Game fs/configs/name.config (server settings and cvar restrictions) to load at startup |
@@ -157,4 +165,16 @@
 | g_spawnOffset | `integer` | `0-99` | `9` | Maximum spawn offset variance between teams (-1) |
 | g_bodiesGrabFlags | `integer` | `0-1` | `1` | Enable/disable dead clients grabbing flags |
 | g_mapScriptDirectory | `string` | `N/A` | `""` | Directory to load map scripts from (must be in fs) |
+| g_allowForceTapout | `integer` | `0-1` | `1` | Allow forcetapout globally |
+| g_alternatePing | `integer` | `0-1` | `1` | Display alternate ping - calculated from ps commands in mod instead of engine |
+| g_fixedphysicsfps | `integer` | `0-333` | `125` | Simulate framerate behavior for all clients |
+| g_allowSS | `integer` | `0-1` | `0` | Allow clients to use `/reqss id` | 
+| g_ssAddress | `string` | `N/A` | `none` | Remote address for SS e.g. hostname or ip:port | 
+| g_ssWebhookId | `string` | `N/A` | `none` | id contained in the discord webhook link (numbers only) e.g. `webhooks/id/` | 
+| g_ssWebhookToken | `string` | `N/A` | `none` | token contained in the discord webhook link (chars) e.g. `webhooks/id/token` | 
+| g_ssWaitTime | `integer` | `30-9999` | `30` | wait time between reqss cmds to prevent spam | 
+| g_reviveSameDirection | `integer` | `0-1` | `0` | when player is revived they will have same viewangle as death | 
+| g_logClientInput | `integer` | `0-1` | `0` | turn on to log unknown client commands
+| g_clientLogFile | `integer` | `0-1` | `logs/clientInput.log` | log file for unknown client commands
+| g_broadcastClients | `integer` | `0-1` | `0` | fix clients appearing from thin air on some maps
 

@@ -1015,7 +1015,10 @@ static void PM_DeadMove( void ) {
 	// extra friction
 
 	forward = VectorLength( pm->ps->velocity );
-	forward -= 20;
+	// RTCWPro
+	//forward -= 20;
+	forward -= 2000 * pml.frametime;
+	// RTCWPro end
 	if ( forward <= 0 ) {
 		VectorClear( pm->ps->velocity );
 	} else {
@@ -1246,7 +1249,7 @@ static void PM_CrashLand( void ) {
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;
-	pm->ps->bobTimer = 0; // RTCWPro
+	pm->ps->quickGrenTime = 0; // RTCWPro hijack for bobtimer
 }
 
 
@@ -1554,11 +1557,12 @@ static void PM_Footsteps( void ) {
 	int animResult = -1;
 	// RTCWPro
 	int	maxBobTime;
+	extern int trap_Cvar_VariableIntegerValue(const char* var_name);
 	static qboolean is_dedicated_server = -1;
 
 	if (is_dedicated_server == -1) 
 	{
-		is_dedicated_server = pm->ps->fixBob;
+		is_dedicated_server = trap_Cvar_VariableIntegerValue("dedicated");
 	}
 
 	bobmove = 0.0f;
@@ -1776,8 +1780,8 @@ static void PM_Footsteps( void ) {
 	//pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
 	if (is_dedicated_server) 
 	{
-		pm->ps->bobTimer += pml.msec;
-		float bobScale = (float)pm->ps->bobTimer / (float)maxBobTime;
+		pm->ps->quickGrenTime += pml.msec; // RTCWPro hijack for bobtimer
+		float bobScale = (float)pm->ps->quickGrenTime / (float)maxBobTime;
 
 		// check for footstep / splash sounds
 		old = pm->ps->bobCycle;

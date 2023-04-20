@@ -280,6 +280,7 @@ void Weapon_MagicAmmo( gentity_t *ent ) {
 RTCWPro
 This is taken out of Weapon_Syringe
 so it can be used for other stuff
+NOTE: this is only used for testing and user has to be a referee
 ================
 */
 qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
@@ -682,20 +683,28 @@ void Weapon_Engineer( gentity_t *ent ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
 								G_matchPrintInfo(va("^5Dynamite planted near %s!", hit->track), qfalse);
-								ent->client->sess.dyn_planted++;
-								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
-                                    G_writeObjectiveEvent(ent, objDynPlant  );
 
+								if (g_gamestate.integer == GS_PLAYING)
+								{
+									ent->client->sess.dyn_planted++;
+									if (g_gameStatslog.integer) {
+										//G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+										G_writeObjectiveEvent(ent, objDynPlant);
+
+									}
 								}
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
 								G_matchPrintInfo(va("^5Dynamite planted near objective #%d!", hit->count), qfalse);
-								ent->client->sess.dyn_planted++;
-								if (g_gameStatslog.integer) {
-                                   //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
-                                   G_writeObjectiveEvent(ent, objDynPlant  );
+								
+								if (g_gamestate.integer == GS_PLAYING)
+								{
+									ent->client->sess.dyn_planted++;
+									if (g_gameStatslog.integer) {
+										//G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+										G_writeObjectiveEvent(ent, objDynPlant);
 
+									}
 								}
 							}
 						}
@@ -705,9 +714,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-							G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
-							ent->client->sess.obj_destroyed++;
-//	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
+
+//	jpw pulled				hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
 					}
@@ -768,11 +776,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 									trap_SendServerCommand(-1, "cp \"Axis engineer disarmed the Dynamite!\n\"");
 									G_matchPrintInfo(va("^5Axis defused dynamite near %s!", hit->track), qfalse);
 
-									ent->client->sess.dyn_defused++;
+									if (g_gamestate.integer == GS_PLAYING)
+									{
+										ent->client->sess.dyn_defused++;
 
-									if (g_gameStatslog.integer) {
-										G_writeObjectiveEvent(ent, objDynDefuse);
-										//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										if (g_gameStatslog.integer) {
+											G_writeObjectiveEvent(ent, objDynDefuse);
+											//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										}
 									}
 
 									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/axis/g-dynamite_defused.wav");
@@ -788,11 +799,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 									trap_SendServerCommand(-1, "cp \"Allied engineer disarmed the Dynamite!\n\"");
 									G_matchPrintInfo(va("^5Allies defused dynamite near %s!", hit->track), qfalse);
 
-									ent->client->sess.dyn_defused++;
+									if (g_gamestate.integer == GS_PLAYING)
+									{
+										ent->client->sess.dyn_defused++;
 
-									if (g_gameStatslog.integer) {
-										G_writeObjectiveEvent(ent, objDynDefuse);
-										// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										if (g_gameStatslog.integer) {
+											G_writeObjectiveEvent(ent, objDynDefuse);
+											// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										}
 									}
 
 									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/allies/a-dynamite_defused.wav");
@@ -813,14 +827,15 @@ void Weapon_Engineer( gentity_t *ent ) {
 // (close air support should *always* drop parallel to friendly lines, tho accidents do happen)
 extern void G_ExplodeMissile( gentity_t *ent );
 
-void G_AirStrikeExplode( gentity_t *self ) {
+void G_AirStrikeExplode(gentity_t* self) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
+
 	// RTCWPro - moved here due to rogue bombs that never truly exploded
-    self->damage = 400;
-    self->splashDamage = 400;
-    self->splashRadius = 400;
+	self->damage = 400;
+	self->splashDamage = 400;
+	self->splashRadius = 400;
     // end addition
 	self->think = G_ExplodeMissile;
 	self->nextthink = level.time + 50;
@@ -1106,8 +1121,8 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_BROADCAST;
 				bomb->classname = "props_explosion"; // was "air strike"
 				bomb->damage        = 0; // maybe should un-hard-code these?
-				bomb->splashDamage  = 90;
-				bomb->splashRadius  = 50;
+				bomb->splashDamage  = 0; // RtcwPro no damage for prop explosion
+				bomb->splashRadius  = 0; // RtcwPro no damage for prop explosion
 //		bomb->s.weapon	= WP_SMOKE_GRENADE;
 				// TTimo ambiguous else
 				if ( ent->client != NULL ) { // set team color on smoke
@@ -1121,9 +1136,9 @@ void Weapon_Artillery( gentity_t *ent ) {
 			} else {
 				bomb->nextthink = level.time + 8950 + 2000 * i + crandom() * 800;
 				bomb->classname = "air strike";
-				bomb->damage        = 0;
-				bomb->splashDamage  = 400;
-				bomb->splashRadius  = 400;
+				bomb->damage        = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashDamage  = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashRadius  = 0; // RtcwPro no damage until airstrikeexplode is called
 			}
 			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->splashMethodOfDeath   = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
@@ -1998,7 +2013,8 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	if (ent->client)
 	{
 		// antilag lerp if enough delay between client and server.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		// RTCWPro added cg_antilag client check (RtCW pub port)
+		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
 		}
@@ -2013,7 +2029,8 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	if (ent->client)
 	{
 		// restore all client positions to before the antilag lerp.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		// RTCWPro added cg_antilag client check (RtCW pub port)
+		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
 			G_UnTimeShiftAllClients(ent);
 		}
@@ -2376,7 +2393,7 @@ gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenType ) {
 
 		te = G_TempEntity( m->s.pos.trBase, EV_GLOBAL_SOUND );
 		te->s.eventParm = G_SoundIndex( "sound/multiplayer/airstrike_01.wav" );
-		te->r.svFlags |= SVF_BROADCAST | SVF_USE_CURRENT_ORIGIN;
+		te->r.svFlags |= SVF_BROADCAST;
 	}
 	// jpw
 

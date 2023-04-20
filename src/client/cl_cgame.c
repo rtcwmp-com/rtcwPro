@@ -546,8 +546,10 @@ void CL_CheckRestStatus(void) {
 			int violations = Cvar_ValidateRest();
 
 			if (violations > 0) {
-				Com_Printf(">> ^3You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
-				Com_Printf(">> ^3Please use /violations and correct them.\n");
+				Com_Printf("^5CVAR >>>>>\n");
+				Com_Printf("^5CVAR >>>>> You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
+				Com_Printf("^5CVAR >>>>> Please use /violations and correct them.\n");
+				Com_Printf("^5CVAR >>>>>\n");
 			}
 			cl.handle.warnedTime = cls.realtime + (violations < 1 ? RKVALD_TIME_PING_L : RKVALD_TIME_PING_S);
 			CL_AddReliableCommand(va("%s %s", CTL_RKVALD, violations < 1 ? RKVALD_OK : RKVALD_NOT_OK));
@@ -586,6 +588,8 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_CVAR_VARIABLESTRINGBUFFER:
 		Cvar_VariableStringBuffer( VMA( 1 ), VMA( 2 ), args[3] );
 		return 0;
+	case CG_CVAR_VARIABLEINTEGERVALUE:
+		return Cvar_VariableIntegerValue(VMA(1));
 	case CG_ARGC:
 		return Cmd_Argc();
 	case CG_ARGV:
@@ -964,10 +968,8 @@ int CL_CgameSystemCalls( int *args ) {
 		CL_SetRestStatus();
 		return 0;
 		// reqSS
-	case CG_REQ_SS:
-		//CL_RequestedSS(args[1]);
-		//CL_RequestedSS();
-		CL_RequestedSS( VMA(1));
+	case CG_REQUEST_SS:
+		CL_GenerateSS(VMA(1), VMA(2), VMA(3), VMA(4), VMA(5));
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );

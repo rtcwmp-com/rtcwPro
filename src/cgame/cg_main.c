@@ -230,7 +230,7 @@ vmCvar_t cg_medicChargeTime;
 vmCvar_t cg_engineerChargeTime;
 vmCvar_t cg_LTChargeTime;
 vmCvar_t cg_soldierChargeTime;
-vmCvar_t cg_redlimbitime;
+vmCvar_t cg_redlimbotime;
 vmCvar_t cg_bluelimbotime;
 // jpw
 
@@ -277,13 +277,6 @@ vmCvar_t cg_popupLimboMenu;
 vmCvar_t cg_descriptiveText;
 // -NERVE - SMF
 
-vmCvar_t cg_medicChargeTime;
-vmCvar_t cg_engineerChargeTime;
-vmCvar_t cg_LTChargeTime;
-vmCvar_t cg_soldierChargeTime;
-vmCvar_t cg_redlimbotime;
-vmCvar_t cg_bluelimbotime;
-
 vmCvar_t cg_autoReload;
 vmCvar_t cg_antilag;
 
@@ -304,7 +297,6 @@ vmCvar_t cg_complaintPopUp;
 vmCvar_t cg_drawReinforcementTime;
 vmCvar_t cg_noChat;
 vmCvar_t cg_noVoice;
-vmCvar_t cg_wideScreen;
 vmCvar_t cg_zoomedFOV;
 vmCvar_t cg_statsList;			// 0 = player only, 1 = team stats, 2 = stats of all players
 vmCvar_t cg_zoomedSens;
@@ -396,6 +388,9 @@ vmCvar_t cg_findMedic; // lock camera on medic at death
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
 vmCvar_t cg_pauseMusic;
+vmCvar_t cg_showPriorityText;
+vmCvar_t cg_priorityTextX;
+vmCvar_t cg_priorityTextY;
 vmCvar_t cg_notifyTextX;
 vmCvar_t cg_notifyTextY;
 vmCvar_t cg_notifyTextShadow;
@@ -477,9 +472,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_markTime, "cg_marktime", "10000", CVAR_ARCHIVE },
 	{ &cg_lagometer, "cg_lagometer", "0", CVAR_ARCHIVE },
 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
-	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT },
-	{ &cg_gun_y, "cg_gunY", "0", CVAR_CHEAT },
-	{ &cg_gun_z, "cg_gunZ", "0", CVAR_CHEAT },
+	{ &cg_gun_x, "cg_gunX", "0", CVAR_ARCHIVE }, //CVAR_CHEAT
+	{ &cg_gun_y, "cg_gunY", "0", CVAR_ARCHIVE }, //CVAR_CHEAT
+	{ &cg_gun_z, "cg_gunZ", "0", CVAR_ARCHIVE }, //CVAR_CHEAT
 	{ &cg_centertime, "cg_centertime", "5", CVAR_CHEAT },     // DHM - Nerve :: changed from 3 to 5
 	{ &cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
 	{ &cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE },
@@ -615,8 +610,6 @@ cvarTable_t cvarTable[] = {
 
 	{ &cg_autoReload, "cg_autoReload", "1", CVAR_ARCHIVE },
 
-	{ &cg_antilag, "g_antilag", "0", 0 },
-
 	// OSPx
 	{ &cg_showFlags, "cg_showFlags", "1", CVAR_ARCHIVE }, //mcwf GeoIP
 	{ &cg_crosshairPulse, "cg_crosshairPulse", "1", CVAR_ARCHIVE },
@@ -659,7 +652,7 @@ cvarTable_t cvarTable[] = {
 	{ &cg_chatAlpha, "cg_chatAlpha", "0.33", CVAR_ARCHIVE },
 	{ &cg_chatBackgroundColor, "cg_chatBackgroundColor", "", CVAR_ARCHIVE },
 	{ &cg_chatBeep, "cg_chatBeep", "0", CVAR_ARCHIVE },
-	{ &cg_antilag, "g_antilag", "0", 0 },
+	{ &cg_antilag, "cg_antilag", "0", 0 }, // RTCWPro
 
 	// draw speed
 	{ &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },
@@ -693,6 +686,11 @@ cvarTable_t cvarTable[] = {
 
 	// pause music
 	//{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
+
+	// priority text (shows objective pickups as a popup)
+	{ &cg_showPriorityText, "cg_showPriorityText", "1", CVAR_ARCHIVE },
+	{ &cg_priorityTextX, "cg_priorityTextX", "0", CVAR_ARCHIVE },
+	{ &cg_priorityTextY, "cg_priorityTextY", "350", CVAR_ARCHIVE },
 
 	// notify text
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
@@ -811,7 +809,7 @@ void CG_UpdateCvars( void ) {
 		if (cv->modificationCount != cv->vmCvar->modificationCount) {
 			cv->modificationCount = cv->vmCvar->modificationCount;
 
-			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload ||
+			if (cv->vmCvar == &cg_autoAction || cv->vmCvar == &cg_autoReload || cv->vmCvar == &cg_antilag ||
 				cv->vmCvar == &int_cl_timenudge || cv->vmCvar == &int_cl_maxpackets ||
 				cv->vmCvar == &cg_autoactivate || cv->vmCvar == &cg_predictItems || cv->vmCvar == &cg_hitsounds || 
 				cv->vmCvar == &cg_hitsoundBodyStyle || cv->vmCvar == &cg_hitsoundHeadStyle || cv->vmCvar == &str_cl_guid) {
@@ -860,7 +858,7 @@ void CG_setClientFlags(void) {
 	}
 
 	cg.pmext.bAutoReload = (cg_autoReload.integer > 0);
-	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d %d %s",
+	trap_Cvar_Set("cg_uinfo", va("%d %d %d %d %d %d %s %d",
 		// Client Flags
 		(
 			((cg_autoReload.integer > 0) ? CGF_AUTORELOAD : 0) |
@@ -879,7 +877,9 @@ void CG_setClientFlags(void) {
 		cg_hitsoundBodyStyle.integer,
 		cg_hitsoundHeadStyle.integer,
 		// GUID
-		str_cl_guid.string
+		str_cl_guid.string,
+		// Antilag
+		cg_antilag.integer
 	));
 }
 
@@ -1435,8 +1435,8 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.normalChat = trap_S_RegisterSound("sound/match/normalChat.wav");
 	cgs.media.teamChat = trap_S_RegisterSound("sound/match/teamChat.wav");
 	// end of round
-	cgs.media.alliesWin = trap_S_RegisterSound("sound/match/winallies.wav");
-	cgs.media.axisWin = trap_S_RegisterSound("sound/match/winaxis.wav");
+	cgs.media.alliesWin = trap_S_RegisterSound("sound/match/winallies_pro.wav");
+	cgs.media.axisWin = trap_S_RegisterSound("sound/match/winaxis_pro.wav");
 	// End
 }
 
@@ -2823,17 +2823,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	// NERVE - SMF
 // JPW NERVE -- commented out 'cause this moved
 
-	// OSPx - Account for WideScreen
-	if (cg_wideScreen.integer) {
-		trap_Cvar_Set("cg_gunX", "2");
-		trap_Cvar_Set("cg_gunY", "-1");
-		trap_Cvar_Set("cg_gunZ", "1");
-	}
-	else {
-		trap_Cvar_Set("cg_gunX", "0");
-		trap_Cvar_Set("cg_gunY", "0");
-		trap_Cvar_Set("cg_gunZ", "0");
-	}
 	if ( cgs.gametype >= GT_WOLF ) {
 		trap_Cvar_Set( "cg_drawTimer", "0" ); // jpw
 	}

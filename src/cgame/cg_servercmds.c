@@ -65,23 +65,14 @@ static void CG_ParseScores( void ) {
 		powerups = atoi( CG_Argv( i * 8 + 9 ) );
 		cg.scores[i].playerClass = atoi( CG_Argv( i * 8 + 10 ) );       // NERVE - SMF
 		cg.scores[i].respawnsLeft = atoi( CG_Argv( i * 8 + 11 ) );      // NERVE - SMF
-		// DHM - Nerve :: the following parameters are not sent by server
-		/*
-		cg.scores[i].accuracy = atoi(CG_Argv(i * 14 + 10));
-		cg.scores[i].impressiveCount = atoi(CG_Argv(i * 14 + 11));
-		cg.scores[i].excellentCount = atoi(CG_Argv(i * 14 + 12));
-		cg.scores[i].guantletCount = atoi(CG_Argv(i * 14 + 13));
-		cg.scores[i].defendCount = atoi(CG_Argv(i * 14 + 14));
-		cg.scores[i].assistCount = atoi(CG_Argv(i * 14 + 15));
-		cg.scores[i].perfect = atoi(CG_Argv(i * 14 + 16));
-		cg.scores[i].captures = atoi(CG_Argv(i * 14 + 17));
-		*/
+		/*cg.scores[i].isReady = atoi(CG_Argv(i * 9 + 12));*/
 
 		if ( cg.scores[i].client < 0 || cg.scores[i].client >= MAX_CLIENTS ) {
 			cg.scores[i].client = 0;
 		}
-		cgs.clientinfo[ cg.scores[i].client ].score = cg.scores[i].score;
-		cgs.clientinfo[ cg.scores[i].client ].powerups = powerups;
+		cgs.clientinfo[cg.scores[i].client].score = cg.scores[i].score;
+		cgs.clientinfo[cg.scores[i].client].powerups = powerups;
+		/*player_ready_status[cg.scores[i].client].isReady = cg.scores[i].isReady;*/
 
 		cg.scores[i].team = cgs.clientinfo[cg.scores[i].client].team;
 	}
@@ -109,15 +100,15 @@ static void CG_ParseTeamInfo( void ) {
 	numSortedTeamPlayers = atoi( CG_Argv( 3 ) );
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
-		client = atoi( CG_Argv( i * 11 + 4 ) );
+		client = atoi(CG_Argv(i * 11 + 4));
 
 		sortedTeamPlayers[i] = client;
 
-		cgs.clientinfo[client].location = atoi( CG_Argv( i * 11 + 5 ) );
-		cgs.clientinfo[client].health = atoi( CG_Argv( i * 11 + 6 ) );
-		cgs.clientinfo[client].powerups = atoi( CG_Argv( i * 11 + 7 ) );
+		cgs.clientinfo[client].location = atoi(CG_Argv(i * 11 + 5));
+		cgs.clientinfo[client].health = atoi(CG_Argv(i * 11 + 6));
+		cgs.clientinfo[client].powerups = atoi(CG_Argv(i * 11 + 7));
 
-		cg_entities[client].currentState.teamNum = atoi( CG_Argv( i * 11 + 8 ) );
+		cg_entities[client].currentState.teamNum = atoi(CG_Argv(i * 11 + 8));
 
 		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 11 + 9));
 		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 11 + 10));
@@ -381,6 +372,18 @@ void CG_SetConfigValues( void ) {
 	cgs.scores2 = atoi( CG_ConfigString( CS_SCORES2 ) );
 	cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
 	cg.warmup = atoi( CG_ConfigString( CS_WARMUP ) );
+
+	// voting - Source ETL
+	// set all of this crap in cgs - it won't be set if it doesn't
+	// change, otherwise.  consider:
+	// vote was called 5 minutes ago for 'Match Reset'.  you connect.
+	// you're sent that value for CS_VOTE_STRING, but ignore it, so
+	// you have nothing to use if another 'Match Reset' vote is called
+	// (no update will be sent because the string will be the same.)
+	cgs.voteTime = atoi(CG_ConfigString(CS_VOTE_TIME));
+	cgs.voteYes = atoi(CG_ConfigString(CS_VOTE_YES));
+	cgs.voteNo = atoi(CG_ConfigString(CS_VOTE_NO));
+	Q_strncpyz(cgs.voteString, CG_ConfigString(CS_VOTE_STRING), sizeof(cgs.voteString));
 
 	CG_ParseReinforcementTimes( CG_ConfigString( CS_REINFSEEDS ) );
 	CG_ParseReady(CG_ConfigString(CS_READY) );
@@ -830,7 +833,7 @@ static void CG_MapRestart( void ) {
 	trap_S_ClearLoopingSounds( qtrue );
 
 	cg.latchAutoActions = qfalse;			// OSPx - Auto Actions
-	cg.latchVictorySound = qfalse;          // NERVE - SMF
+
 // JPW NERVE -- reset render flags
 	cg_fxflags = 0;
 // jpw
@@ -1887,7 +1890,7 @@ void CG_printFile( char *str ) {
 	}
 }
 // Dump stats in file
-void CG_dumpStats( void ) {
+void CG_dumpStats(qboolean endOfRound) {
 	qtime_t ct;
 	qboolean fDoScores = qfalse;
 	const char *info = CG_ConfigString( CS_SERVERINFO );
@@ -1921,6 +1924,24 @@ void CG_dumpStats( void ) {
 	//		   before the scores result would ever hit us.. thus, we still keep proper ordering :)
 	if ( fDoScores ) {
 		trap_SendClientCommand( "scoresdump" );
+	}
+
+	// if intermission play the end of round sounds
+	if (cgs.gamestate == GS_PLAYING && endOfRound)
+	{
+		const char* buf;
+
+		s = CG_ConfigString(CS_MULTI_MAPWINNER);
+		buf = Info_ValueForKey(s, "winner");
+
+		if (atoi(buf))
+		{
+			trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_LOCAL_SOUND);
+		}
+		else
+		{
+			trap_S_StartLocalSound(cgs.media.axisWin, CHAN_LOCAL_SOUND);
+		}
 	}
 }
 /**************** L0 - OSP Stats dump ends here *****************/
@@ -1996,7 +2017,20 @@ static void CG_ServerCommand( void ) {
 		if (args >= 3) {
 			fade = qtrue;
 		}
-		CG_PopinPrint(CG_LocalizeServerCommand(CG_Argv(1)), SCREEN_HEIGHT - (SCREEN_HEIGHT * 0.25), SMALLCHAR_WIDTH, fade);
+		CG_PopinPrint(CG_LocalizeServerCommand(CG_Argv(1)), SMALLCHAR_HEIGHT, fade);
+		return;
+	}
+	if (!Q_stricmp(cmd, "prioritypopin")) {
+		if (cg_showPriorityText.integer)
+		{
+			int args = trap_Argc();
+			qboolean fade = qfalse;
+
+			if (args >= 3) {
+				fade = qtrue;
+			}
+			CG_PopinPrint(CG_LocalizeServerCommand(CG_Argv(1)), SMALLCHAR_HEIGHT, fade);
+		}
 		return;
 	}
 // L0 - OSP's stats dump
@@ -2008,7 +2042,9 @@ static void CG_ServerCommand( void ) {
 	// Weapon stats (console dump)
 	if ( !Q_stricmp( cmd, "ws" ) ) {
 		if ( cgs.dumpStatsTime > cg.time ) {
-			CG_dumpStats();
+			qboolean endOfRound = qfalse;
+			if (cg.predictedPlayerState.pm_type == PM_INTERMISSION) endOfRound = qtrue;
+			CG_dumpStats(endOfRound);
 		} else {
 			CG_parseWeaponStats_cmd( CG_printConsoleString );
 			cgs.dumpStatsTime = 0;
@@ -2294,14 +2330,39 @@ static void CG_ServerCommand( void ) {
 	}
 
 	// reqSS
-	if (!strcmp(cmd, "ssreq"))
+	if (!strcmp(cmd, "reqss"))
 	{
-//		CG_Printf("^nServer requested screenshot..sending.\n");
-		trap_ReqSS(CG_Argv(1));
+		//CG_Printf("^nServer requested screenshot.. sending.\n");
+		char* address = va("%s", CG_Argv(1));
+		char* hookid = va("%s", CG_Argv(2));
+		char* hooktoken = va("%s", CG_Argv(3));
+		char* waittime = va("%s", CG_Argv(4));
+		char* datetime = va("%s", CG_Argv(5));
+
+		trap_RequestSS(address, hookid, hooktoken, waittime, datetime);
+		return;
+	}
+
+	// apiQuery
+	if (!strcmp(cmd, "api"))
+	{
+		char* result = (char*)CG_Argv(1);
+		PrintApiResponse(result); // CG_printConsoleString);
 		return;
 	}
 
 	CG_Printf( "Unknown client game command: %s\n", cmd );
+}
+
+void PrintApiResponse(char* result) //void(txt_dump)(char*)
+{
+	result = Q_StrReplace(result, "[NL]", "\n");
+
+	CG_Printf("%s", result);
+
+	//char* result = va("%s", (char*)CG_Argv(1));
+	//txt_dump(result);
+	//txt_dump("\n");
 }
 
 /*

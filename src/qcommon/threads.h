@@ -35,12 +35,12 @@ If you have questions concerning this license or the applicable additional terms
 	#include <gnu/lib-names.h>
 	#include <pthread.h>
 	#include <dlfcn.h>
-#elif WIN32
+#else //WIN32
 	#include <process.h>
-#elif defined( __MACOS__ )
-	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
-#elif defined( __APPLE__ )
-	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
+//#elif defined( __MACOS__ )
+//	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
+//#elif defined( __APPLE__ )
+//	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
 #endif
 
 //

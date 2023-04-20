@@ -133,31 +133,22 @@ void G_refHelp_cmd(gentity_t *ent) {
 			return;
 		}
 
-		CP("print \"\n^3Referee commands:^7\n\"");
+		CP("print \"\n^3Voting commands:^7\n\"");
 		CP("print \"------------------------------------------\n\"");
 
 		G_voteHelp(ent, qfalse);
 
-		/*CP("print \"\n^5allready         putallies^7 <pid>  ^5speclock          warmup\n\"");
-		CP("print \"^5lock             putaxis^7 <pid>    ^5specunlock        warn ^7<pid>\n\"");
-		CP("print \"^5help             remove           unlock            mute ^7<pid>\n\"");
-		CP("print \"^5pause            maprestart          unpause           unmute ^7<pid>\n\"");
-		*/
-		CP("print \"Usage: ^3\\ref <cmd> [params]\n\n\"");
-
-		// Help for the console
-	}
-	else {
-		G_Printf("\nAdditional console commands:\n");
+		G_Printf("^3Ref console commands:^7\n");
 		G_Printf("----------------------------------------------\n");
 		G_Printf("allready    putallies <pid>     unlock\n");
 		G_Printf("lock        putaxis <pid>       unpause\n");
-		G_Printf("help        restart             warmup [value]\n");
+		G_Printf("help        warmup [value]      rename\n");
 		G_Printf("pause       speclock            warn <pid>\n");
-		G_Printf("remove      specunlock		  rename\n");
-		G_Printf("cancelvote  passvote\n\n");
+		G_Printf("remove      specunlock          reqss\n");
+		G_Printf("cancelvote  passvote            getstatus\n");
+		G_Printf("makescs     removescs\n\n");
 
-		G_Printf("Usage: <cmd> [params]\n\n");
+		G_Printf("^3Usage: \\ref <cmd> [params]\n");
 	}
 }
 
@@ -199,7 +190,7 @@ void G_ref_cmd(gentity_t *ent, qboolean fValue) { //unsigned int dwCommand,
 		}
 
 		if (trap_Argc() < 2) {
-			CP("cpm \"Usage: ref [password]\n\"");
+			CP("cpm \"Usage: ^3\\ref [password]\n\"");
 			return;
 		}
 
@@ -293,7 +284,7 @@ void G_scs_cmd(gentity_t* ent, qboolean fValue) {
 		}
 
 		if (trap_Argc() < 2) {
-			CP("cpm \"Usage: scs [password]\n\"");
+			CP("cpm \"Usage: ^3\\ref scs [password]\n\"");
 			return;
 		}
 
@@ -483,7 +474,7 @@ void G_refMakeShoutcaster_cmd(gentity_t* ent)
 
 	if (trap_Argc() != 3)
 	{
-		G_refPrintf(ent, "Usage: \\ref makeShoutcaster <pid>");
+		G_refPrintf(ent, "Usage: ^3\\ref makeShoutcaster <pid>");
 		return;
 	}
 
@@ -531,7 +522,7 @@ void G_refRemoveShoutcaster_cmd(gentity_t* ent)
 
 	if (trap_Argc() != 3)
 	{
-		G_refPrintf(ent, "Usage: \\ref removeShoutcaster <pid>");
+		G_refPrintf(ent, "Usage: ^3\\ref removeShoutcaster <pid>");
 		return;
 	}
 
@@ -597,10 +588,10 @@ void G_refLockTeams_cmd(gentity_t *ent, qboolean fLock) {
 	teamInfo[TEAM_RED].team_lock = (TeamCount(-1, TEAM_RED)) ? fLock : qfalse;
 	teamInfo[TEAM_BLUE].team_lock = (TeamCount(-1, TEAM_BLUE)) ? fLock : qfalse;
 
-	if (fLock)
-		trap_Cvar_Set("g_gamelocked", "3"); // This actually locks the teams based on logic from xMod
-	else
-		trap_Cvar_Set("g_gamelocked", "0"); // This actually unlocks the teams based on logic from xMod
+	//if (fLock)
+	//	trap_Cvar_Set("g_gamelocked", "3"); // This actually locks the teams based on logic from xMod
+	//else
+	//	trap_Cvar_Set("g_gamelocked", "0"); // This actually unlocks the teams based on logic from xMod
 
 	status = va("Referee has ^3%sLOCKED^7 teams", ((fLock) ? "" : "UN"));
 
@@ -778,7 +769,7 @@ void G_refWarning_cmd(gentity_t* ent) {
 	trap_Argv(2, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_refPrintf(ent, "usage: ref warn <clientname> [reason].");
+		G_refPrintf(ent, "Usage: ^3\\ref warn <clientname> [reason].");
 		return;
 	}
 
@@ -873,6 +864,40 @@ void G_refRequestSS(gentity_t* ent) {
 	gentity_t* targetent;
 	int pid;
 	char arg[MAX_TOKEN_CHARS];
+	char* datetime;
+	char cleanName[16];
+	char guid[64];
+	int remainingTime = (int)(g_ssWaitTime.integer - ((level.time - level.lastSSTime) / 1000));
+
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
+	{
+		G_refPrintf(ent, "g_ssAddress is not set!");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
+	{
+		G_refPrintf(ent, "g_ssWebhookId is not set!");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
+	{
+		G_refPrintf(ent, "g_ssWebhookToken is not set!");
+		return;
+	}
+
+	if (level.time - level.lastSSTime < g_ssWaitTime.integer * 1000)
+	{
+		CP(va("print \"Wait ^3%i ^7%s before requesting SS^1!\n\"", remainingTime, remainingTime == 1 ? "second" : "seconds"));
+		return;
+	}
+
+	if (level.intermissiontime)
+	{
+		CP("print \"Cannot use this command during intermission^1!\n\"");
+		return;
+	}
 
 	trap_Argv(2, arg, sizeof(arg));
 	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
@@ -881,9 +906,26 @@ void G_refRequestSS(gentity_t* ent) {
 
 	targetent = g_entities + pid;
 
-	trap_SendConsoleCommand(EXEC_APPEND, va("reqss %d\n", pid));
-	CP(va("print \"Requested SS from %s ^7(%d)\n\"", targetent->client->pers.netname, pid));
+	if (!targetent->client || targetent->client->pers.connected != CON_CONNECTED)
+	{
+		G_refPrintf(ent, "Invalid client id!");
+		return;
+	}
 
+	datetime = Delim_GetDateTime();
+	BG_cleanName(targetent->client->pers.netname, cleanName, 16, qfalse);
+	Q_strncpyz(guid, targetent->client->sess.guid, sizeof(guid));
+	memmove(guid, guid + 24, strlen(guid));
+
+	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
+		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
+
+	CP(va("print \"^7Requested %s_%s_%s.jpg from id %d\"", cleanName, datetime, guid, pid));
+	CP(va("print \"^7Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
+
+	G_LogPrintf("Referee %s requested %s_%s_%s.jpg from id %d\n", ent->client->pers.netname, cleanName, datetime, guid, pid);
+
+	level.lastSSTime = level.time;
 }
 
 /*
@@ -908,7 +950,8 @@ void G_refGetStatus(gentity_t* ent) {
 
 	CP(va("print \"\n^3Mod: ^7%s \n^3Server: ^7%s\n\"", GAMEVERSION, sv_hostname.string));
 	CP(va("print \"^3Map: ^7%s\n\"", mapName));
-	if (g_gamelocked.integer == 3) { CP("print \n\"^3Teams are locked^1!\n\""); }
+	if (teamInfo[TEAM_RED].team_lock == qtrue) CP("print \n\"^1Axis is locked^1!\n\"");
+	if (teamInfo[TEAM_BLUE].team_lock == qtrue) CP("print \n\"^4Allied is locked^1!\n\"");
 	CP("print \"^3--------------------------------------------------------------------------\n\"");
 	CP("print \"^7CN : Team : Name            : ^3IP              ^7: Ping ^7: Status\n\"");
 	CP("print \"^3--------------------------------------------------------------------------\n\"");
@@ -917,7 +960,7 @@ void G_refGetStatus(gentity_t* ent) {
 
 		if (g_entities[j].client && !(ent->r.svFlags & SVF_BOT)) {
 			char* team, * slot, * ip, * status, * adminTag, * ignoreStatus;
-			int ping, fps;
+			int ping; // , fps;
 			cl = g_entities[j].client;
 
 			// player is connecting
@@ -1016,7 +1059,7 @@ void G_PlayerBan() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: ban <clientname>.");
+		G_Printf("Usage: ^3\\ref ban <clientname>.");
 		return;
 	}
 
@@ -1044,7 +1087,7 @@ void G_MakeReferee() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: MakeReferee <clientname>.");
+		G_Printf("Usage: ^3\\ref MakeReferee <clientname>.");
 		return;
 	}
 
@@ -1069,7 +1112,7 @@ void G_RemoveReferee() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: RemoveReferee <clientname>.");
+		G_Printf("Usage: ^3\\ref RemoveReferee <clientname>.");
 		return;
 	}
 
@@ -1097,7 +1140,7 @@ void G_MuteClient() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: Mute <clientname>.");
+		G_Printf("Usage: ^3\\ref Mute <clientname>.");
 		return;
 	}
 
@@ -1123,7 +1166,7 @@ void G_UnMuteClient() {
 	trap_Argv(1, cmd, sizeof(cmd));
 
 	if (!*cmd) {
-		G_Printf("usage: Unmute <clientname>.\n");
+		G_Printf("Usage: ^3\\ref Unmute <clientname>.\n");
 		return;
 	}
 

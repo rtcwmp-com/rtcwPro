@@ -593,19 +593,28 @@ void respawn( gentity_t *ent ) {
 
 	ent->client->ps.pm_flags &= ~PMF_LIMBO; // JPW NERVE turns off limbo
 
-	// DHM - Nerve :: Decrease the number of respawns left
-	if ( g_maxlives.integer > 0 && ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0 ) {
-		ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
-	}
-
-	G_DPrintf( "Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT] );
-
 	// DHM - Nerve :: Already handled in 'limbo()'
 	if ( g_gametype.integer < GT_WOLF ) {
 		CopyToBodyQue( ent );
 	}
 
-	ClientSpawn( ent, qfalse );
+	if ((g_maxlives.integer > 0 || g_axismaxlives.integer > 0 || g_alliedmaxlives.integer > 0) && g_gamestate.integer == GS_PLAYING)
+	{
+		if (ent->client->ps.persistant[PERS_RESPAWNS_LEFT] > 0)
+		{
+			ClientSpawn(ent, qfalse);
+			ent->client->ps.persistant[PERS_RESPAWNS_LEFT]--;
+			G_DPrintf("Respawning %s, %i lives left\n", ent->client->pers.netname, ent->client->ps.persistant[PERS_RESPAWNS_LEFT]);
+		}
+		else
+		{
+			limbo(ent, qtrue);
+		}
+	}
+	else
+	{
+		ClientSpawn(ent, qfalse);
+	}
 
 	// L0 - antilag
 	G_ResetTrail(ent);
@@ -801,68 +810,81 @@ void SetWolfSkin( gclient_t *client, char *model ) {
 ===========
 RTCWPro
 Checks and potentially sets STAT_MAX_HEALTH for both teams
-Source: Nobo
-
-CheckMaxHealth
+Source: ET
 ===========
 */
-void CheckMaxHealth() {
+int G_CountTeamMedics(team_t team, qboolean alivecheck)
+{
 	int numMedics = 0;
-	int starthealth = 100;
-	int i, team;
-	gclient_t* cl;
+	int i, j;
 
-	// check both teams
-	for (team = TEAM_RED; team <= TEAM_SPECTATOR; ++team) {
+	for (i = 0; i < level.numConnectedClients; i++)
+	{
+		j = level.sortedClients[i];
 
-		numMedics = 0;
-
-		// count up # of medics on team
-		for (i = 0; i < level.maxclients; i++) {
-
-			cl = level.clients + i;
-
-			if (cl->pers.connected != CON_CONNECTED) {
-
-				continue;
-			}
-
-			if (cl->sess.sessionTeam != team) {
-
-				continue;
-			}
-
-			if (cl->ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC) {
-
-				continue;
-			}
-
-			numMedics++;
+		if (level.clients[j].sess.sessionTeam != team)
+		{
+			continue;
 		}
 
-		// compute health mod
-		starthealth = 100 + 10 * numMedics;
-		if (starthealth > 125) {
-
-			starthealth = 125;
+		if (level.clients[j].sess.playerType != PC_MEDIC)
+		{
+			continue;
 		}
 
-		// give everybody health mod in stat_max_health
-		for (i = 0; i < level.maxclients; i++) {
-
-			cl = level.clients + i;
-
-			if (cl->pers.connected == CON_DISCONNECTED) {
-
+		if (alivecheck)
+		{
+			if (g_entities[j].health <= 0)
+			{
 				continue;
 			}
 
-			if (cl->sess.sessionTeam == team) {
-
-				cl->pers.maxHealth = cl->ps.stats[STAT_MAX_HEALTH] = starthealth;
+			if (level.clients[j].ps.pm_type == PM_DEAD || (level.clients[j].ps.pm_flags & PMF_LIMBO))
+			{
+				continue;
 			}
 		}
+
+		numMedics++;
 	}
+
+	return numMedics;
+}
+
+/*
+===========
+RTCWPro
+Sets health based on number of medics
+Source: ET Legacy
+===========
+*/
+void AddMedicTeamBonus(gclient_t* client)
+{
+	//if (!(client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE))
+	//	return;
+
+	//gclient_t* cl;
+	int i, startHealth;
+
+	int numMedics = G_CountTeamMedics(client->sess.sessionTeam, qfalse);
+
+	// compute health mod
+	client->pers.maxHealth = 100 + 10 * numMedics;
+
+	if (client->pers.maxHealth > 125)
+	{
+		client->pers.maxHealth = 125;
+	}
+
+	if (client->sess.playerType == PC_MEDIC)
+	{
+		client->pers.maxHealth *= 1.12;
+
+		if (client->pers.maxHealth > 140)
+			client->pers.maxHealth = 140;
+	}
+
+	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 }
 
 void SetWolfSpawnWeapons( gentity_t *ent ) {
@@ -870,7 +892,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 	gclient_t* client = ent->client;
 
 	int pc = client->sess.playerType;
-	int starthealth = 100,i,numMedics = 0;   // JPW NERVE
+	int starthealth = 100, numMedics = 0;   // JPW NERVE
 	// L0 - ammoClips and NadeValues
 	//
 	// Patched this whole function but not commented it much so be aware..
@@ -897,7 +919,9 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 // Xian -- Commented out and moved to ClientSpawn for clarity
 //	client->ps.powerups[PW_INVULNERABLE] = level.time + 3000; // JPW NERVE some time to find cover
 
-	client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+	// RTCWPro - update ready status
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS)
+		client->ps.powerups[PW_READY] = (player_ready_status[client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
 
 	// Communicate it to cgame
 	client->ps.stats[STAT_PLAYER_CLASS] = pc;
@@ -1201,42 +1225,6 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			client->ps.ammo[WP_MEDKIT] = 1;
 		}
 	} // End Knifeonly stuff -- Ensure that medics get their basic stuff
-
-	// RTCWPro - moved to CheckMaxHealth
-	CheckMaxHealth();
-	/*
-	// JPW NERVE -- medics on each team make cumulative health bonus -- this gets overridden for "revived" players
-	// count up # of medics on team
-	for ( i = 0; i < level.maxclients; i++ ) {
-		if ( level.clients[i].pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		if ( level.clients[i].sess.sessionTeam != client->sess.sessionTeam ) {
-			continue;
-		}
-		if ( level.clients[i].ps.stats[STAT_PLAYER_CLASS] != PC_MEDIC ) {
-			continue;
-		}
-		numMedics++;
-	}
-
-	// compute health mod
-	starthealth = 100 + 10 * numMedics;
-	if ( starthealth > 125 ) {
-		starthealth = 125;
-	}
-
-	// give everybody health mod in stat_max_health
-	for ( i = 0; i < level.maxclients; i++ ) {
-		if ( level.clients[i].pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		if ( level.clients[i].sess.sessionTeam == client->sess.sessionTeam ) {
-			client->ps.stats[STAT_MAX_HEALTH] = starthealth;
-		}
-	}
-	// jpw
-	*/
 }
 // dhm - end
 
@@ -1536,17 +1524,17 @@ The game can override any of the settings and call trap_SetUserinfo
 if desired.
 ============
 */
-void ClientUserinfoChanged( int clientNum ) {
-	gentity_t *ent;
-	char    *s;
+void ClientUserinfoChanged(int clientNum) {
+	gentity_t* ent;
+	char* s;
 	char model[MAX_QPATH], modelname[MAX_QPATH];
 
-//----(SA) added this for head separation
+	//----(SA) added this for head separation
 	char head[MAX_QPATH];
 
 	char oldname[MAX_STRING_CHARS];
-	gclient_t   *client;
-	char    *c1;
+	gclient_t* client;
+	char* c1;
 	char userinfo[MAX_INFO_STRING];
 
 	ent = g_entities + clientNum;
@@ -1554,41 +1542,53 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	client->ps.clientNum = clientNum;
 
-	trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
 
 	// check for malformed or illegal info strings
-	if ( !Info_Validate( userinfo ) ) {
-		strcpy( userinfo, "\\name\\badinfo" );
+	if (!Info_Validate(userinfo)) {
+		strcpy(userinfo, "\\name\\badinfo");
 	}
 
 	// check for local client
-	s = Info_ValueForKey( userinfo, "ip" );
-	if ( s && !strcmp( s, "localhost" ) ) {
+	s = Info_ValueForKey(userinfo, "ip");
+	if (s && !strcmp(s, "localhost")) {
 		client->pers.localClient = qtrue;
-	//	client->sess.referee = RL_REFEREE;
+		//	client->sess.referee = RL_REFEREE;
 	}
-// L0
-	// Save IP for getstatus..
-	s = Info_ValueForKey( userinfo, "ip" );
-	if( s[0] != 0 ){
-		SaveIP_f( client, s );
+	// L0
+		// Save IP for getstatus..
+	s = Info_ValueForKey(userinfo, "ip");
+	if (s[0] != 0) {
+		SaveIP_f(client, s);
 	} // OSPx - Country Flags
 	else if (!(ent->r.svFlags & SVF_BOT) && !strlen(s)) {
 		// To solve the IP bug..
-		s =	va("%s", client->sess.ip);
+		s = va("%s", client->sess.ip);
 	}
-	// Check for "" GUID..
-	if (!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "D41D8CD98F00B204E9800998ECF8427E") ||
-		!Q_stricmp(Info_ValueForKey(userinfo, "cl_guid"), "d41d8cd98f00b204e9800998ecf8427e")) {
-		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
-	}
-	s = Info_ValueForKey( userinfo, "cg_uinfo" );
+
+	s = Info_ValueForKey(userinfo, "cg_uinfo");
 	//sscanf(s, "%i %i %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets);
 	//sscanf(s, "%i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, client->sess.guid);
-	sscanf(s, "%i %i %i %i %i %i %s", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets, 
-		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid);
+	sscanf(s, "%i %i %i %i %i %i %s %i", &client->pers.clientFlags, &client->pers.clientTimeNudge, &client->pers.clientMaxPackets,
+		&client->pers.hitSoundType, &client->pers.hitSoundBodyStyle, &client->pers.hitSoundHeadStyle, client->sess.guid, &client->pers.antilag);
 
-	if (Q_stricmp(client->sess.guid,NO_GUID)==0 ) {
+	// Check for "" GUID..
+	if (!Q_stricmp(client->sess.guid, "D41D8CD98F00B204E9800998ECF8427E") ||
+		!Q_stricmp(client->sess.guid, "d41d8cd98f00b204e9800998ecf8427e")) {
+		trap_DropClient(clientNum, "(Known bug) Corrupted GUID^3! ^7Restart your game..");
+	}
+
+	//// Check for Shared GUIDs and drop client - this is messing up stats
+	if (!Q_stricmp(client->sess.guid, "8E6A51BAF1C7E338A118D9E32472954E") ||
+		!Q_stricmp(client->sess.guid, "8e6a51baf1c7e338a118d9e32472954e") ||
+		!Q_stricmp(client->sess.guid, "58E419DE5A8B2655F6D48EAB68275DB5") ||
+		!Q_stricmp(client->sess.guid, "58e419de5a8b2655f6d48eab68275db5") ||
+		!Q_stricmp(client->sess.guid, "FBE2ED832F8415EFBAAA5DF10074484A") ||
+		!Q_stricmp(client->sess.guid, "fbe2ed832f8415efbaaa5df10074484a")) {
+		trap_DropClient(clientNum, "^3Shared GUID Violation. ^7Delete your RTCWKEY in Main and restart your game.");
+	}
+
+	if (!Q_stricmp(client->sess.guid,NO_GUID)) {
         trap_DropClient(clientNum, "Empty or invalid rtcwkey");
 	}
 
@@ -1674,7 +1674,12 @@ void ClientUserinfoChanged( int clientNum ) {
 	}
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;*/
 
-	CheckMaxHealth();
+	if (g_debugMode.integer)
+	{
+		AP(va("print \"ClientUserinfoChanged:%i class: %i\n\"", client->ps.clientNum, client->ps.teamNum));
+	}
+
+	AddMedicTeamBonus(client);
 	// RTCWPro
 
 	// set model
@@ -1772,7 +1777,7 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 
-		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\country\\255\\mu\\%i",
+		s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s\\cc\\255\\mu\\%i",
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1,
 				client->pers.maxHealth, client->sess.wins, client->sess.losses,
@@ -1780,7 +1785,7 @@ void ClientUserinfoChanged( int clientNum ) {
 				client->sess.uci, (client->sess.muted ? 1 : 0));
 	} else {
 	//	s = va( "n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
-			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\country\\%i\\mu\\%i\\ref\\%i\\scs\\%i",
+			s = va("n\\%s\\t\\%i\\model\\%s\\head\\%s\\c1\\%s\\w\\%i\\l\\%i\\cc\\%i\\mu\\%i\\ref\\%i\\scs\\%i",
 				client->pers.netname, client->sess.sessionTeam, model, head, c1, client->sess.wins, client->sess.losses,
 				client->sess.uci, (client->sess.muted ? 1 : 0), client->sess.referee, client->sess.shoutcaster);
 	}
@@ -1798,7 +1803,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			((client->sess.sessionTeam == TEAM_BLUE) ? "Allied" : "Spectator");
 
 		// Print essentials and skip the garbage
-		s = va("name\\%s\\team\\%s\\IP\\%s\\country\\%i\\muted\\%s\\status\\%i\\scs\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
+		s = va("name\\%s\\team\\%s\\IP\\%s\\cc\\%i\\muted\\%s\\status\\%i\\scs\\%i\\timenudge\\%i\\maxpackets\\%i\\guid\\%s",
 			client->pers.netname, team, client->sess.ip, client->sess.uci, (client->sess.muted ? "yes" : "no"), client->sess.referee,
 			client->sess.shoutcaster, client->pers.clientTimeNudge, client->pers.clientMaxPackets, client->sess.guid);
 	}
@@ -2331,12 +2336,20 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
 
+	// regardless of revive or respawn clear the powerups
+	if (client->ps.powerups)
+	{
+		ent->s.powerups = 0;
+		memset(client->ps.powerups, 0, sizeof(client->ps.powerups));
+	}
+
 	if ( revived ) {
 		spawnPoint = ent;
-		VectorCopy( ent->s.origin, spawn_origin );
+		VectorCopy(ent->r.currentOrigin, spawn_origin); // fix document/revive bug by using r.currentOrigin  //VectorCopy( ent->s.origin, spawn_origin );
 		spawn_origin[2] += 9;   // spawns seem to be sunk into ground?
 		VectorCopy( ent->s.angles, spawn_angles );
-	} else
+	}
+	else
 	{
 		ent->aiName = "player";  // needed for script AI
 		//ent->aiTeam = 1;		// member of allies
@@ -2550,9 +2563,17 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	}
 	// dhm - end
 
+	AddMedicTeamBonus(client);
+
 	// JPW NERVE ***NOTE*** the following line is order-dependent and must *FOLLOW* SetWolfSpawnWeapons() in multiplayer
 	// SetWolfSpawnWeapons() now adds medic team bonus and stores in ps.stats[STAT_MAX_HEALTH].
 	ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
+
+	if (g_debugMode.integer)
+	{
+		G_Printf("Player spawned with StartHealth: %i MaxHealth: %i STAT_MAX_HEALTH: %i\n", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]);
+		AP(va("print \"Player spawned with StartHealth:%i MaxHealth: %i STAT_MAX_HEALTH: %i\n\"", ent->health, client->pers.maxHealth, client->ps.stats[STAT_MAX_HEALTH]));
+	}
 
 	G_SetOrigin( ent, spawn_origin );
 	VectorCopy( spawn_origin, client->ps.origin );
@@ -2560,7 +2581,28 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// the respawned flag will be cleared after the attack and jump keys come up
 	client->ps.pm_flags |= PMF_RESPAWNED;
 
-	SetClientViewAngle( ent, spawn_angles );
+	// if spawning at spawn point do default view
+	if (!revived)
+	{
+		SetClientViewAngle( ent, spawn_angles );
+	}
+	// else if g_reviveSameDirection is enabled spawn them in the direction they were killed
+	else if (g_reviveSameDirection.integer)
+	{
+		vec3_t newangle;
+
+		// RtcwPro - restore the value for the client's view before death
+		newangle[YAW] = client->pers.deathYaw; //ps.persistant[PERS_DEATH_YAW];
+		newangle[PITCH] = 0;
+		newangle[ROLL] = 0;
+
+		SetClientViewAngle(ent, newangle);
+	}
+	// else do default view
+	else
+	{
+		SetClientViewAngle(ent, spawn_angles);
+	}
 
 	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		//G_KillBox( ent );
@@ -2608,31 +2650,6 @@ void ClientSpawn( gentity_t *ent, qboolean revived ) {
 	// RTCWPro - head stuff
 	// add the head entity if it already hasn't been
 	AddHeadEntity(ent);
-}
-
-/*
-================
-OSPx - check for team stuff..
-================
-*/
-void handleEmptyTeams(void) {
-
-	if (g_gamestate.integer != GS_INTERMISSION) {
-		if (!level.axisPlayers) {
-			G_teamReset(TEAM_RED, qtrue);
-
-			// Reset match if not paused with an empty team
-			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-		else if (!level.alliedPlayers) {
-			G_teamReset(TEAM_BLUE, qtrue);
-
-			// Reset match if not paused with an empty team
-			if (level.paused == PAUSE_NONE && g_gamestate.integer == GS_PLAYING)
-				Svcmd_ResetMatch_f(qtrue, qtrue);
-		}
-	}
 }
 
 /*
@@ -2693,36 +2710,53 @@ void ClientDisconnect( int clientNum ) {
 		TossClientItems( ent );
 
 		// New code for tossing flags
-		if ( g_gametype.integer >= GT_WOLF ) {
-			if ( ent->client->ps.powerups[PW_REDFLAG] ) {
-				item = BG_FindItem( "Red Flag" );
-				if ( !item ) {
-					item = BG_FindItem( "Objective" );
+		if (g_gametype.integer >= GT_WOLF) {
+			if (ent->client->ps.powerups[PW_REDFLAG]) {
+				item = BG_FindItem("Red Flag");
+				if (!item) {
+					item = BG_FindItem("Objective");
 				}
 
 				ent->client->ps.powerups[PW_REDFLAG] = 0;
 			}
-			if ( ent->client->ps.powerups[PW_BLUEFLAG] ) {
-				item = BG_FindItem( "Blue Flag" );
-				if ( !item ) {
-					item = BG_FindItem( "Objective" );
+			if (ent->client->ps.powerups[PW_BLUEFLAG]) {
+				item = BG_FindItem("Blue Flag");
+				if (!item) {
+					item = BG_FindItem("Objective");
 				}
 
 				ent->client->ps.powerups[PW_BLUEFLAG] = 0;
 			}
 
-			if ( item ) {
+			if (item) {
 				// OSPx - Fix documents passing exploit
 				launchvel[0] = 0;
 				launchvel[1] = 0;
 				launchvel[2] = 40;
 
-				flag = LaunchItem( item,ent->r.currentOrigin,launchvel,ent->s.number );
+				flag = LaunchItem(item, ent->r.currentOrigin, launchvel, ent->s.number);
 				flag->s.modelindex2 = ent->s.otherEntityNum2; // JPW NERVE FIXME set player->otherentitynum2 with old modelindex2 from flag and restore here
 				flag->message = ent->message;   // DHM - Nerve :: also restore item name
 				// Clear out player's temp copies
 				ent->s.otherEntityNum2 = 0;
 				ent->message = NULL;
+			}
+
+			// Record the players stats into the JSON if they /quit with timelimit under 15 seconds
+			//G_LogPrintf("WeaponStats: %s\n", G_createStats(ent));
+			if (g_gamestate.integer == GS_PLAYING)
+			{
+				if (g_gameStatslog.integer)
+				{
+					if (g_timelimit.value && level.paused == PAUSE_NONE)
+					{
+						// if time left in the round is less than 15 secs
+						int roundTimeLeft = (((g_timelimit.value * 60 * 1000) - ((level.time - level.startTime))) / 1000);
+
+						if (roundTimeLeft <= 15)
+							G_jstatsByPlayers(qtrue, qtrue, clientNum);
+					}
+				}
 			}
 		}
 	}
@@ -2738,7 +2772,7 @@ void ClientDisconnect( int clientNum ) {
 
 	// if a player disconnects during warmup make sure the team's ready status doesn't start the match
 	if (g_tournament.integer
-		&& g_gamestate.integer == GS_WARMUP
+		&& (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WARMUP_COUNTDOWN)
 		&& (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
 	{
 		G_readyResetOnPlayerLeave(ent->client->sess.sessionTeam);
@@ -2770,7 +2804,7 @@ void ClientDisconnect( int clientNum ) {
 
 	CalculateRanks();
 
-	handleEmptyTeams();
+	HandleEmptyTeams();
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );

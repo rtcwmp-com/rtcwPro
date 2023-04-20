@@ -485,7 +485,7 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			}
 		}
 
-		if (e < sv_maxclients->integer) {
+		/*if (e < sv_maxclients->integer) {
 			sharedEntity_t* client;
 
 			if (e == frame->ps.clientNum) {
@@ -502,7 +502,7 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 					continue;
 				}
 			}
-		}
+		}*/
 
 		// add it
 		SV_AddEntToSnapshot( svEnt, ent, eNums );
@@ -633,11 +633,11 @@ static void SV_BuildClientSnapshot( client_t *client ) {
 		state = &svs.snapshotEntities[svs.nextSnapshotEntities % svs.numSnapshotEntities];
 		*state = ent->s;
 
-		if (wh_active->integer && entityNumbers.snapshotEntities[i] < sv_maxclients->integer) {
+		/*if (wh_active->integer && entityNumbers.snapshotEntities[i] < sv_maxclients->integer) {
 			if (SV_PositionChanged(entityNumbers.snapshotEntities[i])) {
 				SV_RestorePos(entityNumbers.snapshotEntities[i]);
 			}
-		}
+		}*/
 
 		svs.nextSnapshotEntities++;
 		// this should never hit, map should always be restarted first in SV_Frame

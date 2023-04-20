@@ -159,9 +159,16 @@ void pCmd_players(gentity_t *ent, qboolean fParam) {
 		for (i = TEAM_RED; i <= TEAM_BLUE; i++) {
 			if (teamInfo[i].spec_lock) {
 				if (ent) {
-					CP(va("print \"** %s team is speclocked.\n\"", aTeams[i]));
+					CPx(ent->client->ps.clientNum, va("print \"** %s team is speclocked.\n\"", aTeams[i]));
 				}
 				else { G_Printf("** %s team is speclocked.\n", aTeams[i]); }
+			}
+
+			if (teamInfo[i].team_lock) {
+				if (ent) {
+					CPx(ent->client->ps.clientNum, va("print \"** %s team is locked.\n\"", aTeams[i]));
+				}
+				else { G_Printf("** %s team is locked.\n", aTeams[i]); }
 			}
 		}
 	}
@@ -538,7 +545,7 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 	} else {
 		ent->client->pers.ready = state;
 		if ( !level.intermissiontime ) {
-			if ( state ) {
+			if (state) {
 				ent->client->pers.ready = qtrue;
 				ent->client->ps.powerups[PW_READY] = INT_MAX;
 			}
@@ -593,7 +600,6 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 
 		if ((cl->client->pers.ready != ready) && !level.intermissiontime) {
 			cl->client->pers.ready = ready;
-			cl->client->ps.powerups[PW_READY] = (ready ? INT_MAX : 0);
 			++p;
 		}
 	}
@@ -675,6 +681,9 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
 		AP(va("print \"^z>> ^7%s ^zUnpaused the match.\n\"", ent->client->pers.netname));
+		// lock the teams after unpausing
+		teamInfo[TEAM_RED].team_lock = qtrue;
+		teamInfo[TEAM_BLUE].team_lock = qtrue;
 	}
 
     if (g_gameStatslog.integer) {
@@ -685,98 +694,51 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 
 /*
 ===========
-Lock or Unlock game
+Lock/Unlock team
 
-What a mess...
+NOTE: Somewhat messy due verbosity
+TODO: Clean this eventually..
 ===========
 */
-void pCmd_gamelocked(gentity_t *ent, qboolean unlock) {
-    int team = ent->client->sess.sessionTeam;
-    char tName[MAX_NETNAME];
-	//char *tag, *log;
-
-	if (team_nocontrols.integer) {
-		CP("print \"Team commands are not enabled on this server.\n\"");
-		return;
-	}
-	//tag = sortTag(ent);
-    DecolorString(aTeams[team], tName);
-
-	// Deals with unlocking
-	if (unlock) {
-		if (!g_gamelocked.integer) {
-			CP(va("print \"Both teams are already unlocked^z!\n\""));
-		return;
-		} else {
-			// Axis
-			if (!strcmp(tName,"red") || !strcmp(tName,"Axis")) {
-				if (g_gamelocked.integer == 1) {
-					trap_Cvar_Set( "g_gamelocked", "0" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^1Axis ^7team^z!\n\"", tName));
-				} else if (g_gamelocked.integer == 3) {
-					trap_Cvar_Set( "g_gamelocked", "2" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^1Axis ^7team^z!\n\"", tName));
-				} else {
-					CP(va("print \"^1Axis ^7team is already unlocked^z!\n\""));
-				return;
-				}
-			}
-			// Allied
-			else if (!strcmp(tName,"blue") || !strcmp(tName,"Allies")) {
-				if (g_gamelocked.integer == 2) {
-					trap_Cvar_Set( "g_gamelocked", "0" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
-				} else if (g_gamelocked.integer == 3) {
-					trap_Cvar_Set( "g_gamelocked", "1" );
-					AP(va("chat \"^zconsole:^7 %s has unlocked ^4Allied ^7team^z!\n\"", tName));
-				} else {
-					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
-				return;
-				}
-			// Both
-			}
-
-		}
-	return;
-	// Deals with locking
-	} else {
-		if (g_gamelocked.integer == 3) {
-			CP(va("print \"Both teams are already locked^z!\n\""));
-		return;
-		} else {
-			// Axis
-			if (!strcmp(tName,"red") || !strcmp(tName,"Axis")) {
-				if (!g_gamelocked.integer) {
-					trap_Cvar_Set( "g_gamelocked", "1" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^1Axis ^7team^z!\n\"", tName));
-				} else if (g_gamelocked.integer == 2) {
-					trap_Cvar_Set( "g_gamelocked", "3" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^1Axis ^7team^z!\n\"", tName));
-				} else {
-					CP(va("print \"^1Axis ^7team is already locked^1!\n\""));
-				return;
-				}
-			}
-			// Allied
-			else if (!strcmp(tName,"blue") || !strcmp(tName,"Allies")) {
-				if (!g_gamelocked.integer) {
-					trap_Cvar_Set( "g_gamelocked", "2" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
-				} else if (g_gamelocked.integer == 1) {
-					trap_Cvar_Set( "g_gamelocked", "3" );
-					AP(va("chat \"^zconsole:^7 %s has locked ^4Allied ^7team^z!\n\"", tName));
-				} else {
-					CP(va("print \"^4Allied ^7team is already unlocked^z!\n\""));
-				return;
-				}
-			// Both
-			}
-		// Log it
-
-		}
-	return;
-	}
+qboolean canTeamBeLocked(int team)
+{
+	if (team == TEAM_RED && level.axisPlayers < 1)
+		return qfalse;
+	else if (team == TEAM_BLUE && level.alliedPlayers < 1)
+		return qfalse;
+	else
+		return qtrue;
 }
+
+// Lock/Unlock
+void cmd_handleTeamLock(gentity_t* ent, qboolean tLock) {
+	char* tag = ent->client->pers.netname;
+	char* action = (tLock ? "Lock" : "Unlock");
+	char* teamTag = "";
+	int team = ent->client->sess.sessionTeam;
+
+	if (team != TEAM_NUM_TEAMS)
+	{
+		if (team == TEAM_BLUE) teamTag = "^4Allied^7"; else teamTag = "^1Axis^7";
+
+		if (teamInfo[team].team_lock == tLock) {
+			CP(va("print \"^1Error^7: %s team is already %sed!  \n\"", teamTag, action));
+			return;
+		}
+		else {
+			if (!canTeamBeLocked(team)) {
+				CP(va("print \"^1Error^7: %s team is empty!\n\"", teamTag));
+				return;
+			}
+			AP(va("chat \"console: %s has %sed %s team!\n\"", tag, action, teamTag));
+			teamInfo[team].team_lock = tLock;
+		}
+	}
+
+	return;
+}
+
+
 /*
 ===================
 OSP's stats
@@ -836,8 +798,8 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "topshots"))			{ G_weaponRankings_cmd( ent, qtrue, qtrue );	return qtrue;}
 	else if(!Q_stricmp(cmd, "weaponstats"))			{ G_weaponStats_cmd( ent );	return qtrue;}
 	//Tardo Ready/Unready
-	else if (!strcmp(cmd,"lock"))			        { pCmd_gamelocked(ent, qfalse); return qtrue;}
-	else if (!strcmp(cmd,"unlock"))		        	{ pCmd_gamelocked(ent, qtrue);  return qtrue;}
+	else if (!Q_stricmp(cmd,"lock"))			        { cmd_handleTeamLock(ent, qtrue); return qtrue;}
+	else if (!Q_stricmp(cmd,"unlock"))		        	{ cmd_handleTeamLock(ent, qfalse);  return qtrue;}
     else if(!Q_stricmp(cmd, "pause"))				{ pCmd_pauseHandle( ent, qtrue); return qtrue;}
     else if(!Q_stricmp(cmd, "unpause"))				{ pCmd_pauseHandle( ent, qfalse); return qtrue;}
 	else if(!Q_stricmp(cmd, "ready"))				{ G_ready_cmd( ent, qtrue ); return qtrue;}

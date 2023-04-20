@@ -209,33 +209,35 @@ char* encode_data_b64( char *infilename ) {
 */
 
 static struct fdata readfile_content(char* jsonfile) {
-char * buffer = 0;
-long length;
-struct fdata out;
-FILE *f = fopen (jsonfile, "rb");
-size_t read_length;
-if (f)
-{
-  fseek (f, 0, SEEK_END);
-  length = ftell (f);
-  fseek (f, 0, SEEK_SET);
-  buffer = malloc (length+1);
-  if (buffer)
-  {
-    read_length=fread (buffer, 1, length, f);
-  }
-  fclose (f);
-    buffer[length]= '\0';
+    char * buffer = 0;
+    long length;
+    struct fdata out;
+    FILE *f = fopen (jsonfile, "rb");
+    size_t read_length;
+
+    if (f)
+    {
+        fseek (f, 0, SEEK_END);
+        length = ftell (f);
+        fseek (f, 0, SEEK_SET);
+        buffer = malloc (length+1);
+        if (buffer)
+        {
+            read_length=fread (buffer, 1, length, f);
+        }
+        fclose (f);
+        buffer[length]= '\0';
+    }
+
+    if (buffer)
+    {
+       out.sizeline = length;
+       out.readptr = buffer;
+       return out;
+    }
+
 }
 
-if (buffer)
-{
-   out.sizeline = length;
-   out.readptr = buffer;
-   return out;
-}
-
-}
 // Prints response from server ("uploaded" / "failed" for donka's server)
 static size_t printcurlresponse(void *ptr, size_t size, size_t nmemb, void *stream){
     Com_Printf("%s\n", ptr);
@@ -243,62 +245,68 @@ static size_t printcurlresponse(void *ptr, size_t size, size_t nmemb, void *stre
 
 
 int submit_curlPost( char* jsonfile, char* matchid ) {
-  char* outfile = encode_data_b64(jsonfile);   // should put this in memory rather than temp file
-  http_stats_t* stats_info = (http_stats_t*)malloc(sizeof(http_stats_t));
+    char* outfile = encode_data_b64(jsonfile);   // should put this in memory rather than temp file
+    http_stats_t* stats_info = (http_stats_t*)malloc(sizeof(http_stats_t));
     char url[256];
 
-  Cvar_VariableStringBuffer( "g_stats_curl_submit_URL", url, sizeof( url ) );
-  if (stats_info) {
+    Cvar_VariableStringBuffer( "g_stats_curl_submit_URL", url, sizeof( url ) );
+    if (stats_info) {
         stats_info->url = url;
-		stats_info->matchid = va("matchid: %s", matchid);
-		stats_info->filename = outfile;
+	    stats_info->matchid = va("matchid: %s", matchid);
+	    stats_info->filename = outfile;
 
-		Threads_Create(submit_HTTP_curlPost, stats_info);
-	}
+	    Threads_Create(submit_HTTP_curlPost, stats_info);
+    }
 }
+
 // post the data to specified server (currently it is fixed but will make customizable via cvar)
 void* submit_HTTP_curlPost(void* args) {
-  http_stats_t* stats_info = (http_stats_t*)args;
-  CURLcode ret;
-  CURL *hnd;
-  struct curl_slist *slist1;
+    http_stats_t* stats_info = (http_stats_t*)args;
+    CURLcode ret;
+    CURL *hnd;
+    struct curl_slist *slist1;
 
 
-  struct fdata fileinfo = readfile_content(stats_info->filename);
+    struct fdata fileinfo = readfile_content(stats_info->filename);
 
 
 
-  slist1 = NULL;
-  slist1 = curl_slist_append(slist1, stats_info->matchid );
-  slist1 = curl_slist_append(slist1, "x-api-key: rtcwproapikeythatisjustforbasicauthorization");
+    slist1 = NULL;
+    slist1 = curl_slist_append(slist1, stats_info->matchid );
+    slist1 = curl_slist_append(slist1, "x-api-key: rtcwproapikeythatisjustforbasicauthorization");
 
-  hnd = curl_easy_init();
-  //curl_easy_setopt(hnd, CURLOPT_URL, "https://rtcwproapi.donkanator.com/submit");
-  curl_easy_setopt(hnd, CURLOPT_URL, stats_info->url);
-  curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, fileinfo.readptr);
-  curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)fileinfo.sizeline);
+    hnd = curl_easy_init();
+    //curl_easy_setopt(hnd, CURLOPT_URL, "https://rtcwproapi.donkanator.com/submit");
+    curl_easy_setopt(hnd, CURLOPT_URL, stats_info->url);
+    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, fileinfo.readptr);
+    curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)fileinfo.sizeline);
 
- // curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
+    // curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
 
-  // THIS DISABLES VERIFICATION OF CERTIFICATE AND IS INSECURE
-  //   INCLUDE CERTIFICATE AND CHANGE VALUE TO 1!
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-
-
-  curl_easy_setopt(hnd, CURLOPT_USE_SSL, CURLUSESSL_TRY);
-  curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, printcurlresponse);
+    // THIS DISABLES VERIFICATION OF CERTIFICATE AND IS INSECURE
+    //   INCLUDE CERTIFICATE AND CHANGE VALUE TO 1!
+    curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
 
 
-  ret = curl_easy_perform(hnd);
+    curl_easy_setopt(hnd, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+    curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
+    curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, printcurlresponse);
 
-  curl_easy_cleanup(hnd);
-  hnd = NULL;
-  curl_slist_free_all(slist1);
-  slist1 = NULL;
+    Com_Printf("Stats API: Calling URL with stats payload\n");
+    ret = curl_easy_perform(hnd);
 
-  remove(stats_info->filename);
-  return (int)ret;
+    if (ret != CURLE_OK)
+    {
+        Com_Printf("Stats API: Curl Error return code: %s\n", curl_easy_strerror(ret));
+    }
+
+    curl_easy_cleanup(hnd);
+    hnd = NULL;
+    curl_slist_free_all(slist1);
+    slist1 = NULL;
+
+    remove(stats_info->filename);
+    return (int)ret;
 
 }

@@ -213,7 +213,17 @@ void QDECL Com_Printf( const char *fmt, ... ) {
 				_fcreator = 'R*ch';
 			}
 #endif
-			logfile = FS_FOpenFileWrite( "rtcwconsole.log" );
+			if ((com_dedicated && com_dedicated->integer) || com_logfile->integer > 2) {
+				char buffer[26];
+				strftime(buffer, 26, "%Y-%m-%d_%H.%M.%S", newtime);
+
+				char *filename = va("logs\\rtcwconsole_%s.log", buffer);
+				logfile = FS_FOpenFileWrite(filename);
+			}
+			else {
+				logfile = FS_FOpenFileWrite("rtcwconsole.log");
+			}
+
 			Com_Printf( "logfile opened on %s\n", asctime( newtime ) );
 			if ( com_logfile->integer > 1 ) {
 				// force it to not buffer so we get valid
@@ -2359,6 +2369,7 @@ void Com_WriteNewKey(const char* filename) {
 	char buffer[16] = { '\0' };
 	char fbuffer[MAX_OSPATH];
     static char charset[] = "abcdefghijklmnopqrstuvwxyz123456789";
+	srand(time(NULL));
 
     for (int n = 0; n < 16; n++) {
 		int val = rand() % (int) (sizeof(charset) -1);

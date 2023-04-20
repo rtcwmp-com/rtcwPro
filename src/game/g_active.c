@@ -81,6 +81,11 @@ void P_DamageFeedback( gentity_t *player ) {
 		client->ps.damageYaw = angles[YAW] / 360.0 * 256;
 	}
 
+	if (g_debugDamage.integer)
+	{
+		AP(va("print \"damage feedback: %i\n\"", client->damage_knockback));
+	}
+
 	// play an apropriate pain sound
 	if ( ( level.time > player->pain_debounce_time ) && !( player->flags & FL_GODMODE ) && !( player->r.svFlags & SVF_CASTAI ) && !( player->s.powerups & PW_INVULNERABLE ) ) { //----(SA)
 		player->pain_debounce_time = level.time + 700;
@@ -560,69 +565,53 @@ qboolean ClientInactivityTimer( gclient_t *client ) {
 ClientTimerActions
 
 Actions that happen once a second
+
+Modifed Source: ET Legacy
 ==================
 */
-void ClientTimerActions( gentity_t *ent, int msec ) {
-	gclient_t *client;
+void ClientTimerActions(gentity_t *ent, int msec)
+{
+	gclient_t *client = ent->client;
 
-	client = ent->client;
 	client->timeResidual += msec;
 
-	while ( client->timeResidual >= 1000 ) {
+	while (client->timeResidual >= 1000)
+	{
 		client->timeResidual -= 1000;
 
 		// regenerate
-		// JPW NERVE, split these completely
-		if ( g_gametype.integer < GT_WOLF ) {
-			if ( client->ps.powerups[PW_REGEN] ) {
-				if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] ) {
-					ent->health += 15;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 1.1 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 1.1;
-					}
-					G_AddEvent( ent, EV_POWERUP_REGEN, 0 );
-				} else if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] * 2 ) {
+		if (ent->health < client->ps.stats[STAT_MAX_HEALTH])
+		{
+			// medic only
+			if (client->sess.playerType == PC_MEDIC)
+			{
+				if (ent->health > client->ps.stats[STAT_MAX_HEALTH] / 1.11)
+				{
 					ent->health += 2;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 2 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 2;
+
+					if (ent->health > client->ps.stats[STAT_MAX_HEALTH])
+					{
+						ent->health = client->ps.stats[STAT_MAX_HEALTH];
 					}
-					G_AddEvent( ent, EV_POWERUP_REGEN, 0 );
 				}
-			} else {
-				// count down health when over max
-				if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] ) {
-					ent->health--;
-				}
-			}
-		}
-// JPW NERVE
-		else { // GT_WOLF
-			if ( client->ps.powerups[PW_REGEN] ) {
-				if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] ) {
+				else
+				{
 					ent->health += 3;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 1.1 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 1.1;
+					if (ent->health > client->ps.stats[STAT_MAX_HEALTH] / 1.1)
+					{
+						ent->health = client->ps.stats[STAT_MAX_HEALTH] / 1.1;
 					}
-				} else if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] * 1.12 ) {
-					ent->health += 2;
-					if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] * 1.12 ) {
-						ent->health = client->ps.stats[STAT_MAX_HEALTH] * 1.12;
-					}
-				}
-			} else {
-				// count down health when over max
-				if ( ent->health > client->ps.stats[STAT_MAX_HEALTH] ) {
-					ent->health--;
 				}
 			}
+
 		}
-// jpw
-		// count down armor when over max
-		if ( client->ps.stats[STAT_ARMOR] > client->ps.stats[STAT_MAX_HEALTH] ) {
-			client->ps.stats[STAT_ARMOR]--;
+		else if (ent->health > client->ps.stats[STAT_MAX_HEALTH])               // count down health when over max
+		{
+			ent->health--;
 		}
 	}
 }
+
 
 /*
 ====================
@@ -1224,6 +1213,13 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
+	// RTCWPro
+	if (g_broadcastClients.integer)
+	{
+		ent->r.svFlags |= SVF_BROADCAST;
+	}
+	// RTCWPro - end
+
 	if ( client->cameraPortal ) {
 		G_SetOrigin( client->cameraPortal, client->ps.origin );
 		trap_LinkEntity( client->cameraPortal );
@@ -1270,13 +1266,13 @@ void ClientThink_real( gentity_t *ent ) {
 // jpw
 
 	// sanity check the command time to prevent speedup cheating
-	if (ucmd->serverTime > level.time + 200)
+	if (ucmd->serverTime > level.time + 200 && !G_DoAntiwarp(ent)) // RTCWPro
 	{
 		ucmd->serverTime = level.time + 200;
 //		G_Printf("serverTime <<<<<\n" );
 	}
 
-	if (ucmd->serverTime < level.time - 1000)
+	if (ucmd->serverTime < level.time - 1000 && !G_DoAntiwarp(ent)) // RTCWPro
 	{
 		ucmd->serverTime = level.time - 1000;
 //		G_Printf("serverTime >>>>>\n" );
@@ -2217,10 +2213,10 @@ void ClientEndFrame( gentity_t *ent ) {
 		// turn off any expired powerups
 		for ( i = 0; i < PW_NUM_POWERUPS; i++ ) {
 
-			if ( i == PW_FIRE ||             // these aren't dependant on level.time
-				 i == PW_ELECTRIC ||
+			if ( i == PW_ELECTRIC || // these aren't dependant on level.time
 				 i == PW_BREATHER ||
 				 i == PW_NOFATIGUE ||
+				 i == PW_CAPPEDOBJ || // RtcwPro added for double objective map like radar
 				  ent->client->ps.powerups[i] == 0  // L0 - Pause dump
 				 ) {
 
@@ -2283,6 +2279,30 @@ void ClientEndFrame( gentity_t *ent ) {
 	// apply all the damage taken this frame
 	P_DamageFeedback( ent );
 
+	// ET Legacy port
+	// increases stats[STAT_MAX_HEALTH] based on # of medics in game
+	// AddMedicTeamBonus() now adds medic team bonus and stores in ps.stats[STAT_MAX_HEALTH].
+	AddMedicTeamBonus(ent->client);
+
+	// all players are init in game, we can set properly starting health
+	if (level.startTime == level.time - ((GAME_INIT_FRAMES + 1) * FRAMETIME))
+	{
+		ent->health = ent->client->ps.stats[STAT_HEALTH] = ent->client->ps.stats[STAT_MAX_HEALTH];
+
+		if (ent->client->sess.playerType == PC_MEDIC)
+		{
+			ent->health = ent->client->ps.stats[STAT_HEALTH] /= 1.12;
+			if (ent->health > 140)
+				ent->health = 140;
+		}
+	}
+	else
+	{
+		ent->client->ps.stats[STAT_HEALTH] = ent->health;
+	}
+	// End ETL port
+
+
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
 	if ( level.time - ent->client->lastCmdTime > 1000 ) {
 		ent->s.eFlags |= EF_CONNECTION;
@@ -2340,7 +2360,4 @@ void ClientEndFrame( gentity_t *ent ) {
 	if (ent->client->pers.drawHitBoxes && g_drawHitboxes.integer && ent->health > 0) {
 		G_DrawHitBoxes(ent);
 	}
-
-	ent->client->ps.fixBob = g_dedicated.integer; // RTCWPro - lame hack to make cg compile
-
 }

@@ -771,6 +771,11 @@ qboolean FS_VerifyPak( const char *pak );
 int  submit_curlPost( char* jsonfile, char* matchid );
 void* submit_HTTP_curlPost(void* args) ;
 char* encode_data_b64( char *infilename ) ;
+
+// Pro API Queries
+int API_Query(char* param, char* jsonText, int clientNumber);
+void* API_HTTP_Query(void* args);
+
 /*
 ==============================================================
 

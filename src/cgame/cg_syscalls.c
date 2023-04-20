@@ -76,6 +76,10 @@ void trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int buf
 	syscall( CG_CVAR_VARIABLESTRINGBUFFER, var_name, buffer, bufsize );
 }
 
+int trap_Cvar_VariableIntegerValue(const char* var_name) {
+	return syscall(CG_CVAR_VARIABLEINTEGERVALUE, var_name);
+}
+
 int     trap_Argc( void ) {
 	return syscall( CG_ARGC );
 }
@@ -530,17 +534,22 @@ void trap_Key_KeynumToStringBuf( int keynum, char *buf, int buflen ) {
 
 #define MAX_VA_STRING       32000
 
-char* trap_TranslateString( const char *string ) {
-	static char staticbuf[2][MAX_VA_STRING];
-	static int bufcount = 0;
-	char *buf;
-
-	buf = staticbuf[bufcount++ % 2];
-
-	syscall( CG_TRANSLATE_STRING, string, buf );
-
-	return buf;
+// ET Port - buffer is now in cg_drawtools.CG_TranslateString
+void trap_TranslateString(const char* string, char* buf) {
+	syscall(CG_TRANSLATE_STRING, string, buf);
 }
+
+//char* trap_TranslateString( const char *string ) {
+//	static char staticbuf[2][MAX_VA_STRING];
+//	static int bufcount = 0;
+//	char *buf;
+//
+//	buf = staticbuf[bufcount++ % 2];
+//
+//	syscall( CG_TRANSLATE_STRING, string, buf );
+//
+//	return buf;
+//}
 // -NERVE - SMF
 
 void trap_Rest_Validate(void) {
@@ -552,11 +561,7 @@ void trap_Rest_Build(const char *data) {
 }
 
 // reqSS
-/*void trap_ReqSS(int quality) {
-	syscall(CG_REQ_SS, quality);
-}*/
-
-void trap_ReqSS(char *ip) {
-	syscall(CG_REQ_SS,ip);
+void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime) {
+	syscall(CG_REQUEST_SS, address, hookid, hooktoken, waittime, datetime);
 }
 

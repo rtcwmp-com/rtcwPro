@@ -229,7 +229,7 @@ void UseHoldableItem( gentity_t *ent, int item ) {
 		break;
 
 	case HI_FIRE:           // protection from fire attacks - absorbs 500 points of fire damage
-		ent->client->ps.powerups[PW_FIRE] = 500;
+		//ent->client->ps.powerups[PW_FIRE] = 500;
 		break;
 
 	case HI_STAMINA:        // restores fatigue bar and sets "nofatigue" for a time period (currently forced to 60 sec)
@@ -957,6 +957,10 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity, int ownerN
 
 	dropped->s.eFlags |= EF_BOUNCE_HALF;
 	if ( item->giType == IT_TEAM ) { // Special case for CTF flags
+		gentity_t* flag = &g_entities[ g_entities[ownerNum].client->flagParent ];
+
+		dropped->s.otherEntityNum = g_entities[ownerNum].client->flagParent;    // store the entitynum of our original flag spawner
+		dropped->s.density = 1;
 		dropped->think = Team_DroppedFlagThink;
 		dropped->nextthink = level.time + 30000;
 	} else { // auto-remove after 30 seconds
@@ -1281,6 +1285,10 @@ void G_SpawnItem( gentity_t *ent, gitem_t *item ) {
 
 	if ( ent->model ) {
 		ent->s.modelindex2 = G_ModelIndex( ent->model );
+	}
+	
+	if ( item->giType == IT_TEAM ) {
+		G_SpawnInt( "count", "1", &ent->s.density );
 	}
 
 	if ( item->giType == IT_CLIPBOARD ) {

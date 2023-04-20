@@ -141,7 +141,7 @@ ammotable_t ammoTable[] = {
 
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42SCOPE           },  //	WP_FG42SCOPE			// 23
 	{   MAX_AMMO_BAR,   1,      20,     2000,   DELAY_LOW,      90,     0,      0,      MOD_BAR                 },  //	WP_BAR2					// 24
-	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
+	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    750,    300,    MOD_STEN                },  //	WP_STEN					// 25
 	{   3,              1,      1,      1500,   50,             1000,   0,      0,      MOD_SYRINGE             },  //	WP_MEDIC_SYRINGE		// 26 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_AMMO,               },  //	WP_AMMO					// 27 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_ARTY,               },  //	WP_ARTY
@@ -3668,6 +3668,11 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 
 		case IT_TEAM: // team items, such as flags
 
+			// density tracks how many uses left
+			if ( ( ent->density < 1 ) || ( ( ( ps->persistant[PERS_TEAM] == TEAM_RED ) ? ps->powerups[PW_BLUEFLAG] : ps->powerups[PW_REDFLAG] ) != 0 ) ) {
+				return qfalse;
+			}
+		
 			// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
 			// ent->modelindex2 is non-zero on items if they are dropped
 			// we need to know this because we can pick up our dropped flag (and return it)
@@ -3972,7 +3977,7 @@ char *eventnames[] = {
 	"EV_USE_ITEM12",
 	"EV_USE_ITEM13",
 	"EV_USE_ITEM14",
-	"EV_USE_ITEM15",
+	"EV_USE_ITEM15",		// hijacked for EV_ANNOUNCER_SOUND
 	"EV_ITEM_RESPAWN",
 	"EV_ITEM_POP",
 	"EV_PLAYER_TELEPORT_IN",
@@ -4521,12 +4526,22 @@ BG_ParseColorCvar
 Reads RBG(A) cvars and sets parsed color var components
 ===============
 */
-void BG_ParseColorCvar(char* cvarString, float* color) {
+void BG_ParseColorCvar(char* cvarString, float* color, float alpha) {
 	char* s = cvarString;
 	unsigned int i = 0;
 
+	if (alpha > 1.0f)
+	{
+		alpha = 1.0f;
+	}
+	else if (alpha < 0.f)
+	{
+		alpha = 0.f;
+	}
+
 	// white in case we have no good format
 	Vector4Copy(colorWhite, color);
+	color[3] = alpha; // rtcwpro - split this up
 
 	// hex format
 	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
@@ -4699,5 +4714,139 @@ char* BG_GetClass(int classNum) {
 		return "e";
 	}
 	return "";
+}
+
+/*
+===================
+L0 - Str replacer
+
+Ported from etPub
+===================
+*/
+char* Q_StrReplace(char* haystack, char* needle, char* newp)
+{
+	static char final[MAX_STRING_CHARS] = { "" };
+	char dest[MAX_STRING_CHARS] = { "" };
+	char newStr[MAX_STRING_CHARS] = { "" };
+	char* destp;
+	int needle_len = 0;
+	int new_len = 0;
+
+	if (!*haystack) {
+		return final;
+	}
+	if (!*needle) {
+		Q_strncpyz(final, haystack, sizeof(final));
+		return final;
+	}
+	if (*newp) {
+		Q_strncpyz(newStr, newp, sizeof(newStr));
+	}
+
+	dest[0] = '\0';
+	needle_len = strlen(needle);
+	new_len = strlen(newStr);
+	destp = &dest[0];
+	while (*haystack) {
+		if (!Q_stricmpn(haystack, needle, needle_len)) {
+			Q_strcat(dest, sizeof(dest), newStr);
+			haystack += needle_len;
+			destp += new_len;
+			continue;
+		}
+		if (MAX_STRING_CHARS > (strlen(dest) + 1)) {
+			*destp = *haystack;
+			*++destp = '\0';
+		}
+		haystack++;
+	}
+	// tjw: don't work with final return value in case haystack
+	//      was pointing at it.
+	Q_strncpyz(final, dest, sizeof(final));
+	return final;
+}
+
+/*
+==================
+L0 - Wish it would be like in php and i wouldn't need to bother with this..
+==================
+*/
+int is_numeric(const char* p) {
+	if (*p) {
+		char c;
+		while ((c = *p++)) {
+			if (!isdigit(c)) return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+/*
+==================
+L0 - Alpha numeric check..
+==================
+*/
+int is_alnum(const char* p) {
+	if (*p) {
+		char c;
+		while ((c = *p++)) {
+			if (!isalnum(c)) return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+
+/*
+==================
+L0 - Strip the chars when need it
+==================
+*/
+void stripChars(char* input, char* output, int cutSize) {
+	int lenght = strlen(input);
+	int i = 0, k = 0;
+
+	for (i = lenght - cutSize; i < lenght; i++)
+		output[k++] = input[i];
+
+	output[k++] = '\0';
+}
+
+/*
+==================
+L0 - Ported from et: NQ
+DecolorString
+
+Remove color characters
+==================
+*/
+void DecolorString(char* in, char* out)
+{
+	while (*in) {
+		if (*in == 27 || *in == '^') {
+			in++;		// skip color code
+			if (*in) in++;
+			continue;
+		}
+		*out++ = *in++;
+	}
+	*out = 0;
+}
+
+/*
+==========
+L0 - setGuid
+==========
+*/
+void setGuid(char* in, char* out) {
+	int length = strlen(in);
+	int i = 0, j = 0;
+
+	for (i = length - GUID_LEN; i < length; i++)
+		out[j++] = in[i];
+
+	out[j++] = '\0';
 }
 
