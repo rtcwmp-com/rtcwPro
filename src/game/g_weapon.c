@@ -1889,9 +1889,15 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
 			if (g_antilag.integer == 1) // Nobo antilag
+			{
+				//if (g_debugMode.integer) CPx(ent->client->ps.clientNum, "print \"nobo antilag\n\"");
 				G_TimeShiftAllClientsNobo(ent->client->pers.cmd.serverTime, ent);
+			}
 			else if (g_antilag.integer == 2) // Unlagged
+			{
+				//if (g_debugMode.integer) CPx(ent->client->ps.clientNum, "print \"unlagged antilag\n\"");
 				G_DoTimeShiftFor(ent);
+			}
 		}
 
 		// update head entitiy positions and link them into the world (for headshots).

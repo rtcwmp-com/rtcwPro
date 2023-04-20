@@ -3434,7 +3434,8 @@ void G_RunFrame( int levelTime ) {
 	} // End
 
 //	level.frameTime = trap_Milliseconds();
-	level.frameStartTime = trap_Milliseconds();
+	if (g_antilag.integer < 2) // not unlagged
+		level.frameStartTime = trap_Milliseconds();
 
 	level.framenum++;
 	level.previousTime = level.time;
