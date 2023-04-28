@@ -4610,7 +4610,7 @@ const voteType_t voteToggles[] =
 	{ "vote_allow_matchreset",       CV_SVF_MATCHRESET },
 	{ "vote_allow_mutespecs",        CV_SVF_MUTESPECS },
 	{ "vote_allow_nextmap",          CV_SVF_NEXTMAP },
-	{ "vote_allow_pub",              CV_SVF_PUB },
+	//{ "vote_allow_pub",              CV_SVF_PUB }, // not used
 	{ "vote_allow_referee",          CV_SVF_REFEREE },
 	{ "vote_allow_shuffleteamsxp",   CV_SVF_SHUFFLETEAMS },
 	{ "vote_allow_swapteams",        CV_SVF_SWAPTEAMS },
@@ -4619,7 +4619,8 @@ const voteType_t voteToggles[] =
 	{ "vote_allow_warmupdamage", CV_SVF_WARMUPDAMAGE },
 	{ "vote_allow_antilag",          CV_SVF_ANTILAG },
 	{ "vote_allow_balancedteams",    CV_SVF_BALANCEDTEAMS },
-	{ "vote_allow_muting",           CV_SVF_MUTING }
+	{ "vote_allow_muting",           CV_SVF_MUTING },
+	{ "vote_allow_knifeonly",    CV_SVF_KNIFEONLY },
 };
 
 int numVotesAvailable = sizeof(voteToggles) / sizeof(voteType_t);
