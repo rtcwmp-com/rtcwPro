@@ -400,6 +400,7 @@ vmCvar_t cg_chatX;
 vmCvar_t cg_chatY;
 vmCvar_t cg_teamOverlayX;
 vmCvar_t cg_teamOverlayY;
+vmCvar_t cg_teamOverlayLatchedClass;
 vmCvar_t cg_compassX;
 vmCvar_t cg_compassY;
 vmCvar_t cg_zoomedSensLock;
@@ -706,6 +707,7 @@ cvarTable_t cvarTable[] = {
 	// team overlay
 	{ &cg_teamOverlayX, "cg_teamOverlayX", "640", CVAR_ARCHIVE },
 	{ &cg_teamOverlayY, "cg_teamOverlayY", "0", CVAR_ARCHIVE },
+	{ &cg_teamOverlayLatchedClass, "cg_teamOverlayLatchedClass", "1", CVAR_ARCHIVE },
 
 	// compass
 	{ &cg_compassX, "cg_compassX", "290", CVAR_ARCHIVE },

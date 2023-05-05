@@ -1023,7 +1023,7 @@ void TeamplayInfoMessage(gentity_t* ent) {
 	int i, j;
 	gentity_t* player;
 	int cnt;
-	int actualHealth, displayHealth, playerLimbo;
+	int actualHealth, displayHealth, playerLimbo, latchPlayerType;
 
 	// send the latest information on all clients
 	string[0] = 0;
@@ -1059,11 +1059,12 @@ void TeamplayInfoMessage(gentity_t* ent) {
 			playerAmmo = player->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
+			latchPlayerType = (player->client->pers.cmd.mpSetup & MP_CLASS_MASK) >> MP_CLASS_OFFSET;
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i %i",
+				" %i %i %i %i %i %i %i %i %i %i %i %i",
 				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready, latchPlayerType); // set ready status on each client
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 

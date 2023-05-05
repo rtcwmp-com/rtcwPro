@@ -756,7 +756,7 @@ typedef struct {
 	int playerAmmoClip;
 	int playerWeapon;
 	int playerNades;
-	//int isReady;
+	int latchedClass;
 
 } clientInfo_t;
 
@@ -1954,6 +1954,7 @@ extern vmCvar_t cg_cycleAllWeaps;
 extern vmCvar_t cg_drawAllWeaps;
 extern vmCvar_t cg_drawRewards;
 extern vmCvar_t cg_drawTeamOverlay;
+extern vmCvar_t cg_teamOverlayLatchedClass;
 extern vmCvar_t cg_uselessNostalgia;         // JPW NERVE
 extern vmCvar_t cg_crosshairX;
 extern vmCvar_t cg_crosshairY;

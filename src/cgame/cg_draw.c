@@ -706,10 +706,12 @@ static float CG_DrawTeamOverlay( float y ) {
 	vec4_t hcolor;
 	int pwidth, lwidth;
 	int plyrs;
-	char st[16];
+	char st[16]; // string that is printed for classtype and health
+	char lt[2]; // string for latch classtype
 	clientInfo_t *ci;
 	// NERVE - SMF
 	char classType[2] = { 0, 0 };
+	char latchType[2] = { 0, 0 };
 	int val;
 	vec4_t deathcolor, damagecolor;      // JPW NERVE
 	float       *pcolor;
@@ -792,9 +794,9 @@ static float CG_DrawTeamOverlay( float y ) {
 	}
 
 	if ( cg_drawTeamOverlay.integer > 1 ) {
-		w = ( pwidth + lwidth + 3 + 7 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
+		w = ( pwidth + lwidth + 3 + 9 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
 	} else {
-		w = ( pwidth + lwidth + 8 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
+		w = ( pwidth + lwidth + 10 ) * TINYCHAR_WIDTH; // JPW NERVE was +4+7
 
 	}
 
@@ -854,6 +856,27 @@ static float CG_DrawTeamOverlay( float y ) {
 
 			Com_sprintf( st, sizeof( st ), "%s", CG_TranslateString( classType ) );
 
+			// deteremine latched class type
+			val = ci->latchedClass;
+
+			if (val == 0) {
+				latchType[0] = 'S';
+			}
+			else if (val == 1) {
+				latchType[0] = 'M';
+			}
+			else if (val == 2) {
+				latchType[0] = 'E';
+			}
+			else if (val == 3) {
+				latchType[0] = 'L';
+			}
+			else {
+				latchType[0] = 'S';
+			}
+
+			Com_sprintf(lt, sizeof(lt), "%s", CG_TranslateString(latchType));
+
 			// JPW NERVE
 			if ( ci->health > 80 ) {
 				pcolor = hcolor;
@@ -879,11 +902,21 @@ static float CG_DrawTeamOverlay( float y ) {
 			hcolor[0] = hcolor[1] = 1.0;
 			hcolor[2] = 0.0;
 			hcolor[3] = cg_hudAlpha.value;
+
 			// RtcwPro put IsRevivable in front of class type
-			CG_DrawStringExt( xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5 ); // always draw class name and * yellow
+
+			if (!Q_stricmp(st, latchType) || cg_teamOverlayLatchedClass.integer == 0)
+				CG_DrawStringExt(xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
+			else
+			{
+				CG_DrawPic(xx + 15, y - 1, 9, 9, trap_R_RegisterShader("gfx/2d/arrow.tga"));
+				CG_DrawStringExt(xx, y, va("%s%s%s%s", isRevivable, st, " ", lt), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
+			}
+
 			hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 			hcolor[3] = cg_hudAlpha.value;
-			xx = x + 3 * TINYCHAR_WIDTH;
+			
+			xx = x + 5 * TINYCHAR_WIDTH;
 			CG_DrawStringExt( xx + 1, y, ci->name, pcolor, qtrue, qfalse, // RtcwPro moved IsRevivable above
 							  TINYCHAR_WIDTH, TINYCHAR_HEIGHT, TEAM_OVERLAY_MAXNAME_WIDTH );
 
@@ -898,7 +931,7 @@ static float CG_DrawTeamOverlay( float y ) {
 					len = lwidth;
 				}
 
-				xx = x + TINYCHAR_WIDTH * 5 + TINYCHAR_WIDTH * pwidth +
+				xx = x + 20 + TINYCHAR_WIDTH * 5 + TINYCHAR_WIDTH * pwidth +
 					 ( ( lwidth / 2 - len / 2 ) * TINYCHAR_WIDTH );
 				CG_DrawStringExt( xx, y,
 								  p, hcolor, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT,
@@ -909,9 +942,9 @@ static float CG_DrawTeamOverlay( float y ) {
 			Com_sprintf( st, sizeof( st ), "%3i", ci->health ); // JPW NERVE pulled class stuff since it's at top now
 
 			if ( cg_drawTeamOverlay.integer > 1 ) {
-				xx = x + TINYCHAR_WIDTH * 6 + TINYCHAR_WIDTH * pwidth + TINYCHAR_WIDTH * lwidth;
+				xx = x + 20 + TINYCHAR_WIDTH * 6 + TINYCHAR_WIDTH * pwidth + TINYCHAR_WIDTH * lwidth;
 			} else {
-				xx = x + TINYCHAR_WIDTH * 4 + TINYCHAR_WIDTH * pwidth + TINYCHAR_WIDTH * lwidth;
+				xx = x + 20 + TINYCHAR_WIDTH * 4 + TINYCHAR_WIDTH * pwidth + TINYCHAR_WIDTH * lwidth;
 			}
 
 			CG_DrawStringExt( xx, y,
