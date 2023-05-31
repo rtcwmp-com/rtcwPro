@@ -909,7 +909,7 @@ static float CG_DrawTeamOverlay( float y ) {
 				CG_DrawStringExt(xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			else
 			{
-				CG_DrawPic(xx + 15, y - 1, 9, 9, trap_R_RegisterShader("gfx/2d/arrow.tga"));
+				CG_DrawPic(xx + 16, y - 1, 9, 9, trap_R_RegisterShader("gfx/2d/arrow.tga"));
 				CG_DrawStringExt(xx, y, va("%s%s%s%s", isRevivable, st, " ", lt), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			}
 
