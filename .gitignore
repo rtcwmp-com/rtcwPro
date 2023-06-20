@@ -18,9 +18,17 @@ src/rtcwpro/
 *.so
 *.o
 *.pk3
+/src/servercache.dat
+/src/main/authkey
+/libs/libcurl/out/build/x64-Debug
+/libs/mongo-c-driver/out/build/x64-Debug
+/src/game/g_missile_vanilla.c
+/src/game/g_weapon_orig.c
+website/
+*.srctrl*
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-website/
 
 # Build results
 output/
@@ -347,10 +355,3 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
-*.pk3
-/src/servercache.dat
-/src/main/authkey
-/libs/libcurl/out/build/x64-Debug
-/libs/mongo-c-driver/out/build/x64-Debug
-/src/game/g_missile_vanilla.c
-/src/game/g_weapon_orig.c
