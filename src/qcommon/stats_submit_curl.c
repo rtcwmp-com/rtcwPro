@@ -7,7 +7,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
-//#include <string.h>
 
 
 
@@ -238,11 +237,10 @@ static struct fdata readfile_content(char* jsonfile) {
 
 }
 
-// Prints response from server ("uploaded" / "failed" for donka's server)
-static size_t printcurlresponse(void *ptr, size_t size, size_t nmemb, void *stream){
-    Com_Printf("%s\n", ptr);
+size_t StatsAPIResultMessage(char* ptr, size_t size, size_t nmemb, void* userdata) {
+    printf("Received response: %.*s\n", (int)(size * nmemb), ptr);
+    return size * nmemb;
 }
-
 
 int submit_curlPost( char* jsonfile, char* matchid ) {
     char* outfile = encode_data_b64(jsonfile);   // should put this in memory rather than temp file
@@ -257,6 +255,17 @@ int submit_curlPost( char* jsonfile, char* matchid ) {
 
 	    Threads_Create(submit_HTTP_curlPost, stats_info);
     }
+}
+
+// wait X amount of seconds to try again
+void RetrySleep(int sleepInSeconds)
+{
+    #ifdef _WIN32 
+        Sleep(sleepInSeconds);
+    #else
+        #include <unistd.h>
+        sleep(sleepInSeconds);
+    #endif
 }
 
 // post the data to specified server (currently it is fixed but will make customizable via cvar)
@@ -277,6 +286,7 @@ void* submit_HTTP_curlPost(void* args) {
 
     hnd = curl_easy_init();
     //curl_easy_setopt(hnd, CURLOPT_URL, "https://rtcwproapi.donkanator.com/submit");
+    curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, &StatsAPIResultMessage);
     curl_easy_setopt(hnd, CURLOPT_URL, stats_info->url);
     curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, fileinfo.readptr);
@@ -288,17 +298,43 @@ void* submit_HTTP_curlPost(void* args) {
     //   INCLUDE CERTIFICATE AND CHANGE VALUE TO 1!
     curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
 
-
     curl_easy_setopt(hnd, CURLOPT_USE_SSL, CURLUSESSL_TRY);
     curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
-    curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, printcurlresponse);
 
-    Com_Printf("Stats API: Calling URL with stats payload\n");
-    ret = curl_easy_perform(hnd);
+    int retryCount = 0;
+    int shouldRetry = qtrue;
 
-    if (ret != CURLE_OK)
-    {
-        Com_Printf("Stats API: Curl Error return code: %s\n", curl_easy_strerror(ret));
+    // get variables for retry count and delay
+    char varStatsRetryCount[10];
+    char varStatsRetryDelay[10];
+    Cvar_VariableStringBuffer("g_statsRetryCount", varStatsRetryCount, sizeof(varStatsRetryCount));
+    Cvar_VariableStringBuffer("g_statsRetryDelay", varStatsRetryDelay, sizeof(varStatsRetryDelay));
+
+    int statsRetryCount = atoi(varStatsRetryCount);
+    int statsRetryDelay = atoi(varStatsRetryDelay);
+
+    // make sure we try at least once
+    if (statsRetryCount < 1)
+        statsRetryCount = 1;
+
+    while (shouldRetry && retryCount < statsRetryCount) {
+        Com_Printf("Stats API: Calling URL with stats payload\n");
+        ret = curl_easy_perform(hnd);
+
+        if (ret != CURLE_OK) {
+            Com_Printf("Stats API: Curl Error return code: %s\n", curl_easy_strerror(ret));
+            Com_Printf("Stats API: Retrying request...\n");
+
+            retryCount++;
+            RetrySleep(statsRetryDelay);  // Wait for a delay before retrying
+        }
+        else {
+            shouldRetry = qfalse;  // Request succeeded, exit the retry loop
+        }
+    }
+
+    if (shouldRetry) {
+        Com_Printf("Stats API: Maximum retry limit reached. Request failed.\n");
     }
 
     curl_easy_cleanup(hnd);
