@@ -1316,11 +1316,11 @@ image_t     *R_CreateImage( const char *name, const byte *pic, int width, int he
 							, qboolean allowPicmip, int wrapClampMode );
 
 // rtcwpro - r_mode -2
-#ifdef _WIN32
+//#ifdef _WIN32
 qboolean R_GetModeInfo(int* width, int* height, float* windowAspect, int mode, int dw, int dh);
-#else
+/*#else
 qboolean R_GetModeInfo(int* width, int* height, float* windowAspect, int mode);
-#endif
+#endif*/
 // rtcwpro - end
 
 void        R_SetColorMappings( void );
