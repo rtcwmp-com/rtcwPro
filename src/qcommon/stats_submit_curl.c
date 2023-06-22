@@ -8,6 +8,10 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+#ifndef _WIN32 
+#include <unistd.h>
+#endif
+
 
 
 struct fdata {
@@ -263,7 +267,6 @@ void RetrySleep(int sleepInSeconds)
     #ifdef _WIN32 
         Sleep(sleepInSeconds);
     #else
-        #include <unistd.h>
         sleep(sleepInSeconds);
     #endif
 }
