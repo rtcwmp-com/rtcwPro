@@ -996,6 +996,9 @@ void SV_Init( void ) {
 	// ET Legacy port reset svs.time on map load to fix knockback bug
 	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "0", CVAR_ARCHIVE); // default to 0 - 1 is causing a bug on map change
 
+	// drop client on msg.overflow in sv_snapshot
+	sv_dropClientOnOverflow = Cvar_Get("sv_dropClientOnOverflow", "1", CVAR_ARCHIVE);
+
 	// End RtcwPro
 	
 

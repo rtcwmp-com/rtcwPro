@@ -111,6 +111,8 @@ cvar_t* sv_checkVersion;
 cvar_t* sv_restRunning;
 cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix knockback bug
 
+cvar_t* sv_dropClientOnOverflow;
+
 // End RtcwPro
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
