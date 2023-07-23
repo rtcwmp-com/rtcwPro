@@ -265,7 +265,7 @@ int submit_curlPost( char* jsonfile, char* matchid ) {
 void RetrySleep(int sleepInSeconds)
 {
     #ifdef _WIN32 
-        Sleep(sleepInSeconds);
+        Sleep(sleepInSeconds * 1000); // windows uses milliseconds
     #else
         sleep(sleepInSeconds);
     #endif
