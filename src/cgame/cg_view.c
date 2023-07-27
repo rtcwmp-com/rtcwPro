@@ -598,6 +598,12 @@ static void CG_OffsetFirstPersonView( void ) {
 			if ( ratio > 0 ) {
 				angles[PITCH] += ratio * cg.v_dmg_pitch;
 				angles[ROLL] += ratio * cg.v_dmg_roll;
+
+				// RtcwPro print damage feedback to rtcwconsole.log
+				if (cg_debugDamage.integer)
+				{
+					LogEntry("logs/debugDamage.log", va("[%s] -> ratio [ %f ] angles[PITCH]: [ %f ] angles[ROLL] [ %f ]\n\"", getDateTime(), ratio, angles[ROLL], angles[PITCH]));
+				}
 			}
 		}
 	}

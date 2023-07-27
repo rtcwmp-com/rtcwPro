@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "q_shared.h"
 #include "bg_public.h"
+#include "g_local.h"
 #include "../../MAIN//ui_mp/menudef.h"
 
 // JPW NERVE -- added because I need to check single/multiplayer instances and branch accordingly
@@ -3478,7 +3479,7 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 			}
 			else if (weapon == WP_PANZERFAUST) {
 				clip = BG_FindAmmoForWeapon(weapon);
-				if (ps->ammoclip[clip] < maxammo) {
+				if (ps->ammo[clip] < maxammo) {
 
 					// early out
 					//if (!numOfClips) {
@@ -3486,8 +3487,8 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 					//}
 
 					//Com_Printf("Panzer added -> %5d\n", ps->ammoclip[clip]);
-
 					needsAmmo = qtrue;
+
 					//ps->ammoclip[clip] += numOfClips;
 					//if (ps->ammoclip[clip] >= maxammo) {
 					//	ps->ammoclip[clip] = maxammo;
@@ -4851,3 +4852,108 @@ void setGuid(char* in, char* out) {
 	out[j++] = '\0';
 }
 
+const char* months[12] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+/*
+==================
+Returns current time % date
+==================
+*/
+char* getDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s %02d %d %02d:%02d:%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+/*
+==================
+// deliminated date-time
+==================
+*/
+char* Delim_GetDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s%02d-%d-%02d-%02d-%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+/*
+==================
+// Returns current date
+==================
+*/
+char* getDate(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%02d/%s/%d", ct.tm_mday, months[ct.tm_mon], getYearFromCYear(ct.tm_year));
+}
+
+/*
+==================
+// returns month string abbreviation (i.e. Jun)
+==================
+*/
+const char* getMonthString(int monthIndex) {
+	if (monthIndex < 0 || monthIndex >= ArrayLength(months)) {
+		return "InvalidMonth";
+	}
+
+	return months[monthIndex];
+}
+
+/*
+==================
+// returns current year
+==================
+*/
+int getYearFromCYear(int cYear) {
+	return 1900 + cYear;
+}
+
+/*
+==================
+// returns the last day for that month.
+==================
+*/ 
+int getDaysInMonth(int monthIndex) {
+	switch (monthIndex) {
+	case 1:  // Feb
+		return 28;
+	case 3:  // Apr
+	case 5:  // Jun
+	case 8:  // Sep
+	case 10: // Nov
+		return 30;
+	default: // Jan, Mar, May, Jul, Aug, Oct, Dec
+		return 31;
+	}
+}
+
+
+/*
+==================
+LogEntry
+
+log to a file
+==================
+*/
+void LogEntry(char* filename, char* info) {
+	fileHandle_t    f;
+	char* varLine;
+
+	strcat(info, "\r");
+	trap_FS_FOpenFile(filename, &f, FS_APPEND);
+
+	varLine = va("%s\n", info);
+
+	trap_FS_Write(varLine, strlen(varLine), f);
+	trap_FS_FCloseFile(f);
+	return;
+}

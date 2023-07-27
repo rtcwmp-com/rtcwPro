@@ -83,7 +83,7 @@ void P_DamageFeedback( gentity_t *player ) {
 
 	if (g_debugDamage.integer)
 	{
-		AP(va("print \"damage feedback: %i\n\"", client->damage_knockback));
+		AP(va("print \"damage feedback: [ %i ] pitch [ %i ] yaw [ %i ]\n\"", client->damage_knockback, client->ps.damagePitch, client->ps.damageYaw));
 	}
 
 	// play an apropriate pain sound

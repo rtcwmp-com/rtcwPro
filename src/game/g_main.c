@@ -85,6 +85,8 @@ vmCvar_t g_warmup;
 // NERVE - SMF
 vmCvar_t g_warmupLatch;
 vmCvar_t g_nextTimeLimit;
+vmCvar_t g_preciseTimeSet;
+vmCvar_t g_usePreciseConsoleTime;
 vmCvar_t g_showHeadshotRatio;
 vmCvar_t g_userTimeLimit;
 vmCvar_t g_userAlliedRespawnTime;
@@ -166,7 +168,6 @@ vmCvar_t g_dbgRevive;
 
 // rtcwpro begin
 //S4NDM4NN - fix errors when sv_fps is adjusted
-vmCvar_t sv_screenshake;
 vmCvar_t g_screenShake;
 vmCvar_t g_preciseHeadHitBox;
 vmCvar_t sv_fps;
@@ -323,7 +324,6 @@ cvarTable_t gameCvarTable[] = {
 	// done
 
 // JPW NERVE multiplayer stuffs
-	{ &sv_screenshake, "sv_screenshake", "5", CVAR_ARCHIVE,0,qfalse},
 	{ &g_redlimbotime, "g_redlimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse },
 	{ &g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse },
 	{ &g_medicChargeTime, "g_medicChargeTime", "45000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse },
@@ -357,6 +357,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_warmupLatch, "g_warmupLatch", "1", 0, 0, qfalse },
 
 	{ &g_nextTimeLimit, "g_nextTimeLimit", "0", CVAR_WOLFINFO, 0, qfalse  },
+	{ &g_preciseTimeSet, "g_preciseTimeSet", "0", CVAR_WOLFINFO, 0, qfalse  },
+	{ &g_usePreciseConsoleTime, "g_usePreciseConsoleTime", "1", CVAR_WOLFINFO, 0, qfalse  },
 	{ &g_currentRound, "g_currentRound", "0", CVAR_WOLFINFO, 0, qfalse  },
 	{ &g_altStopwatchMode, "g_altStopwatchMode", "0", CVAR_ARCHIVE, 0, qtrue  },
 	{ &g_gamestate, "gamestate", "-1", CVAR_WOLFINFO | CVAR_ROM, 0, qfalse  },
@@ -382,7 +384,7 @@ cvarTable_t gameCvarTable[] = {
     { &g_stats_curl_submit_URL, "g_stats_curl_submit_URL", "https://rtcwproapi.donkanator.com/submit", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_headers, "g_stats_curl_submit_headers", "0", CVAR_ARCHIVE, 0, qfalse  }, // not used at the moment, headers are currently hardcoded
 	{ &g_statsRetryCount, "g_statsRetryCount", "3", CVAR_ARCHIVE, 0, qfalse  }, // number of attempts to send stats if first attempt fails
-	{ &g_statsRetryDelay, "g_statsRetryDelay", "2", CVAR_ARCHIVE, 0, qfalse  }, // delay in seconds to retry sending stats if first attempt fails NOTE if are running Windows server use milliseconds i.e. 2000 instead of 2
+	{ &g_statsRetryDelay, "g_statsRetryDelay", "2", CVAR_ARCHIVE, 0, qfalse  }, // delay in seconds to retry sending stats if first attempt fails
 	{ &g_apiquery_curl_URL, "g_apiquery_curl_URL", "https://rtcwproapi.donkanator.com/serverquery", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },

@@ -896,7 +896,7 @@ static float CG_DrawTeamOverlay( float y ) {
 			// RTCWPro - display obj carriers
 			if (ci->powerups & ((1 << PW_REDFLAG) | (1 << PW_BLUEFLAG)))
 			{
-				CG_DrawPic(xx - 3, y - 3, 15, 15, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+				CG_DrawPic(xx - 3, y - 3, 15, 15, cgs.media.treasureIcon); // trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure"));
 			}
 
 			hcolor[0] = hcolor[1] = 1.0;
@@ -909,7 +909,7 @@ static float CG_DrawTeamOverlay( float y ) {
 				CG_DrawStringExt(xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			else
 			{
-				CG_DrawPic(xx + 16, y - 1, 9, 9, trap_R_RegisterShader("gfx/2d/arrow.tga"));
+				CG_DrawPic(xx + 16, y - 1, 9, 9, trap_R_RegisterShaderNoMip("gfx/2d/arrow.tga"));
 				CG_DrawStringExt(xx, y, va("%s%s%s%s", isRevivable, st, " ", lt), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			}
 
@@ -4264,7 +4264,7 @@ void CG_DrawObjectiveIcons() {
 	ps = &cg.snap->ps;
 	ci = &cgs.clientinfo[ps->clientNum];
 	if (ps->powerups[PW_REDFLAG] || ps->powerups[PW_BLUEFLAG]) {
-		CG_DrawPic(-7, y, 48, 48, trap_R_RegisterShader("models/multiplayer/treasure/treasure"));
+		CG_DrawPic(-7, y, 48, 48, cgs.media.treasureIcon); //trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure"));
 		y += 50;
 	}
 	// RTCWPro end
