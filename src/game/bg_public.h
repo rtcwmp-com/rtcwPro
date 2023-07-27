@@ -652,7 +652,7 @@ typedef struct ammotable_s {
 	int nextShotTime;       //
 //----(SA)	added
 	int maxHeat;            // max active firing time before weapon 'overheats' (at which point the weapon will fail)
-	float coolRate;           // how fast the weapon cools down. (per second)
+	int coolRate;           // how fast the weapon cools down. (per second)
 //----(SA)	end
 	int mod;                // means of death
 } ammotable_t;
@@ -1792,7 +1792,16 @@ int BG_GetAnimScriptEvent( playerState_t *ps, scriptAnimEventTypes_t event );
 extern animStringItem_t animStateStr[];
 extern animStringItem_t animBodyPartsStr[];
 
-// OSPx
+// RtcwPro logging
+void LogEntry(char* filename, char* info);
+
+// Shared Date Functions
+char* getDateTime(void);
+char* Delim_GetDateTime(void);
+char* getDate(void);
+const char* getMonthString(int monthIndex);
+int getYearFromCYear(int cYear);
+int getDaysInMonth(int monthIndex);
 
 // Crosshairs
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);

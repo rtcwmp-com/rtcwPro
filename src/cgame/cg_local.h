@@ -1742,6 +1742,14 @@ typedef struct {
 // OSPx
 	// Country Flags
 	qhandle_t countryFlags;
+
+	// Objective icon
+	qhandle_t treasureIcon;
+
+	// arty and airstrike
+	qhandle_t artillery;
+	qhandle_t airstrike;
+
 	// Hitsounds
 	//sfxHandle_t	headShot1;
 	//sfxHandle_t	headShot2;
@@ -2215,6 +2223,7 @@ extern vmCvar_t cg_drawFrags;
 extern vmCvar_t cg_fragsY;
 extern vmCvar_t cg_fragsWidth;
 extern vmCvar_t cg_fixedphysicsfps;
+extern vmCvar_t cg_debugDamage;
 
 //static void CG_TimerSet_f(void);
 //static void CG_TimerReset_f(void);

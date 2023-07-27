@@ -410,6 +410,7 @@ vmCvar_t cg_drawFrags;
 vmCvar_t cg_fragsY;
 vmCvar_t cg_fragsWidth;
 vmCvar_t cg_fixedphysicsfps;
+vmCvar_t cg_debugDamage;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -727,6 +728,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_fragsWidth, "cg_fragsWidth", "16", CVAR_ARCHIVE },
 
 	{ &cg_fixedphysicsfps, "g_fixedphysicsfps", "0", CVAR_ROM },
+
+	// RtcwPro print damage feedback to rtcwconsole.log
+	{ &cg_debugDamage, "cg_debugDamage", "0", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
@@ -1416,8 +1420,8 @@ static void CG_RegisterSounds( void ) {
 
 	// DHM - Nerve :: Used for multiplayer
 	if ( cgs.gametype >= GT_WOLF ) {
-		trap_S_RegisterSound( "sound/multiplayer/artillery_01.wav" );
-		trap_S_RegisterSound( "sound/multiplayer/airstrike_01.wav" );
+		cgs.media.artillery = trap_S_RegisterSound( "sound/multiplayer/artillery_01.wav" );
+		cgs.media.airstrike = trap_S_RegisterSound( "sound/multiplayer/airstrike_01.wav" );
 	}
 
 	//----(SA)	removed some unnecessary stuff
@@ -1528,7 +1532,7 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.hud4Shader = trap_R_RegisterShader( "jpwhud4" );
 	cgs.media.hud5Shader = trap_R_RegisterShader( "jpwhud5" );
 // jpw
-	cgs.media.smokePuffShader = trap_R_RegisterShader( "smokePuff" );
+	cgs.media.smokePuffShader = trap_R_RegisterShader( "smokePuffPro" ); // RtcwPro use smoke.shader for nopicmip option
 
 	// Rafael - blood pool
 	//cgs.media.bloodPool = trap_R_RegisterShader ("bloodPool");
@@ -1538,11 +1542,11 @@ static void CG_RegisterGraphics( void ) {
 
 	// Rafael - cannon
 	cgs.media.smokePuffShaderdirty = trap_R_RegisterShader( "smokePuffdirty" );
-	cgs.media.smokePuffShaderb1 = trap_R_RegisterShader( "smokePuffblack1" );
-	cgs.media.smokePuffShaderb2 = trap_R_RegisterShader( "smokePuffblack2" );
-	cgs.media.smokePuffShaderb3 = trap_R_RegisterShader( "smokePuffblack3" );
-	cgs.media.smokePuffShaderb4 = trap_R_RegisterShader( "smokePuffblack4" );
-	cgs.media.smokePuffShaderb5 = trap_R_RegisterShader( "smokePuffblack5" );
+	cgs.media.smokePuffShaderb1 = trap_R_RegisterShader( "smokePuffblackPro1" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb2 = trap_R_RegisterShader( "smokePuffblackPro2" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb3 = trap_R_RegisterShader( "smokePuffblackPro3" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb4 = trap_R_RegisterShader( "smokePuffblackPro4" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb5 = trap_R_RegisterShader( "smokePuffblackPro5" ); // RtcwPro use smoke.shader for nopicmip option
 	// done
 
 	// Rafael - bleedanim
@@ -1658,6 +1662,9 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.noammoShader = trap_R_RegisterShader( "icons/noammo" );
 	// OSPx - Country Flags (by mcwf)
 	cgs.media.countryFlags = trap_R_RegisterShaderNoMip("gfx/flags/world_flags");
+
+	// RtcwPro objective icon with nopicmip option
+	cgs.media.treasureIcon = trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure");
 
 	// draw triggers
 	cgs.media.transmitTrigger = trap_R_RegisterShaderNoMip("gfx/2d/transmitTrigger");

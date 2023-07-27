@@ -1190,9 +1190,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			targ->client->ps.pm_time = t;
 			targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 
-			if (g_debugDamage.integer) {
-				AP(va("print \"knockback: %i\n\"", t));
-			}
+			//if (g_debugDamage.integer) {
+			//	AP(va("print \"knockback: %i\n\"", t));
+			//}
 		}
 	}
 

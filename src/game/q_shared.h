@@ -1390,8 +1390,8 @@ typedef struct playerState_s {
 
 	// seems like heat and aimspread could be tied together somehow, however, they (appear to) change at different rates and
 	// I can't currently see how to optimize this to one server->client transmission "weapstatus" value.
-	float weapHeat[MAX_WEAPONS];          // some weapons can overheat.  this tracks (server-side) how hot each weapon currently is.
-	float curWeapHeat;                    // value for the currently selected weapon (for transmission to client)
+	int weapHeat[MAX_WEAPONS];          // some weapons can overheat.  this tracks (server-side) how hot each weapon currently is.
+	int curWeapHeat;                    // value for the currently selected weapon (for transmission to client)
 
 	int venomTime;          //----(SA)	added
 //----(SA)	end

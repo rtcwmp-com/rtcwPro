@@ -1234,12 +1234,7 @@ void G_ProcessTagConnect( gentity_t *ent );
 qboolean G_AllowTeamsAllowed(gentity_t* ent, gentity_t* activator); // RTCWPro - allowteams ET - port
 qboolean AllowDropForClass(gentity_t* ent, int pclass); // RTCWPro - drop weapon stuff
 gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found);
-char* getDateTime(void);
-char* Delim_GetDateTime(void);
-char* getDate(void);
-const char* getMonthString(int monthIndex);
-int getYearFromCYear(int cYear);
-int getDaysInMonth(int monthIndex);
+
 char* TablePrintableColorName(const char* name, int maxlength);
 qboolean FileExists(char* filename, char* directory, char* expected_extension, qboolean can_have_extension);
 qboolean G_SpawnEnts(gentity_t* ent);
@@ -1640,13 +1635,14 @@ extern vmCvar_t g_medicChargeTime;
 extern vmCvar_t g_engineerChargeTime;
 extern vmCvar_t g_LTChargeTime;
 extern vmCvar_t g_soldierChargeTime;
-extern vmCvar_t sv_screenshake;
 extern vmCvar_t g_screenShake;
 // jpw
 
 // NERVE - SMF
 extern vmCvar_t g_warmupLatch;
 extern vmCvar_t g_nextTimeLimit;
+extern vmCvar_t g_preciseTimeSet;	// RTCWPro precise timelimit set each round
+extern vmCvar_t g_usePreciseConsoleTime;
 extern vmCvar_t g_showHeadshotRatio;
 extern vmCvar_t g_userTimeLimit;
 extern vmCvar_t g_userAlliedRespawnTime;
@@ -2314,9 +2310,6 @@ qboolean G_DoAntiwarp(gentity_t* ent);
 void AW_AddUserCmd(int clientNum, usercmd_t* cmd);
 static float G_CmdScale(gentity_t* ent, usercmd_t* cmd);
 void DoClientThinks(gentity_t* ent);
-
-// log entry
-void LogEntry(char* filename, char* info);
 
 /**
  * @enum enum_t_dp
