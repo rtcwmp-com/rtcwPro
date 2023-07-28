@@ -578,16 +578,10 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// run a few frames to allow everything to settle
 	for (i = 0; i < GAME_INIT_FRAMES; i++)
 	{
-		svs.time += FRAMETIME;
 		SV_BotFrame(svs.time);
 		VM_Call(gvm, GAME_RUN_FRAME, svs.time);
+		svs.time += FRAMETIME;
 	}
-
-	/*for ( i = 0 ; i < 3 ; i++ ) {
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
-		SV_BotFrame( svs.time );
-		svs.time += 100;
-	}*/
 	// RTCWPro end
 
 	// create a baseline for more efficient communications
