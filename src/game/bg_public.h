@@ -297,6 +297,8 @@ typedef struct {
 	float varc, harc;
 	vec3_t centerangles;
 
+	float weapHeat[MAX_WEAPONS];          // stores values for playerstate weapHeat
+
 } pmoveExt_t;   // data used both in client and server - store it here
 // generally useful for data you want to manipulate in bg_* and cgame, or bg_* and game
 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
