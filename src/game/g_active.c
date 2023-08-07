@@ -1728,7 +1728,12 @@ void ClientThink_real( gentity_t *ent ) {
 	}
 	else if (g_antilag.integer == 2) // Unlagged
 	{
-		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+		}
 	}
 
 	/*if (g_thinkStateLevelTime.integer) 
