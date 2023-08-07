@@ -1255,7 +1255,7 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 }
 
 
-void G_writeChatEvent(gentity_t* agent, char* chatText)
+void G_writeChatEvent(gentity_t* agent, const char* chatText)
 {
     if (!CanAccessFile("Stats: writing global chat event", level.jsonStatInfo.gameStatslogFileName))
         return;

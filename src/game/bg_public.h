@@ -1790,6 +1790,7 @@ int BG_AnimationIndexForString( char *string, int client );
 animation_t *BG_AnimationForString( char *string, animModelInfo_t *modelInfo );
 animation_t *BG_GetAnimationForIndex( int client, int index );
 int BG_GetAnimScriptEvent( playerState_t *ps, scriptAnimEventTypes_t event );
+char* Q_StrReplace(char* haystack, char* needle, char* newp);
 
 extern animStringItem_t animStateStr[];
 extern animStringItem_t animBodyPartsStr[];

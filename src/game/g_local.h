@@ -2116,7 +2116,6 @@ void G_UnMuteClient(void);
 void DecolorString( char *in, char *out);
 
 // g_shared.c
-char *Q_StrReplace(char *haystack, char *needle, char *newp);
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
 void AAPSound(char *sound);
@@ -2252,7 +2251,7 @@ void G_writeClosingJson(void);
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType);
 void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir);
 int G_teamAlive(int team ) ;  // temp addition for calculating number of alive...will improve later if we want to keep
-void G_writeChatEvent(gentity_t* agent, char* chatText);
+void G_writeChatEvent(gentity_t* agent, const char* chatText);
 qboolean CanAccessFile(char* str, char* filename);
 char* LookupEventType(int eventyType);
 void AddQuitPlayerStats(char* guid);
