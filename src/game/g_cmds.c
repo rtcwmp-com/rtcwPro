@@ -1413,7 +1413,9 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 	default:
 	case SAY_ALL:
 		G_LogPrintf( "say: %s: %s\n", ent->client->pers.netname, chatText );
-		G_writeChatEvent(ent, chatText);
+		if (g_gamestate.integer != GS_INTERMISSION) {
+			G_writeChatEvent(ent, chatText);
+		}
 		Com_sprintf( name, sizeof( name ), "%s%c%c: ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 		color = COLOR_GREEN;
 		break;

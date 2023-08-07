@@ -1491,7 +1491,8 @@ void G_writeClosingJson(void)
             }
 
         }
-      }
+        Com_sprintf(level.jsonStatInfo.gameStatslogFileName, sizeof(level.jsonStatInfo.gameStatslogFileName), ""); // prevent from writing to this file because we just closed it
+    }
 
 
 
