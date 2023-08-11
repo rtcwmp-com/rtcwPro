@@ -859,7 +859,13 @@ static float CG_DrawTeamOverlay( float y ) {
 			// deteremine latched class type
 			val = ci->latchedClass;
 
-			if (val == 0) {
+			qboolean playerIsSpawning = (ci->powerups & (1 << PW_INVULNERABLE) && ci->health >= 100);
+
+			if (playerIsSpawning)
+			{
+				latchType[0] = '\0';
+			}
+			else if (val == 0) {
 				latchType[0] = 'S';
 			}
 			else if (val == 1) {
@@ -870,9 +876,6 @@ static float CG_DrawTeamOverlay( float y ) {
 			}
 			else if (val == 3) {
 				latchType[0] = 'L';
-			}
-			else {
-				latchType[0] = 'S';
 			}
 
 			Com_sprintf(lt, sizeof(lt), "%s", CG_TranslateString(latchType));
@@ -905,7 +908,7 @@ static float CG_DrawTeamOverlay( float y ) {
 
 			// RtcwPro put IsRevivable in front of class type
 
-			if (!Q_stricmp(st, latchType) || cg_teamOverlayLatchedClass.integer == 0)
+			if (!Q_stricmp(st, lt) || cg_teamOverlayLatchedClass.integer == 0 || playerIsSpawning)
 				CG_DrawStringExt(xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			else
 			{
