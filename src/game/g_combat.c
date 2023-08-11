@@ -667,9 +667,9 @@ void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int 
 	self->client->ps.viewangles[2] = 0;
 	//VectorCopy( self->s.angles, self->client->ps.viewangles ); // don't make the corpse look a different way
 	
-	//trap_UnlinkEntity( self );
 	self->s.loopSound = 0;
 	
+	trap_UnlinkEntity( self );
 	self->r.maxs[2] = 0;
 	self->client->ps.maxs[2] = 0; 
 

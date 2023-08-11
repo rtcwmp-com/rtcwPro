@@ -232,8 +232,8 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
 			// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
 			int nearest_trail_node_index = frac < 0.5 ? j : k;
-			//VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
-			//VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
+			VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
+			VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
 			// use the trail node's animation info that's nearest "time" (for head hitbox).
 			// the current server animation code used for head hitboxes doesn't support interpolating
 			// between two different animation frames (i.e. crouch -> standing animation), so can't interpolate here either.
@@ -378,7 +378,8 @@ void G_UnTimeShiftAllClients( gentity_t *skip ) {
 	ent = &g_entities[0];
 	for ( i = 0; i < MAX_CLIENTS; i++, ent++) {
 		if ( ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip ) {
-			G_UnTimeShiftClient( ent );
+			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
+				G_UnTimeShiftClient( ent );
 		}
 	}
 }

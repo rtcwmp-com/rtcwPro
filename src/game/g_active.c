@@ -1926,8 +1926,7 @@ void ClientThink( int clientNum ) {
 
 	// mark the time we got info, so we can display the
 	// phone jack if they don't get any for a while
-	if (g_antilag.integer < 2)
-		ent->client->lastCmdTime = level.time;  // don't do this for unlagged
+	ent->client->lastCmdTime = level.time;
 
 	if (G_DoAntiwarp(ent))
 	{
@@ -2393,14 +2392,11 @@ void ClientEndFrame( gentity_t *ent ) {
 
 
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
-	if (g_antilag.integer < 2)
-	{
-		if (level.time - ent->client->lastCmdTime > 1000) {   // don't do this for unlagged
-			ent->s.eFlags |= EF_CONNECTION;
-		}
-		else {
-			ent->s.eFlags &= ~EF_CONNECTION;
-		}
+	if (level.time - ent->client->lastCmdTime > 1000) {
+		ent->s.eFlags |= EF_CONNECTION;
+	}
+	else {
+		ent->s.eFlags &= ~EF_CONNECTION;
 	}
 
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;   // FIXME: get rid of ent->health...
