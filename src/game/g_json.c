@@ -1484,7 +1484,13 @@ void G_writeClosingJson(void)
             G_Printf("Stats API: Starting stats upload process.\n");
 
             if ( level.jsonStatInfo.gameStatslogFile && buf ) {
-                trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
+
+                // prevent from writing to this file because stats are submitting
+                char fileNametoSubmit[256];
+                sprintf(fileNametoSubmit, "%s", level.jsonStatInfo.gameStatslogFileName);
+                Com_sprintf(level.jsonStatInfo.gameStatslogFileName, sizeof(level.jsonStatInfo.gameStatslogFileName), "");
+
+                trap_submit_curlPost(fileNametoSubmit, va("%s",buf));
             }
             else {
                 G_Printf("Stats API: No file to upload. Skipping.\n");
