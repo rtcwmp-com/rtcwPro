@@ -1118,7 +1118,8 @@ typedef struct {
 	int lastSSTime;
 
 	jsonPlayerStats_t playerStats[32];
-	char disconnectStats[32][GUID_LEN];
+	jsonPlayerStats_t disconnectStats[12];
+	int disconnectCount;
 
 } level_locals_t;
 
@@ -2254,7 +2255,7 @@ int G_teamAlive(int team ) ;  // temp addition for calculating number of alive..
 void G_writeChatEvent(gentity_t* agent, const char* chatText);
 qboolean CanAccessFile(char* str, char* filename);
 char* LookupEventType(int eventyType);
-void AddQuitPlayerStats(char* guid);
+//void AddQuitPlayerStats(char* guid);
 
 void G_matchClockDump( gentity_t *ent );  // temp addition for cg_autoaction issue
 

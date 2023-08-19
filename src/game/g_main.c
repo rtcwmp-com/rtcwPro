@@ -1586,6 +1586,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 				// reset disconnect stats for each half round
 				memset(level.disconnectStats, 0, sizeof(level.disconnectStats));
+				level.disconnectCount = 0;
 
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {

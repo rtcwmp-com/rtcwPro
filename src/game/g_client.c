@@ -2771,7 +2771,10 @@ void ClientDisconnect( int clientNum ) {
 						int roundTimeLeft = (((g_timelimit.value * 60 * 1000) - ((level.time - level.startTime))) / 1000);
 
 						if (roundTimeLeft <= 15)
+						{
+							level.disconnectCount++;
 							G_jstatsByPlayers(qtrue, qtrue, clientNum);
+						}
 					}
 				}
 			}

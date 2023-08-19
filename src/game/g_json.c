@@ -77,84 +77,169 @@ qboolean CanAccessFile(char* str, char* filename)
 void BuildPlayerStats(int clientSlot, qboolean clientDisconnected)
 {
     gclient_t* cl;
-    int i, j, eff;
+    int eff;
     char n1[MAX_NETNAME];
     char n2[MAX_NETNAME];
     unsigned int m, dwWeaponMask = 0;
 
-    // loop for amount of players playing and how many have already quit
-    for (i = 0; i < (level.numPlayingClients + ArrayLength(level.disconnectStats)); i++)
+    if (clientDisconnected)
     {
-        if (level.playerStats[i].guid != NULL)
-            continue; // this means player disconnected and stats are already written
-
-        cl = level.clients + level.sortedClients[i];
-
-        if ((clientSlot >= 0 && i != clientSlot) || cl->pers.connected != CON_CONNECTED )
+        for (int i = 0; i < level.numPlayingClients; i++)
         {
-            continue;
-        }
+            int dc = level.disconnectCount - 1;
 
-        DecolorString(cl->pers.netname, n1);
-        SanitizeString(n1, n2);
-        Q_CleanStr(n2);
-        n2[15] = 0;
-        
-        Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
+            if (level.disconnectStats[dc].guid != NULL)
+                continue; // this means player disconnected and stats are already written
 
-        eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
-        if (eff < 0)
-        {
-            eff = 0;
-        }
-       
-        level.playerStats[i].guid = cl->sess.guid;
-        //level.playerStats[i].alias = n2;
-        level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
-        level.playerStats[i].start_time = cl->sess.start_time;
-        level.playerStats[i].rounds = cl->sess.rounds;
-        level.playerStats[i].kills = cl->sess.kills;
-        level.playerStats[i].deaths = cl->sess.deaths;
-        level.playerStats[i].gibs = cl->sess.gibs;
-        level.playerStats[i].suicides = cl->sess.suicides;
-        level.playerStats[i].team_kills = cl->sess.team_kills;
-        level.playerStats[i].headshots = cl->sess.headshots;
-        level.playerStats[i].damage_given = cl->sess.damage_given;
-        level.playerStats[i].damage_received = cl->sess.damage_received;
-        level.playerStats[i].team_damage = cl->sess.team_damage;
-        level.playerStats[i].acc_hits = cl->sess.acc_hits;
-        level.playerStats[i].acc_shots = cl->sess.acc_shots;
-        level.playerStats[i].efficiency = eff;
-        level.playerStats[i].revives = cl->sess.revives;
-        level.playerStats[i].ammo_given = cl->sess.ammo_given;
-        level.playerStats[i].med_given = cl->sess.med_given;
-        level.playerStats[i].knifeKills = cl->sess.knifeKills;
-        level.playerStats[i].killPeak = cl->sess.killPeak;
-        level.playerStats[i].score = cl->ps.persistant[PERS_SCORE];
-        level.playerStats[i].dyn_planted = cl->sess.dyn_planted;
-        level.playerStats[i].dyn_defused = cl->sess.dyn_defused;
-        level.playerStats[i].obj_captured = cl->sess.obj_captured;
-        level.playerStats[i].obj_destroyed = cl->sess.obj_destroyed;
-        level.playerStats[i].obj_returned = cl->sess.obj_returned;
-        level.playerStats[i].obj_taken = cl->sess.obj_taken;
-        level.playerStats[i].obj_checkpoint = cl->sess.obj_checkpoint;
-        level.playerStats[i].obj_killcarrier = cl->sess.obj_killcarrier;
-        level.playerStats[i].obj_protectflag = cl->sess.obj_protectflag;
+            cl = level.clients + level.sortedClients[i];
 
-        if (clientDisconnected)
-            AddQuitPlayerStats(cl->sess.guid);
-
-        j = cl->sess.sessionTeam;
-        for (m = WS_KNIFE; m < WS_MAX; m++)
-        {
-            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+            // if client disconnected we only want to record that player's stats
+            if ((clientSlot >= 0 && i != clientSlot) || cl->pers.connected != CON_CONNECTED)
             {
-                dwWeaponMask |= (1 << j);
-                level.playerStats[i].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
-                level.playerStats[i].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
-                level.playerStats[i].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
-                level.playerStats[i].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
-                level.playerStats[i].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+                continue;
+            }
+
+            if (cl->pers.connected != CON_CONNECTED)
+                continue;
+
+            DecolorString(cl->pers.netname, n1);
+            SanitizeString(n1, n2);
+            Q_CleanStr(n2);
+            n2[15] = 0;
+
+            Q_strncpyz(level.disconnectStats[dc].alias, n2, sizeof(level.disconnectStats[dc].alias));
+
+            eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+            if (eff < 0)
+            {
+                eff = 0;
+            }
+
+            level.disconnectStats[dc].guid = cl->sess.guid;
+            //level.disconnectStats[dc].alias = n2;
+            level.disconnectStats[dc].sessionTeam = cl->sess.sessionTeam;
+            level.disconnectStats[dc].start_time = cl->sess.start_time;
+            level.disconnectStats[dc].rounds = cl->sess.rounds;
+            level.disconnectStats[dc].kills = cl->sess.kills;
+            level.disconnectStats[dc].deaths = cl->sess.deaths;
+            level.disconnectStats[dc].gibs = cl->sess.gibs;
+            level.disconnectStats[dc].suicides = cl->sess.suicides;
+            level.disconnectStats[dc].team_kills = cl->sess.team_kills;
+            level.disconnectStats[dc].headshots = cl->sess.headshots;
+            level.disconnectStats[dc].damage_given = cl->sess.damage_given;
+            level.disconnectStats[dc].damage_received = cl->sess.damage_received;
+            level.disconnectStats[dc].team_damage = cl->sess.team_damage;
+            level.disconnectStats[dc].acc_hits = cl->sess.acc_hits;
+            level.disconnectStats[dc].acc_shots = cl->sess.acc_shots;
+            level.disconnectStats[dc].efficiency = eff;
+            level.disconnectStats[dc].revives = cl->sess.revives;
+            level.disconnectStats[dc].ammo_given = cl->sess.ammo_given;
+            level.disconnectStats[dc].med_given = cl->sess.med_given;
+            level.disconnectStats[dc].knifeKills = cl->sess.knifeKills;
+            level.disconnectStats[dc].killPeak = cl->sess.killPeak;
+            level.disconnectStats[dc].score = cl->ps.persistant[PERS_SCORE];
+            level.disconnectStats[dc].dyn_planted = cl->sess.dyn_planted;
+            level.disconnectStats[dc].dyn_defused = cl->sess.dyn_defused;
+            level.disconnectStats[dc].obj_captured = cl->sess.obj_captured;
+            level.disconnectStats[dc].obj_destroyed = cl->sess.obj_destroyed;
+            level.disconnectStats[dc].obj_returned = cl->sess.obj_returned;
+            level.disconnectStats[dc].obj_taken = cl->sess.obj_taken;
+            level.disconnectStats[dc].obj_checkpoint = cl->sess.obj_checkpoint;
+            level.disconnectStats[dc].obj_killcarrier = cl->sess.obj_killcarrier;
+            level.disconnectStats[dc].obj_protectflag = cl->sess.obj_protectflag;
+
+            int j = cl->sess.sessionTeam;
+            for (m = WS_KNIFE; m < WS_MAX; m++)
+            {
+                if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+                {
+                    dwWeaponMask |= (1 << j);
+                    level.disconnectStats[dc].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
+                    level.disconnectStats[dc].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
+                    level.disconnectStats[dc].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
+                    level.disconnectStats[dc].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
+                    level.disconnectStats[dc].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+                }
+            }
+        }
+    }
+    else
+    {
+        // loop for amount of players playing and how many have already quit
+        for (int i = 0; i < level.numPlayingClients; i++)
+        {
+            if (level.playerStats[i].guid != NULL)
+                continue; // this means player disconnected and stats are already written
+
+            cl = level.clients + level.sortedClients[i];
+
+            // if client disconnected we only want to record that player's stats
+            /*if ((clientSlot >= 0 && i != clientSlot) || cl->pers.connected != CON_CONNECTED)
+            {
+                continue;
+            }*/
+
+            if (cl->pers.connected != CON_CONNECTED)
+                continue;
+
+            DecolorString(cl->pers.netname, n1);
+            SanitizeString(n1, n2);
+            Q_CleanStr(n2);
+            n2[15] = 0;
+
+            Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
+
+            eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+            if (eff < 0)
+            {
+                eff = 0;
+            }
+
+            level.playerStats[i].guid = cl->sess.guid;
+            //level.playerStats[i].alias = n2;
+            level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
+            level.playerStats[i].start_time = cl->sess.start_time;
+            level.playerStats[i].rounds = cl->sess.rounds;
+            level.playerStats[i].kills = cl->sess.kills;
+            level.playerStats[i].deaths = cl->sess.deaths;
+            level.playerStats[i].gibs = cl->sess.gibs;
+            level.playerStats[i].suicides = cl->sess.suicides;
+            level.playerStats[i].team_kills = cl->sess.team_kills;
+            level.playerStats[i].headshots = cl->sess.headshots;
+            level.playerStats[i].damage_given = cl->sess.damage_given;
+            level.playerStats[i].damage_received = cl->sess.damage_received;
+            level.playerStats[i].team_damage = cl->sess.team_damage;
+            level.playerStats[i].acc_hits = cl->sess.acc_hits;
+            level.playerStats[i].acc_shots = cl->sess.acc_shots;
+            level.playerStats[i].efficiency = eff;
+            level.playerStats[i].revives = cl->sess.revives;
+            level.playerStats[i].ammo_given = cl->sess.ammo_given;
+            level.playerStats[i].med_given = cl->sess.med_given;
+            level.playerStats[i].knifeKills = cl->sess.knifeKills;
+            level.playerStats[i].killPeak = cl->sess.killPeak;
+            level.playerStats[i].score = cl->ps.persistant[PERS_SCORE];
+            level.playerStats[i].dyn_planted = cl->sess.dyn_planted;
+            level.playerStats[i].dyn_defused = cl->sess.dyn_defused;
+            level.playerStats[i].obj_captured = cl->sess.obj_captured;
+            level.playerStats[i].obj_destroyed = cl->sess.obj_destroyed;
+            level.playerStats[i].obj_returned = cl->sess.obj_returned;
+            level.playerStats[i].obj_taken = cl->sess.obj_taken;
+            level.playerStats[i].obj_checkpoint = cl->sess.obj_checkpoint;
+            level.playerStats[i].obj_killcarrier = cl->sess.obj_killcarrier;
+            level.playerStats[i].obj_protectflag = cl->sess.obj_protectflag;
+
+            int j = cl->sess.sessionTeam;
+            for (m = WS_KNIFE; m < WS_MAX; m++)
+            {
+                if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+                {
+                    dwWeaponMask |= (1 << j);
+                    level.playerStats[i].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
+                    level.playerStats[i].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
+                    level.playerStats[i].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
+                    level.playerStats[i].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
+                    level.playerStats[i].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+                }
             }
         }
     }
@@ -622,10 +707,9 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     if (!CanAccessFile("Stats: writing stats by players", level.jsonStatInfo.gameStatslogFileName))
         return;
 
-    int i, j;
 	float tot_acc = 0.00f;
 	char* statString = "";
-	gclient_t *cl;
+	//gclient_t *cl;
 	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
@@ -640,15 +724,26 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     // build player stats for players still on the server
     if (!clientDisconnected)
     {
-        for (j = 0; j < level.numPlayingClients; j++)
-        {
-            cl = level.clients + level.sortedClients[j];
-            BuildPlayerStats(cl->ps.clientNum, qfalse);
-        }
+        //for (int j = 0; j < level.numPlayingClients; j++)
+        //{
+        //    cl = level.clients + level.sortedClients[j];
+        //    BuildPlayerStats(cl->ps.clientNum, qfalse);
+        //}
+
+        BuildPlayerStats(-1, qfalse); // call this one time for all clients
 
         jstats = json_array();
 
-        for (j = 0; j < ArrayLength(level.playerStats); j++)
+        int t = 0;
+
+        // copy the disconnectedStats data into the playerStats array
+        for (int i = 0; i < level.disconnectCount; i++)
+        {
+            level.playerStats[level.numConnectedClients + i] = level.disconnectStats[i];
+        }
+
+
+        for (int j = 0; j < ArrayLength(level.playerStats); j++)
         {
             if (level.playerStats[j].guid == NULL) // if array index is empty continue
                 continue;
@@ -684,7 +779,6 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
             json_object_set_new(jcat, "knifekills", json_integer(level.playerStats[j].knifeKills));
             json_object_set_new(jcat, "killpeak", json_integer(level.playerStats[j].killPeak));
             json_object_set_new(jcat, "efficiency", json_real(level.playerStats[j].efficiency));
-            // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
             json_object_set_new(jcat, "score", json_integer(level.playerStats[j].score));
             json_object_set_new(jcat, "dyn_planted", json_integer(level.playerStats[j].dyn_planted));
             json_object_set_new(jcat, "dyn_defused", json_integer(level.playerStats[j].dyn_defused));
@@ -698,7 +792,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
 
 
             weapArray = json_array();
-            i = level.playerStats[j].sessionTeam;
+            int i = level.playerStats[j].sessionTeam;
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
                 if (level.playerStats[j].aWeaponStats[m].atts || level.playerStats[j].aWeaponStats[m].hits ||
@@ -761,25 +855,26 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     }
 }
 
-void AddQuitPlayerStats(char *guid)
-{
-    int i = 0;
-
-    // find the first available index in the array
-    while (i < 32 && level.disconnectStats[i][0] != '\0')
-    {        
-        i++;
-    }
-
-    if (i < 32)
-    {
-        Q_strncpyz(level.disconnectStats[i], guid, sizeof(level.disconnectStats[i]));
-    }
-    else
-    {
-        G_Printf(va("Disconnect stats array is full. Cannot add player guid: %s", guid));
-    }
-}
+//void AddQuitPlayerStats(char *guid)
+//{
+//    int i = 0;
+//
+//    // find the first available index in the array
+//    while (i < 12 && level.disconnectStats[i][0] != '\0')
+//    {        
+//        i++;
+//    }
+//
+//    if (i < 12)
+//    {
+//        Q_strncpyz(level.disconnectStats[i], guid, sizeof(level.disconnectStats[i]));
+//        level.disconnectCount++;
+//    }
+//    else
+//    {
+//        G_Printf(va("Disconnect stats array is full. Cannot add player guid: %s", guid));
+//    }
+//}
 
 /*
 ===========
