@@ -1195,7 +1195,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
             G_jstatsByTeam(wstats); // write out the player stats
         }
         else {
-            G_jstatsByPlayers(wstats, qfalse, -1);  // write out player stats
+            G_jstatsByPlayers(wstats, qfalse, NULL);  // write out player stats
         }
 
         G_writeClosingJson();  // need a closing bracket....will provide better solution later

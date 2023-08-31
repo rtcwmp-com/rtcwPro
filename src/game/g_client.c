@@ -2759,24 +2759,11 @@ void ClientDisconnect( int clientNum ) {
 				ent->message = NULL;
 			}
 
-			// Record the players stats into the JSON if they /quit with timelimit under 15 seconds
-			//G_LogPrintf("WeaponStats: %s\n", G_createStats(ent));
-			if (g_gamestate.integer == GS_PLAYING)
+			// Record the players stats if they /quit so we can reload or save them
+			if (g_gameStatslog.integer)
 			{
-				if (g_gameStatslog.integer)
-				{
-					if (g_timelimit.value && level.paused == PAUSE_NONE)
-					{
-						// if time left in the round is less than 15 secs
-						int roundTimeLeft = (((g_timelimit.value * 60 * 1000) - ((level.time - level.startTime))) / 1000);
-
-						if (roundTimeLeft <= 15)
-						{
-							level.disconnectCount++;
-							G_jstatsByPlayers(qtrue, qtrue, clientNum);
-						}
-					}
-				}
+				// record any player that disconnects
+				G_jstatsByPlayers(qtrue, qtrue, ent->client);
 			}
 		}
 	}

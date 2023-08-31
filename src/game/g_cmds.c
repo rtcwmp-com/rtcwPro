@@ -1036,6 +1036,9 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	if (team != oldTeam) {
 		G_deleteStats(clientNum);
 	}
+
+	//if (g_gamestate.integer == GS_PLAYING)
+	G_read_round_jstats_reconnect(client); // if player reconnected read their stats back into the session
 }
 
 // DHM - Nerve

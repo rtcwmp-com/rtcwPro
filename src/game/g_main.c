@@ -1807,7 +1807,6 @@ void G_ShutdownGame( int restart ) {
 	if (level.jsonStatInfo.gameStatslogFile) {
         // we may want to put some closing information into the gamestat file...
         trap_FS_FCloseFile( level.jsonStatInfo.gameStatslogFile);
-		trap_FS_FCloseFile( level.jsonStatInfo.disconnectFile);
 	}
 
 	// Ridah, shutdown the Botlib, so weapons and things get reset upon doing a "map xxx" command

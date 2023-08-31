@@ -889,7 +889,6 @@ typedef struct jsonStatInfo_s {
    char  round_timelimit[MAX_STRING_CHARS];
    char  gameStatslogFileName[256];
    fileHandle_t gameStatslogFile; // for outputting events in a nice format (possibly temporary) - nihi
-   fileHandle_t disconnectFile;
 } jsonStatInfo_t;
 
 // struct to hold player stats so we can print rage quit stats also
@@ -2236,8 +2235,9 @@ int getPstats(json_t *jsonData, char *id, gclient_t *client);
 int G_write_match_info( void );
 int G_read_match_info( void );
 int G_read_round_jstats( void );
+int G_read_round_jstats_reconnect(gclient_t* client);
 void G_jstatsByTeam(qboolean wstats);
-void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientId);
+void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *client);
 void G_jWeaponStats(void);
 int G_check_before_submit( char* jsonfile);
 void G_writeGameInfo (int winner);
