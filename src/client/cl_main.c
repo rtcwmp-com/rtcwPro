@@ -852,6 +852,8 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		autoupdateFilename[0] = '\0';
 	}
 
+	*clc.downloadTempName = *clc.downloadName = 0; // rtcwpro
+
 	if ( clc.demofile ) {
 		FS_FCloseFile( clc.demofile );
 		clc.demofile = 0;
