@@ -2201,6 +2201,7 @@ int Com_EventLoop( void ) {
 
 			evFrom = *(netadr_t *)ev.evPtr;
 			buf.cursize = ev.evPtrLength - sizeof( evFrom );
+			buf.time_received = Sys_Milliseconds(); // rtcwpro
 
 			// we must copy the contents of the message out, because
 			// the event buffers are only large enough to hold the
