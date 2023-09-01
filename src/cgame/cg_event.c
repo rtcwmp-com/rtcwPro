@@ -2284,8 +2284,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		// dhm - end
 // OSPx
 	// Announcer sounds
-	case EV_ANNOUNCER_SOUND:
-		DEBUGNAME("EV_ANNOUNCER_SOUND");
+	case EV_USE_ITEM15:
+		DEBUGNAME("EV_USE_ITEM15");
 		if (cg_announcer.integer) {
 			// Ridah, check for a sound script
 			s = CG_ConfigString(CS_SOUNDS + es->eventParm);

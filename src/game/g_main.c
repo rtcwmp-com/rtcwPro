@@ -85,6 +85,8 @@ vmCvar_t g_warmup;
 // NERVE - SMF
 vmCvar_t g_warmupLatch;
 vmCvar_t g_nextTimeLimit;
+vmCvar_t g_preciseTimeSet;
+vmCvar_t g_usePreciseConsoleTime;
 vmCvar_t g_showHeadshotRatio;
 vmCvar_t g_userTimeLimit;
 vmCvar_t g_userAlliedRespawnTime;
@@ -166,7 +168,6 @@ vmCvar_t g_dbgRevive;
 
 // rtcwpro begin
 //S4NDM4NN - fix errors when sv_fps is adjusted
-vmCvar_t sv_screenshake;
 vmCvar_t g_screenShake;
 vmCvar_t g_preciseHeadHitBox;
 vmCvar_t sv_fps;
@@ -180,6 +181,9 @@ vmCvar_t g_stats_curl_submit_URL;
 vmCvar_t g_stats_curl_submit_headers;
 vmCvar_t g_gameStatslog; // temp cvar for event logging
 vmCvar_t g_statsDebug; // write in logfile to debug crashes
+vmCvar_t g_statsRetryCount;
+vmCvar_t g_statsRetryDelay;
+vmCvar_t g_apiquery_curl_URL;
 
 // Match
 vmCvar_t team_maxplayers;
@@ -200,7 +204,7 @@ vmCvar_t vote_allow_map;
 vmCvar_t vote_allow_matchreset;
 vmCvar_t vote_allow_mutespecs;
 vmCvar_t vote_allow_nextmap;
-vmCvar_t vote_allow_pub;
+//vmCvar_t vote_allow_pub;
 vmCvar_t vote_allow_referee;
 vmCvar_t vote_allow_shuffleteamsxp;
 vmCvar_t vote_allow_swapteams;
@@ -211,6 +215,7 @@ vmCvar_t vote_allow_antilag;
 vmCvar_t vote_allow_balancedteams;
 vmCvar_t vote_allow_muting;
 vmCvar_t vote_allow_cointoss;
+vmCvar_t vote_allow_knifeonly;
 vmCvar_t vote_limit;
 vmCvar_t vote_percent;
 vmCvar_t refereePassword;
@@ -294,6 +299,11 @@ vmCvar_t g_ssWebhookToken; // token contained in the discord webhook link (chars
 vmCvar_t g_ssWaitTime; // wait time between reqss cmds to prevent spam
 vmCvar_t g_broadcastClients; // fix clients appearing from thin air on some maps
 
+ // unlagged
+vmCvar_t g_floatPlayerPosition;
+vmCvar_t g_delagHitscan;
+vmCvar_t g_maxExtrapolatedFrames;
+
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, qfalse },
@@ -314,7 +324,6 @@ cvarTable_t gameCvarTable[] = {
 	// done
 
 // JPW NERVE multiplayer stuffs
-	{ &sv_screenshake, "sv_screenshake", "5", CVAR_ARCHIVE,0,qfalse},
 	{ &g_redlimbotime, "g_redlimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse },
 	{ &g_bluelimbotime, "g_bluelimbotime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse },
 	{ &g_medicChargeTime, "g_medicChargeTime", "45000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse },
@@ -348,6 +357,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_warmupLatch, "g_warmupLatch", "1", 0, 0, qfalse },
 
 	{ &g_nextTimeLimit, "g_nextTimeLimit", "0", CVAR_WOLFINFO, 0, qfalse  },
+	{ &g_preciseTimeSet, "g_preciseTimeSet", "0", CVAR_WOLFINFO, 0, qfalse  },
+	{ &g_usePreciseConsoleTime, "g_usePreciseConsoleTime", "1", CVAR_WOLFINFO, 0, qfalse  },
 	{ &g_currentRound, "g_currentRound", "0", CVAR_WOLFINFO, 0, qfalse  },
 	{ &g_altStopwatchMode, "g_altStopwatchMode", "0", CVAR_ARCHIVE, 0, qtrue  },
 	{ &g_gamestate, "gamestate", "-1", CVAR_WOLFINFO | CVAR_ROM, 0, qfalse  },
@@ -372,6 +383,9 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_stats_curl_submit, "g_stats_curl_submit", "0", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_URL, "g_stats_curl_submit_URL", "https://rtcwproapi.donkanator.com/submit", CVAR_ARCHIVE, 0, qfalse  },
     { &g_stats_curl_submit_headers, "g_stats_curl_submit_headers", "0", CVAR_ARCHIVE, 0, qfalse  }, // not used at the moment, headers are currently hardcoded
+	{ &g_statsRetryCount, "g_statsRetryCount", "3", CVAR_ARCHIVE, 0, qfalse  }, // number of attempts to send stats if first attempt fails
+	{ &g_statsRetryDelay, "g_statsRetryDelay", "2", CVAR_ARCHIVE, 0, qfalse  }, // delay in seconds to retry sending stats if first attempt fails
+	{ &g_apiquery_curl_URL, "g_apiquery_curl_URL", "https://rtcwproapi.donkanator.com/serverquery", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
 	// show_bug.cgi?id=500
@@ -475,7 +489,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_matchreset,   "vote_allow_matchreset", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_mutespecs,    "vote_allow_mutespecs", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_nextmap,      "vote_allow_nextmap", "1", 0, 0, qfalse, qfalse },
-	{ &vote_allow_pub,          "vote_allow_pub", "1", 0, 0, qfalse, qfalse },
+	//{ &vote_allow_pub,          "vote_allow_pub", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_referee,      "vote_allow_referee", "0", 0, 0, qfalse, qfalse },
 	{ &vote_allow_swapteams,    "vote_allow_swapteams", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_friendlyfire, "vote_allow_friendlyfire", "1", 0, 0, qfalse, qfalse },
@@ -485,6 +499,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_balancedteams,"vote_allow_balancedteams", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_muting,       "vote_allow_muting", "1", 0, 0, qfalse, qfalse },
 	{ &vote_allow_cointoss,		"vote_allow_cointoss", "1", 0, 0, qfalse, qfalse },
+	{ &vote_allow_knifeonly,	"vote_allow_knifeonly", "1", 0, 0, qfalse, qfalse },
 
 	// RTCWPro
 	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
@@ -534,7 +549,12 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_ssWebhookToken, "g_ssWebhookToken", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_ssWaitTime, "g_ssWaitTime", "30", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_broadcastClients, "g_broadcastClients", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
-	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse } // ET Port Players server info
+	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse }, // ET Port Players server info
+
+	// unlagged
+	{ &g_floatPlayerPosition, "g_floatPlayerPosition", "1", CVAR_ARCHIVE, 0, qfalse},
+	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -609,6 +629,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_RETRIEVE_MOVESPEEDS_FROM_CLIENT:
 		G_RetrieveMoveSpeedsFromClient( arg0, (char *)arg1 );
+		return 0;
+
+	case G_RETURN_API_QUERY_RESPONSE:
+		trap_HandleApiResponse(arg0, (char*)arg1);
 		return 0;
 	}
 
@@ -1560,7 +1584,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
                 time_t unixTime = time(NULL);  // come back and make globally available
                 //char cs[MAX_STRING_CHARS];
 
-
+				// reset disconnect stats for each half round
+				memset(level.disconnectStats, 0, sizeof(level.disconnectStats));
+				level.disconnectCount = 0;
 
                 // we want to save some information for the match and round
                 if (g_currentRound.integer == 1) {
@@ -1781,7 +1807,6 @@ void G_ShutdownGame( int restart ) {
 	if (level.jsonStatInfo.gameStatslogFile) {
         // we may want to put some closing information into the gamestat file...
         trap_FS_FCloseFile( level.jsonStatInfo.gameStatslogFile);
-
 	}
 
 	// Ridah, shutdown the Botlib, so weapons and things get reset upon doing a "map xxx" command
@@ -3204,6 +3229,10 @@ OSPx - check for team stuff..
 */
 void HandleEmptyTeams(void) {
 
+	// if there is a live Tournament Stopwatch round going do not reset the match if the other team rage quits
+	if (g_gamestate.integer == GS_PLAYING && g_tournament.integer == 1 && g_gametype.integer == GT_WOLF_STOPWATCH)
+		return;
+
 	if (g_gamestate.integer != GS_INTERMISSION) {
 		if (!level.axisPlayers && match_minplayers.integer > 1) {
 			G_teamReset(TEAM_RED, qtrue, qfalse);
@@ -3413,7 +3442,8 @@ void G_RunFrame( int levelTime ) {
 	} // End
 
 //	level.frameTime = trap_Milliseconds();
-	level.frameStartTime = trap_Milliseconds();
+	if (g_antilag.integer < 2) // not unlagged
+		level.frameStartTime = trap_Milliseconds();
 
 	level.framenum++;
 	level.previousTime = level.time;
@@ -3570,6 +3600,35 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, move the AI
 	//AICast_StartServerFrame ( level.time );
 
+	if (g_antilag.integer == 2) // unlagged
+	{
+		//unlagged - backward reconciliation #2
+		// NOW run the missiles, with all players backward-reconciled
+		// to the positions they were in exactly 50ms ago, at the end
+		// of the last server frame
+		G_TimeShiftAllClients(level.previousTime, NULL);
+
+		ent = &g_entities[0];
+		for (i = 0; i < level.num_entities; i++, ent++) {
+			if (!ent->inuse) {
+				continue;
+			}
+
+			// temporary entities don't think
+			if (ent->freeAfterEvent) {
+				continue;
+			}
+
+			if (ent->s.eType == ET_MISSILE) {
+				G_RunMissile(ent);
+			}
+		}
+
+		G_UnTimeShiftAllClients(NULL);
+		//unlagged - backward reconciliation #2
+	}
+
+
 //start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];
@@ -3635,4 +3694,15 @@ void G_RunFrame( int levelTime ) {
 		// L0 - Check Team Lock status..
 		HandleEmptyTeams();
 	}
+
+	if (g_antilag.integer == 2) // unlagged
+	{
+		//unlagged - backward reconciliation #4
+		// record the time at the end of this frame - it should be about
+		// the time the next frame begins - when the server starts
+		// accepting commands from connected clients
+		level.frameStartTime = trap_Milliseconds();
+		//unlagged - backward reconciliation #4
+	}
+
 }

@@ -756,7 +756,7 @@ typedef struct {
 	int playerAmmoClip;
 	int playerWeapon;
 	int playerNades;
-	//int isReady;
+	int latchedClass;
 
 } clientInfo_t;
 
@@ -1742,6 +1742,14 @@ typedef struct {
 // OSPx
 	// Country Flags
 	qhandle_t countryFlags;
+
+	// Objective icon
+	qhandle_t treasureIcon;
+
+	// arty and airstrike
+	qhandle_t artillery;
+	qhandle_t airstrike;
+
 	// Hitsounds
 	//sfxHandle_t	headShot1;
 	//sfxHandle_t	headShot2;
@@ -1954,6 +1962,7 @@ extern vmCvar_t cg_cycleAllWeaps;
 extern vmCvar_t cg_drawAllWeaps;
 extern vmCvar_t cg_drawRewards;
 extern vmCvar_t cg_drawTeamOverlay;
+extern vmCvar_t cg_teamOverlayLatchedClass;
 extern vmCvar_t cg_uselessNostalgia;         // JPW NERVE
 extern vmCvar_t cg_crosshairX;
 extern vmCvar_t cg_crosshairY;
@@ -2028,7 +2037,7 @@ extern vmCvar_t cg_noVoiceText;                     // NERVE - SMF
 extern vmCvar_t cg_enableBreath;
 extern vmCvar_t cg_autoactivate;
 extern vmCvar_t cg_emptyswitch;
-extern vmCvar_t cg_smoothClients;
+//extern vmCvar_t cg_smoothClients;
 extern vmCvar_t pmove_fixed;
 extern vmCvar_t pmove_msec;
 
@@ -2214,6 +2223,7 @@ extern vmCvar_t cg_drawFrags;
 extern vmCvar_t cg_fragsY;
 extern vmCvar_t cg_fragsWidth;
 extern vmCvar_t cg_fixedphysicsfps;
+extern vmCvar_t cg_debugDamage;
 
 //static void CG_TimerSet_f(void);
 //static void CG_TimerReset_f(void);
@@ -2938,6 +2948,8 @@ int         trap_Key_GetKey( const char *binding );
 
 // RF
 void trap_SendMoveSpeedsToGame( int entnum, char *movespeeds );
+
+void PrintApiResponse(char* result);
 
 typedef enum {
 	SYSTEM_PRINT,

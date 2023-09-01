@@ -82,6 +82,8 @@ static void CG_ParseScores( void ) {
 
 }
 
+#define TEAMINFOARGS 12 // number of arguments for CG_ParseTeamInfo
+
 /*
 =================
 CG_ParseTeamInfo
@@ -100,22 +102,23 @@ static void CG_ParseTeamInfo( void ) {
 	numSortedTeamPlayers = atoi( CG_Argv( 3 ) );
 
 	for ( i = 0 ; i < numSortedTeamPlayers ; i++ ) {
-		client = atoi(CG_Argv(i * 11 + 4));
+		client = atoi(CG_Argv(i * TEAMINFOARGS + 4));
 
 		sortedTeamPlayers[i] = client;
 
-		cgs.clientinfo[client].location = atoi(CG_Argv(i * 11 + 5));
-		cgs.clientinfo[client].health = atoi(CG_Argv(i * 11 + 6));
-		cgs.clientinfo[client].powerups = atoi(CG_Argv(i * 11 + 7));
+		cgs.clientinfo[client].location = atoi(CG_Argv(i * TEAMINFOARGS + 5));
+		cgs.clientinfo[client].health = atoi(CG_Argv(i * TEAMINFOARGS + 6));
+		cgs.clientinfo[client].powerups = atoi(CG_Argv(i * TEAMINFOARGS + 7));
 
-		cg_entities[client].currentState.teamNum = atoi(CG_Argv(i * 11 + 8));
+		cg_entities[client].currentState.teamNum = atoi(CG_Argv(i * TEAMINFOARGS + 8));
 
-		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 11 + 9));
-		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 11 + 10));
-		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 11 + 11));
-		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 11 + 12));
-		cgs.clientinfo[client].playerLimbo = atoi(CG_Argv(i * 11 + 13));
-		player_ready_status[client].isReady = atoi(CG_Argv(i * 11 + 14));
+		cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * TEAMINFOARGS + 9));
+		cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * TEAMINFOARGS + 10));
+		cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * TEAMINFOARGS + 11));
+		cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * TEAMINFOARGS + 12));
+		cgs.clientinfo[client].playerLimbo = atoi(CG_Argv(i * TEAMINFOARGS + 13));
+		player_ready_status[client].isReady = atoi(CG_Argv(i * TEAMINFOARGS + 14));
+		cgs.clientinfo[client].latchedClass = atoi(CG_Argv(i * TEAMINFOARGS + 15));
 	}
 }
 
@@ -2343,7 +2346,26 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// apiQuery
+	if (!strcmp(cmd, "api"))
+	{
+		char* result = (char*)CG_Argv(1);
+		PrintApiResponse(result); // CG_printConsoleString);
+		return;
+	}
+
 	CG_Printf( "Unknown client game command: %s\n", cmd );
+}
+
+void PrintApiResponse(char* result) //void(txt_dump)(char*)
+{
+	result = Q_StrReplace(result, "[NL]", "\n");
+
+	CG_Printf("%s", result);
+
+	//char* result = va("%s", (char*)CG_Argv(1));
+	//txt_dump(result);
+	//txt_dump("\n");
 }
 
 /*
