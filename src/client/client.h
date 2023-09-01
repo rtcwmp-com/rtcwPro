@@ -217,6 +217,8 @@ typedef struct {
 
 	// file transfer from server
 	fileHandle_t download;
+	char downloadTempName[MAX_OSPATH]; // rtcwpro
+	char downloadName[MAX_OSPATH]; // rtcwpro
 	int downloadNumber;
 	int downloadBlock;          // block we are waiting for
 	int downloadCount;          // how many bytes we got
@@ -432,6 +434,9 @@ extern cvar_t* cl_StreamingSelfSignedCert;
 // ~L0
 
 extern cvar_t* cl_activatelean; // RTCWPro
+// rtcwpro - http redirect
+extern cvar_t* cl_httpDomain;
+extern cvar_t* cl_httpPath;
  
 
 //=================================================
@@ -483,6 +488,9 @@ void CL_ReloadTranslation();
 void CL_TranslateString( const char *string, char *dest_buffer );
 const char* CL_TranslateStringBuf( const char *string ); // TTimo
 // -NERVE - SMF
+
+void CL_BeginDownload(const char* localName, const char* remoteName, qboolean attemptHttp);
+qboolean CL_BeginHttpDownload(); // rtcwpro
 
 void CL_OpenURL( const char *url ); // TTimo
 

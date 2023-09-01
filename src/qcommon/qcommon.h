@@ -56,6 +56,7 @@ typedef struct {
 	int uncompsize;             // NERVE - SMF - net debugging
 	int readcount;
 	int bit;                    // for bitwise reads and writes
+	int time_received; // rtcwpro
 } msg_t;
 
 void MSG_Init( msg_t *buf, byte *data, int length );
@@ -179,6 +180,37 @@ typedef struct {
 	unsigned short port;
 	unsigned long	scope_id;	// Needed for IPv6 link-local addresses
 } netadr_t;
+
+// rtcwpro
+typedef struct
+{
+	int socket;
+	qboolean in_use;
+	netadr_t* address;
+	void(*failure_callback)(char*);
+} streamed_socket;
+
+typedef struct http_header_t
+{
+	char* name;
+	char* value;
+	struct http_header_t* next_header;
+} http_header;
+
+typedef struct
+{
+	struct http_header_t* headers;
+	char* body;
+	qboolean is_valid;
+	qboolean has_body;
+	int code;
+	qboolean chunked;
+	int content_length;
+	qboolean accepts_range;
+} http_response;
+
+http_response* http_parse(char* msg, int msg_len);
+// end
 
 void		NET_Restart(void);
 void        NET_Init( void );
@@ -986,6 +1018,8 @@ void CL_JoystickEvent( int axis, int value, int time );
 
 void CL_PacketEvent( netadr_t from, msg_t *msg );
 
+void CL_StreamedPacketEvent(netadr_t from, msg_t* msg); // rtcwpro
+
 void CL_ConsolePrint( char *text );
 
 void CL_MapLoading( void );
@@ -1073,7 +1107,8 @@ typedef enum {
 	SE_MOUSE,   // evValue and evValue2 are reletive signed x / y moves
 	SE_JOYSTICK_AXIS,   // evValue is an axis number and evValue2 is the current state (-127 to 127)
 	SE_CONSOLE, // evPtr is a char*
-	SE_PACKET   // evPtr is a netadr_t followed by data bytes to evPtrLength
+	SE_PACKET,   // evPtr is a netadr_t followed by data bytes to evPtrLength
+	SE_STREAMED_PACKET // evPtr is a netadr_t followed by data bytes to evPtrLength // rtcwpro
 } sysEventType_t;
 
 typedef struct {
@@ -1141,6 +1176,14 @@ void    Sys_ShowConsole( int level, qboolean quitOnClose );
 void    Sys_SetErrorText( const char *text );
 
 void    Sys_SendPacket( int length, const void *data, netadr_t to );
+
+// rtcwpro
+void	Sys_SendStreamedPacket(streamed_socket* ss, void* data, int length);
+void	Sys_ResendStreamedPacket(void);
+
+void	NET_CloseStreamedSocket(streamed_socket* ss);
+qboolean	NET_OpenStreamedSocket(streamed_socket** ss_out, netadr_t* to);
+// end
 
 qboolean    Sys_StringToAdr( const char *s, netadr_t *a );
 //Does NOT parse port numbers, only base addresses.
