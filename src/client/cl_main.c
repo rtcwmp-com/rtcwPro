@@ -853,7 +853,6 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	}
 
 	*clc.downloadTempName = *clc.downloadName = 0; // rtcwpro
-	Cvar_Set("cl_downloadName", ""); // rtcwpro
 
 	if ( clc.demofile ) {
 		FS_FCloseFile( clc.demofile );
