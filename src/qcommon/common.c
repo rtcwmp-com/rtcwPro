@@ -2224,7 +2224,7 @@ int Com_EventLoop( void ) {
 			buf.time_received = Sys_Milliseconds();
 
 			memcpy(buf.data, (byte*)ev.evPtr + sizeof(netadr_t), buf.cursize);
-			if (!com_sv_running->integer) {
+			if (com_sv_running->integer) {
 				CL_StreamedPacketEvent(evFrom, &buf);
 			}
 			break;
