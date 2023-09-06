@@ -2773,7 +2773,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		cgs.fadeAlpha = 0;
 
 // JPW NERVE -- pick a direction for smoke drift on the client -- cheap trick because it can be different on different clients, but who cares?
-	cgs.smokeWindDir = crandom();
+	cgs.smokeWindDir = -1.0f; // RtcwPro always make smoke go south // crandom();
 // jpw
 
 	CG_ParseServerinfo();
