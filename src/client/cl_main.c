@@ -1550,8 +1550,8 @@ void CL_DownloadsComplete( void ) {
 	}
 
 	// if we downloaded files we need to restart the file system
-	if ( clc.downloadRestart ) {
-		clc.downloadRestart = qfalse;
+	if ( cls.downloadRestart ) {
+		cls.downloadRestart = qfalse;
 
 		FS_Restart( clc.checksumFeed ); // We possibly downloaded a pak, restart the file system to load it
 
@@ -1624,8 +1624,8 @@ void CL_BeginDownload(const char* localName, const char* remoteName, qboolean at
 	Q_strncpyz(remote_file_name, remoteName, sizeof(remote_file_name));
 	// end
 
-	Q_strncpyz(clc.downloadName, localName, sizeof(clc.downloadName));
-	Com_sprintf(clc.downloadTempName, sizeof(clc.downloadTempName), "%s.tmp", localName);
+	Q_strncpyz(cls.downloadName, localName, sizeof(cls.downloadName));
+	Com_sprintf(cls.downloadTempName, sizeof(cls.downloadTempName), "%s.tmp", localName);
 
 	// Set so UI gets access to it
 	Cvar_Set( "cl_downloadName", remoteName );
@@ -1680,7 +1680,7 @@ void CL_NextDownload( void ) {
 		}
 		CL_BeginDownload( localName, remoteName, qtrue );
 
-		clc.downloadRestart = qtrue;
+		cls.downloadRestart = qtrue;
 
 		// move over the rest
 		memmove( clc.downloadList, s, strlen( s ) + 1 );
