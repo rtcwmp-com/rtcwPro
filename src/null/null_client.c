@@ -54,10 +54,6 @@ void CL_Frame( int msec ) {
 void CL_PacketEvent( netadr_t from, msg_t *msg ) {
 }
 
-// rtcwpro
-void CL_StreamedPacketEvent(netadr_t from, msg_t* msg) {
-}
-
 void CL_CharEvent( int key ) {
 }
 
