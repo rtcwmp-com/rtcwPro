@@ -1097,7 +1097,9 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
     endofroundinfo=va( "  .."); // plan to remove this soon.....just safety measure
 
 
-	// Check winner and give credit to who captured obj
+	/*
+	// Removed this - logic is now in g_trigger.Touch_flagonly
+	//Check winner and give credit to who captured obj
     if (qtrue) { // for future reference as we may want to restrict this down the road
         for ( i = 0; i < level.numConnectedClients; i++ ) {
             ent = &g_entities[level.sortedClients[i]];
@@ -1116,7 +1118,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
                 break;
 			}
         }
-    }
+    }*/
 
 	for ( i = 0; i < level.numConnectedClients; i++ )
 	{
@@ -1193,7 +1195,7 @@ void G_matchInfoDump( unsigned int dwDumpType ) {
             G_jstatsByTeam(wstats); // write out the player stats
         }
         else {
-            G_jstatsByPlayers(wstats);  // write out player stats
+            G_jstatsByPlayers(wstats, qfalse, NULL);  // write out player stats
         }
 
         G_writeClosingJson();  // need a closing bracket....will provide better solution later
@@ -1220,29 +1222,67 @@ void G_matchClockDump(gentity_t *ent ) {
 
     if ( g_currentRound.integer == 1 )
 	{
-        endofroundinfo=va( "Clock set to: %d:%02d",
-				g_nextTimeLimit.integer,
-				(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
+		// precise logic
+		if (g_usePreciseConsoleTime.integer == 1)
+		{
+			int roundTimeMinutes = g_nextTimeLimit.integer;
+			float roundTimeSeconds = (g_nextTimeLimit.value - g_nextTimeLimit.integer) * 60.0;
+
+			endofroundinfo = va("Clock set to: %0d:%09.6f", roundTimeMinutes, roundTimeSeconds); // %09.6 will be 9 chars total, 2 before the . and 6 after
+
+			trap_Cvar_Set("g_preciseTimeSet", va("%0d:%09.6f", roundTimeMinutes, roundTimeSeconds));
+		}
+		else
+		{
+			// original logic
+			endofroundinfo = va("Clock set to: %d:%02d",
+					g_nextTimeLimit.integer,
+					(int)( 60.0 * (float)( g_nextTimeLimit.value - g_nextTimeLimit.integer ) ) );
+		}
+
 		CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
 	}
 	else
 	{
 		float val = (float)( ( level.timeCurrent - ( level.startTime + level.time - level.intermissiontime ) ) / 60000.0 );
-		if ( val < g_timelimit.value )
+
+		// precise logic
+		if (g_usePreciseConsoleTime.integer == 1)
 		{
-			endofroundinfo=va( "Objective reached at %d:%02d (original: %d:%02d)",
-					(int)val,
-					(int)( 60.0 * ( val - (int)val ) ),
-					g_timelimit.integer,
-					(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) ) ;
-			CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) ) ;
+			int roundTimeMinutes = (int)val;
+			float roundTimeSeconds = (val - (int)val) * 60.0;
+			char* timeSet = va("%0d:%09.6f", roundTimeMinutes, roundTimeSeconds);
+
+			if (val < g_timelimit.value)
+			{
+				endofroundinfo = va("Objective reached at %s (original: %s)", timeSet, g_preciseTimeSet.string);
+				CP(va("sc \">>> ^3%s\n\"", endofroundinfo));
+			}
+			else
+			{
+				endofroundinfo = va("Objective NOT reached in time (original: %s)", g_preciseTimeSet.string);
+				CP(va("sc \">>> ^3%s\n\"", endofroundinfo));
+			}
 		}
 		else
-		{
-			endofroundinfo=va( "Objective NOT reached in time (%d:%02d)",
+		{ 
+			// original logic
+			if (val < g_timelimit.value)
+			{
+				endofroundinfo = va("Objective reached at %d:%02d (original: %d:%02d)",
+					(int)val,
+					(int)(60.0 * (val - (int)val)),
 					g_timelimit.integer,
-					(int)( 60.0 * (float)( g_timelimit.value - g_timelimit.integer ) ) );
-			CP( va( "sc \">>> ^3%s\n\"",endofroundinfo) );
+					(int)(60.0 * (float)(g_timelimit.value - g_timelimit.integer)));
+				CP(va("sc \">>> ^3%s\n\"", endofroundinfo));
+			}
+			else
+			{
+				endofroundinfo = va("Objective NOT reached in time (%d:%02d)",
+					g_timelimit.integer,
+					(int)(60.0 * (float)(g_timelimit.value - g_timelimit.integer)));
+				CP(va("sc \">>> ^3%s\n\"", endofroundinfo));
+			}
 		}
 	}
 }

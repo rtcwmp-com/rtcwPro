@@ -24,6 +24,8 @@
 | con_colorGreen | `float` | `0.0-1.0` | `0.5` | Change console color in the green range |
 | con_colorBlue | `float` | `0.0-1.0` | `0.5` | Change console color in the blue range |
 | con_colorAlpha | `float` | `0.0-1.0` | `1` | Change console color opacity |
+| r_mode | `integer` | `-2-21` | `6` | `-2` - Use desktop resolution, `-1` - custom |
+| r_noborder | `integer` | `0-1` | `0` | Borderless window |
 
 #### Mod (cg)
 | Cvar | Argument type | Value range | Default | Description |
@@ -95,6 +97,7 @@
 | cg_showPriorityText| `integer` | `0-1` | `1` | Enable/disable objective taken/returned prints |
 | cg_priorityTextX | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the horizontal axis |
 | cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
+| cg_lagometer | `integer` | `0-2` | `0` | 1 - normal, 2 - draw speed |
 
 # Server  
 #### Engine (sv)
@@ -173,4 +176,5 @@
 | g_reviveSameDirection | `integer` | `0-1` | `0` | when player is revived they will have same viewangle as death | 
 | g_logClientInput | `integer` | `0-1` | `0` | turn on to log unknown client commands
 | g_clientLogFile | `integer` | `0-1` | `logs/clientInput.log` | log file for unknown client commands
+| g_broadcastClients | `integer` | `0-1` | `0` | fix clients appearing from thin air on some maps
 

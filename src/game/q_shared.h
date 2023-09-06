@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwPro 1.2.8.15"  // RTCWPro
+#define Q3_VERSION      "RtcwPro 1.2.9.16"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -1382,7 +1382,7 @@ typedef struct playerState_s {
 	int aimSpreadScale;         // 0 - 255 increases with angular movement
 	int lastFireTime;           // used by server to hold last firing frame briefly when randomly releasing trigger (AI)
 
-	int quickGrenTime;
+	int quickGrenTime;			// RtcwPro hijacking for bobtimer
 
 	int leanStopDebounceTime;
 
@@ -1390,8 +1390,8 @@ typedef struct playerState_s {
 
 	// seems like heat and aimspread could be tied together somehow, however, they (appear to) change at different rates and
 	// I can't currently see how to optimize this to one server->client transmission "weapstatus" value.
-	float weapHeat[MAX_WEAPONS];          // some weapons can overheat.  this tracks (server-side) how hot each weapon currently is.
-	float curWeapHeat;                    // value for the currently selected weapon (for transmission to client)
+	int weapHeat[MAX_WEAPONS];          // some weapons can overheat.  this tracks (server-side) how hot each weapon currently is.
+	int curWeapHeat;                    // value for the currently selected weapon (for transmission to client)
 
 	int venomTime;          //----(SA)	added
 //----(SA)	end
@@ -1399,7 +1399,6 @@ typedef struct playerState_s {
 	aistateEnum_t aiState;
 
 	int identifyClient;                 // NERVE - SMF
-	int	bobTimer; // RTCWPro
 
 } playerState_t;
 

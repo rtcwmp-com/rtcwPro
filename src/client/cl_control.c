@@ -115,4 +115,3 @@ void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime,
 		Threads_Create(CL_HTTP_SSUpload, SS_info);
 	}
 }
-

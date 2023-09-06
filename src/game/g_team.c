@@ -355,37 +355,36 @@ void Team_CheckHurtCarrier( gentity_t *targ, gentity_t *attacker ) {
 }
 
 
-gentity_t *Team_ResetFlag( int team ) {
-	char *c;
-	gentity_t *ent, *rent = NULL;
+void Team_ResetFlag(gentity_t* ent) {
 
-	switch ( team ) {
-	case TEAM_RED:
-		c = "team_CTF_redflag";
-		break;
-	case TEAM_BLUE:
-		c = "team_CTF_blueflag";
-		break;
-	default:
-		return NULL;
-	}
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		Team_ResetFlag( &g_entities[ent->s.otherEntityNum] );
+		G_FreeEntity( ent );
+	} else {
+			
+		// ET Port for mulitple document objectives
+		ent->s.density++;
 
-	ent = NULL;
-	while ( ( ent = G_Find( ent, FOFS( classname ), c ) ) != NULL ) {
-		if ( ent->flags & FL_DROPPED_ITEM ) {
-			G_FreeEntity( ent );
-		} else {
-			rent = ent;
+		// do we need to respawn?
+		if ( ent->s.density == 1 ) {
 			RespawnItem( ent );
 		}
-	}
 
-	return rent;
+	}
 }
 
 void Team_ResetFlags( void ) {
-	Team_ResetFlag( TEAM_RED );
-	Team_ResetFlag( TEAM_BLUE );
+	gentity_t   *ent;
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_redflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_blueflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
 }
 
 void Team_ReturnFlagSound( gentity_t *ent, int team ) {
@@ -404,8 +403,10 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 	te->r.svFlags |= SVF_BROADCAST;
 }
 
-void Team_ReturnFlag( int team ) {
-	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+void Team_ReturnFlag( gentity_t *ent ) {
+	int team = ent->item->giTag == PW_REDFLAG ? TEAM_RED : TEAM_BLUE;
+	Team_ReturnFlagSound( ent, team );
+	Team_ResetFlag( ent );
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
 }
 
@@ -435,14 +436,18 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 	}
 
 	if ( ent->item->giTag == PW_REDFLAG ) {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_RED ), TEAM_RED );
+		Team_ReturnFlagSound( ent, TEAM_RED );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
 			trap_SendServerCommand( -1, "cp \"^5Axis have returned the objective!\" 2" );
 			AP("prioritypopin \"^5Axis have returned the objective!\n\"");
 			G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 		}
 	} else if ( ent->item->giTag == PW_BLUEFLAG )     {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_BLUE ), TEAM_BLUE );
+		Team_ReturnFlagSound( ent, TEAM_BLUE );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
 			trap_SendServerCommand( -1, "cp \"^5Allies have returned the objective!\" 2" );
 			AP("prioritypopin \"^5Allies have returned the objective!\n\"");
@@ -500,6 +505,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
                 G_writeObjectiveEvent(other, objReturned  );
 				cl->sess.obj_returned++;
 			}
+
 			// dhm
 		}
 // jpw 800 672 2420
@@ -511,7 +517,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		other->client->pers.teamState.flagrecovery++;
 		other->client->pers.teamState.lastreturnedflag = level.time;
 		//ResetFlag will remove this entity!  We must return zero
-		Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+		Team_ReturnFlagSound( ent, team );
+		Team_ResetFlag( ent );
 		return 0;
 	}
 
@@ -520,6 +527,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		return 0;
 	}
 
+	// Only CTF below
+	
 	// the flag is at home base.  if the player has the enemy
 	// flag, he's just won!
 	if ( !cl->ps.powerups[enemy_flag] ) {
@@ -613,6 +622,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	gclient_t *cl = other->client;
 	gentity_t *te, *gm;
 
+	ent->s.density--; // ET Port for multiple document objectives
+	
 	// hey, its not our flag, pick it up
 	if ( g_gametype.integer >= GT_WOLF ) {
 // JPW NERVE
@@ -653,14 +664,24 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 
 	if ( team == TEAM_RED ) {
-		cl->ps.powerups[PW_REDFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_REDFLAG] = INT_MAX;
 	} else {
-		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX;
+	} // flags never expire
 
+	// store the entitynum of our original flag spawner
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		cl->flagParent = ent->s.otherEntityNum;
+	} else {
+		cl->flagParent = ent->s.number;
 	}
 	cl->pers.teamState.flagsince = level.time;
 
-	return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	if ( ent->s.density > 0 ) {
+		return 1; // We have more flags to give out, spawn back quickly
+	} else {
+		return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	}
 }
 
 int Pickup_Team( gentity_t *ent, gentity_t *other ) {
@@ -1002,7 +1023,7 @@ void TeamplayInfoMessage(gentity_t* ent) {
 	int i, j;
 	gentity_t* player;
 	int cnt;
-	int actualHealth, displayHealth, playerLimbo;
+	int actualHealth, displayHealth, playerLimbo, latchPlayerType;
 
 	// send the latest information on all clients
 	string[0] = 0;
@@ -1038,11 +1059,12 @@ void TeamplayInfoMessage(gentity_t* ent) {
 			playerAmmo = player->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
+			latchPlayerType = (player->client->pers.cmd.mpSetup & MP_CLASS_MASK) >> MP_CLASS_OFFSET;
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i %i",
+				" %i %i %i %i %i %i %i %i %i %i %i %i",
 				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
+				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready, latchPlayerType); // set ready status on each client
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 

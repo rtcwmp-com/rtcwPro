@@ -578,16 +578,10 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// run a few frames to allow everything to settle
 	for (i = 0; i < GAME_INIT_FRAMES; i++)
 	{
-		svs.time += FRAMETIME;
-		SV_BotFrame(svs.time);
 		VM_Call(gvm, GAME_RUN_FRAME, svs.time);
+		SV_BotFrame(svs.time);
+		svs.time += FRAMETIME;
 	}
-
-	/*for ( i = 0 ; i < 3 ; i++ ) {
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
-		SV_BotFrame( svs.time );
-		svs.time += 100;
-	}*/
 	// RTCWPro end
 
 	// create a baseline for more efficient communications
@@ -854,11 +848,16 @@ void SV_Init( void ) {
 	// done
 
 	//ServerIP and Server Country
+#ifdef DEDICATED
 	SV_GetIP();
 	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
 	SV_GetCountry(sv_serverIP->string);
 	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_SERVERINFO | CVAR_ROM);
     // end sIP/Country
+#else
+	sv_serverIP = Cvar_Get("sv_serverIP", "", CVAR_LATCH);
+	sv_serverCountry = Cvar_Get("sv_serverCountry", "", CVAR_SERVERINFO | CVAR_ROM);
+#endif
 
 	Cvar_Get( "sv_keywords", "", CVAR_SERVERINFO );
 	Cvar_Get( "protocol", va( "%i", GAME_PROTOCOL_VERSION ), CVAR_SERVERINFO | CVAR_ROM );
@@ -986,10 +985,13 @@ void SV_Init( void ) {
 	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
 	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "15", CVAR_ROM);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "16", CVAR_ROM);
 
 	// ET Legacy port reset svs.time on map load to fix knockback bug
 	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "0", CVAR_ARCHIVE); // default to 0 - 1 is causing a bug on map change
+
+	// drop client on msg.overflow in sv_snapshot
+	sv_dropClientOnOverflow = Cvar_Get("sv_dropClientOnOverflow", "1", CVAR_ARCHIVE);
 
 	// End RtcwPro
 	

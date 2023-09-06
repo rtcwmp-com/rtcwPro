@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2.8" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.2.9" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -297,6 +297,8 @@ typedef struct {
 	float varc, harc;
 	vec3_t centerangles;
 
+	float weapHeat[MAX_WEAPONS];          // stores values for playerstate weapHeat
+
 } pmoveExt_t;   // data used both in client and server - store it here
 // generally useful for data you want to manipulate in bg_* and cgame, or bg_* and game
 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
@@ -399,8 +401,7 @@ typedef enum {
 	// Rafael - mg42		// (SA) I don't understand these here.  can someone explain?
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
-	PERS_WOLFKICK,
-	PERS_DEATH_YAW			// RtcwPro store yaw for value on death
+	PERS_WOLFKICK
 } persEnum_t;
 
 
@@ -446,7 +447,7 @@ typedef enum {
 #define EF_BOUNCE_HALF      0x08000000      // for missiles
 #define EF_MOVER_STOP       0x10000000      // will push otherwise	// (SA) moved down to make space for one more client flag
 
-
+// RtcwPro removed 	PW_BALL and PW_FIRE to keep 16 powerups for msg.c
 typedef enum {
 	PW_NONE,
 
@@ -459,17 +460,15 @@ typedef enum {
 
 	// (SA) for Wolf
 	PW_INVULNERABLE,
-	PW_FIRE,            //----(SA)
 	PW_ELECTRIC,        //----(SA)
 	PW_BREATHER,        //----(SA)
 	PW_NOFATIGUE,       //----(SA)
 
 	PW_REDFLAG,
 	PW_BLUEFLAG,
-	PW_BALL,
+	PW_CAPPEDOBJ,		// PlayerCappedDocuments
 	PW_READY,			// Ready
-	PW_BLACKOUT,		// Specklock
-
+	PW_BLACKOUT,		// Speclock
 	PW_NUM_POWERUPS
 } powerup_t;
 
@@ -655,7 +654,7 @@ typedef struct ammotable_s {
 	int nextShotTime;       //
 //----(SA)	added
 	int maxHeat;            // max active firing time before weapon 'overheats' (at which point the weapon will fail)
-	float coolRate;           // how fast the weapon cools down. (per second)
+	int coolRate;           // how fast the weapon cools down. (per second)
 //----(SA)	end
 	int mod;                // means of death
 } ammotable_t;
@@ -783,7 +782,7 @@ typedef enum {
 	EV_USE_ITEM12,
 	EV_USE_ITEM13,
 	EV_USE_ITEM14,
-	EV_USE_ITEM15,
+	EV_USE_ITEM15,			// hijacked for EV_ANNOUNCER_SOUND
 	EV_ITEM_RESPAWN,
 	EV_ITEM_POP,
 	EV_PLAYER_TELEPORT_IN,
@@ -792,9 +791,7 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
-	// OSPx
-	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
-	// -OSPx
+	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this in place so old demo sounds work
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,
@@ -1793,15 +1790,25 @@ int BG_AnimationIndexForString( char *string, int client );
 animation_t *BG_AnimationForString( char *string, animModelInfo_t *modelInfo );
 animation_t *BG_GetAnimationForIndex( int client, int index );
 int BG_GetAnimScriptEvent( playerState_t *ps, scriptAnimEventTypes_t event );
+char* Q_StrReplace(char* haystack, char* needle, char* newp);
 
 extern animStringItem_t animStateStr[];
 extern animStringItem_t animBodyPartsStr[];
 
-// OSPx
+// RtcwPro logging
+void LogEntry(char* filename, char* info);
+
+// Shared Date Functions
+char* getDateTime(void);
+char* Delim_GetDateTime(void);
+char* getDate(void);
+const char* getMonthString(int monthIndex);
+int getYearFromCYear(int cYear);
+int getDaysInMonth(int monthIndex);
 
 // Crosshairs
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
-void BG_ParseColorCvar(char* cvarString, float* color);
+void BG_ParseColorCvar(char* cvarString, float* color, float alpha);
 
 // Client flags for server processing
 #define CGF_AUTORELOAD      0x01

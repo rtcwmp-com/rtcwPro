@@ -455,6 +455,9 @@ void Cmd_GetOBJ(gentity_t* ent) {
 	char team[64];
 	gentity_t* axisObj = NULL, * alliesObj = NULL;
 
+	if (!CheatsOk(ent)) // devmap only
+		return;
+
 	if (!ent->client->sess.referee) {
 		return;
 	}
@@ -463,7 +466,7 @@ void Cmd_GetOBJ(gentity_t* ent) {
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || ent->client->sess.sessionTeam == TEAM_FREE) {
 		return;
 	}
 
@@ -471,25 +474,19 @@ void Cmd_GetOBJ(gentity_t* ent) {
 		return;
 	}
 
-	trap_Argv(1, team, sizeof(team));
-
-	if (!strlen(team)) {
-		return;
-	}
-
-	if (Q_stricmp(team, "axis") == 0) {
+	if (ent->client->sess.sessionTeam == TEAM_RED) {
 
 		axisObj = &g_entities[0];
-		axisObj = G_Find(axisObj, FOFS(classname), "team_CTF_redflag");
+		axisObj = G_Find(axisObj, FOFS(classname), "team_CTF_blueflag");
 
 		if (axisObj) {
 			Pickup_Team(axisObj, ent);
 		}
 	}
-	else if (Q_stricmp(team, "allies") == 0) {
+	else if (ent->client->sess.sessionTeam == TEAM_BLUE) {
 
 		alliesObj = &g_entities[0];
-		alliesObj = G_Find(alliesObj, FOFS(classname), "team_CTF_blueflag");
+		alliesObj = G_Find(alliesObj, FOFS(classname), "team_CTF_redflag");
 
 		if (alliesObj) {
 			Pickup_Team(alliesObj, ent);
@@ -499,7 +496,10 @@ void Cmd_GetOBJ(gentity_t* ent) {
 
 void Cmd_SelfRevive_f(gentity_t* ent) {
 
-	if (!ent->client->sess.referee && !trap_Cvar_VariableIntegerValue("developer")) {
+	if (!g_cheats.integer) // devmap only
+		return;
+
+	if (!ent->client->sess.referee) {
 		return;
 	}
 
@@ -507,7 +507,7 @@ void Cmd_SelfRevive_f(gentity_t* ent) {
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR) {
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || ent->client->sess.sessionTeam == TEAM_FREE) {
 		return;
 	}
 
@@ -1036,6 +1036,9 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 	if (team != oldTeam) {
 		G_deleteStats(clientNum);
 	}
+
+	//if (g_gamestate.integer == GS_PLAYING)
+	G_read_round_jstats_reconnect(client); // if player reconnected read their stats back into the session
 }
 
 // DHM - Nerve
@@ -1413,6 +1416,9 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 	default:
 	case SAY_ALL:
 		G_LogPrintf( "say: %s: %s\n", ent->client->pers.netname, chatText );
+		if (g_gamestate.integer != GS_INTERMISSION) {
+			G_writeChatEvent(ent, chatText);
+		}
 		Com_sprintf( name, sizeof( name ), "%s%c%c: ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 		color = COLOR_GREEN;
 		break;
@@ -3041,6 +3047,9 @@ void ClientCommand( int clientNum ) {
 		Cmd_DisplayMaps_f( ent );
 	} else if (Q_stricmp(cmd, "reqss") == 0) {
 		Cmd_RequestSS(ent);
+	}
+	else if (Q_stricmp(cmd, "api") == 0) {
+		Cmd_APIQuery(ent);
 	} else if (Q_stricmp(cmd, "more") == 0) {
 		Cmd_More_f(ent);
 	}
@@ -3152,10 +3161,11 @@ static const cmd_reference_t aCommandInfo[] =
 	{ "unpause",        qfalse, qfalse, NULL,           ":^7 Unpauses a match (if initiated by the issuing team)"                                    },
 	{ "unready",        qtrue,  qfalse, NULL,           ":^7 Sets your status to ^5not ready^7 to start a match"                                     },
 	{ "weaponstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 Shows weapon accuracy stats for a player"                                   },
-    { "wstats",    qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
-    { "maps",    qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
-	{ "reqss",    qtrue,  qtrue, NULL,     " Request screenshot from client id"                                   },
-	{ 0,                qfalse, qtrue,  NULL,                  0                                                                                            }
+    { "wstats",			qtrue,  qfalse, NULL,     " [player_ID]:^7 stats for a player"                                   },
+    { "maps",			qtrue,  qtrue, NULL,     " Displays a list of maps supported by the server"                                   },
+	{ "reqss",			qtrue,  qtrue, NULL,     " Request screenshot from client id"                                   },
+	{ "api",			qtrue,	qtrue, NULL,	"Execute RtcwPro API commands"																},
+	{ 0,                qfalse, qtrue,  NULL,    0                                                                                            }
 };
 
 /**

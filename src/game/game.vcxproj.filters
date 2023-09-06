@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="g_shared.c">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="ai_cast.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -196,6 +193,15 @@
     <ClCompile Include="..\qcommon\crypto\sha-1\sha1.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="g_apiquery.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g_unlagged.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ai_cast.h">
@@ -298,6 +304,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="g_stats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\qcommon\threads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -796,6 +796,12 @@ void SV_SendClientSnapshot( client_t *client ) {
 	if ( msg.overflowed ) {
 		Com_Printf( "WARNING: msg overflowed for %s\n", client->name );
 		MSG_Clear( &msg );
+
+		if (sv_dropClientOnOverflow->integer)
+		{
+			SV_DropClient(client, "Msg overflowed");
+			return; // avoid server crash
+		}
 	}
 
 	SV_SendMessageToClient( &msg, client );

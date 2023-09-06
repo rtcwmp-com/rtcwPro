@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "q_shared.h"
 #include "bg_public.h"
+#include "g_local.h"
 #include "../../MAIN//ui_mp/menudef.h"
 
 // JPW NERVE -- added because I need to check single/multiplayer instances and branch accordingly
@@ -3478,7 +3479,7 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 			}
 			else if (weapon == WP_PANZERFAUST) {
 				clip = BG_FindAmmoForWeapon(weapon);
-				if (ps->ammoclip[clip] < maxammo) {
+				if (ps->ammo[clip] < maxammo) {
 
 					// early out
 					//if (!numOfClips) {
@@ -3486,8 +3487,8 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 					//}
 
 					//Com_Printf("Panzer added -> %5d\n", ps->ammoclip[clip]);
-
 					needsAmmo = qtrue;
+
 					//ps->ammoclip[clip] += numOfClips;
 					//if (ps->ammoclip[clip] >= maxammo) {
 					//	ps->ammoclip[clip] = maxammo;
@@ -3668,6 +3669,11 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 
 		case IT_TEAM: // team items, such as flags
 
+			// density tracks how many uses left
+			if ( ( ent->density < 1 ) || ( ( ( ps->persistant[PERS_TEAM] == TEAM_RED ) ? ps->powerups[PW_BLUEFLAG] : ps->powerups[PW_REDFLAG] ) != 0 ) ) {
+				return qfalse;
+			}
+		
 			// DHM - Nerve :: otherEntity2 is now used instead of modelindex2
 			// ent->modelindex2 is non-zero on items if they are dropped
 			// we need to know this because we can pick up our dropped flag (and return it)
@@ -3972,7 +3978,7 @@ char *eventnames[] = {
 	"EV_USE_ITEM12",
 	"EV_USE_ITEM13",
 	"EV_USE_ITEM14",
-	"EV_USE_ITEM15",
+	"EV_USE_ITEM15",		// hijacked for EV_ANNOUNCER_SOUND
 	"EV_ITEM_RESPAWN",
 	"EV_ITEM_POP",
 	"EV_PLAYER_TELEPORT_IN",
@@ -4521,12 +4527,22 @@ BG_ParseColorCvar
 Reads RBG(A) cvars and sets parsed color var components
 ===============
 */
-void BG_ParseColorCvar(char* cvarString, float* color) {
+void BG_ParseColorCvar(char* cvarString, float* color, float alpha) {
 	char* s = cvarString;
 	unsigned int i = 0;
 
+	if (alpha > 1.0f)
+	{
+		alpha = 1.0f;
+	}
+	else if (alpha < 0.f)
+	{
+		alpha = 0.f;
+	}
+
 	// white in case we have no good format
 	Vector4Copy(colorWhite, color);
+	color[3] = alpha; // rtcwpro - split this up
 
 	// hex format
 	if (*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')) {
@@ -4595,7 +4611,7 @@ const voteType_t voteToggles[] =
 	{ "vote_allow_matchreset",       CV_SVF_MATCHRESET },
 	{ "vote_allow_mutespecs",        CV_SVF_MUTESPECS },
 	{ "vote_allow_nextmap",          CV_SVF_NEXTMAP },
-	{ "vote_allow_pub",              CV_SVF_PUB },
+	//{ "vote_allow_pub",              CV_SVF_PUB }, // not used
 	{ "vote_allow_referee",          CV_SVF_REFEREE },
 	{ "vote_allow_shuffleteamsxp",   CV_SVF_SHUFFLETEAMS },
 	{ "vote_allow_swapteams",        CV_SVF_SWAPTEAMS },
@@ -4604,7 +4620,8 @@ const voteType_t voteToggles[] =
 	{ "vote_allow_warmupdamage", CV_SVF_WARMUPDAMAGE },
 	{ "vote_allow_antilag",          CV_SVF_ANTILAG },
 	{ "vote_allow_balancedteams",    CV_SVF_BALANCEDTEAMS },
-	{ "vote_allow_muting",           CV_SVF_MUTING }
+	{ "vote_allow_muting",           CV_SVF_MUTING },
+	{ "vote_allow_knifeonly",    CV_SVF_KNIFEONLY },
 };
 
 int numVotesAvailable = sizeof(voteToggles) / sizeof(voteType_t);
@@ -4701,3 +4718,242 @@ char* BG_GetClass(int classNum) {
 	return "";
 }
 
+/*
+===================
+L0 - Str replacer
+
+Ported from etPub
+===================
+*/
+char* Q_StrReplace(char* haystack, char* needle, char* newp)
+{
+	static char final[MAX_STRING_CHARS] = { "" };
+	char dest[MAX_STRING_CHARS] = { "" };
+	char newStr[MAX_STRING_CHARS] = { "" };
+	char* destp;
+	int needle_len = 0;
+	int new_len = 0;
+
+	if (!*haystack) {
+		return final;
+	}
+	if (!*needle) {
+		Q_strncpyz(final, haystack, sizeof(final));
+		return final;
+	}
+	if (*newp) {
+		Q_strncpyz(newStr, newp, sizeof(newStr));
+	}
+
+	dest[0] = '\0';
+	needle_len = strlen(needle);
+	new_len = strlen(newStr);
+	destp = &dest[0];
+	while (*haystack) {
+		if (!Q_stricmpn(haystack, needle, needle_len)) {
+			Q_strcat(dest, sizeof(dest), newStr);
+			haystack += needle_len;
+			destp += new_len;
+			continue;
+		}
+		if (MAX_STRING_CHARS > (strlen(dest) + 1)) {
+			*destp = *haystack;
+			*++destp = '\0';
+		}
+		haystack++;
+	}
+	// tjw: don't work with final return value in case haystack
+	//      was pointing at it.
+	Q_strncpyz(final, dest, sizeof(final));
+	return final;
+}
+
+/*
+==================
+L0 - Wish it would be like in php and i wouldn't need to bother with this..
+==================
+*/
+int is_numeric(const char* p) {
+	if (*p) {
+		char c;
+		while ((c = *p++)) {
+			if (!isdigit(c)) return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+/*
+==================
+L0 - Alpha numeric check..
+==================
+*/
+int is_alnum(const char* p) {
+	if (*p) {
+		char c;
+		while ((c = *p++)) {
+			if (!isalnum(c)) return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+
+/*
+==================
+L0 - Strip the chars when need it
+==================
+*/
+void stripChars(char* input, char* output, int cutSize) {
+	int lenght = strlen(input);
+	int i = 0, k = 0;
+
+	for (i = lenght - cutSize; i < lenght; i++)
+		output[k++] = input[i];
+
+	output[k++] = '\0';
+}
+
+/*
+==================
+L0 - Ported from et: NQ
+DecolorString
+
+Remove color characters
+==================
+*/
+void DecolorString(char* in, char* out)
+{
+	while (*in) {
+		if (*in == 27 || *in == '^') {
+			in++;		// skip color code
+			if (*in) in++;
+			continue;
+		}
+		*out++ = *in++;
+	}
+	*out = 0;
+}
+
+/*
+==========
+L0 - setGuid
+==========
+*/
+void setGuid(char* in, char* out) {
+	int length = strlen(in);
+	int i = 0, j = 0;
+
+	for (i = length - GUID_LEN; i < length; i++)
+		out[j++] = in[i];
+
+	out[j++] = '\0';
+}
+
+const char* months[12] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+/*
+==================
+Returns current time % date
+==================
+*/
+char* getDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s %02d %d %02d:%02d:%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+/*
+==================
+// deliminated date-time
+==================
+*/
+char* Delim_GetDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s%02d-%d-%02d-%02d-%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+/*
+==================
+// Returns current date
+==================
+*/
+char* getDate(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%02d/%s/%d", ct.tm_mday, months[ct.tm_mon], getYearFromCYear(ct.tm_year));
+}
+
+/*
+==================
+// returns month string abbreviation (i.e. Jun)
+==================
+*/
+const char* getMonthString(int monthIndex) {
+	if (monthIndex < 0 || monthIndex >= ArrayLength(months)) {
+		return "InvalidMonth";
+	}
+
+	return months[monthIndex];
+}
+
+/*
+==================
+// returns current year
+==================
+*/
+int getYearFromCYear(int cYear) {
+	return 1900 + cYear;
+}
+
+/*
+==================
+// returns the last day for that month.
+==================
+*/ 
+int getDaysInMonth(int monthIndex) {
+	switch (monthIndex) {
+	case 1:  // Feb
+		return 28;
+	case 3:  // Apr
+	case 5:  // Jun
+	case 8:  // Sep
+	case 10: // Nov
+		return 30;
+	default: // Jan, Mar, May, Jul, Aug, Oct, Dec
+		return 31;
+	}
+}
+
+
+/*
+==================
+LogEntry
+
+log to a file
+==================
+*/
+void LogEntry(char* filename, char* info) {
+	fileHandle_t    f;
+	char* varLine;
+
+	strcat(info, "\r");
+	trap_FS_FOpenFile(filename, &f, FS_APPEND);
+
+	varLine = va("%s\n", info);
+
+	trap_FS_Write(varLine, strlen(varLine), f);
+	trap_FS_FCloseFile(f);
+	return;
+}

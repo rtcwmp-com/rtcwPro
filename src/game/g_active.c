@@ -83,7 +83,7 @@ void P_DamageFeedback( gentity_t *player ) {
 
 	if (g_debugDamage.integer)
 	{
-		AP(va("print \"damage feedback: %i\n\"", client->damage_knockback));
+		AP(va("print \"damage feedback: [ %i ] pitch [ %i ] yaw [ %i ]\n\"", client->damage_knockback, client->ps.damagePitch, client->ps.damageYaw));
 	}
 
 	// play an apropriate pain sound
@@ -1213,6 +1213,13 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
+	// RTCWPro
+	if (g_broadcastClients.integer)
+	{
+		ent->r.svFlags |= SVF_BROADCAST;
+	}
+	// RTCWPro - end
+
 	if ( client->cameraPortal ) {
 		G_SetOrigin( client->cameraPortal, client->ps.origin );
 		trap_LinkEntity( client->cameraPortal );
@@ -1225,24 +1232,95 @@ void ClientThink_real( gentity_t *ent ) {
 
 	ent->client->ps.identifyClient = ucmd->identClient;     // NERVE - SMF
 
+	if (g_antilag.integer == 2) // Unlagged
+	{
+		//Here comes the unlagged bit!
+		//unlagged - backward reconciliation #4
+		// frameOffset should be about the number of milliseconds into a frame 
+		// this command packet was received, depending on how fast the server
+		// does a G_RunFrame()
+		client->frameOffset = trap_Milliseconds() - level.frameStartTime;
+
+
+		//unlagged - lag simulation #3
+			// if the client wants to simulate outgoing packet loss
+		/*if ( client->pers.plOut ) {
+			// see if a random value is below the threshhold
+			float thresh = (float)client->pers.plOut / 100.0f;
+			if ( random() < thresh ) {
+				// do nothing at all if it is - this is a lost command
+				return;
+			}
+		}*/
+		//unlagged - lag simulation #3
+
+		//unlagged - lag simulation #2
+		// keep a queue of past commands
+		/*client->pers.cmdqueue[client->pers.cmdhead] = client->pers.cmd;
+		client->pers.cmdhead++;
+		if ( client->pers.cmdhead >= MAX_LATENT_CMDS ) {
+			client->pers.cmdhead -= MAX_LATENT_CMDS;
+		}
+
+		// if the client wants latency in commands (client-to-server latency)
+		if ( client->pers.latentCmds ) {
+			// save the actual command time
+			int time = ucmd->serverTime;
+
+			// find out which index in the queue we want
+			int cmdindex = client->pers.cmdhead - client->pers.latentCmds - 1;
+			while ( cmdindex < 0 ) {
+				cmdindex += MAX_LATENT_CMDS;
+			}
+
+			// read in the old command
+			client->pers.cmd = client->pers.cmdqueue[cmdindex];
+
+			// adjust the real ping to reflect the new latency
+			client->pers.realPing += time - ucmd->serverTime;
+		}*/
+
+
+		//unlagged - backward reconciliation #4
+		// save the command time *before* pmove_fixed messes with the serverTime,
+		// and *after* lag simulation messes with it :)
+		// attackTime will be used for backward reconciliation later (time shift)
+		client->attackTime = ucmd->serverTime;
+
+
+		//unlagged - smooth clients #1
+		// keep track of this for later - we'll use this to decide whether or not
+		// to send extrapolated positions for this client
+		client->lastUpdateFrame = level.framenum;
+
+		//unlagged - lag simulation #1
+		// if the client is adding latency to received snapshots (server-to-client latency)
+		/*if ( client->pers.latentSnaps ) {
+			// adjust the real ping
+			client->pers.realPing += client->pers.latentSnaps * (1000 / sv_fps.integer);
+			// adjust the attack time so backward reconciliation will work
+			client->attackTime -= client->pers.latentSnaps * (1000 / sv_fps.integer);
+		}*/
+	}
+
 	// RTCWPro
 	if (g_alternatePing.integer) 
 	{
-		int sum = 0;
-		client->pers.pingsamples[client->pers.samplehead] = level.previousTime - ucmd->serverTime;
-		client->pers.samplehead++;
+		// ratmod trueping port
+		// we use level.previousTime to account for 50ms lag correction
+		// besides, this will turn out numbers more like what players are used to
+		client->pers.pingsamples[client->pers.pingsample_counter % NUM_PING_SAMPLES] = level.previousTime + client->frameOffset - ucmd->serverTime;
+		client->pers.pingsample_counter++;
 
-		if (client->pers.samplehead >= NUM_PING_SAMPLES) 
-		{
-			client->pers.samplehead -= NUM_PING_SAMPLES;
-		}
+		int i, sum = 0;
+		int num = client->pers.pingsample_counter > NUM_PING_SAMPLES ? NUM_PING_SAMPLES : client->pers.pingsample_counter;
 
-		for (i = 0; i < NUM_PING_SAMPLES; i++) 
-		{
+		// get an average of the samples we saved up
+		for (i = 0; i < num; i++) {
 			sum += client->pers.pingsamples[i];
 		}
 
-		client->pers.alternatePing = sum / NUM_PING_SAMPLES;
+		client->pers.alternatePing = sum / num;
 
 		if (client->pers.alternatePing < 0) 
 		{
@@ -1259,16 +1337,16 @@ void ClientThink_real( gentity_t *ent ) {
 // jpw
 
 	// sanity check the command time to prevent speedup cheating
-	if (ucmd->serverTime > level.time + 200)
+	if (ucmd->serverTime > level.time + 200 && !G_DoAntiwarp(ent)) // RTCWPro
 	{
 		ucmd->serverTime = level.time + 200;
-//		G_Printf("serverTime <<<<<\n" );
+		//		G_Printf("serverTime <<<<<\n" );
 	}
 
-	if (ucmd->serverTime < level.time - 1000)
+	if (ucmd->serverTime < level.time - 1000 && !G_DoAntiwarp(ent)) // RTCWPro
 	{
 		ucmd->serverTime = level.time - 1000;
-//		G_Printf("serverTime >>>>>\n" );
+		//		G_Printf("serverTime >>>>>\n" );
 	}
 
 	msec = ucmd->serverTime - client->ps.commandTime;
@@ -1639,10 +1717,23 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	if ( g_smoothClients.integer ) {
-		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue );
-	} else {
-		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
+	if (g_antilag.integer < 2) // Nobo antilag or off
+	{
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
+		}
+	}
+	else if (g_antilag.integer == 2) // Unlagged
+	{
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+		}
 	}
 
 	/*if (g_thinkStateLevelTime.integer) 
@@ -1702,9 +1793,9 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// store the client's current position for antilag traces
 
-	// L0 - antilag
-	G_StoreTrail( ent );
-	// L0 - end
+	// Nobo antilag
+	if (g_antilag.integer == 1)
+		G_StoreTrail(ent);
 
 	// touch other objects
 	ClientImpacts( ent, &pm );
@@ -2184,6 +2275,10 @@ while a slow client may have multiple ClientEndFrame between ClientThink.
 void ClientEndFrame( gentity_t *ent ) {
 	int i;
 
+	//unlagged - smooth clients #1
+	int frames;
+	//unlagged - smooth clients #1
+
 	// RTCWPro
 	if (g_alternatePing.integer) 
 	{
@@ -2206,10 +2301,10 @@ void ClientEndFrame( gentity_t *ent ) {
 		// turn off any expired powerups
 		for ( i = 0; i < PW_NUM_POWERUPS; i++ ) {
 
-			if ( i == PW_FIRE ||             // these aren't dependant on level.time
-				 i == PW_ELECTRIC ||
+			if ( i == PW_ELECTRIC || // these aren't dependant on level.time
 				 i == PW_BREATHER ||
 				 i == PW_NOFATIGUE ||
+				 i == PW_CAPPEDOBJ || // RtcwPro added for double objective map like radar
 				  ent->client->ps.powerups[i] == 0  // L0 - Pause dump
 				 ) {
 
@@ -2278,7 +2373,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	AddMedicTeamBonus(ent->client);
 
 	// all players are init in game, we can set properly starting health
-	if (level.startTime == level.time - ((GAME_INIT_FRAMES + 1) * FRAMETIME))
+	if (level.startTime == level.time - (GAME_INIT_FRAMES * FRAMETIME))
 	{
 		ent->health = ent->client->ps.stats[STAT_HEALTH] = ent->client->ps.stats[STAT_MAX_HEALTH];
 
@@ -2297,9 +2392,10 @@ void ClientEndFrame( gentity_t *ent ) {
 
 
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
-	if ( level.time - ent->client->lastCmdTime > 1000 ) {
+	if (level.time - ent->client->lastCmdTime > 1000) {
 		ent->s.eFlags |= EF_CONNECTION;
-	} else {
+	}
+	else {
 		ent->s.eFlags &= ~EF_CONNECTION;
 	}
 
@@ -2309,13 +2405,56 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// set the latest infor
 
-	// RTCWPro
-	// Ridah, fixes jittery zombie movement
-	if ( g_smoothClients.integer ) {
-		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
-	} else {
-		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, ( ( ent->r.svFlags & SVF_CASTAI ) == 0 ) );
+	if (g_antilag.integer < 2) // Nobo antilag or off
+	{
+		// RTCWPro
+		// Ridah, fixes jittery zombie movement
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, ((ent->r.svFlags & SVF_CASTAI) == 0));
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, ((ent->r.svFlags & SVF_CASTAI) == 0));
+		}
 	}
+	else if (g_antilag.integer == 2) // Unlagged
+	{
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+
+		//unlagged - smooth clients #1
+			// mark as not missing updates initially
+		ent->client->ps.eFlags &= ~EF_CONNECTION;
+
+		// see how many frames the client has missed
+		frames = level.framenum - ent->client->lastUpdateFrame - 1;
+
+		// don't extrapolate more than two frames
+		if (frames > g_maxExtrapolatedFrames.integer) {
+			frames = g_maxExtrapolatedFrames.integer;
+
+			// if they missed more than two in a row, show the phone jack
+			ent->client->ps.eFlags |= EF_CONNECTION;
+			ent->s.eFlags |= EF_CONNECTION;
+		}
+
+		// did the client miss any frames?
+		if (frames > 0 && g_smoothClients.integer) {
+			// yep, missed one or more, so extrapolate the player's movement
+			G_PredictPlayerMove(ent, (float)frames / sv_fps.integer);
+			// save network bandwidth
+			if (!g_floatPlayerPosition.integer) {
+				SnapVector(ent->s.pos.trBase);
+			}
+		}
+		//unlagged - smooth clients #1
+
+		//unlagged - backward reconciliation #1
+		// store the client's position for backward reconciliation later
+		G_StoreHistory(ent);
+		//unlagged - backward reconciliation #1
+
+	}
+
+
 
 	/*if (g_endStateLevelTime.integer) 
 	{

@@ -213,7 +213,17 @@ void QDECL Com_Printf( const char *fmt, ... ) {
 				_fcreator = 'R*ch';
 			}
 #endif
-			logfile = FS_FOpenFileWrite( "rtcwconsole.log" );
+			if ((com_dedicated && com_dedicated->integer) || com_logfile->integer > 2) {
+				char buffer[26];
+				strftime(buffer, 26, "%Y-%m-%d_%H.%M.%S", newtime);
+
+				char *filename = va("logs\\rtcwconsole_%s.log", buffer);
+				logfile = FS_FOpenFileWrite(filename);
+			}
+			else {
+				logfile = FS_FOpenFileWrite("rtcwconsole.log");
+			}
+
 			Com_Printf( "logfile opened on %s\n", asctime( newtime ) );
 			if ( com_logfile->integer > 1 ) {
 				// force it to not buffer so we get valid

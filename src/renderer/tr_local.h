@@ -1202,6 +1202,9 @@ extern cvar_t   *r_wolffog;
 // done
 
 extern cvar_t  *r_highQualityVideo;
+
+extern cvar_t	*r_noborder; // rtcwpro - borderless window
+
 //====================================================================
 
 float R_NoiseGet4f( float x, float y, float z, float t );
@@ -1311,7 +1314,14 @@ image_t     *R_FindImageFile( const char *name, qboolean mipmap, qboolean allowP
 
 image_t     *R_CreateImage( const char *name, const byte *pic, int width, int height, qboolean mipmap
 							, qboolean allowPicmip, int wrapClampMode );
-qboolean    R_GetModeInfo( int *width, int *height, float *windowAspect, int mode );
+
+// rtcwpro - r_mode -2
+//#ifdef _WIN32
+qboolean R_GetModeInfo(int* width, int* height, float* windowAspect, int mode, int dw, int dh);
+/*#else
+qboolean R_GetModeInfo(int* width, int* height, float* windowAspect, int mode);
+#endif*/
+// rtcwpro - end
 
 void        R_SetColorMappings( void );
 void        R_GammaCorrect( byte *buffer, int bufSize );

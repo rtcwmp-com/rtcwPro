@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 
 // Tardo -- Moved these here.
 
-char *Q_StrReplace(char *haystack, char *needle, char *newVal);
 int is_numeric(const char *p);
 int is_alnum(const char *p);
 void stripChars( char *input, char *output, int cutSize );

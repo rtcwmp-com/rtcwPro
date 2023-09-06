@@ -225,6 +225,16 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage ) {
 	vd->damageDuration = kick * 50 * ( 1 + 2 * ( !vd->damageX && !vd->damageY ) );
 	cg.damageTime = cg.snap->serverTime;
 	cg.damageIndex = slot;
+
+	// RtcwPro print damage feedback to rtcwconsole.log
+	if (cg_debugDamage.integer)
+	{
+		LogEntry("logs/debugDamage.log", va("vd->damageValue: [ %f ] cg.v_dmg_time [ %f ] vd->damageTime [ %i ] vd->damageDuration [ %i ] cg.damageTime [ %f ] cg.damageIndex [ %i ]\n\"",
+			vd->damageValue, cg.v_dmg_time, vd->damageTime, vd->damageDuration, cg.damageTime, cg.damageIndex));
+
+		LogEntry("logs/debugDamage.log", va("cg.v_dmg_pitch: [ %f ] cg.v_dmg_roll [ %f ] vd->damageX [ %f ] vd->damageY [ %f ]\n\"",
+			cg.v_dmg_pitch, cg.v_dmg_roll, vd->damageX, vd->damageY));
+	}
 }
 
 
