@@ -4727,9 +4727,9 @@ Ported from etPub
 */
 char* Q_StrReplace(char* haystack, char* needle, char* newp)
 {
-	static char final[MAX_STRING_CHARS] = { "" };
-	char dest[MAX_STRING_CHARS] = { "" };
-	char newStr[MAX_STRING_CHARS] = { "" };
+	static char final[MAX_INFO_STRING] = { "" };
+	char dest[MAX_INFO_STRING] = { "" };
+	char newStr[MAX_INFO_STRING] = { "" };
 	char* destp;
 	int needle_len = 0;
 	int new_len = 0;
@@ -4756,7 +4756,7 @@ char* Q_StrReplace(char* haystack, char* needle, char* newp)
 			destp += new_len;
 			continue;
 		}
-		if (MAX_STRING_CHARS > (strlen(dest) + 1)) {
+		if (MAX_INFO_STRING > (strlen(dest) + 1)) {
 			*destp = *haystack;
 			*++destp = '\0';
 		}
