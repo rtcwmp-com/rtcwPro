@@ -2760,7 +2760,7 @@ void ClientDisconnect( int clientNum ) {
 			}
 
 			// Record the players stats if they /quit so we can reload or save them
-			if (g_gameStatslog.integer)
+			if (g_gameStatslog.integer && (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
 			{
 				// record any player that disconnects
 				G_jstatsByPlayers(qtrue, qtrue, ent->client);

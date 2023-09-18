@@ -1037,8 +1037,8 @@ void SetTeam( gentity_t *ent, char *s , qboolean forced ) {
 		G_deleteStats(clientNum);
 	}
 
-	//if (g_gamestate.integer == GS_PLAYING)
-	G_read_round_jstats_reconnect(client); // if player reconnected read their stats back into the session
+	if (client->sess.sessionTeam == TEAM_BLUE || client->sess.sessionTeam == TEAM_RED)
+		G_read_round_jstats_reconnect(client); // if player reconnected read their stats back into the session
 }
 
 // DHM - Nerve
