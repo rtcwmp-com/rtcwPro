@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
  *****************************************************************************/
 
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "qcommon.h"
 #include "unzip.h"
 
@@ -2800,7 +2800,6 @@ we are not interested in a download string format, we want something human-reada
 
 ================
 */
-qboolean CL_WWWBadChecksum(const char* pakname);
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 	searchpath_t    *sp;
 	qboolean havepak, badchecksum;
@@ -2859,21 +2858,6 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 				// Do we have one with the same name?
 				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
 					Q_strcat(neededpaks, len, " (local file exists with wrong checksum)");
-					// L0 - HTTP downloads
-
-#ifndef DEDICATED
-					// let the client subsystem track bad download redirects (dl file with wrong checksums)
-					// this is a bit ugly but the only other solution would have been callback passing..
-					if (CL_WWWBadChecksum(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
-						// remove a potentially malicious download file
-						// (this is also intended to avoid expansion of the pk3 into a file with different checksum .. messes up wwwdl chkfail)
-						char* rmv = FS_BuildOSPath(fs_homepath->string, va("%s.pk3", fs_serverReferencedPakNames[i]), "");
-						rmv[strlen(rmv) - 1] = '\0';
-						FS_Remove(rmv);
-					}
-#endif
-
-					// End
 				}
 				Q_strcat(neededpaks, len, "\n");
 			}

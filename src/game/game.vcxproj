@@ -253,6 +253,8 @@
     <ClCompile Include="..\botai\ai_team.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha1.c" />
+    <ClCompile Include="..\qcommon\q_math.c" />
+    <ClCompile Include="..\qcommon\q_shared.c" />
     <ClCompile Include="ai_cast.c" />
     <ClCompile Include="ai_cast_characters.c" />
     <ClCompile Include="ai_cast_debug.c" />
@@ -310,8 +312,6 @@
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
-    <ClCompile Include="q_math.c" />
-    <ClCompile Include="q_shared.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\botai\ai_chat.h" />
@@ -327,6 +327,7 @@
     <ClInclude Include="..\botai\syn.h" />
     <ClInclude Include="..\qcommon\crypto\sha-1\sha1.h" />
     <ClInclude Include="..\qcommon\jansson_win\jansson.h" />
+    <ClInclude Include="..\qcommon\q_shared.h" />
     <ClInclude Include="..\qcommon\threads.h" />
     <ClInclude Include="ai_cast.h" />
     <ClInclude Include="ai_cast_fight.h" />
@@ -347,7 +348,6 @@
     <ClInclude Include="g_shared.h" />
     <ClInclude Include="g_stats.h" />
     <ClInclude Include="g_team.h" />
-    <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
   </ItemGroup>
   <ItemGroup>

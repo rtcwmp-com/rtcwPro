@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
-#include "dl_public.h" // L0 - HTTP downloads
 
 //Ignore __attribute__ on non-gcc platforms
 #ifndef __GNUC__

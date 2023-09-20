@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "../renderer/tr_public.h"
 #include "../ui/ui_public.h"

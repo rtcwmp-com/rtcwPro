@@ -1023,7 +1023,7 @@ COLLISION DETECTION
 ==============================================================
 */
 
-#include "surfaceflags.h"            // shared with the q3map utility
+#include "../game/surfaceflags.h"            // shared with the q3map utility
 
 // plane types are used to speed some tests
 // 0-2 are axial planes

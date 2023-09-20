@@ -132,11 +132,8 @@ typedef enum {
 
 	CG_R_GETSKINMODEL,      // client allowed to view what the .skin loaded so they can set their model appropriately
 	CG_R_GETMODELSHADER,    // client allowed the shader handle for given model/surface (for things like debris inheriting shader from explosive)
-
-	CG_R_REGISTERFONT,
 	CG_R_CLEARSCENE,
 	CG_R_ADDREFENTITYTOSCENE,
-	CG_GET_ENTITY_TOKEN,
 	CG_R_ADDPOLYTOSCENE,
 // Ridah
 	CG_R_ADDPOLYSTOSCENE,
@@ -163,7 +160,7 @@ typedef enum {
 	CG_SETCLIENTLERPORIGIN,         // DHM - Nerve
 	CG_R_REGISTERSHADERNOMIP,
 	CG_MEMORY_REMAINING,
-
+	CG_R_REGISTERFONT,
 	CG_KEY_ISDOWN,
 	CG_KEY_GETCATCHER,
 	CG_KEY_SETCATCHER,
@@ -229,7 +226,17 @@ typedef enum {
 	CG_R_BUILD,
 	// -NERVE - SMF
 
-	CG_REQUEST_SS // reqSS
+	CG_REQUEST_SS, // reqSS
+	
+	// new engine
+	CG_GET_ENTITY_TOKEN,
+	CG_R_INPVS,
+	CG_FS_SEEK,
+	CG_R_ADDREFENTITYTOSCENE2,
+	CG_R_FORCEFIXEDDLIGHTS,
+	CG_R_ADDLINEARLIGHTTOSCENE,
+	CG_IS_RECORDING_DEMO
+	//CG_TRAP_GETVALUE = COM_TRAP_GETVALUE
 } cgameImport_t;
 
 
@@ -293,6 +300,7 @@ typedef enum {
 	CG_RELAY_COMMAND,
 //	qboolean(*CG_RelayCommand)(const char type, int value);
 
+	CG_EXPORT_LAST
 } cgameExport_t;
 
 //----------------------------------------------
