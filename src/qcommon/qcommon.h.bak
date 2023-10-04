@@ -152,7 +152,6 @@ NET
 //#define	MAX_RELIABLE_COMMANDS	128			// max string commands buffered for restransmit
 #define MAX_RELIABLE_COMMANDS   256 // bigger!
 #define NET_ENABLEV4            0x01
-#define	MAX_SNAPSHOT_ENTITIES	256
 typedef enum {
 	NA_BOT,
 	NA_BAD,                 // an address lookup failed

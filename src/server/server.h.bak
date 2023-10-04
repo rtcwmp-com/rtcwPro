@@ -123,12 +123,13 @@ typedef struct {
 	byte areabits[MAX_MAP_AREA_BYTES];                  // portalarea visibility bits
 	playerState_t ps;
 	int num_entities;
-//#if 0
+#if 0
+	int				first_entity;		// into the circular sv_packet_entities[]
 	int first_entity;                   // into the circular sv_packet_entities[]
-//#endif
+#endif
 	int messageSent;                    // time the message was transmitted
 	int messageAcked;                   // time the message was acked
-	int messageSize;                    // used to rate drop packets
+	int				messageSize;		// used to rate drop packets
 
 	int				frameNum;			// from snapshot storage to compare with last valid
 	entityState_t	*ents[ MAX_SNAPSHOT_ENTITIES ];
@@ -476,7 +477,7 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd );
 void SV_FreeClient( client_t *client );
 void SV_DropClient( client_t *drop, const char *reason );
 
-qboolean SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK);
+qboolean SV_ExecuteClientCommand( client_t *cl, const char *s );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
 int SV_SendDownloadMessages( void );
@@ -564,7 +565,7 @@ void SV_UnlinkEntity( sharedEntity_t *ent );
 void SV_LinkEntity( sharedEntity_t *ent );
 // Needs to be called any time an entity changes origin, mins, maxs,
 // or solid.  Automatically unlinks if needed.
-// sets ent->r.absmin and ent->r.absmax
+// sets ent->v.absmin and ent->v.absmax
 // sets ent->leafnums[] for pvs determination even if the entity
 // is not solid
 
@@ -588,7 +589,7 @@ int SV_PointContents( const vec3_t p, int passEntityNum );
 // returns the CONTENTS_* value from the world and all entities at the given point.
 
 
-void SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask, qboolean capsule );
+void SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask, int capsule );
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allsolid will be set,
@@ -600,7 +601,7 @@ void SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const ve
 // passEntityNum is explicitly excluded from clipping checks (normally ENTITYNUM_NONE)
 
 
-void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int entityNum, int contentmask, qboolean capsule );
+void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int entityNum, int contentmask, int capsule );
 // clip to a specific entity
 
 //
@@ -615,15 +616,6 @@ int SV_Netchan_TransmitNextFragment( client_t *client );
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
 
 qboolean SV_CheckDRDoS(netadr_t from);
-void SV_Netchan_FreeQueue( client_t *client );
-
-//
-// sv_filter.c
-//
-void SV_LoadFilters( const char *filename );
-const char *SV_RunFilters( const char *userinfo, const netadr_t *addr );
-void SV_AddFilter_f( void );
-void SV_AddFilterCmd_f( void );
 
 #endif // !___SERVER_H
 
