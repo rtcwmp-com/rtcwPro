@@ -95,6 +95,7 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             Q_CleanStr(n2);
             n2[15] = 0;
 
+            Q_strncpyz(level.disconnectStats[dc].aliasColored, cl->pers.netname, sizeof(level.disconnectStats[dc].aliasColored));
             Q_strncpyz(level.disconnectStats[dc].alias, n2, sizeof(level.disconnectStats[dc].alias));
 
             eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
@@ -104,7 +105,6 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             }
 
             level.disconnectStats[dc].guid = cl->sess.guid;
-            //level.disconnectStats[dc].alias = n2;
             level.disconnectStats[dc].sessionTeam = cl->sess.sessionTeam;
             level.disconnectStats[dc].start_time = cl->sess.start_time;
             level.disconnectStats[dc].rounds = cl->sess.rounds;
@@ -167,6 +167,7 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             Q_CleanStr(n2);
             n2[15] = 0;
 
+            Q_strncpyz(level.playerStats[i].aliasColored, cl->pers.netname, sizeof(level.playerStats[i].aliasColored));
             Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
 
             eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
@@ -176,7 +177,6 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             }
 
             level.playerStats[i].guid = cl->sess.guid;
-            //level.playerStats[i].alias = n2;
             level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
             level.playerStats[i].start_time = cl->sess.start_time;
             level.playerStats[i].rounds = cl->sess.rounds;
@@ -789,6 +789,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *
 
             sprintf(pGUID, "%s", level.playerStats[j].guid);
 
+            json_object_set_new(jdata, "alias_colored", json_string(level.playerStats[j].aliasColored));
             json_object_set_new(jdata, "alias", json_string(level.playerStats[j].alias));
             json_object_set_new(jdata, "team", json_string((level.playerStats[j].sessionTeam == TEAM_RED) ? "Axis" : "Allied"));
             json_object_set_new(jdata, "start_time", json_integer(level.playerStats[j].start_time));
