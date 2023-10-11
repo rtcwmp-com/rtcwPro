@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
 //#define GAMEVERSION "RtcwPro 1.0 beta"
-#define JSONGAMESTATVERSION "0.1.4"
+#define JSONGAMESTATVERSION "0.1.5"
 
 // done.
 
@@ -895,6 +895,7 @@ typedef struct jsonStatInfo_s {
 typedef struct {
 	team_t sessionTeam;
 	char *guid;
+	char aliasColored[MAX_NETNAME];
 	char alias[MAX_NETNAME];
 	int start_time;
 	int damage_given;
