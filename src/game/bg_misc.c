@@ -4948,10 +4948,10 @@ void LogEntry(char* filename, char* info) {
 	fileHandle_t    f;
 	char* varLine;
 
-	strcat(info, "\r");
 	trap_FS_FOpenFile(filename, &f, FS_APPEND);
 
-	varLine = va("%s\n", info);
+	varLine = va("%s: %s", getDateTime(), info);
+	strcat(varLine, "\r");
 
 	trap_FS_Write(varLine, strlen(varLine), f);
 	trap_FS_FCloseFile(f);

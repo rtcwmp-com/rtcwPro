@@ -298,6 +298,7 @@ vmCvar_t g_ssWebhookId; // id contained in the discord webhook link (numbers onl
 vmCvar_t g_ssWebhookToken; // token contained in the discord webhook link (chars) e.g. webhooks/id/token
 vmCvar_t g_ssWaitTime; // wait time between reqss cmds to prevent spam
 vmCvar_t g_broadcastClients; // fix clients appearing from thin air on some maps
+vmCvar_t g_logConfigStringChanges; // log config string changes (debugging)
 
  // unlagged
 vmCvar_t g_floatPlayerPosition;
@@ -549,6 +550,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_ssWebhookToken, "g_ssWebhookToken", "none", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_ssWaitTime, "g_ssWaitTime", "30", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_broadcastClients, "g_broadcastClients", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+	{ &g_logConfigStringChanges, "g_logConfigStringChanges", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse }, // ET Port Players server info
 
 	// unlagged
@@ -1655,9 +1657,17 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	// DHM - Nerve :: Clear out spawn target config strings
 	if ( g_gametype.integer >= GT_WOLF ) {
+
 		trap_GetConfigstring( CS_MULTI_INFO, cs, sizeof( cs ) );
+
+		if (g_logConfigStringChanges.integer)
+			LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_InitGame ] CS Before: [ %s ] variable: [ numspawntargets ]\n", g_currentRound.integer + 1, cs));
+
 		Info_SetValueForKey( cs, "numspawntargets", "0" );
 		trap_SetConfigstring( CS_MULTI_INFO, cs );
+
+		if (g_logConfigStringChanges.integer)
+			LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_InitGame ] CS After: [ %s ] variable: [ numspawntargets ]\n", g_currentRound.integer + 1, cs));
 
 		for ( i = CS_MULTI_SPAWNTARGETS; i < CS_MULTI_SPAWNTARGETS + MAX_MULTI_SPAWNTARGETS; i++ ) {
 			trap_SetConfigstring( i, "" );
