@@ -3009,7 +3009,7 @@ CL_startSingleplayer_f
 
 NERVE - SMF
 ==============
-*/
+
 void CL_startSingleplayer_f( void ) {
 #if defined( __linux__ )
 	Sys_StartProcess( "./wolfsp.x86", qtrue );
@@ -3017,7 +3017,7 @@ void CL_startSingleplayer_f( void ) {
 	Sys_StartProcess( "WolfSP.exe", qtrue );
 #endif
 }
-
+RTCWPRO needs no SP */
 /*
 ==============
 CL_buyNow_f
@@ -3361,7 +3361,7 @@ void CL_Init( void ) {
 	// RF, add this command so clients can't bind a key to send client damage commands to the server
 //	Cmd_AddCommand ("cld", CL_ClientDamageCommand );
 
-	Cmd_AddCommand( "startSingleplayer", CL_startSingleplayer_f );      // NERVE - SMF
+//	Cmd_AddCommand( "startSingleplayer", CL_startSingleplayer_f );      // NERVE - SMF
 	Cmd_AddCommand( "buyNow", CL_buyNow_f );                            // NERVE - SMF
 	Cmd_AddCommand( "singlePlayLink", CL_singlePlayLink_f );            // NERVE - SMF
 
