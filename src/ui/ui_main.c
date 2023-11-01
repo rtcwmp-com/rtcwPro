@@ -5041,9 +5041,9 @@ static void UI_RunMenuScript( char **args ) {
 				UI_Update( name2 );
 			}
 			// NERVE - SMF
-		} else if ( Q_stricmp( name, "startSingleplayer" ) == 0 ) {
+		}/* else if ( Q_stricmp( name, "startSingleplayer" ) == 0 ) {
 			trap_Cmd_ExecuteText( EXEC_APPEND, "startSingleplayer\n" );
-		} else if ( Q_stricmp( name, "wm_showPickPlayer" ) == 0 ) {
+		}*/ else if ( Q_stricmp( name, "wm_showPickPlayer" ) == 0 ) {
 			Menus_CloseAll();
 			Menus_OpenByName( "wm_pickplayer" );
 		} else if ( Q_stricmp( name, "wm_showPickTeam" ) == 0 ) {
