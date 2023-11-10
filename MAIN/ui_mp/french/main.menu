@@ -88,7 +88,7 @@
 			decoration
 		}
 
-		itemDef {	// QUICK-PLAY / JOIN
+		itemDef {
 			name USAAWS
 			group mainmenus
 			text "Virginia Server ^6#3^7 NA (aws.wolfdm.xyz)"
