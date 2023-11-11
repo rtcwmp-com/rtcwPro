@@ -137,9 +137,9 @@
 			action { exec "connect wolfdm.xyz" }
 		}
 		itemDef {
-			name Netherlands
+			name USAMiami
 			group mainmenus
-			text "Netherlands Gather (nl.rtcw.eu)"
+			text "LATAMPRO ^1NA^7 Miami (rtcwpub.com)"
 			type 1
 			style 0
 			textstyle 3
