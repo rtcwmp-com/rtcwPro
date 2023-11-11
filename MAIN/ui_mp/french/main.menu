@@ -121,9 +121,9 @@
 			action { exec "connect azure.wolfdm.xyz" }
 		}
 		itemDef {
-			name USAWOLFDM
+			name USAMiami
 			group mainmenus
-			text "EastCoast DM (wolfdm.xyz)"
+			text "LATAMPRO ^1NA^7 Miami (rtcwpub.com)"
 			type 1
 			style 0
 			textstyle 3
