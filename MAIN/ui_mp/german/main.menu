@@ -139,7 +139,7 @@
 		itemDef {
 			name Netherlands
 			group mainmenus
-			rect 380 110 150 10
+			rect 385 110 150 10
 			text "Netherlands Gather (nl.rtcw.eu)"
 			type 1
 			style 0
@@ -154,7 +154,7 @@
 		itemDef {
 			name Britain
 			group mainmenus
-			rect 380 140 150 10
+			rect 385 140 150 10
 			text "Britain Gather (uk.rtcw.eu)"
 			type 1
 			style 0
@@ -169,7 +169,7 @@
 		itemDef {
 			name Germany
 			group mainmenus
-			rect 380 170 150 10
+			rect 385 170 150 10
 			text "Germany Gather (de.rtcw.eu)"
 			type 1
 			style 0

@@ -186,8 +186,8 @@
 		itemDef {
 			name playselection
 			group mainmenus
-			text "MULTIJUGADOR"
-			tooltip "Buscar partidas en internet, configurar opciones de internet, crear un servidor"
+			text "MULTIJOUEUR"
+			tooltip "Rechercher des parties sur internet, configurer les options internet, ou demarrer son propre serveur"
 			type 1
 			style 0
 			textstyle 3
@@ -208,8 +208,8 @@
 		itemDef {
 			name demos
 			group mainmenus
-			text "VER DEMOS"
-			tooltip "Ver demos"
+			text "REGARDER DEMOS"
+			tooltip "Regarder des demos enregistrees"
 			type 1
 			style 0
 			textstyle 3
@@ -230,8 +230,8 @@
 		itemDef {
 			name options
 			group mainmenus
-			text "OPCIONES"
-			tooltip "Editar opciones y ajustes de jugador"
+			text "OPTIONS"
+			tooltip "Modifier les options de jeu"
 			type 1
 			style 0
 			textstyle 3
@@ -252,8 +252,8 @@
 		itemDef {
 			name credits
 			group mainmenus
-			text "CRÉDITOS"
-			tooltip "Ver créditos del juego"
+			text "CRÉDITS"
+			tooltip "Regarder crédits de parties"
 			type 1
 			style 0
 			textstyle 3
@@ -274,8 +274,8 @@
 		itemDef {
 			name quit
 			group mainmenus
-			text "SALIR"
-			tooltip "Salir de RtcwPro"
+			text "QUITTER"
+			tooltip "Quitter RtcwPro"
 			type 1
 			style 0
 			textstyle 3
@@ -305,7 +305,7 @@
 
 		itemDef {
 			name window
-			text "Wolfenstein Multijugador"
+			text "Wolfenstein Multiplayer"
 			type 0
 			style 2
 			textstyle 6
