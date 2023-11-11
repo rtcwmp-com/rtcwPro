@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PK3_NAME=rtcwpro_bin.pk3
+PK3_NAME=rtcwpro_bin.post125.pk3
 OUTPUT_FOLDER=/rtcwpro/output
 CONTENT_FOLDER=/rtcwpro/MAIN
 
