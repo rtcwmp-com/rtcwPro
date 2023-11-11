@@ -88,18 +88,18 @@
 			decoration
 		}
 
-		itemDef {	// QUICK-PLAY / JOIN
+		itemDef {
 			name USAAWS
 			group mainmenus
+			rect 68 110 190 10
 			text "Virginia Server ^6#3^7 NA (aws.wolfdm.xyz)"
 			type 1
 			style 0
 			textstyle 3
-			rect 160 110 100 10
 			textalign 2
-			textalignx 100
 			textfont UI_FONT_SMALL
 			textscale .200
+			textalignx 190
 			forecolor 1 1 1 1
 			visible 1
 			action { exec "connect aws.wolfdm.xyz" }
@@ -107,13 +107,13 @@
 		itemDef {
 			name USAAzure
 			group mainmenus
+			rect 68 140 190 10
 			text "RtCWPro ^1NA^7 (azure.wolfdm.xyz)"
 			type 1
 			style 0
 			textstyle 3
-			rect 160 140 100 10
 			textalign 2
-			textalignx 100
+			textalignx 190
 			textfont UI_FONT_SMALL
 			textscale .200
 			forecolor 1 1 1 1
@@ -123,13 +123,13 @@
 		itemDef {
 			name USAMiami
 			group mainmenus
+			rect 68 170 190 10
 			text "LATAMPRO ^1NA^7 Miami (rtcwpub.com)"
 			type 1
 			style 0
 			textstyle 3
-			rect 160 170 100 10
 			textalign 2
-			textalignx 100
+			textalignx 190
 			textfont UI_FONT_SMALL
 			textscale .200
 			forecolor 1 1 1 1
@@ -139,11 +139,11 @@
 		itemDef {
 			name Netherlands
 			group mainmenus
+			rect 380 110 150 10
 			text "Netherlands Gather (nl.rtcw.eu)"
 			type 1
 			style 0
 			textstyle 3
-			rect 380 110 100 10
 			textalign 0
 			textfont UI_FONT_SMALL
 			textscale .200
@@ -154,11 +154,11 @@
 		itemDef {
 			name Britain
 			group mainmenus
+			rect 380 140 150 10
 			text "Britain Gather (uk.rtcw.eu)"
 			type 1
 			style 0
 			textstyle 3
-			rect 380 140 100 10
 			textalign 0
 			textfont UI_FONT_SMALL
 			textscale .200
@@ -169,11 +169,11 @@
 		itemDef {
 			name Germany
 			group mainmenus
+			rect 380 170 150 10
 			text "Germany Gather (de.rtcw.eu)"
 			type 1
 			style 0
 			textstyle 3
-			rect 380 170 100 10
 			textalign 0
 			textfont UI_FONT_SMALL
 			textscale .200
@@ -181,7 +181,7 @@
 			visible 1
 			action { exec "connect de.rtcw.eu" }
 		}
-			
+
 	//MULTIPLAYER
 		itemDef {
 			name playselection
@@ -252,8 +252,8 @@
 		itemDef {
 			name credits
 			group mainmenus
-			text "CRÃ‰DITOS"
-			tooltip "Ver crÃ©ditos del juego"
+			text "CRÉDITOS"
+			tooltip "Ver créditos del juego"
 			type 1
 			style 0
 			textstyle 3
