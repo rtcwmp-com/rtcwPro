@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PK3_NAME=rtcwpro_assets.pk3
+PK3_NAME=rtcwpro_assets.125plus.pk3
 OUTPUT_FOLDER=/rtcwpro/output
 CONTENT_FOLDER=/rtcwpro/MAIN
 
