@@ -62,17 +62,6 @@ typedef enum {
 	SS_GAME             // actively running
 } serverState_t;
 
-// we might not use all MAX_GENTITIES every frame
-// so leave more room for slow-snaps clients etc.
-#define NUM_SNAPSHOT_FRAMES (PACKET_BACKUP*4)
-
-typedef struct snapshotFrame_s {
-	entityState_t *ents[ MAX_GENTITIES ];
-	int	frameNum;
-	int start;
-	int count;
-} snapshotFrame_t;
-
 typedef struct {
 	serverState_t state;
 	qboolean restarting;                // if true, send configstring changes during SS_LOADING
@@ -100,9 +89,7 @@ typedef struct {
 	int gameClientSize;                 // will be > sizeof(playerState_t) due to game private data
 
 	int restartTime;
-	int				time;
-	byte			baselineUsed[ MAX_GENTITIES ];
-	
+
 	// NERVE - SMF - net debugging
 	int bpsWindow[MAX_BPS_WINDOW];
 	int bpsWindowSteps;
@@ -123,20 +110,16 @@ typedef struct {
 	byte areabits[MAX_MAP_AREA_BYTES];                  // portalarea visibility bits
 	playerState_t ps;
 	int num_entities;
-//#if 0
 	int first_entity;                   // into the circular sv_packet_entities[]
-//#endif
+										// the entities MUST be in increasing state number
+										// order, otherwise the delta compression will fail
 	int messageSent;                    // time the message was transmitted
 	int messageAcked;                   // time the message was acked
 	int messageSize;                    // used to rate drop packets
-
-	int				frameNum;			// from snapshot storage to compare with last valid
-	entityState_t	*ents[ MAX_SNAPSHOT_ENTITIES ];
-
 } clientSnapshot_t;
 
 typedef enum {
-	CS_FREE = 0,    // can be reused for a new connection
+	CS_FREE,        // can be reused for a new connection
 	CS_ZOMBIE,      // client has been disconnected, but don't reuse connection for a couple seconds
 	CS_CONNECTED,   // has been assigned to a client_t, but no gamestate yet
 	CS_PRIMED,      // gamestate has been sent, but client hasn't sent a usercmd
@@ -146,32 +129,8 @@ typedef enum {
 typedef struct netchan_buffer_s {
 	msg_t msg;
 	byte msgBuffer[MAX_MSGLEN];
-	char		clientCommandString[MAX_STRING_CHARS];	// valid command string for SV_Netchan_Encode
 	struct netchan_buffer_s *next;
 } netchan_buffer_t;
-
-typedef struct rateLimit_s {
-	int			lastTime;
-	int			burst;
-} rateLimit_t;
-
-typedef struct leakyBucket_s leakyBucket_t;
-struct leakyBucket_s {
-	netadrtype_t	type;
-
-	union {
-		byte	_4[4];
-		byte	_6[16];
-	} ipv;
-
-	rateLimit_t rate;
-
-	int			hash;
-	int			toxic;
-
-	leakyBucket_t *prev, *next;
-};
-
 
 typedef struct client_s {
 	clientState_t state;
@@ -226,24 +185,7 @@ typedef struct client_s {
 	// buffer them into this queue, and hand them out to netchan as needed
 	netchan_buffer_t *netchan_start_queue;
 	netchan_buffer_t **netchan_end_queue;
-
-	int				oldServerTime;
-	qboolean		csUpdated[MAX_CONFIGSTRINGS];
-	qboolean		compat;
-
-	// flood protection
-	rateLimit_t		cmd_rate;
-	rateLimit_t		info_rate;
-	rateLimit_t		gamestate_rate;
-
-	// client can decode long strings
-	qboolean		longstr;
-
-	qboolean		justConnected;
-
-	char			tld[3]; // "XX\0"
-	const char		*country;
-	//int downloadnotify; //bani
+	int downloadnotify; //bani
 	char guid[GUID_LEN]; // L0
 	int clientRestValidated;
 	qboolean clientValidated;
@@ -314,16 +256,6 @@ typedef struct {
 
 	receipt_t infoReceipts[MAX_INFO_RECEIPTS];
 	floodBan_t infoFloodBans[MAX_INFO_FLOOD_BANS];
-	
-	// common snapshot storage
-	int			freeStorageEntities;
-	int			currentStoragePosition;	// next snapshotEntities to use
-	int			snapshotFrame;			// incremented with each common snapshot built
-	int			currentSnapshotFrame;	// for initializing empty frames
-	int			lastValidFrame;			// updated with each snapshot built
-	snapshotFrame_t	snapFrames[ NUM_SNAPSHOT_FRAMES ];
-	snapshotFrame_t	*currFrame; // current frame that clients can refer
-
 } serverStatic_t;
 
 //================
@@ -390,14 +322,7 @@ extern cvar_t  *sv_maxRate;
 extern cvar_t	*sv_serverIP;
 extern cvar_t	*sv_serverCountry;
 extern cvar_t  *sv_showAverageBPS;          // NERVE - SMF - net debugging
-extern	cvar_t *sv_levelTimeReset;
-extern	cvar_t *sv_filter;
 
-#ifdef USE_BANS
-extern	cvar_t	*sv_banFile;
-extern	serverBan_t serverBans[SERVER_MAXBANS];
-extern	int serverBansCount;
-#endif
 // Rafael gameskill
 extern cvar_t  *sv_gameskill;
 // done
@@ -407,6 +332,13 @@ extern cvar_t *sv_dl_maxRate;
 
 
 // Start RtcwPro
+
+// Anti wallhack
+//extern cvar_t* wh_active;
+//extern cvar_t* wh_bbox_horz;
+//extern cvar_t* wh_bbox_vert;
+//extern cvar_t* wh_add_xy;
+//extern cvar_t* wh_check_fov;
 
 // Streaming
 extern cvar_t* sv_StreamingToken;
@@ -470,20 +402,15 @@ void SV_DirectConnect( netadr_t from );
 void SV_AuthorizeIpPacket( netadr_t from );
 
 void SV_ExecuteClientMessage( client_t *cl, msg_t *msg );
-void SV_UserinfoChanged( client_t *cl, qboolean updateUserinfo, qboolean runFilter );
+void SV_UserinfoChanged( client_t *cl );
 
 void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd );
-void SV_FreeClient( client_t *client );
 void SV_DropClient( client_t *drop, const char *reason );
 
-qboolean SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK);
+void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK );
 void SV_ClientThink( client_t *cl, usercmd_t *cmd );
 
-int SV_SendDownloadMessages( void );
-int SV_SendQueuedMessages( void );
-
-void SV_FreeIP4DB( void );
-void SV_PrintLocations_f( client_t *client );
+int SV_WriteDownloadToClient(client_t* cl, msg_t* msg);
 
 #ifndef _WIN32
 int SV_SendQueuedMessages(void);
@@ -493,7 +420,7 @@ int SV_RateMsec( client_t *client ) ;
 // sv_ccmds.c
 //
 void SV_Heartbeat_f( void );
-client_t *SV_GetPlayerByHandle( void );
+void SV_SetCvarRestrictions(void);
 
 //
 // sv_snapshot.c
@@ -504,11 +431,6 @@ void SV_WriteFrameToClient( client_t *client, msg_t *msg );
 void SV_SendMessageToClient( msg_t *msg, client_t *client );
 void SV_SendClientMessages( void );
 void SV_SendClientSnapshot( client_t *client );
-
-void SV_InitSnapshotStorage( void );
-void SV_IssueNewSnapshot( void );
-
-int SV_RemainingGameState( void );
 
 //
 // sv_game.c
@@ -564,7 +486,7 @@ void SV_UnlinkEntity( sharedEntity_t *ent );
 void SV_LinkEntity( sharedEntity_t *ent );
 // Needs to be called any time an entity changes origin, mins, maxs,
 // or solid.  Automatically unlinks if needed.
-// sets ent->r.absmin and ent->r.absmax
+// sets ent->v.absmin and ent->v.absmax
 // sets ent->leafnums[] for pvs determination even if the entity
 // is not solid
 
@@ -588,7 +510,7 @@ int SV_PointContents( const vec3_t p, int passEntityNum );
 // returns the CONTENTS_* value from the world and all entities at the given point.
 
 
-void SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask, qboolean capsule );
+void SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask, int capsule );
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allsolid will be set,
@@ -600,7 +522,7 @@ void SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const ve
 // passEntityNum is explicitly excluded from clipping checks (normally ENTITYNUM_NONE)
 
 
-void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int entityNum, int contentmask, qboolean capsule );
+void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int entityNum, int contentmask, int capsule );
 // clip to a specific entity
 
 //
@@ -615,15 +537,6 @@ int SV_Netchan_TransmitNextFragment( client_t *client );
 qboolean SV_Netchan_Process( client_t *client, msg_t *msg );
 
 qboolean SV_CheckDRDoS(netadr_t from);
-void SV_Netchan_FreeQueue( client_t *client );
-
-//
-// sv_filter.c
-//
-void SV_LoadFilters( const char *filename );
-const char *SV_RunFilters( const char *userinfo, const netadr_t *addr );
-void SV_AddFilter_f( void );
-void SV_AddFilterCmd_f( void );
 
 #endif // !___SERVER_H
 
