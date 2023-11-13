@@ -184,16 +184,8 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\game\q_math.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-    </ClCompile>
-    <ClCompile Include="..\game\q_shared.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-    </ClCompile>
+    <ClCompile Include="..\qcommon\q_math.c" />
+    <ClCompile Include="..\qcommon\q_shared.c" />
     <ClCompile Include="..\ui\ui_shared.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</BrowseInformation>

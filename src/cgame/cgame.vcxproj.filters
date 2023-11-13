@@ -91,13 +91,13 @@
     <ClCompile Include="cg_window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\q_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ui\ui_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\qcommon\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\qcommon\q_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
