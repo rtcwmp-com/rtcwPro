@@ -1774,6 +1774,7 @@ extern vmCvar_t	g_ssWebhookId;
 extern vmCvar_t	g_ssWebhookToken;
 extern vmCvar_t	g_ssWaitTime;
 extern vmCvar_t	g_broadcastClients;
+extern vmCvar_t g_logConfigStringChanges;
 
 // unlagged
 extern vmCvar_t g_floatPlayerPosition;

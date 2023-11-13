@@ -1253,8 +1253,15 @@ void objective_Register( gentity_t *self ) {
 	level.numspawntargets = numobjectives;
 	trap_GetConfigstring( CS_MULTI_INFO, cs, sizeof( cs ) );
 	sprintf( numspawntargets,"%d",numobjectives );
+
+	if (g_logConfigStringChanges.integer)
+		LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ objective_Register ] CS Before: [ %s ] variable: [ numspawntargets ]\n", g_currentRound.integer + 1, cs));
+
 	Info_SetValueForKey( cs, "numspawntargets", numspawntargets );
 	trap_SetConfigstring( CS_MULTI_INFO, cs );
+
+	if (g_logConfigStringChanges.integer)
+		LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ objective_Register ] CS After: [ %s ] variable: [ numspawntargets ]\n", g_currentRound.integer + 1, cs));
 }
 
 void SP_team_WOLF_objective( gentity_t *ent ) {
