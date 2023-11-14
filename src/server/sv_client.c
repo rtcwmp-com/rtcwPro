@@ -832,6 +832,12 @@ Downloads are finished
 ==================
 */
 void SV_DoneDownload_f( client_t *cl ) {
+	// CS_ACTIVE means the client is fully connected and in-game (has a gamestate).
+	// if this is true then don't allow them to call donedl.. otherwise it's a major exploit.
+	if (cl->state == CS_ACTIVE) {
+		return;
+	}
+
 	Com_DPrintf( "clientDownload: %s Done\n", cl->name );
 	// resend the game state to update any clients that entered during the download
 	SV_SendClientGameState( cl );

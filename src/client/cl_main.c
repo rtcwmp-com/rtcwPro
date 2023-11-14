@@ -109,6 +109,9 @@ cvar_t *cl_guid;
 // ~L0
 
 cvar_t* cl_activatelean; // RTCWPro
+// rtcwpro - http redirect
+cvar_t* cl_httpDomain;
+cvar_t* cl_httpPath;
 
 clientActive_t cl;
 clientConnection_t clc;
@@ -141,6 +144,21 @@ char autoupdateFilename[MAX_QPATH];
 // "updates" shifted from -7
 #define AUTOUPDATE_DIR "ni]Zm^l"
 #define AUTOUPDATE_DIR_SHIFT 7
+
+// rtcwpro
+streamed_socket* ss;
+netadr_t file_server;
+fileHandle_t file_download;
+qboolean downloading_file;
+
+#define DOWNLOAD_BLOCK_BYTES 1024
+
+char http_request[MAX_MSGLEN];
+char download_filename[MAX_QPATH];
+
+char local_file_name[MAX_QPATH];
+char remote_file_name[MAX_QPATH];
+// end
 
 extern void SV_BotFrame( int time );
 void CL_CheckForResend( void );
@@ -804,15 +822,15 @@ void CL_Disconnect( qboolean showMainMenu ) {
 		CL_StopRecord_f();
 	}
 
-		if (clc.download) {
-			FS_FCloseFile(clc.download);
-			clc.download = 0;
-		}
+	if (clc.download) {
+		FS_FCloseFile(clc.download);
+		clc.download = 0;
+	}
 	*clc.downloadTempName = *clc.downloadName = 0;
-		Cvar_Set("cl_downloadName", "");
+	Cvar_Set( "cl_downloadName", "" );
 
-		autoupdateStarted = qfalse;
-		autoupdateFilename[0] = '\0';
+	autoupdateStarted = qfalse;
+	autoupdateFilename[0] = '\0';
 
 	if ( clc.demofile ) {
 		FS_FCloseFile( clc.demofile );
@@ -1456,6 +1474,205 @@ void CL_Clientinfo_f( void ) {
 
 //====================================================================
 
+streamed_socket *ss;
+netadr_t file_server;
+fileHandle_t file_download;
+qboolean downloading_file;
+
+#if 0
+#define FILE_SERVER_DOMAIN "maps.rtcwmp.com"
+#define FILE_SERVER_PATH ""
+#else
+#define FILE_SERVER_DOMAIN "www.x-labs.co.uk"
+#define FILE_SERVER_PATH "/mapdb/rtcw"
+#endif
+
+#define DOWNLOAD_BLOCK_BYTES 1024
+
+char http_request[MAX_MSGLEN];
+char download_filename[MAX_QPATH];
+
+char local_file_name[MAX_QPATH];
+char remote_file_name[MAX_QPATH];
+
+void HttpFailureCallback(char *errmsg)
+{
+	Com_Printf("HttpFailureCallback: %s\n", errmsg);
+	// NOTE(nobo): Entering this callback means nothing was sent to the http-server.
+	// so we don't really have to clean anything up, because it never started in the first place.
+	// Now all that's needed is to start back up the wolf-server -> wolf-client download system.
+	CL_BeginDownload(local_file_name, remote_file_name, qfalse);
+}
+
+/*
+=================
+CL_BeginHttpDownload
+
+Requests a file to download from the http-server.  Stores it in the current
+game directory.
+=================
+*/
+qboolean CL_BeginHttpDownload()
+{
+	char* server_domain;
+	char* server_path;
+
+	server_domain = cl_httpDomain->string;
+	server_path = cl_httpPath->string;
+
+	if (!file_server.ip[0] && file_server.type != NA_BAD)
+	{
+		if (!NET_StringToAdr(server_domain, &file_server))
+		{
+			return qfalse;
+		}
+
+		file_server.port = BigShort(80);
+	}
+
+	if (ss && ss->in_use)
+	{
+		NET_CloseStreamedSocket(ss);
+	}
+
+	if (!NET_OpenStreamedSocket(&ss, &file_server))
+	{
+		return qfalse;
+	}
+
+	ss->failure_callback = HttpFailureCallback;
+	Q_strncpyz(download_filename, COM_SkipPath(local_file_name), sizeof(download_filename));
+	snprintf(http_request, sizeof(http_request), "GET %s/%s HTTP/1.1\r\nHOST: %s\r\n\r\n", server_path, download_filename, server_domain);
+	Sys_SendStreamedPacket(ss, http_request, strlen(http_request));
+	CL_AddReliableCommand("stopdl");
+
+	return qtrue;
+}
+
+void CL_StopHttpDownload()
+{
+	downloading_file = qfalse;
+	FS_FCloseFile(file_download);
+	NET_CloseStreamedSocket(ss);
+	memset(&file_server, 0, sizeof(file_server));
+	download_filename[0] = 0;
+	http_request[0] = 0;
+	clc.downloadSize = clc.downloadCount = clc.downloadBlock = 0;
+}
+
+void CL_ContinueNonHttpDownload()
+{
+	CL_StopHttpDownload();
+	CL_BeginDownload(local_file_name, remote_file_name, qfalse);
+}
+
+void CL_ParseHttpDownload(netadr_t *from, msg_t *msg)
+{
+	http_response *response = http_parse(msg->data, msg->cursize);
+
+	if (response->is_valid)
+	{
+		if (response->code == 200)
+		{
+			if (response->has_body)
+			{
+				clc.downloadSize = response->content_length;
+				Cvar_SetValue("cl_downloadSize", clc.downloadSize);
+				// Open the download file for writing
+				file_download = FS_SV_FOpenFileWrite(clc.downloadTempName);
+				int write_now = msg->cursize - (response->body - msg->data);
+				FS_Write(response->body, write_now, file_download);
+				clc.downloadCount += write_now;
+				downloading_file = qtrue;
+			}
+			else
+			{
+				Com_Printf("http packet from %s - should allow range, but doesn't\n", NET_AdrToString(*from));
+				CL_ContinueNonHttpDownload();
+			}
+		}
+		else if (response->code == 301)
+		{
+			CL_ContinueNonHttpDownload();
+		}
+		else
+		{
+			Com_Printf("http packet from %s - response code: %i\n", NET_AdrToString(*from), response->code);
+			CL_ContinueNonHttpDownload();
+		}
+	}
+	else if (downloading_file)
+	{
+		// Write the bytes we just received from the web server
+		FS_Write(msg->data, msg->cursize, file_download);
+
+		clc.downloadCount += msg->cursize;
+		Cvar_SetValue("cl_downloadCount", clc.downloadCount);
+
+		// Finished downloading the file
+		if (clc.downloadCount == clc.downloadSize)
+		{
+			CL_StopHttpDownload();
+
+			clc.downloadRestart = qfalse;
+			CL_AddReliableCommand("donedl");
+			Cvar_Set("cl_downloadName", "");
+			FS_SV_Rename(clc.downloadTempName, clc.downloadName);
+			FS_Restart(clc.checksumFeed);
+			*clc.downloadTempName = *clc.downloadName = 0;
+		}
+	}
+	else
+	{
+		Com_Printf("Invalid http response from %s\n", NET_AdrToString(*from));
+		CL_ContinueNonHttpDownload();
+	}
+}
+
+void CL_StreamedPacketEvent(netadr_t from, msg_t *msg)
+{
+	if (NET_CompareAdr(from, file_server))
+	{
+		CL_ParseHttpDownload(&from, msg);
+	}
+}
+
+/*
+=================
+CL_BeginDownload
+
+Requests a file to download from the server.  Stores it in the current
+game directory.
+=================
+*/
+void CL_BeginDownload(const char *localName, const char *remoteName, qboolean attemptHttp) {
+
+	Com_DPrintf("***** CL_BeginDownload *****\n"
+		"Localname: %s\n"
+		"Remotename: %s\n"
+		"****************************\n", localName, remoteName);
+
+	Q_strncpyz(local_file_name, localName, sizeof(local_file_name));
+	Q_strncpyz(remote_file_name, remoteName, sizeof(remote_file_name));
+
+	Q_strncpyz(clc.downloadName, localName, sizeof(clc.downloadName));
+	Com_sprintf(clc.downloadTempName, sizeof(clc.downloadTempName), "%s.tmp", localName);
+
+	// Set so UI gets access to it
+	Cvar_Set("cl_downloadName", remoteName);
+	Cvar_Set("cl_downloadSize", "0");
+	Cvar_Set("cl_downloadCount", "0");
+	Cvar_SetValue("cl_downloadTime", cls.realtime);
+
+	clc.downloadBlock = 0; // Starting new file
+	clc.downloadCount = 0;
+	clc.downloadSize = 0;
+
+	if (!attemptHttp || !CL_BeginHttpDownload()) {
+		CL_AddReliableCommand(va("download %s", remoteName));
+	}
+}
+
 /*
 =================
 CL_DownloadsComplete
@@ -1541,36 +1758,6 @@ void CL_DownloadsComplete( void ) {
 
 /*
 =================
-CL_BeginDownload
-
-Requests a file to download from the server.  Stores it in the current
-game directory.
-=================
-*/
-void CL_BeginDownload( const char *localName, const char *remoteName ) {
-
-	Com_DPrintf( "***** CL_BeginDownload *****\n"
-				 "Localname: %s\n"
-				 "Remotename: %s\n"
-				 "****************************\n", localName, remoteName );
-
-	Q_strncpyz( clc.downloadName, localName, sizeof( clc.downloadName ) );
-	Com_sprintf( clc.downloadTempName, sizeof( clc.downloadTempName ), "%s.tmp", localName );
-
-	// Set so UI gets access to it
-	Cvar_Set( "cl_downloadName", remoteName );
-	Cvar_Set( "cl_downloadSize", "0" );
-	Cvar_Set( "cl_downloadCount", "0" );
-	Cvar_SetValue( "cl_downloadTime", cls.realtime );
-
-	clc.downloadBlock = 0; // Starting new file
-	clc.downloadCount = 0;
-
-	CL_AddReliableCommand( va( "download %s", remoteName ) );
-}
-
-/*
-=================
 CL_NextDownload
 
 A download completed or failed
@@ -1605,7 +1792,7 @@ void CL_NextDownload( void ) {
 			s = localName + strlen( localName ); // point at the nul byte
 
 		}
-		CL_BeginDownload( localName, remoteName );
+		CL_BeginDownload( localName, remoteName, qtrue );
 
 		clc.downloadRestart = qtrue;
 
@@ -1665,6 +1852,8 @@ void CL_InitDownloads( void ) {
 	}
 
 #endif
+
+
 	CL_DownloadsComplete();
 }
 
@@ -3049,7 +3238,10 @@ void CL_Init( void ) {
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
     cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM  );
 
-
+	// rtcwpro
+	cl_httpDomain = Cvar_Get("cl_httpDomain", "www.rtcw.life", CVAR_ARCHIVE);
+	cl_httpPath = Cvar_Get("cl_httpPath", "/files/mapdb", CVAR_ARCHIVE);
+	// end
 /*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
 		CL_SetGuid();
