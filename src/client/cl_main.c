@@ -145,21 +145,6 @@ char autoupdateFilename[MAX_QPATH];
 #define AUTOUPDATE_DIR "ni]Zm^l"
 #define AUTOUPDATE_DIR_SHIFT 7
 
-// rtcwpro
-streamed_socket* ss;
-netadr_t file_server;
-fileHandle_t file_download;
-qboolean downloading_file;
-
-#define DOWNLOAD_BLOCK_BYTES 1024
-
-char http_request[MAX_MSGLEN];
-char download_filename[MAX_QPATH];
-
-char local_file_name[MAX_QPATH];
-char remote_file_name[MAX_QPATH];
-// end
-
 extern void SV_BotFrame( int time );
 void CL_CheckForResend( void );
 void CL_ShowIP_f( void );
@@ -1540,9 +1525,13 @@ qboolean CL_BeginHttpDownload()
 		return qfalse;
 	}
 
+	Sleep(3000);
+
 	ss->failure_callback = HttpFailureCallback;
 	Q_strncpyz(download_filename, COM_SkipPath(local_file_name), sizeof(download_filename));
 	snprintf(http_request, sizeof(http_request), "GET %s/%s HTTP/1.1\r\nHOST: %s\r\n\r\n", server_path, download_filename, server_domain);
+	//snprintf(http_request, sizeof(http_request), "GET %s/%s HTTP/1.1\r\nHOST: %s\r\n\r\n", FILE_SERVER_PATH, download_filename, FILE_SERVER_DOMAIN);
+	Com_Printf("Beginning HTTP download from %s\n", server_domain);
 	Sys_SendStreamedPacket(ss, http_request, strlen(http_request));
 	CL_AddReliableCommand("stopdl");
 
@@ -1563,6 +1552,7 @@ void CL_StopHttpDownload()
 void CL_ContinueNonHttpDownload()
 {
 	CL_StopHttpDownload();
+	Com_Printf("HTTP Download not successful. Trying normal download.\n");
 	CL_BeginDownload(local_file_name, remote_file_name, qfalse);
 }
 
@@ -1576,6 +1566,7 @@ void CL_ParseHttpDownload(netadr_t *from, msg_t *msg)
 		{
 			if (response->has_body)
 			{
+				//Com_Printf("HTTP response...%d\n", response->content_length);
 				clc.downloadSize = response->content_length;
 				Cvar_SetValue("cl_downloadSize", clc.downloadSize);
 				// Open the download file for writing
@@ -1647,7 +1638,7 @@ game directory.
 */
 void CL_BeginDownload(const char *localName, const char *remoteName, qboolean attemptHttp) {
 
-	Com_DPrintf("***** CL_BeginDownload *****\n"
+	Com_Printf("***** CL_BeginDownload *****\n"
 		"Localname: %s\n"
 		"Remotename: %s\n"
 		"****************************\n", localName, remoteName);
@@ -3167,7 +3158,7 @@ void CL_Init( void ) {
 	//
 	cl_noprint = Cvar_Get( "cl_noprint", "0", 0 );
 	cl_motd = Cvar_Get( "cl_motd", "1", 0 );
-	cl_autoupdate = Cvar_Get( "cl_autoupdate", "1", CVAR_ARCHIVE );
+	cl_autoupdate = Cvar_Get( "cl_autoupdate", "0", CVAR_ARCHIVE ); // RtcwPro set this to 0 we don't use this
 
 	cl_timeout = Cvar_Get( "cl_timeout", "200", 0 );
 
@@ -3239,8 +3230,8 @@ void CL_Init( void ) {
     cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM  );
 
 	// rtcwpro
-	cl_httpDomain = Cvar_Get("cl_httpDomain", "www.rtcw.life", CVAR_ARCHIVE);
-	cl_httpPath = Cvar_Get("cl_httpPath", "/files/mapdb", CVAR_ARCHIVE);
+	cl_httpDomain = Cvar_Get("cl_httpDomain", "www.rtcw.life", CVAR_ARCHIVE); //"www.x-labs.co.uk", CVAR_ARCHIVE);
+	cl_httpPath = Cvar_Get("cl_httpPath", "/files/mapdb", CVAR_ARCHIVE); //"/mapdb/rtcw", CVAR_ARCHIVE);
 	// end
 /*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {

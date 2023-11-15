@@ -277,13 +277,6 @@ void IN_ButtonUp( void ) {
 }
 
 void IN_CenterView( void ) {
-	qboolean ok = qtrue;
-	if ( cgvm ) {
-		ok = VM_Call( cgvm, CG_CHECKCENTERVIEW );
-	}
-	if ( ok ) {
-		cl.viewangles[PITCH] = -SHORT2ANGLE( cl.snap.ps.delta_angles[PITCH] );
-	}
 }
 
 void IN_Notebook( void ) {
@@ -967,7 +960,6 @@ CL_InitInput
 ============
 */
 void CL_InitInput( void ) {
-	Cmd_AddCommand( "centerview",IN_CenterView );
 
 	Cmd_AddCommand( "+moveup",IN_UpDown );
 	Cmd_AddCommand( "-moveup",IN_UpUp );
