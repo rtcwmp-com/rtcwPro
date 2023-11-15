@@ -1558,6 +1558,7 @@ void CL_ContinueNonHttpDownload()
 
 void CL_ParseHttpDownload(netadr_t *from, msg_t *msg)
 {
+	char* temp = (char*)msg->data;
 	http_response *response = http_parse(msg->data, msg->cursize);
 
 	if (response->is_valid)
@@ -1571,7 +1572,7 @@ void CL_ParseHttpDownload(netadr_t *from, msg_t *msg)
 				Cvar_SetValue("cl_downloadSize", clc.downloadSize);
 				// Open the download file for writing
 				file_download = FS_SV_FOpenFileWrite(clc.downloadTempName);
-				int write_now = msg->cursize - (response->body - msg->data);
+				int write_now = msg->cursize - (response->body - temp);
 				FS_Write(response->body, write_now, file_download);
 				clc.downloadCount += write_now;
 				downloading_file = qtrue;
