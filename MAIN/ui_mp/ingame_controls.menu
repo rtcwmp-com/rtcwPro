@@ -1,5 +1,4 @@
 #include "ui_mp/menudef.h"
-
 {
 \\ SETUP MENU \\
 
@@ -7,7 +6,7 @@ menuDef {
 	name "ingame_controls"
 	visible 0
 	fullscreen 0
-	outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	outOfBoundsClick		// this closes the window if it gets a click out of the rectangle
 	rect 100 125 443 340
 	focusColor 1 .75 0 1
 	style 1
@@ -15,7 +14,6 @@ menuDef {
 	onClose { setCvar cg_draw2D "1"; uiScript saveControls }
 	onopen { hide grpControls ; show look ; setCvar cg_draw2D "0"; uiScript loadControls }
 	onEsc { setCvar cg_draw2D "1" }
-
 
 	itemDef {
 		name window
@@ -56,12 +54,8 @@ menuDef {
 		decoration
 	}
 
-
-
 ////////////////////////
-//
-//       LOOK
-//
+// LOOK
 ////////////////////////
 	itemDef {
 		name ctr_look
@@ -270,12 +264,8 @@ menuDef {
 		visible 0
 	}
 
-
-
 ////////////////////////
-//
-//       MOVE
-//
+// MOVE
 ////////////////////////
 	itemDef {
 		name ctr_move
@@ -559,12 +549,8 @@ menuDef {
 		mouseexit { hide keyBindStatus }
 	}
 
-
-
 ////////////////////////
-//
-//       SHOOT
-//
+// SHOOT
 ////////////////////////
 	itemDef {
 		name ctr_shoot
@@ -868,12 +854,8 @@ menuDef {
 		visible 0
 	}
 
-
-
 ////////////////////////
-//
-//       MISC
-//
+// MISC
 ////////////////////////
 	itemDef {
 		name ctr_miscellaneous
@@ -1180,11 +1162,8 @@ menuDef {
 	}
 // -OSP
 
-
 ////////////////////////
-//
-//       CHAT
-//
+// CHAT
 ////////////////////////
 	itemDef {
 		name ctr_chat
@@ -1306,12 +1285,8 @@ menuDef {
 		mouseexit { hide keyBindStatus }
 	}
 
-
-
 ////////////////////////
-//
-//      MULTIVIEW
-//
+// MULTIVIEW
 ////////////////////////
 	itemDef {
 		name ctr_mv
@@ -1451,7 +1426,5 @@ menuDef {
 		backcolor 1 1 1 .07
 		visible 0
 	}
-
 }	// menuDef
-
 }	// context
