@@ -1607,11 +1607,13 @@ void CL_ParseHttpDownload(netadr_t *from, msg_t *msg)
 			CL_StopHttpDownload();
 
 			clc.downloadRestart = qfalse;
-			CL_AddReliableCommand("donedl");
+			//CL_AddReliableCommand("donedl");
 			Cvar_Set("cl_downloadName", "");
 			FS_SV_Rename(clc.downloadTempName, clc.downloadName);
 			FS_Restart(clc.checksumFeed);
 			*clc.downloadTempName = *clc.downloadName = 0;
+
+			CL_DownloadsComplete()
 		}
 	}
 	else

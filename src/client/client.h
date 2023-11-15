@@ -479,6 +479,7 @@ void CL_BeginDownload(const char* localName, const char* remoteName, qboolean at
 qboolean CL_BeginHttpDownload(); // rtcwpro
 
 void CL_OpenURL( const char *url ); // TTimo
+void CL_DownloadsComplete(void); // rtcwpro
 
 //
 // cl_input
