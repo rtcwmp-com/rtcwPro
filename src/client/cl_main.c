@@ -1613,7 +1613,7 @@ void CL_ParseHttpDownload(netadr_t *from, msg_t *msg)
 			FS_Restart(clc.checksumFeed);
 			*clc.downloadTempName = *clc.downloadName = 0;
 
-			CL_DownloadsComplete()
+			CL_DownloadsComplete();
 		}
 	}
 	else
