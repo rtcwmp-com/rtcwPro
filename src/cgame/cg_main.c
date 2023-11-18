@@ -411,6 +411,7 @@ vmCvar_t cg_fragsY;
 vmCvar_t cg_fragsWidth;
 vmCvar_t cg_fixedphysicsfps;
 vmCvar_t cg_debugDamage;
+vmCvar_t cg_pauseMusic;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -731,6 +732,8 @@ cvarTable_t cvarTable[] = {
 
 	// RtcwPro print damage feedback to rtcwconsole.log
 	{ &cg_debugDamage, "cg_debugDamage", "0", CVAR_ARCHIVE },
+
+	{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

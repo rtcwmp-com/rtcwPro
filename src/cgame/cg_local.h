@@ -2224,6 +2224,7 @@ extern vmCvar_t cg_fragsY;
 extern vmCvar_t cg_fragsWidth;
 extern vmCvar_t cg_fixedphysicsfps;
 extern vmCvar_t cg_debugDamage;
+extern vmCvar_t cg_pauseMusic;
 
 //static void CG_TimerSet_f(void);
 //static void CG_TimerReset_f(void);
