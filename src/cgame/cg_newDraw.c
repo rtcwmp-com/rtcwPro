@@ -2580,6 +2580,14 @@ void CG_MouseEvent( int x, int y ) {
 	int n;
 
 	switch (cgs.eventHandling) {
+	case CGAME_EVENT_NONE:
+		break;
+	case CGAME_EVENT_TEAMMENU:
+		break;
+	case CGAME_EVENT_SCOREBOARD:
+		break;
+	case CGAME_EVENT_EDITHUD:
+		break;
 	case CGAME_EVENT_DEMO:
 		cgs.cursorX += x;
 		if (cgs.cursorX < 0) {
@@ -2701,11 +2709,22 @@ void CG_KeyEvent( int key, qboolean down ) {
 		return;
 	}
 
-	switch (cgs.eventHandling) {
 	// OSPx - Demo..
+	switch (cgs.eventHandling)
+	{
+	case CGAME_EVENT_NONE:
+		break;
+	case CGAME_EVENT_TEAMMENU:
+		break;
+	case CGAME_EVENT_SCOREBOARD:
+		break;
+	case CGAME_EVENT_EDITHUD:
+		break;
 	case CGAME_EVENT_DEMO:
 		CG_DemoClick(key);
 		return;
+	default:
+		break;
 	}
 
 	if ( cg.predictedPlayerState.pm_type == PM_NORMAL || ( cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse ) ) {
