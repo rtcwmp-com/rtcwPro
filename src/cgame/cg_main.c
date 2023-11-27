@@ -412,6 +412,16 @@ vmCvar_t cg_fragsWidth;
 vmCvar_t cg_fixedphysicsfps;
 vmCvar_t cg_debugDamage;
 
+// shoutcast overlay
+vmCvar_t cg_shoutcastDrawPlayers;
+vmCvar_t cg_shoutcastDrawTeamNames;
+vmCvar_t cg_shoutcastTeamNameRed;
+vmCvar_t cg_shoutcastTeamNameBlue;
+vmCvar_t cg_shoutcastDrawHealth;
+vmCvar_t cg_shoutcastGrenadeTrail;
+
+vmCvar_t cg_showLimboMessage;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -737,7 +747,18 @@ cvarTable_t cvarTable[] = {
 	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
 	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },
 	{ &demo_showTimein, "demo_showTimein", "1", CVAR_ARCHIVE },
-	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE }
+	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE },
+
+	// RtcwPro - shoutcast overlay
+	{ &cg_shoutcastDrawPlayers,     "cg_shoutcastDrawPlayers",     "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastDrawTeamNames,   "cg_shoutcastDrawTeamNames",   "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastTeamNameRed,     "cg_shoutcastTeamNameRed",     "Axis",        CVAR_ARCHIVE },
+	{ &cg_shoutcastTeamNameBlue,    "cg_shoutcastTeamNameBlue",    "Allies",      CVAR_ARCHIVE },
+	{ &cg_shoutcastDrawHealth,      "cg_shoutcastDrawHealth",      "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastGrenadeTrail,    "cg_shoutcastGrenadeTrail",    "0",           CVAR_ARCHIVE },
+
+	// show/hide limbo message while dead
+	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
@@ -1674,14 +1695,15 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.customTrigger = trap_R_RegisterShaderNoMip("gfx/2d/customTrigger");
 	cgs.media.customTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/customTriggerEdges");
 
-	// powerup shaders
-//	cgs.media.quadShader = trap_R_RegisterShader("powerups/quad" );
-//	cgs.media.quadWeaponShader = trap_R_RegisterShader("powerups/quadWeapon" );
-//	cgs.media.battleSuitShader = trap_R_RegisterShader("powerups/battleSuit" );
-//	cgs.media.battleWeaponShader = trap_R_RegisterShader("powerups/battleWeapon" );
-//	cgs.media.invisShader = trap_R_RegisterShader("powerups/invisibility" );
-//	cgs.media.regenShader = trap_R_RegisterShader("powerups/regen" );
-//	cgs.media.hastePuffShader = trap_R_RegisterShader("hasteSmokePuff" );
+	// Shoutcast shaders
+	cgs.media.objectiveShader = trap_R_RegisterShader("sprites/objective");
+	cgs.media.medicIcon = trap_R_RegisterShaderNoMip("sprites/voicemedic");
+	cgs.media.ammoIcon = trap_R_RegisterShaderNoMip("sprites/voiceammo");
+
+	cgs.media.classPics[PC_SOLDIER] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
+	cgs.media.classPics[PC_MEDIC] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
+	cgs.media.classPics[PC_ENGINEER] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_engineer");
+	cgs.media.classPics[PC_LT] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lieutenant");
 
 	// DHM - Nerve :: Allow flags again, will change later to more appropriate models
 	if ( cgs.gametype == GT_CTF || cgs.gametype >= GT_WOLF || cg_buildScript.integer ) {
@@ -2137,6 +2159,16 @@ qboolean CG_Asset_Parse( int handle ) {
 			cgDC.registerFont( tempStr, pointSize, &cgDC.Assets.bigFont );
 			continue;
 		}
+
+		// shoutcastFont
+		//if (Q_stricmp(token.string, "shoutcastFont") == 0) {
+		//	int pointSize;
+		//	if (!PC_String_Parse(handle, &tempStr) || !PC_Int_Parse(handle, &pointSize)) {
+		//		return qfalse;
+		//	}
+		//	cgDC.registerFont(tempStr, pointSize, &cgDC.Assets.shoutcastFont);
+		//	continue;
+		//}
 
 		// gradientbar
 		if ( Q_stricmp( token.string, "gradientbar" ) == 0 ) {
@@ -2852,6 +2884,14 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 			CG_execFile("autoexec_default");
 		}
 	}
+
+	// screen support ...
+	cgs.adr43 = cgs.glconfig.windowAspect * RPRATIO43;       // aspectratio / (4/3)
+	cgs.r43da = RATIO43 * 1.0f / cgs.glconfig.windowAspect;  // (4/3) / aspectratio
+	cgs.wideXoffset = (cgs.glconfig.windowAspect > RATIO43) ? (640.0f * cgs.adr43 - 640.0f) * 0.5f : 0.0f;
+
+	// DEBUG
+	//CG_Printf("Screen[%f][%f]: as: %f   adr43: %f  r43da: %f off: %f\n", cgs.screenXScale, cgs.screenYScale, cgs.glconfig.windowAspect, cgs.adr43, cgs.r43da, cgs.wideXoffset);
 }
 
 /*

@@ -1147,6 +1147,8 @@ void CG_NewClientInfo( int clientNum ) {
 	// isolate the player's name
 	v = Info_ValueForKey( configstring, "n" );
 	Q_strncpyz( newInfo.name, v, sizeof( newInfo.name ) );
+	Q_strncpyz(newInfo.cleanname, v, sizeof(newInfo.cleanname));
+	Q_CleanStr(newInfo.cleanname);
 
 	// colors
 	v = Info_ValueForKey( configstring, "c1" );
@@ -3461,4 +3463,47 @@ qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t *or ) {
 	memcpy( or->axis, tempAxis, sizeof( vec3_t ) * 3 );
 
 	return qtrue;
+}
+
+/**
+* @brief Get player max health
+* @param[in] clientNum
+* @param[in] class
+*/
+int CG_GetPlayerMaxHealth(int clientNum, int class, int team)
+{
+	int i;
+	int maxHealth = 100;
+	for (i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!cgs.clientinfo[i].infoValid)
+		{
+			continue;
+		}
+
+		if (cgs.clientinfo[i].team != team)
+		{
+			continue;
+		}
+
+		if (cg_entities[clientNum].currentState.teamNum != PC_MEDIC)
+		{
+			continue;
+		}
+
+		maxHealth += 10;
+
+		if (maxHealth >= 125)
+		{
+			maxHealth = 125;
+			break;
+		}
+	}
+
+	if (class == PC_MEDIC)
+	{
+		maxHealth *= 1.12f;
+	}
+
+	return maxHealth;
 }

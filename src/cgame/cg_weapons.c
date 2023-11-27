@@ -1159,6 +1159,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 
 	weaponInfo->weaponIcon[0] = trap_R_RegisterShader( item->icon );
 	weaponInfo->weaponIcon[1] = trap_R_RegisterShader( va( "%s_select", item->icon ) );    // get the 'selected' icon as well
+	weaponInfo->weaponIconScale = 1; // shoutcsat overlay
 
 	// JOSEPH 4-17-00
 	weaponInfo->ammoIcon = trap_R_RegisterShader( item->ammoicon );

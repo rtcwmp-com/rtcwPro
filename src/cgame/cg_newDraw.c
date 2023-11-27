@@ -207,7 +207,7 @@ static void CG_DrawPlayerArmorValue( rectDef_t *rect, float scale, vec4_t color,
 	ps = &cg.snap->ps;
 
 	// NERVE - SMF - don't draw armor in wolfMP
-	if ( cgs.gametype >= GT_WOLF ) {
+	if ( cgs.gametype >= GT_WOLF) {
 		return;
 	}
 
@@ -291,7 +291,7 @@ static void CG_DrawPlayerWeaponIcon( rectDef_t *rect, qboolean drawHighlighted, 
 // jpw
 
 
-	if ( !cg_drawIcons.integer ) {
+	if ( !cg_drawIcons.integer || cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return;
 	}
 
@@ -415,6 +415,9 @@ static void CG_DrawPlayerAmmoIcon( rectDef_t *rect, qboolean draw2D ) {
 	playerState_t   *ps;
 	vec3_t angles;
 	vec3_t origin;
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
 
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
@@ -667,6 +670,9 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, float scale, vec4_t color, 
 	int weap, startx;
 	qboolean special = qfalse;
 	qboolean skipammo = qfalse;
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
 
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
@@ -1115,6 +1121,10 @@ static void CG_DrawPlayerHealth( rectDef_t *rect, float scale, vec4_t color, qha
 	vec4_t color2;
 
 	ps = &cg.snap->ps;
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
+
 /*
 	if ( cgs.gametype >= GT_WOLF && ( ps->pm_flags & PMF_FOLLOW ) ) {
         value = cgs.clientinfo[ ps->clientNum ].health;
@@ -2267,6 +2277,9 @@ static void CG_DrawFatigue( rectDef_t *rect, vec4_t color, int align ) {
 	float barFrac;  //, omBarFrac;
 	int flags = 0;
 
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
+
 	barFrac = (float)cg.snap->ps.sprintTime / SPRINTTIME;
 //	omBarFrac = 1.0f-barFrac;
 
@@ -2360,7 +2373,7 @@ CG_OwnerDraw
 void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_y, int ownerDraw, int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader, int textStyle ) {
 	rectDef_t rect;
 
-	if ( cg_drawStatus.integer == 0 ) {
+	if ( cg_drawStatus.integer == 0 || cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return;
 	}
 
@@ -2686,12 +2699,28 @@ void CG_EventHandling( int type, qboolean forced ) {
 	case CGAME_EVENT_TEAMMENU:
 	case CGAME_EVENT_SCOREBOARD:
 		break;
+	case CGAME_EVENT_SHOUTCAST:
+		if (cgs.eventHandling == CGAME_EVENT_SHOUTCAST)
+		{
+			if (forced)
+			{
+				trap_UI_Popup("UIMENU_INGAME");
+			}
+
+			trap_Cvar_Set("cl_bypassmouseinput", "0");
+		}
+		break;
 	}
 
 	cgs.eventHandling = type;
 
 	if (type == CGAME_EVENT_NONE) {
 		trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
+	}
+	else if (type == CGAME_EVENT_SHOUTCAST)
+	{
+		trap_Cvar_Set("cl_bypassmouseinput", "1");
+		trap_Key_SetCatcher(KEYCATCH_CGAME);
 	}
 }
 

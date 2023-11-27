@@ -1833,6 +1833,18 @@ extern void CG_SetupDlightstyles(void);
 #define DEBUGTIME
 #endif
 
+/**
+* @brief CG_SetLastKeyCatcher
+*/
+static void CG_SetLastKeyCatcher(void)
+{
+	int keyCatcher = trap_Key_GetCatcher();
+
+	CG_ShoutcastCheckKeyCatcher(keyCatcher);
+
+	cg.lastKeyCatcher = keyCatcher;
+}
+
 /*
 =================
 CG_DrawActiveFrame
@@ -2047,6 +2059,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 	}
 
+	CG_SetLastKeyCatcher();
+
 	DEBUGTIME
 
 	// RTCWPro - complete OSP demo features
@@ -2060,4 +2074,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		cg.timein++;
 	}
 }
-

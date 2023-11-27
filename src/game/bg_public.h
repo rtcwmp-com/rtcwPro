@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../MAIN/ui_mp/menudef.h" // For vote options
 
+#define SPRINTTIME 20000.0f
+
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 
@@ -375,7 +377,9 @@ typedef enum {
 	STAT_MAX_HEALTH,                // health / armor limit, changable by handicap
 	STAT_PLAYER_CLASS,              // DHM - Nerve :: player class in multiplayer
 	STAT_CAPTUREHOLD_RED,           // JPW NERVE - red team score
-	STAT_CAPTUREHOLD_BLUE          // JPW NERVE - blue team score
+	STAT_CAPTUREHOLD_BLUE,          // JPW NERVE - blue team score
+	STAT_AIRLEFT,                   //< airtime for CG_DrawBreathBar()
+	STAT_SPRINTTIME,                //< sprinttime for CG_DrawStaminaBar()
 } statIndex_t;
 
 
@@ -665,7 +669,7 @@ extern int weapAlts[];  // defined in bg_misc.c
 int BG_MaxAmmoForWeapon(weapon_t weaponNum);
 
 #define GetAmmoTableData( ammoIndex ) ( (ammotable_t*)( &ammoTable[ammoIndex] ) )
-
+#define IS_VALID_WEAPON(w) ((w) > WP_NONE && (w) < WP_NUM_WEAPONS)
 
 //----(SA)
 // for routines that need to check if a WP_ is </=/> a given set of weapons
@@ -1116,8 +1120,12 @@ typedef enum {
 	TEAM_NUM_TEAMS
 } team_t;
 
+#define NO_AIRSTRIKE    1
+#define NO_ARTILLERY    2
+
 // Time between location updates
-#define TEAM_LOCATION_UPDATE_TIME       1000
+#define TEAM_LOCATION_UPDATE_TIME       500 // default 1000
+
 // L0 - OSP stats dump / weapon stat info: mapping between MOD_ and WP_ types
 typedef enum extWeaponStats_s
 {

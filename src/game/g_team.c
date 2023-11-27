@@ -1015,42 +1015,49 @@ Format:
 
 ==================
 */
-void TeamplayInfoMessage(gentity_t* ent) {
-	int identClientNum, identHealth;                // NERVE - SMF
+void TeamplayInfoMessage(team_t team)
+{
+	//int identClientNum, identHealth;                // NERVE - SMF
 	char entry[1024];
 	char string[1400];
-	int stringlength;
-	int i, j;
-	gentity_t* player;
-	int cnt;
+	size_t    stringlength = 0;
+	int       i;
+	size_t    j;
+	gentity_t *player;
+	int       cnt;
 	int actualHealth, displayHealth, playerLimbo, latchPlayerType;
+	char      *bufferedData;
+	char      *tinfo; // currently 32 players in team create about max 750 chars of tinfo
+	                  // note: trap_SendServerCommand won't send tinfo > 1022 - also see string[1024]
 
 	// send the latest information on all clients
 	string[0] = 0;
-	stringlength = 0;
 
 	// Do each team for team information
-	for (i = 0, cnt = 0; i < level.numConnectedClients /*&& cnt < TEAM_MAXOVERLAY*/; i++) {
-
+	for (i = 0, cnt = 0; i < level.numConnectedClients; i++)
+	{
 		player = g_entities + level.sortedClients[i];
 
 		int playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;
 
-		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
-
+		if (player->inuse && player->client->sess.sessionTeam == team)
+		{
 			actualHealth = player->client->ps.stats[STAT_HEALTH]; // actual health used for gibbed status
 
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
-			if (player->client->ps.pm_flags & PMF_LIMBO) {
+			if (player->client->ps.pm_flags & PMF_LIMBO)
+			{
 				displayHealth = 0;
 				playerLimbo = 1;
 			}
-			else {
+			else
+			{
 				displayHealth = player->client->ps.stats[STAT_HEALTH];
 				playerLimbo = 0;
 			}
 
-			if (actualHealth < 0) {
+			if (actualHealth < 0)
+			{
 				displayHealth = 0;
 			}
 
@@ -1063,49 +1070,84 @@ void TeamplayInfoMessage(gentity_t* ent) {
 
 			Com_sprintf(entry, sizeof(entry),
 				" %i %i %i %i %i %i %i %i %i %i %i %i",
-				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready, latchPlayerType); // set ready status on each client
+				level.sortedClients[i], 
+				player->client->pers.teamState.location, 
+				displayHealth, 
+				player->s.powerups, 
+				player->client->ps.stats[STAT_PLAYER_CLASS],
+				playerAmmo, 
+				playerAmmoClip, 
+				playerNades, 
+				playerWeapon, 
+				playerLimbo, 
+				player->client->pers.ready, 
+				latchPlayerType);
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 
 			j = strlen(entry);
-			if (stringlength + j > sizeof(string)) {
+			if (stringlength + j > sizeof(string) - 10) // reserve some chars for tinfo prefix
+			{
+				G_Printf("Warning: tinfo exceeds limit");
 				break;
 			}
+			
 			strcpy(string + stringlength, entry);
 			stringlength += j;
 			cnt++;
 		}
 	}
 
-	// NERVE - SMF
-	identClientNum = ent->client->ps.identifyClient;
+	bufferedData = team == TEAM_RED ? level.tinfoAxis : level.tinfoAllies;
 
-	if (g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client) {
-		identHealth = g_entities[identClientNum].health;
-	}
-	else {
-		identClientNum = -1;
-		identHealth = 0;
-	}
-	// -NERVE - SMF
+	//// NERVE - SMF
+	//identClientNum = ent->client->ps.identifyClient;
 
-	trap_SendServerCommand(ent - g_entities, va("tinfo %i %i %i%s", identClientNum, identHealth, cnt, string));
+	//if (g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client) {
+	//	identHealth = g_entities[identClientNum].health;
+	//}
+	//else {
+	//	identClientNum = -1;
+	//	identHealth = 0;
+	//}
+	//// -NERVE - SMF
+
+	//tinfo = va("tinfo %i %i %i%s", identClientNum, identHealth, cnt, string);
+	tinfo = va("tinfo %i%s", cnt, string);
+
+	//if (!Q_stricmp(bufferedData, tinfo))       // no change so just return
+	//{
+	//	return;
+	//}
+
+	Q_strncpyz(bufferedData, tinfo, 1024);
+
+	for (i = 0; i < level.numConnectedClients; i++)
+	{
+		player = g_entities + level.sortedClients[i];
+
+		if (player->inuse && (player->client->sess.sessionTeam == team || player->client->sess.shoutcaster) && !(player->r.svFlags & SVF_BOT) && player->client->pers.connected == CON_CONNECTED)
+		{
+			trap_SendServerCommand(player - g_entities, tinfo);
+		}
+	}
+
 }
 
-void CheckTeamStatus( void ) {
-	int i;
-	gentity_t *loc, *ent;
-
-	if ( level.time - level.lastTeamLocationTime > TEAM_LOCATION_UPDATE_TIME ) {
+void CheckTeamStatus(void)
+{
+	if (level.time - level.lastTeamLocationTime > TEAM_LOCATION_UPDATE_TIME)
+	{
+		int       i;
+		gentity_t *loc, *ent;
 
 		level.lastTeamLocationTime = level.time;
 
-		for ( i = 0; i < g_maxclients.integer; i++ ) {
-			ent = g_entities + i;
-			if ( ent->inuse &&
-				 ( ent->client->sess.sessionTeam == TEAM_RED ||
-				   ent->client->sess.sessionTeam == TEAM_BLUE ) ) {
+		for (i = 0; i < level.numConnectedClients; i++)
+		{
+			ent = g_entities + level.sortedClients[i];
+			if (ent->inuse && (ent->client->sess.sessionTeam == TEAM_RED || ent->client->sess.sessionTeam == TEAM_BLUE ))
+			{
 				loc = Team_GetLocation( ent );
 				if ( loc ) {
 					ent->client->pers.teamState.location = loc->health;
@@ -1115,14 +1157,8 @@ void CheckTeamStatus( void ) {
 			}
 		}
 
-		for ( i = 0; i < g_maxclients.integer; i++ ) {
-			ent = g_entities + i;
-			if ( ent->inuse &&
-				 ( ent->client->sess.sessionTeam == TEAM_RED ||
-				   ent->client->sess.sessionTeam == TEAM_BLUE ) ) {
-				TeamplayInfoMessage( ent );
-			}
-		}
+		TeamplayInfoMessage(TEAM_RED);
+		TeamplayInfoMessage(TEAM_BLUE);
 	}
 }
 

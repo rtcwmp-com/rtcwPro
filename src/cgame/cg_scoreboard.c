@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 Scoreboard flags (WolfSE)
 =================
 */
-static qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
+qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
 	float alpha[4];
 	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "cc"));
 

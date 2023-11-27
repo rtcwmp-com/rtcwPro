@@ -281,6 +281,7 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
+    <ClCompile Include="cg_shoutcastoverlay.c" />
     <ClCompile Include="cg_snapshot.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</BrowseInformation>
@@ -322,8 +323,8 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
     <ClInclude Include="..\..\main\ui\menudef.h" />
     <ClInclude Include="..\game\bg_local.h" />
     <ClInclude Include="..\game\bg_public.h" />
-    <ClInclude Include="..\game\q_shared.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
+    <ClInclude Include="..\qcommon\q_shared.h" />
     <ClInclude Include="..\ui\keycodes.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
     <ClInclude Include="cg_local.h" />
