@@ -1552,6 +1552,7 @@ NOTE: My changes aren't commented really.
 // +wstats
 void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
+
 	qboolean fFull = ( txt_dump != CG_printWindow );
 //	qboolean fFull = qfalse;
 	qboolean fHasStats = qfalse;
@@ -1623,6 +1624,30 @@ void CG_parseWeaponStats_cmd( void( txt_dump ) ( char * ) ) {
 	}
 	txt_dump( "\n" );
 }
+
+// Shoutcast player follow stats
+void CG_ParseGameStats(void) {
+	clientInfo_t* ci;
+	gameStats_t* gs = &cgs.gamestats;
+
+	unsigned int iArg = 1;
+	unsigned int nClient = atoi(CG_Argv(iArg++));
+
+	ci = &cgs.clientinfo[nClient];
+
+	gs->nClientID = nClient;
+	gs->fHasStats = qtrue;
+	gs->kills = atoi(CG_Argv(iArg++));
+	gs->deaths = atoi(CG_Argv(iArg++));
+	gs->suicides = atoi(CG_Argv(iArg++));
+	gs->damage_giv = atoi(CG_Argv(iArg++));
+	gs->damage_rec = atoi(CG_Argv(iArg++));
+	gs->gibs = atoi(CG_Argv(iArg++));
+	gs->revives = atoi(CG_Argv(iArg++));
+	gs->health_given = atoi(CG_Argv(iArg++));
+	gs->ammo_given = atoi(CG_Argv(iArg++));
+}
+
 // 1.0 like stats (+stats)
 void CG_parseClientStats_cmd (void( txt_dump ) ( char * ) ) {
 	clientInfo_t *ci;
@@ -2077,6 +2102,10 @@ static void CG_ServerCommand( void ) {
 	// +stats
 	if ( !Q_stricmp( cmd, "cgs" ) ) {
 		CG_clientParse_cmd();
+		return;
+	}
+	if (!Q_stricmp(cmd, "gamestats")) {
+		CG_ParseGameStats();
 		return;
 	}
 	// +topshots

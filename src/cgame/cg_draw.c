@@ -919,7 +919,7 @@ static float CG_DrawTeamOverlay( float y ) {
 				CG_DrawStringExt(xx, y, va("%s%s", isRevivable, st), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			else
 			{
-				CG_DrawPic(xx + 16, y - 1, 9, 9, trap_R_RegisterShaderNoMip("gfx/2d/arrow.tga"));
+				CG_DrawPic(xx + 16, y - 1, 9, 9, trap_R_RegisterShaderNoMip("icons/icon_arrow.tga"));
 				CG_DrawStringExt(xx, y, va("%s%s%s%s", isRevivable, st, " ", lt), damagecolor, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 5); // always draw class name and * yellow
 			}
 
@@ -1513,13 +1513,20 @@ static void CG_DrawTeamInfo( void ) {
 	int chatHeight;
 	float alphapercent;
 	float chatAlpha = (float)cg_chatAlpha.value;
-	// RTCWPro
 	int x = cg_chatX.integer;
 	int y = cg_chatY.integer;
 
-#define CHATLOC_Y 385 // bottom end
-#define CHATLOC_X 0
-
+	// RTCWPro
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		x = 60;
+		y = 100;
+	}
+	else
+	{
+		x = cg_chatX.integer;
+		y = cg_chatY.integer;
+	}
 	if ( cg_teamChatHeight.integer < TEAMCHAT_HEIGHT ) {
 		chatHeight = cg_teamChatHeight.integer;
 	} else {
@@ -1572,7 +1579,7 @@ static void CG_DrawTeamInfo( void ) {
 				hcolor[2] = 0;
 			}
 //			hcolor[3] = 0.33;
-// L0 - Wanted to do this for years..
+
 			if (chatAlpha > 1.0f) {
 				chatAlpha = 1.0f;
 			}
@@ -1584,7 +1591,7 @@ static void CG_DrawTeamInfo( void ) {
 				hcolor[3] = chatAlpha * alphapercent;
 			else // Abuse this..
 				BG_setCrosshair(cg_chatBackgroundColor.string, hcolor, chatAlpha * alphapercent, "cg_chatBackgroundColor");
-// End
+
 			trap_R_SetColor( hcolor );
 			CG_DrawPic( x, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, UPPERRIGHT_X, TINYCHAR_HEIGHT, cgs.media.teamStatusBar );
 
@@ -1595,9 +1602,6 @@ static void CG_DrawTeamInfo( void ) {
 			CG_DrawStringExt(x + TINYCHAR_WIDTH, y - ( cgs.teamChatPos - i ) * TINYCHAR_HEIGHT, cgs.teamChatMsgs[i % chatHeight], 
 				hcolor, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
 
-//			CG_DrawSmallString( CHATLOC_X + SMALLCHAR_WIDTH,
-//				CHATLOC_Y - (cgs.teamChatPos - i)*SMALLCHAR_HEIGHT,
-//				cgs.teamChatMsgs[i % TEAMCHAT_HEIGHT], 1.0F );
 		}
 // jpw
 	}
@@ -1669,9 +1673,22 @@ static void CG_DrawNotify( void ) {
 	float alphapercent;
 	char var[MAX_TOKEN_CHARS];
 	float notifytime = 1.0f;
-	// RTCWPro
 	int x = cg_notifyTextX.integer;
 	int y = cg_notifyTextY.integer;
+
+	// RTCWPro
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		x = 60;
+		y = 85;
+	}
+	else
+	{
+		x = cg_notifyTextX.integer;
+		y = cg_notifyTextY.integer;
+	}
+
 	qboolean shadow = cg_notifyTextShadow.integer;
 	int width = cg_notifyTextWidth.integer;
 	int height = cg_notifyTextHeight.integer;
@@ -2194,6 +2211,9 @@ void CG_PopinPrint(const char *str, int charWidth, qboolean blink) {
 	char    *s;
 	int i, len;                         // NERVE - SMF
 	qboolean neednewline = qfalse;      // NERVE - SMF
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
 
 	int x = cg_priorityTextX.integer;
 	int y = cg_priorityTextY.integer;
@@ -2948,11 +2968,11 @@ CG_DrawSpectator
 */
 static void CG_DrawSpectator( void ) {
 
-	if (cgs.clientinfo[cg.clientNum].shoutStatus == 1)
+	if (cgs.clientinfo[cg.clientNum].shoutStatus && cgs.gamestate == GS_WARMUP)
 	{
 		CG_DrawBigString(320 - 9 * 8, 440, CG_TranslateString("SHOUTCASTER"), 1.0F);
 	}
-	else
+	else if (!cgs.clientinfo[cg.clientNum].shoutStatus)
 	{
 		CG_DrawBigString(320 - 9 * 8, 440, CG_TranslateString("SPECTATOR"), 1.0F);
 	}
@@ -4056,7 +4076,7 @@ static void CG_DrawObjectiveInfo( void ) {
 }
 
 void CG_DrawObjectiveIcons() {
-	float x, y, w, h, xx, fade; // JPW NERVE
+	float x = 5, y = 48, w, h, xx, fade; // JPW NERVE
 	float startColor[4];
 	const char *s, *buf;
 	char teamstr[32];
@@ -4064,36 +4084,38 @@ void CG_DrawObjectiveIcons() {
 	int i, num, status,barheight;
 	vec4_t hcolor = { 0.2f, 0.2f, 0.2f, 1.f };
 	int msec, mins, seconds, tens; // JPW NERVE
+
 	// RTCWPro
 	playerState_t* ps;
 	clientInfo_t* ci;
 
-// JPW NERVE added round timer
-	y = 48;
-	x = 5;
-	msec = ( cgs.timelimit * 60.f * 1000.f ) - ( cg.time - cgs.levelStartTime );
+	if (!cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		msec = (cgs.timelimit * 60.f * 1000.f) - (cg.time - cgs.levelStartTime);
 
-	seconds = msec / 1000;
-	mins = seconds / 60;
-	seconds -= mins * 60;
-	tens = seconds / 10;
-	seconds -= tens * 10;
+		seconds = msec / 1000;
+		mins = seconds / 60;
+		seconds -= mins * 60;
+		tens = seconds / 10;
+		seconds -= tens * 10;
 
-	// OSPx - Print fancy warmup in corner..
-	if (cgs.gamestate != GS_PLAYING) {
-		fade = Q_fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
-		s = va("^3Warmup");
-	} else if (msec < 0) {
-		fade = Q_fabs( sin( cg.time * 0.002 ) ) * cg_hudAlpha.value;
-		s = va( "0:00" );
-	} else {
-		s = va( "%i:%i%i", mins, tens, seconds ); // float cast to line up with reinforce time
-		fade = cg_hudAlpha.value;
+		// OSPx - Print fancy warmup in corner..
+		if (cgs.gamestate != GS_PLAYING) {
+			fade = Q_fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
+			s = va("^3Warmup");
+		}
+		else if (msec < 0) {
+			fade = Q_fabs(sin(cg.time * 0.002)) * cg_hudAlpha.value;
+			s = va("0:00");
+		}
+		else {
+			s = va("%i:%i%i", mins, tens, seconds); // float cast to line up with reinforce time
+			fade = cg_hudAlpha.value;
+		}
+
+		CG_DrawSmallString(x, y, s, fade);
 	}
-
-	CG_DrawSmallString( x,y,s,fade );
-
-// jpw
+	// jpw
 
 	x = 5;
 	y = 68;
@@ -4101,7 +4123,7 @@ void CG_DrawObjectiveIcons() {
 	h = 14;
 
 	// draw the stopwatch
-	if ( cgs.gametype == GT_WOLF_STOPWATCH ) {
+	if ( cgs.gametype == GT_WOLF_STOPWATCH && !cgs.clientinfo[cg.clientNum].shoutStatus) {
 		if ( cgs.currentRound == 0 ) {
 			CG_DrawPic( 3, y, 30, 30, trap_R_RegisterShader( "sprites/stopwatch1.tga" ) );
 		} else {
@@ -4216,24 +4238,21 @@ void CG_DrawObjectiveIcons() {
 
 
 	// draw treasure icon if we have the flag
-	y += 4;
+	if (!cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		y += 4;
 
-	VectorSet( hcolor, 1, 1, 1 );
-	hcolor[3] = cg_hudAlpha.value;
-	trap_R_SetColor( hcolor );
-	// RTCWPro
-	/*if ( cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_REDFLAG ) ||
-		 cgs.clientinfo[cg.snap->ps.clientNum].powerups & ( 1 << PW_BLUEFLAG ) ) {
-		CG_DrawPic( -7, y, 48, 48, trap_R_RegisterShader( "models/multiplayer/treasure/treasure" ) );
-		y += 50;
-	}*/
-	ps = &cg.snap->ps;
-	ci = &cgs.clientinfo[ps->clientNum];
-	if (ps->powerups[PW_REDFLAG] || ps->powerups[PW_BLUEFLAG]) {
-		CG_DrawPic(-7, y, 48, 48, cgs.media.treasureIcon); //trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure"));
-		y += 50;
+		VectorSet(hcolor, 1, 1, 1);
+		hcolor[3] = cg_hudAlpha.value;
+		trap_R_SetColor(hcolor);
+
+		ps = &cg.snap->ps;
+		ci = &cgs.clientinfo[ps->clientNum];
+		if (ps->powerups[PW_REDFLAG] || ps->powerups[PW_BLUEFLAG]) {
+			CG_DrawPic(-7, y, 48, 48, cgs.media.treasureIcon);
+			y += 50;
+		}
 	}
-	// RTCWPro end
 }
 // -NERVE - SMF
 
@@ -4623,10 +4642,10 @@ static void CG_Draw2D( void ) {
 			if (!cgs.gamestate == GS_WARMUP || cg_drawPickupItems.integer )
 				CG_DrawPickupItem();
 		}
-		if ( cgs.gametype >= GT_TEAM ) {
+		if ( cgs.gametype >= GT_TEAM) {
 			CG_DrawTeamInfo();
 		}
-		if ( cg_drawStatus.integer || cgs.clientinfo[cg.clientNum].shoutStatus) {
+		if ( cg_drawStatus.integer && !cgs.clientinfo[cg.clientNum].shoutStatus) { // don't show health and sprint bars for Shoutcaster
 			Menu_PaintAll();
 			CG_DrawTimedMenus();
 		}

@@ -415,6 +415,8 @@ vmCvar_t cg_debugDamage;
 // shoutcast overlay
 vmCvar_t cg_shoutcastDrawPlayers;
 vmCvar_t cg_shoutcastDrawTeamNames;
+vmCvar_t cg_shoutcastRedScore;
+vmCvar_t cg_shoutcastBlueScore;
 vmCvar_t cg_shoutcastTeamNameRed;
 vmCvar_t cg_shoutcastTeamNameBlue;
 vmCvar_t cg_shoutcastDrawHealth;
@@ -752,6 +754,8 @@ cvarTable_t cvarTable[] = {
 	// RtcwPro - shoutcast overlay
 	{ &cg_shoutcastDrawPlayers,     "cg_shoutcastDrawPlayers",     "1",           CVAR_ARCHIVE },
 	{ &cg_shoutcastDrawTeamNames,   "cg_shoutcastDrawTeamNames",   "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastRedScore,		"cg_shoutcastRedScore",		   "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastBlueScore,		"cg_shoutcastBlueScore",	   "0",           CVAR_ARCHIVE },
 	{ &cg_shoutcastTeamNameRed,     "cg_shoutcastTeamNameRed",     "Axis",        CVAR_ARCHIVE },
 	{ &cg_shoutcastTeamNameBlue,    "cg_shoutcastTeamNameBlue",    "Allies",      CVAR_ARCHIVE },
 	{ &cg_shoutcastDrawHealth,      "cg_shoutcastDrawHealth",      "0",           CVAR_ARCHIVE },
@@ -1696,7 +1700,6 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.customTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/customTriggerEdges");
 
 	// Shoutcast shaders
-	cgs.media.objectiveShader = trap_R_RegisterShader("sprites/objective");
 	cgs.media.medicIcon = trap_R_RegisterShaderNoMip("sprites/voicemedic");
 	cgs.media.ammoIcon = trap_R_RegisterShaderNoMip("sprites/voiceammo");
 
@@ -2884,14 +2887,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 			CG_execFile("autoexec_default");
 		}
 	}
-
-	// screen support ...
-	cgs.adr43 = cgs.glconfig.windowAspect * RPRATIO43;       // aspectratio / (4/3)
-	cgs.r43da = RATIO43 * 1.0f / cgs.glconfig.windowAspect;  // (4/3) / aspectratio
-	cgs.wideXoffset = (cgs.glconfig.windowAspect > RATIO43) ? (640.0f * cgs.adr43 - 640.0f) * 0.5f : 0.0f;
-
-	// DEBUG
-	//CG_Printf("Screen[%f][%f]: as: %f   adr43: %f  r43da: %f off: %f\n", cgs.screenXScale, cgs.screenYScale, cgs.glconfig.windowAspect, cgs.adr43, cgs.r43da, cgs.wideXoffset);
 }
 
 /*
@@ -2914,6 +2909,12 @@ L0 - we'll need this later on ..
 =================
 */
 qboolean CG_CheckExecKey(int key) {
+
+	//if (cgs.clientinfo[cg.clientNum].shoutStatus)
+	//{
+	//	return CG_ShoutcastCheckExecKey(key, qfalse);
+	//}
+
 	return qfalse;
 }
 

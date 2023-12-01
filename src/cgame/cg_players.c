@@ -1259,6 +1259,21 @@ void CG_NewClientInfo( int clientNum ) {
 		}
 	}
 
+	// RtcwPro Shoutcaster toggle
+	//if (clientNum == cg.clientNum && newInfo.shoutStatus != ci->shoutStatus)
+	//{
+	//	if (newInfo.shoutStatus <= 0)
+	//	{
+	//		CG_Printf("[cgnotify]^3*** You have been stripped of your shoutcaster status! ***\n");
+	//	}
+	//	else
+	//	{
+	//		CG_Printf("[cgnotify]^2*** You have been authorized \"shoutcaster\" status ***\n");
+	//	}
+
+	//	CG_ToggleShoutcasterMode(newInfo.shoutStatus);
+	//}
+
 	// RTCWPro - autoexec
 	if (!cg.demoPlayback) {
 
@@ -3465,15 +3480,15 @@ qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t *or ) {
 	return qtrue;
 }
 
-/**
-* @brief Get player max health
-* @param[in] clientNum
-* @param[in] class
+/*
+Get player max health fraction
 */
-int CG_GetPlayerMaxHealth(int clientNum, int class, int team)
+float CG_GetPlayerMaxHealthFrac(int clientNum, int playerHealth, int class, int team)
 {
 	int i;
 	int maxHealth = 100;
+	float barFrac;
+
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!cgs.clientinfo[i].infoValid)
@@ -3486,24 +3501,15 @@ int CG_GetPlayerMaxHealth(int clientNum, int class, int team)
 			continue;
 		}
 
-		if (cg_entities[clientNum].currentState.teamNum != PC_MEDIC)
-		{
-			continue;
+		barFrac = (float)playerHealth / 100;
+
+		if (barFrac > 1.0) {
+			barFrac = 1.0;
 		}
-
-		maxHealth += 10;
-
-		if (maxHealth >= 125)
-		{
-			maxHealth = 125;
-			break;
+		else if (barFrac < 0) {
+			barFrac = 0;
 		}
 	}
 
-	if (class == PC_MEDIC)
-	{
-		maxHealth *= 1.12f;
-	}
-
-	return maxHealth;
+	return barFrac;
 }

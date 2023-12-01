@@ -377,9 +377,7 @@ typedef enum {
 	STAT_MAX_HEALTH,                // health / armor limit, changable by handicap
 	STAT_PLAYER_CLASS,              // DHM - Nerve :: player class in multiplayer
 	STAT_CAPTUREHOLD_RED,           // JPW NERVE - red team score
-	STAT_CAPTUREHOLD_BLUE,          // JPW NERVE - blue team score
-	STAT_AIRLEFT,                   //< airtime for CG_DrawBreathBar()
-	STAT_SPRINTTIME,                //< sprinttime for CG_DrawStaminaBar()
+	STAT_CAPTUREHOLD_BLUE          // JPW NERVE - blue team score
 } statIndex_t;
 
 

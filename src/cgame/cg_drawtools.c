@@ -1111,8 +1111,6 @@ CG_GetColorForHealth
 =================
 */
 void CG_GetColorForHealth(int health, vec4_t hcolor) {
-	int max;
-
 	// calculate the total points of damage that can
 	// be sustained at the current health / armor level
 	if (health <= 0) {
@@ -1887,27 +1885,4 @@ void CG_DrawTriggers(void) {
 
 		CG_AddShaderToBox(mins, maxs, triggerShader, edgesShader, drawEdges);
 	}
-}
-
-/**
- * @brief Ccg_Is43Screen
- * @return
- */
-qboolean Ccg_Is43Screen(void)
-{
-	if (cgs.glconfig.windowAspect <= RATIO43)
-	{
-		return qtrue;
-	}
-	return qfalse;
-}
-
-/**
- * @brief Ccg_WideX
- * @param[in] x
- * @return
- */
-float Ccg_WideX(float x)
-{
-	return (Ccg_Is43Screen()) ? x : x * cgs.adr43;  // * (aspectratio / (4/3))
 }

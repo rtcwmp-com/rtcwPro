@@ -212,18 +212,21 @@ typedef struct {
 
 // L0 - Commented out few vars
 typedef struct {
-	char strWS[WS_MAX][MAX_STRING_TOKENS];
-	char strExtra[2][MAX_STRING_TOKENS];
-	char strRank[MAX_STRING_TOKENS];
-//	char strSkillz[SK_NUM_SKILLS][MAX_STRING_TOKENS];
-	int cWeapons;
-	int cSkills;
 	qboolean fHasStats;
 	int nClientID;
 	int nRounds;
 	int fadeTime;
 	int show;
 	int requestTime;
+	int kills;
+	int deaths;
+	int suicides;
+	int damage_giv;
+	int damage_rec;
+	int gibs;
+	int revives;
+	int health_given;
+	int ammo_given;
 } gameStats_t;
 
 typedef struct {
@@ -815,11 +818,10 @@ typedef struct weaponInfo_s {
 	sfxHandle_t flashEchoSound[4];      //----(SA)	added - distant gun firing sound
 	sfxHandle_t lastShotSound[4];       // sound of the last shot can be different (mauser doesn't have bolt action on last shot for example)
 
-	qhandle_t weaponIcon[2];            //----(SA)	[0] is weap icon, [1] is highlight icon
+	qhandle_t weaponIcon[3];            //----(SA)	[0] is weap icon, [1] is highlight icon, [2] is shoutcast overlay icon
 	int weaponIconScale;
 	qhandle_t ammoIcon;
 	qhandle_t weaponSimpleIcon;
-	vec2_t weaponSimpleIconScale;
 
 	qhandle_t ammoModel;
 
@@ -1247,7 +1249,7 @@ typedef struct {
 	pmoveExt_t pmext;
 
 	// RtcwPro shoutcast overlay
-	int lastKeyCatcher;
+	//int lastKeyCatcher;
 } cg_t;
 
 
@@ -1780,7 +1782,6 @@ typedef struct {
 	qhandle_t customTriggerEdges;
 
 	// Shoutcasting shaders
-	qhandle_t objectiveShader;
 	qhandle_t medicIcon;
 	qhandle_t ammoIcon;
 
@@ -1875,7 +1876,7 @@ typedef struct {
 
 	int cursorX;
 	int cursorY;
-	qboolean eventHandling;
+	int eventHandling;
 	qboolean mouseCaptured;
 	qboolean sizingHud;
 	void *capturedItem;
@@ -1941,11 +1942,6 @@ typedef struct {
 	int dumpStatsTime;
 	qboolean fKeyPressed[256];                          // Key status to get around console issues
 	int timescaleUpdate;                                // Timescale display for demo playback
-
-	// screen adjustments
-	float adr43;                        ///< aspectratio / RATIO43
-	float r43da;                        ///< RATIO43 / aspectratio
-	float wideXoffset;                  ///< the x-offset for displaying horizontally centered loading/limbo screens
 } cgs_t;
 
 //==============================================================================
@@ -2248,15 +2244,14 @@ extern vmCvar_t cg_debugDamage;
 // shoutcast overlay
 extern vmCvar_t cg_shoutcastDrawPlayers;
 extern vmCvar_t cg_shoutcastDrawTeamNames;
+extern vmCvar_t cg_shoutcastRedScore;
+extern vmCvar_t cg_shoutcastBlueScore;
 extern vmCvar_t cg_shoutcastTeamNameRed;
 extern vmCvar_t cg_shoutcastTeamNameBlue;
 extern vmCvar_t cg_shoutcastDrawHealth;
 extern vmCvar_t cg_shoutcastGrenadeTrail;
 
 extern vmCvar_t cg_showLimboMessage; // show/hide limbo message while dead
-
-//static void CG_TimerSet_f(void);
-//static void CG_TimerReset_f(void);
 
 //
 // cg_main.c
@@ -2321,8 +2316,6 @@ void CG_DrawPic( float x, float y, float width, float height, qhandle_t hShader 
 void CG_DrawRotatedPic( float x, float y, float width, float height, qhandle_t hShader, float angle );      // NERVE - SMF
 void CG_FilledBar( float x, float y, float w, float h, float *startColor, float *endColor, const float *bgColor, float frac, int flags );
 void CG_FilledBar2(float x, float y, float w, float h, float* startColor, float* endColor, const float* bgColor, const float* bdColor, float frac, int flags, qhandle_t icon);
-qboolean Ccg_Is43Screen(void);      // does this game-window have a 4:3 aspectratio. note: this is also true for a 800x600 windowed game on a widescreen monitor
-float Ccg_WideX(float x);           // convert an x-coordinate to a widescreen x-coordinate. (only if the game-window is non 4:3 aspectratio)
 
 // JOSEPH 10-26-99
 void CG_DrawStretchPic( float x, float y, float width, float height, qhandle_t hShader );
@@ -2449,7 +2442,7 @@ void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, entityState_t *es, const vec3_t fireRiseDir );
 void CG_NewClientInfo( int clientNum );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
-int CG_GetPlayerMaxHealth(int clientNum, int class, int team);
+float CG_GetPlayerMaxHealthFrac(int clientNum, int playerHealth, int class, int team);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -2754,6 +2747,7 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
+void CG_ParseGameStats(void);
 
 //
 // cg_playerstate.c
@@ -2789,12 +2783,11 @@ void CG_DrawShoutcastPlayerStatus(void);
 void CG_DrawShoutcastTimer(void);
 //void CG_DrawShoutcastPowerups(void);
 void CG_RequestPlayerStats(int clientNum);
-char* CG_ParseStats(char* data, int i);
 
 void CG_ToggleShoutcasterMode(int shoutcaster);
 void CG_ShoutcastCheckKeyCatcher(int keycatcher);
-void CG_Shoutcast_KeyHandling(int key, qboolean down);
-qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction);
+//qboolean CG_Shoutcast_KeyHandling(int key, qboolean down);
+//qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction);
 
 //===============================================
 

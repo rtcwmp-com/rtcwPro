@@ -2593,57 +2593,57 @@ void CG_MouseEvent( int x, int y ) {
 	int n;
 
 	switch (cgs.eventHandling) {
-	case CGAME_EVENT_DEMO:
-		cgs.cursorX += x;
-		if (cgs.cursorX < 0) {
-			cgs.cursorX = 0;
-		}
-		else if (cgs.cursorX > 640) {
-			cgs.cursorX = 640;
-		}
-		cgs.cursorY += y;
-		if (cgs.cursorY < 0) {
-			cgs.cursorY = 0;
-		}
-		else if (cgs.cursorY > 480) {
-			cgs.cursorY = 480;
-		}
-		break;
+		case CGAME_EVENT_DEMO:
+			cgs.cursorX += x;
+			if (cgs.cursorX < 0) {
+				cgs.cursorX = 0;
+			}
+			else if (cgs.cursorX > 640) {
+				cgs.cursorX = 640;
+			}
+			cgs.cursorY += y;
+			if (cgs.cursorY < 0) {
+				cgs.cursorY = 0;
+			}
+			else if (cgs.cursorY > 480) {
+				cgs.cursorY = 480;
+			}
+			break;
 		default:
 			if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
 				cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse) {
-				trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
-			return;
-		}
+					trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
+				return;
+			}
 
-		cgs.cursorX += x;
-		if ( cgs.cursorX < 0 ) {
-			cgs.cursorX = 0;
-		} else if ( cgs.cursorX > 640 ) {
-			cgs.cursorX = 640;
-		}
+			cgs.cursorX += x;
+			if ( cgs.cursorX < 0 ) {
+				cgs.cursorX = 0;
+			} else if ( cgs.cursorX > 640 ) {
+				cgs.cursorX = 640;
+			}
 
-		cgs.cursorY += y;
-		if ( cgs.cursorY < 0 ) {
-			cgs.cursorY = 0;
-		} else if ( cgs.cursorY > 480 ) {
-			cgs.cursorY = 480;
-		}
+			cgs.cursorY += y;
+			if ( cgs.cursorY < 0 ) {
+				cgs.cursorY = 0;
+			} else if ( cgs.cursorY > 480 ) {
+				cgs.cursorY = 480;
+			}
 
-		n = Display_CursorType( cgs.cursorX, cgs.cursorY );
-		cgs.activeCursor = 0;
-		if ( n == CURSOR_ARROW ) {
-			cgs.activeCursor = cgs.media.selectCursor;
-		} else if ( n == CURSOR_SIZER ) {
-			cgs.activeCursor = cgs.media.sizeCursor;
-		}
+			n = Display_CursorType( cgs.cursorX, cgs.cursorY );
+			cgs.activeCursor = 0;
+			if ( n == CURSOR_ARROW ) {
+				cgs.activeCursor = cgs.media.selectCursor;
+			} else if ( n == CURSOR_SIZER ) {
+				cgs.activeCursor = cgs.media.sizeCursor;
+			}
 
-		if ( cgs.capturedItem ) {
-			Display_MouseMove( cgs.capturedItem, x, y );
-		} else {
-			Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
-		}
-		break;
+			if ( cgs.capturedItem ) {
+				Display_MouseMove( cgs.capturedItem, x, y );
+			} else {
+				Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
+			}
+			break;
 	}
 }
 
@@ -2680,7 +2680,8 @@ CG_EventHandling
 	  2 - hud editor
 
 */
-void CG_EventHandling( int type, qboolean forced ) {
+void CG_EventHandling( int type, qboolean forced )
+{
 	if (cg.demoPlayback && type == CGAME_EVENT_NONE && !forced) {
 		type = CGAME_EVENT_DEMO;
 	}
@@ -2699,16 +2700,16 @@ void CG_EventHandling( int type, qboolean forced ) {
 	case CGAME_EVENT_TEAMMENU:
 	case CGAME_EVENT_SCOREBOARD:
 		break;
-	case CGAME_EVENT_SHOUTCAST:
-		if (cgs.eventHandling == CGAME_EVENT_SHOUTCAST)
-		{
-			if (forced)
-			{
-				trap_UI_Popup("UIMENU_INGAME");
-			}
+	//case CGAME_EVENT_SHOUTCAST:
+	//	if (cgs.eventHandling == CGAME_EVENT_SHOUTCAST)
+	//	{
+	//		if (forced)
+	//		{
+	//			trap_UI_Popup("UIMENU_INGAME");
+	//		}
 
-			trap_Cvar_Set("cl_bypassmouseinput", "0");
-		}
+	//		trap_Cvar_Set("cl_bypassmouseinput", "0");
+	//	}
 		break;
 	}
 
@@ -2717,29 +2718,36 @@ void CG_EventHandling( int type, qboolean forced ) {
 	if (type == CGAME_EVENT_NONE) {
 		trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
 	}
-	else if (type == CGAME_EVENT_SHOUTCAST)
-	{
-		trap_Cvar_Set("cl_bypassmouseinput", "1");
-		trap_Key_SetCatcher(KEYCATCH_CGAME);
-	}
+	//else if (type == CGAME_EVENT_SHOUTCAST)
+	//{
+	//	trap_Cvar_Set("cl_bypassmouseinput", "1");
+	//	trap_Key_SetCatcher(KEYCATCH_CGAME);
+	//}
 }
 
-void CG_KeyEvent( int key, qboolean down ) {
-
+void CG_KeyEvent( int key, qboolean down ) 
+{
 	if ( !down ) {
 		return;
 	}
-
-	switch (cgs.eventHandling) {
-	// OSPx - Demo..
-	case CGAME_EVENT_DEMO:
-		CG_DemoClick(key);
-		return;
+	switch (cgs.eventHandling)
+	{
+		// Demos get their own keys
+		case CGAME_EVENT_DEMO:
+			CG_DemoClick(key);
+			return;
+			break;
+		//case CGAME_EVENT_SHOUTCAST:
+		//	CG_Shoutcast_KeyHandling(key, down);
+		//	break;
 	}
 
-	if ( cg.predictedPlayerState.pm_type == PM_NORMAL || ( cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse ) ) {
-		CG_EventHandling( CGAME_EVENT_NONE, qfalse );
-		trap_Key_SetCatcher( 0 );
+	if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
+		(cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse)))
+	{
+
+		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+		trap_Key_SetCatcher(0);
 		return;
 	}
 
