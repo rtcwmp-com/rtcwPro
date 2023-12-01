@@ -64,7 +64,8 @@ enum {
 	CGAME_EVENT_TEAMMENU,
 	CGAME_EVENT_SCOREBOARD,
 	CGAME_EVENT_EDITHUD,
-	CGAME_EVENT_DEMO               // OSP
+	CGAME_EVENT_DEMO, // RtcwPro demo port
+	CGAME_EVENT_SHOUTCAST // RtcwPro shoutcast overaly
 };
 
 

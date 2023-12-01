@@ -2509,7 +2509,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 	client->ps.crouchSpeedScale = 0.25;
 
 	// Rafael
-	client->ps.sprintTime = 20000;
+	client->ps.sprintTime = SPRINTTIME;
 	client->ps.sprintExertTime = 0;
 
 	client->ps.friction = 1.0;

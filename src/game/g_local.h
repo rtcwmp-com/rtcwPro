@@ -1121,6 +1121,8 @@ typedef struct {
 	jsonPlayerStats_t disconnectStats[12];
 	int disconnectCount;
 
+	char tinfoAxis[1024];                       ///< sent as server command (limited to 1022 chars)
+	char tinfoAllies[1024];                     ///< sent as server command (limited to 1022 chars)
 } level_locals_t;
 
 // OSPx - Team extras
@@ -2200,6 +2202,8 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
+void G_gameStatsPrint(gentity_t* ent);
+
 // json stat stuff
 enum eventList {
     eventSuicide=0,

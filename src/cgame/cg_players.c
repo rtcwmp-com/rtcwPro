@@ -1147,6 +1147,8 @@ void CG_NewClientInfo( int clientNum ) {
 	// isolate the player's name
 	v = Info_ValueForKey( configstring, "n" );
 	Q_strncpyz( newInfo.name, v, sizeof( newInfo.name ) );
+	Q_strncpyz(newInfo.cleanname, v, sizeof(newInfo.cleanname));
+	Q_CleanStr(newInfo.cleanname);
 
 	// colors
 	v = Info_ValueForKey( configstring, "c1" );
@@ -1256,6 +1258,21 @@ void CG_NewClientInfo( int clientNum ) {
 			// don't print a message as the MakeRef code already does a center print
 		}
 	}
+
+	// RtcwPro Shoutcaster toggle
+	//if (clientNum == cg.clientNum && newInfo.shoutStatus != ci->shoutStatus)
+	//{
+	//	if (newInfo.shoutStatus <= 0)
+	//	{
+	//		CG_Printf("[cgnotify]^3*** You have been stripped of your shoutcaster status! ***\n");
+	//	}
+	//	else
+	//	{
+	//		CG_Printf("[cgnotify]^2*** You have been authorized \"shoutcaster\" status ***\n");
+	//	}
+
+	//	CG_ToggleShoutcasterMode(newInfo.shoutStatus);
+	//}
 
 	// RTCWPro - autoexec
 	if (!cg.demoPlayback) {
@@ -3461,4 +3478,38 @@ qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t *or ) {
 	memcpy( or->axis, tempAxis, sizeof( vec3_t ) * 3 );
 
 	return qtrue;
+}
+
+/*
+Get player max health fraction
+*/
+float CG_GetPlayerMaxHealthFrac(int clientNum, int playerHealth, int class, int team)
+{
+	int i;
+	int maxHealth = 100;
+	float barFrac;
+
+	for (i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!cgs.clientinfo[i].infoValid)
+		{
+			continue;
+		}
+
+		if (cgs.clientinfo[i].team != team)
+		{
+			continue;
+		}
+
+		barFrac = (float)playerHealth / 100;
+
+		if (barFrac > 1.0) {
+			barFrac = 1.0;
+		}
+		else if (barFrac < 0) {
+			barFrac = 0;
+		}
+	}
+
+	return barFrac;
 }
