@@ -387,7 +387,6 @@ vmCvar_t cg_reinforcementTimeProY;
 vmCvar_t cg_findMedic; // lock camera on medic at death
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
-vmCvar_t cg_pauseMusic;
 vmCvar_t cg_showPriorityText;
 vmCvar_t cg_priorityTextX;
 vmCvar_t cg_priorityTextY;
@@ -411,7 +410,6 @@ vmCvar_t cg_fragsY;
 vmCvar_t cg_fragsWidth;
 vmCvar_t cg_fixedphysicsfps;
 vmCvar_t cg_debugDamage;
-vmCvar_t cg_pauseMusic;
 
 // shoutcast overlay
 vmCvar_t cg_shoutcastDrawPlayers;
@@ -699,9 +697,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_hitsoundBodyStyle, "cg_hitsoundBodyStyle", "1", CVAR_ARCHIVE },
 	{ &cg_hitsoundHeadStyle, "cg_hitsoundHeadStyle", "1", CVAR_ARCHIVE },
 
-	// pause music
-	//{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
-
 	// priority text (shows objective pickups as a popup)
 	{ &cg_showPriorityText, "cg_showPriorityText", "1", CVAR_ARCHIVE },
 	{ &cg_priorityTextX, "cg_priorityTextX", "0", CVAR_ARCHIVE },
@@ -744,8 +739,6 @@ cvarTable_t cvarTable[] = {
 
 	// RtcwPro print damage feedback to rtcwconsole.log
 	{ &cg_debugDamage, "cg_debugDamage", "0", CVAR_ARCHIVE },
-
-	{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
 
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },

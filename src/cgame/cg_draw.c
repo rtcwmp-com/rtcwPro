@@ -3407,11 +3407,6 @@ static void CG_PausePrint( void ) {
 			cgs.match_expired++;
 			cgs.match_stepTimer = cg.time + 1000;
 		}
-
-		if (cg_pauseMusic.integer) {
-			trap_S_StopBackgroundTrack();
-			trap_S_StartBackgroundTrack("sound/match/pause_m.wav", "sound/match/pause_m.wav");
-		}
 	}
 	else if (cgs.match_paused == PAUSE_RESUMING) {
 		s = va("%s", CG_TranslateString("^3Prepare to fight!"));
@@ -3426,9 +3421,6 @@ static void CG_PausePrint( void ) {
 			cgs.match_stepTimer = cg.time + 1000;
 		}
 
-		if (cg_pauseMusic.integer) {
-			trap_S_StopBackgroundTrack();
-		}
 	}
 	else {
 		return;

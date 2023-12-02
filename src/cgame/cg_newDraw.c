@@ -2592,66 +2592,64 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_
 void CG_MouseEvent( int x, int y ) {
 	int n;
 
-	switch (cgs.eventHandling) {
-	case CGAME_EVENT_NONE:
-		break;
-	case CGAME_EVENT_TEAMMENU:
-		break;
-	case CGAME_EVENT_SCOREBOARD:
-		break;
-	case CGAME_EVENT_EDITHUD:
-		break;
-	case CGAME_EVENT_DEMO:
-		cgs.cursorX += x;
-		if (cgs.cursorX < 0) {
-			cgs.cursorX = 0;
-		}
-		else if (cgs.cursorX > 640) {
-			cgs.cursorX = 640;
-		}
-		cgs.cursorY += y;
-		if (cgs.cursorY < 0) {
-			cgs.cursorY = 0;
-		}
-		else if (cgs.cursorY > 480) {
-			cgs.cursorY = 480;
-		}
-		break;
-		default:
-			if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
-				cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse) {
-					trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
-				return;
-			}
-
+	switch (cgs.eventHandling)
+	{
+		case CGAME_EVENT_NONE:
+		case CGAME_EVENT_TEAMMENU:
+		case CGAME_EVENT_SCOREBOARD:
+		case CGAME_EVENT_EDITHUD:
+			break;
+		case CGAME_EVENT_DEMO:
 			cgs.cursorX += x;
-			if ( cgs.cursorX < 0 ) {
+			if (cgs.cursorX < 0) {
 				cgs.cursorX = 0;
-			} else if ( cgs.cursorX > 640 ) {
+			}
+			else if (cgs.cursorX > 640) {
 				cgs.cursorX = 640;
 			}
-
 			cgs.cursorY += y;
-			if ( cgs.cursorY < 0 ) {
+			if (cgs.cursorY < 0) {
 				cgs.cursorY = 0;
-			} else if ( cgs.cursorY > 480 ) {
+			}
+			else if (cgs.cursorY > 480) {
 				cgs.cursorY = 480;
 			}
-
-			n = Display_CursorType( cgs.cursorX, cgs.cursorY );
-			cgs.activeCursor = 0;
-			if ( n == CURSOR_ARROW ) {
-				cgs.activeCursor = cgs.media.selectCursor;
-			} else if ( n == CURSOR_SIZER ) {
-				cgs.activeCursor = cgs.media.sizeCursor;
-			}
-
-			if ( cgs.capturedItem ) {
-				Display_MouseMove( cgs.capturedItem, x, y );
-			} else {
-				Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
-			}
 			break;
+			default:
+				if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
+					cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse) {
+						trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
+					return;
+				}
+
+				cgs.cursorX += x;
+				if ( cgs.cursorX < 0 ) {
+					cgs.cursorX = 0;
+				} else if ( cgs.cursorX > 640 ) {
+					cgs.cursorX = 640;
+				}
+
+				cgs.cursorY += y;
+				if ( cgs.cursorY < 0 ) {
+					cgs.cursorY = 0;
+				} else if ( cgs.cursorY > 480 ) {
+					cgs.cursorY = 480;
+				}
+
+				n = Display_CursorType( cgs.cursorX, cgs.cursorY );
+				cgs.activeCursor = 0;
+				if ( n == CURSOR_ARROW ) {
+					cgs.activeCursor = cgs.media.selectCursor;
+				} else if ( n == CURSOR_SIZER ) {
+					cgs.activeCursor = cgs.media.sizeCursor;
+				}
+
+				if ( cgs.capturedItem ) {
+					Display_MouseMove( cgs.capturedItem, x, y );
+				} else {
+					Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
+				}
+				break;
 	}
 }
 
@@ -2742,25 +2740,21 @@ void CG_KeyEvent( int key, qboolean down )
 	// OSPx - Demo..
 	switch (cgs.eventHandling)
 	{
-	case CGAME_EVENT_NONE:
-		break;
-	case CGAME_EVENT_TEAMMENU:
-		break;
-	case CGAME_EVENT_SCOREBOARD:
-		break;
-	case CGAME_EVENT_EDITHUD:
-		break;
-	case CGAME_EVENT_DEMO:
-		CG_DemoClick(key);
-		return;
-	default:
-		break;
+		case CGAME_EVENT_NONE:
+		case CGAME_EVENT_TEAMMENU:
+		case CGAME_EVENT_SCOREBOARD:
+		case CGAME_EVENT_EDITHUD:
+			break;
+		case CGAME_EVENT_DEMO:
+			CG_DemoClick(key);
+			return;
+		default:
+			break;
 	}
 
 	if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
 		(cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse)))
 	{
-
 		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
 		trap_Key_SetCatcher(0);
 		return;

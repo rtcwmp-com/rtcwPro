@@ -888,6 +888,22 @@ void CPSound(gentity_t* ent, char* sound) {
 
 /*
 ===========
+Global sound - Hooked under cg_announced ..
+===========
+*/
+void AAPSound(char* sound) {
+	gentity_t* ent;
+	gentity_t* te;
+
+	ent = g_entities;
+
+	te = G_TempEntity(ent->s.pos.trBase, EV_USE_ITEM15);
+	te->s.eventParm = G_SoundIndex(sound);
+	te->r.svFlags |= SVF_BROADCAST;
+}
+
+/*
+===========
 Global sound with limited range
 ===========
 */

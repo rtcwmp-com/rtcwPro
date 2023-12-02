@@ -2217,7 +2217,6 @@ extern vmCvar_t cg_reinforcementTimeProY;
 extern vmCvar_t cg_findMedic;
 extern vmCvar_t cg_hitsoundBodyStyle;
 extern vmCvar_t cg_hitsoundHeadStyle;
-extern vmCvar_t cg_pauseMusic;
 extern vmCvar_t cg_showPriorityText;
 extern vmCvar_t cg_priorityTextX;
 extern vmCvar_t cg_priorityTextY;
@@ -2240,7 +2239,6 @@ extern vmCvar_t cg_fragsY;
 extern vmCvar_t cg_fragsWidth;
 extern vmCvar_t cg_fixedphysicsfps;
 extern vmCvar_t cg_debugDamage;
-extern vmCvar_t cg_pauseMusic;
 
 // shoutcast overlay
 extern vmCvar_t cg_shoutcastDrawPlayers;

@@ -299,6 +299,7 @@ vmCvar_t g_ssWebhookToken; // token contained in the discord webhook link (chars
 vmCvar_t g_ssWaitTime; // wait time between reqss cmds to prevent spam
 vmCvar_t g_broadcastClients; // fix clients appearing from thin air on some maps
 vmCvar_t g_logConfigStringChanges; // log config string changes (debugging)
+vmCvar_t g_playPauseMusic; // play music during pause
 
  // unlagged
 vmCvar_t g_floatPlayerPosition;
@@ -551,6 +552,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_ssWaitTime, "g_ssWaitTime", "30", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_broadcastClients, "g_broadcastClients", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
 	{ &g_logConfigStringChanges, "g_logConfigStringChanges", "0", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_playPauseMusic, "g_playPauseMusic", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse }, // ET Port Players server info
 
 	// unlagged

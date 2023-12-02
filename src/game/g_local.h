@@ -1777,6 +1777,7 @@ extern vmCvar_t	g_ssWebhookToken;
 extern vmCvar_t	g_ssWaitTime;
 extern vmCvar_t	g_broadcastClients;
 extern vmCvar_t g_logConfigStringChanges;
+extern vmCvar_t g_playPauseMusic;
 
 // unlagged
 extern vmCvar_t g_floatPlayerPosition;
@@ -2122,7 +2123,6 @@ void DecolorString( char *in, char *out);
 // g_shared.c
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
-void AAPSound(char *sound);
 
 ///////////////////////
 // g_vote.c
@@ -2278,11 +2278,12 @@ void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
 //qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
-// now residing in g_utils.c  (previous declaration in g_admin.h)
+// g_utils.c
 //
+void AAPSound(char* sound);
 void CPSound(gentity_t *ent, char *sound);
 void APSound(char *sound);
-void APRSound(gentity_t *ent, char *sound);
+void APRSound(gentity_t* ent, char* sound);
 
 
 // Macros

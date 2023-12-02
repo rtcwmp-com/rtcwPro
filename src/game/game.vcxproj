@@ -299,7 +299,6 @@
     <ClCompile Include="g_script_actions.c" />
     <ClCompile Include="g_session.c" />
     <ClCompile Include="g_sha1.c" />
-    <ClCompile Include="g_shared.c" />
     <ClCompile Include="g_spawn.c" />
     <ClCompile Include="g_stats.c" />
     <ClCompile Include="g_svcmds.c" />
