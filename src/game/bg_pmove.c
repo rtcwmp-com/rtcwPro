@@ -2295,7 +2295,7 @@ void PM_CoolWeapons( void ) {
 		if ( COM_BitCheck( pm->ps->weapons, wp ) )
 		{
 			// and it's hot
-#if 1
+#if 0
 			if (pm->pmext->weapHeat[wp])
 			{
 				pm->pmext->weapHeat[wp] -= ((float)ammoTable[wp].coolRate * pml.frametime);
@@ -3056,7 +3056,7 @@ static void PM_Weapon( void ) {
 
 	// add weapon heat
 	if ( ammoTable[pm->ps->weapon].maxHeat ) {
-#if 1
+#if 0
 			pm->pmext->weapHeat[pm->ps->weapon] += (float)ammoTable[pm->ps->weapon].nextShotTime;
 #else
 			pm->ps->weapHeat[pm->ps->weapon] += ammoTable[pm->ps->weapon].nextShotTime;
@@ -3280,7 +3280,7 @@ static void PM_Weapon( void ) {
 	// check for overheat
 
 	// the weapon can overheat, and it's hot
-#if 1
+#if 0
 	if (ammoTable[pm->ps->weapon].maxHeat && pm->pmext->weapHeat[pm->ps->weapon]) {
 		// it is overheating
 		if (pm->pmext->weapHeat[pm->ps->weapon] >= ammoTable[pm->ps->weapon].maxHeat) {
