@@ -979,7 +979,7 @@ void SV_Init( void ) {
 	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
 	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "16", CVAR_ROM);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "17", CVAR_ROM);
 
 	// ET Legacy port reset svs.time on map load to fix knockback bug
 	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "0", CVAR_ARCHIVE); // default to 0 - 1 is causing a bug on map change
