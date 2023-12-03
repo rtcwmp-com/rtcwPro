@@ -1245,15 +1245,15 @@ void CG_DrawShoutcastTimer(void)
 * @param[in] _key
 * @param[in] down
 */
-qboolean CG_Shoutcast_KeyHandling(int key, qboolean down)
-{
-	if (down)
-	{
-		return CG_ShoutcastCheckExecKey(key, qtrue);
-	}
-
-	return qfalse;
-}
+//qboolean CG_Shoutcast_KeyHandling(int key, qboolean down)
+//{
+//	if (down)
+//	{
+//		return CG_ShoutcastCheckExecKey(key, qtrue);
+//	}
+//
+//	return qfalse;
+//}
 
 /**
 * @brief CG_ShoutcastCheckExecKey
@@ -1261,29 +1261,29 @@ qboolean CG_Shoutcast_KeyHandling(int key, qboolean down)
 * @param[in] doaction
 * @return
 */
-qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction)
-{
-	if (key == K_ESCAPE)
-	{
-		return qtrue;
-	}
-
-	if ((key & K_CHAR_FLAG))
-	{
-		return qfalse;
-	}
-
-	key &= ~K_CHAR_FLAG;
-
-	if (key >= K_F1 && key <= K_F12)
-	{
-		if (doaction)
-		{
-			trap_SendClientCommand(va("follow %d", players[key - K_F1]));
-		}
-
-		return qtrue;
-	}
-
-	return qfalse;
-}
+//qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction)
+//{
+//	if (key == K_ESCAPE)
+//	{
+//		return qtrue;
+//	}
+//
+//	if ((key & K_CHAR_FLAG))
+//	{
+//		return qfalse;
+//	}
+//
+//	key &= ~K_CHAR_FLAG;
+//
+//	if (key >= K_F1 && key <= K_F12)
+//	{
+//		if (doaction)
+//		{
+//			trap_SendClientCommand(va("follow %d", players[key - K_F1]));
+//		}
+//
+//		return qtrue;
+//	}
+//
+//	return qfalse;
+//}
