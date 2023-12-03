@@ -967,12 +967,6 @@ void SV_Init( void ) {
 
 	// Start RtcwPro
 
-	// HTTP downloads
-	sv_wwwDownload = Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE);
-	sv_wwwBaseURL = Cvar_Get("sv_wwwBaseURL", "https://maps.rtcwmp.com/", CVAR_ARCHIVE);
-	sv_wwwDlDisconnected = Cvar_Get("sv_wwwDlDisconnected", "0", CVAR_ARCHIVE);
-	sv_wwwFallbackURL = Cvar_Get("sv_wwwFallbackURL", "", CVAR_ARCHIVE);
-
 	// Streaming
 	sv_StreamingToken = Cvar_Get("sv_StreamingToken", "0", CVAR_ARCHIVE);
 	sv_StreamingSelfSignedCert = Cvar_Get("sv_StreamingSelfSignedCert", "0", CVAR_ARCHIVE);
@@ -985,7 +979,7 @@ void SV_Init( void ) {
 	sv_GameConfig = Cvar_Get("sv_GameConfig", "", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_ROM); // | CVAR_LATCH );
 	sv_restRunning = Cvar_Get("sv_restRunning", "0", CVAR_INIT);
 
-	sv_checkVersion = Cvar_Get("sv_checkVersion", "16", CVAR_ROM);
+	sv_checkVersion = Cvar_Get("sv_checkVersion", "17", CVAR_ROM);
 
 	// ET Legacy port reset svs.time on map load to fix knockback bug
 	sv_serverTimeReset = Cvar_Get("sv_serverTimeReset", "0", CVAR_ARCHIVE); // default to 0 - 1 is causing a bug on map change

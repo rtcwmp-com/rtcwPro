@@ -93,6 +93,57 @@ void CG_FillRectGradient( float x, float y, float width, float height, const flo
 	trap_R_SetColor( NULL );
 }
 
+/**
+ * @brief CG_DrawSides_NoScale
+ * @param[in] x
+ * @param[in] y
+ * @param[in] w
+ * @param[in] h
+ * @param[in] size
+ * @note Coordinates are 640*480 virtual values
+ */
+void CG_DrawSides_NoScale(float x, float y, float w, float h, float size)
+{
+	CG_AdjustFrom640(&x, &y, &w, &h);
+	trap_R_DrawStretchPic(x, y, size, h, 0, 0, 0, 0, cgs.media.whiteShader);
+	trap_R_DrawStretchPic(x + w - size, y, size, h, 0, 0, 0, 0, cgs.media.whiteShader);
+}
+
+/**
+ * @brief CG_DrawTopBottom_NoScale
+ * @param[in] x
+ * @param[in] y
+ * @param[in] w
+ * @param[in] h
+ * @param[in] size
+ * @note Coordinates are 640*480 virtual values
+ */
+void CG_DrawTopBottom_NoScale(float x, float y, float w, float h, float size)
+{
+	CG_AdjustFrom640(&x, &y, &w, &h);
+	trap_R_DrawStretchPic(x, y, w, size, 0, 0, 0, 0, cgs.media.whiteShader);
+	trap_R_DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0, cgs.media.whiteShader);
+}
+
+/**
+ * @brief CG_SetChargebarIconColor
+ * Sets correct charge bar icon for fieldops to indicate air support status
+ */
+void CG_SetChargebarIconColor(void)
+{
+	if (cg.snap->ps.ammo[WP_ARTY] & NO_AIRSTRIKE && cg.snap->ps.ammo[WP_ARTY] & NO_ARTILLERY)
+	{
+		trap_R_SetColor(colorRed);
+	}
+	else if (cg.snap->ps.ammo[WP_ARTY] & NO_AIRSTRIKE)
+	{
+		trap_R_SetColor(colorOrange);
+	}
+	else if (cg.snap->ps.ammo[WP_ARTY] & NO_ARTILLERY)
+	{
+		trap_R_SetColor(colorYellow);
+	}
+}
 
 /*
 ==============
@@ -111,19 +162,6 @@ flags:
 	lerp color	- 256	// use an average of the start and end colors to set the fill color
 ==============
 */
-
-
-// TODO: these flags will be shared, but it was easier to work on stuff if I wasn't changing header files a lot
-#define BAR_LEFT        0x0001
-#define BAR_CENTER      0x0002
-#define BAR_VERT        0x0004
-#define BAR_NOHUDALPHA  0x0008
-#define BAR_BG          0x0010
-// different spacing modes for use w/ BAR_BG
-#define BAR_BGSPACING_X0Y5  0x0020
-#define BAR_BGSPACING_X0Y0  0x0040
-
-#define BAR_LERP_COLOR  0x0100
 
 #define BAR_BORDERSIZE 2
 
@@ -209,6 +247,211 @@ void CG_FilledBar( float x, float y, float w, float h, float *startColor, float 
 }
 
 
+/**
+ * @brief CG_FilledBar
+ * @param[in] x
+ * @param[in] y
+ * @param[in] w
+ * @param[in] h
+ * @param[in,out] startColor
+ * @param[in,out] endColor
+ * @param[in,out] bgColor
+ * @param[in] frac
+ * @param[in] flags
+ */
+void CG_FilledBar2(float x, float y, float w, float h, float* startColor, float* endColor, const float* bgColor, const float* bdColor, float frac, int flags, qhandle_t icon)
+{
+	vec4_t backgroundcolor = { 1, 1, 1, 0.25f }, colorAtPos;  // colorAtPos is the lerped color if necessary
+	float  x2 = x, y2 = y, w2 = w, h2 = h;
+	float  iconW, iconH;
+
+	if (frac > 1)
+	{
+		frac = 1.f;
+	}
+	if (frac < 0)
+	{
+		frac = 0;
+	}
+
+	if ((flags & BAR_BG) && bgColor)       // BAR_BG set, and color specified, use specified bg color
+	{
+		Vector4Copy(bgColor, backgroundcolor);
+	}
+
+	if (flags & BAR_LERP_COLOR)
+	{
+		if (endColor)
+		{
+			Vector4Average(startColor, endColor, frac, colorAtPos);
+		}
+		else
+		{
+			Vector4Scale(startColor, frac, colorAtPos);
+		}
+	}
+
+	if (flags & BAR_DECOR)
+	{
+		if (flags & BAR_VERT)
+		{
+			y += (h * 0.1f);
+			h *= 0.84f;
+		}
+		else
+		{
+			x += (w * 0.1f);
+			w *= 0.84f;
+		}
+	}
+
+	// background
+	if ((flags & BAR_BG))
+	{
+		int indent = BAR_BORDERSIZE;
+
+		// draw background at full size and shrink the remaining box to fit inside with a border.  (alternate border may be specified by a BAR_BGSPACING_xx)
+		CG_FillRect(x,
+			y,
+			w,
+			h,
+			backgroundcolor);
+
+		if (flags & BAR_BGSPACING_X0Y0)              // fill the whole box (no border)
+		{
+		}
+		else if (flags & BAR_BGSPACING_X0Y5)         // spacing created for weapon heat
+		{
+			indent *= 3;
+			y += indent;
+			h -= (2 * indent);
+
+		}
+		else                                    // default spacing of 2 units on each side
+		{
+			x += indent;
+			y += indent;
+			w -= (2 * indent);
+			h -= (2 * indent);
+		}
+	}
+	else if (((flags & BAR_BORDER) || (flags & BAR_BORDER_SMALL)) && bdColor)
+	{
+		int indent = (flags & BAR_BORDER_SMALL) ? 1 : BAR_BORDERSIZE;
+
+		CG_DrawRect_FixedBorder(x, y, w, h, indent, bdColor);
+		x += indent;
+		y += indent;
+		w -= (2 * indent);
+		h -= (2 * indent);
+	}
+
+	// adjust for horiz/vertical and draw the fractional box
+	if (flags & BAR_VERT)
+	{
+		iconW = w2;
+		iconH = iconW;
+
+		if (flags & BAR_LEFT)        // TODO: remember to swap colors on the ends here
+		{
+			y += (h * (1 - frac));
+		}
+		else if (flags & BAR_CENTER)
+		{
+			y += (h * (1 - frac) / 2);
+		}
+
+		if (flags & BAR_LERP_COLOR)
+		{
+			CG_FillRect(x, y, w, h * frac, colorAtPos);
+		}
+		else
+		{
+			CG_FillRect(x, y, w, h * frac, startColor);
+		}
+
+		if (flags & BAR_DECOR)
+		{
+			CG_DrawPic(x2, y2, w2, h2, cgs.media.hudSprintBar);
+		}
+
+		if (flags & BAR_ICON && icon > -1)
+		{
+			float offset = 4.0f;
+			if (icon == cgs.media.treasureIcon)  // TODO hudPowerIcon
+			{
+				iconW *= .5f;
+				x2 += iconW * .5f;
+
+				if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_LT)
+				{
+					CG_SetChargebarIconColor();
+				}
+			}
+
+			if (flags & BAR_LEFT)
+			{
+				CG_DrawPic(x2, y2 + h2 + offset, iconW, iconH, icon);
+			}
+			else
+			{
+				CG_DrawPic(x2, y2 - w2 - offset, iconW, iconH, icon);
+			}
+		}
+	}
+	else
+	{
+		iconH = h2;
+		iconW = iconH;
+
+		if (flags & BAR_LEFT)        // TODO: remember to swap colors on the ends here
+		{
+			x += (w * (1 - frac));
+		}
+		else if (flags & BAR_CENTER)
+		{
+			x += (w * (1 - frac) / 2);
+		}
+
+		if (flags & BAR_LERP_COLOR)
+		{
+			CG_FillRect(x, y, w * frac, h, colorAtPos);
+		}
+		else
+		{
+			CG_FillRect(x, y, w * frac, h, startColor);
+		}
+
+		if (flags & BAR_DECOR)
+		{
+			//CG_DrawPic(x2, y2, w2, h2, cgs.media.hudSprintBarHorizontal); // TODO
+		}
+
+		if (flags & BAR_ICON && icon > -1)
+		{
+			float offset = 4.0f;
+			if (icon == cgs.media.treasureIcon) //hudPowerIcon
+			{
+				iconW *= .5f;
+
+				if (cg.snap->ps.stats[STAT_PLAYER_CLASS] == PC_LT)
+				{
+					CG_SetChargebarIconColor();
+				}
+			}
+
+			if (flags & BAR_LEFT)
+			{
+				CG_DrawPic(x2 + w2 + offset, y2, iconW, iconH, icon);
+			}
+			else
+			{
+				CG_DrawPic(x2 - iconW - offset, y2, iconW, iconH, icon);
+			}
+		}
+	}
+}
+
 /*
 =================
 CG_HorizontalPercentBar
@@ -278,6 +521,25 @@ void CG_DrawRect( float x, float y, float width, float height, float size, const
 	CG_DrawSides( x, y, width, height, size );
 
 	trap_R_SetColor( NULL );
+}
+
+/**
+ * @brief CG_DrawRect_FixedBorder
+ * @param[in] x
+ * @param[in] y
+ * @param[in] width
+ * @param[in] height
+ * @param[in] border
+ * @param[in,out] color
+ */
+void CG_DrawRect_FixedBorder(float x, float y, float width, float height, int border, const float* color)
+{
+	trap_R_SetColor(color);
+
+	CG_DrawTopBottom_NoScale(x, y, width, height, border);
+	CG_DrawSides_NoScale(x, y, width, height, border);
+
+	trap_R_SetColor(NULL);
 }
 
 /*
@@ -848,41 +1110,36 @@ float *CG_TeamColor( int team ) {
 CG_GetColorForHealth
 =================
 */
-void CG_GetColorForHealth( int health, int armor, vec4_t hcolor ) {
-	int count;
-	int max;
-
+void CG_GetColorForHealth(int health, vec4_t hcolor) {
 	// calculate the total points of damage that can
 	// be sustained at the current health / armor level
-	if ( health <= 0 ) {
-		VectorClear( hcolor );  // black
+	if (health <= 0) {
+		VectorClear(hcolor);  // black
 		hcolor[3] = 1;
 		return;
 	}
-	count = armor;
-	max = health * ARMOR_PROTECTION / ( 1.0 - ARMOR_PROTECTION );
-	if ( max < count ) {
-		count = max;
-	}
-	health += count;
 
 	// set the color based on health
 	hcolor[0] = 1.0;
 	hcolor[3] = 1.0;
-	if ( health >= 100 ) {
+	if (health >= 100) {
 		hcolor[2] = 1.0;
-	} else if ( health < 66 ) {
+	}
+	else if (health < 66) {
 		hcolor[2] = 0;
-	} else {
-		hcolor[2] = ( health - 66 ) / 33.0;
+	}
+	else {
+		hcolor[2] = (health - 66) / 33.0;
 	}
 
-	if ( health > 60 ) {
+	if (health > 60) {
 		hcolor[1] = 1.0;
-	} else if ( health < 30 ) {
+	}
+	else if (health < 30) {
 		hcolor[1] = 0;
-	} else {
-		hcolor[1] = ( health - 30 ) / 30.0;
+	}
+	else {
+		hcolor[1] = (health - 30) / 30.0;
 	}
 }
 
@@ -1629,4 +1886,3 @@ void CG_DrawTriggers(void) {
 		CG_AddShaderToBox(mins, maxs, triggerShader, edgesShader, drawEdges);
 	}
 }
-

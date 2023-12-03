@@ -3601,14 +3601,20 @@ static void UI_LoadDemos() {
 	char	dirlist[2048];
 	int		dirlen;
 	char*	dirptr;
+	char	game[60];
+
 	Com_sprintf( demoExt, sizeof( demoExt ), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
 	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, sizeof( demolist ) );
 
 	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
-	numdirs = trap_FS_GetFileList("../rtcwpro/demos", "/", dirlist, 2048 );
+	trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
+
+	numdirs = trap_FS_GetFileList(va("../%s/demos", game), "/", dirlist, 2048 );
+
 	dirptr  = dirlist;
+
 	// iterate over all sub-directories
 	for (i=0; i<numdirs && uiInfo.demoCount < MAX_DEMOS; i++,dirptr+=dirlen+1)
 	{
@@ -3621,7 +3627,7 @@ static void UI_LoadDemos() {
 
 		// iterate all demo files in directory
 
-		numfiles = trap_FS_GetFileList( va("../rtcwpro/demos/%s",dirptr), demoExt, demolist, sizeof( demolist )  );
+		numfiles = trap_FS_GetFileList( va("../%s/demos/%s", game, dirptr), demoExt, demolist, sizeof( demolist )  );
 		demoname  = demolist;
 		for (j=0; j<numfiles &&  uiInfo.demoCount < MAX_DEMOS;j++,demoname+=len+1)
 		{

@@ -40,11 +40,11 @@ If you have questions concerning this license or the applicable additional terms
 Scoreboard flags (WolfSE)
 =================
 */
-static qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
+qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
 	float alpha[4];
 	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "cc"));
 
-	if (client_flag < 255)
+	if (client_flag <= 255)
 	{
 		float x1 = (float)((client_flag * (unsigned int)COUNTRY_FLAG_INDIVIDUAL_SIZE) % COUNTRY_FLAG_WIDTH);
 		float y1 = (float)(floor((client_flag * COUNTRY_FLAG_INDIVIDUAL_SIZE) / COUNTRY_FLAG_WIDTH) * COUNTRY_FLAG_INDIVIDUAL_SIZE);

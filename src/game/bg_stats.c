@@ -30,7 +30,7 @@ L0 - Port from ET for stats code by OSP
 ================================
 */
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 
 //	--> WP_* to WS_* conversion

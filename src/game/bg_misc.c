@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "g_local.h"
 #include "../../MAIN//ui_mp/menudef.h"
@@ -142,7 +142,7 @@ ammotable_t ammoTable[] = {
 
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42SCOPE           },  //	WP_FG42SCOPE			// 23
 	{   MAX_AMMO_BAR,   1,      20,     2000,   DELAY_LOW,      90,     0,      0,      MOD_BAR                 },  //	WP_BAR2					// 24
-	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    750,    300,    MOD_STEN                },  //	WP_STEN					// 25
+	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
 	{   3,              1,      1,      1500,   50,             1000,   0,      0,      MOD_SYRINGE             },  //	WP_MEDIC_SYRINGE		// 26 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_AMMO,               },  //	WP_AMMO					// 27 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_ARTY,               },  //	WP_ARTY
@@ -4727,9 +4727,9 @@ Ported from etPub
 */
 char* Q_StrReplace(char* haystack, char* needle, char* newp)
 {
-	static char final[MAX_STRING_CHARS] = { "" };
-	char dest[MAX_STRING_CHARS] = { "" };
-	char newStr[MAX_STRING_CHARS] = { "" };
+	static char final[MAX_INFO_STRING] = { "" };
+	char dest[MAX_INFO_STRING] = { "" };
+	char newStr[MAX_INFO_STRING] = { "" };
 	char* destp;
 	int needle_len = 0;
 	int new_len = 0;
@@ -4756,7 +4756,7 @@ char* Q_StrReplace(char* haystack, char* needle, char* newp)
 			destp += new_len;
 			continue;
 		}
-		if (MAX_STRING_CHARS > (strlen(dest) + 1)) {
+		if (MAX_INFO_STRING > (strlen(dest) + 1)) {
 			*destp = *haystack;
 			*++destp = '\0';
 		}
@@ -4948,10 +4948,10 @@ void LogEntry(char* filename, char* info) {
 	fileHandle_t    f;
 	char* varLine;
 
-	strcat(info, "\r");
 	trap_FS_FOpenFile(filename, &f, FS_APPEND);
 
-	varLine = va("%s\n", info);
+	varLine = va("%s: %s", getDateTime(), info);
+	strcat(varLine, "\r");
 
 	trap_FS_Write(varLine, strlen(varLine), f);
 	trap_FS_FCloseFile(f);

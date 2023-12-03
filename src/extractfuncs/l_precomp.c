@@ -126,7 +126,7 @@ int Q_stricmp( const char *s1, const char *s2 ) {
 #endif //SCREWUP
 
 #ifdef BOTLIB
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "botlib.h"
 #include "be_interface.h"
 #include "l_memory.h"

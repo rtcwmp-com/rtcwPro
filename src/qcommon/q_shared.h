@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwPro 1.2.9.16"  // RTCWPro
+#define Q3_VERSION      "RtcwPro 1.3.0.17"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -569,6 +569,7 @@ extern vec4_t g_color_table[32];
 // check if it's format rrggbb r,g,b e {0..9} U {A...F}
 #define Q_IsHexColorString( p ) ( ishex( *( p ) ) && ishex( *( ( p ) + 1 ) ) && ishex( *( ( p ) + 2 ) ) && ishex( *( ( p ) + 3 ) ) && ishex( *( ( p ) + 4 ) ) && ishex( *( ( p ) + 5 ) ) )
 #define Q_HexColorStringHasAlpha( p ) ( ishex( *( ( p ) + 6 ) ) && ishex( *( ( p ) + 7 ) ) )
+
 // -OSPx
 
 #define MAKERGB( v, r, g, b ) v[0] = r; v[1] = g; v[2] = b
@@ -729,6 +730,9 @@ char* Q_CleanDirName(char* dirname);
 qboolean Q_IsNumeric(const char* s);
 
 char* Q_CleanDirName(char* dirname);
+
+/// Encodes a plain un-colored string so that it'll be drawn with the given color code.
+void Q_ColorizeString(char colorCode, const char* inStr, char* outStr, size_t outBufferLen);
 
 //=============================================
 
@@ -1023,7 +1027,7 @@ COLLISION DETECTION
 ==============================================================
 */
 
-#include "surfaceflags.h"            // shared with the q3map utility
+#include "../game/surfaceflags.h"            // shared with the q3map utility
 
 // plane types are used to speed some tests
 // 0-2 are axial planes
@@ -1755,6 +1759,18 @@ qboolean clientIsConnected;
 
 #define ArrayLength(x)	(sizeof(x) / sizeof(*(x)))
 
+#ifndef BIT
+#if defined(_WIN64) || defined(__LP64__)
+#define BIT(x)              (1ULL << (x))
+#else
+#define BIT(x)              (1U << (x))
+#endif
+#endif
 
+#define Q_atoi(str) (int) strtol(str, NULL, 10)
+
+// widescreen monitor support
+#define RATIO43     (4.0f / 3.0f)   ///< 4:3 aspectratio is the default for this game engine ...
+#define RPRATIO43   (1 / RATIO43)   ///<
 
 #endif  // __Q_SHARED_H

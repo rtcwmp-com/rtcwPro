@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "../renderer/tr_public.h"
 #include "../ui/ui_public.h"
@@ -217,16 +217,13 @@ typedef struct {
 
 	// file transfer from server
 	fileHandle_t download;
+	char downloadTempName[MAX_OSPATH];
+	char downloadName[MAX_OSPATH];
 	int downloadNumber;
 	int downloadBlock;          // block we are waiting for
 	int downloadCount;          // how many bytes we got
 	int downloadSize;           // how many bytes we got
 	char downloadList[MAX_INFO_STRING];        // list of paks we need to download
-	int downloadFlags;			// misc download behaviour flags sent by the server
-	qboolean bWWWDl;			// we have a www download going
-	qboolean bWWWDlAborting;    // disable the CL_WWWDownload until server gets us a gamestate (used for aborts)
-	char redirectedList[MAX_INFO_STRING];	// list of files that we downloaded through a redirect since last FS_ComparePaks
-	char badChecksumList[MAX_INFO_STRING];	// list of files for which wwwdl redirect is broken (wrong checksum)
 	qboolean downloadRestart;       // if true, we need to do another FS_Restart because we downloaded a pak
 
 	// demo information
@@ -353,15 +350,6 @@ typedef struct {
 	qhandle_t whiteShader;
 	qhandle_t consoleShader;
 	qhandle_t consoleShader2;       // NERVE - SMF - merged from WolfSP
-
-	// L0 - HTTP downloads
-	// in the static stuff since this may have to survive server disconnects
-	// if new stuff gets added, CL_ClearStaticDownload code needs to be updated for clear up
-	qboolean bWWWDlDisconnected;			// keep going with the download after server disconnect
-	char downloadName[MAX_OSPATH];
-	char downloadTempName[MAX_OSPATH];		// in wwwdl mode, this is OS path (it's a qpath otherwise)
-	char originalDownloadName[MAX_QPATH];	// if we get a redirect, keep a copy of the original file path
-	qboolean downloadRestart;
 } clientStatic_t;
 
 extern clientStatic_t cls;
@@ -432,6 +420,9 @@ extern cvar_t* cl_StreamingSelfSignedCert;
 // ~L0
 
 extern cvar_t* cl_activatelean; // RTCWPro
+// rtcwpro - http redirect
+extern cvar_t* cl_httpDomain;
+extern cvar_t* cl_httpPath;
  
 
 //=================================================
@@ -484,7 +475,11 @@ void CL_TranslateString( const char *string, char *dest_buffer );
 const char* CL_TranslateStringBuf( const char *string ); // TTimo
 // -NERVE - SMF
 
+void CL_BeginDownload(const char* localName, const char* remoteName, qboolean attemptHttp);
+qboolean CL_BeginHttpDownload(); // rtcwpro
+
 void CL_OpenURL( const char *url ); // TTimo
+void CL_DownloadsComplete(void); // rtcwpro
 
 //
 // cl_input
