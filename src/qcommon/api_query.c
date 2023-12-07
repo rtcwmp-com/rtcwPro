@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "../qcommon/q_shared.h"
+#include "q_shared.h"
 #include "../game/g_shared.h"
 #include "qcommon.h"
 #include "http.h"

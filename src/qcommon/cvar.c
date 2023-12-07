@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // cvar.c -- dynamic variable tracking
 
-#include "../qcommon/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 cvar_t      *cvar_vars;
