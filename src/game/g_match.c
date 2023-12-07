@@ -308,10 +308,6 @@ Central function for (un)pausing the game.
 */
 void G_handlePause(qboolean dPause, int time) {
 	if (dPause) {
-		
-		if (g_playPauseMusic.integer)
-			APSound("sound/match/pause_m.wav");
-
 		level.paused = 100 + time;
 		G_spawnPrintf(DP_PAUSEINFO, level.time + 15000, NULL);
 	}
