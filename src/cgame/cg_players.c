@@ -1260,6 +1260,7 @@ void CG_NewClientInfo( int clientNum ) {
 	}
 
 	// RtcwPro Shoutcaster toggle
+	// changed this to a command/bind
 	//if (clientNum == cg.clientNum && newInfo.shoutStatus != ci->shoutStatus)
 	//{
 	//	if (newInfo.shoutStatus <= 0)

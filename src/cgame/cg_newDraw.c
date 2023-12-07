@@ -2696,27 +2696,28 @@ void CG_EventHandling( int type, qboolean forced )
 		trap_Cvar_Set("cl_bypassMouseInput", 0);
 	}
 
-	switch (type) {
-	/*case CGAME_EVENT_DEMO:
-		CG_ScoresUp_f();
-		break;*/
-	case CGAME_EVENT_NONE:
-		CG_HideTeamMenu();
-		break;
-	case CGAME_EVENT_TEAMMENU:
-	case CGAME_EVENT_SCOREBOARD:
-		break;
-	//case CGAME_EVENT_SHOUTCAST:
-	//	if (cgs.eventHandling == CGAME_EVENT_SHOUTCAST)
-	//	{
-	//		if (forced)
-	//		{
-	//			trap_UI_Popup("UIMENU_INGAME");
-	//		}
+	switch (type)
+	{
+		/*case CGAME_EVENT_DEMO:
+			CG_ScoresUp_f();
+			break;*/
+		case CGAME_EVENT_NONE:
+			CG_HideTeamMenu();
+			break;
+		case CGAME_EVENT_TEAMMENU:
+		case CGAME_EVENT_SCOREBOARD:
+			break;
+		case CGAME_EVENT_SHOUTCAST:
+			if (cgs.eventHandling == CGAME_EVENT_SHOUTCAST)
+			{
+				if (forced)
+				{
+					trap_UI_Popup("UIMENU_INGAME");
+				}
 
-	//		trap_Cvar_Set("cl_bypassmouseinput", "0");
-	//	}
-		break;
+				trap_Cvar_Set("cl_bypassmouseinput", "0");
+			}
+			break;
 	}
 
 	cgs.eventHandling = type;
@@ -2724,19 +2725,15 @@ void CG_EventHandling( int type, qboolean forced )
 	if (type == CGAME_EVENT_NONE) {
 		trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
 	}
-	//else if (type == CGAME_EVENT_SHOUTCAST)
-	//{
-	//	trap_Cvar_Set("cl_bypassmouseinput", "1");
-	//	trap_Key_SetCatcher(KEYCATCH_CGAME);
-	//}
+	else if (type == CGAME_EVENT_SHOUTCAST)
+	{
+		trap_Cvar_Set("cl_bypassmouseinput", "1");
+		trap_Key_SetCatcher(KEYCATCH_CGAME);
+	}
 }
 
 void CG_KeyEvent( int key, qboolean down ) 
 {
-	if ( !down ) {
-		return;
-	}
-
 	// OSPx - Demo..
 	switch (cgs.eventHandling)
 	{
@@ -2748,8 +2745,15 @@ void CG_KeyEvent( int key, qboolean down )
 		case CGAME_EVENT_DEMO:
 			CG_DemoClick(key);
 			return;
+		case CGAME_EVENT_SHOUTCAST:
+			CG_Shoutcast_KeyHandling(key, down);
+			return;
 		default:
 			break;
+	}
+
+	if (!down) {
+		return;
 	}
 
 	if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||

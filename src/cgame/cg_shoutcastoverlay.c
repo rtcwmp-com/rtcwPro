@@ -87,6 +87,7 @@ static vec4_t bg = { 0.0f, 0.0f, 0.0f, 0.7f };
 static vec4_t colorAllies = { 0.121f, 0.447f, 0.811f, 0.45f };
 static vec4_t colorAxis   = { 0.749f, 0.129f, 0.129f, 0.45f };
 
+char* inputMode = "";
 int players[12];
 
 /*
@@ -412,9 +413,9 @@ static void CG_DrawShoutcastPlayerOverlayAxis(clientInfo_t *player, float x, flo
 		Vector4Copy(colorWhite, hcolor);
 	}
 
-	//text      = va("(F%i)", index + 1);
-	//textWidth = CG_Text_Width_Ext(text, 0.12f, 0, FONT_TEXT);
-	//CG_Text_Paint(x + PLAYER_LIST_WIDTH - textWidth - 5, y + (PLAYER_LIST_HEIGHT / 4) + 2.0f, 0.12f, hcolor, text, 0, 0, ITEM_TEXTSTYLE_NORMAL);
+	text      = va("(F%i)", index + 1);
+	textWidth = CG_Text_Width_Ext(text, 0.12f, 0, FONT_TEXT);
+	CG_Text_Paint(x + PLAYER_LIST_WIDTH - textWidth - 5, y + (PLAYER_LIST_HEIGHT / 4) + 2.0f, 0.12f, hcolor, text, 0, 0, ITEM_TEXTSTYLE_NORMAL);
 	
 	// draw class
 	CG_DrawPic(bottomRowX + PLAYER_LIST_STATUS_WIDTH + 4, y + (PLAYER_LIST_HEIGHT * 0.75f) - 6, 12, 12, cgs.media.classPics[cg_entities[player->clientNum].currentState.teamNum]);
@@ -525,7 +526,7 @@ static void CG_DrawShoutcastPlayerOverlayAllies(clientInfo_t *player, float x, f
 	{
 		textWidth = 116;
 	}
-	CG_Text_Paint(x + PLAYER_LIST_WIDTH - textWidth - 36, y + (PLAYER_LIST_HEIGHT / 4) + (textHeight / 2), 0.16f, colorWhite, name, 0, 20, ITEM_TEXTSTYLE_NORMAL);
+	CG_Text_Paint(x + PLAYER_LIST_WIDTH - textWidth - 42, y + (PLAYER_LIST_HEIGHT / 4) + (textHeight / 2), 0.16f, colorWhite, name, 0, 20, ITEM_TEXTSTYLE_NORMAL);
 
 	// draw follow bind
 	if (player->health < 0)
@@ -537,8 +538,8 @@ static void CG_DrawShoutcastPlayerOverlayAllies(clientInfo_t *player, float x, f
 		Vector4Copy(colorWhite, hcolor);
 	}
 
-	//text = va("(F%i)", index + 7);
-	//CG_Text_Paint(x + 5, y + (PLAYER_LIST_HEIGHT / 4) + 2.0f, 0.12f, hcolor, text, 0, 0, ITEM_TEXTSTYLE_NORMAL);
+	text = va("(F%i)", index + 7);
+	CG_Text_Paint(x + 5, y + (PLAYER_LIST_HEIGHT / 4) + 2.0f, 0.12f, hcolor, text, 0, 0, ITEM_TEXTSTYLE_NORMAL);
 
 	// draw class
 	CG_DrawPic(bottomRowX - 16, y + (PLAYER_LIST_HEIGHT * 0.75f) - 6, 12, 12, cgs.media.classPics[cg_entities[player->clientNum].currentState.teamNum]);
@@ -770,7 +771,7 @@ void CG_DrawShoutcastPlayerStatus(void)
 	{
 		textWidth = 110;
 	}
-	CG_Text_Paint(nameBoxX + (nameBoxWidth / 2) - (textWidth / 2), nameBoxY + (nameBoxHeight / 2) + (textHeight / 2), 0.19f, colorWhite, name, 0, 20, ITEM_TEXTSTYLE_NORMAL);
+	CG_Text_Paint(nameBoxX + (nameBoxWidth / 2) - (textWidth / 2) - 5, nameBoxY + (nameBoxHeight / 2) + (textHeight / 2), 0.19f, colorWhite, name, 0, 20, ITEM_TEXTSTYLE_NORMAL);
 
 	// draw country flag
 	WM_SE_DrawFlags(nameBoxX + nameBoxWidth - 18, nameBoxY + (nameBoxHeight / 2) + 3, 1, player->clientNum);
@@ -1159,101 +1160,44 @@ void CG_DrawShoutcastTimer(void)
 	}
 	CG_DrawShoutcastTeamNames();
 
+	CG_Text_Paint(5, 475, 0.12f, colorYellow, inputMode, 0, 0, 0); // show input mode toggle info
+
 	//return y += TINYCHAR_HEIGHT;
 }
-
-/**
-* @brief CG_DrawShoutcastPowerups
-*/
-//void CG_DrawShoutcastPowerups(void)
-//{
-//	if (cg.flagIndicator & (1 << PW_REDFLAG))
-//	{
-//		if (cg.redFlagCounter > 0)
-//		{
-//			CG_DrawPic(POWERUPS_X, POWERUPS_Y, POWERUPS_WIDTH, POWERUPS_HEIGHT, cgs.media.objectiveTeamShader);
-//		}
-//		else
-//		{
-//			CG_DrawPic(POWERUPS_X, POWERUPS_Y, POWERUPS_WIDTH, POWERUPS_HEIGHT, cgs.media.objectiveDroppedShader);
-//		}
-//	}
-//	else if (cg.flagIndicator & (1 << PW_BLUEFLAG))
-//	{
-//		if (cg.blueFlagCounter > 0)
-//		{
-//			CG_DrawPic(POWERUPS_X, POWERUPS_Y, POWERUPS_WIDTH, POWERUPS_HEIGHT, cgs.media.objectiveTeamShader);
-//		}
-//		else
-//		{
-//			CG_DrawPic(POWERUPS_X, POWERUPS_Y, POWERUPS_WIDTH, POWERUPS_HEIGHT, cgs.media.objectiveDroppedShader);
-//		}
-//	}
-//}
 
 /**
 * @brief CG_ToggleShoutcasterMode
 *        set event handling to CGAME_EVENT_SHOUTCAST so we can listen to keypresses
 * @param[in] shoutcaster
 */
-//void CG_ToggleShoutcasterMode(int shoutcaster)
-//{
-//	if (shoutcaster)
-//	{
-//		CG_EventHandling(CGAME_EVENT_SHOUTCAST, qfalse);
-//	}
-//	else
-//	{
-//		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
-//	}
-//}
-
-/**
-* @brief CG_ShoutcastCheckKeyCatcher
-*
-* @details track the moment when key catcher is changed away from KEYCATCH_UI
-*          so we can set back event handling to CGAME_EVENT_SHOUTCAST
-*          and key catcher to KEYCATCH_CGAME for shoutcaster follow keybinds
-*
-* @param[in] keycatcher
-*/
-//void CG_ShoutcastCheckKeyCatcher(int keycatcher)
-//{
-//	// going out of ui menu
-//	if (cgs.clientinfo[cg.clientNum].shoutStatus && cgs.eventHandling == CGAME_EVENT_NONE &&
-//		cg.snap->ps.pm_type != PM_INTERMISSION && !(keycatcher & KEYCATCH_UI) && (cg.lastKeyCatcher & KEYCATCH_UI))
-//	{
-//		CG_ToggleShoutcasterMode(1);
-//	}
-//
-//	// going out of limbo menu
-//	if (cgs.clientinfo[cg.clientNum].shoutStatus && cgs.eventHandling == CGAME_EVENT_NONE && !(keycatcher & KEYCATCH_UI))
-//	{
-//		CG_ToggleShoutcasterMode(1);
-//	}
-//
-//	// resolution changes don't automatically close the ui menus but show confirmation window after vid_restart
-//	// so need to turn off shoutcast event handling otherwise mouse cursor will not work
-//	if (cgs.clientinfo[cg.clientNum].shoutStatus && cgs.eventHandling == CGAME_EVENT_SHOUTCAST && (keycatcher & KEYCATCH_UI))
-//	{
-//		CG_ToggleShoutcasterMode(0);
-//	}
-//}
+void CG_ToggleShoutcasterMode(int shoutcaster)
+{
+	if (shoutcaster)
+	{
+		CG_EventHandling(CGAME_EVENT_SHOUTCAST, qfalse);
+		inputMode = "Input Mode: Shoutcast";
+	}
+	else
+	{
+		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+		inputMode = "Input Mode: Normal";
+	}
+}
 
 /**
 * @brief CG_Shoutcast_KeyHandling
 * @param[in] _key
 * @param[in] down
 */
-//qboolean CG_Shoutcast_KeyHandling(int key, qboolean down)
-//{
-//	if (down)
-//	{
-//		return CG_ShoutcastCheckExecKey(key, qtrue);
-//	}
-//
-//	return qfalse;
-//}
+qboolean CG_Shoutcast_KeyHandling(int key, qboolean down)
+{
+	if (down)
+	{
+		return CG_ShoutcastCheckExecKey(key, qtrue, down);
+	}
+
+	return qfalse;
+}
 
 /**
 * @brief CG_ShoutcastCheckExecKey
@@ -1261,29 +1205,47 @@ void CG_DrawShoutcastTimer(void)
 * @param[in] doaction
 * @return
 */
-//qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction)
-//{
-//	if (key == K_ESCAPE)
-//	{
-//		return qtrue;
-//	}
-//
-//	if ((key & K_CHAR_FLAG))
-//	{
-//		return qfalse;
-//	}
-//
-//	key &= ~K_CHAR_FLAG;
-//
-//	if (key >= K_F1 && key <= K_F12)
-//	{
-//		if (doaction)
-//		{
-//			trap_SendClientCommand(va("follow %d", players[key - K_F1]));
-//		}
-//
-//		return qtrue;
-//	}
-//
-//	return qfalse;
-//}
+qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction, qboolean down)
+{
+	if (cg.lastKeyCatcher & KEYCATCH_CONSOLE)
+		return qfalse;
+
+	if (key == K_ESCAPE)
+	{
+		return qtrue;
+	}
+	else if (key == K_MOUSE1)
+	{
+		trap_SendClientCommand("follownext");
+		return qtrue;
+	}
+	else if (key == K_MOUSE2)
+	{
+		trap_SendClientCommand("followprev");
+		return qtrue;
+	}
+	else if (key == K_ENTER) // exit shoutcast input mode and do free look
+	{
+		CG_ToggleShoutcasterMode(0);
+		trap_SendClientCommand("team s");
+		return qtrue;
+	}
+	else if ((key & K_CHAR_FLAG))
+	{
+		return qfalse;
+	}
+
+	key &= ~K_CHAR_FLAG;
+
+	if (key >= K_F1 && key <= K_F12)
+	{
+		if (doaction)
+		{
+			trap_SendClientCommand(va("follow %d", players[key - K_F1]));
+		}
+
+		return qtrue;
+	}
+
+	return qfalse;
+}

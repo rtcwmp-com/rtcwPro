@@ -499,6 +499,11 @@ static void CG_SetRedScore_f(void)
 	trap_Cvar_Set("cg_shoutcastRedScore", score);
 }
 
+static void CG_ToggleShoutcastFollow_f(void)
+{
+	CG_ToggleShoutcasterMode(1);
+}
+
 /*
 ===================
 CG_DumpLocation_f
@@ -900,6 +905,7 @@ static consoleCommand_t commands[] = {
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
 	{ "setbluescore", CG_SetBlueScore_f },
 	{ "setredscore", CG_SetRedScore_f },
+	{ "scsfollow", CG_ToggleShoutcastFollow_f },
 	// RTCWPro
 
 	// Arnout
