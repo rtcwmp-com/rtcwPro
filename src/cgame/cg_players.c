@@ -1260,20 +1260,11 @@ void CG_NewClientInfo( int clientNum ) {
 	}
 
 	// RtcwPro Shoutcaster toggle
-	// changed this to a command/bind
-	//if (clientNum == cg.clientNum && newInfo.shoutStatus != ci->shoutStatus)
-	//{
-	//	if (newInfo.shoutStatus <= 0)
-	//	{
-	//		CG_Printf("[cgnotify]^3*** You have been stripped of your shoutcaster status! ***\n");
-	//	}
-	//	else
-	//	{
-	//		CG_Printf("[cgnotify]^2*** You have been authorized \"shoutcaster\" status ***\n");
-	//	}
-
-	//	CG_ToggleShoutcasterMode(newInfo.shoutStatus);
-	//}
+	// if shoutcast logs out turn off shoutcast mode
+	if (clientNum == cg.clientNum && !newInfo.shoutStatus && newInfo.shoutStatus != ci->shoutStatus)
+	{
+		CG_ToggleShoutcasterMode(0);
+	}
 
 	// RTCWPro - autoexec
 	if (!cg.demoPlayback) {

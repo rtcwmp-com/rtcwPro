@@ -501,7 +501,8 @@ static void CG_SetRedScore_f(void)
 
 static void CG_ToggleShoutcastFollow_f(void)
 {
-	CG_ToggleShoutcasterMode(1);
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		CG_ToggleShoutcasterMode(1);
 }
 
 /*
