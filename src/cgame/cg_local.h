@@ -1249,7 +1249,7 @@ typedef struct {
 	pmoveExt_t pmext;
 
 	// RtcwPro shoutcast overlay
-	//int lastKeyCatcher;
+	int lastKeyCatcher;
 } cg_t;
 
 
@@ -2412,9 +2412,6 @@ qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 qhandle_t CG_StatusHandle( int task );
 void CG_Fade( int r, int g, int b, int a, float time );
-void CG_ShoutcasterItems();
-void CG_ShoutcasterDynamite(int num);
-void CG_PlayerAmmoValue(int* ammo, int* clips, int* akimboammo, vec4_t** colorAmmo /*, vec4_t **colorClip*/);
 
 // - Reinforcement offset
 //int CG_CalculateReinfTime(void);
@@ -2782,11 +2779,16 @@ void CG_DrawShoutcastPlayerStatus(void);
 void CG_DrawShoutcastTimer(void);
 //void CG_DrawShoutcastPowerups(void);
 void CG_RequestPlayerStats(int clientNum);
+void CG_ShoutcasterItems();
+void CG_ShoutcasterDynamite(int num);
+void CG_PlayerAmmoValue(int* ammo, int* clips, int* akimboammo, vec4_t** colorAmmo /*, vec4_t **colorClip*/);
 
 void CG_ToggleShoutcasterMode(int shoutcaster);
-void CG_ShoutcastCheckKeyCatcher(int keycatcher);
-//qboolean CG_Shoutcast_KeyHandling(int key, qboolean down);
-//qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction);
+//void CG_ShoutcastCheckKeyCatcher(int keycatcher);
+qboolean CG_Shoutcast_KeyHandling(int key, qboolean down);
+qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction, qboolean down);
+
+//qboolean CG_ShoutcastKeyHandler(int key);
 
 //===============================================
 

@@ -2928,9 +2928,10 @@ static void CG_DrawCrosshairNames( void ) {
 	}
 
 	// draw the health bar
-	playerHealth = cg.identifyClientHealth;
+	playerHealth = cgs.clientinfo[cg.crosshairClientNum].health;
 
-	if ( cg.crosshairClientNum == cg.identifyClientNum ) {
+	if ( cg.crosshairClientNum >= 0 && playerHealth >= 0 )
+	{
 		barFrac = (float)playerHealth / 100;
 
 		if ( barFrac > 1.0 ) {

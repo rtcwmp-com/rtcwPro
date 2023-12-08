@@ -1,5 +1,5 @@
 //#include "../game/g_local.h"
-#include "../qcommon/q_shared.h"
+#include "q_shared.h"
 #include "../game/g_shared.h"
 #include "qcommon.h"
 #include "http.h"

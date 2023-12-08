@@ -1836,14 +1836,12 @@ extern void CG_SetupDlightstyles(void);
 /**
 * @brief CG_SetLastKeyCatcher
 */
-//static void CG_SetLastKeyCatcher(void)
-//{
-//	int keyCatcher = trap_Key_GetCatcher();
-//
-//	CG_ShoutcastCheckKeyCatcher(keyCatcher);
-//
-//	cg.lastKeyCatcher = keyCatcher;
-//}
+static void CG_SetLastKeyCatcher(void)
+{
+	int keyCatcher = trap_Key_GetCatcher();
+
+	cg.lastKeyCatcher = keyCatcher;
+}
 
 /*
 =================
@@ -2059,7 +2057,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 	}
 
-	//CG_SetLastKeyCatcher();
+	CG_SetLastKeyCatcher();
 
 	DEBUGTIME
 

@@ -8,7 +8,7 @@ CFLAGS =  -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -m32
 LDFLAGS = -I./../qcommon/jansson 
 #-ljansson
 
-SOURCES = $(shell ls  ../qcommon/jansson/*.c g_*.c q_*.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c  ../qcommon/crypto/sha-1/sha1.c )
+SOURCES = $(shell ls  ../qcommon/jansson/*.c g_*.c ../qcommon/q_math.c ../qcommon/q_shared.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c  ../qcommon/crypto/sha-1/sha1.c )
 #SOURCES = $(shell ls g_*.c q_*.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c  ../qcommon/crypto/sha-1/sha1.c )
 MODULES = $(SOURCES:.c=.o)
 

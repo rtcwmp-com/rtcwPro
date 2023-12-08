@@ -803,6 +803,8 @@ void CL_Disconnect( qboolean showMainMenu ) {
 	// shutting down the client so enter full screen ui mode
 	Cvar_Set( "r_uiFullScreen", "1" );
 
+	Cvar_Set("cl_bypassmouseinput", "0"); // RtcwPro if user has shoutcast input mode on, then disconnects we don't want to lose mouse control
+
 	if ( clc.demorecording ) {
 		CL_StopRecord_f();
 	}

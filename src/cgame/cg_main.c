@@ -2906,10 +2906,10 @@ L0 - we'll need this later on ..
 */
 qboolean CG_CheckExecKey(int key) {
 
-	//if (cgs.clientinfo[cg.clientNum].shoutStatus)
-	//{
-	//	return CG_ShoutcastCheckExecKey(key, qfalse);
-	//}
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		return CG_ShoutcastCheckExecKey(key, qfalse, qfalse);
+	}
 
 	return qfalse;
 }

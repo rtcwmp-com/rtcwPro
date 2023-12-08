@@ -15,7 +15,7 @@
 * will fill a supplied 16-byte array with the digest.
 */
 #include <stdint.h>
-#include "../qcommon/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 typedef struct MD5Context {
