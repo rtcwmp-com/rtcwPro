@@ -5,7 +5,7 @@ CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce \
 -DWIN32 -D_WINDOWS -DC_ONLY -DGAMEDLL
 
-SOURCES = $(shell ls g_*.c q_*.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c ../qcommon/crypto/sha-1/sha1.c)
+SOURCES = $(shell ls g_*.c ../qcommon/q_math.c ../qcommon/q_shared.c ai_*.c bg_animation.c bg_misc.c bg_pmove.c bg_stats.c bg_slidemove.c ../botai/*.c ../qcommon/crypto/sha-1/sha1.c)
 MODULES = $(SOURCES:.c=.o)
 
 

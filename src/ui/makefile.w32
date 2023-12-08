@@ -4,7 +4,7 @@ CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce \
 -DWIN32 -D_WINDOWS -D_MBCS -D_USRDLL -DUI_EXPORTS -DC_ONLY
 
-SOURCES = $(shell ls ui_*.c ../game/bg_misc.c ../game/q_math.c ../game/q_shared.c)
+SOURCES = $(shell ls ui_*.c ../game/bg_misc.c ../qcommon/q_math.c ../qcommon/q_shared.c)
 MODULES = $(SOURCES:.c=.o)
 
 all: clean gameclean ui_mp_x86.dll
