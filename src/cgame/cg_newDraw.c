@@ -2734,6 +2734,10 @@ void CG_EventHandling( int type, qboolean forced )
 
 void CG_KeyEvent( int key, qboolean down ) 
 {
+	if (!down) {
+		return;
+	}
+
 	// OSPx - Demo..
 	switch (cgs.eventHandling)
 	{
@@ -2750,10 +2754,6 @@ void CG_KeyEvent( int key, qboolean down )
 			return;
 		default:
 			break;
-	}
-
-	if (!down) {
-		return;
 	}
 
 	if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
