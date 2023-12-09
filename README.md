@@ -8,7 +8,7 @@ Main objective: create a competition mod similar to OSP with updates for tournam
 
 To run a RtcwPro server (Linux only) you may use Msh Docker available here: https://github.com/msh100/rtcw
 
-To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.htm
+To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.php
 
 **Change Log**
  - 1.0/1.0.1 [changelog](changelog/1.0-changelog.txt)
