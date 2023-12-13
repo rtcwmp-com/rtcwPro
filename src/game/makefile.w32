@@ -12,6 +12,8 @@ MODULES = $(SOURCES:.c=.o)
 all: clean gameclean qagame_mp_x86.dll
 
 gameclean:
+	rm -rf ../qcommon/q_math.o
+	rm -rf ../qcommon/q_shared.o
 	rm -rf ../botai/*.o
 	rm -rf ../qcommon/crypto/sha-1/*.o
 
