@@ -13,6 +13,8 @@ MODULES = $(SOURCES:.c=.o)
 all: clean gameclean cgame.mp.i386.so
 
 gameclean:
+	rm -rf ../qcommon/q_math.o
+	rm -rf ../qcommon/q_shared.o
 	rm -rf ../game/*.o ../ui/*.o
 
 cgame.mp.i386.so: $(MODULES)
