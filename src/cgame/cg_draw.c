@@ -205,7 +205,8 @@ void CG_Text_Paint( float x, float y, float scale, vec4_t color, const char *tex
 	}
 	useScale = scale * font->glyphScale;
 
-	color[3] *= cg_hudAlpha.value;  // (SA) adjust for cg_hudalpha
+	if (!cgs.clientinfo[cg.clientNum].shoutStatus)
+		color[3] *= cg_hudAlpha.value;  // (SA) adjust for cg_hudalpha
 
 	if ( text ) {
 		const char *s = text;

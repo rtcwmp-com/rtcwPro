@@ -422,6 +422,7 @@ vmCvar_t cg_shoutcastDrawHealth;
 vmCvar_t cg_shoutcastGrenadeTrail;
 
 vmCvar_t cg_showLimboMessage;
+vmCvar_t cg_teamObituaryColors;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -758,7 +759,10 @@ cvarTable_t cvarTable[] = {
 	{ &cg_shoutcastGrenadeTrail,    "cg_shoutcastGrenadeTrail",    "0",           CVAR_ARCHIVE },
 
 	// show/hide limbo message while dead
-	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE }
+	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE },
+
+	// custom kill feed colors
+	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 

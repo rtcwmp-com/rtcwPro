@@ -445,16 +445,12 @@ void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int 
 		} // End
 	}
 
-	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
-
 	// broadcast the death event to everyone
 	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
 	ent->s.eventParm = meansOfDeath;
 	ent->s.otherEntityNum = self->s.number;
 	ent->s.otherEntityNum2 = killer;
 	ent->r.svFlags = SVF_BROADCAST; // send to everyone
-
-	//}
 
 	self->enemy = attacker;
 

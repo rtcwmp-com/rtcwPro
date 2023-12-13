@@ -2251,6 +2251,7 @@ extern vmCvar_t cg_shoutcastDrawHealth;
 extern vmCvar_t cg_shoutcastGrenadeTrail;
 
 extern vmCvar_t cg_showLimboMessage; // show/hide limbo message while dead
+extern vmCvar_t cg_teamObituaryColors; // custom color in kill feed
 
 //
 // cg_main.c
