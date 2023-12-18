@@ -724,7 +724,7 @@ static void CG_GrenadeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 
 		for (; t <= ent->trailTime; t += step)
 		{
-			BG_EvaluateTrajectory(&es->pos, t, origin, qfalse, es->effect2Time);
+			BG_EvaluateTrajectory(&es->pos, t, origin);
 			ent->headJuncIndex = CG_AddTrailJunc(ent->headJuncIndex,
 			                                     cgs.media.railCoreShader,
 			                                     startTime,
