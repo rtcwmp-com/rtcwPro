@@ -82,7 +82,7 @@ const char  *CG_PlaceString( int rank ) {
 	return str;
 }
 
-static ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, char force)
+static ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, qboolean teamKill)
 {
 	clientInfo_t* self = &cgs.clientinfo[cg.clientNum];
 	Q_CleanStr(name);
@@ -91,23 +91,56 @@ static ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, char
 
 	if (self->team != TEAM_SPECTATOR)
 	{
-		if (ci->team != self->team)
+		int i = 0;
+		while (OSP_Colortable[i].colorname != NULL)
 		{
-			name[1] = '1';
-		}
-		else
-		{
-			name[1] = '2';
+			if (ci->team != self->team)
+			{
+				if (teamKill)
+				{
+					if (Q_stricmp(cg_teamObituaryColorEnemyTK.string, OSP_Colortable[i].colorname) == 0)
+					{
+						name[1] = *OSP_Colortable[i].colorCode;
+						break;
+					}
+				}
+				else
+				{
+					if (Q_stricmp(cg_teamObituaryColorEnemy.string, OSP_Colortable[i].colorname) == 0)
+					{
+						name[1] = *OSP_Colortable[i].colorCode;
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (teamKill)
+				{
+					if (Q_stricmp(cg_teamObituaryColorSameTK.string, OSP_Colortable[i].colorname) == 0)
+					{
+						name[1] = *OSP_Colortable[i].colorCode;
+						break;
+					}
+				}
+				else
+				{
+					if (Q_stricmp(cg_teamObituaryColorSameTK.string, OSP_Colortable[i].colorname) == 0)
+					{
+						name[1] = *OSP_Colortable[i].colorCode;
+						break;
+					}
+				}
+			}
+			i++;
 		}
 	}
 	else
 	{
-		name[1] = '3';
-	}
-
-	if (force)
-	{
-		name[1] = force;
+		if (ci->team == TEAM_BLUE)
+			name[1] = '4'; // blue
+		else
+			name[1] = '1'; // red
 	}
 }
 
@@ -158,7 +191,7 @@ static void CG_Obituary( entityState_t *ent ) {
 
 	if (cg_teamObituaryColors.integer)
 	{
-		CG_ColorObituaryEntName(ci, targetName, ca && ca->team == ci->team ? '4' : 0);
+		CG_ColorObituaryEntName(ci, targetName, ci->team == ca->team);
 	}
 
 	strcat( targetName, S_COLOR_WHITE );
@@ -292,7 +325,7 @@ static void CG_Obituary( entityState_t *ent ) {
 
 		if (cg_teamObituaryColors.integer)
 		{
-			CG_ColorObituaryEntName(ca, attackerName, ca && ca->team == ci->team ? '4' : 0);
+			CG_ColorObituaryEntName(ca, attackerName, ci->team == ca->team);
 		}
 
 		strcat( attackerName, S_COLOR_WHITE );

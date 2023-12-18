@@ -2250,8 +2250,12 @@ extern vmCvar_t cg_shoutcastTeamNameBlue;
 extern vmCvar_t cg_shoutcastDrawHealth;
 extern vmCvar_t cg_shoutcastGrenadeTrail;
 
-extern vmCvar_t cg_showLimboMessage; // show/hide limbo message while dead
-extern vmCvar_t cg_teamObituaryColors; // custom color in kill feed
+extern vmCvar_t cg_showLimboMessage;			// show/hide limbo message while dead
+extern vmCvar_t cg_teamObituaryColors;			// custom colors in kill feed
+extern vmCvar_t cg_teamObituaryColorSame;		// same team color
+extern vmCvar_t cg_teamObituaryColorSameTK;		// same team TK color
+extern vmCvar_t cg_teamObituaryColorEnemy;		// enemy team color
+extern vmCvar_t cg_teamObituaryColorEnemyTK;	// enemy team TK color
 
 //
 // cg_main.c

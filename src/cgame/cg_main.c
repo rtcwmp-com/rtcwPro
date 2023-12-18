@@ -423,6 +423,10 @@ vmCvar_t cg_shoutcastGrenadeTrail;
 
 vmCvar_t cg_showLimboMessage;
 vmCvar_t cg_teamObituaryColors;
+vmCvar_t cg_teamObituaryColorSame;
+vmCvar_t cg_teamObituaryColorSameTK;
+vmCvar_t cg_teamObituaryColorEnemy;
+vmCvar_t cg_teamObituaryColorEnemyTK;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -762,7 +766,11 @@ cvarTable_t cvarTable[] = {
 	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE },
 
 	// custom kill feed colors
-	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE }
+	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "2", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "<", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "1", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "?", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
