@@ -4453,34 +4453,27 @@ void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int tim
 // Crosshairs
 //
 
-// Only used locally
-typedef struct {
-	char *colorname;
-	vec4_t *color;
-} colorTable_t;
-
-// Colors for crosshairs
-colorTable_t OSP_Colortable[] =
+const colorTable_t OSP_Colortable[] =
 {
-	{ "white", &colorWhite },
-	{ "red", &colorRed },
-	{ "green", &colorGreen },
-	{ "blue", &colorBlue },
-	{ "yellow", &colorYellow },
-	{ "magenta", &colorMagenta },
-	{ "cyan", &colorCyan },
-	{ "orange", &colorOrange },
-	{ "mdred", &colorMdRed },
-	{ "mdgreen", &colorMdGreen },
-	{ "dkgreen", &colorDkGreen },
-	{ "mdcyan", &colorMdCyan },
-	{ "mdyellow", &colorMdYellow },
-	{ "mdorange", &colorMdOrange },
-	{ "mdblue", &colorMdBlue },
-	{ "ltgrey", &colorLtGrey },
-	{ "mdgrey", &colorMdGrey },
-	{ "dkgrey", &colorDkGrey },
-	{ "black", &colorBlack },
+	{ "white", &colorWhite, '7' },
+	{ "red", &colorRed, '1' },
+	{ "green", &colorGreen, '2' },
+	{ "blue", &colorBlue, '4' },
+	{ "yellow", &colorYellow, '3' },
+	{ "magenta", &colorMagenta, '6' },
+	{ "cyan", &colorCyan, '5' },
+	{ "orange", &colorOrange, '8' },
+	{ "mdred", &colorMdRed, '?' },
+	{ "mdgreen", &colorMdGreen, '<' },
+	{ "dkgreen", &colorDkGreen, 'h' },
+	{ "mdcyan", &colorMdCyan, 'b' },
+	{ "mdyellow", &colorMdYellow, '=' },
+	{ "mdorange", &colorMdOrange, 'x' },
+	{ "mdblue", &colorMdBlue, '>'},
+	{ "ltgrey", &colorLtGrey, ':'},
+	{ "mdgrey", &colorMdGrey, '9' },
+	{ "dkgrey", &colorDkGrey, 'y' },
+	{ "black", &colorBlack, '0' },
 	{ NULL, NULL }
 };
 

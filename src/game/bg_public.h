@@ -1854,4 +1854,14 @@ char* BG_GetClass(int classNum);
 #define HITSOUND_BODY 2
 #define HITSOUND_TEAM 4
 
+
+typedef struct {
+	char* colorname;
+	vec4_t* color;
+	char colorCode[1];
+} colorTable_t;
+
+// Colors for crosshairs
+extern const colorTable_t OSP_Colortable[];
+
 #endif // ! ___BG_PUBLIC_H
