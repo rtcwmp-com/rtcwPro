@@ -767,10 +767,10 @@ cvarTable_t cvarTable[] = {
 
 	// custom kill feed colors
 	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE },
-	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "2", CVAR_ARCHIVE },
-	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "<", CVAR_ARCHIVE },
-	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "1", CVAR_ARCHIVE },
-	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "?", CVAR_ARCHIVE }
+	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "green", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "drgreen", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "red", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "mdred", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
