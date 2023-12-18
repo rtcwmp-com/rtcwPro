@@ -1396,6 +1396,12 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 
 void G_writeChatEvent(gentity_t* agent, const char* chatText)
 {
+    // if client wrote same thing as their last chat return to prevent spamming gamelog
+    if (!Q_stricmp(agent->client->sess.lastChatText, chatText))
+        return;
+
+    agent->client->sess.lastChatText = chatText;
+
     char* s;
     json_t* jdata = json_object();
     json_t* event = json_object();

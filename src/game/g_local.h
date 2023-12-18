@@ -580,6 +580,7 @@ typedef struct {
 
 	int clientFlags;		// Sort some stuff based upon user settings
 	int specSpeed;
+	char* lastChatText;		// prevent spam chat text being saved to stats gamelog
 } clientSession_t;
 
 //
