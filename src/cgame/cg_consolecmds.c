@@ -782,7 +782,10 @@ static void CG_TimerSet_f(void) {
 		return;
 	}
 
-	if (trap_Argc() == 1)
+	trap_Cvar_Set("cg_spawnTimer_period", "30"); // just set a default value - cg_draw will use cg_red/bluelimbotime
+	trap_Cvar_Set("cg_spawnTimer_set", va("%i", (cg.time - cgs.levelStartTime)));
+
+	/*if (trap_Argc() == 1)
 	{
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
@@ -812,6 +815,7 @@ static void CG_TimerSet_f(void) {
 	{
 		CG_Printf("Usage: timerSet [seconds]\n");
 	}
+	*/
 }
 
 /**

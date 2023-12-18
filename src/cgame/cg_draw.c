@@ -1153,8 +1153,8 @@ static float CG_DrawEnemyTimer(float y) {
 
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) { 
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) { 
-			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
-				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+			//int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
+			int period = (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
 
 			if (period > 0) { // prevent division by 0 for weird cases like limbtotime < 1000
 				seconds = msec / 1000;
@@ -1389,8 +1389,8 @@ static float CG_DrawProEnemyTimer(float y) {
 
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) {
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer :
-				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+			//int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer :
+			int period = (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
 
 			if (period > 0) { // prevent division by 0 for weird cases like limbtotime < 1000
 				seconds = msec / 1000;
