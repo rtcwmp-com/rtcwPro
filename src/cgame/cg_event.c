@@ -125,7 +125,7 @@ static ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, qboo
 				}
 				else
 				{
-					if (Q_stricmp(cg_teamObituaryColorSameTK.string, OSP_Colortable[i].colorname) == 0)
+					if (Q_stricmp(cg_teamObituaryColorSame.string, OSP_Colortable[i].colorname) == 0)
 					{
 						name[1] = *OSP_Colortable[i].colorCode;
 						break;
