@@ -1400,7 +1400,7 @@ void G_writeChatEvent(gentity_t* agent, const char* chatText)
     if (!Q_stricmp(agent->client->sess.lastChatText, chatText))
         return;
 
-    agent->client->sess.lastChatText = chatText;
+    agent->client->sess.lastChatText = (char *)chatText;
 
     char* s;
     json_t* jdata = json_object();
