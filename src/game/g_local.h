@@ -685,6 +685,8 @@ typedef struct {
 	int	alternatePing;
 	int	pingsamples[NUM_PING_SAMPLES];
 	int	samplehead;
+	unsigned int pingsample_counter;
+	int deathYaw;
 
 	// temp
 	//S4NDM4NN for the stats
