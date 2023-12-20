@@ -598,6 +598,12 @@ static void CG_OffsetFirstPersonView( void ) {
 			if ( ratio > 0 ) {
 				angles[PITCH] += ratio * cg.v_dmg_pitch;
 				angles[ROLL] += ratio * cg.v_dmg_roll;
+
+				// RtcwPro print damage feedback to rtcwconsole.log
+				if (cg_debugDamage.integer)
+				{
+					LogEntry("logs/debugDamage.log", va("[%s] -> ratio [ %f ] angles[PITCH]: [ %f ] angles[ROLL] [ %f ]\n\"", getDateTime(), ratio, angles[ROLL], angles[PITCH]));
+				}
 			}
 		}
 	}
@@ -1827,6 +1833,16 @@ extern void CG_SetupDlightstyles(void);
 #define DEBUGTIME
 #endif
 
+/**
+* @brief CG_SetLastKeyCatcher
+*/
+static void CG_SetLastKeyCatcher(void)
+{
+	int keyCatcher = trap_Key_GetCatcher();
+
+	cg.lastKeyCatcher = keyCatcher;
+}
+
 /*
 =================
 CG_DrawActiveFrame
@@ -2041,6 +2057,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 	}
 
+	CG_SetLastKeyCatcher();
+
 	DEBUGTIME
 
 	// RTCWPro - complete OSP demo features
@@ -2054,4 +2072,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		cg.timein++;
 	}
 }
-

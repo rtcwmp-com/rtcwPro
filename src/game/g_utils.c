@@ -900,6 +900,22 @@ void CPSound(gentity_t* ent, char* sound) {
 
 /*
 ===========
+Global sound - Hooked under cg_announced ..
+===========
+*/
+void AAPSound(char* sound) {
+	gentity_t* ent;
+	gentity_t* te;
+
+	ent = g_entities;
+
+	te = G_TempEntity(ent->s.pos.trBase, EV_USE_ITEM15);
+	te->s.eventParm = G_SoundIndex(sound);
+	te->r.svFlags |= SVF_BROADCAST;
+}
+
+/*
+===========
 Global sound with limited range
 ===========
 */
@@ -955,64 +971,6 @@ gentity_t* GetClientEntity(gentity_t* ent, char* cNum, gentity_t** found)
 	*found = match;
 	return *found;
 }
-
-/*
-==================
-Time
-
-Returns current time.
-==================
-*/
-const char* months[12] = {
-	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-// Returns current time % date
-char* getDateTime(void) {
-	qtime_t		ct;
-	trap_RealTime(&ct);
-
-	return va("%s %02d %d %02d:%02d:%02d",
-		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
-}
-
-// Returns current date
-char* getDate(void) {
-	qtime_t		ct;
-	trap_RealTime(&ct);
-
-	return va("%02d/%s/%d", ct.tm_mday, months[ct.tm_mon], getYearFromCYear(ct.tm_year));
-}
-
-// returns month string abbreviation (i.e. Jun)
-const char* getMonthString(int monthIndex) {
-	if (monthIndex < 0 || monthIndex >= ArrayLength(months)) {
-		return "InvalidMonth";
-	}
-
-	return months[monthIndex];
-}
-
-// returns current year
-int getYearFromCYear(int cYear) {
-	return 1900 + cYear;
-}
-
-// returns the last day for that month.
-int getDaysInMonth(int monthIndex) {
-	switch (monthIndex) {
-	case 1:  // Feb
-		return 28;
-	case 3:  // Apr
-	case 5:  // Jun
-	case 8:  // Sep
-	case 10: // Nov
-		return 30;
-	default: // Jan, Mar, May, Jul, Aug, Oct, Dec
-		return 31;
-	}
-}
-// end time stuff
 
 /*
 ==================

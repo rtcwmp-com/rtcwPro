@@ -83,7 +83,8 @@ COMMONOBJS := \
 	../qcommon/common.o ../qcommon/cvar.o ../qcommon/files.o \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
-	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o
+	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o \
+	../qcommon/api_query.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -96,7 +97,7 @@ SERVEROBJS := \
 VMOBJS := \
 	../qcommon/vm.o ../qcommon/vm_interpreted.o
 SHAREDOBJS := \
-	../game/q_shared.o ../game/q_math.o
+	../qcommon/q_shared.o ../qcommon/q_math.o
 DEDOBJS := \
 	../null/null_client.o ../null/null_input.o ../null/null_snddma.o
 UNIXCLIENTOBJS := \

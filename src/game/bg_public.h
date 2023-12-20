@@ -38,11 +38,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../MAIN/ui_mp/menudef.h" // For vote options
 
+#define SPRINTTIME 20000.0f
+
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2.7" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.3" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -302,6 +304,8 @@ typedef struct {
 	float varc, harc;
 	vec3_t centerangles;
 
+	float weapHeat[MAX_WEAPONS];          // stores values for playerstate weapHeat
+
 } pmoveExt_t;   // data used both in client and server - store it here
 // generally useful for data you want to manipulate in bg_* and cgame, or bg_* and game
 // instead of playerstate to prevent different engine versions of playerstate between XP and MP
@@ -381,7 +385,7 @@ typedef enum {
 	STAT_MAX_HEALTH,                // health / armor limit, changable by handicap
 	STAT_PLAYER_CLASS,              // DHM - Nerve :: player class in multiplayer
 	STAT_CAPTUREHOLD_RED,           // JPW NERVE - red team score
-	STAT_CAPTUREHOLD_BLUE           // JPW NERVE - blue team score
+	STAT_CAPTUREHOLD_BLUE          // JPW NERVE - blue team score
 } statIndex_t;
 
 
@@ -408,13 +412,6 @@ typedef enum {
 	PERS_HWEAPON_USE,
 	// Rafael wolfkick
 	PERS_WOLFKICK
-
-	// RTCWPro - unused
-	//PERS_HITHEAD,
-	//PERS_HITBODY
-
-	// Weapon Restrictions
-	//PERS_RESTRICTEDWEAPON			// RtcwPro moved this here as other persistent values are cleared on respawn
 } persEnum_t;
 
 
@@ -464,6 +461,7 @@ typedef enum {
 #ifdef OMNIBOT
 	#define BG_PlayerMounted( eFlags ) ( ( eFlags & EF_MG42_ACTIVE ) )
 #endif
+// RtcwPro removed 	PW_BALL and PW_FIRE to keep 16 powerups for msg.c
 typedef enum {
 	PW_NONE,
 
@@ -476,17 +474,15 @@ typedef enum {
 
 	// (SA) for Wolf
 	PW_INVULNERABLE,
-	PW_FIRE,            //----(SA)
 	PW_ELECTRIC,        //----(SA)
 	PW_BREATHER,        //----(SA)
 	PW_NOFATIGUE,       //----(SA)
 
 	PW_REDFLAG,
 	PW_BLUEFLAG,
-	PW_BALL,
+	PW_CAPPEDOBJ,		// PlayerCappedDocuments
 	PW_READY,			// Ready
-	PW_BLACKOUT,		// Specklock
-
+	PW_BLACKOUT,		// Speclock
 	PW_NUM_POWERUPS
 } powerup_t;
 
@@ -686,7 +682,7 @@ extern int weapAlts[];  // defined in bg_misc.c
 int BG_MaxAmmoForWeapon(weapon_t weaponNum);
 
 #define GetAmmoTableData( ammoIndex ) ( (ammotable_t*)( &ammoTable[ammoIndex] ) )
-
+#define IS_VALID_WEAPON(w) ((w) > WP_NONE && (w) < WP_NUM_WEAPONS)
 
 //----(SA)
 // for routines that need to check if a WP_ is </=/> a given set of weapons
@@ -803,7 +799,7 @@ typedef enum {
 	EV_USE_ITEM12,
 	EV_USE_ITEM13,
 	EV_USE_ITEM14,
-	EV_USE_ITEM15,
+	EV_USE_ITEM15,			// hijacked for EV_ANNOUNCER_SOUND
 	EV_ITEM_RESPAWN,
 	EV_ITEM_POP,
 	EV_PLAYER_TELEPORT_IN,
@@ -812,9 +808,7 @@ typedef enum {
 	EV_GENERAL_SOUND,
 	EV_GLOBAL_SOUND,        // no attenuation
 	EV_GLOBAL_CLIENT_SOUND, // DHM - Nerve :: no attenuation, only plays for specified client
-	// OSPx
-	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this last to avoid OSP demo errors
-	// -OSPx
+	EV_ANNOUNCER_SOUND,		// Deals with countdown // RtcwPro keep this in place so old demo sounds work
 	EV_BULLET_HIT_FLESH,
 	EV_BULLET_HIT_WALL,
 	EV_MISSILE_HIT,
@@ -1139,8 +1133,12 @@ typedef enum {
 	TEAM_NUM_TEAMS
 } team_t;
 
+#define NO_AIRSTRIKE    1
+#define NO_ARTILLERY    2
+
 // Time between location updates
-#define TEAM_LOCATION_UPDATE_TIME       1000
+#define TEAM_LOCATION_UPDATE_TIME       500 // default 1000
+
 // L0 - OSP stats dump / weapon stat info: mapping between MOD_ and WP_ types
 typedef enum extWeaponStats_s
 {
@@ -1813,10 +1811,21 @@ int BG_AnimationIndexForString( char *string, int client );
 animation_t *BG_AnimationForString( char *string, animModelInfo_t *modelInfo );
 animation_t *BG_GetAnimationForIndex( int client, int index );
 int BG_GetAnimScriptEvent( playerState_t *ps, scriptAnimEventTypes_t event );
+char* Q_StrReplace(char* haystack, char* needle, char* newp);
 
 extern animStringItem_t animStateStr[];
 extern animStringItem_t animBodyPartsStr[];
 
+// RtcwPro logging
+void LogEntry(char* filename, char* info);
+
+// Shared Date Functions
+char* getDateTime(void);
+char* Delim_GetDateTime(void);
+char* getDate(void);
+const char* getMonthString(int monthIndex);
+int getYearFromCYear(int cYear);
+int getDaysInMonth(int monthIndex);
 
 #ifdef OMNIBOT
 qboolean BG_IsScopedWeapon( int weapon );
@@ -1829,7 +1838,8 @@ extern ammotable_t ammoTable[WP_NUM_WEAPONS];
 
 // Crosshairs
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName);
-void BG_ParseColorCvar(char* cvarString, float* color);
+void BG_ParseColorCvar(char* cvarString, float* color, float alpha);
+
 // Client flags for server processing
 #define CGF_AUTORELOAD      0x01
 #define CGF_STATSDUMP       0x02
@@ -1867,5 +1877,15 @@ char* BG_GetClass(int classNum);
 #define HITSOUND_HEAD 1
 #define HITSOUND_BODY 2
 #define HITSOUND_TEAM 4
+
+
+typedef struct {
+	char* colorname;
+	vec4_t* color;
+	char colorCode[1];
+} colorTable_t;
+
+// Colors for crosshairs
+extern const colorTable_t OSP_Colortable[];
 
 #endif // ! ___BG_PUBLIC_H

@@ -545,7 +545,7 @@ void G_ready_cmd( gentity_t *ent, qboolean state ) {
 	} else {
 		ent->client->pers.ready = state;
 		if ( !level.intermissiontime ) {
-			if ( state ) {
+			if (state) {
 				ent->client->pers.ready = qtrue;
 				ent->client->ps.powerups[PW_READY] = INT_MAX;
 			}
@@ -600,7 +600,6 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 
 		if ((cl->client->pers.ready != ready) && !level.intermissiontime) {
 			cl->client->pers.ready = ready;
-			cl->client->ps.powerups[PW_READY] = (ready ? INT_MAX : 0);
 			++p;
 		}
 	}
@@ -682,6 +681,9 @@ void pCmd_pauseHandle(gentity_t *ent, qboolean dPause) {
 		G_spawnPrintf(DP_UNPAUSING, level.time + 10, NULL);
 		AP(va("chat \"^zconsole: ^7%s has ^3Unpaused ^7a match!\n\"", tName));
 		AP(va("print \"^z>> ^7%s ^zUnpaused the match.\n\"", ent->client->pers.netname));
+		// lock the teams after unpausing
+		teamInfo[TEAM_RED].team_lock = qtrue;
+		teamInfo[TEAM_BLUE].team_lock = qtrue;
 	}
 
     if (g_gameStatslog.integer) {
@@ -786,6 +788,7 @@ qboolean playerCmds (gentity_t *ent, char *cmd ) {
 	else if(!Q_stricmp(cmd, "wstats"))				{ G_statsPrint( ent, 1 );	return qtrue;}
 	else if(!Q_stricmp(cmd, "cstats"))				{ G_clientStatsPrint( ent, 1, qtrue );	return qtrue;}
 	else if(!Q_stricmp(cmd, "stats"))				{ G_clientStatsPrint( ent, 1, qfalse );	return qtrue;}
+	else if(!Q_stricmp(cmd, "gamestats"))			{ G_gameStatsPrint(ent);	return qtrue; }
 	else if(!Q_stricmp(cmd, "sgstats"))				{ G_statsPrint( ent, 2 );	return qtrue;}
 	else if(!Q_stricmp(cmd, "stshots"))				{ G_weaponStatsLeaders_cmd( ent, qtrue, qtrue );	return qtrue;}
 	else if(!Q_stricmp(cmd, "scores"))				{ G_scores_cmd(ent);	return qtrue;}

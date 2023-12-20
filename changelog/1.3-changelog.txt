@@ -1,0 +1,13 @@
+🛠️ Changelog Highlights:
+
+- Fixed Panzer Ammo Spawn Issue: No more worries about spawning with the wrong Panzer ammo
+- Debug Logging for ConfigString Changes: We've implemented debug logging to track down the elusive issues related to te_escape2 flags. This will help us pinpoint and squash those bugs for good.
+- Colored Player Names in Stats Output: Stand out on the battlefield with colored player names in the stats output. Show your unique identity and let the enemy know who they're up against!
+- Client HTTP Downloads from RtcwPub: Say goodbye to unreliable server downloads. We've integrated client HTTP downloads from RtcwPub to ensure a smooth and efficient download experience for all players.
+- Shoutcast Overlay: Shoutcast overlay added to enhance your broadcasting and spectating experience.
+- Backed Out Changes to Sten/Venom Overheat: We're fine-tuning the balance of the Sten and Venom weapons. Expect improvements as we work to ensure a fair and enjoyable gameplay experience.
+
+🔧 Bug Fixes and Improvements:
+
+Backed out original HTTP downloads that didn't work.
+Various under-the-hood optimizations and stability improvements.

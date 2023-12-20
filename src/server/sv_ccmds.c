@@ -399,11 +399,14 @@ static void SV_MapRestart_f( void ) {
 
 	SV_RestartGameProgs();
 
+	// RTCWPro
 	// run a few frames to allow everything to settle
-	for ( i = 0 ; i < 3 ; i++ ) {
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
-		svs.time += 100;
+	for (i = 0; i < GAME_INIT_FRAMES; i++)
+	{
+		VM_Call(gvm, GAME_RUN_FRAME, svs.time);
+		svs.time += FRAMETIME;
 	}
+	// RTCWPro end
 
 	sv.state = SS_GAME;
 	sv.restarting = qfalse;
@@ -451,7 +454,7 @@ static void SV_MapRestart_f( void ) {
 
 	// run another frame to allow things to look at all the players
 	VM_Call( gvm, GAME_RUN_FRAME, svs.time );
-	svs.time += 100;
+	svs.time += FRAMETIME;
 
 	Cvar_Set( "sv_serverRestarting", "0" );
 }
@@ -956,70 +959,6 @@ static void SV_DumpUser_f( void ) {
 	Info_Print( cl->userinfo );
 }
 
-/* RTCWPro - reqSS
-===========
-L0 - SV_RequestSS
-
-Requests ScreenShot from client
-===========
-*/
-static void SV_RequestSS_f(void) {
-	client_t* cl;
-	//int quality = 45;
-
-	if (!com_sv_running->integer)
-	{
-		Com_Printf("Server is not running.\n");
-		return;
-	}
-
-	/*
-	if (!sv_pure->integer) {
-		Com_Printf("SS can only be requested when server is running as pure.\n");
-		return;
-	}
-	*/
-
-	/*if (Cmd_Argc() < 2)
-	{
-		Com_Printf("Usage: reqss <slot> <optional: jpeg quality[30-100]>\n");
-		return;
-	}*/
-
-	if (Cmd_Argc() < 1)
-	{
-		Com_Printf("Usage: reqss <slot>\n");
-		return;
-	}
-
-	/*if (Cmd_Argv(2))
-	{
-		quality = atoi(Cmd_Argv(2));
-
-		if (quality > 100)
-			quality = 100;
-		else if (quality < 30)
-			quality = 30;
-	}*/
-
-	cl = SV_GetPlayerByNum();
-
-	if (!cl)
-	{
-		Com_Printf("Invalid client id!\n");
-		return;
-	}
-
-	if (cl->ping < 0 || cl->ping >= 999)
-	{
-		Com_Printf("Invalid client id!\n");
-		return;
-	}
-
-	//SV_SendSSRequest(cl->gentity->s.clientNum, quality);
-	SV_SendSSRequest(cl->gentity->s.clientNum);
-}
-
 /*
 =================
 SV_KillServer
@@ -1134,8 +1073,6 @@ void SV_AddOperatorCommands( void ) {
 	Cmd_AddCommand("exceptdel", SV_ExceptDel_f);
 	Cmd_AddCommand("flushbans", SV_FlushBans_f);
 */
-	// reqSS
-	Cmd_AddCommand("reqss", SV_RequestSS_f);
 
 }
 

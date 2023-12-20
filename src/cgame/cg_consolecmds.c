@@ -37,11 +37,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
 
-// RTCWPro - minimizer
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 void CG_TargetCommand_f( void ) {
 	int targetNum;
 	char test[4];
@@ -474,6 +469,42 @@ static void CG_ResetMaxSpeed_f(void)
 	cg.resetmaxspeed = qtrue;
 }
 
+static void CG_SetBlueScore_f(void)
+{
+	char score[MAX_STRING_CHARS];
+
+	if (trap_Argc() < 2)
+	{
+		CG_Printf("Usage: setbluescore <score>\n");
+		return;
+	}
+
+	trap_Args(score, sizeof(score));
+
+	trap_Cvar_Set("cg_shoutcastBlueScore", score);
+}
+
+static void CG_SetRedScore_f(void)
+{
+	char score[MAX_STRING_CHARS];
+
+	if (trap_Argc() < 2)
+	{
+		CG_Printf("Usage: setredscore <score>\n");
+		return;
+	}
+
+	trap_Args(score, sizeof(score));
+
+	trap_Cvar_Set("cg_shoutcastRedScore", score);
+}
+
+static void CG_ToggleShoutcastFollow_f(void)
+{
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		CG_ToggleShoutcasterMode(1);
+}
+
 /*
 ===================
 CG_DumpLocation_f
@@ -533,13 +564,6 @@ static void CG_DumpLocation_f( void ) {
 			   (int) cg.snap->ps.origin[0], (int) cg.snap->ps.origin[1], (int) cg.snap->ps.origin[2] );
 }
 
-/*
-===================
-OSPx
-
-+vstr
-===================
-*/
 
 /************ L0 - OSP dump ************/
 const char *aMonths[12] = {
@@ -563,9 +587,19 @@ void CG_autoRecord_f(void) {	// Due rtcw bug we need to sync"h" first..but to av
 void CG_autoScreenShot_f(void) {
 	trap_SendConsoleCommand(va("screenshot%s %s\n", ((cg_useScreenshotJPEG.integer) ? "JPEG" : ""), CG_generateFilename()));
 }
+
+/*
+===================
+OSPx
+
++vstr
+===================
+*/
 void CG_vstrDown_f(void) {
 	if (trap_Argc() == 5) {
 		trap_SendConsoleCommand(va("vstr %s;", CG_Argv(1)));
+		//trap_SendClientCommand(va("%s", CG_Argv(0))); // client input logging
+		//trap_SendClientCommand(va("%s", CG_Argv(1))); // client input logging
 	}
 	else { CG_Printf("[cgnotify]^3Usage: ^7+vstr [down_vstr] [up_vstr]\n"); }
 }
@@ -748,7 +782,10 @@ static void CG_TimerSet_f(void) {
 		return;
 	}
 
-	if (trap_Argc() == 1)
+	trap_Cvar_Set("cg_spawnTimer_period", "30"); // just set a default value - cg_draw will use cg_red/bluelimbotime
+	trap_Cvar_Set("cg_spawnTimer_set", va("%i", (cg.time - cgs.levelStartTime)));
+
+	/*if (trap_Argc() == 1)
 	{
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
@@ -778,6 +815,7 @@ static void CG_TimerSet_f(void) {
 	{
 		CG_Printf("Usage: timerSet [seconds]\n");
 	}
+	*/
 }
 
 /**
@@ -796,27 +834,6 @@ static void CG_TimerReset_f(void)
 	}
 
 	trap_Cvar_Set("cg_spawnTimer_set", va("%d", cg.time - cgs.levelStartTime));
-}
-
-/*
-================
-RTCWPro - minimizer (windows only)
-Source: http://forums.warchestgames.com/showthread.php/24040-CODE-Tutorial-Minimize-Et-(Only-Windoof)
-================
-*/
-static void CG_Minimize_f(void)
-{
-#ifdef _WIN32
-	HWND wnd;
-
-	wnd = GetForegroundWindow();
-	if (wnd)
-	{
-		ShowWindow(wnd, SW_MINIMIZE);
-	}
-#else
-	CG_Printf(S_COLOR_RED "ERROR: minimize command is not supported on this operating system.\n");
-#endif
 }
 
 typedef struct {
@@ -890,8 +907,10 @@ static consoleCommand_t commands[] = {
 	{ "timerSet", CG_TimerSet_f },
 	{ "timerReset", CG_TimerReset_f },
 	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
-	{ "minimize", CG_Minimize_f },
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
+	{ "setbluescore", CG_SetBlueScore_f },
+	{ "setredscore", CG_SetRedScore_f },
+	{ "scsfollow", CG_ToggleShoutcastFollow_f },
 	// RTCWPro
 
 	// Arnout
@@ -1058,5 +1077,3 @@ qboolean CG_RelayCommand(char* type, int value) {
 	//}
 	return qfalse;
 }
-
-

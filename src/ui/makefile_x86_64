@@ -4,7 +4,7 @@ CFLAGS = -Wall -fno-strict-aliasing -pipe -DUSE_ICON -DARCH_STRING="x86_64" -m64
     -DUSE_LOCAL_HEADERS  -Wformat=2 -Wformat-security -Wno-format-nonliteral \
     -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -MMD -DNDEBUG -O3 -ffast-math -fPIC
 
-SOURCES = $(shell ls ui_*.c ../game/bg_misc.c ../game/bg_stats.c ../game/q_math.c ../game/q_shared.c)
+SOURCES = $(shell ls ui_*.c ../game/bg_misc.c ../game/bg_stats.c ../qcommon/q_math.c ../qcommon/q_shared.c)
 MODULES = $(SOURCES:.c=.o)
 
 all: gameclean ui.mp.x86_64.so

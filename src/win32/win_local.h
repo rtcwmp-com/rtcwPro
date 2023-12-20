@@ -64,6 +64,7 @@ void    Sys_DestroyConsole( void );
 char    *Sys_ConsoleInput( void );
 
 qboolean    Sys_GetPacket( netadr_t *net_from, msg_t *net_message );
+qboolean	Sys_GetStreamedPacket(netadr_t* net_from, msg_t* net_message); // rtcwpro
 
 // Input subsystem
 
@@ -105,12 +106,17 @@ typedef struct
 	qboolean isMinimized;
 	OSVERSIONINFO osversion;
 
+	int noborder; // rtcwpro - borderless window
+
 	// when we get a windows message, we store the time off so keyboard processing
 	// can know the exact time of an event
 	unsigned sysMsgTime;
 } WinVars_t;
 
 extern WinVars_t g_wv;
+
+#define WINDOW_STYLE_NORMAL			(WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_VISIBLE) // rtcwpro - originally WINDOW_STYLE, moved from win_glimp
+#define	WINDOW_STYLE_NOBORDER       (WS_VISIBLE | WS_POPUP) // rtcwpro - borderless window
 
 #ifdef DOOMSOUND    ///// (SA) DOOMSOUND
 #ifdef __cplusplus

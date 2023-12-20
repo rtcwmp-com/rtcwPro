@@ -91,15 +91,16 @@
     <ClCompile Include="cg_window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\q_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ui\ui_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\qcommon\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\qcommon\q_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_shoutcastoverlay.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\main\ui\menudef.h" />
@@ -118,9 +119,6 @@
     <ClInclude Include="..\ui\keycodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\game\q_shared.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tr_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -130,6 +128,7 @@
     <ClInclude Include="..\ui\ui_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\qcommon\q_shared.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />

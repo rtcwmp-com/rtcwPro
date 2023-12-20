@@ -717,24 +717,53 @@ static void CG_GrenadeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 
 	ent->trailTime = cg.time;
 
-	if ( contents & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
-		if ( contents & lastContents & CONTENTS_WATER ) {
-			CG_BubbleTrail( lastPos, origin, 2, 8 );
+	if (cgs.clientinfo[cg.clientNum].shoutStatus && cg_shoutcastGrenadeTrail.integer)
+	{
+		vec3_t colorStart = { 1.0f, 0.0f, 0.0f };
+		vec3_t colorEnd   = { 1.0f, 0.0f, 0.0f };
+
+		for (; t <= ent->trailTime; t += step)
+		{
+			BG_EvaluateTrajectory(&es->pos, t, origin);
+			ent->headJuncIndex = CG_AddTrailJunc(ent->headJuncIndex,
+			                                     cgs.media.railCoreShader,
+			                                     startTime,
+			                                     0,
+			                                     origin,
+			                                     cg_railTrailTime.integer,
+			                                     0.3f,
+			                                     0.0f,
+			                                     2,
+			                                     20,
+			                                     0,
+			                                     colorStart,
+			                                     colorEnd,
+			                                     0,
+			                                     0);
+			ent->lastTrailTime = cg.time;
 		}
-		return;
 	}
+	else
+	{
+		if ( contents & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
+			if ( contents & lastContents & CONTENTS_WATER ) {
+				CG_BubbleTrail( lastPos, origin, 2, 8 );
+			}
+			return;
+		}
 
-//----(SA)	trying this back on for DM
+	//----(SA)	trying this back on for DM
 
-	// spawn smoke junctions
-	for ( ; t <= ent->trailTime ; t += step ) {
-		BG_EvaluateTrajectory( &es->pos, t, origin );
-		ent->headJuncIndex = CG_AddSmokeJunc( ent->headJuncIndex,
-											  cgs.media.smokeTrailShader,
-											  origin,
-//												1500, 0.3, 10, 50 );
-											  1000, 0.3, 2, 20 );
-		ent->lastTrailTime = cg.time;
+		// spawn smoke junctions
+		for ( ; t <= ent->trailTime ; t += step ) {
+			BG_EvaluateTrajectory( &es->pos, t, origin );
+			ent->headJuncIndex = CG_AddSmokeJunc( ent->headJuncIndex,
+												  cgs.media.smokeTrailShader,
+												  origin,
+	//												1500, 0.3, 10, 50 );
+												  1000, 0.3, 2, 20 );
+			ent->lastTrailTime = cg.time;
+		}
 	}
 //----(SA)	end
 }
@@ -1159,6 +1188,8 @@ void CG_RegisterWeapon( int weaponNum ) {
 
 	weaponInfo->weaponIcon[0] = trap_R_RegisterShader( item->icon );
 	weaponInfo->weaponIcon[1] = trap_R_RegisterShader( va( "%s_select", item->icon ) );    // get the 'selected' icon as well
+	weaponInfo->weaponIcon[2] = trap_R_RegisterShader(va("%s_sc", item->icon));    // shoutcast overlay icon
+	weaponInfo->weaponIconScale = 1; // shoutcast overlay icon scale
 
 	// JOSEPH 4-17-00
 	weaponInfo->ammoIcon = trap_R_RegisterShader( item->ammoicon );
@@ -6206,7 +6237,7 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 // jpw
 
 	// Arnout: snap tracers for MG42 to viewangle of client when antilag is enabled
-	if ( cgs.antilag && otherEntNum2 == cg.snap->ps.clientNum && cg_entities[otherEntNum2].currentState.eFlags & EF_MG42_ACTIVE ) {
+	if ( cgs.antilag && cg_antilag.integer && otherEntNum2 == cg.snap->ps.clientNum && cg_entities[otherEntNum2].currentState.eFlags & EF_MG42_ACTIVE ) {
 		vec3_t muzzle, forward, right, up;
 		float r, u;
 		trace_t tr;

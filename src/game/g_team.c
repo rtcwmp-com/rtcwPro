@@ -359,27 +359,18 @@ const char *_GetEntityName( gentity_t *_ent );
 void Bot_Util_SendTrigger( gentity_t *_ent, gentity_t *_activator, const char *_tagname, const char *_action );
 #endif
 
-gentity_t *Team_ResetFlag( int team ) {
-	char *c;
-	gentity_t *ent, *rent = NULL;
+void Team_ResetFlag(gentity_t* ent) {
 
-	switch ( team ) {
-	case TEAM_RED:
-		c = "team_CTF_redflag";
-		break;
-	case TEAM_BLUE:
-		c = "team_CTF_blueflag";
-		break;
-	default:
-		return NULL;
-	}
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		Team_ResetFlag( &g_entities[ent->s.otherEntityNum] );
+		G_FreeEntity( ent );
+	} else {
+			
+		// ET Port for mulitple document objectives
+		ent->s.density++;
 
-	ent = NULL;
-	while ( ( ent = G_Find( ent, FOFS( classname ), c ) ) != NULL ) {
-		if ( ent->flags & FL_DROPPED_ITEM ) {
-			G_FreeEntity( ent );
-		} else {
-			rent = ent;
+		// do we need to respawn?
+		if ( ent->s.density == 1 ) {
 			RespawnItem( ent );
 		}
 	}
@@ -388,12 +379,21 @@ gentity_t *Team_ResetFlag( int team ) {
 		Bot_Util_SendTrigger( ent, NULL, va( "Flag returned %s!", _GetEntityName( rent ) ), "returned" );
 	}
 #endif
-	return rent;
+
 }
 
 void Team_ResetFlags( void ) {
-	Team_ResetFlag( TEAM_RED );
-	Team_ResetFlag( TEAM_BLUE );
+	gentity_t   *ent;
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_redflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
+
+	ent = NULL;
+	while ( ( ent = G_Find( ent, FOFS( classname ), "team_CTF_blueflag" ) ) != NULL ) {
+		Team_ResetFlag( ent );
+	}
 }
 
 void Team_ReturnFlagSound( gentity_t *ent, int team ) {
@@ -412,8 +412,10 @@ void Team_ReturnFlagSound( gentity_t *ent, int team ) {
 	te->r.svFlags |= SVF_BROADCAST;
 }
 
-void Team_ReturnFlag( int team ) {
-	Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+void Team_ReturnFlag( gentity_t *ent ) {
+	int team = ent->item->giTag == PW_REDFLAG ? TEAM_RED : TEAM_BLUE;
+	Team_ReturnFlagSound( ent, team );
+	Team_ResetFlag( ent );
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
 }
 
@@ -443,19 +445,21 @@ void Team_DroppedFlagThink( gentity_t *ent ) {
 	}
 
 	if ( ent->item->giTag == PW_REDFLAG ) {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_RED ), TEAM_RED );
+		Team_ReturnFlagSound( ent, TEAM_RED );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
-			//G_matchPrintInfo( "Axis have returned the objective!", qfalse);
-			trap_SendServerCommand( -1, "cp \"Axis have returned the objective!\" 2" );
-			//G_writeObjectiveEvent("Axis", "Axis have returned the objective", ".."  );
+			trap_SendServerCommand( -1, "cp \"^5Axis have returned the objective!\" 2" );
+			AP("prioritypopin \"^5Axis have returned the objective!\n\"");
 			G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 		}
 	} else if ( ent->item->giTag == PW_BLUEFLAG )     {
-		Team_ReturnFlagSound( Team_ResetFlag( TEAM_BLUE ), TEAM_BLUE );
+		Team_ReturnFlagSound( ent, TEAM_BLUE );
+		Team_ResetFlag( ent );
+		
 		if ( gm ) {
-			//G_matchPrintInfo("Allies have returned the objective!", qfalse);
-			trap_SendServerCommand( -1, "cp \"Allies have returned the objective!\" 2" );
-			//G_writeObjectiveEvent("Allied", "Allies have returned the objective", ".."  );
+			trap_SendServerCommand( -1, "cp \"^5Allies have returned the objective!\" 2" );
+			AP("prioritypopin \"^5Allies have returned the objective!\n\"");
 			G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 		}
 	}
@@ -491,8 +495,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 			if ( cl->sess.sessionTeam == TEAM_RED ) {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_secure.wav" );
-				//G_matchPrintInfo(va("Axis have returned %s!", ent->message), qfalse);
-				trap_SendServerCommand( -1, va( "cp \"Axis have returned %s!\n\" 2", ent->message ) );
+				trap_SendServerCommand( -1, va( "cp \"^5Axis have returned %s!\n\" 2", ent->message ) );
+				AP(va("prioritypopin \"^5Axis have returned %s!\n\"", ent->message));
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "axis_object_returned" );
 				}
@@ -506,8 +510,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 			} else {
 				te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_secure.wav" );
-				//G_matchPrintInfo(va("Allies have returned %s!", ent->message), qfalse);
-				trap_SendServerCommand( -1, va( "cp \"Allies have returned %s!\n\" 2", ent->message ) );
+				trap_SendServerCommand( -1, va( "cp \"^5Allies have returned %s!\n\" 2", ent->message ) );
+				AP(va("prioritypopin \"^5Allies have returned %s!\n\"", ent->message));
 				if ( gm ) {
 					G_Script_ScriptEvent( gm, "trigger", "allied_object_returned" );
 				}
@@ -531,7 +535,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		other->client->pers.teamState.flagrecovery++;
 		other->client->pers.teamState.lastreturnedflag = level.time;
 		//ResetFlag will remove this entity!  We must return zero
-		Team_ReturnFlagSound( Team_ResetFlag( team ), team );
+		Team_ReturnFlagSound( ent, team );
+		Team_ResetFlag( ent );
 		return 0;
 	}
 
@@ -540,6 +545,8 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 		return 0;
 	}
 
+	// Only CTF below
+	
 	// the flag is at home base.  if the player has the enemy
 	// flag, he's just won!
 	if ( !cl->ps.powerups[enemy_flag] ) {
@@ -633,6 +640,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	gclient_t *cl = other->client;
 	gentity_t *te, *gm;
 
+	ent->s.density--; // ET Port for multiple document objectives
+	
 	// hey, its not our flag, pick it up
 	if ( g_gametype.integer >= GT_WOLF ) {
 // JPW NERVE
@@ -646,8 +655,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 		if ( cl->sess.sessionTeam == TEAM_RED ) {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/axis/g-objective_taken.wav" );
-			//G_matchPrintInfo(va("Axis have stolen %s!", ent->message), qfalse);
-			trap_SendServerCommand( -1, va( "cp \"Axis have stolen %s!\n\" 2", ent->message ) );
+			AP(va("prioritypopin \"^1Axis have stolen %s!\n\"", ent->message));
+			trap_SendServerCommand( -1, va( "cp \"^5Axis have stolen %s!\n\" 2", ent->message ) );
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "allied_object_stolen" );
 			}
@@ -660,8 +669,8 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 #endif
 		} else {
 			te->s.eventParm = G_SoundIndex( "sound/multiplayer/allies/a-objective_taken.wav" );
-			//G_matchPrintInfo(va("Allies have stolen %s!", ent->message), qfalse);
-			trap_SendServerCommand( -1, va( "cp \"Allies have stolen %s!\n\" 2", ent->message ) );
+			AP(va("prioritypopin \"^1Allies have stolen %s!\n\"", ent->message));
+			trap_SendServerCommand( -1, va( "cp \"^5Allies have stolen %s!\n\" 2", ent->message ) );
 
 			if ( gm ) {
 				G_Script_ScriptEvent( gm, "trigger", "axis_object_stolen" );
@@ -683,14 +692,24 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	}
 
 	if ( team == TEAM_RED ) {
-		cl->ps.powerups[PW_REDFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_REDFLAG] = INT_MAX;
 	} else {
-		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX; // flags never expire
+		cl->ps.powerups[PW_BLUEFLAG] = INT_MAX;
+	} // flags never expire
 
+	// store the entitynum of our original flag spawner
+	if ( ent->flags & FL_DROPPED_ITEM ) {
+		cl->flagParent = ent->s.otherEntityNum;
+	} else {
+		cl->flagParent = ent->s.number;
 	}
 	cl->pers.teamState.flagsince = level.time;
 
-	return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	if ( ent->s.density > 0 ) {
+		return 1; // We have more flags to give out, spawn back quickly
+	} else {
+		return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
+	}
 }
 
 int Pickup_Team( gentity_t *ent, gentity_t *other ) {
@@ -1024,42 +1043,49 @@ Format:
 
 ==================
 */
-void TeamplayInfoMessage( gentity_t *ent ) {
-	int identClientNum, identHealth;                // NERVE - SMF
+void TeamplayInfoMessage(team_t team)
+{
+	//int identClientNum, identHealth;                // NERVE - SMF
 	char entry[1024];
 	char string[1400];
-	int stringlength;
-	int i, j;
-	gentity_t   *player;
-	int cnt;
-	int actualHealth, displayHealth, playerLimbo;
+	size_t    stringlength = 0;
+	int       i;
+	size_t    j;
+	gentity_t *player;
+	int       cnt;
+	int actualHealth, displayHealth, playerLimbo, latchPlayerType;
+	char      *bufferedData;
+	char      *tinfo; // currently 32 players in team create about max 750 chars of tinfo
+	                  // note: trap_SendServerCommand won't send tinfo > 1022 - also see string[1024]
 
 	// send the latest information on all clients
 	string[0] = 0;
-	stringlength = 0;
 
 	// Do each team for team information
-	for (i = 0, cnt = 0; i < level.numConnectedClients /*&& cnt < TEAM_MAXOVERLAY*/; i++) {
-
+	for (i = 0, cnt = 0; i < level.numConnectedClients; i++)
+	{
 		player = g_entities + level.sortedClients[i];
 
 		int playerAmmo = 0, playerAmmoClip = 0, playerWeapon = 0, playerNades = 0;
 
-		if (player->inuse && player->client->sess.sessionTeam == ent->client->sess.sessionTeam) {
-
+		if (player->inuse && player->client->sess.sessionTeam == team)
+		{
 			actualHealth = player->client->ps.stats[STAT_HEALTH]; // actual health used for gibbed status
 
 			// DHM - Nerve :: If in LIMBO, don't show followee's health
-			if (player->client->ps.pm_flags & PMF_LIMBO) {
+			if (player->client->ps.pm_flags & PMF_LIMBO)
+			{
 				displayHealth = 0;
 				playerLimbo = 1;
 			}
-			else {
+			else
+			{
 				displayHealth = player->client->ps.stats[STAT_HEALTH];
 				playerLimbo = 0;
 			}
 
-			if (actualHealth < 0) {
+			if (actualHealth < 0)
+			{
 				displayHealth = 0;
 			}
 
@@ -1068,52 +1094,88 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			playerAmmo = player->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_PINEAPPLE)];
+			latchPlayerType = (player->client->pers.cmd.mpSetup & MP_CLASS_MASK) >> MP_CLASS_OFFSET;
 
 			Com_sprintf(entry, sizeof(entry),
-				" %i %i %i %i %i %i %i %i %i %i %i",
-				level.sortedClients[i], player->client->pers.teamState.location, displayHealth, player->s.powerups, player->client->ps.stats[STAT_PLAYER_CLASS],
-				playerAmmo, playerAmmoClip, playerNades, playerWeapon, playerLimbo, player->client->pers.ready); // set ready status on each client
+				" %i %i %i %i %i %i %i %i %i %i %i %i",
+				level.sortedClients[i], 
+				player->client->pers.teamState.location, 
+				displayHealth, 
+				player->s.powerups, 
+				player->client->ps.stats[STAT_PLAYER_CLASS],
+				playerAmmo, 
+				playerAmmoClip, 
+				playerNades, 
+				playerWeapon, 
+				playerLimbo, 
+				player->client->pers.ready, 
+				latchPlayerType);
 
 			player_ready_status[level.sortedClients[i]].isReady = player->client->pers.ready; // set on the server also
 
 			j = strlen(entry);
-			if (stringlength + j > sizeof(string)) {
+			if (stringlength + j > sizeof(string) - 10) // reserve some chars for tinfo prefix
+			{
+				G_Printf("Warning: tinfo exceeds limit");
 				break;
 			}
+			
 			strcpy(string + stringlength, entry);
 			stringlength += j;
 			cnt++;
 		}
 	}
 
-	// NERVE - SMF
-	identClientNum = ent->client->ps.identifyClient;
+	bufferedData = team == TEAM_RED ? level.tinfoAxis : level.tinfoAllies;
 
-	if (g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client) {
-		identHealth = g_entities[identClientNum].health;
-	}
-	else {
-		identClientNum = -1;
-		identHealth = 0;
-	}
-	// -NERVE - SMF
+	//// NERVE - SMF
+	//identClientNum = ent->client->ps.identifyClient;
 
-	trap_SendServerCommand(ent - g_entities, va("tinfo %i %i %i%s", identClientNum, identHealth, cnt, string));
+	//if (g_entities[identClientNum].team == ent->team && g_entities[identClientNum].client) {
+	//	identHealth = g_entities[identClientNum].health;
+	//}
+	//else {
+	//	identClientNum = -1;
+	//	identHealth = 0;
+	//}
+	//// -NERVE - SMF
+
+	//tinfo = va("tinfo %i %i %i%s", identClientNum, identHealth, cnt, string);
+	tinfo = va("tinfo %i%s", cnt, string);
+
+	//if (!Q_stricmp(bufferedData, tinfo))       // no change so just return
+	//{
+	//	return;
+	//}
+
+	Q_strncpyz(bufferedData, tinfo, 1024);
+
+	for (i = 0; i < level.numConnectedClients; i++)
+	{
+		player = g_entities + level.sortedClients[i];
+
+		if (player->inuse && (player->client->sess.sessionTeam == team || player->client->sess.shoutcaster) && !(player->r.svFlags & SVF_BOT) && player->client->pers.connected == CON_CONNECTED)
+		{
+			trap_SendServerCommand(player - g_entities, tinfo);
+		}
+	}
+
 }
 
-void CheckTeamStatus( void ) {
-	int i;
-	gentity_t *loc, *ent;
-
-	if ( level.time - level.lastTeamLocationTime > TEAM_LOCATION_UPDATE_TIME ) {
+void CheckTeamStatus(void)
+{
+	if (level.time - level.lastTeamLocationTime > TEAM_LOCATION_UPDATE_TIME)
+	{
+		int       i;
+		gentity_t *loc, *ent;
 
 		level.lastTeamLocationTime = level.time;
 
-		for ( i = 0; i < g_maxclients.integer; i++ ) {
-			ent = g_entities + i;
-			if ( ent->inuse &&
-				 ( ent->client->sess.sessionTeam == TEAM_RED ||
-				   ent->client->sess.sessionTeam == TEAM_BLUE ) ) {
+		for (i = 0; i < level.numConnectedClients; i++)
+		{
+			ent = g_entities + level.sortedClients[i];
+			if (ent->inuse && (ent->client->sess.sessionTeam == TEAM_RED || ent->client->sess.sessionTeam == TEAM_BLUE ))
+			{
 				loc = Team_GetLocation( ent );
 				if ( loc ) {
 					ent->client->pers.teamState.location = loc->health;
@@ -1123,14 +1185,8 @@ void CheckTeamStatus( void ) {
 			}
 		}
 
-		for ( i = 0; i < g_maxclients.integer; i++ ) {
-			ent = g_entities + i;
-			if ( ent->inuse &&
-				 ( ent->client->sess.sessionTeam == TEAM_RED ||
-				   ent->client->sess.sessionTeam == TEAM_BLUE ) ) {
-				TeamplayInfoMessage( ent );
-			}
-		}
+		TeamplayInfoMessage(TEAM_RED);
+		TeamplayInfoMessage(TEAM_BLUE);
 	}
 }
 
@@ -1264,8 +1320,15 @@ void objective_Register( gentity_t *self ) {
 	level.numspawntargets = numobjectives;
 	trap_GetConfigstring( CS_MULTI_INFO, cs, sizeof( cs ) );
 	sprintf( numspawntargets,"%d",numobjectives );
+
+	if (g_logConfigStringChanges.integer)
+		LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ objective_Register ] CS Before: [ %s ] variable: [ numspawntargets ]\n", g_currentRound.integer + 1, cs));
+
 	Info_SetValueForKey( cs, "numspawntargets", numspawntargets );
 	trap_SetConfigstring( CS_MULTI_INFO, cs );
+
+	if (g_logConfigStringChanges.integer)
+		LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ objective_Register ] CS After: [ %s ] variable: [ numspawntargets ]\n", g_currentRound.integer + 1, cs));
 }
 
 void SP_team_WOLF_objective( gentity_t *ent ) {
@@ -1800,6 +1863,7 @@ void G_swapTeams( void ) {
 	int i;
 	gclient_t *cl;
 
+	G_swapTeamLocks();
 	G_teamReset(0, qfalse, qtrue); // both teams
 
 	for ( i = 0; i < level.numConnectedClients; i++ ) {
@@ -1979,6 +2043,9 @@ void G_readyReset( qboolean aForced ) {
 // if a player leaves a team (disconnect to change teams) reset the team's ready status by setting one player to not ready
 void G_readyResetOnPlayerLeave( int team ) {
 	if (g_gamestate.integer == GS_WARMUP && g_tournament.integer) {
+
+		trap_Cvar_Set("g_swapteams", "0"); // make sure we don't swap teams with our fubar swap teams logic
+
 		int i, randomPlayer = -1;
 		qboolean resetStatus = qfalse;
 

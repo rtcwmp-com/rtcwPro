@@ -64,7 +64,8 @@ enum {
 	CGAME_EVENT_TEAMMENU,
 	CGAME_EVENT_SCOREBOARD,
 	CGAME_EVENT_EDITHUD,
-	CGAME_EVENT_DEMO               // OSP
+	CGAME_EVENT_DEMO, // RtcwPro demo port
+	CGAME_EVENT_SHOUTCAST // RtcwPro shoutcast overaly
 };
 
 
@@ -132,7 +133,6 @@ typedef enum {
 
 	CG_R_GETSKINMODEL,      // client allowed to view what the .skin loaded so they can set their model appropriately
 	CG_R_GETMODELSHADER,    // client allowed the shader handle for given model/surface (for things like debris inheriting shader from explosive)
-
 	CG_R_REGISTERFONT,
 	CG_R_CLEARSCENE,
 	CG_R_ADDREFENTITYTOSCENE,
@@ -229,7 +229,7 @@ typedef enum {
 	CG_R_BUILD,
 	// -NERVE - SMF
 
-	CG_REQ_SS // reqSS
+	CG_REQUEST_SS // reqSS
 } cgameImport_t;
 
 
@@ -290,8 +290,9 @@ typedef enum {
 	CG_CHECKEXECKEY,
 //  qboolean CG_CheckExecKey(int key);
 
-	CG_RELAY_COMMAND,
+	CG_RELAY_COMMAND
 //	qboolean(*CG_RelayCommand)(const char type, int value);
+
 } cgameExport_t;
 
 //----------------------------------------------

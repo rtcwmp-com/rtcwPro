@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 #else
     #include "g_local.h"
 #endif
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 /*
 Contains the code to handle the various commands available with an event script.
 
@@ -1038,7 +1038,13 @@ qboolean G_ScriptAction_OverviewImage( gentity_t *ent, char *params ) {         
 	if ( Q_stricmp( Info_ValueForKey( cs, "overviewimage" ), token ) ) {
 		Info_SetValueForKey( cs, "overviewimage", token );
 
+		if (g_logConfigStringChanges.integer)
+			LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_ScriptAction_OverviewImage ] CS Before: [ %s ] variable: [ overviewimage ]\n", g_currentRound.integer + 1, cs));
+
 		trap_SetConfigstring( CS_MULTI_INFO, cs );
+
+		if (g_logConfigStringChanges.integer)
+			LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_ScriptAction_OverviewImage ] CS After: [ %s ] variable: [ overviewimage ]\n", g_currentRound.integer + 1, cs));
 	}
 
 	return qtrue;
@@ -1122,9 +1128,16 @@ qboolean G_ScriptAction_NumberofObjectives( gentity_t *ent, char *params ) {
 
 	// NERVE - SMF - compare before setting, so we don't spam the clients during map_restart
 	if ( Q_stricmp( Info_ValueForKey( cs, "numobjectives" ), token ) ) {
+
+		if (g_logConfigStringChanges.integer)
+			LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_ScriptAction_NumberofObjectives ] CS Before: [ %s ] variable: [ NumberofObjectives ] params: [ %s ]\n", g_currentRound.integer + 1, cs, params));
+
 		Info_SetValueForKey( cs, "numobjectives", token );
 
 		trap_SetConfigstring( CS_MULTI_INFO, cs );
+
+		if (g_logConfigStringChanges.integer)
+			LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_ScriptAction_NumberofObjectives ] CS After: [ %s ] variable: [ NumberofObjectives ] params: [ %s ]\n", g_currentRound.integer + 1, cs, params));
 	}
 
 	return qtrue;
@@ -1483,9 +1496,15 @@ qboolean G_ScriptAction_SetDefendingTeam( gentity_t *ent, char *params ) {
 
 	trap_GetConfigstring( CS_MULTI_INFO, cs, sizeof( cs ) );
 
+	if (g_logConfigStringChanges.integer)
+		LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_ScriptAction_SetDefendingTeam ] CS Before: [ %s ] variable: [ defender ] params: [ %s ]\n", g_currentRound.integer + 1, cs, params));
+
 	Info_SetValueForKey( cs, "defender", token );
 
 	trap_SetConfigstring( CS_MULTI_INFO, cs );
+
+	if (g_logConfigStringChanges.integer)
+		LogEntry("logs/configStrings.log", va("Round: [ %d ] Location: [ G_ScriptAction_SetDefendingTeam ] CS After: [ %s ] variable: [ defender ] params: [ %s ]\n", g_currentRound.integer + 1, cs, params));
 
 	return qtrue;
 }

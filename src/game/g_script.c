@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #else
     #include "g_local.h"
 #endif
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 /*
 Scripting that allows the designers to control the behaviour of entities
 according to each different scenario.

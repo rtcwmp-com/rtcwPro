@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __UI_SHARED_H
 
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../cgame/tr_types.h"
 #include "keycodes.h"
 
@@ -471,6 +471,7 @@ qboolean PC_Char_Parse( int handle, char *out );              // NERVE - SMF
 int Menu_Count();
 void Menu_New( int handle );
 void Menu_PaintAll();
+void GradientBar_Paint(rectDef_t *rect, vec4_t color);
 menuDef_t *Menus_ActivateByName( const char *p, qboolean modalStack );
 void Menu_Reset();
 qboolean Menus_AnyFullScreenVisible();

@@ -317,26 +317,32 @@ player_die
 */
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 
-void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
-	gentity_t   *ent;
+void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int damage, int meansOfDeath) {
+	gentity_t* ent;
 	// TTimo might be used uninitialized
 	int contents = 0;
 	int killer;
 	int i;
-	char        *killerName, *obit;
+	char* killerName, * obit;
 	qboolean nogib = qtrue;
-	gitem_t     *item = NULL; // JPW NERVE for flag drop
-	vec3_t launchvel,launchspot;      // JPW NERVE
-	gentity_t   *flag; // JPW NERVE
+	gitem_t* item = NULL; // JPW NERVE for flag drop
+	vec3_t launchvel, launchspot;      // JPW NERVE
+	gentity_t* flag; // JPW NERVE
 
-	if ( self->client->ps.pm_type == PM_DEAD ) {
+	if (self->client->ps.pm_type == PM_DEAD) {
 		return;
 	}
 
-	if ( level.intermissiontime ) {
+	if (level.intermissiontime) {
 		return;
 	}
 
+	if (g_antilag.integer == 2)
+	{	
+		// Unlagged - backward reconciliation #2
+		// make sure the body shows up in the client's current position
+		G_UnTimeShiftClient(self);
+	}
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );
@@ -445,7 +451,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	Bot_Event_Death( self - g_entities, &g_entities[attacker - g_entities], obit );
 	Bot_Event_KilledSomeone( attacker - g_entities, &g_entities[self - g_entities], obit );
 #endif
-	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
+	
 
 	// broadcast the death event to everyone
 	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
@@ -453,8 +459,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	ent->s.otherEntityNum = self->s.number;
 	ent->s.otherEntityNum2 = killer;
 	ent->r.svFlags = SVF_BROADCAST; // send to everyone
-
-	//}
 
 	self->enemy = attacker;
 
@@ -473,9 +477,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
 			
 			// RtcwPro Issue #345 Clear out empty weapon, change to next best weapon
-			//PM_SwitchIfEmpty();
-			if (self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] == 0)
-				G_AddEvent(self, EV_NOAMMO, 0);
+			if (!self->client->ps.ammoclip[BG_FindClipForWeapon(self->client->ps.weapon)])
+			{
+				// remove nade from weapon bank
+				COM_BitClear(self->client->ps.weapons, self->client->ps.weapon);
+			}
 		}
 	}
 // jpw
@@ -664,18 +670,31 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->limboDropWeapon = self->s.weapon; // store this so it can be dropped in limbo
 	}
 // jpw
-	self->s.angles[2] = 0;
+
+	// RtcwPro - store the value for player YAW so we can restore on revive
+	// the value STAT_DEAD_YAW can change with lookatkiller etc
+	self->client->pers.deathYaw = SHORT2ANGLE(self->client->pers.cmd.angles[YAW] + self->client->ps.delta_angles[YAW]);
+
+	//self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );
+	self->client->ps.viewangles[0] = 0;
+	self->client->ps.viewangles[2] = 0;
 
-#ifdef OMNIBOT
-	if ( !( self->r.svFlags & SVF_BOT ) )
-#endif
-	VectorCopy( self->s.angles, self->client->ps.viewangles );
+//#ifdef OMNIBOT
+//	if (!(self->r.svFlags & SVF_BOT))
+//#endif
+//		VectorCopy(self->s.angles, self->client->ps.viewangles);
+	
 	self->s.loopSound = 0;
-
+	
 	trap_UnlinkEntity( self );
 	self->r.maxs[2] = 0;
-	self->client->ps.maxs[2] = 0;
+	self->client->ps.maxs[2] = 0; 
+
+	// ET Port
+	//self->r.maxs[2] = self->client->ps.crouchMaxZ;  //%	0;			// ydnar: so bodies don't clip into world
+	//self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
+	
 	trap_LinkEntity( self );
 
 	// don't allow respawn until the death anim is done
@@ -688,6 +707,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// RTCWPro - update ready status
 	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS) // only do this during warmup
 		self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+
 
 	// never gib in a nodrop
 	if ( self->health <= GIB_HEALTH && !( contents & CONTENTS_NODROP ) ) {
@@ -1190,6 +1210,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 			targ->client->ps.pm_time = t;
 			targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+
+			//if (g_debugDamage.integer) {
+			//	AP(va("print \"knockback: %i\n\"", t));
+			//}
 		}
 	}
 
@@ -1283,11 +1307,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-	}
-
-	if ( g_debugDamage.integer ) {
-		G_Printf( "client: %i health: %i damage: %i mod: %i\n", targ->s.number, targ->health, take, mod); //, asave );
-		AP(va("print \"client:%i health:%i damage:%i mod: %i\n\"", targ->s.number, targ->health, take, mod));
 	}
 
 	// add to the damage inflicted on a player this frame
