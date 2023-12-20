@@ -376,7 +376,7 @@ void Team_ResetFlag(gentity_t* ent) {
 	}
 #ifdef OMNIBOT
 	{
-		Bot_Util_SendTrigger( ent, NULL, va( "Flag returned %s!", _GetEntityName( rent ) ), "returned" );
+		Bot_Util_SendTrigger( ent, NULL, va( "Flag returned %s!", _GetEntityName(ent) ), "returned" );
 	}
 #endif
 

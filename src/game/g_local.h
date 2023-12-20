@@ -688,21 +688,21 @@ typedef struct {
 	unsigned int pingsample_counter;
 	int deathYaw;
 
-	// temp
-	//S4NDM4NN for the stats
-	//int kills;
-	//int teamKills;
-	//int gibs;
-	//int teamGibs;
-	//int revives;
-	//int medPacks;
-	//int ammoPacks;
-	//int acc_shots;
-	//int acc_hits;
-	//int acc_teamHits;
-	//int headshots;
-	//int deaths;
-
+#ifdef OMNIBOT
+	// omnibot bot stats?
+	int kills;
+	int teamKills;
+	int gibs;
+	int teamGibs;
+	int revives;
+	int medPacks;
+	int ammoPacks;
+	int acc_shots;
+	int acc_hits;
+	int acc_teamHits;
+	int headshots;
+	int deaths;
+#endif
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -1904,7 +1904,7 @@ int     trap_BotAllocateClient( void );
 void    trap_BotFreeClient( int clientNum );
 void    trap_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean    trap_GetEntityToken( char *buffer, int bufferSize );
-qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* or );
+qboolean trap_GetTag(gentity_t* ent, clientAnimationInfo_t* animInfo, char* tagName, orientation_t* orr);
 
 int     trap_DebugPolygonCreate( int color, int numPoints, vec3_t *points );
 void    trap_DebugPolygonDelete( int id );

@@ -2043,9 +2043,9 @@ obResult GetEntityPowerups( const GameEntity _ent, BitFlag64 &_flags ) {
 		if ( pEnt->client->ps.powerups[PW_INVULNERABLE] || ( pEnt->flags & FL_GODMODE ) ) {
 			_flags.SetFlag( PWR_INVINCIBLE );
 		}
-		if ( pEnt->client->ps.powerups[PW_FIRE] ) {
-			_flags.SetFlag( RTCW_PWR_FIRE );
-		}
+		//if ( pEnt->client->ps.powerups[PW_FIRE] ) {
+		//	_flags.SetFlag( RTCW_PWR_FIRE );
+		//}
 		if ( pEnt->client->ps.powerups[PW_ELECTRIC] ) {
 			_flags.SetFlag( RTCW_PWR_ELECTRIC );
 		}
