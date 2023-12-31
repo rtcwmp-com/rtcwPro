@@ -1485,6 +1485,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	if ( cg_debugEvents.integer ) {
 		CG_Printf( "ent:%3i  event:%3i ", es->number, event );
+		CG_PrintEntityStatep(es);
 	}
 
 	if ( !event ) {
@@ -1501,6 +1502,17 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	if ( cgs.gametype == GT_SINGLE_PLAYER && !ci->modelInfo ) {   // not ready yet?
 		return;
 	}
+
+	
+	if (cg.demoPlayback) {
+		if (!isRtcwPro) {
+			if (event >= EV_ANNOUNCER_SOUND) {
+				event++;
+			}
+		}
+	}
+	
+	
 
 	switch ( event ) {
 		//
@@ -2358,6 +2370,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		// dhm - end
 // OSPx
 	// Announcer sounds
+	case EV_ANNOUNCER_SOUND:
 	case EV_USE_ITEM15:
 		DEBUGNAME("EV_USE_ITEM15");
 		if (cg_announcer.integer) {

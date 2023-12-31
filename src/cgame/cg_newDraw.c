@@ -2604,37 +2604,24 @@ void CG_MouseEvent( int x, int y ) {
 			if (cgs.cursorX < 0) {
 				cgs.cursorX = 0;
 			}
-			else if (cgs.cursorX > 640) {
-				cgs.cursorX = 640;
+			else if (cgs.cursorX > SCREEN_WIDTH ) {
+				cgs.cursorX = SCREEN_WIDTH;
 			}
 			cgs.cursorY += y;
 			if (cgs.cursorY < 0) {
 				cgs.cursorY = 0;
 			}
-			else if (cgs.cursorY > 480) {
-				cgs.cursorY = 480;
+			else if (cgs.cursorY > SCREEN_HEIGHT ) {
+				cgs.cursorY = SCREEN_HEIGHT;
 			}
-			break;
+			//break;
 			default:
 				if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
-					cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse) {
-						trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
+					cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse && !cg.demoPlayback) {
+					trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
 					return;
 				}
 
-				cgs.cursorX += x;
-				if ( cgs.cursorX < 0 ) {
-					cgs.cursorX = 0;
-				} else if ( cgs.cursorX > 640 ) {
-					cgs.cursorX = 640;
-				}
-
-				cgs.cursorY += y;
-				if ( cgs.cursorY < 0 ) {
-					cgs.cursorY = 0;
-				} else if ( cgs.cursorY > 480 ) {
-					cgs.cursorY = 480;
-				}
 
 				n = Display_CursorType( cgs.cursorX, cgs.cursorY );
 				cgs.activeCursor = 0;
@@ -2734,9 +2721,12 @@ void CG_EventHandling( int type, qboolean forced )
 
 void CG_KeyEvent( int key, qboolean down ) 
 {
-	if (!down) {
+	cgs.fKeyPressed[key] = down;
+	
+	if ( !down ) {
 		return;
 	}
+	
 
 	// OSPx - Demo..
 	switch (cgs.eventHandling)

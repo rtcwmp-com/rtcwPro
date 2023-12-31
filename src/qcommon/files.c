@@ -4007,3 +4007,12 @@ qboolean FS_VerifyPak( const char *pak ) {
 	}
 	return qfalse;
 }
+
+qbool FS_IsZipFile(fileHandle_t f)
+{
+	if (f < 0 || f >= MAX_FILE_HANDLES) {
+		Com_Error(ERR_DROP, "FS_IsZipFile: out of range");
+	}
+
+	return fsh[f].zipFile;
+}

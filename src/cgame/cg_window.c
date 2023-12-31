@@ -465,8 +465,89 @@ void CG_windowDraw( void ) {
 								   qfalse, qtrue, w->fontWidth, w->fontHeight, 0 );
 			}
 		}
+		
 	}
+	if (demo_timelineWindow.integer) {
+		if (cg.demoTimelineWindow) {
+			if (cg.demoTimelineWindow->state == WSTATE_COMPLETE) {
+				vec4_t timelineBarFill = { 0.25f, 0.36f, 0.2f, 0.8f };
+				vec4_t timelineBarPositionFill = { 1.0f, 0.0f, 0.0f, 1.0f };
+				vec4_t killSquareFill = { 0.0f, 1.0f, 0.0f, 1.0f };
+				vec4_t killStreakFill = { 0.98f, 0.98f, 0.02f, 1.0f };
+				vec4_t docCarrierFill = { 0.02f, 0.98f, 0.98f, 1.0f };
+				CG_FillRect(GIANTCHAR_WIDTH, SCREEN_HEIGHT - GIANTCHAR_HEIGHT, SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2), 8, timelineBarFill);
+				int demoDuration = m_lastServerTime - m_firstServerTime;
+				int demoProgress = m_currServerTime - m_firstServerTime;
+				float progressPercent = (float)demoProgress / (float)demoDuration;
+				int progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
 
+				CG_FillRect(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - GIANTCHAR_HEIGHT, 3, 10, timelineBarPositionFill);
+				CG_FillRect(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - GIANTCHAR_HEIGHT, 1, 32, timelineBarPositionFill);
+				CG_DrawPic(24, SCREEN_HEIGHT - 37, 10, 10, cgs.media.skull);
+				CG_DrawPic(20, SCREEN_HEIGHT - 28, 15, 15, cgs.media.treasureIcon);
+				for (i = 0; i < ndp_myKillsSize; i++) {
+					demoProgress = ndp_myKills[i] - m_firstServerTime;
+					progressPercent = (float)demoProgress / (float)demoDuration;
+					progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
+					if (ndp_killStreak[i]) {
+						CG_FillRect(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 32, 2, 2, killStreakFill);
+					}
+					else {
+						CG_FillRect(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 32, 2, 2, killSquareFill);
+					}
+					
+
+				}
+				for (i = 0; i < ndp_axisWinsSize; i++) {
+					demoProgress = ndp_axisWins[i] - m_firstServerTime;
+					progressPercent = (float)demoProgress / (float)demoDuration;
+					progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
+
+					CG_DrawPic(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 52, 24, 14, cgs.media.axisFlag);
+				}
+				for (i = 0; i < ndp_alliesWinsSize; i++) {
+					demoProgress = ndp_alliesWins[i] - m_firstServerTime;
+					progressPercent = (float)demoProgress / (float)demoDuration;
+					progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
+
+					CG_DrawPic(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 52, 24, 14, cgs.media.alliesFlag);
+				}
+				for (i = 0; i < ndp_round1EndSize; i++) {
+					demoProgress = ndp_round1End[i] - m_firstServerTime;
+					progressPercent = (float)demoProgress / (float)demoDuration;
+					progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
+
+					CG_DrawPic(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 64, 14, 14, cgs.media.stopwatch1);
+				}
+				for (i = 0; i < ndp_round2EndSize; i++) {
+					demoProgress = ndp_round2End[i] - m_firstServerTime;
+					progressPercent = (float)demoProgress / (float)demoDuration;
+					progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
+
+					CG_DrawPic(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 64, 14, 14, cgs.media.stopwatch2);
+				}
+				
+				for (i = 0; i < ndp_docPickupSize; i++) {
+					demoProgress = ndp_docPickupTime[i] - m_firstServerTime;
+					progressPercent = (float)demoProgress / (float)demoDuration;
+					progressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)progressPercent);
+					int docDropTime = 0;
+					float docDropProgressPercent = 1.0f;
+					if (i < ndp_docDropSize) {
+						docDropTime = ndp_docDropTime[i] - m_firstServerTime;
+						docDropProgressPercent = (float)docDropTime / (float)demoDuration;
+					}
+					int docDropProgressLocation = (int)((float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2)) * (float)docDropProgressPercent);
+					CG_FillRect(progressLocation + GIANTCHAR_WIDTH, SCREEN_HEIGHT - 20, docDropProgressLocation - progressLocation, 2, docCarrierFill);
+
+				}
+				CG_DrawPic(cgs.cursorX - 16, cgs.cursorY - 16, 32, 32, cgDC.Assets.cursor);
+
+			}
+		}
+
+
+	}
 	// Extra rate info
 //	CG_demoAviFPSDraw();
 //	CG_demoTimescaleDraw();
