@@ -5,8 +5,7 @@ qbool CG_NDP_AnalyzeObituary(entityState_t* ent, snapshot_t* snapshot);
 
 
 
-void SeekAbsolute(int serverTime);
-void SeekRelative(int serverTime);
+
 
 
 int m_currServerTime;
@@ -420,7 +419,7 @@ void CG_NDP_EndAnalysis(const char* filePath, int firstServerTime, int lastServe
 
 }
 
-void SeekAbsolute(int serverTime)
+void CG_NDP_SeekAbsolute(int serverTime)
 {
 	if (serverTime != m_currServerTime) {
 		int time = trap_CNQ3_NDP_Seek(serverTime);
@@ -431,9 +430,9 @@ void SeekAbsolute(int serverTime)
 	}
 }
 
-void SeekRelative(int seconds)
+void CG_NDP_SeekRelative(int seconds)
 {
-	SeekAbsolute(cg.time + seconds * 1000);
+	CG_NDP_SeekAbsolute(cg.time + seconds * 1000);
 }
 
 
@@ -527,4 +526,31 @@ void CG_NDP_SetGameTime() {
 	cg.time = m_currServerTime;
 	prevRealTime = currRealTime;
 
+}
+
+void CG_NDP_GoToNextFrag(qbool forward) {
+	int i; 
+	if (forward) {
+		for (i = 0; i < ndp_myKillsSize; i++) {
+			if (ndp_myKills[i] > m_currServerTime) {
+				if (ndp_myKills[i] - 3000 < m_currServerTime) {
+					continue;
+				}
+				CG_NDP_SeekAbsolute(ndp_myKills[i] - 3000);
+				return;
+			}
+		}
+	}
+	else {
+		for (i = ndp_myKillsSize - 1; i >= 0; i--) {
+			if (ndp_myKills[i] < m_currServerTime) {
+				if (ndp_myKills[i] - 3000 < m_currServerTime) {
+					continue;
+				}
+				CG_NDP_SeekAbsolute(ndp_myKills[i] - 3000);
+				return;
+			}
+		}
+	}
+	
 }

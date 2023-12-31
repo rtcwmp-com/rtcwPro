@@ -2614,7 +2614,7 @@ void CG_MouseEvent( int x, int y ) {
 			else if (cgs.cursorY > SCREEN_HEIGHT ) {
 				cgs.cursorY = SCREEN_HEIGHT;
 			}
-			//break;
+			break;
 			default:
 				if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
 					cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse && !cg.demoPlayback) {

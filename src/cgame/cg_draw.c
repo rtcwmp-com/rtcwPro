@@ -1701,7 +1701,11 @@ static void CG_DrawNotify( void ) {
 		notifytime = 100.0f;
 	}
 
-	chatHeight = NOTIFY_HEIGHT;
+	trap_Cvar_VariableStringBuffer("cg_notifyTextLines", var, sizeof(var));
+	chatHeight = atoi(var);
+	if (chatHeight > MAX_NOTIFY_HEIGHT) {
+		chatHeight = MAX_NOTIFY_HEIGHT;
+	}
 
 	if ( cgs.notifyLastPos != cgs.notifyPos ) {
 		if ( cg.time - cgs.notifyMsgTimes[cgs.notifyLastPos % chatHeight] > notifytime ) {
@@ -4589,6 +4593,16 @@ static void CG_Draw2D( void ) {
 
 	if ( cg_draw2D.integer == 0) {
 		return;
+	}
+
+	if (cg.demoPlayback) {
+		if (cg_draw2D.integer == 2) {
+			CG_DrawCrosshair();
+			CG_DrawNotify();
+			CG_DrawCenterString();
+			CG_windowDraw();
+			return;
+		}
 	}
 
 	CG_ScreenFade();

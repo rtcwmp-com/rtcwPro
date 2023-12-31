@@ -87,7 +87,7 @@ If you have questions concerning this license or the applicable additional terms
 #define TEAMCHAT_HEIGHT     8
 
 #define NOTIFY_WIDTH        80
-#define NOTIFY_HEIGHT       5
+#define MAX_NOTIFY_HEIGHT   32
 
 // very large characters
 #define GIANT_WIDTH         32
@@ -1885,8 +1885,8 @@ typedef struct {
 	int teamLastChatPos;
 
 	// New notify mechanism for obits
-	char notifyMsgs[NOTIFY_HEIGHT][NOTIFY_WIDTH * 3 + 1];
-	int notifyMsgTimes[NOTIFY_HEIGHT];
+	char notifyMsgs[MAX_NOTIFY_HEIGHT][NOTIFY_WIDTH * 3 + 1];
+	int notifyMsgTimes[MAX_NOTIFY_HEIGHT];
 	int notifyPos;
 	int notifyLastPos;
 

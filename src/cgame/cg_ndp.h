@@ -16,6 +16,9 @@ qbool CG_NDP_AnalyzeSnapshot(int progress);
 
 //Public functions
 void CG_NDP_ResetStateWhenBackInTime(void);
+void CG_NDP_SeekAbsolute(int serverTime);
+void CG_NDP_SeekRelative(int serverTime);
+void CG_NDP_GoToNextFrag(qbool forward);
 
 extern int ndp_myKills[1024];
 extern int ndp_myKillsSize;

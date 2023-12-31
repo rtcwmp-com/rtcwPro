@@ -290,6 +290,7 @@ vmCvar_t mp_item1;
 
 vmCvar_t cg_drawCompass;
 vmCvar_t cg_drawNotifyText;
+vmCvar_t cg_notifyTextLines;
 vmCvar_t cg_quickMessageAlt;
 vmCvar_t cg_popupLimboMenu;
 vmCvar_t cg_descriptiveText;
@@ -728,10 +729,11 @@ cvarTable_t cvarTable[] = {
 
 	// notify text
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
-	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
+	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE }, // 5 lines * 8 height + 2 offset
 	{ &cg_notifyTextShadow, "cg_notifyTextShadow", "0", CVAR_ARCHIVE },
 	{ &cg_notifyTextWidth, "cg_notifyTextWidth", "8", CVAR_ARCHIVE },
 	{ &cg_notifyTextHeight, "cg_notifyTextHeight", "8", CVAR_ARCHIVE },
+	{ &cg_notifyTextLines, "cg_notifyTextLines", "5", CVAR_ARCHIVE },
 
 	// chat
 	{ &cg_chatX, "cg_chatX", "0", CVAR_ARCHIVE },

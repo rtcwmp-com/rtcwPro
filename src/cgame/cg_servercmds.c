@@ -779,7 +779,11 @@ void CG_AddToNotify( const char *str ) {
 	trap_Cvar_VariableStringBuffer( "con_notifytime", var, sizeof( var ) );
 	notifytime = atof( var ) * 1000;
 
-	chatHeight = NOTIFY_HEIGHT;
+	trap_Cvar_VariableStringBuffer("cg_notifyTextLines", var, sizeof(var));
+	chatHeight = atoi( var );
+	if (chatHeight > MAX_NOTIFY_HEIGHT) {
+		chatHeight = MAX_NOTIFY_HEIGHT;
+	}
 
 	if ( chatHeight <= 0 || notifytime <= 0 ) {
 		// team chat disabled, dump into normal chat

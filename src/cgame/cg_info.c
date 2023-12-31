@@ -314,6 +314,13 @@ void CG_DemoClick(int key) {
 			trap_Cvar_Set("demo_timelineWindow", "0");
 		}
 		return;
+
+	case K_PGUP:
+		CG_NDP_GoToNextFrag(qtrue);
+		break;
+	case K_PGDN:
+		CG_NDP_GoToNextFrag(qfalse);
+		break;
 		
 	case K_TAB:
 		if (cgs.demoControlInfo.show != SHOW_ON) {
@@ -369,7 +376,7 @@ void CG_DemoClick(int key) {
 		if (demo_timelineWindow.integer) {
 			float percentX = (float)(cgs.cursorX-35.0f) / (float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2));
 			int serverTimeAtPercent = (int)((float)((m_lastServerTime - m_firstServerTime) * percentX)) + m_firstServerTime;
-			SeekAbsolute(serverTimeAtPercent);
+			CG_NDP_SeekAbsolute(serverTimeAtPercent);
 			return;
 		}
 		CG_zoomViewSet_f();
@@ -383,7 +390,7 @@ void CG_DemoClick(int key) {
 		
 	case K_UPARROW:
 		if (demo_timelineWindow.integer) {
-			SeekRelative(60);
+			CG_NDP_SeekRelative(60);
 			return;
 		}
 
@@ -397,7 +404,7 @@ void CG_DemoClick(int key) {
 		return;
 	case K_DOWNARROW:
 		if (demo_timelineWindow.integer) {
-			SeekRelative(-60);
+			CG_NDP_SeekRelative(-60);
 			return;
 		}
 		if (milli > cgs.thirdpersonUpdate) {
@@ -419,7 +426,7 @@ void CG_DemoClick(int key) {
 			else {
 				duration = 10;
 			}
-			SeekRelative(duration);
+			CG_NDP_SeekRelative(duration);
 			return;
 		}
 		if (milli > cgs.thirdpersonUpdate) {
@@ -443,7 +450,7 @@ void CG_DemoClick(int key) {
 			else {
 				duration = 10;
 			}
-			SeekRelative(-duration);
+			CG_NDP_SeekRelative(-duration);
 			return;
 		}
 		if (milli > cgs.thirdpersonUpdate) {
