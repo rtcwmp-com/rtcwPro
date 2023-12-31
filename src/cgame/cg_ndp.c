@@ -544,9 +544,6 @@ void CG_NDP_GoToNextFrag(qbool forward) {
 	else {
 		for (i = ndp_myKillsSize - 1; i >= 0; i--) {
 			if (ndp_myKills[i] < m_currServerTime) {
-				if (ndp_myKills[i] - 3000 < m_currServerTime) {
-					continue;
-				}
 				CG_NDP_SeekAbsolute(ndp_myKills[i] - 3000);
 				return;
 			}

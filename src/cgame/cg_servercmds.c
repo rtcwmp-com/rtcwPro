@@ -166,8 +166,6 @@ static void CG_ParseTeamInfo( void ) {
 		else {
 			//1.1.2 to 1.2.8
 			if (isRtcwProV128) {
-				int i;
-				int client;
 
 				// NERVE - SMF
 				cg.identifyClientNum = atoi(CG_Argv(1));
@@ -197,8 +195,6 @@ static void CG_ParseTeamInfo( void ) {
 				return;
 			}
 			if (isRtcwProV129) {
-				int i;
-				int client;
 
 				// NERVE - SMF
 				cg.identifyClientNum = atoi(CG_Argv(1));
