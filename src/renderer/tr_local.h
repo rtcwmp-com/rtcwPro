@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef TR_LOCAL_H
 #define TR_LOCAL_H
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qfiles.h"
 #include "../qcommon/qcommon.h"
 #include "tr_public.h"
@@ -1316,11 +1316,11 @@ image_t     *R_CreateImage( const char *name, const byte *pic, int width, int he
 							, qboolean allowPicmip, int wrapClampMode );
 
 // rtcwpro - r_mode -2
-#ifdef _WIN32
+//#ifdef _WIN32
 qboolean R_GetModeInfo(int* width, int* height, float* windowAspect, int mode, int dw, int dh);
-#else
+/*#else
 qboolean R_GetModeInfo(int* width, int* height, float* windowAspect, int mode);
-#endif
+#endif*/
 // rtcwpro - end
 
 void        R_SetColorMappings( void );

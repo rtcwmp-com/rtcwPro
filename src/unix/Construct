@@ -245,7 +245,7 @@ else
 }
 
 # extract the wolf version from q_shared.h
-$line = `cat ../game/q_shared.h | grep Q3_VERSION`;
+$line = `cat ../qcommon/q_shared.h | grep Q3_VERSION`;
 chomp $line;
 $line =~ s/.*Wolf\ (.*)\"/$1/;
 $WOLF_VER = $line;

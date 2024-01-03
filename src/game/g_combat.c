@@ -314,26 +314,32 @@ player_die
 */
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 
-void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
-	gentity_t   *ent;
+void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int damage, int meansOfDeath) {
+	gentity_t* ent;
 	// TTimo might be used uninitialized
 	int contents = 0;
 	int killer;
 	int i;
-	char        *killerName, *obit;
+	char* killerName, * obit;
 	qboolean nogib = qtrue;
-	gitem_t     *item = NULL; // JPW NERVE for flag drop
-	vec3_t launchvel,launchspot;      // JPW NERVE
-	gentity_t   *flag; // JPW NERVE
+	gitem_t* item = NULL; // JPW NERVE for flag drop
+	vec3_t launchvel, launchspot;      // JPW NERVE
+	gentity_t* flag; // JPW NERVE
 
-	if ( self->client->ps.pm_type == PM_DEAD ) {
+	if (self->client->ps.pm_type == PM_DEAD) {
 		return;
 	}
 
-	if ( level.intermissiontime ) {
+	if (level.intermissiontime) {
 		return;
 	}
 
+	if (g_antilag.integer == 2)
+	{	
+		// Unlagged - backward reconciliation #2
+		// make sure the body shows up in the client's current position
+		G_UnTimeShiftClient(self);
+	}
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );
@@ -439,16 +445,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		} // End
 	}
 
-	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
-
 	// broadcast the death event to everyone
 	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
 	ent->s.eventParm = meansOfDeath;
 	ent->s.otherEntityNum = self->s.number;
 	ent->s.otherEntityNum2 = killer;
 	ent->r.svFlags = SVF_BROADCAST; // send to everyone
-
-	//}
 
 	self->enemy = attacker;
 
@@ -661,9 +663,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	self->client->ps.viewangles[2] = 0;
 	//VectorCopy( self->s.angles, self->client->ps.viewangles ); // don't make the corpse look a different way
 	
-	//trap_UnlinkEntity( self );
 	self->s.loopSound = 0;
 	
+	trap_UnlinkEntity( self );
 	self->r.maxs[2] = 0;
 	self->client->ps.maxs[2] = 0; 
 
@@ -1184,9 +1186,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			targ->client->ps.pm_time = t;
 			targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 
-			if (g_debugDamage.integer) {
-				AP(va("print \"knockback: %i\n\"", t));
-			}
+			//if (g_debugDamage.integer) {
+			//	AP(va("print \"knockback: %i\n\"", t));
+			//}
 		}
 	}
 

@@ -81,21 +81,6 @@ cvar_t  *sv_showAverageBPS;     // NERVE - SMF - net debugging
 
 // Start RtcwPro
 
-// Anti-Wallhack
-//cvar_t* wh_active;
-//cvar_t* wh_bbox_horz;
-//cvar_t* wh_bbox_vert;
-//cvar_t* wh_add_xy;
-//cvar_t* wh_check_fov;
-
-// -> HTTP downloads
-cvar_t* sv_wwwDownload;	// server does a www dl redirect
-cvar_t* sv_wwwBaseURL;		// base URL for redirect
-							// tell clients to perform their downloads while disconnected from the server
-							// this gets you a better throughput, but you loose the ability to control the download usage
-cvar_t* sv_wwwDlDisconnected;
-cvar_t* sv_wwwFallbackURL;	// URL to send to if an http/ftp fails or is refused client side
-
 // Streaming
 cvar_t* sv_StreamingToken;
 cvar_t* sv_StreamingSelfSignedCert;
@@ -110,6 +95,8 @@ cvar_t* sv_GameConfig;
 cvar_t* sv_checkVersion;
 cvar_t* sv_restRunning;
 cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix knockback bug
+
+cvar_t* sv_dropClientOnOverflow;
 
 // End RtcwPro
 

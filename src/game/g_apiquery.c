@@ -123,6 +123,9 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 
 	json_t* jdata = json_object(); // json for all queries
 	
+	if (Q_stricmp(arg1, "")) commandText = va("%s %s", commandText, arg1);
+	if (Q_stricmp(arg2, "")) commandText = va("%s %s", commandText, arg2);
+
 	json_object_set_new(jdata, "format", json_string(va("%s", "v1")));
 	json_object_set_new(jdata, "command", json_string(va("%s", commandText))); // set the command
 	json_object_set_new(jdata, "server_name", json_string(sv_hostname.string));

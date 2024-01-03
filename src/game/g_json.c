@@ -74,87 +74,151 @@ qboolean CanAccessFile(char* str, char* filename)
   Build player stats objects
   This will allow us to access stats for players who quit before the round is finished
 */
-void BuildPlayerStats(int clientSlot, qboolean clientDisconnected)
+void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
 {
     gclient_t* cl;
-    int i, j, eff;
+    int eff;
     char n1[MAX_NETNAME];
     char n2[MAX_NETNAME];
-    unsigned int m, dwWeaponMask = 0;
+    unsigned int m;
 
-    // loop for amount of players playing and how many have already quit
-    for (i = 0; i < (level.numPlayingClients + ArrayLength(level.disconnectStats)); i++)
+    if (clientDisconnected && client != NULL)
     {
-        if (level.playerStats[i].guid != NULL)
-            continue; // this means player disconnected and stats are already written
+        int dc = level.disconnectCount;
 
-        cl = level.clients + level.sortedClients[i];
-
-        if ((clientSlot >= 0 && i != clientSlot) || cl->pers.connected != CON_CONNECTED )
+        if (level.disconnectStats[dc].guid == NULL)
         {
-            continue;
-        }
+            cl = client; // used passed in client
 
-        DecolorString(cl->pers.netname, n1);
-        SanitizeString(n1, n2);
-        Q_CleanStr(n2);
-        n2[15] = 0;
-        
-        Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
+            DecolorString(cl->pers.netname, n1);
+            SanitizeString(n1, n2);
+            Q_CleanStr(n2);
+            n2[15] = 0;
 
-        eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
-        if (eff < 0)
-        {
-            eff = 0;
-        }
-       
-        level.playerStats[i].guid = cl->sess.guid;
-        //level.playerStats[i].alias = n2;
-        level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
-        level.playerStats[i].start_time = cl->sess.start_time;
-        level.playerStats[i].rounds = cl->sess.rounds;
-        level.playerStats[i].kills = cl->sess.kills;
-        level.playerStats[i].deaths = cl->sess.deaths;
-        level.playerStats[i].gibs = cl->sess.gibs;
-        level.playerStats[i].suicides = cl->sess.suicides;
-        level.playerStats[i].team_kills = cl->sess.team_kills;
-        level.playerStats[i].headshots = cl->sess.headshots;
-        level.playerStats[i].damage_given = cl->sess.damage_given;
-        level.playerStats[i].damage_received = cl->sess.damage_received;
-        level.playerStats[i].team_damage = cl->sess.team_damage;
-        level.playerStats[i].acc_hits = cl->sess.acc_hits;
-        level.playerStats[i].acc_shots = cl->sess.acc_shots;
-        level.playerStats[i].efficiency = eff;
-        level.playerStats[i].revives = cl->sess.revives;
-        level.playerStats[i].ammo_given = cl->sess.ammo_given;
-        level.playerStats[i].med_given = cl->sess.med_given;
-        level.playerStats[i].knifeKills = cl->sess.knifeKills;
-        level.playerStats[i].killPeak = cl->sess.killPeak;
-        level.playerStats[i].score = cl->ps.persistant[PERS_SCORE];
-        level.playerStats[i].dyn_planted = cl->sess.dyn_planted;
-        level.playerStats[i].dyn_defused = cl->sess.dyn_defused;
-        level.playerStats[i].obj_captured = cl->sess.obj_captured;
-        level.playerStats[i].obj_destroyed = cl->sess.obj_destroyed;
-        level.playerStats[i].obj_returned = cl->sess.obj_returned;
-        level.playerStats[i].obj_taken = cl->sess.obj_taken;
-        level.playerStats[i].obj_checkpoint = cl->sess.obj_checkpoint;
-        level.playerStats[i].obj_killcarrier = cl->sess.obj_killcarrier;
-        level.playerStats[i].obj_protectflag = cl->sess.obj_protectflag;
+            Q_strncpyz(level.disconnectStats[dc].aliasColored, cl->pers.netname, sizeof(level.disconnectStats[dc].aliasColored));
+            Q_strncpyz(level.disconnectStats[dc].alias, n2, sizeof(level.disconnectStats[dc].alias));
 
-        if (clientDisconnected)
-            AddQuitPlayerStats(cl->sess.guid);
-
-        j = cl->sess.sessionTeam;
-        for (m = WS_KNIFE; m < WS_MAX; m++)
-        {
-            if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+            eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+            if (eff < 0)
             {
-                dwWeaponMask |= (1 << j);
-                level.playerStats[i].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
-                level.playerStats[i].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
-                level.playerStats[i].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
-                level.playerStats[i].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
-                level.playerStats[i].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+                eff = 0;
+            }
+
+            level.disconnectStats[dc].guid = cl->sess.guid;
+            level.disconnectStats[dc].sessionTeam = cl->sess.sessionTeam;
+            level.disconnectStats[dc].start_time = cl->sess.start_time;
+            level.disconnectStats[dc].rounds = cl->sess.rounds;
+            level.disconnectStats[dc].kills = cl->sess.kills;
+            level.disconnectStats[dc].deaths = cl->sess.deaths;
+            level.disconnectStats[dc].gibs = cl->sess.gibs;
+            level.disconnectStats[dc].suicides = cl->sess.suicides;
+            level.disconnectStats[dc].team_kills = cl->sess.team_kills;
+            level.disconnectStats[dc].headshots = cl->sess.headshots;
+            level.disconnectStats[dc].damage_given = cl->sess.damage_given;
+            level.disconnectStats[dc].damage_received = cl->sess.damage_received;
+            level.disconnectStats[dc].team_damage = cl->sess.team_damage;
+            level.disconnectStats[dc].acc_hits = cl->sess.acc_hits;
+            level.disconnectStats[dc].acc_shots = cl->sess.acc_shots;
+            level.disconnectStats[dc].efficiency = eff;
+            level.disconnectStats[dc].revives = cl->sess.revives;
+            level.disconnectStats[dc].ammo_given = cl->sess.ammo_given;
+            level.disconnectStats[dc].med_given = cl->sess.med_given;
+            level.disconnectStats[dc].knifeKills = cl->sess.knifeKills;
+            level.disconnectStats[dc].killPeak = cl->sess.killPeak;
+            level.disconnectStats[dc].score = cl->ps.persistant[PERS_SCORE];
+            level.disconnectStats[dc].dyn_planted = cl->sess.dyn_planted;
+            level.disconnectStats[dc].dyn_defused = cl->sess.dyn_defused;
+            level.disconnectStats[dc].obj_captured = cl->sess.obj_captured;
+            level.disconnectStats[dc].obj_destroyed = cl->sess.obj_destroyed;
+            level.disconnectStats[dc].obj_returned = cl->sess.obj_returned;
+            level.disconnectStats[dc].obj_taken = cl->sess.obj_taken;
+            level.disconnectStats[dc].obj_checkpoint = cl->sess.obj_checkpoint;
+            level.disconnectStats[dc].obj_killcarrier = cl->sess.obj_killcarrier;
+            level.disconnectStats[dc].obj_protectflag = cl->sess.obj_protectflag;
+
+            int j = cl->sess.sessionTeam;
+            for (m = WS_KNIFE; m < WS_MAX; m++)
+            {
+                if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+                {
+                    level.disconnectStats[dc].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
+                    level.disconnectStats[dc].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
+                    level.disconnectStats[dc].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
+                    level.disconnectStats[dc].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
+                    level.disconnectStats[dc].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+                }
+            }
+
+            level.disconnectCount++;
+        }
+    }
+    else
+    {
+        // loop for amount of players playing and how many have already quit
+        for (int i = 0; i < level.numPlayingClients; i++)
+        {
+            cl = level.clients + level.sortedClients[i];
+
+            if (cl->pers.connected != CON_CONNECTED)
+                continue;
+
+            DecolorString(cl->pers.netname, n1);
+            SanitizeString(n1, n2);
+            Q_CleanStr(n2);
+            n2[15] = 0;
+
+            Q_strncpyz(level.playerStats[i].aliasColored, cl->pers.netname, sizeof(level.playerStats[i].aliasColored));
+            Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
+
+            eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
+            if (eff < 0)
+            {
+                eff = 0;
+            }
+
+            level.playerStats[i].guid = cl->sess.guid;
+            level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
+            level.playerStats[i].start_time = cl->sess.start_time;
+            level.playerStats[i].rounds = cl->sess.rounds;
+            level.playerStats[i].kills = cl->sess.kills;
+            level.playerStats[i].deaths = cl->sess.deaths;
+            level.playerStats[i].gibs = cl->sess.gibs;
+            level.playerStats[i].suicides = cl->sess.suicides;
+            level.playerStats[i].team_kills = cl->sess.team_kills;
+            level.playerStats[i].headshots = cl->sess.headshots;
+            level.playerStats[i].damage_given = cl->sess.damage_given;
+            level.playerStats[i].damage_received = cl->sess.damage_received;
+            level.playerStats[i].team_damage = cl->sess.team_damage;
+            level.playerStats[i].acc_hits = cl->sess.acc_hits;
+            level.playerStats[i].acc_shots = cl->sess.acc_shots;
+            level.playerStats[i].efficiency = eff;
+            level.playerStats[i].revives = cl->sess.revives;
+            level.playerStats[i].ammo_given = cl->sess.ammo_given;
+            level.playerStats[i].med_given = cl->sess.med_given;
+            level.playerStats[i].knifeKills = cl->sess.knifeKills;
+            level.playerStats[i].killPeak = cl->sess.killPeak;
+            level.playerStats[i].score = cl->ps.persistant[PERS_SCORE];
+            level.playerStats[i].dyn_planted = cl->sess.dyn_planted;
+            level.playerStats[i].dyn_defused = cl->sess.dyn_defused;
+            level.playerStats[i].obj_captured = cl->sess.obj_captured;
+            level.playerStats[i].obj_destroyed = cl->sess.obj_destroyed;
+            level.playerStats[i].obj_returned = cl->sess.obj_returned;
+            level.playerStats[i].obj_taken = cl->sess.obj_taken;
+            level.playerStats[i].obj_checkpoint = cl->sess.obj_checkpoint;
+            level.playerStats[i].obj_killcarrier = cl->sess.obj_killcarrier;
+            level.playerStats[i].obj_protectflag = cl->sess.obj_protectflag;
+
+            int j = cl->sess.sessionTeam;
+            for (m = WS_KNIFE; m < WS_MAX; m++)
+            {
+                if (cl->sess.aWeaponStats[m].atts || cl->sess.aWeaponStats[m].hits || cl->sess.aWeaponStats[m].deaths)
+                {
+                    level.playerStats[i].aWeaponStats[m].kills = cl->sess.aWeaponStats[m].kills;
+                    level.playerStats[i].aWeaponStats[m].deaths = cl->sess.aWeaponStats[m].deaths;
+                    level.playerStats[i].aWeaponStats[m].headshots = cl->sess.aWeaponStats[m].headshots;
+                    level.playerStats[i].aWeaponStats[m].hits = cl->sess.aWeaponStats[m].hits;
+                    level.playerStats[i].aWeaponStats[m].atts = cl->sess.aWeaponStats[m].atts;
+                }
             }
         }
     }
@@ -166,8 +230,8 @@ void BuildPlayerStats(int clientSlot, qboolean clientDisconnected)
 
 int getPstats(json_t *jsonData, char *id, gclient_t *client) {
 
-    if (!CanAccessFile("Stats: get pstats", level.jsonStatInfo.gameStatslogFileName))
-        return 0;
+    //if (!CanAccessFile("Stats: get pstats", level.jsonStatInfo.gameStatslogFileName))
+    //    return 0;
 
     json_t *pcat, *pitem, *pstats;
     int i = 0;
@@ -487,6 +551,66 @@ int G_check_before_submit( char* jsonfile)
 
 
 /*
+Read stats back into client session if player disconnected and came back
+*/
+int G_read_round_jstats_reconnect(gclient_t* client)
+{
+    char pGUID[64];
+
+    for (int i = 0; i < ArrayLength(level.disconnectStats); i++)
+    {
+        sprintf(pGUID, "%s", client->sess.guid);
+
+        if (!Q_stricmp(level.disconnectStats[i].guid, pGUID))
+        {
+            client->sess.deaths = level.disconnectStats[i].deaths;
+            client->sess.kills = level.disconnectStats[i].kills;
+            client->sess.damage_given = level.disconnectStats[i].damage_given;
+            client->sess.damage_received = level.disconnectStats[i].damage_received;
+            client->sess.team_damage = level.disconnectStats[i].team_damage;
+            client->sess.team_kills = level.disconnectStats[i].team_kills;
+            client->sess.gibs = level.disconnectStats[i].gibs;
+            client->sess.acc_shots = level.disconnectStats[i].acc_shots;
+            client->sess.acc_hits = level.disconnectStats[i].acc_hits;
+            client->sess.headshots = level.disconnectStats[i].headshots;
+            client->sess.suicides = level.disconnectStats[i].suicides;
+            client->sess.med_given = level.disconnectStats[i].med_given;
+            client->sess.ammo_given = level.disconnectStats[i].ammo_given;
+            client->sess.revives = level.disconnectStats[i].revives;
+            client->sess.knifeKills = level.disconnectStats[i].knifeKills;
+            client->sess.dyn_planted = level.disconnectStats[i].dyn_planted;
+            client->sess.dyn_defused = level.disconnectStats[i].dyn_defused;
+            client->sess.obj_captured = level.disconnectStats[i].obj_captured;
+            client->sess.obj_destroyed = level.disconnectStats[i].obj_destroyed;
+            client->sess.obj_returned = level.disconnectStats[i].obj_returned;
+            client->sess.obj_taken = level.disconnectStats[i].obj_taken;
+            client->sess.obj_checkpoint = level.disconnectStats[i].obj_checkpoint;
+            client->sess.obj_killcarrier = level.disconnectStats[i].obj_killcarrier;
+            client->sess.obj_protectflag = level.disconnectStats[i].obj_protectflag;
+
+            for (int m = WS_KNIFE; m < WS_MAX; m++)
+            {
+                if (level.disconnectStats[i].aWeaponStats[m].atts || level.disconnectStats[i].aWeaponStats[m].hits || level.disconnectStats[i].aWeaponStats[m].deaths)
+                {
+                    client->sess.aWeaponStats[m].kills = level.disconnectStats[i].aWeaponStats[m].kills;
+                    client->sess.aWeaponStats[m].deaths = level.disconnectStats[i].aWeaponStats[m].deaths;
+                    client->sess.aWeaponStats[m].headshots = level.disconnectStats[i].aWeaponStats[m].headshots;
+                    client->sess.aWeaponStats[m].hits = level.disconnectStats[i].aWeaponStats[m].hits;
+                    client->sess.aWeaponStats[m].atts = level.disconnectStats[i].aWeaponStats[m].atts;
+                }
+            }
+
+            memset(&level.disconnectStats[i], 0, sizeof(level.disconnectStats[i]));
+            level.disconnectCount--;
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/*
  Read in stats from json to client session
 
  Currently reads in stats from round 1 but the idea is to have it reload
@@ -617,15 +741,11 @@ Output the end of round stats in Json format with player array...
 ===========
 */
 
-void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientId) {
+void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *client) {
 
-    if (!CanAccessFile("Stats: writing stats by players", level.jsonStatInfo.gameStatslogFileName))
-        return;
-
-    int i, j;
 	float tot_acc = 0.00f;
 	char* statString = "";
-	gclient_t *cl;
+	//gclient_t *cl;
 	char pGUID[64];
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
@@ -640,15 +760,26 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     // build player stats for players still on the server
     if (!clientDisconnected)
     {
-        for (j = 0; j < level.numPlayingClients; j++)
-        {
-            cl = level.clients + level.sortedClients[j];
-            BuildPlayerStats(cl->ps.clientNum, qfalse);
-        }
+        //for (int j = 0; j < level.numPlayingClients; j++)
+        //{
+        //    cl = level.clients + level.sortedClients[j];
+        //    BuildPlayerStats(cl->ps.clientNum, qfalse);
+        //}
+
+        BuildPlayerStats(NULL, qfalse); // call this one time for all clients
 
         jstats = json_array();
 
-        for (j = 0; j < ArrayLength(level.playerStats); j++)
+        int t = 0;
+
+        // copy the disconnectedStats data into the playerStats array
+        for (int i = 0; i < level.disconnectCount; i++)
+        {
+            level.playerStats[level.numConnectedClients + i] = level.disconnectStats[i];
+        }
+
+
+        for (int j = 0; j < ArrayLength(level.playerStats); j++)
         {
             if (level.playerStats[j].guid == NULL) // if array index is empty continue
                 continue;
@@ -658,6 +789,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
 
             sprintf(pGUID, "%s", level.playerStats[j].guid);
 
+            json_object_set_new(jdata, "alias_colored", json_string(level.playerStats[j].aliasColored));
             json_object_set_new(jdata, "alias", json_string(level.playerStats[j].alias));
             json_object_set_new(jdata, "team", json_string((level.playerStats[j].sessionTeam == TEAM_RED) ? "Axis" : "Allied"));
             json_object_set_new(jdata, "start_time", json_integer(level.playerStats[j].start_time));
@@ -684,7 +816,6 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
             json_object_set_new(jcat, "knifekills", json_integer(level.playerStats[j].knifeKills));
             json_object_set_new(jcat, "killpeak", json_integer(level.playerStats[j].killPeak));
             json_object_set_new(jcat, "efficiency", json_real(level.playerStats[j].efficiency));
-            // The following objects are not stored over multiple rounds....need to add to g_session if we want these to reflect multiple rounds
             json_object_set_new(jcat, "score", json_integer(level.playerStats[j].score));
             json_object_set_new(jcat, "dyn_planted", json_integer(level.playerStats[j].dyn_planted));
             json_object_set_new(jcat, "dyn_defused", json_integer(level.playerStats[j].dyn_defused));
@@ -698,7 +829,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
 
 
             weapArray = json_array();
-            i = level.playerStats[j].sessionTeam;
+            int i = level.playerStats[j].sessionTeam;
 
             for (m = WS_KNIFE; m < WS_MAX; m++) {
                 if (level.playerStats[j].aWeaponStats[m].atts || level.playerStats[j].aWeaponStats[m].hits ||
@@ -745,6 +876,9 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
 
     if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer && !clientDisconnected)
     {
+        if (!CanAccessFile("Stats: writing stats by players", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         trap_FS_Write("\"stats\": ", strlen("\"stats\": "), level.jsonStatInfo.gameStatslogFile);
         trap_FS_Write(statString, strlen(statString), level.jsonStatInfo.gameStatslogFile);
         trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.gameStatslogFile);  // for writing weapon stats after
@@ -753,7 +887,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     }
     else if (clientDisconnected)
     {
-        BuildPlayerStats(clientId, clientDisconnected);
+        BuildPlayerStats(client, clientDisconnected);
     }
 
     if (!wstats) {// write weapon stats separately
@@ -761,25 +895,26 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, int clientI
     }
 }
 
-void AddQuitPlayerStats(char *guid)
-{
-    int i = 0;
-
-    // find the first available index in the array
-    while (i < 32 && level.disconnectStats[i][0] != '\0')
-    {        
-        i++;
-    }
-
-    if (i < 32)
-    {
-        Q_strncpyz(level.disconnectStats[i], guid, sizeof(level.disconnectStats[i]));
-    }
-    else
-    {
-        G_Printf(va("Disconnect stats array is full. Cannot add player guid: %s", guid));
-    }
-}
+//void AddQuitPlayerStats(char *guid)
+//{
+//    int i = 0;
+//
+//    // find the first available index in the array
+//    while (i < 12 && level.disconnectStats[i][0] != '\0')
+//    {        
+//        i++;
+//    }
+//
+//    if (i < 12)
+//    {
+//        Q_strncpyz(level.disconnectStats[i], guid, sizeof(level.disconnectStats[i]));
+//        level.disconnectCount++;
+//    }
+//    else
+//    {
+//        G_Printf(va("Disconnect stats array is full. Cannot add player guid: %s", guid));
+//    }
+//}
 
 /*
 ===========
@@ -790,9 +925,6 @@ Output the end of round stats in Json format with team array ...
 */
 
 void G_jstatsByTeam(qboolean wstats) {
-
-    if (!CanAccessFile("Stats: writing stats by team", level.jsonStatInfo.gameStatslogFileName))
-        return;
 
     int i, j, eff,rc;
 	float tot_acc = 0.00f;
@@ -934,6 +1066,9 @@ void G_jstatsByTeam(qboolean wstats) {
 
         if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer)
         {
+            if (!CanAccessFile("Stats: writing stats by team", level.jsonStatInfo.gameStatslogFileName))
+                return;
+
             trap_FS_Write( "\"stats\": ", strlen( "\"stats\": " ), level.jsonStatInfo.gameStatslogFile );
             trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
             trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );  // for writing weapon stats after
@@ -965,9 +1100,6 @@ Output the weapon stats for each player
 */
 
 void G_jWeaponStats(void) {
-
-    if (!CanAccessFile("Stats: writing weapon stats", level.jsonStatInfo.gameStatslogFileName))
-        return;
 
     int i, j, rc;
 	char* s;
@@ -1025,6 +1157,10 @@ void G_jWeaponStats(void) {
     s = json_dumps( jwstat, 1 ); // for a pretty print form
 
     if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
+
+        if (!CanAccessFile("Stats: writing weapon stats", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         trap_FS_Write( "\"wstats\": ", strlen( "\"wstats\": " ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
 
@@ -1053,9 +1189,6 @@ Output server related information
 ===========
 */
 void G_writeServerInfo(void) {
-
-    if (!CanAccessFile("Stats: writing server info", level.jsonStatInfo.gameStatslogFileName))
-        return;
 
     //char* buf;
     char* s;
@@ -1090,6 +1223,10 @@ void G_writeServerInfo(void) {
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing server info", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps( jdata, 1 );
         //s = json_dumps( jdata, 0 );
 
@@ -1115,9 +1252,6 @@ Output end of info (i.e. round, winner, etc)
 */
 
 void G_writeGameInfo (int winner ) {
-
-    if (!CanAccessFile("Stats: writing game info", level.jsonStatInfo.gameStatslogFileName))
-        return;
 
 	char* s;
 	char mapName[64];
@@ -1168,6 +1302,10 @@ void G_writeGameInfo (int winner ) {
     */
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing game info", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         //s = json_dumps( jdata, 0 );
         s = json_dumps( jdata, 1 );
         trap_FS_Write( "\"gameinfo\": \n", strlen( "\"gameinfo\": \n" ), level.jsonStatInfo.gameStatslogFile );
@@ -1184,9 +1322,6 @@ void G_writeGameInfo (int winner ) {
 // Probably should have just made an array of all events to loop over.....bah will do that when more events are added
 
 void G_writeObjectiveEvent (gentity_t* agent,int objType) {
-
-    if (!CanAccessFile("Stats: writing Objective event", level.jsonStatInfo.gameStatslogFileName))
-        return;
 
     char* s;
     //char buf[64];
@@ -1242,6 +1377,10 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
     json_object_set_new(jdata, "agent",    json_string(agent->client->sess.guid));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing Objective event", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
@@ -1255,10 +1394,13 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 }
 
 
-void G_writeChatEvent(gentity_t* agent, char* chatText)
+void G_writeChatEvent(gentity_t* agent, const char* chatText)
 {
-    if (!CanAccessFile("Stats: writing global chat event", level.jsonStatInfo.gameStatslogFileName))
+    // if client wrote same thing as their last chat return to prevent spamming gamelog
+    if (!Q_stricmp(agent->client->sess.lastChatText, chatText))
         return;
+
+    agent->client->sess.lastChatText = (char *)chatText;
 
     char* s;
     json_t* jdata = json_object();
@@ -1274,6 +1416,10 @@ void G_writeChatEvent(gentity_t* agent, char* chatText)
     json_object_set_new(jdata, "text", json_string(va("%s", chatText)));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing global chat event", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps(jdata, 0);
         trap_FS_Write(s, strlen(s), level.jsonStatInfo.gameStatslogFile);
         trap_FS_Write(",\n", strlen(",\n"), level.jsonStatInfo.gameStatslogFile);
@@ -1286,9 +1432,6 @@ void G_writeChatEvent(gentity_t* agent, char* chatText)
 
 
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType) {
-
-    if (!CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName))
-        return;
 
     char* s;
     //char buf[64];
@@ -1391,6 +1534,10 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
 	}
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
@@ -1435,9 +1582,6 @@ void G_writeCombatEvent (gentity_t* agent,gentity_t* other, vec3_t dir) {
 
 void G_writeDisconnectEvent (gentity_t* agent) {
 
-    if (!CanAccessFile("Stats: writing disconnect event", level.jsonStatInfo.gameStatslogFileName))
-        return;
-
     char* s;
     //char buf[64];
     json_t *jdata = json_object();
@@ -1455,6 +1599,10 @@ void G_writeDisconnectEvent (gentity_t* agent) {
     json_object_set_new(jdata, "agent",    json_string(va("%s",agent->client->sess.guid)));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing disconnect event", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( ",\n", strlen( ",\n" ), level.jsonStatInfo.gameStatslogFile );
@@ -1467,9 +1615,6 @@ void G_writeDisconnectEvent (gentity_t* agent) {
 
 void G_writeClosingJson(void)
 {
-    if (!CanAccessFile("Stats: writing closing json", level.jsonStatInfo.gameStatslogFileName))
-        return;
-
     char buf[64];
     int ret = 0;
     if (level.jsonStatInfo.gameStatslogFile) {
@@ -1484,14 +1629,24 @@ void G_writeClosingJson(void)
             G_Printf("Stats API: Starting stats upload process.\n");
 
             if ( level.jsonStatInfo.gameStatslogFile && buf ) {
-                trap_submit_curlPost(level.jsonStatInfo.gameStatslogFileName, va("%s",buf));
+
+                if (!CanAccessFile("Stats: writing closing json", level.jsonStatInfo.gameStatslogFileName))
+                    return;
+
+                // prevent from writing to this file because stats are submitting
+                char fileNametoSubmit[256];
+                sprintf(fileNametoSubmit, "%s", level.jsonStatInfo.gameStatslogFileName);
+                Com_sprintf(level.jsonStatInfo.gameStatslogFileName, sizeof(level.jsonStatInfo.gameStatslogFileName), "");
+
+                trap_submit_curlPost(fileNametoSubmit, va("%s",buf));
             }
             else {
                 G_Printf("Stats API: No file to upload. Skipping.\n");
             }
 
         }
-      }
+        Com_sprintf(level.jsonStatInfo.gameStatslogFileName, sizeof(level.jsonStatInfo.gameStatslogFileName), ""); // prevent from writing to this file because we just closed it
+    }
 
 
 
@@ -1500,9 +1655,6 @@ void G_writeClosingJson(void)
 
 void G_writeGameLogStart(void)
 {
-    if (!CanAccessFile("Stats: writing game log start", level.jsonStatInfo.gameStatslogFileName))
-        return;
-
     char* s;
     json_t *jdata = json_object();
     time_t unixTime = time(NULL);
@@ -1512,6 +1664,10 @@ void G_writeGameLogStart(void)
     trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing game log start", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         trap_FS_Write( "\"gamelog\": [\n", strlen( "\"gamelog\": [\n"), level.jsonStatInfo.gameStatslogFile );
         json_object_set_new(jdata, "match_id",    json_string(va("%s",buf)));
         json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
@@ -1537,9 +1693,6 @@ void G_writeGameLogStart(void)
 
 void G_writeGameLogEnd(void)
 {
-    if (!CanAccessFile("Stats: writing game log end", level.jsonStatInfo.gameStatslogFileName))
-        return;;
-
     char* s;
     //char buf[64];
     json_t *jdata = json_object();
@@ -1553,6 +1706,10 @@ void G_writeGameLogEnd(void)
     json_object_set_new(jdata, "label",    json_string("round_end"));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing game log end", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile );
@@ -1568,9 +1725,6 @@ void G_writeGameLogEnd(void)
 
 void G_writeGameEarlyExit(void)
 {
-    if (!CanAccessFile("Stats: writing game early exit", level.jsonStatInfo.gameStatslogFileName))
-        return;
-
     char* s;
     char buf[64];
     json_t *jdata = json_object();
@@ -1587,6 +1741,10 @@ void G_writeGameEarlyExit(void)
     json_object_set_new(jdata, "label",    json_string("map_restart"));
 
     if (level.jsonStatInfo.gameStatslogFile) {
+
+        if (!CanAccessFile("Stats: writing game early exit", level.jsonStatInfo.gameStatslogFileName))
+            return;
+
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile );
@@ -1613,8 +1771,8 @@ void G_writeGameEarlyExit(void)
 */
 int G_teamAlive(int team ) {
 
-    if (!CanAccessFile("Stats: checking for alive players", level.jsonStatInfo.gameStatslogFileName))
-        return 0;
+    //if (!CanAccessFile("Stats: checking for alive players", level.jsonStatInfo.gameStatslogFileName))
+    //    return 0;
 
     int  j;
 	gclient_t *cl;

@@ -257,6 +257,8 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
     - server: Fixed physics for FPS (1.2.61 already released to a few servers)
     - server: Added /maps command
 
+- 1.2.8 [changelog](changelog/1.2.8-changelog.txt)
+- 1.2.9 [changelog](changelog/1.2.9-changelog.txt)  
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 

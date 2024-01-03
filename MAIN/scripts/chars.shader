@@ -21,3 +21,14 @@ gfx/2d/hudchars_OSP2
 		rgbgen vertex
 	}
 }
+
+fonts/courbd_0_30
+{
+	nopicmip
+	nomipmaps
+	{
+		map fonts/courbd_0_30.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbgen vertex
+	}
+}

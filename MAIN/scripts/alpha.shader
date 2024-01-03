@@ -1363,6 +1363,7 @@ textures/terrain/pine3
 textures/doors/door_m04
 {
 	surfaceparm metalsteps		
+	nopicmip
 	cull none
 	{
 		map textures/doors/door_m04.tga

@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __THREADS_H
 #define __THREADS_H
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 #ifdef __linux__

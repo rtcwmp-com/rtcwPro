@@ -181,12 +181,6 @@
     <ClCompile Include="g_weapon.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="q_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\qcommon\crypto\sha-1\sha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -196,9 +190,11 @@
     <ClCompile Include="g_apiquery.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="g_shared.c">
+    <ClCompile Include="g_unlagged.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\qcommon\q_math.c" />
+    <ClCompile Include="..\qcommon\q_shared.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ai_cast.h">
@@ -279,9 +275,6 @@
     <ClInclude Include="..\botai\match.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="q_shared.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\qcommon\crypto\sha-1\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -306,6 +299,7 @@
     <ClInclude Include="..\qcommon\threads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\qcommon\q_shared.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

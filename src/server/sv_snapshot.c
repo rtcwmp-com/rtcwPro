@@ -787,15 +787,18 @@ void SV_SendClientSnapshot( client_t *client ) {
 	SV_WriteSnapshotToClient( client, &msg );
 
 	// Add any download data if the client is downloading
-	if (sv_wwwDownload->integer) {
-	  SV_WriteDownloadToClient( client, &msg );
-	}
-	//SV_WriteDownloadToClient( client, &msg );
+	SV_WriteDownloadToClient( client, &msg );
 
 	// check for overflow
 	if ( msg.overflowed ) {
 		Com_Printf( "WARNING: msg overflowed for %s\n", client->name );
 		MSG_Clear( &msg );
+
+		if (sv_dropClientOnOverflow->integer)
+		{
+			SV_DropClient(client, "Msg overflowed");
+			return; // avoid server crash
+		}
 	}
 
 	SV_SendMessageToClient( &msg, client );

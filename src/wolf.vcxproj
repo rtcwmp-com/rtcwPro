@@ -479,24 +479,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
-    <ClCompile Include="game\q_math.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">MaxSpeed</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
-    </ClCompile>
-    <ClCompile Include="game\q_shared.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">MaxSpeed</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
-    </ClCompile>
     <ClCompile Include="null\null_client.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
@@ -605,7 +587,6 @@
     </ClCompile>
     <ClCompile Include="qcommon\db_main.c" />
     <ClCompile Include="qcommon\db_mysql.c" />
-    <ClCompile Include="qcommon\dl_main_curl.c" />
     <ClCompile Include="qcommon\files.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
@@ -654,6 +635,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="qcommon\q_math.c" />
+    <ClCompile Include="qcommon\q_shared.c" />
     <ClCompile Include="qcommon\stats_submit_curl.c" />
     <ClCompile Include="qcommon\unzip.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
@@ -934,7 +917,6 @@
     <ClInclude Include="game\bg_public.h" />
     <ClInclude Include="game\botlib.h" />
     <ClInclude Include="game\g_public.h" />
-    <ClInclude Include="game\q_shared.h" />
     <ClInclude Include="game\surfaceflags.h" />
     <ClInclude Include="qcommon\cm_local.h" />
     <ClInclude Include="qcommon\cm_patch.h" />
@@ -950,6 +932,7 @@
     <ClInclude Include="qcommon\md5.h" />
     <ClInclude Include="qcommon\qcommon.h" />
     <ClInclude Include="qcommon\qfiles.h" />
+    <ClInclude Include="qcommon\q_shared.h" />
     <ClInclude Include="qcommon\threads.h" />
     <ClInclude Include="qcommon\unzip.h" />
     <ClInclude Include="qcommon\vm_local.h" />

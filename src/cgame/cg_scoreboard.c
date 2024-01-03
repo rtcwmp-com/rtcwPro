@@ -40,11 +40,11 @@ If you have questions concerning this license or the applicable additional terms
 Scoreboard flags (WolfSE)
 =================
 */
-static qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
+qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
 	float alpha[4];
 	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "cc"));
 
-	if (client_flag < 255)
+	if (client_flag <= 255)
 	{
 		float x1 = (float)((client_flag * (unsigned int)COUNTRY_FLAG_INDIVIDUAL_SIZE) % COUNTRY_FLAG_WIDTH);
 		float y1 = (float)(floor((client_flag * COUNTRY_FLAG_INDIVIDUAL_SIZE) / COUNTRY_FLAG_WIDTH) * COUNTRY_FLAG_INDIVIDUAL_SIZE);
@@ -259,7 +259,28 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 	if ( cg.snap->ps.pm_type != PM_INTERMISSION ) {
 		CG_DrawSmallString( x, y, CG_TranslateString( "Goals" ), fade );
 	}
-	CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // RTCWPro - time
+
+	// show server name and time/date
+	char scoreInfo[200];
+	scoreInfo[0] = 0;
+	
+	s = CG_ConfigString(CS_SERVERINFO);
+	Q_strcat(scoreInfo, sizeof(scoreInfo), va("^3Server: ^7%s  ", Q_CleanStr(Info_ValueForKey(s, "sv_hostname"))));
+	Q_strcat(scoreInfo, sizeof(scoreInfo), va("^3Time: ^7%s", CG_GetClock()));
+
+	// if intermission move it up a little
+	if (cg.snap->ps.pm_type == PM_INTERMISSION)
+		y -= 15;
+
+	int w = CG_DrawStrlen(scoreInfo) * TINYCHAR_WIDTH;
+	CG_DrawStringExt(615 - w, y + TINYCHAR_HEIGHT - 2, scoreInfo, colorWhite, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	//CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // RTCWPro - time
+
+	// if intermission move it back
+	if (cg.snap->ps.pm_type == PM_INTERMISSION)
+		y += 15;
+
 	y += SMALLCHAR_HEIGHT + 3;
 
 	// draw color bands
@@ -470,7 +491,7 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 
 	if ( ci->team != TEAM_SPECTATOR ) {
 		if ( ci->powerups & ( ( 1 << PW_REDFLAG ) | ( 1 << PW_BLUEFLAG ) ) || (ci->powerups & ( 1 << PW_CAPPEDOBJ ) && cg.snap->ps.pm_type == PM_INTERMISSION)) {
-			CG_DrawPic( tempx - 4, y - 4, 24, 24, trap_R_RegisterShader( "models/multiplayer/treasure/treasure" ) );
+			CG_DrawPic(tempx - 4, y - 4, 24, 24, cgs.media.treasureIcon); // trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure") );
 			offset += 16;
 			tempx += 16;
 			maxchars -= 2;

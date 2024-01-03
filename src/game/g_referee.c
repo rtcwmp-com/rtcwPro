@@ -326,7 +326,7 @@ void G_MakeShoutcaster(gentity_t* ent)
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR && qfalse)
 	{
 		SetTeam(ent, "spectator", qtrue);
 	}
@@ -1224,4 +1224,39 @@ void G_refPrintf(gentity_t* ent, const char *fmt, ...) {
 	}
 	//else { CP(va("cpm \"%s\n\"", text)); }
 	else { CP(va("print \"%s\n\"", text)); }
+}
+
+/*
+===========
+Kill player
+===========
+*/
+void G_refKillAllPlayers(gentity_t* ent)
+{
+	gclient_t* cl;
+
+	for (int i = 0; i < level.numPlayingClients; i++) {
+
+		cl = &level.clients[level.sortedClients[i]];
+
+		if (cl->pers.connected != CON_CONNECTED) {
+			continue;
+		}
+
+		if (cl->sess.sessionTeam == TEAM_SPECTATOR) {
+			continue;
+		}
+
+		if (cl->ps.pm_flags & PMF_LIMBO)
+		{
+			continue;
+		}
+
+		ent = &g_entities[cl->ps.clientNum];
+		G_Damage(ent, NULL, NULL, NULL, NULL, 250, DAMAGE_NO_PROTECTION, MOD_SELFKILL);
+		//AP(va("chat \"console:^7 %s ^7was killed by %s^3!\n\"", ent->client->pers.netname, tag));
+		player_die(ent, ent, ent, 100000, MOD_SELFKILL);
+	}
+	
+	return;
 }

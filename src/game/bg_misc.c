@@ -34,8 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
+#include "g_local.h"
 #include "../../MAIN//ui_mp/menudef.h"
 
 // JPW NERVE -- added because I need to check single/multiplayer instances and branch accordingly
@@ -141,7 +142,7 @@ ammotable_t ammoTable[] = {
 
 	{   MAX_AMMO_FG42,  1,      20,     2000,   DELAY_LOW,      200,    0,      0,      MOD_FG42SCOPE           },  //	WP_FG42SCOPE			// 23
 	{   MAX_AMMO_BAR,   1,      20,     2000,   DELAY_LOW,      90,     0,      0,      MOD_BAR                 },  //	WP_BAR2					// 24
-	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    750,    300,    MOD_STEN                },  //	WP_STEN					// 25
+	{   MAX_AMMO_STEN,  1,      32,     3100,   DELAY_LOW,      110,    700,    300,    MOD_STEN                },  //	WP_STEN					// 25
 	{   3,              1,      1,      1500,   50,             1000,   0,      0,      MOD_SYRINGE             },  //	WP_MEDIC_SYRINGE		// 26 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_AMMO,               },  //	WP_AMMO					// 27 // JPW NERVE
 	{   1,              0,      1,      3000,   50,             1000,   0,      0,      MOD_ARTY,               },  //	WP_ARTY
@@ -3478,7 +3479,7 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 			}
 			else if (weapon == WP_PANZERFAUST) {
 				clip = BG_FindAmmoForWeapon(weapon);
-				if (ps->ammoclip[clip] < maxammo) {
+				if (ps->ammo[clip] < maxammo) {
 
 					// early out
 					//if (!numOfClips) {
@@ -3486,8 +3487,8 @@ qboolean BG_AddMagicAmmo(playerState_t* ps, int teamNum) {
 					//}
 
 					//Com_Printf("Panzer added -> %5d\n", ps->ammoclip[clip]);
-
 					needsAmmo = qtrue;
+
 					//ps->ammoclip[clip] += numOfClips;
 					//if (ps->ammoclip[clip] >= maxammo) {
 					//	ps->ammoclip[clip] = maxammo;
@@ -4452,34 +4453,27 @@ void BG_PlayerStateToEntityStatePro(playerState_t* ps, entityState_t* s, int tim
 // Crosshairs
 //
 
-// Only used locally
-typedef struct {
-	char *colorname;
-	vec4_t *color;
-} colorTable_t;
-
-// Colors for crosshairs
-colorTable_t OSP_Colortable[] =
+const colorTable_t OSP_Colortable[] =
 {
-	{ "white", &colorWhite },
-	{ "red", &colorRed },
-	{ "green", &colorGreen },
-	{ "blue", &colorBlue },
-	{ "yellow", &colorYellow },
-	{ "magenta", &colorMagenta },
-	{ "cyan", &colorCyan },
-	{ "orange", &colorOrange },
-	{ "mdred", &colorMdRed },
-	{ "mdgreen", &colorMdGreen },
-	{ "dkgreen", &colorDkGreen },
-	{ "mdcyan", &colorMdCyan },
-	{ "mdyellow", &colorMdYellow },
-	{ "mdorange", &colorMdOrange },
-	{ "mdblue", &colorMdBlue },
-	{ "ltgrey", &colorLtGrey },
-	{ "mdgrey", &colorMdGrey },
-	{ "dkgrey", &colorDkGrey },
-	{ "black", &colorBlack },
+	{ "white", &colorWhite, '7' },
+	{ "red", &colorRed, '1' },
+	{ "green", &colorGreen, '2' },
+	{ "blue", &colorBlue, '4' },
+	{ "yellow", &colorYellow, '3' },
+	{ "magenta", &colorMagenta, '6' },
+	{ "cyan", &colorCyan, '5' },
+	{ "orange", &colorOrange, '8' },
+	{ "mdred", &colorMdRed, '?' },
+	{ "mdgreen", &colorMdGreen, '<' },
+	{ "dkgreen", &colorDkGreen, 'h' },
+	{ "mdcyan", &colorMdCyan, 'b' },
+	{ "mdyellow", &colorMdYellow, '=' },
+	{ "mdorange", &colorMdOrange, 'x' },
+	{ "mdblue", &colorMdBlue, '>'},
+	{ "ltgrey", &colorLtGrey, ':'},
+	{ "mdgrey", &colorMdGrey, '9' },
+	{ "dkgrey", &colorDkGrey, 'y' },
+	{ "black", &colorBlack, '0' },
 	{ NULL, NULL }
 };
 
@@ -4610,7 +4604,7 @@ const voteType_t voteToggles[] =
 	{ "vote_allow_matchreset",       CV_SVF_MATCHRESET },
 	{ "vote_allow_mutespecs",        CV_SVF_MUTESPECS },
 	{ "vote_allow_nextmap",          CV_SVF_NEXTMAP },
-	{ "vote_allow_pub",              CV_SVF_PUB },
+	//{ "vote_allow_pub",              CV_SVF_PUB }, // not used
 	{ "vote_allow_referee",          CV_SVF_REFEREE },
 	{ "vote_allow_shuffleteamsxp",   CV_SVF_SHUFFLETEAMS },
 	{ "vote_allow_swapteams",        CV_SVF_SWAPTEAMS },
@@ -4619,7 +4613,8 @@ const voteType_t voteToggles[] =
 	{ "vote_allow_warmupdamage", CV_SVF_WARMUPDAMAGE },
 	{ "vote_allow_antilag",          CV_SVF_ANTILAG },
 	{ "vote_allow_balancedteams",    CV_SVF_BALANCEDTEAMS },
-	{ "vote_allow_muting",           CV_SVF_MUTING }
+	{ "vote_allow_muting",           CV_SVF_MUTING },
+	{ "vote_allow_knifeonly",    CV_SVF_KNIFEONLY },
 };
 
 int numVotesAvailable = sizeof(voteToggles) / sizeof(voteType_t);
@@ -4725,9 +4720,9 @@ Ported from etPub
 */
 char* Q_StrReplace(char* haystack, char* needle, char* newp)
 {
-	static char final[MAX_STRING_CHARS] = { "" };
-	char dest[MAX_STRING_CHARS] = { "" };
-	char newStr[MAX_STRING_CHARS] = { "" };
+	static char final[MAX_INFO_STRING] = { "" };
+	char dest[MAX_INFO_STRING] = { "" };
+	char newStr[MAX_INFO_STRING] = { "" };
 	char* destp;
 	int needle_len = 0;
 	int new_len = 0;
@@ -4754,7 +4749,7 @@ char* Q_StrReplace(char* haystack, char* needle, char* newp)
 			destp += new_len;
 			continue;
 		}
-		if (MAX_STRING_CHARS > (strlen(dest) + 1)) {
+		if (MAX_INFO_STRING > (strlen(dest) + 1)) {
 			*destp = *haystack;
 			*++destp = '\0';
 		}
@@ -4850,3 +4845,108 @@ void setGuid(char* in, char* out) {
 	out[j++] = '\0';
 }
 
+const char* months[12] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+/*
+==================
+Returns current time % date
+==================
+*/
+char* getDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s %02d %d %02d:%02d:%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+/*
+==================
+// deliminated date-time
+==================
+*/
+char* Delim_GetDateTime(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%s%02d-%d-%02d-%02d-%02d",
+		months[ct.tm_mon], ct.tm_mday, getYearFromCYear(ct.tm_year), ct.tm_hour, ct.tm_min, ct.tm_sec);
+}
+
+/*
+==================
+// Returns current date
+==================
+*/
+char* getDate(void) {
+	qtime_t		ct;
+	trap_RealTime(&ct);
+
+	return va("%02d/%s/%d", ct.tm_mday, months[ct.tm_mon], getYearFromCYear(ct.tm_year));
+}
+
+/*
+==================
+// returns month string abbreviation (i.e. Jun)
+==================
+*/
+const char* getMonthString(int monthIndex) {
+	if (monthIndex < 0 || monthIndex >= ArrayLength(months)) {
+		return "InvalidMonth";
+	}
+
+	return months[monthIndex];
+}
+
+/*
+==================
+// returns current year
+==================
+*/
+int getYearFromCYear(int cYear) {
+	return 1900 + cYear;
+}
+
+/*
+==================
+// returns the last day for that month.
+==================
+*/ 
+int getDaysInMonth(int monthIndex) {
+	switch (monthIndex) {
+	case 1:  // Feb
+		return 28;
+	case 3:  // Apr
+	case 5:  // Jun
+	case 8:  // Sep
+	case 10: // Nov
+		return 30;
+	default: // Jan, Mar, May, Jul, Aug, Oct, Dec
+		return 31;
+	}
+}
+
+
+/*
+==================
+LogEntry
+
+log to a file
+==================
+*/
+void LogEntry(char* filename, char* info) {
+	fileHandle_t    f;
+	char* varLine;
+
+	trap_FS_FOpenFile(filename, &f, FS_APPEND);
+
+	varLine = va("%s: %s", getDateTime(), info);
+	strcat(varLine, "\r");
+
+	trap_FS_Write(varLine, strlen(varLine), f);
+	trap_FS_FCloseFile(f);
+	return;
+}

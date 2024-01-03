@@ -1433,4 +1433,73 @@ qboolean Q_IsNumeric(const char* s) {
 	return qtrue;
 }
 
-//====================================================================
+/**
+ * @brief Takes a plain "un-colored" string, and then colorizes it so the string is displayed in the given color.
+ * If given a string such as "Bob" and asked to colorize to '1' (red)', the output would be "^1Bob". If given
+ * "John^^7Candy" the output is "^1John^^1^^17Candy"  -- Note that when drawn, this would literally show
+ * the text "John^^7Candy" in red.
+ *
+ * If the desired result is to see "John^Candy" in red, then create a clean un-colored string before calling this.
+ *
+ * REQUIREMENTS:
+ *	- Callers must pass in a buffer that is *at least* 3 bytes long.
+ *  - inStr and outStr cannot overlap
+ *
+ * @param[in] colorCode
+ * @param[in] inStr
+ * @param[out] outStr
+ * @param[in] outBufferLen
+ */
+void Q_ColorizeString(char colorCode, const char* inStr, char* outStr, size_t outBufferLen)
+{
+	size_t inLen = strlen(inStr);
+	size_t outOffset = 0;
+	size_t inOffset = 0;
+
+	if (outBufferLen < 3 || inStr == outStr)
+	{
+		//etl_assert(qfalse);
+		Com_Error(ERR_DROP, "Q_ColorizeString: invalid input data");
+	}
+
+	outStr[outOffset++] = Q_COLOR_ESCAPE;
+	outStr[outOffset++] = colorCode;
+
+	// Ok the buffer is way too small
+	if (outOffset + 1 >= outBufferLen)
+	{
+		outStr[outOffset] = 0;
+		return;
+	}
+
+	// There needs to be one extra char available in the output buffer for the terminating zero
+	while (inOffset < inLen && outOffset + 1 < outBufferLen)
+	{
+		char c = inStr[inOffset];
+
+		if (c == Q_COLOR_ESCAPE)
+		{
+			// chars plus possible terminator char
+			if (outOffset + 4 < outBufferLen)
+			{
+				outStr[outOffset++] = c;
+				outStr[outOffset++] = Q_COLOR_ESCAPE;
+				outStr[outOffset++] = colorCode;
+			}
+			else
+			{
+				break;
+			}
+		}
+		else
+		{
+			outStr[outOffset++] = c;
+		}
+
+		inOffset++;
+	}
+
+	outStr[outOffset] = 0;
+}
+
+

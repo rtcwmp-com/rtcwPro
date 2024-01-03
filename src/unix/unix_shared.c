@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/time.h>
 #include <pwd.h>
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 //=============================================================================

@@ -97,7 +97,7 @@ SERVEROBJS := \
 VMOBJS := \
 	../qcommon/vm.o ../qcommon/vm_interpreted.o
 SHAREDOBJS := \
-	../game/q_shared.o ../game/q_math.o
+	../qcommon/q_shared.o ../qcommon/q_math.o
 DEDOBJS := \
 	../null/null_client.o ../null/null_input.o ../null/null_snddma.o
 UNIXCLIENTOBJS := \

@@ -18,7 +18,7 @@
 #define __MD5_H
 
 #include <stdint.h>
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 typedef struct MD5Context {

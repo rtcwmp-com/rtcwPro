@@ -123,7 +123,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GAMEDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GAMEDLL;UNLAGGED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>..\qcommon\jansson_win;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <AdditionalIncludeDirectories>..\qcommon\jansson_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderOutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pch</PrecompiledHeaderOutputFile>
@@ -253,6 +253,8 @@
     <ClCompile Include="..\botai\ai_team.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha1.c" />
+    <ClCompile Include="..\qcommon\q_math.c" />
+    <ClCompile Include="..\qcommon\q_shared.c" />
     <ClCompile Include="ai_cast.c" />
     <ClCompile Include="ai_cast_characters.c" />
     <ClCompile Include="ai_cast_debug.c" />
@@ -297,7 +299,6 @@
     <ClCompile Include="g_script_actions.c" />
     <ClCompile Include="g_session.c" />
     <ClCompile Include="g_sha1.c" />
-    <ClCompile Include="g_shared.c" />
     <ClCompile Include="g_spawn.c" />
     <ClCompile Include="g_stats.c" />
     <ClCompile Include="g_svcmds.c" />
@@ -306,11 +307,10 @@
     <ClCompile Include="g_team.c" />
     <ClCompile Include="g_tramcar.c" />
     <ClCompile Include="g_trigger.c" />
+    <ClCompile Include="g_unlagged.c" />
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
-    <ClCompile Include="q_math.c" />
-    <ClCompile Include="q_shared.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\botai\ai_chat.h" />
@@ -326,6 +326,7 @@
     <ClInclude Include="..\botai\syn.h" />
     <ClInclude Include="..\qcommon\crypto\sha-1\sha1.h" />
     <ClInclude Include="..\qcommon\jansson_win\jansson.h" />
+    <ClInclude Include="..\qcommon\q_shared.h" />
     <ClInclude Include="..\qcommon\threads.h" />
     <ClInclude Include="ai_cast.h" />
     <ClInclude Include="ai_cast_fight.h" />
@@ -346,7 +347,6 @@
     <ClInclude Include="g_shared.h" />
     <ClInclude Include="g_stats.h" />
     <ClInclude Include="g_team.h" />
-    <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
   </ItemGroup>
   <ItemGroup>

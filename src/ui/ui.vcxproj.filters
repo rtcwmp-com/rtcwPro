@@ -4,12 +4,6 @@
     <ClCompile Include="..\game\bg_misc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\q_shared.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui_atoms.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -26,6 +20,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui_syscalls.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\qcommon\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\qcommon\q_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -207,7 +207,7 @@ vmCvar_t cg_enableBreath;
 vmCvar_t cg_autoactivate;
 vmCvar_t cg_blinktime;      //----(SA)	added
 
-vmCvar_t cg_smoothClients;
+//vmCvar_t cg_smoothClients;
 vmCvar_t pmove_fixed;
 vmCvar_t pmove_msec;
 
@@ -387,7 +387,6 @@ vmCvar_t cg_reinforcementTimeProY;
 vmCvar_t cg_findMedic; // lock camera on medic at death
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
-vmCvar_t cg_pauseMusic;
 vmCvar_t cg_showPriorityText;
 vmCvar_t cg_priorityTextX;
 vmCvar_t cg_priorityTextY;
@@ -400,6 +399,7 @@ vmCvar_t cg_chatX;
 vmCvar_t cg_chatY;
 vmCvar_t cg_teamOverlayX;
 vmCvar_t cg_teamOverlayY;
+vmCvar_t cg_teamOverlayLatchedClass;
 vmCvar_t cg_compassX;
 vmCvar_t cg_compassY;
 vmCvar_t cg_zoomedSensLock;
@@ -409,6 +409,24 @@ vmCvar_t cg_drawFrags;
 vmCvar_t cg_fragsY;
 vmCvar_t cg_fragsWidth;
 vmCvar_t cg_fixedphysicsfps;
+vmCvar_t cg_debugDamage;
+
+// shoutcast overlay
+vmCvar_t cg_shoutcastDrawPlayers;
+vmCvar_t cg_shoutcastDrawTeamNames;
+vmCvar_t cg_shoutcastRedScore;
+vmCvar_t cg_shoutcastBlueScore;
+vmCvar_t cg_shoutcastTeamNameRed;
+vmCvar_t cg_shoutcastTeamNameBlue;
+vmCvar_t cg_shoutcastDrawHealth;
+vmCvar_t cg_shoutcastGrenadeTrail;
+
+vmCvar_t cg_showLimboMessage;
+vmCvar_t cg_teamObituaryColors;
+vmCvar_t cg_teamObituaryColorSame;
+vmCvar_t cg_teamObituaryColorSameTK;
+vmCvar_t cg_teamObituaryColorEnemy;
+vmCvar_t cg_teamObituaryColorEnemyTK;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -684,9 +702,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_hitsoundBodyStyle, "cg_hitsoundBodyStyle", "1", CVAR_ARCHIVE },
 	{ &cg_hitsoundHeadStyle, "cg_hitsoundHeadStyle", "1", CVAR_ARCHIVE },
 
-	// pause music
-	//{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
-
 	// priority text (shows objective pickups as a popup)
 	{ &cg_showPriorityText, "cg_showPriorityText", "1", CVAR_ARCHIVE },
 	{ &cg_priorityTextX, "cg_priorityTextX", "0", CVAR_ARCHIVE },
@@ -706,6 +721,7 @@ cvarTable_t cvarTable[] = {
 	// team overlay
 	{ &cg_teamOverlayX, "cg_teamOverlayX", "640", CVAR_ARCHIVE },
 	{ &cg_teamOverlayY, "cg_teamOverlayY", "0", CVAR_ARCHIVE },
+	{ &cg_teamOverlayLatchedClass, "cg_teamOverlayLatchedClass", "1", CVAR_ARCHIVE },
 
 	// compass
 	{ &cg_compassX, "cg_compassX", "290", CVAR_ARCHIVE },
@@ -726,12 +742,35 @@ cvarTable_t cvarTable[] = {
 
 	{ &cg_fixedphysicsfps, "g_fixedphysicsfps", "0", CVAR_ROM },
 
+	// RtcwPro print damage feedback to rtcwconsole.log
+	{ &cg_debugDamage, "cg_debugDamage", "0", CVAR_ARCHIVE },
+
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
 	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
 	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },
 	{ &demo_showTimein, "demo_showTimein", "1", CVAR_ARCHIVE },
-	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE }
+	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE },
+
+	// RtcwPro - shoutcast overlay
+	{ &cg_shoutcastDrawPlayers,     "cg_shoutcastDrawPlayers",     "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastDrawTeamNames,   "cg_shoutcastDrawTeamNames",   "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastRedScore,		"cg_shoutcastRedScore",		   "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastBlueScore,		"cg_shoutcastBlueScore",	   "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastTeamNameRed,     "cg_shoutcastTeamNameRed",     "Axis",        CVAR_ARCHIVE },
+	{ &cg_shoutcastTeamNameBlue,    "cg_shoutcastTeamNameBlue",    "Allies",      CVAR_ARCHIVE },
+	{ &cg_shoutcastDrawHealth,      "cg_shoutcastDrawHealth",      "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastGrenadeTrail,    "cg_shoutcastGrenadeTrail",    "0",           CVAR_ARCHIVE },
+
+	// show/hide limbo message while dead
+	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE },
+
+	// custom kill feed colors
+	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "green", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "mdgreen", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "red", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "mdred", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
@@ -1414,8 +1453,8 @@ static void CG_RegisterSounds( void ) {
 
 	// DHM - Nerve :: Used for multiplayer
 	if ( cgs.gametype >= GT_WOLF ) {
-		trap_S_RegisterSound( "sound/multiplayer/artillery_01.wav" );
-		trap_S_RegisterSound( "sound/multiplayer/airstrike_01.wav" );
+		cgs.media.artillery = trap_S_RegisterSound( "sound/multiplayer/artillery_01.wav" );
+		cgs.media.airstrike = trap_S_RegisterSound( "sound/multiplayer/airstrike_01.wav" );
 	}
 
 	//----(SA)	removed some unnecessary stuff
@@ -1526,7 +1565,7 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.hud4Shader = trap_R_RegisterShader( "jpwhud4" );
 	cgs.media.hud5Shader = trap_R_RegisterShader( "jpwhud5" );
 // jpw
-	cgs.media.smokePuffShader = trap_R_RegisterShader( "smokePuff" );
+	cgs.media.smokePuffShader = trap_R_RegisterShader( "smokePuffPro" ); // RtcwPro use smoke.shader for nopicmip option
 
 	// Rafael - blood pool
 	//cgs.media.bloodPool = trap_R_RegisterShader ("bloodPool");
@@ -1536,11 +1575,11 @@ static void CG_RegisterGraphics( void ) {
 
 	// Rafael - cannon
 	cgs.media.smokePuffShaderdirty = trap_R_RegisterShader( "smokePuffdirty" );
-	cgs.media.smokePuffShaderb1 = trap_R_RegisterShader( "smokePuffblack1" );
-	cgs.media.smokePuffShaderb2 = trap_R_RegisterShader( "smokePuffblack2" );
-	cgs.media.smokePuffShaderb3 = trap_R_RegisterShader( "smokePuffblack3" );
-	cgs.media.smokePuffShaderb4 = trap_R_RegisterShader( "smokePuffblack4" );
-	cgs.media.smokePuffShaderb5 = trap_R_RegisterShader( "smokePuffblack5" );
+	cgs.media.smokePuffShaderb1 = trap_R_RegisterShader( "smokePuffblackPro1" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb2 = trap_R_RegisterShader( "smokePuffblackPro2" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb3 = trap_R_RegisterShader( "smokePuffblackPro3" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb4 = trap_R_RegisterShader( "smokePuffblackPro4" ); // RtcwPro use smoke.shader for nopicmip option
+	cgs.media.smokePuffShaderb5 = trap_R_RegisterShader( "smokePuffblackPro5" ); // RtcwPro use smoke.shader for nopicmip option
 	// done
 
 	// Rafael - bleedanim
@@ -1657,6 +1696,9 @@ static void CG_RegisterGraphics( void ) {
 	// OSPx - Country Flags (by mcwf)
 	cgs.media.countryFlags = trap_R_RegisterShaderNoMip("gfx/flags/world_flags");
 
+	// RtcwPro objective icon with nopicmip option
+	cgs.media.treasureIcon = trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure");
+
 	// draw triggers
 	cgs.media.transmitTrigger = trap_R_RegisterShaderNoMip("gfx/2d/transmitTrigger");
 	cgs.media.transmitTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/transmitTriggerEdges");
@@ -1665,14 +1707,14 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.customTrigger = trap_R_RegisterShaderNoMip("gfx/2d/customTrigger");
 	cgs.media.customTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/customTriggerEdges");
 
-	// powerup shaders
-//	cgs.media.quadShader = trap_R_RegisterShader("powerups/quad" );
-//	cgs.media.quadWeaponShader = trap_R_RegisterShader("powerups/quadWeapon" );
-//	cgs.media.battleSuitShader = trap_R_RegisterShader("powerups/battleSuit" );
-//	cgs.media.battleWeaponShader = trap_R_RegisterShader("powerups/battleWeapon" );
-//	cgs.media.invisShader = trap_R_RegisterShader("powerups/invisibility" );
-//	cgs.media.regenShader = trap_R_RegisterShader("powerups/regen" );
-//	cgs.media.hastePuffShader = trap_R_RegisterShader("hasteSmokePuff" );
+	// Shoutcast shaders
+	cgs.media.medicIcon = trap_R_RegisterShaderNoMip("sprites/voicemedic");
+	cgs.media.ammoIcon = trap_R_RegisterShaderNoMip("sprites/voiceammo");
+
+	cgs.media.classPics[PC_SOLDIER] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
+	cgs.media.classPics[PC_MEDIC] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
+	cgs.media.classPics[PC_ENGINEER] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_engineer");
+	cgs.media.classPics[PC_LT] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lieutenant");
 
 	// DHM - Nerve :: Allow flags again, will change later to more appropriate models
 	if ( cgs.gametype == GT_CTF || cgs.gametype >= GT_WOLF || cg_buildScript.integer ) {
@@ -2128,6 +2170,16 @@ qboolean CG_Asset_Parse( int handle ) {
 			cgDC.registerFont( tempStr, pointSize, &cgDC.Assets.bigFont );
 			continue;
 		}
+
+		// shoutcastFont
+		//if (Q_stricmp(token.string, "shoutcastFont") == 0) {
+		//	int pointSize;
+		//	if (!PC_String_Parse(handle, &tempStr) || !PC_Int_Parse(handle, &pointSize)) {
+		//		return qfalse;
+		//	}
+		//	cgDC.registerFont(tempStr, pointSize, &cgDC.Assets.shoutcastFont);
+		//	continue;
+		//}
 
 		// gradientbar
 		if ( Q_stricmp( token.string, "gradientbar" ) == 0 ) {
@@ -2764,7 +2816,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		cgs.fadeAlpha = 0;
 
 // JPW NERVE -- pick a direction for smoke drift on the client -- cheap trick because it can be different on different clients, but who cares?
-	cgs.smokeWindDir = crandom();
+	cgs.smokeWindDir = -1.0f; // RtcwPro always make smoke go south // crandom();
 // jpw
 
 	CG_ParseServerinfo();
@@ -2865,6 +2917,12 @@ L0 - we'll need this later on ..
 =================
 */
 qboolean CG_CheckExecKey(int key) {
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		return CG_ShoutcastCheckExecKey(key, qfalse, qfalse);
+	}
+
 	return qfalse;
 }
 
