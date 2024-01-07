@@ -781,6 +781,20 @@ void CG_AddToNotify( const char *str ) {
 		chatHeight = MAX_NOTIFY_HEIGHT;
 	}
 
+	if (cg.demoPlayback) {
+		trap_Cvar_VariableStringBuffer("cg_notifyPlayerOnly", var, sizeof(var));
+		int notifyPlayerOnly = atoi(var);
+		if (notifyPlayerOnly) {
+			char* playerName = Info_ValueForKey(CG_ConfigString(CS_PLAYERS + cg.snap->ps.clientNum), "n");
+			if (strlen(playerName)) {
+				if (strstr(str, playerName) == NULL) {
+					return;
+				}
+			}
+		}
+	}
+
+
 	if ( chatHeight <= 0 || notifytime <= 0 ) {
 		// team chat disabled, dump into normal chat
 		cgs.notifyPos = cgs.notifyLastPos = 0;

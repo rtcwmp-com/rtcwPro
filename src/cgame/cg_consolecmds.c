@@ -355,6 +355,11 @@ static void CG_OpenLimbo_f( void ) {
 	int currentTeam;
 	char buf[32];
 
+	// No limbo menu in demos
+	if (cg.demoPlayback) {
+		return;
+	}
+
 	// set correct team, also set current team to detect if its changed
 	if ( cg.snap ) {
 		currentTeam = cg.snap->ps.persistant[PERS_TEAM] - 1;

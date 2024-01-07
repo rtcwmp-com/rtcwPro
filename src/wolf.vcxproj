@@ -122,7 +122,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\curl\include;..\libs\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -130,8 +130,8 @@
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -145,7 +145,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Debug\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;..\..\curl\bin;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -283,7 +283,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\curl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -291,8 +291,8 @@
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;botlib.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;botlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;botlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -306,7 +306,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Debug\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;..\..\curl\bin;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -351,7 +351,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="client\cl_demo.c" />
+    <ClCompile Include="client\cl_demo.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="client\cl_events.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
