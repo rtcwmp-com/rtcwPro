@@ -1550,7 +1550,7 @@ qboolean CL_BeginHttpDownload()
 		return qfalse;
 	}
 
-	Sleep(3000);
+	Sleep(1000);
 
 	ss->failure_callback = HttpFailureCallback;
 	Q_strncpyz(download_filename, COM_SkipPath(local_file_name), sizeof(download_filename));
@@ -1787,38 +1787,41 @@ void CL_NextDownload( void ) {
 	char *remoteName, *localName;
 
 	// We are looking to start a download here
-	if ( *clc.downloadList ) {
+	if ( *clc.downloadList )
+	{
 		s = clc.downloadList;
 
-		// format is:
-		//  @remotename@localname@remotename@localname, etc.
+		while (clc.downloadList[0] != '\0')
+		{
+			// format is:
+			//  @remotename@localname@remotename@localname, etc.
 
-		if ( *s == '@' ) {
-			s++;
-		}
-		remoteName = s;
+			if (*s == '@') {
+				s++;
+			}
+			remoteName = s;
 
-		if ( ( s = strchr( s, '@' ) ) == NULL ) {
-			CL_DownloadsComplete();
-			return;
-		}
+			if ((s = strchr(s, '@')) == NULL) {
+				CL_DownloadsComplete();
+				return;
+			}
 
-		*s++ = 0;
-		localName = s;
-		if ( ( s = strchr( s, '@' ) ) != NULL ) {
 			*s++ = 0;
-		} else {
-			s = localName + strlen( localName ); // point at the nul byte
+			localName = s;
+			if ((s = strchr(s, '@')) != NULL) {
+				*s++ = 0;
+			}
+			else {
+				s = localName + strlen(localName); // point at the nul byte
 
+			}
+			CL_BeginDownload(localName, remoteName, qtrue);
+
+			clc.downloadRestart = qtrue;
+
+			// move over the rest
+			memmove(clc.downloadList, s, strlen(s) + 1);
 		}
-		CL_BeginDownload( localName, remoteName, qtrue );
-
-		clc.downloadRestart = qtrue;
-
-		// move over the rest
-		memmove( clc.downloadList, s, strlen( s ) + 1 );
-
-		return;
 	}
 
 	CL_DownloadsComplete();
