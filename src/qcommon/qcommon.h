@@ -747,6 +747,9 @@ int     FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );
 int     FS_Seek( fileHandle_t f, long offset, int origin );
 // seek on a file (doesn't work for zip files!!!!!!!!)
 
+qbool	FS_IsZipFile(fileHandle_t f);
+// tells us whether we opened a zip file
+
 qboolean FS_FilenameCompare( const char *s1, const char *s2 );
 
 const char *FS_GamePureChecksum( void );
@@ -878,6 +881,7 @@ int         Com_Filter( char *filter, char *name, int casesensitive );
 int         Com_FilterPath( char *filter, char *name, int casesensitive );
 int         Com_RealTime( qtime_t *qtime );
 qboolean    Com_SafeMode( void );
+const char* Com_FormatBytes(uint64_t numBytes);
 
 void        Com_StartupVariable( const char *match );
 void        Com_SetRecommended();
@@ -1351,6 +1355,13 @@ extern huffman_t clientHuffTables;
 #define RKVALD_TIME_PING_L  40000
 #define RKVALD_TIME_PING_S  20000
 #define RKVALD_TIME_OFF     -1
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+//#define Q_assert(Cond) do { if(!(Cond)) { if(Sys_IsDebuggerAttached()) __debugbreak(); else assert((Cond)); } } while(0)
+#define Q_assert(Cond)
+#else
+#define Q_assert(Cond)
+#endif
 
 #endif // _QCOMMON_H_
 

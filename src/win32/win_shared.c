@@ -59,6 +59,12 @@ int Sys_Milliseconds( void ) {
 	return sys_curtime;
 }
 
+void Sys_Sleep(int ms)
+{
+	if (ms >= 1)
+		Sleep(ms);
+}
+
 /*
 ================
 Sys_SnapVector

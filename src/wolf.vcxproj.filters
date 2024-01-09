@@ -235,6 +235,9 @@
     <ClCompile Include="qcommon\q_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="client\cl_demo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">

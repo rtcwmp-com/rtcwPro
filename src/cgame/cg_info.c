@@ -288,11 +288,40 @@ void CG_DrawInformation(void) {
 	Demo key actions...
 */
 extern void CG_createControlsWindow(void);
+extern void CG_createDemoTimelineWindow(void);
+
 void CG_DemoClick(int key) {
 	int milli = trap_Milliseconds();
-	
+	int duration;
 	switch (key)
 	{	
+	case K_END:
+		if (cgs.demoTimeline.show != SHOW_ON) {
+			cgs.demoTimeline.show = SHOW_ON;
+			CG_createDemoTimelineWindow();
+			trap_Cvar_Set("demo_timelineWindow", "1");
+		}
+		else {
+			cgs.demoTimeline.show = SHOW_SHUTDOWN;
+			if (cg.time < cgs.demoTimeline.fadeTime) {
+				cgs.demoTimeline.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoTimeline.fadeTime;
+			}
+			else {
+				cgs.demoTimeline.fadeTime = cg.time + STATS_FADE_TIME;
+			}
+			CG_windowFree(cg.demoTimelineWindow);
+			cg.demoTimelineWindow = NULL;
+			trap_Cvar_Set("demo_timelineWindow", "0");
+		}
+		return;
+
+	case K_PGUP:
+		CG_NDP_GoToNextFrag(qtrue);
+		break;
+	case K_PGDN:
+		CG_NDP_GoToNextFrag(qfalse);
+		break;
+		
 	case K_TAB:
 		if (cgs.demoControlInfo.show != SHOW_ON) {
 			cgs.demoControlInfo.show = SHOW_ON;
@@ -344,6 +373,12 @@ void CG_DemoClick(int key) {
 			trap_Cvar_Set("demo_showTimein", "1");
 		return;
 	case K_MOUSE1:
+		if (demo_timelineWindow.integer) {
+			float percentX = (float)(cgs.cursorX-35.0f) / (float)(SCREEN_WIDTH - (GIANTCHAR_WIDTH * 2));
+			int serverTimeAtPercent = (int)((float)((m_lastServerTime - m_firstServerTime) * percentX)) + m_firstServerTime;
+			CG_NDP_SeekAbsolute(serverTimeAtPercent);
+			return;
+		}
 		CG_zoomViewSet_f();
 		return;
 	case K_MOUSE2:
@@ -352,7 +387,13 @@ void CG_DemoClick(int key) {
 	case K_ENTER:	
 		trap_Cvar_Set("cg_thirdperson", ((cg_thirdPerson.integer == 0) ? "1" : "0"));
 		return;	
+		
 	case K_UPARROW:
+		if (demo_timelineWindow.integer) {
+			CG_NDP_SeekRelative(60);
+			return;
+		}
+
 		if (milli > cgs.thirdpersonUpdate) {
 			float range = cg_thirdPersonRange.value;
 
@@ -362,6 +403,10 @@ void CG_DemoClick(int key) {
 		}
 		return;
 	case K_DOWNARROW:
+		if (demo_timelineWindow.integer) {
+			CG_NDP_SeekRelative(-60);
+			return;
+		}
 		if (milli > cgs.thirdpersonUpdate) {
 			float range = cg_thirdPersonRange.value;
 
@@ -371,6 +416,19 @@ void CG_DemoClick(int key) {
 		}
 		return;
 	case K_RIGHTARROW:
+		if (demo_timelineWindow.integer) {
+			if (cgs.fKeyPressed[K_CTRL]) {
+				duration = 60;
+			}
+			else if (cgs.fKeyPressed[K_SHIFT]) {
+				duration = 3;
+			}
+			else {
+				duration = 10;
+			}
+			CG_NDP_SeekRelative(duration);
+			return;
+		}
 		if (milli > cgs.thirdpersonUpdate) {
 			float angle = cg_thirdPersonAngle.value - DEMO_ANGLEDELTA;
 
@@ -382,6 +440,19 @@ void CG_DemoClick(int key) {
 		}
 		return;
 	case K_LEFTARROW:
+		if (demo_timelineWindow.integer) {
+			if (cgs.fKeyPressed[K_CTRL]) {
+				duration = 60;
+			}
+			else if (cgs.fKeyPressed[K_SHIFT]) {
+				duration = 3;
+			}
+			else {
+				duration = 10;
+			}
+			CG_NDP_SeekRelative(-duration);
+			return;
+		}
 		if (milli > cgs.thirdpersonUpdate) {
 			float angle = cg_thirdPersonAngle.value + DEMO_ANGLEDELTA;
 
@@ -392,6 +463,7 @@ void CG_DemoClick(int key) {
 			trap_Cvar_Set("cg_thirdPersonAngle", va("%f", angle));
 		}
 		return;
+		
 	// Timescale controls
 	case K_SPACE:
 		trap_Cvar_Set("timescale", "1");
@@ -480,10 +552,11 @@ void CG_DemoClick(int key) {
 			trap_Cvar_Set("cl_freezeDemo", "0");
 		}
 		return;
-		break;
 		}
 	}
 }
+
+
 
 /*
 	OSPx 
@@ -499,6 +572,7 @@ static const helpCmd_reference_t helpInfo[] = {
 		{ "TAB",		"Show/Hide This Window" },
 		{ "SHIFT",		"Show/Hide Status Window" },
 		{ "CTRL",		"Show/Hide Start Timer"}, 
+		{ "END",		"Show/Hide Demo Timeline"},
 		{ " ",			" "},
 		{ "F1",			"Toggle Wallhack" },
 		{ "F2",			"Toggle ShowNormals" },
@@ -514,7 +588,9 @@ static const helpCmd_reference_t helpInfo[] = {
 		{ "SCROLL",		"Timescale Slow/Fast" },
 		{ " ", " " },		
 		{ "ENTER",		"Toggle third person view"},
-		{ "ARROWS",		"Third person rotation" }
+		{ "ARROWS",		"Third person rotation" },
+		{ "",			"Timeline jump forward/back" }
+	    
 };
 
 void CG_createControlsWindow(void) {
@@ -558,6 +634,38 @@ void CG_createControlsWindow(void) {
 				}
 			}
 		}
+	}
+}
+
+void CG_createDemoTimelineWindow(void) {
+	if (cgs.demoTimeline.show == SHOW_OFF) {
+		return;
+	}
+	else {
+		vec4_t colorGeneralFill = { 0.1f, 0.1f, 0.1f, 0.8f };
+
+		cg_window_t* sw = CG_windowAlloc( WFX_FADEIN | WFX_FLASH | WFX_SCROLLUP, 500);
+
+		cg.demoTimelineWindow = sw;
+		if (sw == NULL) {
+			return;
+		}
+
+		// Window specific
+		sw->id = WID_DEMOTIMELINE;
+		sw->fontScaleX = 0.7f;
+		sw->fontScaleY = 0.8f;
+		sw->x = 0;
+		sw->y = 480-64;
+		sw->h = 64;
+		sw->w = 640;
+		sw->flashMidpoint = sw->flashPeriod * 0.7f;
+		memcpy(&sw->colorBackground2, colorGeneralFill, sizeof(vec4_t));
+
+		// Pump stuff in it now
+		cg.windowCurrent = sw;
+		cgs.cursorY = 240;
+		cgs.cursorX = 320;
 	}
 }
 

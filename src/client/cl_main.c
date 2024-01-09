@@ -112,6 +112,7 @@ cvar_t* cl_activatelean; // RTCWPro
 // rtcwpro - http redirect
 cvar_t* cl_httpDomain;
 cvar_t* cl_httpPath;
+cvar_t* cl_demoPlayer; // NDP
 
 clientActive_t cl;
 clientConnection_t clc;
@@ -566,14 +567,10 @@ void CL_WriteWaveFilePacket() {
 	}
 }
 
-/*
-====================
-CL_PlayDemo_f
 
-demo <demoname>
-====================
-*/
-void CL_PlayDemo_f( void ) {
+
+void CL_PlayDemo(qbool videoRestart)
+{
 	char name[MAX_OSPATH], extension[32];
 	char        *arg;
 
@@ -620,6 +617,14 @@ void CL_PlayDemo_f( void ) {
 
 	Q_strncpyz( cls.servername, Cmd_Argv( 1 ), sizeof( cls.servername ) );
 
+	if (cl_demoPlayer->integer) {
+		//while (CL_MapDownload_Active()) {
+		//	Sys_Sleep(50);
+		//}
+		CL_NDP_PlayDemo(videoRestart);
+		return;
+	}
+
 	// read demo messages until connected
 	while ( cls.state >= CA_CONNECTED && cls.state < CA_PRIMED ) {
 		CL_ReadDemoMessage();
@@ -634,6 +639,17 @@ void CL_PlayDemo_f( void ) {
 		CL_WriteWaveClose();
 		clc.waverecording = qfalse;
 	}
+}
+
+/*
+====================
+CL_PlayDemo_f
+
+demo <demoname>
+====================
+*/
+void CL_PlayDemo_f(void) {
+	CL_PlayDemo(qfalse);
 }
 
 /*
@@ -1362,8 +1378,15 @@ void CL_Vid_Restart_f( void ) {
 	// startup all the client stuff
 	CL_StartHunkUsers();
 
+	// we don't really technically need to run everything again,
+	// but trying to optimize parts out is very likely to lead to nasty bugs
+	if (clc.demoplaying && clc.newDemoPlayer) {
+		Cmd_TokenizeString(va("demo \"%s\"", clc.demoName));
+		CL_PlayDemo(qtrue);
+	}
+
 	// start the cgame if connected
-	if ( cls.state > CA_CONNECTED && cls.state != CA_CINEMATIC ) {
+	else if ( cls.state > CA_CONNECTED && cls.state != CA_CINEMATIC ) {
 		cls.cgameStarted = qtrue;
 		CL_InitCGame();
 		// send pure checksums
@@ -3241,6 +3264,8 @@ void CL_Init( void ) {
 	cl_httpDomain = Cvar_Get("cl_httpDomain", "www.rtcw.life", CVAR_ARCHIVE); //"www.x-labs.co.uk", CVAR_ARCHIVE);
 	cl_httpPath = Cvar_Get("cl_httpPath", "/files/mapdb", CVAR_ARCHIVE); //"/mapdb/rtcw", CVAR_ARCHIVE);
 	// end
+	cl_demoPlayer = Cvar_Get("cl_demoPlayer", "1", CVAR_ARCHIVE);
+
 /*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
 		CL_SetGuid();

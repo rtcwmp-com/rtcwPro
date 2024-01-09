@@ -42,6 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/keycodes.h"	// OSPx - Demo commands
+#include "cg_ndp.h"
 
 
 #define POWERUP_BLINKS      5
@@ -86,7 +87,7 @@ If you have questions concerning this license or the applicable additional terms
 #define TEAMCHAT_HEIGHT     8
 
 #define NOTIFY_WIDTH        80
-#define NOTIFY_HEIGHT       5
+#define MAX_NOTIFY_HEIGHT   32
 
 // very large characters
 #define GIANT_WIDTH         32
@@ -143,6 +144,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WSTATE_OFF          0x04    // Window is completely shutdown
 #define WID_DEMOCONTROLS	0x01    // Demo Controls
 #define WID_DEMOPOPUP		0x02	// Demo Pop ups
+#define WID_DEMOTIMELINE	0x03	// Demo Timeline
 //#define WID_DEMOHELP		0x08	// Demo key control info
 
 typedef struct {
@@ -199,6 +201,12 @@ typedef struct {
 	int show;
 	int requestTime;
 } demoControlInfo_t;
+
+typedef struct {
+	int fadeTime;
+	int show;
+	int requestTime;
+} demoTimeline_t;
 
 typedef struct {
 	int fadeTime;
@@ -1212,6 +1220,7 @@ typedef struct {
 	// Demo
 	qboolean revertToDefaultKeys;
 	qboolean advertisementDone;
+	cg_window_t* demoTimelineWindow;
 
 	// Priority Prints (Pop In prints)
 	int popinPrintTime;
@@ -1785,6 +1794,13 @@ typedef struct {
 	qhandle_t medicIcon;
 	qhandle_t ammoIcon;
 
+	//Demo timeline shaders
+	qhandle_t skull;
+	qhandle_t axisFlag;
+	qhandle_t alliesFlag;
+	qhandle_t stopwatch1;
+	qhandle_t stopwatch2;
+
 	qhandle_t classPics[4];
 
 } cgMedia_t;
@@ -1869,8 +1885,8 @@ typedef struct {
 	int teamLastChatPos;
 
 	// New notify mechanism for obits
-	char notifyMsgs[NOTIFY_HEIGHT][NOTIFY_WIDTH * 3 + 1];
-	int notifyMsgTimes[NOTIFY_HEIGHT];
+	char notifyMsgs[MAX_NOTIFY_HEIGHT][NOTIFY_WIDTH * 3 + 1];
+	int notifyMsgTimes[MAX_NOTIFY_HEIGHT];
 	int notifyPos;
 	int notifyLastPos;
 
@@ -1942,6 +1958,7 @@ typedef struct {
 	int dumpStatsTime;
 	qboolean fKeyPressed[256];                          // Key status to get around console issues
 	int timescaleUpdate;                                // Timescale display for demo playback
+	demoTimeline_t demoTimeline;
 } cgs_t;
 
 //==============================================================================
@@ -2178,6 +2195,7 @@ extern vmCvar_t demo_avifpsF5;
 extern vmCvar_t demo_drawTimeScale;
 extern vmCvar_t demo_infoWindow;
 extern vmCvar_t demo_controlsWindow;
+extern vmCvar_t demo_timelineWindow;
 extern vmCvar_t demo_popupWindow;
 extern vmCvar_t demo_notifyWindow;
 extern vmCvar_t demo_showTimein;
@@ -2475,6 +2493,7 @@ void CG_PainEvent( centity_t *cent, int health, qboolean crouching );
 void CG_SetEntitySoundPosition( centity_t *cent );
 void CG_AddPacketEntities( void );
 void CG_Beam( centity_t *cent );
+void CG_PrintEntityStatep(const entityState_t* ent);
 
 //void CG_AdjustPositionForMover(const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t angles_in, vec3_t angles_out);
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t outDeltaAngles );
@@ -2691,6 +2710,7 @@ void CG_RumbleEfx( float pitch, float yaw );
 // cg_snapshot.c
 //
 void CG_ProcessSnapshots( void );
+void CG_NDP_ProcessSnapshots( void );
 
 //
 // cg_spawn.c

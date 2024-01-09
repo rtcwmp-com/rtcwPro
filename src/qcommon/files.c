@@ -2980,7 +2980,7 @@ static void FS_Startup( const char *gameName ) {
 		homePath = fs_basepath->string;
 	}
 	fs_homepath = Cvar_Get( "fs_homepath", homePath, CVAR_INIT );
-	fs_gamedirvar = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
+	fs_gamedirvar = Cvar_Get( "fs_game", "rtcwpro", CVAR_INIT | CVAR_SYSTEMINFO );
 	fs_restrict = Cvar_Get( "fs_restrict", "", CVAR_INIT );
 
 	// add search path elements in reverse priority order
@@ -4006,4 +4006,13 @@ qboolean FS_VerifyPak( const char *pak ) {
 		}
 	}
 	return qfalse;
+}
+
+qbool FS_IsZipFile(fileHandle_t f)
+{
+	if (f < 0 || f >= MAX_FILE_HANDLES) {
+		Com_Error(ERR_DROP, "FS_IsZipFile: out of range");
+	}
+
+	return fsh[f].zipFile;
 }
