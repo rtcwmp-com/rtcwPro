@@ -26,6 +26,8 @@ src/rtcwpro/
 /src/game/g_weapon_orig.c
 website/
 *.srctrl*
+/src/ProjectMacros.props
+*.user
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
