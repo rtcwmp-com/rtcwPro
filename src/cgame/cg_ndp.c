@@ -510,6 +510,9 @@ Advance the demo playback by incrementing the current time every frame
 void CG_NDP_SetGameTime() {
 	static int prevRealTime = 0;
 	const int currRealTime = trap_Milliseconds();
+	if (prevRealTime == 0) {
+		prevRealTime = currRealTime;
+	}
 	const int frameDuration = currRealTime - prevRealTime;
 
 	m_currServerTime += (int)((float)frameDuration * cg_timescale.value);

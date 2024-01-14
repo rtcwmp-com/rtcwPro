@@ -2510,6 +2510,7 @@ static void CG_ServerCommand( void ) {
 	}
 
 	// ydnar: bug 267: server sends this command when it's about to kill the current server, before the client can reconnect
+	//TODO: if demo is recording, stop recording and start a new demo after server respawn (eliminate multiple gamestates in a demo) 
 	if (!Q_stricmp(cmd, "spawnserver")) {
 		cg.serverRespawning = qtrue;
 		return;

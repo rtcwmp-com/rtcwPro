@@ -1504,7 +1504,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	}
 
 	
-	if (cg.demoPlayback) {
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
 		if (!isRtcwPro) {
 			if (event >= EV_ANNOUNCER_SOUND) {
 				event++;

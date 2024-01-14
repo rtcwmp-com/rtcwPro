@@ -2,7 +2,7 @@
 #ifndef cg_ndp_h
 #define cg_ndp_h
 //Syscalls to Client
-void trap_CNQ3_NDP_Enable(void);
+qbool trap_CNQ3_NDP_Enable(void);
 int trap_CNQ3_NDP_Seek(int servertime);
 void trap_CNQ3_NDP_ReadUntil(int serverTime);
 void trap_CNQ3_NDP_StartVideo(void);

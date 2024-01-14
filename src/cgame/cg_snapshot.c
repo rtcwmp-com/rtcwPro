@@ -427,7 +427,7 @@ of an interpolating one)
 ============
 */
 void CG_ProcessSnapshots( void ) {
-	if (cg.demoPlayback) {
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
 		CG_NDP_ProcessSnapshots();
 		return;
 	}

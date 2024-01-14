@@ -296,22 +296,24 @@ void CG_DemoClick(int key) {
 	switch (key)
 	{	
 	case K_END:
-		if (cgs.demoTimeline.show != SHOW_ON) {
-			cgs.demoTimeline.show = SHOW_ON;
-			CG_createDemoTimelineWindow();
-			trap_Cvar_Set("demo_timelineWindow", "1");
-		}
-		else {
-			cgs.demoTimeline.show = SHOW_SHUTDOWN;
-			if (cg.time < cgs.demoTimeline.fadeTime) {
-				cgs.demoTimeline.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoTimeline.fadeTime;
+		if (cg.ndpDemoEnabled) {
+			if (cgs.demoTimeline.show != SHOW_ON) {
+				cgs.demoTimeline.show = SHOW_ON;
+				CG_createDemoTimelineWindow();
+				trap_Cvar_Set("demo_timelineWindow", "1");
 			}
 			else {
-				cgs.demoTimeline.fadeTime = cg.time + STATS_FADE_TIME;
+				cgs.demoTimeline.show = SHOW_SHUTDOWN;
+				if (cg.time < cgs.demoTimeline.fadeTime) {
+					cgs.demoTimeline.fadeTime = 2 * cg.time + STATS_FADE_TIME - cgs.demoTimeline.fadeTime;
+				}
+				else {
+					cgs.demoTimeline.fadeTime = cg.time + STATS_FADE_TIME;
+				}
+				CG_windowFree(cg.demoTimelineWindow);
+				cg.demoTimelineWindow = NULL;
+				trap_Cvar_Set("demo_timelineWindow", "0");
 			}
-			CG_windowFree(cg.demoTimelineWindow);
-			cg.demoTimelineWindow = NULL;
-			trap_Cvar_Set("demo_timelineWindow", "0");
 		}
 		return;
 
@@ -389,7 +391,7 @@ void CG_DemoClick(int key) {
 		return;	
 		
 	case K_UPARROW:
-		if (demo_timelineWindow.integer) {
+		if (demo_timelineWindow.integer && cg.ndpDemoEnabled) {
 			CG_NDP_SeekRelative(60);
 			return;
 		}
@@ -403,7 +405,7 @@ void CG_DemoClick(int key) {
 		}
 		return;
 	case K_DOWNARROW:
-		if (demo_timelineWindow.integer) {
+		if (demo_timelineWindow.integer && cg.ndpDemoEnabled) {
 			CG_NDP_SeekRelative(-60);
 			return;
 		}
@@ -416,7 +418,7 @@ void CG_DemoClick(int key) {
 		}
 		return;
 	case K_RIGHTARROW:
-		if (demo_timelineWindow.integer) {
+		if (demo_timelineWindow.integer && cg.ndpDemoEnabled) {
 			if (cgs.fKeyPressed[K_CTRL]) {
 				duration = 60;
 			}
@@ -440,7 +442,7 @@ void CG_DemoClick(int key) {
 		}
 		return;
 	case K_LEFTARROW:
-		if (demo_timelineWindow.integer) {
+		if (demo_timelineWindow.integer && cg.ndpDemoEnabled) {
 			if (cgs.fKeyPressed[K_CTRL]) {
 				duration = 60;
 			}

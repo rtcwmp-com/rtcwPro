@@ -1870,7 +1870,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 #endif
 	DEBUGTIME
 
-	if (cg.demoPlayback) {
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
 		CG_NDP_SetGameTime();
 	}
 		

@@ -467,7 +467,7 @@ void CG_windowDraw( void ) {
 		}
 		
 	}
-	if (demo_timelineWindow.integer) {
+	if (demo_timelineWindow.integer && cg.ndpDemoEnabled) {
 		if (cg.demoTimelineWindow) {
 			if (cg.demoTimelineWindow->state == WSTATE_COMPLETE) {
 				vec4_t timelineBarFill = { 0.25f, 0.36f, 0.2f, 0.8f };

@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-Copyright (C) 2022 Gian 'myT' Schellenbaum
+Copyright (C) 2022-2024 Gian 'myT' Schellenbaum
 
 This file is part of Challenge Quake 3 (CNQ3).
 
@@ -176,6 +176,7 @@ typedef struct {
 	int nextFullSnapshotTime;  // when server time is bigger, write a full snapshot
 	int serverCommandSequence; // the command number of the latest command we decoded
 	int progress;
+	int numGamestates;
 } parser_t;
 
 typedef struct {
@@ -435,7 +436,8 @@ static void ParseServerCommand()
 
 	const int commandNumber = MSG_ReadLong(inMsg);
 	const char* const s = MSG_ReadString(inMsg);
-	if (commandNumber <= parser.serverCommandSequence) {
+	if (commandNumber <= parser.serverCommandSequence ||
+		parser.numGamestates <= 0) {
 		return;
 	}
 	parser.serverCommandSequence = commandNumber;
@@ -468,7 +470,7 @@ static void ParseServerCommand()
 static void ParseGamestate()
 {
 	msg_t* const inMsg = &parser.inMsg;
-	MSG_ReadLong(inMsg); // skip message sequence
+	parser.serverCommandSequence = MSG_ReadLong(inMsg);
 
 	ndpSnapshot_t* const currSnap = parser.currSnap;
 	for (;;) {
@@ -605,7 +607,7 @@ static void ParseSnapshot()
 		newSnap->numEntities++;
 	}
 
-	if (!newSnap->valid) {
+	if (!newSnap->valid || parser.numGamestates <= 0) {
 		return;
 	}
 
@@ -618,9 +620,20 @@ static void ParseSnapshot()
 	}
 	parser.lastMessageNum = newSnap->messageNum + 1;
 
-	if (currServerTime <= parser.prevServerTime) {
+	// some servers reset the server time...
+	if (currServerTime < parser.prevServerTime) {
+		// ignore all previous snapshots and the current one too
+		parser.prevServerTime = currServerTime;
+		parser.lastMessageNum = newSnap->messageNum + 1;
+		demo.firstServerTime = INT_MAX;
+		demo.lastServerTime = INT_MIN;
+		demo.buffer.numBytes = 0;
+		demo.numCommands = 0;
+		demo.numSnapshots = 0;
+		demo.numIndices = 0;
 		return;
 	}
+
 	qbool isFullSnap = qfalse;
 	if (demo.numSnapshots == 0 || currServerTime > parser.nextFullSnapshotTime) {
 		isFullSnap = qtrue;
@@ -718,7 +731,6 @@ static void ParseDemo()
 	byte oldData[MAX_MSGLEN];
 	msg_t* const msg = &parser.inMsg;
 	const int fh = clc.demofile;
-	int numGamestates = 0;
 
 	Com_Memset(&parser, 0, sizeof(parser));
 	parser.currSnap = &parser.ndpSnapshots[0];
@@ -784,8 +796,8 @@ static void ParseDemo()
 					break;
 
 				case svc_gamestate:
-					++numGamestates;
-					if (numGamestates >= 2) {
+					++parser.numGamestates;
+					if (parser.numGamestates >= 2) {
 						Warning("More than 1 gamestate found, only the first one was loaded");
 						return;
 					}
@@ -1058,14 +1070,17 @@ after_parse:
 	demo.nextSnap = &demo.snapshots[1];
 	MB_InitRead(&demo.buffer);
 
-	// finalize CGame load and set any extra info needed now
-	// CGame will also restore previous state when videoRestart is qtrue
-	CL_CGNDP_EndAnalysis(clc.demoName, demo.firstServerTime, demo.lastServerTime, videoRestart);
-
 	// make sure we don't execute commands from the end of the demo when starting up
 	demo.commands[0].command[0] = '\0';
 	demo.commands[1].command[0] = '\0';
 	demo.numCommands = 1;
+
+	// finalize CGame load and set any extra info needed now
+	// CGame will also restore previous state when videoRestart is qtrue
+	CL_CGNDP_EndAnalysis(clc.demoName, demo.firstServerTime, demo.lastServerTime, videoRestart);
+
+	// seek to make sure we're synchronized as if the user had manually asked for said time
+	CL_NDP_Seek(videoRestart ? demo.currSnap->serverTime : demo.firstServerTime);
 
 	const int duration = Sys_Milliseconds() - startTime;
 	Com_Printf("New Demo Player: loaded demo in %d.%03d seconds\n", duration / 1000, duration % 1000);

@@ -1259,6 +1259,7 @@ typedef struct {
 
 	// RtcwPro shoutcast overlay
 	int lastKeyCatcher;
+	qbool ndpDemoEnabled;
 } cg_t;
 
 

@@ -1615,10 +1615,6 @@ typedef enum {
 	CA_CINEMATIC        // playing a cinematic or a static pic, not connected to a server
 } connstate_t;
 
-// L0
-// Indicates if client is connected or not.
-// Deals with Bloom issues as well as just identifying if extra stuff should be ran..
-qboolean clientIsConnected;
 
 // font support
 

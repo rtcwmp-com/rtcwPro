@@ -565,8 +565,8 @@ void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime
 	syscall(CG_REQUEST_SS, address, hookid, hooktoken, waittime, datetime);
 }
 
-void trap_CNQ3_NDP_Enable(void) {
-	syscall(CG_EXT_NDP_ENABLE, CG_NDP_ANALYZE_COMMAND, CG_NDP_GENERATE_COMMANDS, CG_NDP_IS_CS_NEEDED, CG_NDP_ANALYZE_SNAPSHOT, CG_NDP_END_ANALYSIS);
+qbool trap_CNQ3_NDP_Enable(void) {
+	return syscall(CG_EXT_NDP_ENABLE, CG_NDP_ANALYZE_COMMAND, CG_NDP_GENERATE_COMMANDS, CG_NDP_IS_CS_NEEDED, CG_NDP_ANALYZE_SNAPSHOT, CG_NDP_END_ANALYSIS);
 }
 
 int trap_CNQ3_NDP_Seek(int serverTime) {

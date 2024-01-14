@@ -26,6 +26,7 @@
 | con_colorAlpha | `float` | `0.0-1.0` | `1` | Change console color opacity |
 | r_mode | `integer` | `-2-21` | `6` | `-2` - Use desktop resolution, `-1` - custom |
 | r_noborder | `integer` | `0-1` | `0` | Borderless window |
+| cl_demoPlayer | `integer` | `0-1` | `1` | Enable/disable the new demo player |
 
 #### Mod (cg)
 | Cvar | Argument type | Value range | Default | Description |
@@ -80,6 +81,7 @@
 | cg_zoomedSensLock | `integer` | `0-1` | `0` | Enable/disable decreasing of sensitivity with each zoom step while scoped |
 | cg_notifyTextX | `integer` | `-999-999` | `0` | Change kill feed position in the horizontal axis |
 | cg_notifyTextY | `integer` | `-999-999` | `42` | Change kill feed position in the vertical axis |
+| cg_notifyTextLines | `integer` | `0-32` | `5` | Change kill feed max number of lines displayed |
 | cg_notifyTextWidth | `integer` | `0-99` | `8` | Change kill feed char width |
 | cg_notifyTextHeight | `integer` | `0-99` | `8` | Change kill feed char height |
 | cg_notifyTextShadow | `integer` | `0-1` | `0` | Enable/disable shadowing of kill feed |
@@ -98,6 +100,7 @@
 | cg_priorityTextX | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the horizontal axis |
 | cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
 | cg_lagometer | `integer` | `0-2` | `0` | 1 - normal, 2 - draw speed |
+| cg_draw2d | `integer` | `0-2` | `1` | `0` - No HUD, `1` - Normal HUD, `2` - xhair, killfeed, frag center print (demo only) |
 
 # Server  
 #### Engine (sv)

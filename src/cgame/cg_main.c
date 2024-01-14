@@ -2925,7 +2925,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		}
 	}
 	trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut)); //call during CG_Init, pointer and size , do once
-	trap_CNQ3_NDP_Enable();
+	cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
 	
 }
 
@@ -2946,7 +2946,7 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
-	if (cg.demoPlayback) {
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
 		ndp_myKillsSize = 0;
 		ndp_alliesWinsSize = 0;
 		ndp_axisWinsSize = 0;
