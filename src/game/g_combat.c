@@ -846,73 +846,24 @@ RTCWPro
 G_GetHitsoundStyle
 ==============
 */
-char* G_GetHitsoundStyle(int headStyle, int bodyStyle, qboolean headshot) {
+char* G_GetHitsoundStyle(int type, int style) {
 
-	if (headshot) 
+	switch (type)
 	{
-		switch (headStyle)
+	case HITSOUND_BODY:
+		if (!style)
 		{
-		case 0:
-			return "sound/hitsounds/hithead1.wav";
-			break;
-		case 1:
-			return "sound/hitsounds/hithead1.wav";
-			break;
-		case 2:
-			return "sound/hitsounds/hithead2.wav";
-			break;
-		case 3:
-			return "sound/hitsounds/hithead3.wav";
-			break;
-		case 4:
-			return "sound/hitsounds/hithead4.wav";
-			break;
-		case 5:
-			return "sound/hitsounds/hithead5.wav";
-			break;
-		case 6:
-			return "sound/hitsounds/hithead6.wav";
-			break;
-		case 7:
-			return "sound/hitsounds/hithead7.wav";
-			break;
-		case 8:
-			return "sound/hitsounds/hithead8.wav";
-			break;
-		case 9:
-			return "sound/hitsounds/hithead9.wav";
-			break;
-		default:
-			return "sound/hitsounds/hithead1.wav";
-			break;
+			return va("sound/hitsounds/hitbody1.wav");
 		}
-	}
-	else
-	{
-		switch (bodyStyle)
+		return va("sound/hitsounds/hitbody%i.wav", style);
+	case HITSOUND_HEAD:
+		if (!style)
 		{
-		case 0:
-			return "sound/hitsounds/hitbody1.wav";
-			break;
-		case 1:
-			return "sound/hitsounds/hitbody1.wav";
-			break;
-		case 2:
-			return "sound/hitsounds/hitbody2.wav";
-			break;
-		case 3:
-			return "sound/hitsounds/hitbody3.wav";
-			break;
-		case 4:
-			return "sound/hitsounds/hitbody4.wav";
-			break;
-		case 5:
-			return "sound/hitsounds/hitbody5.wav";
-			break;
-		default:
-			return "sound/hitsounds/hitbody1.wav";
-			break;
+			return va("sound/hitsounds/hithead.wav");
 		}
+		return va("sound/hitsounds/hithead%i.wav", style);
+	default:
+		return va("sound/hitsounds/hitbody1.wav");
 	}
 }
 
@@ -996,7 +947,7 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 				//hitEventType = HIT_HEADSHOT;
 
 				int headStyle = attacker->client->pers.hitSoundHeadStyle;
-				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(headStyle, 0, qtrue));
+				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(HITSOUND_HEAD, headStyle));
 			}
 		}
 		else 
@@ -1007,7 +958,7 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 				//hitEventType = HIT_BODYSHOT;
 
 				int bodyStyle = attacker->client->pers.hitSoundBodyStyle;
-				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(0, bodyStyle, qfalse));
+				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(HITSOUND_BODY, bodyStyle));
 			}
 		}
 
