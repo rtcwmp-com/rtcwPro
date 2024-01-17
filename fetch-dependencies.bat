@@ -103,7 +103,7 @@ rem ***************************************************************************
 		echo openssl...
 		call powershell "$source= ((Invoke-RestMethod -Method GET -Uri """https://api.github.com/repos/openssl/openssl/releases""")[0].assets | Where-Object name -like """openssl*.tar.gz""" ).browser_download_url;Write-Host $source;Invoke-WebRequest -Uri $source -Out $(Split-Path -Path $source -Leaf)"
 		call powershell "$file = Get-ChildItem """openssl*"""; tar -xzf $file"
-		call powershell "Get-ChildItem """openssl*""" | move-item -Destination """openssl\""""
+		call powershell "Get-ChildItem """openssl*""" | move-item -Destination """openssl\""
 	)
 	
 	rem OpenSSL needs perl to build, strawberry perl portable will do it, add it to PATH
@@ -120,7 +120,7 @@ rem ***************************************************************************
 		call powershell "$source= (Invoke-RestMethod -Method GET -Uri """https://api.github.com/repos/curl/curl/releases""")[0].zipball_url;Write-Host $source;Invoke-WebRequest -Uri $source -Out $(Split-Path -Path $source -Leaf)"
 		call powershell "Get-ChildItem """curl*""" | move-item -Destination """curl.zip""""
 		call powershell "Expand-Archive -Path """curl*.zip""" -DestinationPath """curl""""
-		call powershell "Get-ChildItem """curl\*\*""" | move-item -Destination """curl\""""
+		call powershell "Get-ChildItem """curl\*\*""" | move-item -Destination """curl\""
 	)
 
 :buildDeps
@@ -133,15 +133,16 @@ rem ***************************************************************************
 	call build-openssl.bat %vc_version% x86 release ..\..\openssl 
 	cd Windows\%VC_DESC%
 	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" curl-all.sln /Build "DLL Release - DLL OpenSSL"
+:harvest
 	cd %ROOT_DEV_DIR%\curl
 	mkdir bin
-	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.dll""" | move-item -Destination """bin\""""
-	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.lib""" | move-item -Destination """bin\""""
-	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.pdb""" | move-item -Destination """bin\""""
-	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.exe""" | move-item -Destination """bin\""""
-	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.dll""" | copy-item -Destination """bin\""""
-	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.lib""" | copy-item -Destination """bin\""""
-	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.pdb""" | copy-item -Destination """bin\""""
-	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.exe""" | copy-item -Destination """bin\""""
+	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.dll""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.lib""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.pdb""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.exe""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.dll""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.lib""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.pdb""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """..\openssl\build\Win32\%VC_DESC%\DLL Release\*.exe""" | copy-item -Destination """bin\""
 	echo Done
 	pause

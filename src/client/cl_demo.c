@@ -620,8 +620,15 @@ static void ParseSnapshot()
 	}
 	parser.lastMessageNum = newSnap->messageNum + 1;
 
+	// zombie snapshots at the end of the demo are not saved
+	const qbool zombieSnap = (newSnap->snapFlags & SNAPFLAG_NOT_ACTIVE) != 0;
+	if (zombieSnap && demo.numSnapshots > 20) {
+		return;
+	}
+
 	// some servers reset the server time...
-	if (currServerTime < parser.prevServerTime) {
+	// some snapshots are to be ignored entirely at the start of a demo
+	if (currServerTime < parser.prevServerTime || zombieSnap) {
 		// ignore all previous snapshots and the current one too
 		parser.prevServerTime = currServerTime;
 		parser.lastMessageNum = newSnap->messageNum + 1;
