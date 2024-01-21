@@ -1929,7 +1929,7 @@ static void CG_DrawLagometer( void ) {
 
 		BG_ParseColorCvar("ltgrey", color2, 0.8);
 
-		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+		speed = VectorLength(cg.predictedPlayerState.velocity);
 
 		if (speed != speed) {
 			speed = 0;
