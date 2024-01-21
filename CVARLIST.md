@@ -99,7 +99,7 @@
 | cg_showPriorityText| `integer` | `0-1` | `1` | Enable/disable objective taken/returned prints |
 | cg_priorityTextX | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the horizontal axis |
 | cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
-| cg_lagometer | `integer` | `0-2` | `0` | 1 - normal, 2 - draw speed |
+| cg_lagometer | `integer` | `0-9999` | `0` | 1 - normal, 2 - draw speed, each increase from 2 increases max speed drawn, 2 - 2048, 3 - 3072, etc. |
 | cg_draw2d | `integer` | `0-2` | `1` | `0` - No HUD, `1` - Normal HUD, `2` - xhair, killfeed, frag center print (demo only) |
 
 # Server  

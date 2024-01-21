@@ -1871,6 +1871,8 @@ static void CG_DrawDisconnect( void ) {
 
 #define MAX_LAGOMETER_PING  900
 #define MAX_LAGOMETER_RANGE 300
+#define MAX_SPEEDMETER_SPEED 1024
+#define MAX_SPEEDMETER_RANGE 128
 
 /*
 ==============
@@ -1918,44 +1920,43 @@ static void CG_DrawLagometer( void ) {
 	vscale = range / MAX_LAGOMETER_RANGE;
 
 	// rtcwpro - speed
-	if (cg_lagometer.integer > 1)
-	{
-		static vec_t speed;
+	if (cg_lagometer.integer > 1) { 
+		static vec_t speed, speedHistory[MAX_SPEEDMETER_RANGE];
 		float vscale2, range2, v2;
 		vec4_t color2;
+		int j;
 
 		BG_ParseColorCvar("ltgrey", color2, 0.8);
 
-		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] +
-			cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] + cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
 
-		if (speed != speed)
-		{
+		if (speed != speed) {
 			speed = 0;
 		}
 
 		range2 = ah;
-		vscale2 = range2 / 2048;
+		vscale2 = range2 / (cg_lagometer.integer * MAX_SPEEDMETER_SPEED); // max speed drawn, 2 - 2048, 3 - 3072, etc. (TODO): update cvar descriptions
 
-		for (a = 0; a < aw; a++)
-		{
-			v2 = speed;
+		for (j = MAX_SPEEDMETER_RANGE - 1; j > 0; j--) {
+			speedHistory[j] = speedHistory[j - 1];
+		}
 
-			if (v2 > 0)
-			{
+		speedHistory[0] = speed;
+
+		for (int a = 0; a < aw; a++) {
+			v2 = speedHistory[a];
+
+			if (v2 > 0) {
 				trap_R_SetColor(color2);
 
 				v2 = v2 * vscale2;
-
-				if (v2 > range2)
-				{
-					v2 = range2;
-				}
+				v2 = (v2 > range2) ? range2 : v2;
 
 				trap_R_DrawStretchPic(ax + aw - a, ay + ah - v2, 1, v2, 0, 0, 0, 0, cgs.media.whiteShader);
 			}
 		}
 	}
+	// end
 
 	// draw the frame interpoalte / extrapolate graph
 	for ( a = 0 ; a < aw ; a++ ) {
