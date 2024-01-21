@@ -1881,7 +1881,7 @@ CG_DrawLagometer
 */
 static void CG_DrawLagometer( void ) {
 	// RTCWPro
-	int a, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i;
+	int a = 0, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i = 0;
 	float v;
 	float ax, ay, aw, ah, mid, range;
 	int color;
@@ -1920,11 +1920,12 @@ static void CG_DrawLagometer( void ) {
 	vscale = range / MAX_LAGOMETER_RANGE;
 
 	// rtcwpro - speed
+	a = 0;
 	if (cg_lagometer.integer > 1) { 
 		static vec_t speed, speedHistory[MAX_SPEEDMETER_RANGE];
 		float vscale2, range2, v2;
 		vec4_t color2;
-		int j;
+		int j = 0;
 
 		BG_ParseColorCvar("ltgrey", color2, 0.8);
 
@@ -1935,7 +1936,7 @@ static void CG_DrawLagometer( void ) {
 		}
 
 		range2 = ah;
-		vscale2 = range2 / (cg_lagometer.integer * MAX_SPEEDMETER_SPEED); // max speed drawn, 2 - 2048, 3 - 3072, etc. (TODO): update cvar descriptions
+		vscale2 = range2 / (cg_lagometer.integer * MAX_SPEEDMETER_SPEED);
 
 		for (j = MAX_SPEEDMETER_RANGE - 1; j > 0; j--) {
 			speedHistory[j] = speedHistory[j - 1];
@@ -1943,7 +1944,7 @@ static void CG_DrawLagometer( void ) {
 
 		speedHistory[0] = speed;
 
-		for (int a = 0; a < aw; a++) {
+		for (a = 0; a < aw; a++) {
 			v2 = speedHistory[a];
 
 			if (v2 > 0) {
@@ -1958,6 +1959,7 @@ static void CG_DrawLagometer( void ) {
 	}
 	// end
 
+	a = 0;
 	// draw the frame interpoalte / extrapolate graph
 	for ( a = 0 ; a < aw ; a++ ) {
 		i = ( lagometer.frameCount - 1 - a ) & ( LAG_SAMPLES - 1 );
@@ -1988,7 +1990,7 @@ static void CG_DrawLagometer( void ) {
 	// draw the snapshot latency / drop graph
 	range = ah / 2;
 	vscale = range / MAX_LAGOMETER_PING;
-
+	a = 0;
 	for ( a = 0 ; a < aw ; a++ ) {
 		i = ( lagometer.snapshotCount - 1 - a ) & ( LAG_SAMPLES - 1 );
 		v = lagometer.snapshotSamples[i];
