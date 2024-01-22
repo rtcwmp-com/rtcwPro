@@ -36,9 +36,10 @@ If you have questions concerning this license or the applicable additional terms
 
  *
 */
-
+#ifndef __CG_LOCAL
+#define __CG_LOCAL
 #include "../qcommon/q_shared.h"
-#include "tr_types.h"
+#include "../renderercommon/tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/keycodes.h"	// OSPx - Demo commands
@@ -3111,3 +3112,5 @@ enum
 	BAR_DECOR = BIT(10),
 	BAR_ICON = BIT(11),
 };
+
+#endif

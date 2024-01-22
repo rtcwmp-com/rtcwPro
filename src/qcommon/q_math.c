@@ -1448,3 +1448,13 @@ float VectorDistance( vec3_t v1, vec3_t v2 ) {
 	return VectorLength( dir );
 }
 // done.
+
+
+#if id386 && defined(_WIN32)
+long Q_ftol(float f) {
+	static int tmp;
+	__asm fld f
+	__asm fistp tmp
+	__asm mov eax, tmp
+}
+#endif

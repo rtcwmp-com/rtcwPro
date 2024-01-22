@@ -19,6 +19,7 @@ void CG_NDP_ResetStateWhenBackInTime(void);
 void CG_NDP_SeekAbsolute(int serverTime);
 void CG_NDP_SeekRelative(int serverTime);
 void CG_NDP_GoToNextFrag(qbool forward);
+void CG_NDP_SetGameTime();
 
 extern int ndp_myKills[1024];
 extern int ndp_myKillsSize;

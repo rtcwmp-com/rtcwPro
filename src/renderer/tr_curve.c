@@ -1,25 +1,25 @@
 /*
 ===========================================================================
 
-Return to Castle Wolfenstein multiplayer GPL Source Code
+Wolfenstein: Enemy Territory GPL Source Code
 Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Wolfenstein: Enemy Territory GPL Source Code (Wolf ET Source Code).  
 
-RTCW MP Source Code is free software: you can redistribute it and/or modify
+Wolf ET Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-RTCW MP Source Code is distributed in the hope that it will be useful,
+Wolf ET Source Code is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with RTCW MP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+along with Wolf ET Source Code.  If not, see <http://www.gnu.org/licenses/>.
 
-In addition, the RTCW MP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW MP Source Code.  If not, please request a copy in writing from id Software at the address below.
+In addition, the Wolf: ET Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Wolf ET Source Code.  If not, please request a copy in writing from id Software at the address below.
 
 If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
 
@@ -117,25 +117,24 @@ Handles all the complicated wrapping and degenerate cases
 =================
 */
 static void MakeMeshNormals( int width, int height, drawVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE] ) {
-	int i, j, k, dist;
-	vec3_t normal;
-	vec3_t sum;
-	int count = 0;
-	vec3_t base;
-	vec3_t delta;
-	int x, y;
-	drawVert_t  *dv;
-	vec3_t around[8], temp;
-	qboolean good[8];
-	qboolean wrapWidth, wrapHeight;
-	float len;
-	static int neighbors[8][2] = {
-		{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}
+	int		i, j, k, dist;
+	vec3_t	normal;
+	vec3_t	sum;
+	vec3_t	base;
+	vec3_t	delta;
+	int		x, y;
+	drawVert_t	*dv;
+	vec3_t		around[8], temp;
+	qboolean	good[8];
+	qboolean	wrapWidth, wrapHeight;
+	float		len;
+static	int	neighbors[8][2] = {
+	{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}
 	};
 
 	wrapWidth = qfalse;
 	for ( i = 0 ; i < height ; i++ ) {
-		VectorSubtract( ctrl[i][0].xyz, ctrl[i][width - 1].xyz, delta );
+		VectorSubtract( ctrl[i][0].xyz, ctrl[i][width-1].xyz, delta );
 		len = VectorLengthSquared( delta );
 		if ( len > 1.0 ) {
 			break;
@@ -147,20 +146,19 @@ static void MakeMeshNormals( int width, int height, drawVert_t ctrl[MAX_GRID_SIZ
 
 	wrapHeight = qfalse;
 	for ( i = 0 ; i < width ; i++ ) {
-		VectorSubtract( ctrl[0][i].xyz, ctrl[height - 1][i].xyz, delta );
+		VectorSubtract( ctrl[0][i].xyz, ctrl[height-1][i].xyz, delta );
 		len = VectorLengthSquared( delta );
 		if ( len > 1.0 ) {
 			break;
 		}
 	}
-	if ( i == width ) {
+	if ( i == width) {
 		wrapHeight = qtrue;
 	}
 
 
 	for ( i = 0 ; i < width ; i++ ) {
 		for ( j = 0 ; j < height ; j++ ) {
-			count = 0;
 			dv = &ctrl[j][i];
 			VectorCopy( dv->xyz, base );
 			for ( k = 0 ; k < 8 ; k++ ) {
@@ -186,31 +184,31 @@ static void MakeMeshNormals( int width, int height, drawVert_t ctrl[MAX_GRID_SIZ
 					}
 
 					if ( x < 0 || x >= width || y < 0 || y >= height ) {
-						break;                  // edge of patch
+						break;					// edge of patch
 					}
 					VectorSubtract( ctrl[y][x].xyz, base, temp );
-					if ( VectorNormalize2( temp, temp ) == 0 ) {
-						continue;               // degenerate edge, get more dist
+					if ( VectorNormalize( temp ) < 0.001f ) {
+						continue;				// degenerate edge, get more dist
 					} else {
 						good[k] = qtrue;
 						VectorCopy( temp, around[k] );
-						break;                  // good edge
+						break;					// good edge
 					}
 				}
 			}
 
 			VectorClear( sum );
 			for ( k = 0 ; k < 8 ; k++ ) {
-				if ( !good[k] || !good[( k + 1 ) & 7] ) {
-					continue;   // didn't get two points
+				if ( !good[k] || !good[(k+1)&7] ) {
+					continue;	// didn't get two points
 				}
-				CrossProduct( around[( k + 1 ) & 7], around[k], normal );
-				if ( VectorNormalize2( normal, normal ) == 0 ) {
+				CrossProduct( around[(k+1)&7], around[k], normal );
+				if ( VectorNormalize( normal ) < 0.001f ) {
 					continue;
 				}
 				VectorAdd( normal, sum, sum );
-				count++;
 			}
+
 			VectorNormalize2( sum, dv->normal );
 		}
 	}
@@ -284,14 +282,13 @@ static void PutPointsOnCurve( drawVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE],
 	}
 }
 
-
 /*
 =================
 R_CreateSurfaceGridMesh
 =================
 */
-srfGridMesh_t *R_CreateSurfaceGridMesh( int width, int height,
-										drawVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE], float errorTable[2][MAX_GRID_SIZE] ) {
+static srfGridMesh_t *R_CreateSurfaceGridMesh(int width, int height,
+								drawVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE], float errorTable[2][MAX_GRID_SIZE] ) {
 	int i, j, size;
 	drawVert_t  *vert;
 	vec3_t tmpVec;
@@ -301,13 +298,13 @@ srfGridMesh_t *R_CreateSurfaceGridMesh( int width, int height,
 	size = ( width * height - 1 ) * sizeof( drawVert_t ) + sizeof( *grid );
 
 #ifdef PATCH_STITCHING
-	grid = /*ri.Hunk_Alloc*/ ri.Z_Malloc( size );
+	grid = /*ri.Hunk_Alloc*/ ri.Malloc( size );
 	Com_Memset( grid, 0, size );
 
-	grid->widthLodError = /*ri.Hunk_Alloc*/ ri.Z_Malloc( width * 4 );
+	grid->widthLodError = /*ri.Hunk_Alloc*/ ri.Malloc( width * 4 );
 	memcpy( grid->widthLodError, errorTable[0], width * 4 );
 
-	grid->heightLodError = /*ri.Hunk_Alloc*/ ri.Z_Malloc( height * 4 );
+	grid->heightLodError = /*ri.Hunk_Alloc*/ ri.Malloc( height * 4 );
 	memcpy( grid->heightLodError, errorTable[1], height * 4 );
 #else
 	grid = ri.Hunk_Alloc( size, h_low );
@@ -323,23 +320,23 @@ srfGridMesh_t *R_CreateSurfaceGridMesh( int width, int height,
 	grid->width = width;
 	grid->height = height;
 	grid->surfaceType = SF_GRID;
-	ClearBounds( grid->meshBounds[0], grid->meshBounds[1] );
+	ClearBounds( grid->bounds[0], grid->bounds[1] );
 	for ( i = 0 ; i < width ; i++ ) {
 		for ( j = 0 ; j < height ; j++ ) {
 			vert = &grid->verts[j * width + i];
 			*vert = ctrl[j][i];
-			AddPointToBounds( vert->xyz, grid->meshBounds[0], grid->meshBounds[1] );
+			AddPointToBounds( vert->xyz, grid->bounds[0], grid->bounds[1] );
 		}
 	}
 
 	// compute local origin and bounds
-	VectorAdd( grid->meshBounds[0], grid->meshBounds[1], grid->localOrigin );
-	VectorScale( grid->localOrigin, 0.5f, grid->localOrigin );
-	VectorSubtract( grid->meshBounds[0], grid->localOrigin, tmpVec );
-	grid->meshRadius = VectorLength( tmpVec );
+	VectorAdd( grid->bounds[0], grid->bounds[1], grid->origin );
+	VectorScale( grid->origin, 0.5f, grid->origin );
+	VectorSubtract( grid->bounds[0], grid->origin, tmpVec );
+	grid->radius = VectorLength( tmpVec );
 
-	VectorCopy( grid->localOrigin, grid->lodOrigin );
-	grid->lodRadius = grid->meshRadius;
+	VectorCopy( grid->origin, grid->lodOrigin );
+	grid->lodRadius = grid->radius;
 	//
 	return grid;
 }
@@ -361,27 +358,31 @@ R_SubdividePatchToGrid
 =================
 */
 srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
-									   drawVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] ) {
-	int i, j, k, l;
-	drawVert_t_cleared(prev);
-	drawVert_t_cleared(next);
-	drawVert_t_cleared(mid);
-	float len, maxLen;
-	int dir;
-	int t;
-	drawVert_t ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE];
-	float errorTable[2][MAX_GRID_SIZE];
+								drawVert_t points[MAX_PATCH_SIZE*MAX_PATCH_SIZE] ) {
+	int			i, j, k, l;
+	drawVert_t	prev;
+	drawVert_t	next;
+	drawVert_t	mid;
+	float		len, maxLen;
+	int			n;
+	int			t;
+	drawVert_t	ctrl[MAX_GRID_SIZE][MAX_GRID_SIZE];
+	float		errorTable[2][MAX_GRID_SIZE];
+
+	memset( &prev, 0, sizeof( prev ) );
+	memset( &next, 0, sizeof( next ) );
+	memset( &mid, 0, sizeof( mid ) );
 
 	for ( i = 0 ; i < width ; i++ ) {
 		for ( j = 0 ; j < height ; j++ ) {
-			ctrl[j][i] = points[j * width + i];
+			ctrl[j][i] = points[j*width+i];
 		}
 	}
 
-	for ( dir = 0 ; dir < 2 ; dir++ ) {
+	for ( n = 0 ; n < 2 ; n++ ) {
 
 		for ( j = 0 ; j < MAX_GRID_SIZE ; j++ ) {
-			errorTable[dir][j] = 0;
+			errorTable[n][j] = 0;
 		}
 
 		// horizontal subdivisions
@@ -393,15 +394,16 @@ srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
 
 			maxLen = 0;
 			for ( i = 0 ; i < height ; i++ ) {
-				vec3_t midxyz;
-				vec3_t dir;
-				vec3_t projected;
-				float d;
+				vec3_t		midxyz;
+				vec3_t		midxyz2;
+				vec3_t		dir;
+				vec3_t		projected;
+				float		d;
 
 				// calculate the point on the curve
 				for ( l = 0 ; l < 3 ; l++ ) {
-					midxyz[l] = ( ctrl[i][j].xyz[l] + ctrl[i][j + 1].xyz[l] * 2
-								  + ctrl[i][j + 2].xyz[l] ) * 0.25f;
+					midxyz[l] = (ctrl[i][j].xyz[l] + ctrl[i][j+1].xyz[l] * 2
+							+ ctrl[i][j+2].xyz[l] ) * 0.25f;
 				}
 
 				// see how far off the line it is
@@ -409,48 +411,48 @@ srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
 				// texture warping, but it gives a lot less polygons than
 				// dist-from-midpoint
 				VectorSubtract( midxyz, ctrl[i][j].xyz, midxyz );
-				VectorSubtract( ctrl[i][j + 2].xyz, ctrl[i][j].xyz, dir );
+				VectorSubtract( ctrl[i][j+2].xyz, ctrl[i][j].xyz, dir );
 				VectorNormalize( dir );
 
 				d = DotProduct( midxyz, dir );
 				VectorScale( dir, d, projected );
-				VectorSubtract( midxyz, projected, midxyz );
-				len = VectorLengthSquared( midxyz );            // we will do the sqrt later
-
+				VectorSubtract( midxyz, projected, midxyz2);
+				len = VectorLengthSquared( midxyz2 );			// we will do the sqrt later
 				if ( len > maxLen ) {
 					maxLen = len;
 				}
 			}
 
-			maxLen = sqrt( maxLen );
+			maxLen = sqrt(maxLen);
+
 			// if all the points are on the lines, remove the entire columns
 			if ( maxLen < 0.1f ) {
-				errorTable[dir][j + 1] = 999;
+				errorTable[n][j+1] = 999;
 				continue;
 			}
 
 			// see if we want to insert subdivided columns
 			if ( width + 2 > MAX_GRID_SIZE ) {
-				errorTable[dir][j + 1] = 1.0f / maxLen;
-				continue;   // can't subdivide any more
+				errorTable[n][j+1] = 1.0f/maxLen;
+				continue;	// can't subdivide any more
 			}
 
 			if ( maxLen <= r_subdivisions->value ) {
-				errorTable[dir][j + 1] = 1.0f / maxLen;
-				continue;   // didn't need subdivision
+				errorTable[n][j+1] = 1.0f/maxLen;
+				continue;	// didn't need subdivision
 			}
 
-			errorTable[dir][j + 2] = 1.0f / maxLen;
+			errorTable[n][j+2] = 1.0f/maxLen;
 
 			// insert two columns and replace the peak
 			width += 2;
 			for ( i = 0 ; i < height ; i++ ) {
-				LerpDrawVert( &ctrl[i][j], &ctrl[i][j + 1], &prev );
-				LerpDrawVert( &ctrl[i][j + 1], &ctrl[i][j + 2], &next );
+				LerpDrawVert( &ctrl[i][j], &ctrl[i][j+1], &prev );
+				LerpDrawVert( &ctrl[i][j+1], &ctrl[i][j+2], &next );
 				LerpDrawVert( &prev, &next, &mid );
 
 				for ( k = width - 1 ; k > j + 3 ; k-- ) {
-					ctrl[i][k] = ctrl[i][k - 2];
+					ctrl[i][k] = ctrl[i][k-2];
 				}
 				ctrl[i][j + 1] = prev;
 				ctrl[i][j + 2] = mid;
@@ -473,28 +475,28 @@ srfGridMesh_t *R_SubdividePatchToGrid( int width, int height,
 	PutPointsOnCurve( ctrl, width, height );
 
 	// cull out any rows or columns that are colinear
-	for ( i = 1 ; i < width - 1 ; i++ ) {
+	for ( i = 1 ; i < width-1 ; i++ ) {
 		if ( errorTable[0][i] != 999 ) {
 			continue;
 		}
-		for ( j = i + 1 ; j < width ; j++ ) {
+		for ( j = i+1 ; j < width ; j++ ) {
 			for ( k = 0 ; k < height ; k++ ) {
-				ctrl[k][j - 1] = ctrl[k][j];
+				ctrl[k][j-1] = ctrl[k][j];
 			}
-			errorTable[0][j - 1] = errorTable[0][j];
+			errorTable[0][j-1] = errorTable[0][j];
 		}
 		width--;
 	}
 
-	for ( i = 1 ; i < height - 1 ; i++ ) {
+	for ( i = 1 ; i < height-1 ; i++ ) {
 		if ( errorTable[1][i] != 999 ) {
 			continue;
 		}
-		for ( j = i + 1 ; j < height ; j++ ) {
+		for ( j = i+1 ; j < height ; j++ ) {
 			for ( k = 0 ; k < width ; k++ ) {
-				ctrl[j - 1][k] = ctrl[j][k];
+				ctrl[j-1][k] = ctrl[j][k];
 			}
-			errorTable[1][j - 1] = errorTable[1][j];
+			errorTable[1][j-1] = errorTable[1][j];
 		}
 		height--;
 	}

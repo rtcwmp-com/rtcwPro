@@ -39,6 +39,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef  _WIN32
 #include <stdint.h>
 #endif // ! _WIN32
+#ifndef _WIN32
+#include <netinet/in.h>
+#include <sys/stat.h> // umask
+#include <sys/time.h>
+#else
+#include <winsock.h>
+#endif
 
 #define MAX_NUM_ARGVS   50
 
@@ -57,6 +64,7 @@ char    *com_argv[MAX_NUM_ARGVS + 1];
 
 jmp_buf abortframe;     // an ERR_DROP occured, exit the entire frame
 
+char cl_title[MAX_CVAR_VALUE_STRING] = Q3_VERSION;
 
 FILE *debuglogfile;
 static fileHandle_t logfile;
@@ -120,6 +128,12 @@ int com_frameNumber;
 
 qboolean com_errorEntered;
 qboolean com_fullyInitialized;
+
+// renderer window states
+qboolean	gw_minimized = qfalse; // this will be always true for dedicated servers
+#ifndef DEDICATED
+qboolean	gw_active = qtrue;
+#endif
 
 char com_errorMessage[MAXPRINTMSG];
 
@@ -753,6 +767,42 @@ int Com_RealTime( qtime_t *qtime ) {
 	return t;
 }
 
+
+/*
+================
+Sys_Microseconds
+================
+*/
+int64_t Sys_Microseconds(void)
+{
+#ifdef _WIN32
+	static qboolean inited = qfalse;
+	static LARGE_INTEGER base;
+	static LARGE_INTEGER freq;
+	LARGE_INTEGER curr;
+
+	if (!inited)
+	{
+		QueryPerformanceFrequency(&freq);
+		QueryPerformanceCounter(&base);
+		if (!freq.QuadPart)
+		{
+			return (int64_t)Sys_Milliseconds() * 1000LL; // fallback
+		}
+		inited = qtrue;
+		return 0;
+	}
+
+	QueryPerformanceCounter(&curr);
+
+	return ((curr.QuadPart - base.QuadPart) * 1000000LL) / freq.QuadPart;
+#else
+	struct timeval curr;
+	gettimeofday(&curr, NULL);
+
+	return (int64_t)curr.tv_sec * 1000000LL + (int64_t)curr.tv_usec;
+#endif
+}
 
 /*
 ==============================================================================

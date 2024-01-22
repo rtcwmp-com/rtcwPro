@@ -40,6 +40,8 @@ cvar_rest_t* cvar_rest_vars;
 cvar_t cvar_indexes[MAX_CVARS];
 int cvar_numIndexes;
 
+static int	cvar_group[CVG_MAX];
+
 cvar_rest_t cvar_rest_indexes[MAX_CVARS];
 int cvar_rest_numIndexes;
 
@@ -1500,4 +1502,119 @@ void Cvar_Init( void ) {
 
 	// NERVE - SMF - can't rely on autoexec to do this
 	Cvar_Get( "devdll", "1", CVAR_ROM );
+}
+
+
+/*
+=====================
+Cvar_SetGroup
+=====================
+*/
+void Cvar_SetGroup(cvar_t* var, cvarGroup_t group) {
+	if (group < CVG_MAX) {
+		var->group = group;
+	}
+	else {
+		Com_Error(ERR_DROP, "Bad group index %i for %s", group, var->name);
+	}
+}
+
+
+/*
+=====================
+Cvar_CheckGroup
+=====================
+*/
+int Cvar_CheckGroup(cvarGroup_t group) {
+	if (group < CVG_MAX) {
+		return cvar_group[group];
+	}
+	else {
+		return 0;
+	}
+}
+
+
+/*
+=====================
+Cvar_ResetGroup
+=====================
+*/
+void Cvar_ResetGroup(cvarGroup_t group, qboolean resetModifiedFlags) {
+	if (group < CVG_MAX) {
+		cvar_group[group] = 0;
+		if (resetModifiedFlags) {
+			int i;
+			for (i = 0; i < cvar_numIndexes; i++) {
+				if (cvar_indexes[i].group == group && cvar_indexes[i].name) {
+					cvar_indexes[i].modified = qfalse;
+				}
+			}
+		}
+	}
+}
+
+/*
+=====================
+Cvar_SetDescription
+=====================
+*/
+void Cvar_SetDescription(cvar_t* var, const char* var_description)
+{
+	if (var_description && var_description[0] != '\0')
+	{
+		if (var->description != NULL)
+		{
+			Z_Free(var->description);
+		}
+		var->description = CopyString(var_description);
+	}
+}
+
+/*
+=====================
+Cvar_CheckRange
+=====================
+*/
+void Cvar_CheckRange(cvar_t* var, const char* mins, const char* maxs, cvarValidator_t type)
+{
+	if (type >= CV_MAX) {
+		Com_Printf(S_COLOR_YELLOW "Invalid validation type %i for %s\n", type, var->name);
+		return;
+	}
+
+	if (var->mins) {
+		Z_Free(var->mins);
+		var->mins = NULL;
+	}
+	if (var->maxs) {
+		Z_Free(var->maxs);
+		var->maxs = NULL;
+	}
+
+	var->validator = type;
+
+	if (type == CV_NONE)
+		return;
+
+	if (mins)
+		var->mins = CopyString(mins);
+
+	if (maxs)
+		var->maxs = CopyString(maxs);
+
+	// Force an initial range check
+	Cvar_Set(var->name, var->string);
+}
+
+/*
+============
+Cvar_SetIntegerValue
+============
+*/
+void Cvar_SetIntegerValue(const char* var_name, int value) {
+	char	val[32];
+
+	Com_sprintf(val, sizeof(val), "%i", value);
+	Cvar_Set(var_name, val);
 }

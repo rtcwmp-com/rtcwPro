@@ -1266,39 +1266,7 @@ void Sys_Init( void ) {
 	Cmd_AddCommand( "in_restart", Sys_In_Restart_f );
 	Cmd_AddCommand( "net_restart", Sys_Net_Restart_f );
 
-	g_wv.osversion.dwOSVersionInfoSize = sizeof( g_wv.osversion );
-
-	if ( !GetVersionEx( &g_wv.osversion ) ) {
-		Sys_Error( "Couldn't get OS info" );
-	}
-
-	if ( g_wv.osversion.dwMajorVersion < 4 ) {
-		Sys_Error( "RTCW requires Windows version 4 or greater" );
-	}
-	if ( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32s ) {
-		Sys_Error( "RTCW doesn't run on Win32s" );
-	}
-
-	if ( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32_NT ) {
-		Cvar_Set( "arch", "winnt" );
-	} else if ( g_wv.osversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )   {
-		if ( LOWORD( g_wv.osversion.dwBuildNumber ) >= WIN98_BUILD_NUMBER ) {
-			Cvar_Set( "arch", "win98" );
-		} else if ( LOWORD( g_wv.osversion.dwBuildNumber ) >= OSR2_BUILD_NUMBER )   {
-			Cvar_Set( "arch", "win95 osr2.x" );
-		} else
-		{
-			Cvar_Set( "arch", "win95" );
-		}
-	} else
-	{
-		Cvar_Set( "arch", "unknown Windows variant" );
-	}
-
-	// save out a couple things in rom cvars for the renderer to access
-	Cvar_Get( "win_hinstance", va( "%i", (int)g_wv.hInstance ), CVAR_ROM );
-	Cvar_Get( "win_wndproc", va( "%i", (int)MainWndProc ), CVAR_ROM );
-
+	Cvar_Set( "arch", "winnt" );
 	//
 	// figure out our CPU
 	//
@@ -1364,10 +1332,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 	// main game loop
 	while ( 1 ) {
-		// if not running as a game client, sleep a bit
-		if ( g_wv.isMinimized || ( com_dedicated && com_dedicated->integer ) ) {
-			Sleep( 5 );
-		}
 
 		// set low precision every frame, because some system calls
 		// reset it arbitrarily
@@ -1399,3 +1363,80 @@ char *Sys_DefaultInstallPath( void ) {
 	return Sys_Cwd();
 }
 
+//========================================================
+
+/*
+========================================================================
+
+LOAD/UNLOAD DLL
+
+========================================================================
+*/
+
+static int dll_err_count = 0;
+
+/*
+=================
+Sys_UnloadLibrary
+=================
+*/
+void Sys_UnloadLibrary(void* handle)
+{
+	if (handle)
+		FreeLibrary(handle);
+}
+
+/*
+=================
+Sys_LoadLibrary
+=================
+*/
+void* Sys_LoadLibrary(const char* name)
+{
+	const char* ext;
+
+	if (!name || !*name)
+		return NULL;
+
+	if (FS_AllowedExtension(name, qfalse, &ext))
+	{
+		Com_Error(ERR_FATAL, "Sys_LoadLibrary: Unable to load library with '%s' extension", ext);
+	}
+
+	return (void*)LoadLibrary(AtoW(name));
+}
+
+/*
+=================
+Sys_LoadFunction
+=================
+*/
+void* Sys_LoadFunction(void* handle, const char* name)
+{
+	void* symbol;
+
+	if (handle == NULL || name == NULL || *name == '\0')
+	{
+		dll_err_count++;
+		return NULL;
+	}
+
+	symbol = GetProcAddress(handle, name);
+	if (!symbol)
+		dll_err_count++;
+
+	return symbol;
+}
+
+
+/*
+=================
+Sys_LoadFunctionErrors
+=================
+*/
+int Sys_LoadFunctionErrors(void)
+{
+	int result = dll_err_count;
+	dll_err_count = 0;
+	return result;
+}

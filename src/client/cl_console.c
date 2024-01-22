@@ -77,6 +77,7 @@ cvar_t      *con_notifytime;
 
 // DHM - Nerve :: Must hold CTRL + SHIFT + ~ to get console
 cvar_t      *con_restricted;
+cvar_t* con_scale;
 
 #define DEFAULT_CONSOLE_WIDTH   78
 

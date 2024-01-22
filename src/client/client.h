@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
-#include "../renderer/tr_public.h"
+#include "../renderercommon/tr_public.h"
 #include "../ui/ui_public.h"
 #include "keys.h"
 #include "snd_public.h"
@@ -376,6 +376,11 @@ typedef struct {
 
 	// extension: new demo player supported by the mod
 	qbool		cgameNewDemoPlayer;
+
+	int			captureWidth;
+	int			captureHeight;
+
+	float		con_factor;
 } clientStatic_t;
 
 extern clientStatic_t cls;
@@ -420,6 +425,9 @@ extern cvar_t  *cl_freelook;
 extern cvar_t  *cl_mouseAccel;
 extern cvar_t  *cl_showMouseRate;
 
+extern cvar_t* con_scale;
+
+
 extern cvar_t  *m_pitch;
 extern cvar_t  *m_yaw;
 extern cvar_t  *m_forward;
@@ -451,6 +459,36 @@ extern cvar_t* cl_httpDomain;
 extern cvar_t* cl_httpPath;
  
 extern cvar_t* cl_demoPlayer;
+
+extern	cvar_t* vid_xpos;
+extern	cvar_t* vid_ypos;
+extern	cvar_t* r_noborder;
+
+extern	cvar_t* r_allowSoftwareGL;
+extern	cvar_t* r_swapInterval;
+#ifndef USE_SDL
+extern	cvar_t* r_glDriver;
+#ifdef _WIN32
+extern	cvar_t* r_allowScreenSaver;
+#endif
+#else
+extern	cvar_t* r_sdlDriver;
+extern	cvar_t* r_allowScreenSaver;
+#endif
+extern	cvar_t* r_displayRefresh;
+extern	cvar_t* r_fullscreen;
+extern	cvar_t* r_mode;
+extern	cvar_t* r_modeFullscreen;
+extern	cvar_t* r_customwidth;
+extern	cvar_t* r_customheight;
+extern	cvar_t* r_customaspect;
+extern	cvar_t* r_colorbits;
+extern	cvar_t* cl_stencilbits;
+extern	cvar_t* cl_depthbits;
+extern	cvar_t* cl_drawBuffer;
+#ifndef USE_SDL
+extern	cvar_t* in_forceCharset;
+#endif
 
 //=================================================
 
@@ -507,6 +545,8 @@ qboolean CL_BeginHttpDownload(); // rtcwpro
 
 void CL_OpenURL( const char *url ); // TTimo
 void CL_DownloadsComplete(void); // rtcwpro
+
+qboolean CL_GetModeInfo(int* width, int* height, float* windowAspect, int mode, const char* modeFS, int dw, int dh, qboolean fullscreen);
 
 //
 // cl_input
@@ -698,7 +738,25 @@ int CL_NDP_Seek(int serverTime);
 void CL_NDP_ReadUntil(int serverTime);
 void CL_NDP_HandleError();
 
+//
+// cl_jpeg.c
+//
+size_t	CL_SaveJPGToBuffer(byte* buffer, size_t bufSize, int quality, int image_width, int image_height, byte* image_buffer, int padding);
+void	CL_SaveJPG(const char* filename, int quality, int image_width, int image_height, byte* image_buffer, int padding);
+void	CL_LoadJPG(const char* filename, byte** pic, int* width, int* height);
 
+// Vulkan
+#ifdef USE_VULKAN_API
+void	VKimp_Init(glconfig_t* config);
+void	VKimp_Shutdown(qboolean unloadDLL);
+void* VK_GetInstanceProcAddr(VkInstance instance, const char* name);
+qboolean VK_CreateSurface(VkInstance instance, VkSurfaceKHR* pSurface);
+#endif
 
+void HandleEvents(void);
+
+// platform-specific
+void	GLimp_InitGamma(glconfig_t* config);
+void	GLimp_SetGamma(unsigned char red[256], unsigned char green[256], unsigned char blue[256]);
 #endif // !__CLIENT_H
 

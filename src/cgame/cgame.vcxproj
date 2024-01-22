@@ -329,12 +329,12 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
     <ClInclude Include="..\game\bg_public.h" />
     <ClInclude Include="..\game\surfaceflags.h" />
     <ClInclude Include="..\qcommon\q_shared.h" />
+    <ClInclude Include="..\renderercommon\tr_types.h" />
     <ClInclude Include="..\ui\keycodes.h" />
     <ClInclude Include="..\ui\ui_shared.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="cg_ndp.h" />
     <ClInclude Include="cg_public.h" />
-    <ClInclude Include="tr_types.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />

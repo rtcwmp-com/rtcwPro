@@ -41,6 +41,27 @@ int qmin( int x, int y ) {
 }
 #endif
 
+float Com_ClampFloat(float min, float max, float value) {
+	if (value < min) {
+		return min;
+	}
+	if (value > max) {
+		return max;
+	}
+	return value;
+}
+
+
+int Com_ClampInt(int min, int max, int value) {
+	if (value < min) {
+		return min;
+	}
+	if (value > max) {
+		return max;
+	}
+	return value;
+}
+
 float Com_Clamp( float min, float max, float value ) {
 	if ( value < min ) {
 		return min;
@@ -69,6 +90,36 @@ char *COM_SkipPath( char *pathname ) {
 		pathname++;
 	}
 	return last;
+}
+
+/*
+============
+COM_GetExtension
+============
+*/
+const char* COM_GetExtension(const char* name)
+{
+	const char* dot = strrchr(name, '.'), * slash;
+	if (dot && ((slash = strrchr(name, '/')) == NULL || slash < dot))
+		return dot + 1;
+	else
+		return "";
+}
+
+
+/*
+COM_FixPath()
+unixifies a pathname
+*/
+
+void COM_FixPath(char* pathname) {
+	while (*pathname)
+	{
+		if (*pathname == '\\') {
+			*pathname = '/';
+		}
+		pathname++;
+	}
 }
 
 /*
@@ -341,6 +392,10 @@ PARSING
 static char com_token[MAX_TOKEN_CHARS];
 static char com_parsename[MAX_TOKEN_CHARS];
 static int com_lines;
+static  int		com_tokenline;
+
+// for complex parser
+tokenType_t		com_tokentype;
 
 static int backup_lines;
 static char    *backup_text;
@@ -393,6 +448,233 @@ void COM_ParseWarning( char *format, ... ) {
 
 	Com_Printf( "WARNING: %s, line %d: %s\n", com_parsename, com_lines, string );
 }
+
+
+/*
+==============
+COM_ParseComplex
+==============
+*/
+char* COM_ParseComplex(const char** data_p, qboolean allowLineBreaks)
+{
+	static const byte is_separator[256] =
+	{
+		// \0 . . . . . . .\b\t\n . .\r . .
+			1,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,
+			//  . . . . . . . . . . . . . . . .
+				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+				//    ! " # $ % & ' ( ) * + , - . /
+					1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0, // excl. '-' '.' '/'
+					//  0 1 2 3 4 5 6 7 8 9 : ; < = > ?
+						0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+						//  @ A B C D E F G H I J K L M N O
+							1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+							//  P Q R S T U V W X Y Z [ \ ] ^ _
+								0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0, // excl. '\\' '_'
+								//  ` a b c d e f g h i j k l m n o
+									1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+									//  p q r s t u v w x y z { | } ~ 
+										0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1
+	};
+
+	int c, len, shift;
+	const byte* str;
+
+	str = (byte*)*data_p;
+	len = 0;
+	shift = 0; // token line shift relative to com_lines
+	com_tokentype = TK_GENEGIC;
+
+__reswitch:
+	switch (*str)
+	{
+	case '\0':
+		com_tokentype = TK_EOF;
+		break;
+
+		// whitespace
+	case ' ':
+	case '\t':
+		str++;
+		while ((c = *str) == ' ' || c == '\t')
+			str++;
+		goto __reswitch;
+
+		// newlines
+	case '\n':
+	case '\r':
+		com_lines++;
+		if (*str == '\r' && str[1] == '\n')
+			str += 2; // CR+LF
+		else
+			str++;
+		if (!allowLineBreaks) {
+			com_tokentype = TK_NEWLINE;
+			break;
+		}
+		goto __reswitch;
+
+		// comments, single slash
+	case '/':
+		// until end of line
+		if (str[1] == '/') {
+			str += 2;
+			while ((c = *str) != '\0' && c != '\n' && c != '\r')
+				str++;
+			goto __reswitch;
+		}
+
+		// comment
+		if (str[1] == '*') {
+			str += 2;
+			while ((c = *str) != '\0' && (c != '*' || str[1] != '/')) {
+				if (c == '\n' || c == '\r') {
+					com_lines++;
+					if (c == '\r' && str[1] == '\n') // CR+LF?
+						str++;
+				}
+				str++;
+			}
+			if (c != '\0' && str[1] != '\0') {
+				str += 2;
+			}
+			else {
+				// FIXME: unterminated comment?
+			}
+			goto __reswitch;
+		}
+
+		// single slash
+		com_token[len++] = *str++;
+		break;
+
+		// quoted string?
+	case '"':
+		str++; // skip leading '"'
+		//com_tokenline = com_lines;
+		while ((c = *str) != '\0' && c != '"') {
+			if (c == '\n' || c == '\r') {
+				com_lines++; // FIXME: unterminated quoted string?
+				shift++;
+			}
+			if (len < MAX_TOKEN_CHARS - 1) // overflow check
+				com_token[len++] = c;
+			str++;
+		}
+		if (c != '\0') {
+			str++; // skip ending '"'
+		}
+		else {
+			// FIXME: unterminated quoted string?
+		}
+		com_tokentype = TK_QUOTED;
+		break;
+
+		// single tokens:
+	case '+': case '`':
+	/*case '*':*/ case '~':
+	case '{': case '}':
+	case '[': case ']':
+	case '?': case ',':
+	case ':': case ';':
+	case '%': case '^':
+		com_token[len++] = *str++;
+		break;
+
+	case '*':
+		com_token[len++] = *str++;
+		com_tokentype = TK_MATCH;
+		break;
+
+	case '(':
+		com_token[len++] = *str++;
+		com_tokentype = TK_SCOPE_OPEN;
+		break;
+
+	case ')':
+		com_token[len++] = *str++;
+		com_tokentype = TK_SCOPE_CLOSE;
+		break;
+
+		// !, !=
+	case '!':
+		com_token[len++] = *str++;
+		if (*str == '=') {
+			com_token[len++] = *str++;
+			com_tokentype = TK_NEQ;
+		}
+		break;
+
+		// =, ==
+	case '=':
+		com_token[len++] = *str++;
+		if (*str == '=') {
+			com_token[len++] = *str++;
+			com_tokentype = TK_EQ;
+		}
+		break;
+
+		// >, >=
+	case '>':
+		com_token[len++] = *str++;
+		if (*str == '=') {
+			com_token[len++] = *str++;
+			com_tokentype = TK_GTE;
+		}
+		else {
+			com_tokentype = TK_GT;
+		}
+		break;
+
+		//  <, <=
+	case '<':
+		com_token[len++] = *str++;
+		if (*str == '=') {
+			com_token[len++] = *str++;
+			com_tokentype = TK_LTE;
+		}
+		else {
+			com_tokentype = TK_LT;
+		}
+		break;
+
+		// |, ||
+	case '|':
+		com_token[len++] = *str++;
+		if (*str == '|') {
+			com_token[len++] = *str++;
+			com_tokentype = TK_OR;
+		}
+		break;
+
+		// &, &&
+	case '&':
+		com_token[len++] = *str++;
+		if (*str == '&') {
+			com_token[len++] = *str++;
+			com_tokentype = TK_AND;
+		}
+		break;
+
+		// rest of the charset
+	default:
+		com_token[len++] = *str++;
+		while (!is_separator[(c = *str)]) {
+			if (len < MAX_TOKEN_CHARS - 1)
+				com_token[len++] = c;
+			str++;
+		}
+		com_tokentype = TK_STRING;
+		break;
+
+	} // switch ( *str )
+
+	com_tokenline = com_lines - shift;
+	com_token[len] = '\0';
+	*data_p = (char*)str;
+	return com_token;
+}
+
 
 /*
 ==============
@@ -596,7 +878,7 @@ SkipBracedSection_Depth
 
 =================
 */
-void SkipBracedSection_Depth( char **program, int depth ) {
+qbool SkipBracedSection_Depth( char **program, int depth ) {
 	char            *token;
 
 	do {
@@ -609,6 +891,7 @@ void SkipBracedSection_Depth( char **program, int depth ) {
 			}
 		}
 	} while ( depth && *program );
+	return (depth == 0);
 }
 
 /*
@@ -845,6 +1128,100 @@ void Q_strcat( char *dest, int size, const char *src ) {
 	Q_strncpyz( dest + l1, src, size - l1 );
 }
 
+char* Q_stradd(char* dst, const char* src)
+{
+	char c;
+	while ((c = *src++) != '\0')
+		*dst++ = c;
+	*dst = '\0';
+	return dst;
+}
+
+int Q_replace(const char* str1, const char* str2, char* src, int max_len)
+{
+	int len1, len2, d, count;
+	const char* s0, * s1, * s2, * max;
+	char* match, * dst;
+
+	match = strstr(src, str1);
+
+	if (!match)
+		return 0;
+
+	count = 0; // replace count
+
+	len1 = strlen(str1);
+	len2 = strlen(str2);
+	d = len2 - len1;
+
+	if (d > 0) // expand and replace mode    
+	{
+		max = src + max_len;
+		src += strlen(src);
+
+		do
+		{
+			// expand source string
+			s1 = src;
+			src += d;
+			if (src >= max)
+				return count;
+			dst = src;
+
+			s0 = match + len1;
+
+			while (s1 >= s0)
+				*dst-- = *s1--;
+
+			// replace match
+			s2 = str2;
+			while (*s2) {
+				*match++ = *s2++;
+			}
+			match = strstr(match, str1);
+
+			count++;
+		} while (match);
+
+		return count;
+	}
+	else
+		if (d < 0) // shrink and replace mode
+		{
+			do
+			{
+				// shrink source string
+				s1 = match + len1;
+				dst = match + len2;
+				while ((*dst++ = *s1++) != '\0');
+
+				//replace match
+				s2 = str2;
+				while (*s2) {
+					*match++ = *s2++;
+				}
+
+				match = strstr(match, str1);
+
+				count++;
+			} while (match);
+
+			return count;
+		}
+		else
+			do  // just replace match
+			{
+				s2 = str2;
+				while (*s2) {
+					*match++ = *s2++;
+				}
+
+				match = strstr(match, str1);
+				count++;
+			} while (match);
+
+			return count;
+}
 
 int Q_PrintStrlen( const char *string ) {
 	int len;
@@ -907,6 +1284,52 @@ void QDECL Com_sprintf( char *dest, int size, const char *fmt, ... ) {
 	}
 }
 
+
+/*
+============
+Com_Split
+============
+*/
+int Com_Split(char* in, char** out, int outsz, int delim)
+{
+	int c;
+	char** o = out, ** end = out + outsz;
+	// skip leading spaces
+	if (delim >= ' ') {
+		while ((c = *in) != '\0' && c <= ' ')
+			in++;
+	}
+	*out = in; out++;
+	while (out < end) {
+		while ((c = *in) != '\0' && c != delim)
+			in++;
+		*in = '\0';
+		if (!c) {
+			// don't count last null value
+			if (out[-1][0] == '\0')
+				out--;
+			break;
+		}
+		in++;
+		// skip leading spaces
+		if (delim >= ' ') {
+			while ((c = *in) != '\0' && c <= ' ')
+				in++;
+		}
+		*out = in; out++;
+	}
+	// sanitize last value
+	while ((c = *in) != '\0' && c != delim)
+		in++;
+	*in = '\0';
+	c = out - o;
+	// set remaining out pointers
+	while (out < end) {
+		*out = in; out++;
+	}
+	return c;
+}
+
 // Ridah, ripped from l_bsp.c
 int Q_strncasecmp( char *s1, char *s2, int n ) {
 	int c1, c2;
@@ -940,6 +1363,31 @@ int Q_strcasecmp( char *s1, char *s2 ) {
 	return Q_strncasecmp( s1, s2, 99999 );
 }
 // done.
+
+/*
+================
+Q_atof
+================
+*/
+float Q_atof(const char* str)
+{
+	float f;
+
+	f = atof(str);
+
+	// modern C11-like implementations of atof() may return INF or NAN
+	// which breaks all FP code where such values getting passed
+	// and effectively corrupts range checks for cvars as well
+#if USE_QISFINITE
+	if (!Q_isfinite(f))
+		return 0.0f;
+#else
+	if (!isfinite(f))
+		return 0.0f;
+#endif
+
+	return f;
+}
 
 /*
 ============
@@ -1503,3 +1951,98 @@ void Q_ColorizeString(char colorCode, const char* inStr, char* outStr, size_t ou
 }
 
 
+/*
+* Find the first occurrence of find in s.
+*/
+const char* Q_stristr(const char* s, const char* find)
+{
+	char c, sc;
+	size_t len;
+
+	if ((c = *find++) != 0)
+	{
+		if (c >= 'a' && c <= 'z')
+		{
+			c -= ('a' - 'A');
+		}
+		len = strlen(find);
+		do
+		{
+			do
+			{
+				if ((sc = *s++) == 0)
+					return NULL;
+				if (sc >= 'a' && sc <= 'z')
+				{
+					sc -= ('a' - 'A');
+				}
+			} while (sc != c);
+		} while (Q_stricmpn(s, find, len) != 0);
+		s--;
+	}
+	return s;
+}
+
+
+/*
+==================
+COM_GenerateHashValue
+
+used in renderer and filesystem
+==================
+*/
+// ASCII lowcase conversion table with '\\' turned to '/' and '.' to '\0'
+static const byte hash_locase[256] =
+{
+	0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
+	0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
+	0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,
+	0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
+	0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,
+	0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x00,0x2f,
+	0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,
+	0x38,0x39,0x3a,0x3b,0x3c,0x3d,0x3e,0x3f,
+	0x40,0x61,0x62,0x63,0x64,0x65,0x66,0x67,
+	0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,
+	0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,
+	0x78,0x79,0x7a,0x5b,0x2f,0x5d,0x5e,0x5f,
+	0x60,0x61,0x62,0x63,0x64,0x65,0x66,0x67,
+	0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,
+	0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,
+	0x78,0x79,0x7a,0x7b,0x7c,0x7d,0x7e,0x7f,
+	0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,
+	0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,
+	0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,
+	0x98,0x99,0x9a,0x9b,0x9c,0x9d,0x9e,0x9f,
+	0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,
+	0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
+	0xb0,0xb1,0xb2,0xb3,0xb4,0xb5,0xb6,0xb7,
+	0xb8,0xb9,0xba,0xbb,0xbc,0xbd,0xbe,0xbf,
+	0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,
+	0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,
+	0xd0,0xd1,0xd2,0xd3,0xd4,0xd5,0xd6,0xd7,
+	0xd8,0xd9,0xda,0xdb,0xdc,0xdd,0xde,0xdf,
+	0xe0,0xe1,0xe2,0xe3,0xe4,0xe5,0xe6,0xe7,
+	0xe8,0xe9,0xea,0xeb,0xec,0xed,0xee,0xef,
+	0xf0,0xf1,0xf2,0xf3,0xf4,0xf5,0xf6,0xf7,
+	0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0xfe,0xff
+};
+
+unsigned long Com_GenerateHashValue(const char* fname, const unsigned int size)
+{
+	const byte* s;
+	unsigned long hash;
+	int		c;
+
+	s = (byte*)fname;
+	hash = 0;
+
+	while ((c = hash_locase[(byte)*s++]) != '\0') {
+		hash = hash * 101 + c;
+	}
+
+	hash = (hash ^ (hash >> 10) ^ (hash >> 20));
+	hash &= (size - 1);
+
+	return hash;
+}

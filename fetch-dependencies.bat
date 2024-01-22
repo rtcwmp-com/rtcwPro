@@ -122,17 +122,37 @@ rem ***************************************************************************
 		call powershell "Expand-Archive -Path """curl*.zip""" -DestinationPath """curl""""
 		call powershell "Get-ChildItem """curl\*\*""" | move-item -Destination """curl\""
 	)
-
+	
+	if not exist "libjpeg-turbo" (
+		echo libjpeg-turbo...
+		call powershell "$source= (Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/libjpeg-turbo/libjpeg-turbo/releases)[0].zipball_url;"^
+						"Write-Host $source;"^
+						"$file=$(Split-Path -Path $source -Leaf);"^
+						"Invoke-WebRequest -Uri $source -Out $file;"^
+						"Get-ChildItem $file | move-item -Destination libjpeg-turbo.zip"
+		call powershell "Expand-Archive -Path """libjpeg-turbo*.zip""" -DestinationPath """libjpeg-turbo""""
+		call powershell "Get-ChildItem """libjpeg-turbo\*\*""" | move-item -Destination """libjpeg-turbo\""
+	)
 :buildDeps
 	call "%PF%\%VC_PATH%\VC\Auxiliary\Build\vcvars32.bat"
 	set ROOT_DEV_DIR=%cd%
+:buildOpenSSL
 	cd curl
 	call buildconf.bat
 	cd projects
 	call generate.bat %VC_generate%
 	call build-openssl.bat %vc_version% x86 release ..\..\openssl 
+:buildCurl
 	cd Windows\%VC_DESC%
 	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" curl-all.sln /Build "DLL Release - DLL OpenSSL"
+:buildLibJPEG
+	cd %ROOT_DEV_DIR%\libjpeg-turbo
+	mkdir build
+	cd build
+	call cmake -G"Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
+	call devenv libjpeg-turbo.sln /Build Release
+	cp *.h ..\
+	
 :harvest
 	cd %ROOT_DEV_DIR%\curl
 	mkdir bin

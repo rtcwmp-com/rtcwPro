@@ -67,7 +67,7 @@ void CG_BubbleTrail( vec3_t start, vec3_t end, float size, float spacing ) {
 		le->lifeRate = 1.0 / ( le->endTime - le->startTime );
 
 		re = &le->refEntity;
-		re->shaderTime = cg.time / 1000.0f;
+		re->shaderTime.f = cg.time / 1000.0f;
 
 		re->reType = RT_SPRITE;
 		re->rotation = 0;
@@ -126,7 +126,7 @@ localEntity_t *CG_SmokePuff( const vec3_t p, const vec3_t vel,
 	re = &le->refEntity;
 	re->rotation = Q_random( &seed ) * 360;
 	re->radius = radius;
-	re->shaderTime = startTime / 1000.0f;
+	re->shaderTime.f = startTime / 1000.0f;
 
 	le->leType = LE_MOVE_SCALE_FADE;
 	le->startTime = startTime;
@@ -202,7 +202,7 @@ void CG_SpawnEffect( vec3_t org ) {
 	re = &le->refEntity;
 
 	re->reType = RT_MODEL;
-	re->shaderTime = cg.time / 1000.0f;
+	re->shaderTime.f = cg.time / 1000.0f;
 
 	re->customShader = cgs.media.teleportEffectShader;
 	re->hModel = cgs.media.teleportEffectModel;
@@ -270,7 +270,7 @@ localEntity_t *CG_MakeExplosion( vec3_t origin, vec3_t dir,
 	ex->endTime = ex->startTime + msec;
 
 	// bias the time so all shader effects start correctly
-	ex->refEntity.shaderTime = ex->startTime / 1000.0f;
+	ex->refEntity.shaderTime.f = ex->startTime / 1000.0f;
 
 	ex->refEntity.hModel = hModel;
 	ex->refEntity.customShader = shader;

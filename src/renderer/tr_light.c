@@ -1,25 +1,25 @@
 /*
 ===========================================================================
 
-Return to Castle Wolfenstein multiplayer GPL Source Code
+Wolfenstein: Enemy Territory GPL Source Code
 Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Wolfenstein: Enemy Territory GPL Source Code (Wolf ET Source Code).  
 
-RTCW MP Source Code is free software: you can redistribute it and/or modify
+Wolf ET Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-RTCW MP Source Code is distributed in the hope that it will be useful,
+Wolf ET Source Code is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with RTCW MP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+along with Wolf ET Source Code.  If not, see <http://www.gnu.org/licenses/>.
 
-In addition, the RTCW MP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW MP Source Code.  If not, please request a copy in writing from id Software at the address below.
+In addition, the Wolf: ET Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Wolf ET Source Code.  If not, please request a copy in writing from id Software at the address below.
 
 If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
 
@@ -46,18 +46,64 @@ Used by both the front end (for DlightBmodel) and
 the back end (before doing the lighting calculation)
 ===============
 */
-void R_TransformDlights( int count, dlight_t *dl, orientationr_t *or ) {
-	int i;
-	vec3_t temp;
+void R_TransformDlights( int count, dlight_t *dl, orientationr_t *or) {
+	int		i;
+	vec3_t	temp, temp2;
 
 	for ( i = 0 ; i < count ; i++, dl++ ) {
 		VectorSubtract( dl->origin, or->origin, temp );
 		dl->transformed[0] = DotProduct( temp, or->axis[0] );
 		dl->transformed[1] = DotProduct( temp, or->axis[1] );
 		dl->transformed[2] = DotProduct( temp, or->axis[2] );
+		if ( dl->linear ) {
+			VectorSubtract( dl->origin2, or->origin, temp2 );
+			dl->transformed2[0] = DotProduct( temp2, or->axis[0] );
+			dl->transformed2[1] = DotProduct( temp2, or->axis[1] );
+			dl->transformed2[2] = DotProduct( temp2, or->axis[2] );
+		}
 	}
 }
 
+
+/*
+R_CullDlights()
+frustum culls dynamic lights
+only used by skybox portal rendering
+*/
+#if 0
+void R_CullDlights( void ) {
+	int i, numDlights, dlightBits;
+	dlight_t    *dl;
+
+
+	/* limit */
+	if ( tr.refdef.num_dlights > MAX_DLIGHTS ) {
+		tr.refdef.num_dlights = MAX_DLIGHTS;
+	}
+
+	R_TransformDlights( tr.refdef.num_dlights, tr.refdef.dlights, &tr.orientation );
+
+	/* walk dlight list */
+	numDlights = 0;
+	dlightBits = 0;
+	for ( i = 0, dl = tr.refdef.dlights; i < tr.refdef.num_dlights; i++, dl++ )
+	{
+		if ( R_CullDlight( dl ) != CULL_OUT ) {
+			numDlights = i + 1;
+			dlightBits |= ( 1 << i );
+		}
+	}
+
+	/* reset count */
+	tr.refdef.num_dlights = numDlights;
+
+	/* set bits */
+	tr.refdef.dlightBits = dlightBits;
+}
+#endif
+
+
+#ifdef USE_LEGACY_DLIGHTS
 /*
 =============
 R_DlightBmodel
@@ -67,28 +113,31 @@ Determine which dynamic lights may effect this bmodel
 */
 void R_DlightBmodel( bmodel_t *bmodel ) {
 	int i, j;
-	dlight_t    *dl;
+	const dlight_t	*dl;
 	int mask;
 	msurface_t  *surf;
 
 	// transform all the lights
-	R_TransformDlights( tr.refdef.num_dlights, tr.refdef.dlights, &tr.or );
+	R_TransformDlights( tr.refdef.num_dlights, tr.refdef.dlights, &tr.orientation );
 
 	mask = 0;
-	for ( i = 0 ; i < tr.refdef.num_dlights ; i++ ) {
+	for ( i = 0; i < tr.refdef.num_dlights; i++ ) {
 		dl = &tr.refdef.dlights[i];
 
-		// see if the point is close enough to the bounds to matter
-		for ( j = 0 ; j < 3 ; j++ ) {
-			if ( dl->transformed[j] - bmodel->bounds[1][j] > dl->radius ) {
-				break;
+		// ydnar: parallel dlights affect all entities
+		if ( !( dl->flags & REF_DIRECTED_DLIGHT ) ) {
+			// see if the point is close enough to the bounds to matter
+			for ( j = 0 ; j < 3 ; j++ ) {
+				if ( dl->transformed[j] - bmodel->bounds[1][j] > dl->radius ) {
+					break;
+				}
+				if ( bmodel->bounds[0][j] - dl->transformed[j] > dl->radius ) {
+					break;
+				}
 			}
-			if ( bmodel->bounds[0][j] - dl->transformed[j] > dl->radius ) {
-				break;
+			if ( j < 3 ) {
+				continue;
 			}
-		}
-		if ( j < 3 ) {
-			continue;
 		}
 
 		// we need to check this light
@@ -102,22 +151,25 @@ void R_DlightBmodel( bmodel_t *bmodel ) {
 	// (SA) isn't this dangerous to do to an enumerated type? (setting it to an int)
 	//		meaning, shouldn't ->needDlights be changed to an int rather than a qbool?
 
-	tr.currentEntity->needDlights = mask;
-
+	tr.currentEntity->needDlights = (mask != 0) ? 1 : 0;
 
 	// set the dlight bits in all the surfaces
 	for ( i = 0 ; i < bmodel->numSurfaces ; i++ ) {
 		surf = bmodel->firstSurface + i;
 
 		if ( *surf->data == SF_FACE ) {
-			( (srfSurfaceFace_t *)surf->data )->dlightBits[ tr.smpFrame ] = mask;
+			((srfSurfaceFace_t *)surf->data)->dlightBits = mask;
 		} else if ( *surf->data == SF_GRID ) {
-			( (srfGridMesh_t *)surf->data )->dlightBits[ tr.smpFrame ] = mask;
+			((srfGridMesh_t *)surf->data)->dlightBits = mask;
 		} else if ( *surf->data == SF_TRIANGLES ) {
-			( (srfTriangles_t *)surf->data )->dlightBits[ tr.smpFrame ] = mask;
+			((srfTriangles_t *)surf->data)->dlightBits = mask;
+//			((srfTriangles2_t *)surf->data)->dlightBits = mask;
+		} else if ( *surf->data == SF_FOLIAGE ) {   // ydnar
+			((srfFoliage_t *)surf->data)->dlightBits = mask;
 		}
 	}
 }
+#endif // USE_LEGACY_DLIGHTS
 
 
 /*
@@ -166,7 +218,7 @@ static void R_SetupEntityLightingGrid( trRefEntity_t *ent ) {
 		frac[i] = v - pos[i];
 		if ( pos[i] < 0 ) {
 			pos[i] = 0;
-		} else if ( pos[i] >= tr.world->lightGridBounds[i] - 1 ) {
+		} else if ( pos[i] > tr.world->lightGridBounds[i] - 1 ) {
 			pos[i] = tr.world->lightGridBounds[i] - 1;
 		}
 	}
@@ -229,6 +281,11 @@ static void R_SetupEntityLightingGrid( trRefEntity_t *ent ) {
 		normal[2] = tr.sinTable[( lng + ( FUNCTABLE_SIZE / 4 ) ) & FUNCTABLE_MASK];
 
 		VectorMA( direction, factor, normal, direction );
+
+		// ydnar: test code
+		//%	if( strstr( tr.models[ ent->e.hModel ]->name, ".mdm" ) && i == 0 )
+		//%		ri.Printf( PRINT_ALL, "lat: %3d lng: %3d dir: %2.3f %2.3f %2.3f\n",
+		//%			data[ 7 ], data[ 8 ], normal[ 0 ], normal[ 1 ], normal[ 2 ] );
 	}
 
 	if ( totalFactor > 0 && totalFactor < 0.99 ) {
@@ -251,6 +308,9 @@ static void R_SetupEntityLightingGrid( trRefEntity_t *ent ) {
 //----(SA)	end
 
 	VectorNormalize2( direction, ent->lightDir );
+
+	// ydnar: debug hack
+	//%	VectorSubtract( vec3_origin, direction, ent->lightDir );
 }
 
 
@@ -259,7 +319,7 @@ static void R_SetupEntityLightingGrid( trRefEntity_t *ent ) {
 LogLight
 ===============
 */
-static void LogLight( trRefEntity_t *ent ) {
+static void LogLight( const trRefEntity_t *ent ) {
 	int max1, max2;
 
 	if ( !( ent->e.renderfx & RF_FIRST_PERSON ) ) {
@@ -292,14 +352,17 @@ by the Calc_* functions
 =================
 */
 void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
-	int i;
-	dlight_t        *dl;
-	float power;
-	vec3_t dir;
-	float d;
-	vec3_t lightDir;
-	vec3_t lightOrigin;
-//	qboolean		highlighted = qfalse; // TTimo: unused
+	int				i;
+	const dlight_t		*dl;
+	vec3_t			dir;
+	float			d, power;
+	vec3_t			lightDir;
+	vec3_t			lightOrigin;
+	vec3_t			lightValue;
+	byte            *entityLight;
+#ifdef USE_PMLIGHT
+	vec3_t			shadowLightDir;
+#endif
 
 	// lighting calculations
 	if ( ent->lightingCalculated ) {
@@ -311,7 +374,7 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	// trace a sample point down to find ambient light
 	//
 	if ( ent->e.renderfx & RF_LIGHTING_ORIGIN ) {
-		// seperate lightOrigins are needed so an object that is
+		// separate lightOrigins are needed so an object that is
 		// sinking into the ground can still be lit, and so
 		// multi-part models can be lit identically
 		VectorCopy( ent->e.lightingOrigin, lightOrigin );
@@ -320,15 +383,23 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	}
 
 	// if NOWORLDMODEL, only use dynamic lights (menu system, etc)
-	if ( !( refdef->rdflags & RDF_NOWORLDMODEL )
-		 && tr.world->lightGridData ) {
+	if ( tr.world && tr.world->lightGridData &&
+		 ( !( refdef->rdflags & RDF_NOWORLDMODEL ) ||
+		   ( ( refdef->rdflags & RDF_NOWORLDMODEL ) && ( ent->e.renderfx & RF_LIGHTING_ORIGIN ) ) ) ) {
 		R_SetupEntityLightingGrid( ent );
-	} else {
-		ent->ambientLight[0] = ent->ambientLight[1] =
-								   ent->ambientLight[2] = tr.identityLight * 150;
-		ent->directedLight[0] = ent->directedLight[1] =
-									ent->directedLight[2] = tr.identityLight * 150;
-		VectorCopy( tr.sunDirection, ent->lightDir );
+	} else
+	{
+		//%	ent->ambientLight[0] = ent->ambientLight[1] = ent->ambientLight[2] = tr.identityLight * 150;
+		//%	ent->directedLight[0] = ent->directedLight[1] = ent->directedLight[2] = tr.identityLight * 150;
+		//%	VectorCopy( tr.sunDirection, ent->lightDir );
+		ent->ambientLight[ 0 ] = tr.identityLight * 64;
+		ent->ambientLight[ 1 ] = tr.identityLight * 64;
+		ent->ambientLight[ 2 ] = tr.identityLight * 96;
+		ent->directedLight[ 0 ] = tr.identityLight * 255;
+		ent->directedLight[ 1 ] = tr.identityLight * 232;
+		ent->directedLight[ 2 ] = tr.identityLight * 224;
+		VectorSet( ent->lightDir, -1, 1, 1.25 );
+		VectorNormalize( ent->lightDir );
 	}
 
 	if ( ent->e.hilightIntensity ) {
@@ -354,14 +425,42 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	//
 	d = VectorLength( ent->directedLight );
 	VectorScale( ent->lightDir, d, lightDir );
+#ifdef USE_PMLIGHT
+	if ( r_dlightMode->integer == 2 ) { 
+		// only direct lights
+		// but we need to deal with shadow light direction
+		VectorCopy( lightDir, shadowLightDir );
+		if ( r_shadows->integer == 2 ) {
+			for ( i = 0 ; i < refdef->num_dlights ; i++ ) {
+				dl = &refdef->dlights[i];
+				if ( dl->linear ) // no support for linear lights atm
+					continue;
 
+				if ( dl->shader ) { //----(SA)	if the dlight has a diff shader specified, you don't know what it does, so don't let it affect entities lighting
+					continue;
+				}
+
+				VectorSubtract( dl->origin, lightOrigin, dir );
+				d = VectorNormalize( dir );
+				power = DLIGHT_AT_RADIUS * ( dl->radius * dl->radius );
+				if ( d < DLIGHT_MINIMUM_RADIUS ) {
+					d = DLIGHT_MINIMUM_RADIUS;
+				}
+				d = power / ( d * d );
+				VectorMA( shadowLightDir, d, dir, shadowLightDir );
+			}
+		} // if ( r_shadows->integer == 2 )
+	}  // if ( r_dlightMode->integer == 2 )
+	else
+#endif
 	for ( i = 0 ; i < refdef->num_dlights ; i++ ) {
 		dl = &refdef->dlights[i];
 
-		if ( dl->dlshader ) {  //----(SA)	if the dlight has a diff shader specified, you don't know what it does, so don't let it affect entities lighting
+		if ( dl->shader ) { //----(SA)	if the dlight has a diff shader specified, you don't know what it does, so don't let it affect entities lighting
 			continue;
 		}
 
+		#if 0
 		VectorSubtract( dl->origin, lightOrigin, dir );
 		d = VectorNormalize( dir );
 
@@ -369,11 +468,28 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 		if ( d < DLIGHT_MINIMUM_RADIUS ) {
 			d = DLIGHT_MINIMUM_RADIUS;
 		}
-
 		d = power / ( d * d );
+		#else
+		// directional dlight, origin is a directional normal
+		if ( dl->flags & REF_DIRECTED_DLIGHT ) {
+			power = dl->intensity * 255.0f;
+			VectorCopy( dl->origin, dir );
+		}
+		// ball dlight
+		else
+		{
+			VectorSubtract( dl->origin, lightOrigin, dir );
+			d = dl->radius - VectorNormalize( dir );
+			if ( d <= 0.0f ) {
+				power = 0;
+			} else {
+				power = dl->intensity * d;
+			}
+		}
+		#endif
 
-		VectorMA( ent->directedLight, d, dl->color, ent->directedLight );
-		VectorMA( lightDir, d, dir, lightDir );
+		VectorMA( ent->directedLight, power, dl->color, ent->directedLight );
+		VectorMA( lightDir, power, dir, lightDir );
 	}
 
 	// clamp ambient
@@ -387,18 +503,61 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 		LogLight( ent );
 	}
 
+	// ydnar: test code
+	//%	VectorClear( ent->ambientLight );
+
 	// save out the byte packet version
-	( (byte *)&ent->ambientLightInt )[0] = myftol( ent->ambientLight[0] );
-	( (byte *)&ent->ambientLightInt )[1] = myftol( ent->ambientLight[1] );
-	( (byte *)&ent->ambientLightInt )[2] = myftol( ent->ambientLight[2] );
+	( (byte *)&ent->ambientLightInt )[0] = Q_ftol( ent->ambientLight[0] );
+	( (byte *)&ent->ambientLightInt )[1] = Q_ftol( ent->ambientLight[1] );
+	( (byte *)&ent->ambientLightInt )[2] = Q_ftol( ent->ambientLight[2] );
 	( (byte *)&ent->ambientLightInt )[3] = 0xff;
+
+	// ydnar: save out the light table
+	d = 0.0f;
+	entityLight = (byte*) ent->entityLightInt;
+	power = 1.0f / ( ENTITY_LIGHT_STEPS - 1 );
+	for ( i = 0; i < ENTITY_LIGHT_STEPS; i++ )
+	{
+		VectorMA( ent->ambientLight, d, ent->directedLight, lightValue );
+		entityLight[ 0 ] = lightValue[ 0 ] > 255.0f ? 255 : Q_ftol( lightValue[ 0 ] );
+		entityLight[ 1 ] = lightValue[ 1 ] > 255.0f ? 255 : Q_ftol( lightValue[ 1 ] );
+		entityLight[ 2 ] = lightValue[ 2 ] > 255.0f ? 255 : Q_ftol( lightValue[ 2 ] );
+		entityLight[ 3 ] = 0xFF;
+
+		d += power;
+		entityLight += 4;
+	}
+
+	// ydnar: test code
+	//%	VectorSet( lightDir, 0, 0, 1 );
 
 	// transform the direction to local space
 	VectorNormalize( lightDir );
 	ent->lightDir[0] = DotProduct( lightDir, ent->e.axis[0] );
 	ent->lightDir[1] = DotProduct( lightDir, ent->e.axis[1] );
 	ent->lightDir[2] = DotProduct( lightDir, ent->e.axis[2] );
+
+	// ydnar: renormalize if necessary
+	if ( ent->e.nonNormalizedAxes ) {
+		VectorNormalize( ent->lightDir );
+	}
+
+#ifdef USE_PMLIGHT
+	if ( r_shadows->integer == 2 && r_dlightMode->integer == 2 ) {
+		VectorNormalize( shadowLightDir );
+		ent->shadowLightDir[0] = DotProduct( shadowLightDir, ent->e.axis[0] );
+		ent->shadowLightDir[1] = DotProduct( shadowLightDir, ent->e.axis[1] );
+		ent->shadowLightDir[2] = DotProduct( shadowLightDir, ent->e.axis[2] );
+	}
+#endif
+
+	// ydnar: test code
+	//%	if( strstr( tr.models[ ent->e.hModel ]->name, ".mdm" ) )
+	//%		ri.Printf( PRINT_ALL, "vec: %f %f %f   localvec: %f %f %f\n",
+	//%			lightDir[ 0 ], lightDir[ 1 ], lightDir[ 2 ],
+	//%			ent->lightDir[ 0 ], ent->lightDir[ 1 ], ent->lightDir[ 2 ] );
 }
+
 
 /*
 =================

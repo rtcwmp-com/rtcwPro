@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../client/client.h"
 #include "win_local.h"
+#include "glw_win.h"
+
+static POINT window_center;
+static POINT client_center;
 
 // RTCWPro - raw input begin - source: quake
 // defines
@@ -915,11 +919,13 @@ void IN_Frame( void ) {
 		// temporarily deactivate if not in the game and
 		// running on the desktop
 		// voodoo always counts as full screen
+#if 0
 		if ( Cvar_VariableValue( "r_fullscreen" ) == 0
 			 && strcmp( Cvar_VariableString( "r_glDriver" ), _3DFX_DRIVER_NAME ) ) {
 			IN_DeactivateMouse();
 			return;
 		}
+#endif
 	}
 
 	if ( !in_appactive ) {
@@ -1306,4 +1312,64 @@ static void IN_ShutdownMIDI( void ) {
 		midiInClose( s_midiInfo.hMidiIn );
 	}
 	memset( &s_midiInfo, 0, sizeof( s_midiInfo ) );
+}
+
+/*
+================
+IN_UpdateWindow
+
+Called when window gets resized/moved
+Updates window center and clip region
+================
+*/
+void IN_UpdateWindow(RECT* window_rect, qboolean updateClipRegion)
+{
+	RECT rect;
+
+	if (!window_rect)
+		window_rect = &rect;
+
+	if (GetClientRect(g_wv.hWnd, window_rect)) {
+		POINT pos;
+		int sx = 0, sy = 0;
+
+		pos.x = window_rect->left;
+		pos.y = window_rect->top;
+		ClientToScreen(g_wv.hWnd, &pos);
+		window_rect->left = pos.x;
+		window_rect->top = pos.y;
+		window_rect->right += pos.x;
+		window_rect->bottom += pos.y;
+
+		// do not overlap with taskbar
+		if (window_rect->bottom > glw_state.workArea.bottom)
+			window_rect->bottom = glw_state.workArea.bottom;
+		// ... and with 90 degrees clockwise rotation
+		if (window_rect->right > glw_state.workArea.right)
+			window_rect->right = glw_state.workArea.right;
+
+		if (window_rect->top < glw_state.workArea.top)
+			sy = glw_state.workArea.top - window_rect->top;
+
+		if (window_rect->left < glw_state.workArea.left)
+			sx = glw_state.workArea.left - window_rect->left;
+
+		client_center.x = (window_rect->right - window_rect->left + sx) / 2;
+		client_center.y = (window_rect->bottom - window_rect->top + sy) / 2;
+		window_center = client_center;
+		ClientToScreen(g_wv.hWnd, &window_center);
+
+	}
+	else {
+		if (!GetWindowRect(g_wv.hWnd, window_rect))
+			return;
+		window_center.x = (window_rect->right + window_rect->left) / 2;
+		window_center.y = (window_rect->top + window_rect->bottom) / 2;
+		client_center = window_center;
+		ScreenToClient(g_wv.hWnd, &client_center);
+	}
+
+	if (updateClipRegion && s_wmv.mouseActive && gw_active) {
+		ClipCursor(window_rect);
+	}
 }

@@ -114,6 +114,37 @@ cvar_t* cl_httpDomain;
 cvar_t* cl_httpPath;
 cvar_t* cl_demoPlayer; // NDP
 
+// common cvars for GLimp modules
+cvar_t* vid_xpos;			// X coordinate of window position
+cvar_t* vid_ypos;			// Y coordinate of window position
+cvar_t* r_noborder;
+
+cvar_t* r_allowSoftwareGL;	// don't abort out if the pixelformat claims software
+cvar_t* r_swapInterval;
+#ifndef USE_SDL
+cvar_t* r_glDriver;
+#ifdef _WIN32
+cvar_t* r_allowScreenSaver;
+#endif
+#else
+cvar_t* r_sdlDriver;
+cvar_t* r_allowScreenSaver;
+#endif
+cvar_t* r_displayRefresh;
+cvar_t* r_fullscreen;
+cvar_t* r_mode;
+cvar_t* r_modeFullscreen;
+//cvar_t *r_oldMode;
+cvar_t* r_customwidth;
+cvar_t* r_customheight;
+cvar_t* r_customaspect;
+
+cvar_t* r_colorbits;
+// these also shared with renderers:
+cvar_t* cl_stencilbits;
+cvar_t* cl_depthbits;
+cvar_t* cl_drawBuffer;
+
 clientActive_t cl;
 clientConnection_t clc;
 clientStatic_t cls;
@@ -153,6 +184,8 @@ void CL_ServerStatus_f( void );
 void CL_ServerStatusResponse( netadr_t from, msg_t *msg );
 void CL_SaveTranslations_f( void );
 void CL_LoadTranslations_f( void );
+
+static void CL_InitGLimp_Cvars(void);
 
 /*
 ===============
@@ -2928,10 +2961,6 @@ CL_RefMalloc
 void *CL_RefMallocDebug( int size, char *label, char *file, int line ) {
 	return Z_TagMallocDebug( size, TAG_RENDERER, label, file, line );
 }
-#else
-void *CL_RefMalloc( int size ) {
-	return Z_TagMalloc( size, TAG_RENDERER );
-}
 #endif
 
 /*
@@ -2953,73 +2982,206 @@ int CL_ScaledMilliseconds( void ) {
 	return Sys_Milliseconds() * com_timescale->value;
 }
 
+static void Ref_Cmd_RegisterList(const cmdListItem_t* cmds, int count) {
+	Cmd_RegisterList(cmds, count, MODULE_RENDERER);
+}
+
+static void Ref_Cmd_UnregisterModule(void) {
+	Cmd_UnregisterModule(MODULE_RENDERER);
+}
+
+/*
+============
+CL_SetScaling
+
+Sets console chars height
+============
+*/
+static void CL_SetScaling(float factor, int captureWidth, int captureHeight) {
+
+	//if (cls.con_factor != factor) {
+		// rescale console
+	//	con_scale->modified = qtrue;
+	//}
+
+	cls.con_factor = factor;
+
+	// set custom capture resolution
+	cls.captureWidth = captureWidth;
+	cls.captureHeight = captureHeight;
+}
+
+/*
+============
+CL_RefMalloc
+============
+*/
+static void* CL_RefMalloc(int size) {
+	return Z_TagMalloc(size, TAG_RENDERER);
+}
+
+/*
+============
+CL_IsMinimized
+============
+*/
+static qboolean CL_IsMininized(void) {
+	return gw_minimized;
+}
+
 /*
 ============
 CL_InitRef
 ============
 */
 void CL_InitRef( void ) {
-	refimport_t ri;
-	refexport_t *ret;
-
-	Com_Printf( "----- Initializing Renderer ----\n" );
-
-	ri.Cmd_AddCommand = Cmd_AddCommand;
-	ri.Cmd_RemoveCommand = Cmd_RemoveCommand;
-	ri.Cmd_Argc = Cmd_Argc;
-	ri.Cmd_Argv = Cmd_Argv;
-	ri.Cmd_ExecuteText = Cbuf_ExecuteText;
-	ri.Printf = CL_RefPrintf;
-	ri.Error = Com_Error;
-	ri.Milliseconds = CL_ScaledMilliseconds;
-#ifdef ZONE_DEBUG
-	ri.Z_MallocDebug = CL_RefMallocDebug;
-#else
-	ri.Z_Malloc = CL_RefMalloc;
+	refimport_t	rimp;
+	refexport_t* ret;
+#ifdef USE_RENDERER_DLOPEN
+	GetRefAPI_t		GetRefAPI;
+	char			dllName[MAX_OSPATH];
 #endif
-	ri.Free = Z_Free;
-	ri.Tag_Free = CL_RefTagFree;
-	ri.Hunk_Clear = Hunk_ClearToMark;
+
+	CL_InitGLimp_Cvars();
+
+	Com_Printf("----- Initializing Renderer ----\n");
+
+#ifdef USE_RENDERER_DLOPEN
+
+#if defined (__linux__) && id386
+#define REND_ARCH_STRING "x86"
+#else
+#define REND_ARCH_STRING ARCH_STRING
+#endif
+
+	Com_sprintf(dllName, sizeof(dllName), RENDERER_PREFIX "_%s_" REND_ARCH_STRING REN_DLL_EXT, cl_renderer->string);
+	rendererLib = FS_LoadLibrary(dllName);
+	if (!rendererLib)
+	{
+		Cvar_ForceReset("cl_renderer");
+		Com_sprintf(dllName, sizeof(dllName), RENDERER_PREFIX "_%s_" REND_ARCH_STRING REN_DLL_EXT, cl_renderer->string);
+		rendererLib = FS_LoadLibrary(dllName);
+		if (!rendererLib)
+		{
+			Com_Error(ERR_FATAL, "Failed to load renderer %s", dllName);
+		}
+	}
+
+	GetRefAPI = Sys_LoadFunction(rendererLib, "GetRefAPI");
+	if (!GetRefAPI)
+	{
+		Com_Error(ERR_FATAL, "Can't load symbol GetRefAPI");
+		return;
+	}
+
+	cl_renderer->modified = qfalse;
+#endif
+
+	Com_Memset(&rimp, 0, sizeof(rimp));
+
+	rimp.Cmd_AddCommand = Cmd_AddCommand;
+	rimp.Cmd_RemoveCommand = Cmd_RemoveCommand;
+	rimp.Cmd_RegisterList = Ref_Cmd_RegisterList;
+	rimp.Cmd_UnregisterModule = Ref_Cmd_UnregisterModule;
+	rimp.Cmd_Argc = Cmd_Argc;
+	rimp.Cmd_Argv = Cmd_Argv;
+	rimp.Cmd_ExecuteText = Cbuf_ExecuteText;
+	rimp.Printf = CL_RefPrintf;
+	rimp.Error = Com_Error;
+	rimp.Milliseconds = CL_ScaledMilliseconds;
+	//rimp.Microseconds = Sys_Microseconds;
+	rimp.Malloc = CL_RefMalloc;
+	rimp.Free = Z_Free;
+	rimp.Tag_Free = CL_RefTagFree;
+	rimp.Hunk_Clear = Hunk_ClearToMark;
 #ifdef HUNK_DEBUG
-	ri.Hunk_AllocDebug = Hunk_AllocDebug;
+	rimp.Hunk_AllocDebug = Hunk_AllocDebug;
 #else
-	ri.Hunk_Alloc = Hunk_Alloc;
+	rimp.Hunk_Alloc = Hunk_Alloc;
 #endif
-	ri.Hunk_AllocateTempMemory = Hunk_AllocateTempMemory;
-	ri.Hunk_FreeTempMemory = Hunk_FreeTempMemory;
-	ri.CM_DrawDebugSurface = CM_DrawDebugSurface;
-	ri.FS_ReadFile = FS_ReadFile;
-	ri.FS_FreeFile = FS_FreeFile;
-	ri.FS_WriteFile = FS_WriteFile;
-	ri.FS_FreeFileList = FS_FreeFileList;
-	ri.FS_ListFiles = FS_ListFiles;
-	ri.FS_FileIsInPAK = FS_FileIsInPAK;
-	ri.FS_FileExists = FS_FileExists;
-	ri.Cvar_Get = Cvar_Get;
-	ri.Cvar_Set = Cvar_Set;
+	rimp.Hunk_AllocateTempMemory = Hunk_AllocateTempMemory;
+	rimp.Hunk_FreeTempMemory = Hunk_FreeTempMemory;
+
+	rimp.CM_ClusterPVS = CM_ClusterPVS;
+	rimp.CM_DrawDebugSurface = CM_DrawDebugSurface;
+
+	rimp.FS_ReadFile = FS_ReadFile;
+	rimp.FS_FreeFile = FS_FreeFile;
+	rimp.FS_WriteFile = FS_WriteFile;
+	rimp.FS_FreeFileList = FS_FreeFileList;
+	rimp.FS_ListFiles = FS_ListFiles;
+	//rimp.FS_ListFilesEx = FS_ListFilesEx;
+	//rimp.FS_FileIsInPAK = FS_FileIsInPAK;
+	rimp.FS_FileExists = FS_FileExists;
+	//rimp.FS_GetCurrentGameDir = FS_GetCurrentGameDir;
+	//rimp.CL_CurrentGameMod = CL_CurrentGameMod;
+
+	rimp.Cvar_Get = Cvar_Get;
+	rimp.Cvar_Set = Cvar_Set;
+	rimp.Cvar_SetValue = Cvar_SetValue;
+	rimp.Cvar_CheckRange = Cvar_CheckRange;
+	rimp.Cvar_SetDescription = Cvar_SetDescription;
+	rimp.Cvar_VariableStringBuffer = Cvar_VariableStringBuffer;
+	rimp.Cvar_VariableString = Cvar_VariableString;
+	rimp.Cvar_VariableIntegerValue = Cvar_VariableIntegerValue;
+
+	rimp.Cvar_SetGroup = Cvar_SetGroup;
+	rimp.Cvar_CheckGroup = Cvar_CheckGroup;
+	rimp.Cvar_ResetGroup = Cvar_ResetGroup;
 
 	// cinematic stuff
 
-	ri.CIN_UploadCinematic = CIN_UploadCinematic;
-	ri.CIN_PlayCinematic = CIN_PlayCinematic;
-	ri.CIN_RunCinematic = CIN_RunCinematic;
+	rimp.CIN_UploadCinematic = CIN_UploadCinematic;
+	rimp.CIN_PlayCinematic = CIN_PlayCinematic;
+	rimp.CIN_RunCinematic = CIN_RunCinematic;
 
-	ret = GetRefAPI( REF_API_VERSION, &ri );
+	//rimp.CL_WriteAVIVideoFrame = CL_WriteAVIVideoFrame;
+	rimp.CL_SaveJPGToBuffer = CL_SaveJPGToBuffer;
+	rimp.CL_SaveJPG = CL_SaveJPG;
+	rimp.CL_LoadJPG = CL_LoadJPG;
 
-#if 0 // MrE defined __USEA3D && defined __A3D_GEOM
-	hA3Dg_ExportRenderGeom( ret );
+	rimp.CL_IsMinimized = CL_IsMininized;
+	rimp.CL_SetScaling = CL_SetScaling;
+	rimp.SCR_UpdateScreen = SCR_UpdateScreen;
+
+	//rimp.Sys_SetClipboardBitmap = Sys_SetClipboardBitmap;
+	rimp.Sys_LowPhysicalMemory = Sys_LowPhysicalMemory;
+	//rimp.Sys_OmnibotRender = Sys_OmnibotRender;
+	rimp.Com_RealTime = Com_RealTime;
+	rimp.Com_Filter = Com_Filter;
+	rimp.MSG_HashKey = MSG_HashKey;
+
+	rimp.GLimp_InitGamma = GLimp_InitGamma;
+	rimp.GLimp_SetGamma = GLimp_SetGamma;
+	// OpenGL API
+#ifdef USE_OPENGL_API
+	rimp.GLimp_Init = GLimp_Init;
+	rimp.GLimp_Shutdown = GLimp_Shutdown;
+	rimp.GL_GetProcAddress = GL_GetProcAddress;
+	rimp.GLimp_EndFrame = GLimp_EndFrame;
+	rimp.GLimp_NormalFontBase = GLimp_NormalFontBase;
 #endif
 
-	Com_Printf( "-------------------------------\n" );
+	// Vulkan API
+#ifdef USE_VULKAN_API
+	rimp.VKimp_Init = VKimp_Init;
+	rimp.VKimp_Shutdown = VKimp_Shutdown;
+	rimp.VK_GetInstanceProcAddr = VK_GetInstanceProcAddr;
+	rimp.VK_CreateSurface = VK_CreateSurface;
+#endif
 
-	if ( !ret ) {
-		Com_Error( ERR_FATAL, "Couldn't initialize refresh" );
+	ret = GetRefAPI(REF_API_VERSION, &rimp);
+
+	Com_Printf("-------------------------------\n");
+
+	if (!ret) {
+		Com_Error(ERR_FATAL, "Couldn't initialize refresh");
 	}
 
 	re = *ret;
 
-	// unpause so the cgame definately gets a snapshot and renders a frame
-	Cvar_Set( "cl_paused", "0" );
+	// unpause so the cgame definitely gets a snapshot and renders a frame
+	Cvar_Set("cl_paused", "0");
 }
 
 /*
@@ -5103,3 +5265,171 @@ void CL_ActionGenerateTime(qboolean useFixedTime) {
 
 	cl.handle.actionTime = cl.serverTime + time;
 }
+
+/*
+** CL_GetModeInfo
+*/
+typedef struct vidmode_s
+{
+	const char* description;
+	int			width, height;
+	float		pixelAspect;		// pixel width / height
+} vidmode_t;
+
+static const vidmode_t cl_vidModes[] =
+{
+	{ "Mode  0: 320x240",			320,	240,	1 },
+	{ "Mode  1: 400x300",			400,	300,	1 },
+	{ "Mode  2: 512x384",			512,	384,	1 },
+	{ "Mode  3: 640x480",			640,	480,	1 },
+	{ "Mode  4: 800x600",			800,	600,	1 },
+	{ "Mode  5: 960x720",			960,	720,	1 },
+	{ "Mode  6: 1024x768",			1024,	768,	1 },
+	{ "Mode  7: 1152x864",			1152,	864,	1 },
+	{ "Mode  8: 1280x1024 (5:4)",	1280,	1024,	1 },
+	{ "Mode  9: 1600x1200",			1600,	1200,	1 },
+	{ "Mode 10: 2048x1536",			2048,	1536,	1 },
+	{ "Mode 11: 856x480 (wide)",	856,	480,	1 },
+	// extra modes:
+	{ "Mode 12: 1280x960",			1280,	960,	1 },
+	{ "Mode 13: 1280x720",			1280,	720,	1 },
+	{ "Mode 14: 1280x800 (16:10)",	1280,	800,	1 },
+	{ "Mode 15: 1366x768",			1366,	768,	1 },
+	{ "Mode 16: 1440x900 (16:10)",	1440,	900,	1 },
+	{ "Mode 17: 1600x900",			1600,	900,	1 },
+	{ "Mode 18: 1680x1050 (16:10)",	1680,	1050,	1 },
+	{ "Mode 19: 1920x1080",			1920,	1080,	1 },
+	{ "Mode 20: 1920x1200 (16:10)",	1920,	1200,	1 },
+	{ "Mode 21: 2560x1080 (21:9)",	2560,	1080,	1 },
+	{ "Mode 22: 3440x1440 (21:9)",	3440,	1440,	1 },
+	{ "Mode 23: 3840x2160 (4K UHD)",3840,	2160,	1 },
+	{ "Mode 24: 4096x2160 (4K)",	4096,	2160,	1 }
+};
+static const int s_numVidModes = ARRAY_LEN(cl_vidModes);
+
+qboolean CL_GetModeInfo(int* width, int* height, float* windowAspect, int mode, const char* modeFS, int dw, int dh, qboolean fullscreen)
+{
+	const	vidmode_t* vm;
+	float	pixelAspect;
+
+	// set dedicated fullscreen mode
+	if (fullscreen && *modeFS)
+		mode = atoi(modeFS);
+
+	if (mode < -2)
+		return qfalse;
+
+	if (mode >= s_numVidModes)
+		return qfalse;
+
+	// fix unknown desktop resolution
+	if (mode == -2 && (dw == 0 || dh == 0))
+		mode = 3; // 640x480
+
+	if (mode == -2) { // desktop resolution
+		*width = dw;
+		*height = dh;
+		pixelAspect = r_customaspect->value;
+	}
+	else if (mode == -1) { // custom resolution
+		*width = r_customwidth->integer;
+		*height = r_customheight->integer;
+		pixelAspect = r_customaspect->value;
+	}
+	else { // predefined resolution
+		vm = &cl_vidModes[mode];
+		*width = vm->width;
+		*height = vm->height;
+		pixelAspect = vm->pixelAspect;
+	}
+
+	*windowAspect = (float)*width / (*height * pixelAspect);
+
+	return qtrue;
+}
+
+
+
+static void CL_InitGLimp_Cvars(void)
+{
+	// shared with GLimp
+	r_allowSoftwareGL = Cvar_Get("r_allowSoftwareGL", "0", CVAR_LATCH);
+	Cvar_SetDescription(r_allowSoftwareGL, "Toggle the use of the default software OpenGL driver supplied by the Operating System");
+	r_swapInterval = Cvar_Get("r_swapInterval", "0", CVAR_ARCHIVE_ND);
+	Cvar_SetDescription(r_swapInterval, "V-blanks to wait before swapping buffers\n 0: No V-Sync\n 1: Synced to the monitor's refresh rate");
+#ifndef USE_SDL
+	r_glDriver = Cvar_Get("r_glDriver", OPENGL_DRIVER_NAME, CVAR_ARCHIVE_ND | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_SetDescription(r_glDriver, "Specifies the OpenGL driver to use, will revert back to default if driver name set is invalid");
+#ifdef _WIN32
+	r_allowScreenSaver = Cvar_Get("r_allowScreenSaver", "0", CVAR_ARCHIVE_ND | CVAR_UNSAFE);
+	Cvar_SetDescription(r_allowScreenSaver, "Allow screen to sleep while the game is running");
+#endif
+#else
+	r_sdlDriver = Cvar_Get("r_sdlDriver", "", CVAR_ARCHIVE_ND | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_SetDescription(r_sdlDriver, "Override hint to SDL which video driver to use, example \"x11\" or \"wayland\"");
+	r_allowScreenSaver = Cvar_Get("r_allowScreenSaver", "0", CVAR_ARCHIVE_ND | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_SetDescription(r_allowScreenSaver, "Allow screen to sleep while the game is running, requires full restart");
+#endif
+
+	r_displayRefresh = Cvar_Get("r_displayRefresh", "0", CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_CheckRange(r_displayRefresh, "0", "1000", CV_INTEGER);
+	Cvar_SetDescription(r_displayRefresh, "Override monitor refresh rate in fullscreen mode:\n  0 - use current monitor refresh rate\n >0 - use custom refresh rate");
+
+	vid_xpos = Cvar_Get("vid_xpos", "3", CVAR_ARCHIVE);
+	vid_ypos = Cvar_Get("vid_ypos", "22", CVAR_ARCHIVE);
+	Cvar_CheckRange(vid_xpos, NULL, NULL, CV_INTEGER);
+	Cvar_CheckRange(vid_ypos, NULL, NULL, CV_INTEGER);
+	Cvar_SetDescription(vid_xpos, "Saves/Sets window X-coordinate when windowed, requires \\vid_restart");
+	Cvar_SetDescription(vid_ypos, "Saves/Sets window Y-coordinate when windowed, requires \\vid_restart");
+
+	r_noborder = Cvar_Get("r_noborder", "0", CVAR_ARCHIVE_ND | CVAR_LATCH);
+	Cvar_CheckRange(r_noborder, "0", "1", CV_INTEGER);
+	Cvar_SetDescription(r_noborder, "Setting to 1 will remove window borders and title bar in windowed mode, hold ALT to drag & drop it with opened console");
+
+	r_mode = Cvar_Get("r_mode", "-2", CVAR_ARCHIVE | CVAR_LATCH);
+	r_modeFullscreen = Cvar_Get("r_modeFullscreen", "-2", CVAR_ARCHIVE | CVAR_LATCH);
+	/*r_oldMode =*/ Cvar_Get("r_oldMode", "", CVAR_ARCHIVE | CVAR_NOTABCOMPLETE);                             // ydnar: previous "good" video mode
+	Cvar_CheckRange(r_mode, "-2", va("%i", s_numVidModes - 1), CV_INTEGER);
+	Cvar_SetDescription(r_mode, "Set video mode:\n -2 - use current desktop resolution\n -1 - use \\r_customWidth and \\r_customHeight\n  0..N - enter \\modelist for details");
+	Cvar_SetDescription(r_modeFullscreen, "Dedicated fullscreen mode, set to \"\" to use \\r_mode in all cases");
+
+	r_fullscreen = Cvar_Get("r_fullscreen", "1", CVAR_ARCHIVE | CVAR_LATCH);
+	Cvar_SetDescription(r_fullscreen, "Fullscreen mode. Set to 0 for windowed mode");
+	r_customaspect = Cvar_Get("r_customAspect", "1", CVAR_ARCHIVE_ND | CVAR_LATCH);
+	r_customwidth = Cvar_Get("r_customWidth", "1280", CVAR_ARCHIVE | CVAR_LATCH);
+	r_customheight = Cvar_Get("r_customHeight", "720", CVAR_ARCHIVE | CVAR_LATCH);
+	Cvar_CheckRange(r_customaspect, "0.001", NULL, CV_FLOAT); // check better ranges
+	Cvar_CheckRange(r_customwidth, "4", NULL, CV_INTEGER);
+	Cvar_CheckRange(r_customheight, "4", NULL, CV_INTEGER);
+	Cvar_SetDescription(r_customaspect, "Enables custom aspect of the screen, with \\r_mode -1");
+	Cvar_SetDescription(r_customwidth, "Custom width to use with \\r_mode -1");
+	Cvar_SetDescription(r_customheight, "Custom height to use with \\r_mode -1");
+
+	r_colorbits = Cvar_Get("r_colorbits", "0", CVAR_ARCHIVE_ND | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_CheckRange(r_colorbits, "0", "32", CV_INTEGER);
+	Cvar_SetDescription(r_colorbits, "Sets color bit depth, set to 0 to use desktop settings");
+
+	// shared with renderer:
+	cl_stencilbits = Cvar_Get("r_stencilbits", "8", CVAR_ARCHIVE_ND | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_CheckRange(cl_stencilbits, "0", "8", CV_INTEGER);
+	Cvar_SetDescription(cl_stencilbits, "Stencil buffer size, value decreases Z-buffer depth");
+	cl_depthbits = Cvar_Get("r_depthbits", "0", CVAR_ARCHIVE_ND | CVAR_LATCH | CVAR_UNSAFE);
+	Cvar_CheckRange(cl_depthbits, "0", "32", CV_INTEGER);
+	Cvar_SetDescription(cl_depthbits, "Sets precision of Z-buffer");
+
+	cl_drawBuffer = Cvar_Get("r_drawBuffer", "GL_BACK", CVAR_CHEAT);
+	Cvar_SetDescription(cl_drawBuffer, "Specifies buffer to draw from: GL_FRONT or GL_BACK");
+#ifdef USE_RENDERER_DLOPEN
+#ifdef RENDERER_DEFAULT
+	cl_renderer = Cvar_Get("cl_renderer", XSTRING(RENDERER_DEFAULT), CVAR_ARCHIVE | CVAR_LATCH);
+#else
+	cl_renderer = Cvar_Get("cl_renderer", "opengl", CVAR_ARCHIVE | CVAR_LATCH);
+#endif
+	Cvar_SetDescription(cl_renderer, "Sets your desired renderer, requires \\vid_restart.");
+
+	if (!isValidRenderer(cl_renderer->string)) {
+		Cvar_ForceReset("cl_renderer");
+	}
+#endif
+}
+

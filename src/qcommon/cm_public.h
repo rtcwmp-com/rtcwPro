@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "qfiles.h"
 
-#include "../cgame/tr_types.h"
+#include "../renderercommon/tr_types.h"
 
 void        CM_LoadMap( const char *name, qboolean clientload, int *checksum );
 void        CM_ClearMap( void );

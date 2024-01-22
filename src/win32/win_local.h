@@ -54,6 +54,15 @@ extern "C" {
 #endif
 #endif  ///// (SA) DOOMSOUND
 
+#define T TEXT
+#ifdef UNICODE
+	LPWSTR AtoW(const char* s);
+	const char* WtoA(const LPWSTR s);
+#else
+#define AtoW(S) (S)
+#define WtoA(S) (S)
+#endif
+
 void    IN_MouseEvent( int mstate );
 
 void Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
@@ -81,6 +90,9 @@ void    IN_Activate( qboolean active );
 void    IN_Frame( void );
 
 void	IN_RawInput_MouseRead(HANDLE in_device_handle); // RTCWPro - raw input
+void	UpdateMonitorInfo(const RECT* target);
+
+void GLW_RestoreGamma(void);
 
 // window procedure
 LONG WINAPI MainWndProc(
@@ -96,27 +108,53 @@ int  SNDDMA_InitDS();
 
 typedef struct
 {
-
-	HINSTANCE reflib_library;           // Handle to refresh DLL
-	qboolean reflib_active;
-
-	HWND hWnd;
-	HINSTANCE hInstance;
-	qboolean activeApp;
-	qboolean isMinimized;
-	OSVERSIONINFO osversion;
-
-	int noborder; // rtcwpro - borderless window
+	HWND			hWnd;
+	HINSTANCE		hInstance;
+	int				borderless;
 
 	// when we get a windows message, we store the time off so keyboard processing
 	// can know the exact time of an event
-	unsigned sysMsgTime;
+	unsigned		sysMsgTime;
+
+	// Multi-monitor tracking
+	RECT			conRect;
+	RECT			winRect;
+	qboolean		winRectValid;
+
+	int raw_mx;
+	int raw_my;
+
+	POINT mouse;
+
 } WinVars_t;
 
 extern WinVars_t g_wv;
 
-#define WINDOW_STYLE_NORMAL			(WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_VISIBLE) // rtcwpro - originally WINDOW_STYLE, moved from win_glimp
-#define	WINDOW_STYLE_NOBORDER       (WS_VISIBLE | WS_POPUP) // rtcwpro - borderless window
+//#define WINDOW_STYLE_NORMAL			(WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_VISIBLE) // rtcwpro - originally WINDOW_STYLE, moved from win_glimp
+//#define	WINDOW_STYLE_NOBORDER       (WS_VISIBLE | WS_POPUP) // rtcwpro - borderless window
+
+#define	WINDOW_STYLE_NORMAL          (WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_SYSMENU|WS_CAPTION|WS_MINIMIZEBOX|WS_BORDER)
+#define	WINDOW_STYLE_NORMAL_NB       (WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_POPUP)
+#define	WINDOW_ESTYLE_NORMAL         (0)
+#define	WINDOW_STYLE_FULLSCREEN      (WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS|WS_POPUP)
+#define	WINDOW_ESTYLE_FULLSCREEN     (0)
+#define	WINDOW_STYLE_FULLSCREEN_MIN  (WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS)
+#define	WINDOW_ESTYLE_FULLSCREEN_MIN (0)
+
+#define HK_MOD_ALT		0x00100
+#define HK_MOD_CONTROL  0x00200
+#define HK_MOD_SHIFT	0x00400
+#define HK_MOD_WIN		0x00800
+#define HK_MOD_MASK		0x00F00
+#define HK_MOD_LALT		0x01000
+#define HK_MOD_RALT		0x02000
+#define HK_MOD_LCONTROL	0x04000
+#define HK_MOD_RCONTROL	0x08000
+#define HK_MOD_LSHIFT	0x10000
+#define HK_MOD_RSHIFT	0x20000
+#define HK_MOD_LWIN		0x40000
+#define HK_MOD_RWIN		0x80000
+#define HK_MOD_XMASK	0xFF000
 
 #ifdef DOOMSOUND    ///// (SA) DOOMSOUND
 #ifdef __cplusplus

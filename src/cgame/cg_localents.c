@@ -1057,14 +1057,14 @@ void CG_AddClientCritter( localEntity_t *le ) {
 
 		le->refEntity.customShader = cgs.media.onFireShader2;
 		trap_R_AddRefEntityToScene( &le->refEntity );
-		le->refEntity.shaderTime = 1434;
+		le->refEntity.shaderTime.i = 1434;
 		trap_R_AddRefEntityToScene( &le->refEntity );
 //		le->refEntity.customShader = cgs.media.onFireShader;
 //		le->refEntity.shaderTime = 0;
 //		trap_R_AddRefEntityToScene( &le->refEntity );
 
 		le->refEntity.customShader = 0;
-		le->refEntity.shaderTime = 0;
+		le->refEntity.shaderTime.f = 0;
 /*
 		// drop a dlight
 		lightSize = 1.0 + 0.2*(sin(1.0*cg.time/50.0) * cos(1.0*cg.time/43.0));

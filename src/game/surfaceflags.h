@@ -84,7 +84,7 @@ If you have questions concerning this license or the applicable additional terms
 #define SURF_NOIMPACT           0x10    // don't make missile explosions
 #define SURF_NOMARKS            0x20    // don't leave missile marks
 //#define	SURF_FLESH			0x40	// make flesh sounds and effects
-#define SURF_CERAMIC            0x40    // out of surf's, so replacing unused 'SURF_FLESH'
+#define SURF_SPLASH             0x00000040  // out of surf's, so replacing unused 'SURF_FLESH' - and as SURF_CERAMIC wasn't used, it's now SURF_SPLASH
 #define SURF_NODRAW             0x80    // don't generate a drawsurface at all
 #define SURF_HINT               0x100   // make a primary bsp splitter
 #define SURF_SKIP               0x200   // completely ignore, allowing non-closed brushes

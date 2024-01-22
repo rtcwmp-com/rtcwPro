@@ -893,7 +893,7 @@ int CL_UISystemCalls( int *args ) {
 		return 0;
 
 	case UI_R_ADDREFENTITYTOSCENE:
-		re.AddRefEntityToScene( VMA( 1 ) );
+		re.AddRefEntityToScene( VMA( 1 ), qfalse);
 		return 0;
 
 	case UI_R_ADDPOLYTOSCENE:
@@ -907,7 +907,8 @@ int CL_UISystemCalls( int *args ) {
 		// done.
 
 	case UI_R_ADDLIGHTTOSCENE:
-		re.AddLightToScene( VMA( 1 ), VMF( 2 ), VMF( 3 ), VMF( 4 ), VMF( 5 ), args[6] );
+		//re.AddLightToScene( VMA( 1 ), VMF( 2 ), VMF( 3 ), VMF( 4 ), VMF( 5 ), args[6] );
+		re.AddLightToScene(VMA(1), VMF(2), VMF(3), VMF(4), VMF(5), VMF(6), args[7], args[8]);
 		return 0;
 
 	case UI_R_ADDCORONATOSCENE:

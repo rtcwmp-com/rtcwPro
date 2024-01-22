@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #define __UI_LOCAL_H__
 
 #include "../qcommon/q_shared.h"
-#include "../cgame/tr_types.h"
+#include "../renderercommon/tr_types.h"
 #include "ui_public.h"
 #include "keycodes.h"
 #include "../game/bg_public.h"

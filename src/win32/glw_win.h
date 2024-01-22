@@ -33,24 +33,46 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __GLW_WIN_H__
 #define __GLW_WIN_H__
 
+#include <windows.h>
+
 typedef struct
 {
-	WNDPROC wndproc;
+	qboolean	isattached;
+	HMODULE		handle;
+} steamoverlay_t;
 
-	HDC hDC;                // handle to device context
-	HGLRC hGLRC;            // handle to GL rendering context
+typedef struct
+{
+	HDC     hDC;			// handle to device context
+	HGLRC   hGLRC;			// handle to GL rendering context
 
-	HINSTANCE hinstOpenGL;  // HINSTANCE for the OpenGL library
+	HINSTANCE   OpenGLLib;  // HINSTANCE for the OpenGL library
+	HINSTANCE   VulkanLib;  // HINSTANCE for the Vulkan library
 
-	qboolean allowdisplaydepthchange;
-	qboolean pixelFormatSet;
+	qboolean	pixelFormatSet;
 
-	int desktopBitsPixel;
-	int desktopWidth, desktopHeight;
+	int			desktopBitsPixel;
+	int			desktopWidth;
+	int			desktopHeight;
+	int			desktopX;		// can be negative
+	int			desktopY;		// can be negative
 
-	qboolean cdsFullscreen;
+	RECT		workArea;
 
-	FILE *log_fp;
+	HMONITOR	hMonitor;		// current monitor
+	TCHAR		displayName[CCHDEVICENAME];
+	qboolean	deviceSupportsGamma;
+	qboolean	gammaSet;
+
+	qboolean	cdsFullscreen;
+	int			monitorCount;
+
+	FILE* log_fp;	// TODO: implement?
+
+	glconfig_t* config;	// feedback to renderer module
+
+	steamoverlay_t	overlay;
+
 } glwstate_t;
 
 extern glwstate_t glw_state;

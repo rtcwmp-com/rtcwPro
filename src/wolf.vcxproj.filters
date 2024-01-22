@@ -238,6 +238,18 @@
     <ClCompile Include="client\cl_demo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="win32\win_glimp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\win_gamma.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\win_qvk.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client\cl_jpeg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -373,6 +385,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="qcommon\q_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="win32\glw_win.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\q_platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

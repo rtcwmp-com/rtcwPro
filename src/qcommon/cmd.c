@@ -313,9 +313,12 @@ void Cmd_Echo_f( void ) {
 
 typedef struct cmd_function_s
 {
-	struct cmd_function_s   *next;
-	char                    *name;
-	xcommand_t function;
+	struct cmd_function_s* next;
+	char* name;
+	xcommand_t				function;
+	xcommandCompFunc_t		complete;
+	module_t				init_module;
+	uint32_t				modules;
 } cmd_function_t;
 
 
@@ -760,3 +763,89 @@ void Cmd_Init( void ) {
 	Cmd_AddCommand( "wait", Cmd_Wait_f );
 }
 
+/*
+============
+Cmd_FindCommand
+============
+*/
+static cmd_function_t* Cmd_FindCommand(const char* cmd_name)
+{
+	cmd_function_t* cmd;
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+		if (!Q_stricmp(cmd_name, cmd->name))
+			return cmd;
+	return NULL;
+}
+
+void Cmd_SetModule(const char* cmd_name, module_t module) {
+	cmd_function_t* cmd = Cmd_FindCommand(cmd_name);
+	if (!cmd)
+		return;
+
+	cmd->modules |= (1u << (uint32_t)module);
+	if (cmd->init_module == MODULE_NONE)
+		cmd->init_module = module;
+}
+
+/*
+============
+Cmd_SetCommandCompletionFunc
+============
+*/
+void Cmd_SetCommandCompletionFunc(const char* command, xcommandCompFunc_t complete) {
+	cmd_function_t* cmd = Cmd_FindCommand(command);
+
+	if (cmd) {
+		cmd->complete = complete;
+	}
+}
+
+
+void Cmd_RegisterList(const cmdListItem_t* cmds, int count, module_t module) {
+	int i;
+	for (i = 0; i < count; i++) {
+		const cmdListItem_t* item = &cmds[i];
+
+		Cmd_AddCommand(item->name, item->func);
+
+		if (item->complete)
+			Cmd_SetCommandCompletionFunc(item->name, item->complete);
+
+		Cmd_SetModule(item->name, module);
+	}
+}
+
+
+void Cmd_UnregisterList(const cmdListItem_t* cmds, int count) {
+	int i;
+	for (i = 0; i < count; i++) {
+		Cmd_RemoveCommand(cmds[i].name);
+	}
+}
+
+void Cmd_UnregisterModule(module_t module) {
+	if (module <= MODULE_NONE || module >= MODULE_COUNT)
+		return;
+
+	cmd_function_t* cmd = cmd_functions;
+	while (cmd) {
+		if (cmd->init_module == module && cmd->modules == (1u << (uint32_t)module)) {
+			cmd_function_t* next = cmd->next;
+			Cmd_RemoveCommand(cmd->name);
+			cmd = next;
+		}
+		else {
+			cmd = cmd->next;
+		}
+	}
+}
+
+/*
+============
+Cmd_Clear
+============
+*/
+void Cmd_Clear(void) {
+	cmd_cmd[0] = '\0';
+	cmd_argc = 0;
+}

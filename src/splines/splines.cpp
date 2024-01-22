@@ -107,6 +107,7 @@ idCameraDef *g_splineList = &splineList;
 
 idVec3 idSplineList::zero( 0,0,0 );
 
+#ifdef ENABLE_DRAWING
 void glLabeledPoint( idVec3 &color, idVec3 &point, float size, const char *label ) {
 	qglColor3fv( color );
 	qglPointSize( size );
@@ -157,6 +158,7 @@ void glBox( idVec3 &color, idVec3 &point, float size ) {
 	qglEnd();
 
 }
+#endif
 
 void splineTest() {
 	//g_splineList->load("p:/doom/base/maps/test_base1.camera");
@@ -255,6 +257,7 @@ void idSplineList::buildSpline() {
 
 
 void idSplineList::draw( bool editMode ) {
+#ifdef ENABLE_DRAWING
 	int i;
 	idVec4 yellow( 1, 1, 0, 1 );
 
@@ -307,7 +310,7 @@ void idSplineList::draw( bool editMode ) {
 			glBox( yellow, *splinePoints[activeSegment], 8 );
 		}
 	}
-
+#endif
 }
 
 float idSplineList::totalDistance() {

@@ -4016,3 +4016,51 @@ qbool FS_IsZipFile(fileHandle_t f)
 
 	return fsh[f].zipFile;
 }
+
+/*
+=================
+FS_AllowedExtension
+=================
+*/
+qboolean FS_AllowedExtension(const char* fileName, qboolean allowPk3s, const char** ext)
+{
+	static const char* extlist[] = { "dll", "exe", "so", "dylib", "qvm", "pk3" };
+	const char* e;
+	int i, n;
+
+	e = strrchr(fileName, '.');
+
+	// check for unix '.so.[0-9]' pattern
+	if (e >= (fileName + 3) && *(e + 1) >= '0' && *(e + 1) <= '9' && *(e + 2) == '\0')
+	{
+		if (*(e - 3) == '.' && (*(e - 2) == 's' || *(e - 2) == 'S') && (*(e - 1) == 'o' || *(e - 1) == 'O'))
+		{
+			if (ext)
+			{
+				*ext = (e - 2);
+			}
+			return qfalse;
+		}
+	}
+	if (!e)
+		return qtrue;
+
+	e++; // skip '.'
+
+	if (allowPk3s)
+		n = ARRAY_LEN(extlist) - 1;
+	else
+		n = ARRAY_LEN(extlist);
+
+	for (i = 0; i < n; i++)
+	{
+		if (Q_stricmp(e, extlist[i]) == 0)
+		{
+			if (ext)
+				*ext = e;
+			return qfalse;
+		}
+	}
+
+	return qtrue;
+}

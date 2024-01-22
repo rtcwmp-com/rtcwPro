@@ -1,80 +1,82 @@
 /*
 ===========================================================================
 
-Return to Castle Wolfenstein multiplayer GPL Source Code
+Wolfenstein: Enemy Territory GPL Source Code
 Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Wolfenstein: Enemy Territory GPL Source Code (Wolf ET Source Code).  
 
-RTCW MP Source Code is free software: you can redistribute it and/or modify
+Wolf ET Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-RTCW MP Source Code is distributed in the hope that it will be useful,
+Wolf ET Source Code is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with RTCW MP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+along with Wolf ET Source Code.  If not, see <http://www.gnu.org/licenses/>.
 
-In addition, the RTCW MP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW MP Source Code.  If not, please request a copy in writing from id Software at the address below.
+In addition, the Wolf: ET Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Wolf ET Source Code.  If not, please request a copy in writing from id Software at the address below.
 
 If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
 
 ===========================================================================
 */
-
 #include "tr_local.h"
-
-volatile renderCommandList_t    *renderCommandList;
-
-volatile qboolean renderThreadActive;
-
 
 /*
 =====================
 R_PerformanceCounters
 =====================
 */
-void R_PerformanceCounters( void ) {
+static void R_PerformanceCounters( void ) {
 	if ( !r_speeds->integer ) {
 		// clear the counters even if we aren't printing
-		memset( &tr.pc, 0, sizeof( tr.pc ) );
-		memset( &backEnd.pc, 0, sizeof( backEnd.pc ) );
+		Com_Memset( &tr.pc, 0, sizeof( tr.pc ) );
+		Com_Memset( &backEnd.pc, 0, sizeof( backEnd.pc ) );
 		return;
 	}
 
-	if ( r_speeds->integer == 1 ) {
+	/*if ( r_speeds->integer )*/ { //%	== 1)
 		ri.Printf( PRINT_ALL, "%i/%i shaders/surfs %i leafs %i verts %i/%i tris %.2f mtex %.2f dc\n",
 				   backEnd.pc.c_shaders, backEnd.pc.c_surfaces, tr.pc.c_leafs, backEnd.pc.c_vertexes,
 				   backEnd.pc.c_indexes / 3, backEnd.pc.c_totalIndexes / 3,
 				   R_SumOfUsedImages() / ( 1000000.0f ), backEnd.pc.c_overDraw / (float)( glConfig.vidWidth * glConfig.vidHeight ) );
-	} else if ( r_speeds->integer == 2 ) {
+	}
+
+	if ( r_speeds->integer == 2 ) {
 		ri.Printf( PRINT_ALL, "(patch) %i sin %i sclip  %i sout %i bin %i bclip %i bout\n",
 				   tr.pc.c_sphere_cull_patch_in, tr.pc.c_sphere_cull_patch_clip, tr.pc.c_sphere_cull_patch_out,
 				   tr.pc.c_box_cull_patch_in, tr.pc.c_box_cull_patch_clip, tr.pc.c_box_cull_patch_out );
 		ri.Printf( PRINT_ALL, "(md3) %i sin %i sclip  %i sout %i bin %i bclip %i bout\n",
 				   tr.pc.c_sphere_cull_md3_in, tr.pc.c_sphere_cull_md3_clip, tr.pc.c_sphere_cull_md3_out,
 				   tr.pc.c_box_cull_md3_in, tr.pc.c_box_cull_md3_clip, tr.pc.c_box_cull_md3_out );
-	} else if ( r_speeds->integer == 3 ) {
+		ri.Printf( PRINT_ALL, "(gen) %i sin %i sout %i pin %i pout\n",
+				   tr.pc.c_sphere_cull_in, tr.pc.c_sphere_cull_out,
+				   tr.pc.c_plane_cull_in, tr.pc.c_plane_cull_out );
+	} else if ( r_speeds->integer == 3 )     {
 		ri.Printf( PRINT_ALL, "viewcluster: %i\n", tr.viewCluster );
-	} else if ( r_speeds->integer == 4 ) {
+	} else if ( r_speeds->integer == 4 )     {
 		if ( backEnd.pc.c_dlightVertexes ) {
 			ri.Printf( PRINT_ALL, "dlight srf:%i  culled:%i  verts:%i  tris:%i\n",
 					   tr.pc.c_dlightSurfaces, tr.pc.c_dlightSurfacesCulled,
 					   backEnd.pc.c_dlightVertexes, backEnd.pc.c_dlightIndexes / 3 );
 		}
 	}
-//----(SA)	this is unnecessary since it will always show 2048.  I moved this to where it is accurate for the world
-//	else if (r_speeds->integer == 5 )
-//	{
-//		ri.Printf( PRINT_ALL, "zFar: %.0f\n", tr.viewParms.zFar );
-//	}
-	else if ( r_speeds->integer == 6 ) {
+	else if (r_speeds->integer == 5 )
+	{
+		ri.Printf( PRINT_ALL, "zFar: %.0f\n", tr.viewParms.zFar );
+	}
+	else if ( r_speeds->integer == 6 )
+	{
 		ri.Printf( PRINT_ALL, "flare adds:%i tests:%i renders:%i\n",
 				   backEnd.pc.c_flareAdds, backEnd.pc.c_flareTests, backEnd.pc.c_flareRenders );
+	} else if ( r_speeds->integer == 7 )    {
+		ri.Printf( PRINT_ALL, "decal projectors: %d test surfs: %d clip surfs: %d decal surfs: %d created: %d\n",
+				   tr.pc.c_decalProjectors, tr.pc.c_decalTestSurfaces, tr.pc.c_decalClipSurfaces, tr.pc.c_decalSurfaces, tr.pc.c_decalSurfacesCreated );
 	}
 
 	memset( &tr.pc, 0, sizeof( tr.pc ) );
@@ -84,134 +86,66 @@ void R_PerformanceCounters( void ) {
 
 /*
 ====================
-R_InitCommandBuffers
-====================
-*/
-void R_InitCommandBuffers( void ) {
-	glConfig.smpActive = qfalse;
-	if ( r_smp->integer ) {
-		ri.Printf( PRINT_ALL, "Trying SMP acceleration...\n" );
-		if ( GLimp_SpawnRenderThread( RB_RenderThread ) ) {
-			ri.Printf( PRINT_ALL, "...succeeded.\n" );
-			glConfig.smpActive = qtrue;
-		} else {
-			ri.Printf( PRINT_ALL, "...failed.\n" );
-		}
-	}
-}
-
-/*
-====================
-R_ShutdownCommandBuffers
-====================
-*/
-void R_ShutdownCommandBuffers( void ) {
-	// kill the rendering thread
-	if ( glConfig.smpActive ) {
-		GLimp_WakeRenderer( NULL );
-		glConfig.smpActive = qfalse;
-	}
-}
-
-/*
-====================
 R_IssueRenderCommands
 ====================
 */
-int c_blockedOnRender;
-int c_blockedOnMain;
+static void R_IssueRenderCommands( void ) {
+	renderCommandList_t	*cmdList;
 
-void R_IssueRenderCommands( qboolean runPerformanceCounters ) {
-	renderCommandList_t *cmdList;
+	cmdList = &backEndData->commands;
 
-	if ( !tr.registered ) {  //DAJ BUGFIX
-		return;
-	}
-	cmdList = &backEndData[tr.smpFrame]->commands;
-	assert( cmdList ); // bk001205
 	// add an end-of-list command
-	*( int * )( cmdList->cmds + cmdList->used ) = RC_END_OF_LIST;
+	*(int *)(cmdList->cmds + cmdList->used) = RC_END_OF_LIST;
 
 	// clear it out, in case this is a sync and not a buffer flip
 	cmdList->used = 0;
 
-	if ( glConfig.smpActive ) {
-		// if the render thread is not idle, wait for it
-		if ( renderThreadActive ) {
-			c_blockedOnRender++;
-			if ( r_showSmp->integer ) {
-				ri.Printf( PRINT_ALL, "R" );
-			}
-		} else {
-			c_blockedOnMain++;
-			if ( r_showSmp->integer ) {
-				ri.Printf( PRINT_ALL, "." );
-			}
-		}
-
-		// sleep until the renderer has completed
-		GLimp_FrontEndSleep();
-	}
-
-	// at this point, the back end thread is idle, so it is ok
-	// to look at it's performance counters
-	if ( runPerformanceCounters ) {
-		R_PerformanceCounters();
+	if ( backEnd.screenshotMask == 0 ) {
+		if ( ri.CL_IsMinimized() )
+			return; // skip backend when minimized
+		if ( backEnd.throttle )
+			return; // or throttled on demand
 	}
 
 	// actually start the commands going
 	if ( !r_skipBackEnd->integer ) {
 		// let it start on the new batch
-		if ( !glConfig.smpActive ) {
-			RB_ExecuteRenderCommands( cmdList->cmds );
-		} else {
-			GLimp_WakeRenderer( cmdList );
-		}
+		RB_ExecuteRenderCommands( cmdList->cmds );
 	}
 }
 
 
 /*
 ====================
-R_SyncRenderThread
+R_IssuePendingRenderCommands
 
 Issue any pending commands and wait for them to complete.
-After exiting, the render thread will have completed its work
-and will remain idle and the main thread is free to issue
-OpenGL calls until R_IssueRenderCommands is called.
 ====================
 */
-void R_SyncRenderThread( void ) {
+void R_IssuePendingRenderCommands( void ) {
 	if ( !tr.registered ) {
 		return;
 	}
-	R_IssueRenderCommands( qfalse );
-
-	if ( !glConfig.smpActive ) {
-		return;
-	}
-	GLimp_FrontEndSleep();
+	R_IssueRenderCommands();
 }
+
 
 /*
 ============
-R_GetCommandBuffer
+R_GetCommandBufferReserved
 
-make sure there is enough command space, waiting on the
-render thread if needed.
+make sure there is enough command space
 ============
 */
-void *R_GetCommandBuffer( int bytes ) {
-	renderCommandList_t *cmdList;
+static void *R_GetCommandBufferReserved( int bytes, int reservedBytes ) {
+	renderCommandList_t	*cmdList;
 
-	if ( !tr.registered ) {  //DAJ BUGFIX
-		return NULL;
-	}
-	cmdList = &backEndData[tr.smpFrame]->commands;
+	cmdList = &backEndData->commands;
+	bytes = PAD(bytes, sizeof(void *));
 
 	// always leave room for the end of list command
-	if ( cmdList->used + bytes + 4 > MAX_RENDER_COMMANDS ) {
-		if ( bytes > MAX_RENDER_COMMANDS - 4 ) {
+	if ( cmdList->used + bytes + sizeof( int ) + reservedBytes > MAX_RENDER_COMMANDS ) {
+		if ( bytes > MAX_RENDER_COMMANDS - sizeof( int ) ) {
 			ri.Error( ERR_FATAL, "R_GetCommandBuffer: bad size %i", bytes );
 		}
 		// if we run out of room, just start dropping commands
@@ -226,12 +160,22 @@ void *R_GetCommandBuffer( int bytes ) {
 
 /*
 =============
-R_AddDrawSurfCmd
-
+R_GetCommandBuffer
+returns NULL if there is not enough space for important commands
 =============
 */
-void    R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs ) {
-	drawSurfsCommand_t  *cmd;
+static void *R_GetCommandBuffer( int bytes ) {
+	return R_GetCommandBufferReserved( bytes, PAD( sizeof( swapBuffersCommand_t ), sizeof(void *) ) );
+}
+
+
+/*
+=============
+R_AddDrawSurfCmd
+=============
+*/
+void R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs ) {
+	drawSurfsCommand_t	*cmd;
 
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
 	if ( !cmd ) {
@@ -254,17 +198,18 @@ RE_SetColor
 Passing NULL will set the color to white
 =============
 */
-void    RE_SetColor( const float *rgba ) {
-	setColorCommand_t   *cmd;
+void RE_SetColor( const float *rgba ) {
+	setColorCommand_t	*cmd;
 
+	if ( !tr.registered ) {
+		return;
+	}
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
 	if ( !cmd ) {
 		return;
 	}
 	cmd->commandId = RC_SET_COLOR;
 	if ( !rgba ) {
-		static float colorWhite[4] = { 1, 1, 1, 1 };
-
 		rgba = colorWhite;
 	}
 
@@ -282,8 +227,11 @@ RE_StretchPic
 */
 void RE_StretchPic( float x, float y, float w, float h,
 					float s1, float t1, float s2, float t2, qhandle_t hShader ) {
-	stretchPicCommand_t *cmd;
+	stretchPicCommand_t	*cmd;
 
+	if ( !tr.registered ) {
+		return;
+	}
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
 	if ( !cmd ) {
 		return;
@@ -300,6 +248,81 @@ void RE_StretchPic( float x, float y, float w, float h,
 	cmd->t2 = t2;
 }
 
+#define MODE_RED_CYAN	1
+#define MODE_RED_BLUE	2
+#define MODE_RED_GREEN	3
+#define MODE_GREEN_MAGENTA 4
+#define MODE_MAX	MODE_GREEN_MAGENTA
+
+static void R_SetColorMode(GLboolean *rgba, stereoFrame_t stereoFrame, int colormode)
+{
+	rgba[0] = rgba[1] = rgba[2] = rgba[3] = GL_TRUE;
+
+	if(colormode > MODE_MAX)
+	{
+		if(stereoFrame == STEREO_LEFT)
+			stereoFrame = STEREO_RIGHT;
+		else if(stereoFrame == STEREO_RIGHT)
+			stereoFrame = STEREO_LEFT;
+
+		colormode -= MODE_MAX;
+	}
+
+	if(colormode == MODE_GREEN_MAGENTA)
+	{
+		if(stereoFrame == STEREO_LEFT)
+			rgba[0] = rgba[2] = GL_FALSE;
+		else if(stereoFrame == STEREO_RIGHT)
+			rgba[1] = GL_FALSE;
+	}
+	else
+	{
+		if(stereoFrame == STEREO_LEFT)
+			rgba[1] = rgba[2] = GL_FALSE;
+		else if(stereoFrame == STEREO_RIGHT)
+		{
+			rgba[0] = GL_FALSE;
+
+			if(colormode == MODE_RED_BLUE)
+				rgba[1] = GL_FALSE;
+			else if(colormode == MODE_RED_GREEN)
+				rgba[2] = GL_FALSE;
+		}
+	}
+}
+
+/*
+=============
+RE_2DPolyies
+=============
+*/
+extern int r_numpolyverts;
+
+void RE_2DPolyies( polyVert_t* verts, int numverts, qhandle_t hShader ) {
+	poly2dCommand_t* cmd;
+
+	if (!tr.registered) {
+		return;
+	}
+
+	if ( r_numpolyverts + numverts > max_polyverts ) {
+		return;
+	}
+
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+
+	cmd->commandId =    RC_2DPOLYS;
+	cmd->verts =        &backEndData->polyVerts[r_numpolyverts];
+	cmd->numverts =     numverts;
+	memcpy( cmd->verts, verts, sizeof( polyVert_t ) * numverts );
+	cmd->shader =       R_GetShaderByHandle( hShader );
+
+	r_numpolyverts += numverts;
+}
+
 
 /*
 =============
@@ -309,6 +332,10 @@ RE_RotatedPic
 void RE_RotatedPic( float x, float y, float w, float h,
 					float s1, float t1, float s2, float t2, qhandle_t hShader, float angle ) {
 	stretchPicCommand_t *cmd;
+
+	if (!tr.registered) {
+		return;
+	}
 
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
 	if ( !cmd ) {
@@ -346,6 +373,10 @@ void RE_StretchPicGradient( float x, float y, float w, float h,
 							float s1, float t1, float s2, float t2, qhandle_t hShader, const float *gradientColor, int gradientType ) {
 	stretchPicCommand_t *cmd;
 
+	if (!tr.registered) {
+		return;
+	}
+
 	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
 	if ( !cmd ) {
 		return;
@@ -362,8 +393,6 @@ void RE_StretchPicGradient( float x, float y, float w, float h,
 	cmd->t2 = t2;
 
 	if ( !gradientColor ) {
-		static float colorWhite[4] = { 1, 1, 1, 1 };
-
 		gradientColor = colorWhite;
 	}
 
@@ -375,6 +404,54 @@ void RE_StretchPicGradient( float x, float y, float w, float h,
 }
 //----(SA)	end
 
+/*
+====================
+RE_SetGlobalFog
+	rgb = colour
+	depthForOpaque is depth for opaque
+
+	the restore flag can be used to restore the original level fog
+	duration can be set to fade over a certain period
+====================
+*/
+void RE_SetGlobalFog( qboolean restore, int duration, float r, float g, float b, float depthForOpaque ) {
+	if ( restore ) {
+		if ( duration > 0 ) {
+			VectorCopy( tr.world->fogs[tr.world->globalFog].shader->fogParms.color, tr.world->globalTransStartFog );
+			tr.world->globalTransStartFog[ 3 ] = tr.world->fogs[tr.world->globalFog].shader->fogParms.depthForOpaque;
+
+			Vector4Copy( tr.world->globalOriginalFog, tr.world->globalTransEndFog );
+
+			tr.world->globalFogTransStartTime = tr.refdef.time;
+			tr.world->globalFogTransEndTime = tr.refdef.time + duration;
+		} else {
+			VectorCopy( tr.world->globalOriginalFog, tr.world->fogs[tr.world->globalFog].shader->fogParms.color );
+			tr.world->fogs[tr.world->globalFog].shader->fogParms.colorInt = ColorBytes4( tr.world->globalOriginalFog[ 0 ] * tr.identityLight,
+																						 tr.world->globalOriginalFog[ 1 ] * tr.identityLight,
+																						 tr.world->globalOriginalFog[ 2 ] * tr.identityLight, 1.0 );
+			tr.world->fogs[tr.world->globalFog].shader->fogParms.depthForOpaque = tr.world->globalOriginalFog[ 3 ];
+			tr.world->fogs[tr.world->globalFog].shader->fogParms.tcScale = 1.0f / ( tr.world->fogs[tr.world->globalFog].shader->fogParms.depthForOpaque );
+		}
+	} else {
+		if ( duration > 0 ) {
+			VectorCopy( tr.world->fogs[tr.world->globalFog].shader->fogParms.color, tr.world->globalTransStartFog );
+			tr.world->globalTransStartFog[ 3 ] = tr.world->fogs[tr.world->globalFog].shader->fogParms.depthForOpaque;
+
+			VectorSet( tr.world->globalTransEndFog, r, g, b );
+			tr.world->globalTransEndFog[ 3 ] = depthForOpaque < 1 ? 1 : depthForOpaque;
+
+			tr.world->globalFogTransStartTime = tr.refdef.time;
+			tr.world->globalFogTransEndTime = tr.refdef.time + duration;
+		} else {
+			VectorSet( tr.world->fogs[tr.world->globalFog].shader->fogParms.color, r, g, b );
+			tr.world->fogs[tr.world->globalFog].shader->fogParms.colorInt = ColorBytes4( r * tr.identityLight,
+																						 g * tr.identityLight,
+																						 b * tr.identityLight, 1.0 );
+			tr.world->fogs[tr.world->globalFog].shader->fogParms.depthForOpaque = depthForOpaque < 1 ? 1 : depthForOpaque;
+			tr.world->fogs[tr.world->globalFog].shader->fogParms.tcScale = 1.0f / ( tr.world->fogs[tr.world->globalFog].shader->fogParms.depthForOpaque );
+		}
+	}
+}
 
 /*
 ====================
@@ -385,113 +462,28 @@ for each RE_EndFrame
 ====================
 */
 void RE_BeginFrame( stereoFrame_t stereoFrame ) {
-	drawBufferCommand_t *cmd;
+	drawBufferCommand_t	*cmd = NULL;
+	colorMaskCommand_t *colcmd = NULL;
+	clearColorCommand_t *clrcmd = NULL;
 
 	if ( !tr.registered ) {
 		return;
 	}
+
 	glState.finishCalled = qfalse;
 
 	tr.frameCount++;
 	tr.frameSceneNum = 0;
 
-	//
-	// do overdraw measurement
-	//
-	if ( r_measureOverdraw->integer ) {
-		if ( glConfig.stencilBits < 4 ) {
-			ri.Printf( PRINT_ALL, "Warning: not enough stencil bits to measure overdraw: %d\n", glConfig.stencilBits );
-			ri.Cvar_Set( "r_measureOverdraw", "0" );
-			r_measureOverdraw->modified = qfalse;
-		} else if ( r_shadows->integer == 2 )   {
-			ri.Printf( PRINT_ALL, "Warning: stencil shadows and overdraw measurement are mutually exclusive\n" );
-			ri.Cvar_Set( "r_measureOverdraw", "0" );
-			r_measureOverdraw->modified = qfalse;
-		} else
-		{
-			R_SyncRenderThread();
-			qglEnable( GL_STENCIL_TEST );
-			qglStencilMask( ~0U );
-			qglClearStencil( 0U );
-			qglStencilFunc( GL_ALWAYS, 0U, ~0U );
-			qglStencilOp( GL_KEEP, GL_INCR, GL_INCR );
-		}
-		r_measureOverdraw->modified = qfalse;
-	} else
-	{
-		// this is only reached if it was on and is now off
-		if ( r_measureOverdraw->modified ) {
-			R_SyncRenderThread();
-			qglDisable( GL_STENCIL_TEST );
-		}
-		r_measureOverdraw->modified = qfalse;
-	}
+	backEnd.doneBloom = qfalse;
 
-	//
-	// texturemode stuff
-	//
-	if ( r_textureMode->modified ) {
-		R_SyncRenderThread();
-		GL_TextureMode( r_textureMode->string );
-		r_textureMode->modified = qfalse;
-	}
-
-	//
-	// anisotropic filtering stuff
-	//
-	if (r_textureAnisotropy->modified) {
-		R_SyncRenderThread();
-		GL_TextureAnisotropy(r_textureAnisotropy->value);
-		r_textureAnisotropy->modified = qfalse;
-	}
-
-	//
-	// NVidia stuff
-	//
-
-	// fog control
-	if ( glConfig.NVFogAvailable && r_nv_fogdist_mode->modified ) {
-		r_nv_fogdist_mode->modified = qfalse;
-		if ( !Q_stricmp( r_nv_fogdist_mode->string, "GL_EYE_PLANE_ABSOLUTE_NV" ) ) {
-			glConfig.NVFogMode = (int)GL_EYE_PLANE_ABSOLUTE_NV;
-		} else if ( !Q_stricmp( r_nv_fogdist_mode->string, "GL_EYE_PLANE" ) ) {
-			glConfig.NVFogMode = (int)GL_EYE_PLANE;
-		} else if ( !Q_stricmp( r_nv_fogdist_mode->string, "GL_EYE_RADIAL_NV" ) ) {
-			glConfig.NVFogMode = (int)GL_EYE_RADIAL_NV;
-		} else {
-			// in case this was really 'else', store a valid value for next time
-			glConfig.NVFogMode = (int)GL_EYE_RADIAL_NV;
-			ri.Cvar_Set( "r_nv_fogdist_mode", "GL_EYE_RADIAL_NV" );
-		}
-	}
-
-	//
-	// gamma stuff
-	//
-	if ( r_gamma->modified ) {
-		r_gamma->modified = qfalse;
-
-		R_SyncRenderThread();
-		R_SetColorMappings();
-	}
+	Byte4Set(backEnd.color2D, 0xFF, 0xFF, 0xFF, 0xFF);
 
 	// check for errors
-	if ( !r_ignoreGLErrors->integer ) {
-		int err;
+	GL_CheckErrors();
 
-		R_SyncRenderThread();
-		if ( ( err = qglGetError() ) != GL_NO_ERROR ) {
-			ri.Error( ERR_FATAL, "RE_BeginFrame() - glGetError() failed (0x%x)!\n", err );
-		}
-	}
-
-	//
-	// draw buffer stuff
-	//
-	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
-	if ( !cmd ) {
+	if ( ( cmd = R_GetCommandBuffer( sizeof( *cmd ) ) ) == NULL )
 		return;
-	}
 	cmd->commandId = RC_DRAW_BUFFER;
 
 	if ( glConfig.stereoEnabled ) {
@@ -502,16 +494,92 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 		} else {
 			ri.Error( ERR_FATAL, "RE_BeginFrame: Stereo is enabled, but stereoFrame was %i", stereoFrame );
 		}
-	} else {
-		if ( stereoFrame != STEREO_CENTER ) {
-			ri.Error( ERR_FATAL, "RE_BeginFrame: Stereo is disabled, but stereoFrame was %i", stereoFrame );
-		}
-		if ( !Q_stricmp( r_drawBuffer->string, "GL_FRONT" ) ) {
+	}
+	else
+	{
+		if ( !Q_stricmp( r_drawBuffer->string, "GL_FRONT" ) )
 			cmd->buffer = (int)GL_FRONT;
-		} else {
+		else
 			cmd->buffer = (int)GL_BACK;
+
+		if ( r_anaglyphMode->integer )
+		{
+			if ( r_anaglyphMode->modified )
+			{
+				clrcmd = R_GetCommandBuffer( sizeof( *clrcmd ) );
+				if ( clrcmd ) {
+					Com_Memset( clrcmd, 0, sizeof( *clrcmd ) );
+					clrcmd->commandId = RC_CLEARCOLOR;
+				} else {
+					return;
+				}
+				clrcmd->colorMask = qtrue;
+#ifdef USE_FBO
+				if ( !fboEnabled )
+#endif
+				{
+					// clear both, front and backbuffer.
+					clrcmd->frontAndBack = qtrue;
+				}
+			}
+
+			if ( stereoFrame == STEREO_LEFT )
+			{
+				// first frame
+			}
+			else if ( stereoFrame == STEREO_RIGHT )
+			{
+				clearDepthCommand_t *cldcmd;
+				
+				if ( (cldcmd = R_GetCommandBuffer(sizeof(*cldcmd))) == NULL )
+					return;
+
+				cldcmd->commandId = RC_CLEARDEPTH;
+			}
+			else
+				ri.Error( ERR_FATAL, "RE_BeginFrame: Stereo is enabled, but stereoFrame was %i", stereoFrame );
+
+			if ( (colcmd = R_GetCommandBuffer(sizeof(*colcmd))) == NULL )
+				return;
+
+			R_SetColorMode( colcmd->rgba, stereoFrame, r_anaglyphMode->integer );
+			colcmd->commandId = RC_COLORMASK;
+		}
+		else // !r_anaglyphMode->integer
+		{
+			if ( stereoFrame != STEREO_CENTER )
+				ri.Error( ERR_FATAL, "RE_BeginFrame: Stereo is disabled, but stereoFrame was %i", stereoFrame );
+
+			// reset color mask
+			if ( r_anaglyphMode->modified )	{
+				if ( ( colcmd = R_GetCommandBuffer( sizeof( *colcmd ) ) ) == NULL )
+					return;
+
+				R_SetColorMode( colcmd->rgba, stereoFrame, r_anaglyphMode->integer );
+				colcmd->commandId = RC_COLORMASK;
+			}
 		}
 	}
+
+	if ( r_fastsky->integer ) {
+		if ( stereoFrame != STEREO_RIGHT ) {
+			if ( !clrcmd ) {
+				clrcmd = R_GetCommandBuffer( sizeof( *clrcmd ) );
+				if ( clrcmd ) {
+					Com_Memset( clrcmd, 0, sizeof( *clrcmd ) );
+					clrcmd->commandId = RC_CLEARCOLOR;
+				} else {
+					return;
+				}
+			}
+			clrcmd->fullscreen = qtrue;
+			if ( r_anaglyphMode->integer ) {
+				clrcmd->colorMask = qtrue;
+			}
+		}
+	}
+
+	tr.refdef.stereoFrame = stereoFrame;
 }
 
 
@@ -523,22 +591,24 @@ Returns the number of msec spent in the back end
 =============
 */
 void RE_EndFrame( int *frontEndMsec, int *backEndMsec ) {
-	swapBuffersCommand_t    *cmd;
+
+	swapBuffersCommand_t *cmd;
 
 	if ( !tr.registered ) {
 		return;
 	}
-	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+
+	cmd = R_GetCommandBufferReserved( sizeof( *cmd ), 0 );
 	if ( !cmd ) {
 		return;
 	}
 	cmd->commandId = RC_SWAP_BUFFERS;
 
-	R_IssueRenderCommands( qtrue );
+	R_PerformanceCounters();
 
-	// use the other buffers next frame, because another CPU
-	// may still be rendering into the current ones
-	R_ToggleSmpFrame();
+	R_IssueRenderCommands();
+
+	R_InitNextFrame();
 
 	if ( frontEndMsec ) {
 		*frontEndMsec = tr.frontEndMsec;
@@ -548,5 +618,180 @@ void RE_EndFrame( int *frontEndMsec, int *backEndMsec ) {
 		*backEndMsec = backEnd.pc.msec;
 	}
 	backEnd.pc.msec = 0;
+	backEnd.throttle = qfalse;
+
+	if ( r_trisColor->modified )
+	{
+		R_SetTrisColor();
+		r_trisColor->modified = qfalse;
+	}
+
+	// recompile GPU shaders if needed
+	if ( ri.Cvar_CheckGroup( CVG_RENDERER ) )
+	{
+		ARB_UpdatePrograms();
+
+#ifdef USE_FBO
+		if ( r_ext_multisample->modified || r_hdr->modified )
+			QGL_InitFBO();
+#endif
+
+		if ( r_textureMode->modified )
+			GL_TextureMode( r_textureMode->string );
+
+		if ( r_gamma->modified )
+			R_SetColorMappings();
+
+		ri.Cvar_ResetGroup( CVG_RENDERER, qtrue );
+	}
 }
 
+
+/*
+=============
+RE_TakeVideoFrame
+=============
+*/
+void RE_TakeVideoFrame( int width, int height,
+		byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg )
+{
+	videoFrameCommand_t	*cmd;
+
+	if( !tr.registered ) {
+		return;
+	}
+
+	backEnd.screenshotMask |= SCREENSHOT_AVI;
+
+	cmd = &backEnd.vcmd;
+
+	//cmd->commandId = RC_VIDEOFRAME;
+
+	cmd->width = width;
+	cmd->height = height;
+	cmd->captureBuffer = captureBuffer;
+	cmd->encodeBuffer = encodeBuffer;
+	cmd->motionJpeg = motionJpeg;
+}
+
+
+void RE_ThrottleBackend( void )
+{
+	backEnd.throttle = qtrue;
+}
+
+
+void RE_FinishBloom( void )
+{
+#ifdef USE_FBO
+	finishBloomCommand_t *cmd;
+
+	if ( !tr.registered ) {
+		return;
+	}
+
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+
+	cmd->commandId = RC_FINISHBLOOM;
+#endif // USE_FBO
+}
+
+
+qboolean RE_CanMinimize( void )
+{
+#ifdef USE_FBO
+	return fboEnabled;
+#else
+	return qfalse;
+#endif
+}
+
+
+const glconfig_t *RE_GetConfig( void )
+{
+	return &glConfig;
+}
+
+
+//bani
+/*
+==================
+RE_RenderToTexture
+==================
+*/
+void RE_RenderToTexture( int textureid, int x, int y, int w, int h ) {
+	renderToTextureCommand_t    *cmd;
+
+//	ri.Printf( PRINT_ALL, "RE_RenderToTexture\n" );
+
+	if ( !tr.registered ) {
+		return;
+	}
+
+	// Can't do GL_GENERATE_MIPMAP_SGIS without GL 1.4
+	if (gl_version < 14) {
+		ri.Printf( PRINT_ALL, "WARNING: RE_RenderToTexture requires OpenGL 1.4 or newer!\n" );
+		return;
+	}
+
+	if ( textureid > tr.numImages || textureid < 0 ) {
+		ri.Printf( PRINT_ALL, "Warning: trap_R_RenderToTexture textureid %d out of range.\n", textureid );
+		return;
+	}
+
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+	cmd->commandId = RC_RENDERTOTEXTURE;
+	cmd->image = tr.images[textureid];
+	cmd->x = x;
+	cmd->y = y;
+	cmd->w = w;
+	cmd->h = h;
+}
+
+//bani
+/*
+==================
+RE_Finish
+==================
+*/
+void RE_Finish( void ) {
+	renderFinishCommand_t   *cmd;
+
+	if (!tr.registered) {
+		return;
+	}
+
+	ri.Printf( PRINT_ALL, "RE_Finish\n" );
+
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+	if ( !cmd ) {
+		return;
+	}
+	cmd->commandId = RC_FINISH;
+}
+
+
+/*
+==================
+RE_RenderOmnibot
+==================
+*/
+void RE_RenderOmnibot( void ) {
+	renderOmnibot_t *cmd;
+	
+	if (!tr.registered) {
+		return;
+	}
+	cmd = R_GetCommandBuffer( sizeof( *cmd ) );
+
+	if ( !cmd ) {
+		return;
+	}
+	cmd->commandId = RC_DRAW_OMNIBOT;
+}

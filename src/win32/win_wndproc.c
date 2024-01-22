@@ -29,8 +29,45 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../client/client.h"
 #include "win_local.h"
+#include "glw_win.h"
 
 WinVars_t g_wv;
+
+static HHOOK WinHook;
+
+/*
+==================
+WinKeyHook
+==================
+*/
+static LRESULT CALLBACK WinKeyHook(int code, WPARAM wParam, LPARAM lParam)
+{
+	PKBDLLHOOKSTRUCT key = (PKBDLLHOOKSTRUCT)lParam;
+	switch (wParam)
+	{
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		if ((key->vkCode == VK_LWIN || key->vkCode == VK_RWIN) && !(Key_GetCatcher() & KEYCATCH_CONSOLE)) {
+			Sys_QueEvent(0, SE_KEY, K_SUPER, qtrue, 0, NULL);
+			return 1;
+		}
+		if (key->vkCode == VK_SNAPSHOT) {
+			Sys_QueEvent(0, SE_KEY, K_PRINT, qtrue, 0, NULL);
+			return 1;
+		}
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		if ((key->vkCode == VK_LWIN || key->vkCode == VK_RWIN) && !(Key_GetCatcher() & KEYCATCH_CONSOLE)) {
+			Sys_QueEvent(0, SE_KEY, K_SUPER, qfalse, 0, NULL);
+			return 1;
+		}
+		if (key->vkCode == VK_SNAPSHOT) {
+			Sys_QueEvent(0, SE_KEY, K_PRINT, qfalse, 0, NULL);
+			return 1;
+		}
+	}
+	return CallNextHookEx(NULL, code, wParam, lParam);
+}
 
 #ifndef WM_MOUSEWHEEL
 #define WM_MOUSEWHEEL ( WM_MOUSELAST + 1 )  // message that will be supported by the OS
@@ -82,32 +119,56 @@ static void WIN_EnableAltTab( void ) {
 
 /*
 ==================
+WIN_DisableHook
+==================
+*/
+void WIN_DisableHook(void)
+{
+	if (WinHook) {
+		UnhookWindowsHookEx(WinHook);
+		WinHook = NULL;
+	}
+}
+
+
+/*
+==================
+WIN_EnableHook
+
+Capture PrintScreen and Win* keys
+==================
+*/
+void WIN_EnableHook(void)
+{
+#ifndef DEDICATED
+	if (!WinHook)
+	{
+		WinHook = SetWindowsHookEx(WH_KEYBOARD_LL, WinKeyHook, g_wv.hInstance, 0);
+	}
+#endif
+}
+
+/*
+==================
 VID_AppActivate
 ==================
 */
-static void VID_AppActivate( BOOL fActive, BOOL minimize ) {
-	g_wv.isMinimized = minimize;
+static void VID_AppActivate(qboolean active)
+{
+	Key_ClearStates();
 
-	Com_DPrintf( "VID_AppActivate: %i\n", fActive );
+	IN_Activate(active);
 
-	Key_ClearStates();  // FIXME!!!
-
-	// we don't want to act like we're active if we're minimized
-	if ( fActive && !g_wv.isMinimized ) {
-		g_wv.activeApp = qtrue;
-	} else
-	{
-		g_wv.activeApp = qfalse;
+	if (active) {
+		WIN_EnableHook();
+		SetWindowPos(g_wv.hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
-
-	// minimize/restore mouse-capture on demand
-	if ( !g_wv.activeApp ) {
-		IN_Activate( qfalse );
-	} else
-	{
-		IN_Activate( qtrue );
+	else {
+		WIN_DisableHook();
+		SetWindowPos(g_wv.hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
 }
+
 
 //==========================================================================
 
@@ -302,6 +363,106 @@ static int MapKey( int key ) {
 	}
 }
 
+extern cvar_t* in_mouse;
+extern cvar_t* in_logitechbug;
+
+int			HotKey = 0;
+int			hkinstalled = 0;
+
+extern void SetGameDisplaySettings(void);
+extern void SetDesktopDisplaySettings(void);
+
+void Win_AddHotkey(void)
+{
+	UINT modifiers, vk;
+	ATOM atom;
+
+	if (!HotKey || !g_wv.hWnd || hkinstalled)
+		return;
+
+	modifiers = 0;
+
+	if (HotKey & HK_MOD_ALT)		modifiers |= MOD_ALT;
+	if (HotKey & HK_MOD_CONTROL)	modifiers |= MOD_CONTROL;
+	if (HotKey & HK_MOD_SHIFT)	modifiers |= MOD_SHIFT;
+	if (HotKey & HK_MOD_WIN)		modifiers |= MOD_WIN;
+
+	vk = HotKey & 0xFF;
+
+	atom = GlobalAddAtom(TEXT("ETMinimizeHotkey"));
+	if (!RegisterHotKey(g_wv.hWnd, atom, modifiers, vk)) {
+		GlobalDeleteAtom(atom);
+		return;
+	}
+	hkinstalled = 1;
+}
+
+
+void Win_RemoveHotkey(void)
+{
+	ATOM atom;
+
+	if (!g_wv.hWnd || !hkinstalled)
+		return;
+
+	atom = GlobalFindAtom(TEXT("ETMinimizeHotkey"));
+	if (atom) {
+		UnregisterHotKey(g_wv.hWnd, atom);
+		GlobalDeleteAtom(atom);
+		hkinstalled = 0;
+	}
+}
+
+
+BOOL Win_CheckHotkeyMod(void) {
+
+	if (!(HotKey & HK_MOD_XMASK))
+		return TRUE;
+
+	if ((HotKey & HK_MOD_LALT) && !GetAsyncKeyState(VK_LMENU)) return FALSE;
+	if ((HotKey & HK_MOD_RALT) && !GetAsyncKeyState(VK_RMENU)) return FALSE;
+	if ((HotKey & HK_MOD_LSHIFT) && !GetAsyncKeyState(VK_LSHIFT)) return FALSE;
+	if ((HotKey & HK_MOD_RSHIFT) && !GetAsyncKeyState(VK_RSHIFT)) return FALSE;
+	if ((HotKey & HK_MOD_LCONTROL) && !GetAsyncKeyState(VK_LCONTROL)) return FALSE;
+	if ((HotKey & HK_MOD_RCONTROL) && !GetAsyncKeyState(VK_RCONTROL)) return FALSE;
+	if ((HotKey & HK_MOD_LWIN) && !GetAsyncKeyState(VK_LWIN)) return FALSE;
+	if ((HotKey & HK_MOD_RWIN) && !GetAsyncKeyState(VK_RWIN)) return FALSE;
+
+	return TRUE;
+}
+
+
+#define TIMER_M 11
+#define TIMER_T 12
+static UINT uTimerM;
+static UINT uTimerT;
+
+void WIN_Minimize(void) {
+	static int minimize = 0;
+
+	if (minimize)
+		return;
+
+	minimize = 1;
+
+#ifdef FAST_MODE_SWITCH
+	// move game window to background
+	if (glw_state.cdsFullscreen) {
+		if (gw_active)
+			SetForegroundWindow(GetDesktopWindow());
+		// and wait some time before minimizing
+		if (!uTimerM)
+			uTimerM = SetTimer(g_wv.hWnd, TIMER_M, 50, NULL);
+	}
+	else {
+		ShowWindow(g_wv.hWnd, SW_MINIMIZE);
+	}
+#else
+	ShowWindow(g_wv.hWnd, SW_MINIMIZE);
+#endif
+
+	minimize = 0;
+}
 
 /*
 ====================
@@ -315,6 +476,12 @@ LONG WINAPI MainWndProc(
 	UINT uMsg,
 	WPARAM wParam,
 	LPARAM lParam ) {
+
+	static qboolean flip = qtrue;
+	static qboolean focused = qfalse;
+	qboolean active;
+	qboolean minimized;
+	int zDelta, i;
 
 	if ( uMsg == MSH_MOUSEWHEEL ) {
 		if ( ( ( int ) wParam ) > 0 ) {
@@ -397,51 +564,108 @@ LONG WINAPI MainWndProc(
 		break;
 
 	case WM_ACTIVATE:
-	{
-		int fActive, fMinimized;
+		active = (LOWORD(wParam) != WA_INACTIVE) ? qtrue : qfalse;
+		minimized = (BOOL)HIWORD(wParam) ? qtrue : qfalse;
 
-		fActive = LOWORD( wParam );
-		fMinimized = (BOOL) HIWORD( wParam );
+		// We can receive Active & Minimized when restoring from minimized state
+		if (active && minimized) {
+			gw_minimized = qtrue;
+			break;
+		}
 
-		VID_AppActivate( fActive != WA_INACTIVE, fMinimized );
-#ifndef DOOMSOUND   ///// (SA) DOOMSOUND
+		gw_active = active;
+		gw_minimized = minimized;
+
+		VID_AppActivate(gw_active);
+		Win_AddHotkey();
+
+		if (glw_state.cdsFullscreen) {
+			if (gw_active) {
+				SetGameDisplaySettings();
+				if (re.SetColorMappings)
+					re.SetColorMappings();
+			}
+			else {
+				// don't restore gamma if we have multiple monitors
+				if (glw_state.monitorCount <= 1 || gw_minimized)
+					GLW_RestoreGamma();
+				// minimize if there is only one monitor
+				if (glw_state.monitorCount <= 1) {
+					//if (CL_VideoRecording() == AVIDEMO_NONE || (re.CanMinimize && re.CanMinimize())) {
+					if (re.CanMinimize&& re.CanMinimize()) {
+						if (!gw_minimized) {
+							WIN_Minimize();
+						}
+						SetDesktopDisplaySettings();
+					}
+				}
+			}
+		}
+		else {
+			if (gw_active) {
+				if (re.SetColorMappings)
+					re.SetColorMappings();
+			}
+			else {
+				GLW_RestoreGamma();
+			}
+		}
+
+		// after ALT+TAB, even if we selected other window we may receive WM_ACTIVATE 1 and then WM_ACTIVATE 0
+		// if we set HWND_TOPMOST in VID_AppActivate() other window will be not visible despite obtained input focus
+		// so delay HWND_TOPMOST setup to make sure we have no such bogus activation
+		if (gw_active && glw_state.cdsFullscreen) {
+			if (uTimerT) {
+				KillTimer(g_wv.hWnd, uTimerT);
+			}
+			uTimerT = SetTimer(g_wv.hWnd, TIMER_T, 20, NULL);
+		}
+
 		SNDDMA_Activate();
-#endif  ///// (SA) DOOMSOUND
-	}
-	break;
+		break;
+
+	case WM_SETFOCUS:
+		focused = qtrue;
+		break;
+
+	case WM_KILLFOCUS:
+		//gw_active = qfalse;
+		focused = qfalse;
+		break;
 
 	case WM_MOVE:
 	{
-		int xPos, yPos;
-		RECT r;
-		int style;
+		if (!gw_active || gw_minimized || !focused)
+			break;
 
-		if ( !r_fullscreen->integer ) {
-			xPos = (short) LOWORD( lParam );      // horizontal position
-			yPos = (short) HIWORD( lParam );      // vertical position
+		GetWindowRect(hWnd, &g_wv.winRect);
+		g_wv.winRectValid = qtrue;
+		UpdateMonitorInfo(&g_wv.winRect);
+		IN_UpdateWindow(NULL, qtrue);
+		IN_Activate(gw_active);
 
-			r.left   = 0;
-			r.top    = 0;
-			r.right  = 1;
-			r.bottom = 1;
-
-			style = GetWindowLong( hWnd, GWL_STYLE );
-			AdjustWindowRect( &r, style, FALSE );
-
-			Cvar_SetValue( "vid_xpos", xPos + r.left );
-			Cvar_SetValue( "vid_ypos", yPos + r.top );
+		if (!glw_state.cdsFullscreen) {
+			Cvar_SetIntegerValue("vid_xpos", g_wv.winRect.left);
+			Cvar_SetIntegerValue("vid_ypos", g_wv.winRect.top);
 			vid_xpos->modified = qfalse;
 			vid_ypos->modified = qfalse;
-			if ( g_wv.activeApp ) {
-				IN_Activate( qtrue );
-			}
 		}
+		break;
 	}
 	break;
 
 	// rtcwpro - borderless window - snap edges to screen
 	case WM_WINDOWPOSCHANGING:
-		if (g_wv.noborder)
+	{
+		WINDOWPLACEMENT wp;
+
+		// set minimized flag as early as possible
+		Com_Memset(&wp, 0, sizeof(wp));
+		wp.length = sizeof(WINDOWPLACEMENT);
+		if (GetWindowPlacement(hWnd, &wp) && wp.showCmd == SW_SHOWMINIMIZED)
+			gw_minimized = qtrue;
+
+		if (g_wv.borderless)
 		{
 			WINDOWPOS* pos = (LPWINDOWPOS)lParam;
 			const int threshold = 10;
@@ -454,7 +678,7 @@ LONG WINAPI MainWndProc(
 			rr.right = pos->x + pos->cx;
 			rr.top = pos->y;
 			rr.bottom = pos->y + pos->cy;
-			hMonitor = MonitorFromRect(&rr, MONITOR_DEFAULTTOPRIMARY);
+			hMonitor = MonitorFromRect(&rr, MONITOR_DEFAULTTONEAREST);
 
 			if (hMonitor)
 			{
@@ -462,6 +686,7 @@ LONG WINAPI MainWndProc(
 				GetMonitorInfo(hMonitor, &mi);
 				r = &mi.rcWork;
 
+				// snap window to current monitor borders
 				if (pos->x >= (r->left - threshold) && pos->x <= (r->left + threshold))
 					pos->x = r->left;
 				else if ((pos->x + pos->cx) >= (r->right - threshold) && (pos->x + pos->cx) <= (r->right + threshold))
@@ -475,7 +700,8 @@ LONG WINAPI MainWndProc(
 				return 0;
 			}
 		}
-		break;
+	}
+	break;
 
 // this is complicated because Win32 seems to pack multiple mouse events into
 // one update sometimes, so we always check all states and look for events
@@ -547,12 +773,35 @@ LONG WINAPI MainWndProc(
 
 		// rtcwpro - borderless window - move window with mouse while holding ctrl
 	case WM_NCHITTEST:
-		if (g_wv.noborder && GetKeyState(VK_CONTROL) & (1 << 15))
-		{
+		// in borderless mode - drag using client area when holding ALT
+		if (g_wv.borderless && GetKeyState(VK_MENU) & (1 << 15))
 			return HTCAPTION;
-		}
 		break;
 	}
 
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );
+}
+
+/*
+================
+HandleEvents
+================
+*/
+void HandleEvents(void) {
+	MSG msg;
+
+	// pump the message loop
+	while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
+		if (GetMessage(&msg, NULL, 0, 0) <= 0) {
+			Cmd_Clear();
+			Com_Quit_f();
+		}
+
+		// save the msg time, because wndprocs don't have access to the timestamp
+		//g_wv.sysMsgTime = msg.time;
+		g_wv.sysMsgTime = Sys_Milliseconds();
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }

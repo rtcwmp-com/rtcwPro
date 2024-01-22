@@ -64,6 +64,7 @@ void MSG_Clear( msg_t *buf );
 void *MSG_GetSpace( msg_t *buf, int length );
 void MSG_WriteData( msg_t *buf, const void *data, int length );
 void MSG_Bitstream( msg_t *buf );
+int MSG_HashKey(const char* string, int maxlen);
 
 // TTimo
 // copy a msg_t in case we need to store it as is for a bit
@@ -461,7 +462,23 @@ void Cbuf_Execute( void );
 // Do not call inside a command function, or current args will be destroyed.
 
 //===========================================================================
-
+typedef enum module_e {
+	MODULE_NONE = 0,
+	MODULE_COMMON,
+	MODULE_SERVER,
+	MODULE_CLIENT,
+	MODULE_RENDERER,
+	MODULE_SOUND,
+	MODULE_NETWORK,
+	MODULE_INPUT,
+	//MODULE_SYSTEM,
+	//MODULE_DOWNLOAD,
+	MODULE_CONSOLE,
+	MODULE_CGAME,
+	MODULE_SGAME,
+	MODULE_UI,
+	MODULE_COUNT
+} module_t;
 /*
 
 Command execution takes a null terminated string, breaks it into tokens,
@@ -470,6 +487,13 @@ then searches for a command or variable that matches the first token.
 */
 
 typedef void ( *xcommand_t )( void );
+typedef void (*xcommandCompFunc_t)(char* args, int argNum);
+
+typedef struct cmdListItem_s {
+	const char* name;
+	xcommand_t	func;
+	xcommandCompFunc_t	complete;
+} cmdListItem_t;
 
 void    Cmd_Init( void );
 
@@ -482,10 +506,18 @@ void    Cmd_AddCommand( const char *cmd_name, xcommand_t function );
 
 void    Cmd_RemoveCommand( const char *cmd_name );
 
+void Cmd_RegisterList(const cmdListItem_t* cmds, int count, module_t module);
+void Cmd_UnregisterList(const cmdListItem_t* cmds, int count);
+void Cmd_UnregisterModule(module_t module);
+#define Cmd_RegisterArray( a, m )  Cmd_RegisterList( a, ARRAY_LEN(a), m )
+#define Cmd_UnregisterArray( a )   Cmd_UnregisterList( a, ARRAY_LEN(a) )
+
 void Cmd_CommandCompletion( void ( *callback )( const char *s ) );
+void	Cmd_SetCommandCompletionFunc(const char* command, xcommandCompFunc_t complete);
 // callback with each valid string
 
 int     Cmd_Argc( void );
+void		Cmd_Clear(void);
 char    *Cmd_Argv( int arg );
 void    Cmd_ArgvBuffer( int arg, char *buffer, int bufferLength );
 char    *Cmd_Args( void );
@@ -616,8 +648,16 @@ char    *Cvar_InfoString_Big( int bit );
 // returns an info string containing all the cvars that have the given bit set
 // in their flags ( CVAR_USERINFO, CVAR_SERVERINFO, CVAR_SYSTEMINFO, etc )
 void    Cvar_InfoStringBuffer( int bit, char *buff, int buffsize );
+void	Cvar_CheckRange(cvar_t* cv, const char* minVal, const char* maxVal, cvarValidator_t type);
+void	Cvar_SetDescription(cvar_t* var, const char* var_description);
 
 void    Cvar_Restart_f( void );
+
+void	Cvar_SetGroup(cvar_t* var, cvarGroup_t group);
+int		Cvar_CheckGroup(cvarGroup_t group);
+void	Cvar_ResetGroup(cvarGroup_t group, qboolean resetModifiedFlags);
+void	Cvar_SetIntegerValue(const char* var_name, int value);
+
 
 unsigned int RestrictedTypeToInt(char* str);
 
@@ -802,6 +842,8 @@ void FS_CopyFile( char *fromOSPath, char *toOSPath );
 qboolean FS_CreatePath( char *OSPath ) ;
 qboolean FS_VerifyPak( const char *pak );
 
+qboolean FS_AllowedExtension(const char* fileName, qboolean allowPk3s, const char** ext);
+
 int  submit_curlPost( char* jsonfile, char* matchid );
 void* submit_HTTP_curlPost(void* args) ;
 char* encode_data_b64( char *infilename ) ;
@@ -916,6 +958,11 @@ extern int com_frameTime;
 extern int com_frameMsec;
 
 extern qboolean com_errorEntered;
+
+//#ifndef DEDICATED
+extern	qboolean	gw_minimized;
+extern	qboolean	gw_active;
+//#endif
 
 extern fileHandle_t com_journalFile;
 extern fileHandle_t com_journalDataFile;
@@ -1157,6 +1204,11 @@ char    *Sys_GetClipboardData( void );  // note that this isn't journaled...
 
 void    Sys_Print( const char *msg );
 
+void* Sys_LoadLibrary(const char* name);
+void* Sys_LoadFunction(void* handle, const char* name);
+int   Sys_LoadFunctionErrors(void);
+void  Sys_UnloadLibrary(void* handle);
+
 
 // Sys_Milliseconds should only be used for profiling purposes,
 // any game related timing information should come from event timestamps
@@ -1362,6 +1414,30 @@ extern huffman_t clientHuffTables;
 #else
 #define Q_assert(Cond)
 #endif
+
+// AVI files have the start of pixel lines 4 byte-aligned
+#define AVI_LINE_PADDING 4
+
+// stringify macro
+#define XSTRING(x)	STRING(x)
+#define STRING(x)	#x
+
+static ID_INLINE unsigned int log2pad(unsigned int v, int roundup)
+{
+	unsigned int x = 1;
+
+	while (x < v) x <<= 1;
+
+	if (roundup == 0) {
+		if (x > v) {
+			x >>= 1;
+		}
+	}
+
+	return x;
+}
+// customizable client window title
+extern char cl_title[MAX_CVAR_VALUE_STRING];
 
 #endif // _QCOMMON_H_
 

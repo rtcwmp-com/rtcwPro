@@ -33,11 +33,20 @@ If you have questions concerning this license or the applicable additional terms
 // A user mod should never modify this file
 #define Q3_VERSION      "RtcwPro 1.3.0.17"  // RTCWPro
 
+#define CLIENT_WINDOW_TITLE   "Wolfenstein"
+#define CLIENT_WINDOW_CLASS   CLIENT_WINDOW_TITLE
+#ifdef _WIN32
+#define CONSOLE_WINDOW_CLASS  "RtCW WinConsole"
+#endif
+#define CONSOLE_WINDOW_TITLE  "RtCW Console"
+
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
 // 1.3-MP : final for release
 // 1.1b - TTimo SP linux release (+ MP updates)
 // 1.1b5 - Mac update merge in
+
+#include "q_platform.h"
 
 #define NEW_ANIMS
 #define MAX_TEAMNAME    32
@@ -110,6 +119,40 @@ If you have questions concerning this license or the applicable additional terms
 #include <ctype.h>
 #include <limits.h>
 
+
+
+#endif
+
+#if defined (_MSC_VER) && !defined(__clang__)
+#if _MSC_VER >= 1600
+#if !defined(__STDC_LIMIT_MACROS)
+#define __STDC_LIMIT_MACROS
+#endif
+#include <stdint.h>
+#else
+#include <io.h>
+typedef __int64 int64_t;
+typedef __int32 int32_t;
+typedef __int16 int16_t;
+typedef __int8 int8_t;
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int8 uint8_t;
+#endif
+#else
+#if !defined(__STDC_LIMIT_MACROS)
+#define __STDC_LIMIT_MACROS
+#endif
+#include <stdint.h>
+#endif
+
+#if defined (_WIN32) && !defined(_MSC_VER)
+#define Q_setjmp __builtin_setjmp
+#define Q_longjmp __builtin_longjmp
+#else
+#define Q_setjmp setjmp
+#define Q_longjmp longjmp
 #endif
 
 #ifdef _WIN32
@@ -133,9 +176,7 @@ If you have questions concerning this license or the applicable additional terms
 #define id386   0
 #endif
 
-// for windows fastcall option
 
-#define QDECL
 
 //======================= WIN32 DEFINES =================================
 
@@ -314,6 +355,8 @@ typedef int clipHandle_t;
 #define MAX_QINT            0x7fffffff
 #define MIN_QINT            ( -MAX_QINT - 1 )
 
+#define	MAX_UINT			((unsigned)(~0))
+
 // TTimo gcc: was missing, added from Q3 source
 #ifndef max
 #define max( x, y ) ( ( ( x ) > ( y ) ) ? ( x ) : ( y ) )
@@ -379,6 +422,7 @@ typedef enum {
 // parameters to the main Error routine
 typedef enum {
 	ERR_FATAL,                  // exit the entire game with a popup window
+	ERR_VID_FATAL,              // exit the entire game with a popup window and doesn't delete profile.pid
 	ERR_DROP,                   // print to console and disconnect from game
 	ERR_SERVERDISCONNECT,       // don't kill server
 	ERR_DISCONNECT,             // client disconnected from the server
@@ -466,9 +510,15 @@ typedef vec_t vec3_t[3];
 typedef vec_t vec4_t[4];
 typedef vec_t vec5_t[5];
 
+typedef vec_t quat_t[4];
+
 typedef int fixed4_t;
 typedef int fixed8_t;
 typedef int fixed16_t;
+
+#ifndef M_TAU
+#define M_TAU		6.28318530717958647693f
+#endif
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846f // matches value in gcc v2 math.h
@@ -598,8 +648,17 @@ float Q_rsqrt( float f );       // reciprocal square root
 
 #define SQRTFAST( x ) ( 1.0f / Q_rsqrt( x ) )
 
+// fast float to int conversion
+#if id386 && defined(_WIN32)
+long Q_ftol(float f);
+#else
+#define Q_ftol( x ) lrintf( x )
+#endif
+
 signed char ClampChar( int i );
 signed short ClampShort( int i );
+float Com_ClampFloat(float min, float max, float value);
+int Com_ClampInt(int min, int max, int value);
 
 // this isn't a real cheap function to call!
 int DirToByte( vec3_t dir );
@@ -613,6 +672,8 @@ void ByteToDir( int b, vec3_t dir );
 #define VectorCopy( a,b )         ( ( b )[0] = ( a )[0],( b )[1] = ( a )[1],( b )[2] = ( a )[2] )
 #define VectorScale( v, s, o )    ( ( o )[0] = ( v )[0] * ( s ),( o )[1] = ( v )[1] * ( s ),( o )[2] = ( v )[2] * ( s ) )
 #define VectorMA( v, s, b, o )    ( ( o )[0] = ( v )[0] + ( b )[0] * ( s ),( o )[1] = ( v )[1] + ( b )[1] * ( s ),( o )[2] = ( v )[2] + ( b )[2] * ( s ) )
+#define VectorScale4(a,b,c)		((c)[0]=(a)[0]*(b),(c)[1]=(a)[1]*(b),(c)[2]=(a)[2]*(b),(c)[3]=(a)[3]*(b))
+#define DotProduct4(a,b)		((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2] + (a)[3]*(b)[3])
 
 #else
 
@@ -646,6 +707,8 @@ typedef struct {
 #define Vector4Average( v, b, s, o )  ( ( o )[0] = ( ( v )[0] * ( 1 - ( s ) ) ) + ( ( b )[0] * ( s ) ),( o )[1] = ( ( v )[1] * ( 1 - ( s ) ) ) + ( ( b )[1] * ( s ) ),( o )[2] = ( ( v )[2] * ( 1 - ( s ) ) ) + ( ( b )[2] * ( s ) ),( o )[3] = ( ( v )[3] * ( 1 - ( s ) ) ) + ( ( b )[3] * ( s ) ) )
 
 #define SnapVector( v ) {v[0] = ( (int)( v[0] ) ); v[1] = ( (int)( v[1] ) ); v[2] = ( (int)( v[2] ) );}
+
+#define QuatCopy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
 
 // just in case you do't want to use the macros
 vec_t _DotProduct( const vec3_t v1, const vec3_t v2 );
@@ -749,6 +812,8 @@ void    COM_StripExtension( const char *in, char *out );
 void    COM_StripExtension2( const char *in, char *out, int destsize );
 void    COM_StripFilename( char *in, char *out );
 void    COM_DefaultExtension( char *path, int maxSize, const char *extension );
+const char* COM_GetExtension(const char* name);
+void    COM_FixPath(char* pathname);
 
 void    COM_BeginParseSession( const char *name );
 void    COM_RestoreParseSession( char **data_p );
@@ -760,6 +825,29 @@ int     COM_Compress( char *data_p );
 void    COM_ParseError( char *format, ... );
 void    COM_ParseWarning( char *format, ... );
 //int		COM_ParseInfos( char *buf, int max, char infos[][MAX_INFO_STRING] );
+
+char* COM_ParseComplex(const char** data_p, qboolean allowLineBreak);
+
+typedef enum {
+	TK_GENEGIC = 0, // for single-char tokens
+	TK_STRING,
+	TK_QUOTED,
+	TK_EQ,
+	TK_NEQ,
+	TK_GT,
+	TK_GTE,
+	TK_LT,
+	TK_LTE,
+	TK_MATCH,
+	TK_OR,
+	TK_AND,
+	TK_SCOPE_OPEN,
+	TK_SCOPE_CLOSE,
+	TK_NEWLINE,
+	TK_EOF,
+} tokenType_t;
+
+extern tokenType_t com_tokentype;
 
 qboolean COM_BitCheck( const int array[], int bitNum );
 void COM_BitSet( int array[], int bitNum );
@@ -790,7 +878,7 @@ typedef struct pc_token_s
 void    COM_MatchToken( char**buf_p, char *match );
 
 void SkipBracedSection( char **program );
-void SkipBracedSection_Depth( char **program, int depth ); // start at given depth if already matching stuff
+qbool SkipBracedSection_Depth( char **program, int depth ); // start at given depth if already matching stuff
 void SkipRestOfLine( char **data );
 
 void Parse1DMatrix( char **buf_p, int x, float *m );
@@ -828,12 +916,16 @@ int     Q_stricmpn( const char *s1, const char *s2, int n );
 char    *Q_strlwr( char *s1 );
 char    *Q_strupr( char *s1 );
 char    *Q_strrchr( const char* string, int c );
+const char* Q_stristr(const char* s, const char* find);
 
 #ifdef _WIN32
 #define Q_putenv _putenv
 #else
 #define Q_putenv putenv
 #endif
+
+int     Q_replace(const char* str1, const char* str2, char* src, int max_len);
+char* Q_stradd(char* dst, const char* src);
 
 // buffer size safe library replacements
 void    Q_strncpyz( char *dest, const char *src, int destsize );
@@ -846,6 +938,7 @@ char *Q_CleanStr( char *string );
 // Ridah
 int Q_strncasecmp( char *s1, char *s2, int n );
 int Q_strcasecmp( char *s1, char *s2 );
+float Q_atof(const char* str);
 // done.
 // TTimo
 // vsnprintf is ISO/IEC 9899:1999
@@ -905,6 +998,8 @@ void Info_NextPair( const char **s, char *key, char *value );
 void QDECL Com_Error( int level, const char *error, ... );
 void QDECL Com_Printf( const char *msg, ... );
 void QDECL Com_DPrintf(const char* fmt, ...);
+int Com_Split(char* in, char** out, int outsz, int delim);
+unsigned long Com_GenerateHashValue(const char* fname, const unsigned int size);
 
 /*
 ==========================================================
@@ -938,6 +1033,14 @@ default values.
 #define CVAR_CHEAT          512 // can not be changed if cheats are disabled
 #define CVAR_NORESTART      1024    // do not clear when a cvar_restart is issued
 #define CVAR_WOLFINFO       2048    // DHM - NERVE :: Like userinfo, but for wolf multiplayer info
+
+
+#define CVAR_VM_CREATED		0x8000	// cvar was created exclusively in one of the VMs.
+#define CVAR_UNSAFE         0x1000    // ydnar: unsafe system cvars (renderer, sound settings, anything that might cause a crash)
+#define CVAR_DEVELOPER		0x80000	// can be set only in developer mode
+#define CVAR_NODEFAULT		0x20000	// do not write to config if matching with default value
+#define CVAR_NOTABCOMPLETE	0x100000 // no tab completion in console
+#define CVAR_ARCHIVE_ND		(CVAR_ARCHIVE | CVAR_NODEFAULT)
 
 #define SVC_NONE            0
 #define SVC_EQUAL           1
@@ -998,20 +1101,48 @@ typedef struct cvar_restrictions_s {
 	qboolean flagged;
 } cvar_rest_t;
 
+typedef enum {
+	CV_NONE = 0,
+	CV_FLOAT,
+	CV_INTEGER,
+	CV_FSPATH,
+	CV_USERINFO, // clean userinfo of > 127 chars
+	CV_MAX,
+} cvarValidator_t;
+
+typedef enum {
+	CVG_NONE = 0,
+	CVG_RENDERER,
+	CVG_CLIENT,
+	CVG_SERVER,
+	CVG_LANGUAGE,
+	CVG_MAX,
+} cvarGroup_t;
+
 // nothing outside the Cvar_*() functions should modify these fields!
-typedef struct cvar_s {
-	char        *name;
-	char        *string;
-	char        *resetString;       // cvar_restart will reset to this value
-	char        *latchedString;     // for CVAR_LATCH vars
-	int flags;
-	qboolean modified;              // set each time the cvar is changed
-	int modificationCount;          // incremented each time the cvar is changed
-	float value;                    // atof( string )
-	int integer;                    // atoi( string )
-	struct cvar_s *next;
-	struct cvar_s *hashNext;
-} cvar_t;
+typedef struct cvar_s cvar_t;
+struct cvar_s {
+	char* name;
+	char* string;
+	char* resetString;		// cvar_restart will reset to this value
+	char* latchedString;		// for CVAR_LATCH vars
+	int			flags;
+	qboolean	modified;			// set each time the cvar is changed
+	int			modificationCount;	// incremented each time the cvar is changed
+	float		value;				// Q_atof( string )
+	int			integer;			// atoi( string )
+	cvarValidator_t validator;
+	char* mins;
+	char* maxs;
+	char* description;
+
+	cvar_t* next;
+	cvar_t* prev;
+	cvar_t* hashNext;
+	cvar_t* hashPrev;
+	int			hashIndex;
+	cvarGroup_t	group;				// to track changes
+};
 
 typedef int cvarHandle_t;
 
@@ -1193,6 +1324,11 @@ typedef struct {
 	char stringData[MAX_GAMESTATE_CHARS];
 	int dataCount;
 } gameState_t;
+
+#define LERP( a, b, w ) ( ( a ) * ( 1.0f - ( w ) ) + ( b ) * ( w ) )
+#define LUMA( red, green, blue ) ( 0.2126f * ( red ) + 0.7152f * ( green ) + 0.0722f * ( blue ) )
+
+#define SQR( a ) ( ( a ) * ( a ) )
 
 #define REF_FORCE_DLIGHT    ( 1 << 31 ) // RF, passed in through overdraw parameter, force this dlight under all conditions
 #define REF_JUNIOR_DLIGHT   ( 1 << 30 ) // (SA) this dlight does not light surfaces.  it only affects dynamic light grid
@@ -1774,5 +1910,29 @@ qboolean clientIsConnected;
 // widescreen monitor support
 #define RATIO43     (4.0f / 3.0f)   ///< 4:3 aspectratio is the default for this game engine ...
 #define RPRATIO43   (1 / RATIO43)   ///<
+
+#if defined(USE_VULKAN)
+typedef union {
+	byte rgba[4];
+	uint32_t u32;
+} color4ub_t;
+#endif
+
+
+
+
+#ifndef MAX
+#define MAX(x,y) ((x)>(y)?(x):(y))
+#endif
+
+#ifndef MIN
+#define MIN(x,y) ((x)<(y)?(x):(y))
+#endif
+
+#define REF_DIRECTED_DLIGHT 0x20000000u // ydnar: global directional light, origin should be interpreted as a normal vector
+
+#ifndef SGN
+#define SGN(x) (((x) >= 0) ? !!(x) : -1)
+#endif
 
 #endif  // __Q_SHARED_H

@@ -157,6 +157,18 @@ typedef enum {
 	K_AUX15,
 	K_AUX16,
 
+	K_SUPER,
+	K_COMPOSE,
+	K_MODE,
+	K_HELP,
+	K_PRINT,
+	K_SYSREQ,
+	K_SCROLLOCK,
+	K_BREAK,
+	K_MENU,
+	K_EURO,
+	K_UNDO,
+
 	K_LAST_KEY      // this had better be <256!
 } keyNum_t;
 

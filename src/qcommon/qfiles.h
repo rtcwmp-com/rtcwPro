@@ -73,7 +73,7 @@ PCX files are used for 8 bit images
 
 ========================================================================
 */
-
+#if 0
 typedef struct {
 	char manufacturer;
 	char version;
@@ -89,7 +89,7 @@ typedef struct {
 	char filler[58];
 	unsigned char data;             // unbounded
 } pcx_t;
-
+#endif
 
 /*
 ========================================================================
@@ -98,7 +98,7 @@ TGA files are used for 24/32 bit images
 
 ========================================================================
 */
-
+#if 0
 typedef struct _TargaHeader {
 	unsigned char id_length, colormap_type, image_type;
 	unsigned short colormap_index, colormap_length;
@@ -106,7 +106,7 @@ typedef struct _TargaHeader {
 	unsigned short x_origin, y_origin, width, height;
 	unsigned char pixel_size, attributes;
 } TargaHeader;
-
+#endif
 
 
 /*
@@ -689,7 +689,11 @@ typedef struct {
 	float st[2];
 	float lightmap[2];
 	vec3_t normal;
+#ifdef USE_VULKAN
+	color4ub_t	color;
+#else
 	byte color[4];
+#endif
 } drawVert_t;
 
 #define drawVert_t_cleared(x) drawVert_t (x) = {{0, 0, 0}, {0, 0}, {0, 0}, {0, 0, 0}, {0, 0, 0, 0}}

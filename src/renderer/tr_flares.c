@@ -1,25 +1,25 @@
 /*
 ===========================================================================
 
-Return to Castle Wolfenstein multiplayer GPL Source Code
+Wolfenstein: Enemy Territory GPL Source Code
 Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+This file is part of the Wolfenstein: Enemy Territory GPL Source Code (Wolf ET Source Code).  
 
-RTCW MP Source Code is free software: you can redistribute it and/or modify
+Wolf ET Source Code is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-RTCW MP Source Code is distributed in the hope that it will be useful,
+Wolf ET Source Code is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with RTCW MP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+along with Wolf ET Source Code.  If not, see <http://www.gnu.org/licenses/>.
 
-In addition, the RTCW MP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW MP Source Code.  If not, please request a copy in writing from id Software at the address below.
+In addition, the Wolf: ET Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Wolf ET Source Code.  If not, please request a copy in writing from id Software at the address below.
 
 If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
 
@@ -65,29 +65,28 @@ up to five or more times in a frame with 3D status bar icons).
 // flare states maintain visibility over multiple frames for fading
 // layers: view, mirror, menu
 typedef struct flare_s {
-	struct      flare_s *next;      // for active chain
+	struct		flare_s	*next;		// for active chain
 
-	int addedFrame;
+	int			addedFrame;
 
-	qboolean inPortal;                  // true if in a portal view of the scene
-	int frameSceneNum;
-	void        *surface;
-	int fogNum;
+	portalView_t portalView;
+	int			frameSceneNum;
+	void		*surface;
+	int			fogNum;
 
-	int fadeTime;
+	int			fadeTime;
 
-	qboolean cgvisible;             // for coronas, the client determines current visibility, but it's still inserted so it will fade out properly
-	qboolean visible;               // state of last test
-	float drawIntensity;            // may be non 0 even if !visible due to fading
+	qboolean	cgvisible;			// for coronas, the client determines current visibility, but it's still inserted so it will fade out properly
+	qboolean	visible;			// state of last test
+	float		drawIntensity;		// may be non 0 even if !visible due to fading
 
-	int windowX, windowY;
-	float eyeZ;
+	int			windowX, windowY;
+	float		eyeZ;
 
-	vec3_t origin;
-	vec3_t color;
-	float scale;
+	vec3_t		color;
+	float		scale;
 
-	int id;
+	int			id;
 } flare_t;
 
 #define     MAX_FLARES      256
@@ -95,7 +94,6 @@ typedef struct flare_s {
 flare_t r_flareStructs[MAX_FLARES];
 flare_t     *r_activeFlares, *r_inactiveFlares;
 
-int flareCoeff;
 
 /*
 ==================
@@ -124,27 +122,29 @@ This is called at surface tesselation time
 ==================
 */
 void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, float scale, vec3_t normal, int id, qboolean cgvisible ) { //----(SA)	added scale. added id.  added visible
-	int i;
-	flare_t *f;
-	vec3_t local;
-	float d = 1;
-	vec4_t eye, clip, normalized, window;
+	int				i;
+	flare_t			*f;
+	vec3_t			local;
+	float			d = 1;
+	vec4_t			eye, clip, normalized, window;
 
 	backEnd.pc.c_flareAdds++;
 
-	if (normal && (normal[0] || normal[1] || normal[2])) {
-		VectorSubtract(backEnd.viewParms. or .origin, point, local);
-		VectorNormalizeFast(local);
-		d = DotProduct(local, normal);
+	if ( normal && (normal[0] || normal[1] || normal[2]) )
+	{
+		VectorSubtract( backEnd.viewParms.orientation.origin, point, local );
+		VectorNormalizeFast( local );
+		d = DotProduct( local, normal );
 
 		// If the viewer is behind the flare don't add it.
-		if (d < 0)
-			return;
+		//if ( d < 0 )
+		//	return;
 	}
 
 	// if the point is off the screen, don't bother adding it
 	// calculate screen coordinates and depth
-	R_TransformModelToClip(point, backEnd. or .modelMatrix, backEnd.viewParms.projectionMatrix, eye, clip);
+	R_TransformModelToClip( point, backEnd.orientation.modelMatrix,
+							backEnd.viewParms.projectionMatrix, eye, clip );
 
 	//ri.Printf(PRINT_ALL, "src:  %f  %f  %f  \n", point[0], point[1], point[2]);
 	//ri.Printf(PRINT_ALL, "eye:  %f  %f  %f  %f\n", eye[0], eye[1], eye[2], eye[3]);
@@ -166,11 +166,11 @@ void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, float s
 	}
 
 	// see if a flare with a matching surface, scene, and view exists
-	for ( f = r_activeFlares; f; f = f->next ) {
+	for ( f = r_activeFlares ; f ; f = f->next ) {
 //		if ( f->surface == surface && f->frameSceneNum == backEnd.viewParms.frameSceneNum && f->inPortal == backEnd.viewParms.isPortal ) {
 
 		// (SA) added back in more checks for different scenes
-		if ( f->id == id && f->frameSceneNum == backEnd.viewParms.frameSceneNum && f->inPortal == backEnd.viewParms.isPortal ) {
+		if ( f->id == id && f->frameSceneNum == backEnd.viewParms.frameSceneNum && f->portalView == backEnd.viewParms.portalView ) {
 			break;
 		}
 	}
@@ -188,7 +188,7 @@ void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, float s
 
 		f->surface = surface;
 		f->frameSceneNum = backEnd.viewParms.frameSceneNum;
-		f->inPortal = backEnd.viewParms.isPortal;
+		f->portalView = backEnd.viewParms.portalView;
 		f->addedFrame = -1;
 		f->id = id;
 	}
@@ -203,14 +203,13 @@ void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, float s
 	f->addedFrame = backEnd.viewParms.frameCount;
 	f->fogNum = fogNum;
 
-	VectorCopy( point, f->origin );
 	VectorCopy( color, f->color );
 
 	f->scale = scale;   //----(SA)
 
 	// fade the intensity of the flare down as the
 	// light surface turns away from the viewer
-	VectorScale(f->color, d, f->color);
+	VectorScale( f->color, d, f->color );
 
 	// save info needed to test
 	f->windowX = backEnd.viewParms.viewportX + window[0];
@@ -219,49 +218,51 @@ void RB_AddFlare( void *surface, int fogNum, vec3_t point, vec3_t color, float s
 	f->eyeZ = eye[2];
 }
 
+
 /*
 ==================
 RB_AddDlightFlares
 ==================
 */
 void RB_AddDlightFlares( void ) {
-	dlight_t *l;
-	int i, j, k;
-	int id = 0;
-	fog_t *fog = NULL;
+	dlight_t		*l;
+	int				i, j, k;
+	int				id = 0;
+	const fog_t     *fog = NULL;
 
 	if ( r_flares->integer < 2 ) {
 		return;
 	}
 
 	l = backEnd.refdef.dlights;
-	if (tr.world)
+
+	if(tr.world)
 		fog = tr.world->fogs;
 
-	for (i = 0; i < backEnd.refdef.num_dlights; i++, l++) {
+	for ( i = 0 ; i < backEnd.refdef.num_dlights ; i++, l++ ) {
 
-		// find which fog volume the light is in
-		if (fog) {
-			// find which fog volume the light is in 
-			for (j = 1; j < tr.world->numfogs; j++) {
+		if(fog)
+		{
+			// find which fog volume the light is in
+			for ( j = 1 ; j < tr.world->numfogs ; j++ ) {
 				fog = &tr.world->fogs[j];
-				for (k = 0; k < 3; k++) {
-					if (l->origin[k] < fog->bounds[0][k] || l->origin[k] > fog->bounds[1][k]) {
+				for ( k = 0 ; k < 3 ; k++ ) {
+					if ( l->origin[k] < fog->bounds[0][k] || l->origin[k] > fog->bounds[1][k] ) {
 						break;
 					}
 				}
-				if (k == 3) {
+				if ( k == 3 ) {
 					break;
 				}
 			}
-			if (j == tr.world->numfogs) {
+			if ( j == tr.world->numfogs ) {
 				j = 0;
 			}
 		}
 		else
 			j = 0;
 
-		RB_AddFlare((void*)l, j, l->origin, l->color, 1.0f, NULL, id++, qtrue);  //----(SA)	also set scale
+		RB_AddFlare( (void *)l, j, l->origin, l->color, 1.0f, NULL, id++, qtrue );  //----(SA)	also set scale
 	}
 }
 
@@ -272,9 +273,9 @@ RB_AddCoronaFlares
 ==============
 */
 void RB_AddCoronaFlares( void ) {
-	corona_t        *cor;
-	int i, j, k;
-	fog_t           *fog;
+	corona_t		*cor;
+	int				i, j, k;
+	const fog_t		*fog = NULL;
 
 	if ( r_flares->integer != 1 && r_flares->integer != 3 ) {
 		return;
@@ -320,12 +321,32 @@ FLARE BACK END
 RB_TestFlare
 ==================
 */
-void RB_TestFlare( flare_t *f ) {
+static void RB_TestFlare( flare_t *f ) {
+//	float			depth;
 	qboolean visible;
 	float fade;
+//	float			screenZ;
 
 	backEnd.pc.c_flareTests++;
 
+	// doing a readpixels is as good as doing a glFinish(), so
+	// don't bother with another sync
+//	glState.finishCalled = qfalse;
+//	glState.finishCalled = qtrue;	// (SA) Hmm, shouldn't this be true?
+
+	// read back the z buffer contents
+//	qglReadPixels( f->windowX, f->windowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth );
+//	screenZ = backEnd.viewParms.projectionMatrix[14] /
+//		( ( 2*depth - 1 ) * backEnd.viewParms.projectionMatrix[11] - backEnd.viewParms.projectionMatrix[10] );
+
+	//----(SA)	24 was way to low tolerance.  It gave Dan problems with free standing light fixtures
+	//----(SA)	I will monitor to see if changing this screws up any other situations
+	//----(SA)	and 2 was way to high tolerance
+//	visible = ( -f->eyeZ - -screenZ ) < 2;
+//	visible = ( -f->eyeZ - -screenZ ) < 24;
+//	visible = ( -f->eyeZ - -screenZ ) < 6;
+
+//	visible = qtrue;
 	visible = f->cgvisible;
 
 	if ( visible ) {
@@ -334,8 +355,7 @@ void RB_TestFlare( flare_t *f ) {
 			f->fadeTime = backEnd.refdef.time - 1;
 		}
 		fade = ( ( backEnd.refdef.time - f->fadeTime ) / 1000.0f ) * r_flareFade->value;
-	} 
-	else {
+	} else {
 		if ( f->visible ) {
 			f->visible = qfalse;
 			f->fadeTime = backEnd.refdef.time - 1;
@@ -353,128 +373,52 @@ void RB_TestFlare( flare_t *f ) {
 	f->drawIntensity = fade;
 }
 
+
 /*
 ==================
 RB_RenderFlare
 ==================
 */
-void RB_RenderFlare( flare_t *f ) {
-	float size;
-	vec3_t color;
-	int iColor[3];
-	float distance, intensity, factor;
-	byte fogFactors[3] = {255, 255, 255};
+static void RB_RenderFlare( flare_t *f ) {
+	float			size;
+	vec3_t			color;
+	float distance;//, intensity, factor;
+	//byte fogFactors[3] = {255, 255, 255};
+	color4ub_t		c;
 
 	backEnd.pc.c_flareRenders++;
 
 	// We don't want too big values anyways when dividing by distance.
-	if (f->eyeZ > -1.0f)
+	if ( f->eyeZ > -1.0f )
 		distance = 1.0f;
 	else
 		distance = -f->eyeZ;
 
 	// calculate the flare size..
-	size = backEnd.viewParms.viewportWidth * (r_flareSize->value / 640.0f + 8 / distance);
+	size = backEnd.viewParms.viewportWidth * ( ( r_flareSize->value * f->scale )/640.0f + 8 / distance );
 
-	/*
-	* This is an alternative to intensity scaling. It changes the size of the flare on screen instead
-	* with growing distance. See in the description at the top why this is not the way to go.
-	// size will change ~ 1/r.
-	size = backEnd.viewParms.viewportWidth * (r_flareSize->value / (distance * -2.0f));
-	*/
+//----(SA)	changed to use alpha blend rather than additive blend
+//			this is to accomidate the fact we can't right now do
+//			additive blends and have them fog correctly with our distance fog.
+//		/when/ we fix the blend problems with distance fog, this should
+//		be changed back to additive since there's nearly no hit for that
+//		but the alpha blend is noticably slower.
 
-	/*
-	* As flare sizes stay nearly constant with increasing distance we must decrease the intensity
-	* to achieve a reasonable visual result. The intensity is ~ (size^2 / distance^2) which can be
-	* got by considering the ratio of
-	* (flaresurface on screen) : (Surface of sphere defined by flare origin and distance from flare)
-	* An important requirement is:
-	* intensity <= 1 for all distances.
-	*
-	* The formula used here to compute the intensity is as follows:
-	* intensity = flareCoeff * size^2 / (distance + size*sqrt(flareCoeff))^2
-	* As you can see, the intensity will have a max. of 1 when the distance is 0.
-	* The coefficient flareCoeff will determine the falloff speed with increasing distance.
-	*/
+//	VectorScale( f->color, f->drawIntensity*tr.identityLight, color );
+	VectorScale( f->color, tr.identityLight, color );       //----(SA)	mod for alpha blend rather than additive
 
-	factor = distance + size * sqrt(flareCoeff);
-	intensity = flareCoeff * size * size / (factor * factor);
+	RB_BeginSurface( tr.flareShader, f->fogNum );
 
-	VectorScale(f->color, f->drawIntensity * intensity, color);
-
-	// Calculations for fogging
-	if (tr.world && f->fogNum > 0 && f->fogNum < tr.world->numfogs) {
-		tess.numVertexes = 1;
-		VectorCopy(f->origin, tess.xyz[0]);
-		tess.fogNum = f->fogNum;
-
-		RB_CalcModulateColorsByFog(fogFactors);
-
-		// We don't need to render the flare if colors are 0 anyways.
-		if (!(fogFactors[0] || fogFactors[1] || fogFactors[2]))
-			return;
-	}
-
-	iColor[0] = color[0] * fogFactors[0];
-	iColor[1] = color[1] * fogFactors[1];
-	iColor[2] = color[2] * fogFactors[2];
-
-	RB_BeginSurface(tr.flareShader, f->fogNum);
-
-	// FIXME: use quadstamp?
-	tess.xyz[tess.numVertexes][0] = f->windowX - size;
-	tess.xyz[tess.numVertexes][1] = f->windowY - size;
-	tess.texCoords[tess.numVertexes][0][0] = 0;
-	tess.texCoords[tess.numVertexes][0][1] = 0;
-	tess.vertexColors[tess.numVertexes][0] = iColor[0];
-	tess.vertexColors[tess.numVertexes][1] = iColor[1];
-	tess.vertexColors[tess.numVertexes][2] = iColor[2];
-	tess.vertexColors[tess.numVertexes][3] = f->drawIntensity * 255;      //----(SA)	mod for alpha blend rather than additive
-//	tess.vertexColors[tess.numVertexes][3] = 255;		//----(SA)	mod for alpha blend rather than additive
-	tess.numVertexes++;
-
-	tess.xyz[tess.numVertexes][0] = f->windowX - size;
-	tess.xyz[tess.numVertexes][1] = f->windowY + size;
-	tess.texCoords[tess.numVertexes][0][0] = 0;
-	tess.texCoords[tess.numVertexes][0][1] = 1;
-	tess.vertexColors[tess.numVertexes][0] = iColor[0];
-	tess.vertexColors[tess.numVertexes][1] = iColor[1];
-	tess.vertexColors[tess.numVertexes][2] = iColor[2];
-	tess.vertexColors[tess.numVertexes][3] = f->drawIntensity * 255;      //----(SA)	mod for alpha blend rather than additive
-//	tess.vertexColors[tess.numVertexes][3] = 255;		//----(SA)	mod for alpha blend rather than additive
-	tess.numVertexes++;
-
-	tess.xyz[tess.numVertexes][0] = f->windowX + size;
-	tess.xyz[tess.numVertexes][1] = f->windowY + size;
-	tess.texCoords[tess.numVertexes][0][0] = 1;
-	tess.texCoords[tess.numVertexes][0][1] = 1;
-	tess.vertexColors[tess.numVertexes][0] = iColor[0];
-	tess.vertexColors[tess.numVertexes][1] = iColor[1];
-	tess.vertexColors[tess.numVertexes][2] = iColor[2];
-	tess.vertexColors[tess.numVertexes][3] = f->drawIntensity * 255;      //----(SA)	mod for alpha blend rather than additive
-//	tess.vertexColors[tess.numVertexes][3] = 255;		//----(SA)	mod for alpha blend rather than additive
-	tess.numVertexes++;
-
-	tess.xyz[tess.numVertexes][0] = f->windowX + size;
-	tess.xyz[tess.numVertexes][1] = f->windowY - size;
-	tess.texCoords[tess.numVertexes][0][0] = 1;
-	tess.texCoords[tess.numVertexes][0][1] = 0;
-	tess.vertexColors[tess.numVertexes][0] = iColor[0];
-	tess.vertexColors[tess.numVertexes][1] = iColor[1];
-	tess.vertexColors[tess.numVertexes][2] = iColor[2];
-	tess.vertexColors[tess.numVertexes][3] = f->drawIntensity * 255;      //----(SA)	mod for alpha blend rather than additive
-//	tess.vertexColors[tess.numVertexes][3] = 255;		//----(SA)	mod for alpha blend rather than additive
-	tess.numVertexes++;
-
-	tess.indexes[tess.numIndexes++] = 0;
-	tess.indexes[tess.numIndexes++] = 1;
-	tess.indexes[tess.numIndexes++] = 2;
-	tess.indexes[tess.numIndexes++] = 0;
-	tess.indexes[tess.numIndexes++] = 2;
-	tess.indexes[tess.numIndexes++] = 3;
+	c[0] = color[0] * 255;
+	c[1] = color[1] * 255;
+	c[2] = color[2] * 255;
+	c[3] = f->drawIntensity * 255;
+	
+	RB_AddQuadStamp2( f->windowX - size, f->windowY - size, size * 2, size * 2, 0, 0, 1, 1, c );
 
 	RB_EndSurface();
 }
+
 
 /*
 ==================
@@ -492,28 +436,30 @@ when occluded by something in the main view, and portal flares that should
 extend past the portal edge will be overwritten.
 ==================
 */
-void RB_RenderFlares( void ) {
-	flare_t     *f;
-	flare_t     **prev;
-	qboolean draw;
+void RB_RenderFlares (void) {
+	flare_t		*f;
+	flare_t		**prev;
+	qboolean	draw;
 
 	if ( !r_flares->integer ) {
 		return;
 	}
 
-	if (r_flareCoeff->modified) {
-		if (r_flareCoeff->value == 0.0f)
-			flareCoeff = atof(FLARE_STDCOEFF);
-		else
-			flareCoeff = r_flareCoeff->value;
-
-		r_flareCoeff->modified = qfalse;
+	if ( backEnd.isHyperspace ) {
+		return;
 	}
 
 	// Reset currentEntity to world so that any previously referenced entities
 	// don't have influence on the rendering of these flares (i.e. RF_ renderer flags).
 	backEnd.currentEntity = &tr.worldEntity;
-	backEnd. or = backEnd.viewParms.world;
+	backEnd.orientation = backEnd.viewParms.world;
+
+#ifdef USE_FBO
+	// we can't read from multisampled renderbuffer storage
+	if ( blitMSfbo ) {
+		FBO_BlitMS( qtrue );
+	}
+#endif
 
 	// (SA) turned light flares back on.  must evaluate problem id had with this
 	RB_AddDlightFlares();
@@ -534,12 +480,11 @@ void RB_RenderFlares( void ) {
 		// don't draw any here that aren't from this scene / portal
 		f->drawIntensity = 0;
 		if ( f->frameSceneNum == backEnd.viewParms.frameSceneNum
-			 && f->inPortal == backEnd.viewParms.isPortal ) {
+			&& f->portalView == backEnd.viewParms.portalView ) {
 			RB_TestFlare( f );
 			if ( f->drawIntensity ) {
 				draw = qtrue;
-			} 
-			else {
+			} else {
 				// this flare has completely faded out, so remove it from the chain
 				*prev = f->next;
 				f->next = r_inactiveFlares;
@@ -551,11 +496,18 @@ void RB_RenderFlares( void ) {
 		prev = &f->next;
 	}
 
+#ifdef USE_FBO
+	// bind primary framebuffer again
+	if ( blitMSfbo ) {
+		FBO_BindMain();
+	}
+#endif
+
 	if ( !draw ) {
-		return;     // none visible
+		return;		// none visible
 	}
 
-	if ( backEnd.viewParms.isPortal ) {
+	if ( backEnd.viewParms.portalView != PV_NONE ) {
 		qglDisable( GL_CLIP_PLANE0 );
 	}
 
@@ -563,15 +515,13 @@ void RB_RenderFlares( void ) {
 	qglLoadIdentity();
 	qglMatrixMode( GL_PROJECTION );
 	qglPushMatrix();
-	qglLoadIdentity();
-	qglOrtho( backEnd.viewParms.viewportX, backEnd.viewParms.viewportX + backEnd.viewParms.viewportWidth,
-			  backEnd.viewParms.viewportY, backEnd.viewParms.viewportY + backEnd.viewParms.viewportHeight,
-			  -99999, 99999 );
+	qglLoadMatrixf( GL_Ortho( backEnd.viewParms.viewportX, backEnd.viewParms.viewportX + backEnd.viewParms.viewportWidth,
+		backEnd.viewParms.viewportY, backEnd.viewParms.viewportY + backEnd.viewParms.viewportHeight, -99999, 99999 ) );
 
 	for ( f = r_activeFlares ; f ; f = f->next ) {
 		if ( f->frameSceneNum == backEnd.viewParms.frameSceneNum
-			 && f->inPortal == backEnd.viewParms.isPortal
-			 && f->drawIntensity ) {
+			&& f->portalView == backEnd.viewParms.portalView
+			&& f->drawIntensity ) {
 			RB_RenderFlare( f );
 		}
 	}
@@ -580,4 +530,3 @@ void RB_RenderFlares( void ) {
 	qglMatrixMode( GL_MODELVIEW );
 	qglPopMatrix();
 }
-
