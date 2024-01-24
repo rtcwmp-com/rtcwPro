@@ -13,6 +13,7 @@
 src/Backup/*.*
 src/.vs/*.*
 src/rtcwpro/
+deps
 # we should not put dll / so / object files in the repo
 *.dll
 *.so
