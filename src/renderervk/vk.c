@@ -1557,13 +1557,13 @@ static qboolean vk_create_device( VkPhysicalDevice physical_device, int device_i
 
 
 #define INIT_INSTANCE_FUNCTION(func) \
-	q##func = /*(PFN_ ## func)*/ ri.VK_GetInstanceProcAddr(vk_instance, #func); \
+	q##func = /*(PFN_ ## func)*/ VK_GetInstanceProcAddr(vk_instance, #func); \
 	if (q##func == NULL) {											\
 		ri.Error(ERR_FATAL, "Failed to find entrypoint %s", #func);	\
 	}
 
 #define INIT_INSTANCE_FUNCTION_EXT(func) \
-	q##func = /*(PFN_ ## func)*/ ri.VK_GetInstanceProcAddr(vk_instance, #func);
+	q##func = /*(PFN_ ## func)*/ VK_GetInstanceProcAddr(vk_instance, #func);
 
 
 #define INIT_DEVICE_FUNCTION(func) \
@@ -1600,6 +1600,8 @@ static void vk_destroy_instance( void ) {
 		vk_instance = VK_NULL_HANDLE;
 	}
 }
+
+
 
 
 static void init_vulkan_library( void )
@@ -1660,7 +1662,7 @@ static void init_vulkan_library( void )
 #endif
 
 		// create surface
-		if ( !ri.VK_CreateSurface( vk_instance, &vk_surface ) ) {
+		if ( !VK_CreateSurface( vk_instance, &vk_surface ) ) {
 			ri.Error( ERR_FATAL, "Error creating Vulkan surface" );
 			return;
 		}
@@ -3794,7 +3796,7 @@ void vk_initialize( void )
 	{
 		VkDescriptorPoolSize pool_size[3];
 		VkDescriptorPoolCreateInfo desc;
-		uint32_t i, maxSets;
+		uint32_t maxSets;
 
 		pool_size[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		pool_size[0].descriptorCount = MAX_DRAWIMAGES + 1 + 1 + 1 + VK_NUM_BLOOM_PASSES * 2; // color, screenmap, bloom descriptors
@@ -6843,7 +6845,7 @@ void vk_begin_frame( void )
 {
 	VkCommandBufferBeginInfo begin_info;
 	//VkFramebuffer frameBuffer;
-	VkResult res;
+	VkResult result;
 
 	if ( vk.frame_count++ ) // might happen during stereo rendering
 		return;
@@ -6864,15 +6866,15 @@ void vk_begin_frame( void )
 					ri.Error(ERR_FATAL, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(res));
 				}
 			}*/
-			res = qvkAcquireNextImageKHR( vk.device, vk.swapchain, 5 * 1000000000ULL, vk.cmd->image_acquired, VK_NULL_HANDLE, &vk.swapchain_image_index );
+			result = qvkAcquireNextImageKHR( vk.device, vk.swapchain, 5 * 1000000000ULL, vk.cmd->image_acquired, VK_NULL_HANDLE, &vk.swapchain_image_index );
 			// when running via RDP: "Application has already acquired the maximum number of images (0x2)"
 			// probably caused by "device lost" errors
-			if ( res < 0 ) {
-				if ( res == VK_ERROR_OUT_OF_DATE_KHR ) {
+			if (result < 0 ) {
+				if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
 					// swapchain re-creation needed
 					vk_restart_swapchain( __func__ );
 				} else {
-					ri.Error( ERR_FATAL, "vkAcquireNextImageKHR returned %s", vk_result_string( res ) );
+					ri.Error( ERR_FATAL, "vkAcquireNextImageKHR returned %s", vk_result_string(result) );
 				}
 			}
 		} else {
@@ -6881,13 +6883,13 @@ void vk_begin_frame( void )
 		}
 
 		vk.cmd->waitForFence = qfalse;
-		res = qvkWaitForFences( vk.device, 1, &vk.cmd->rendering_finished_fence, VK_FALSE, 1e10 );
-		if ( res != VK_SUCCESS ) {
-			if ( res == VK_ERROR_DEVICE_LOST ) {
+		result = qvkWaitForFences( vk.device, 1, &vk.cmd->rendering_finished_fence, VK_FALSE, 1e10 );
+		if (result != VK_SUCCESS ) {
+			if (result == VK_ERROR_DEVICE_LOST ) {
 				// silently discard previous command buffer
-				ri.Printf( PRINT_WARNING, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string( res ) );
+				ri.Printf( PRINT_WARNING, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(result) );
 			} else {
-				ri.Error( ERR_FATAL, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string( res ) );
+				ri.Error( ERR_FATAL, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(result) );
 			}
 		}
 	} else {
@@ -6995,7 +6997,7 @@ void vk_end_frame( void )
 	const VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	VkPresentInfoKHR present_info;
 	VkSubmitInfo submit_info;
-	VkResult res;
+	VkResult result;
 
 	if ( vk.frame_count == 0 )
 		return;
@@ -7087,17 +7089,17 @@ void vk_end_frame( void )
 	present_info.pImageIndices = &vk.swapchain_image_index;
 	present_info.pResults = NULL;
 
-	res = qvkQueuePresentKHR( vk.queue, &present_info );
-	if ( res < 0 ) {
-		if ( res == VK_ERROR_DEVICE_LOST ) {
+	result = qvkQueuePresentKHR( vk.queue, &present_info );
+	if (result < 0 ) {
+		if (result == VK_ERROR_DEVICE_LOST ) {
 			 // we can ignore that
 			ri.Printf( PRINT_DEVELOPER, "vkQueuePresentKHR: device lost\n" );
-		} else if ( res == VK_ERROR_OUT_OF_DATE_KHR ) {
+		} else if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
 			// swapchain re-creation needed
 			vk_restart_swapchain( __func__ );
 		} else {
 			// or we don't
-			ri.Error( ERR_FATAL, "vkQueuePresentKHR returned %s", vk_result_string( res ) );
+			ri.Error( ERR_FATAL, "vkQueuePresentKHR returned %s", vk_result_string(result) );
 		}
 	}
 }

@@ -89,6 +89,8 @@ void    IN_DeactivateWin32Mouse( void );
 void    IN_Activate( qboolean active );
 void    IN_Frame( void );
 
+void	IN_UpdateWindow(RECT* window_rect, qboolean updateClipRegion);
+
 void	IN_RawInput_MouseRead(HANDLE in_device_handle); // RTCWPro - raw input
 void	UpdateMonitorInfo(const RECT* target);
 

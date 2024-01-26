@@ -2451,4 +2451,10 @@ extern void VBO_ClearQueue( void );
 extern void VBO_Flush( void );
 #endif
 
+void	GL_API_Init(glconfig_t* config);
+void	GL_API_Shutdown(qboolean unloadDLL);
+
+void* VK_GetInstanceProcAddr(VkInstance instance, const char* name);
+qboolean VK_CreateSurface(VkInstance instance, VkSurfaceKHR* pSurface);
+
 #endif //TR_LOCAL_H

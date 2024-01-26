@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../renderercommon/vulkan/vulkan.h"
+#include "vulkan/vulkan.h"
 #include "tr_common.h"
 
 #define MAX_SWAPCHAIN_IMAGES 8

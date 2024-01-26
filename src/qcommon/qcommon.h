@@ -1260,7 +1260,7 @@ void    Sys_FreeFileList( char **list );
 void    Sys_BeginProfiling( void );
 void    Sys_EndProfiling( void );
 
-qboolean Sys_LowPhysicalMemory();
+qboolean Sys_LowPhysicalMemory( void );
 unsigned int Sys_ProcessorCount();
 
 void* GetMemory(unsigned long size);

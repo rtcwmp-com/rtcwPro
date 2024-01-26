@@ -244,9 +244,6 @@
     <ClCompile Include="win32\win_gamma.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="win32\win_qvk.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="client\cl_jpeg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -334,12 +331,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\surfaceflags.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\tr_local.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\tr_public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cgame\tr_types.h">

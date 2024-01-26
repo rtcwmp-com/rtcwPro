@@ -30,7 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #define __TR_PUBLIC_H
 
 #include "tr_types.h"
-#include "vulkan/vulkan.h"
 
 #define REF_API_VERSION     8
 
@@ -162,6 +161,8 @@ typedef struct {
 
 	void* (*GetImageBuffer)(int size, bufferMemType_t bufferType);
 
+	qboolean (*ApiInit)(void);
+	void (*ApiShutdown)(qboolean);
 
 } refexport_t;
 
@@ -283,7 +284,7 @@ typedef struct {
 	const void *(*Sys_OmnibotRender)( const void *data );
 
 	int		(*Com_RealTime)( qtime_t *qtime );
-	int		(*Com_Filter)( const char *filter, const char *name );
+	int		(*Com_Filter)( const char *filter, const char *name);
 	int		(*MSG_HashKey)( const char *string, int maxlen );
 
 	// platform-dependent functions
@@ -299,10 +300,8 @@ typedef struct {
 	void*	(*GL_GetProcAddress)( const char *name );
 
 	// Vulkan
-	void	(*VKimp_Init)( glconfig_t *config );
-	void	(*VKimp_Shutdown)( qboolean unloadDLL );
-	void*	(*VK_GetInstanceProcAddr)( VkInstance instance, const char *name );
-	qboolean (*VK_CreateSurface)( VkInstance instance, VkSurfaceKHR *pSurface );
+	void	(*GL_API_Init)( glconfig_t *config );
+	void	(*GL_API_Shutdown)( qboolean unloadDLL );
 
 } refimport_t;
 

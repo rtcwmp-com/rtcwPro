@@ -481,7 +481,6 @@ LONG WINAPI MainWndProc(
 	static qboolean focused = qfalse;
 	qboolean active;
 	qboolean minimized;
-	int zDelta, i;
 
 	if ( uMsg == MSH_MOUSEWHEEL ) {
 		if ( ( ( int ) wParam ) > 0 ) {

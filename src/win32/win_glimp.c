@@ -46,13 +46,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "win_local.h"
 #include "glw_win.h"
 
-#ifdef USE_OPENGL_API
-#include "../renderer/qgl.h"
-
-// Enable High Performance Graphics while using Integrated Graphics.
-__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;		// Nvidia
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;	// AMD
-#endif
 
 typedef enum {
 	RSERR_OK,
@@ -74,8 +67,7 @@ typedef enum {
 static DEVMODE dm_desktop;
 static DEVMODE dm_current;
 
-static rserr_t	GLW_SetMode(int mode, const char* modeFS, int colorbits,
-	qboolean cdsFullscreen, qboolean vulkan);
+static rserr_t	GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean cdsFullscreen);
 
 //
 // function declaration
@@ -86,8 +78,8 @@ void		QGL_Shutdown(qboolean unloadDLL);
 #endif
 
 #ifdef USE_VULKAN_API
-qboolean	QVK_Init(void);
-void		QVK_Shutdown(qboolean unloadDLL);
+qboolean	RE_Init(void);
+void		RE_Shutdown(qboolean unloadDLL);
 #endif
 
 //
@@ -95,27 +87,15 @@ void		QVK_Shutdown(qboolean unloadDLL);
 //
 glwstate_t glw_state;
 
-// GLimp-specific cvars
-#ifdef USE_OPENGL_API
-static cvar_t* r_maskMinidriver;		// allow a different dll name to be treated as if it were opengl32.dll
-static cvar_t* r_stereoEnabled;
-static cvar_t* r_verbose;				// used for verbose debug spew
-#endif
-
-#ifdef USE_OPENGL_API
-int gl_NormalFontBase = 0;
-static qboolean fontbase_init = qfalse;
-#endif
-
 /*
 ** GLW_StartDriverAndSetMode
 */
 static rserr_t GLW_StartDriverAndSetMode(int mode, const char* modeFS, int colorbits,
-	qboolean cdsFullscreen, qboolean vulkan)
+	qboolean cdsFullscreen)
 {
 	rserr_t err;
 
-	err = GLW_SetMode(mode, modeFS, colorbits, cdsFullscreen, vulkan);
+	err = GLW_SetMode(mode, modeFS, colorbits, cdsFullscreen);
 
 	switch (err)
 	{
@@ -132,501 +112,7 @@ static rserr_t GLW_StartDriverAndSetMode(int mode, const char* modeFS, int color
 }
 
 
-#ifdef USE_OPENGL_API
-/*
-** GLW_ChoosePFD
-**
-** Helper function that replaces ChoosePixelFormat.
-*/
-static int GLW_ChoosePFD(HDC hDC, PIXELFORMATDESCRIPTOR* pPFD)
-{
-	PIXELFORMATDESCRIPTOR* pfds;
-	int maxPFD, bestMatch;
-	int i;
 
-	Com_Printf("...GLW_ChoosePFD( %d, %d, %d )\n", (int)pPFD->cColorBits, (int)pPFD->cDepthBits, (int)pPFD->cStencilBits);
-
-	// count number of PFDs
-#ifdef _MSC_VER
-	__try {
-		maxPFD = DescribePixelFormat(hDC, 1, sizeof(PIXELFORMATDESCRIPTOR), NULL);
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER) {
-		Com_Error(ERR_FATAL, "DescribePixelFormat() crashed");
-		return 0;
-	}
-#else
-	maxPFD = DescribePixelFormat(hDC, 1, sizeof(PIXELFORMATDESCRIPTOR), NULL);
-#endif
-
-	pfds = Z_Malloc((maxPFD + 1) * sizeof(PIXELFORMATDESCRIPTOR));
-
-	Com_Printf("...%d PFDs found\n", maxPFD - 1);
-
-	// grab information
-	for (i = 1; i <= maxPFD; i++)
-	{
-		DescribePixelFormat(hDC, i, sizeof(PIXELFORMATDESCRIPTOR), &pfds[i]);
-	}
-
-__rescan:
-
-	bestMatch = 0;
-
-	// look for a best match
-	for (i = 1; i <= maxPFD; i++)
-	{
-		//
-		// make sure this has hardware acceleration
-		//
-		if ((pfds[i].dwFlags & PFD_GENERIC_FORMAT) != 0)
-		{
-			if (!r_allowSoftwareGL->integer)
-			{
-				if (r_verbose->integer)
-				{
-					Com_Printf("...PFD %d rejected, software acceleration\n", i);
-				}
-				continue;
-			}
-		}
-
-		// verify pixel type
-		if (pfds[i].iPixelType != PFD_TYPE_RGBA)
-		{
-			if (r_verbose->integer)
-			{
-				Com_Printf("...PFD %d rejected, not RGBA\n", i);
-			}
-			continue;
-		}
-
-		// verify proper flags
-		if ((pfds[i].dwFlags & pPFD->dwFlags) != pPFD->dwFlags)
-		{
-			if (r_verbose->integer)
-			{
-				Com_Printf("...PFD %d rejected, improper flags (%lx instead of %lx)\n", i, pfds[i].dwFlags, pPFD->dwFlags);
-			}
-			continue;
-		}
-
-		// verify enough bits
-		if (pfds[i].cDepthBits < 15)
-		{
-			continue;
-		}
-		if ((pfds[i].cStencilBits < 4) && (pPFD->cStencilBits > 0))
-		{
-			continue;
-		}
-
-		//
-		// selection criteria (in order of priority):
-		// 
-		//  PFD_STEREO
-		//  colorBits
-		//  depthBits
-		//  stencilBits
-		//
-		if (bestMatch)
-		{
-			// check stereo
-			if ((pfds[i].dwFlags & PFD_STEREO) && (!(pfds[bestMatch].dwFlags & PFD_STEREO)) && (pPFD->dwFlags & PFD_STEREO))
-			{
-				bestMatch = i;
-				continue;
-			}
-
-			if (!(pfds[i].dwFlags & PFD_STEREO) && (pfds[bestMatch].dwFlags & PFD_STEREO) && (pPFD->dwFlags & PFD_STEREO))
-			{
-				bestMatch = i;
-				continue;
-			}
-
-			// check color
-			if (pfds[bestMatch].cColorBits != pPFD->cColorBits)
-			{
-				// prefer perfect match
-				if (pfds[i].cColorBits == pPFD->cColorBits)
-				{
-					bestMatch = i;
-					continue;
-				}
-				// otherwise if this PFD has more bits than our best, use it
-				else if (pfds[i].cColorBits > pfds[bestMatch].cColorBits)
-				{
-					bestMatch = i;
-					continue;
-				}
-			}
-
-			// check depth
-			if (pfds[bestMatch].cDepthBits != pPFD->cDepthBits)
-			{
-				// prefer perfect match
-				if (pfds[i].cDepthBits == pPFD->cDepthBits)
-				{
-					bestMatch = i;
-					continue;
-				}
-				// otherwise if this PFD has more bits than our best, use it
-				else if (pfds[i].cDepthBits > pfds[bestMatch].cDepthBits)
-				{
-					bestMatch = i;
-					continue;
-				}
-			}
-
-			// check stencil
-			if (pfds[bestMatch].cStencilBits != pPFD->cStencilBits)
-			{
-				// prefer perfect match
-				if (pfds[i].cStencilBits == pPFD->cStencilBits)
-				{
-					bestMatch = i;
-					continue;
-				}
-				// otherwise if this PFD has more bits than our best, use it
-				else if ((pfds[i].cStencilBits > pfds[bestMatch].cStencilBits) &&
-					(pPFD->cStencilBits > 0))
-				{
-					bestMatch = i;
-					continue;
-				}
-			}
-		}
-		else
-		{
-			bestMatch = i;
-		}
-	}
-
-	if (!bestMatch)
-	{
-		if (pPFD->dwFlags & PFD_SUPPORT_COMPOSITION)
-		{
-			// this can be a problem if we are working via RDP for example
-			pPFD->dwFlags &= ~PFD_SUPPORT_COMPOSITION;
-			goto __rescan;
-		}
-		Z_Free(pfds);
-		return 0;
-	}
-
-	if ((pfds[bestMatch].dwFlags & PFD_GENERIC_FORMAT) != 0)
-	{
-		if (!r_allowSoftwareGL->integer)
-		{
-			Com_Printf("...no hardware acceleration found\n");
-			Z_Free(pfds);
-			return 0;
-		}
-		else
-		{
-			Com_Printf("...using software emulation\n");
-		}
-	}
-	else if (pfds[bestMatch].dwFlags & PFD_GENERIC_ACCELERATED)
-	{
-		Com_Printf("...MCD acceleration found\n");
-	}
-	else
-	{
-		Com_Printf("...hardware acceleration found\n");
-	}
-
-	*pPFD = pfds[bestMatch];
-
-	Z_Free(pfds);
-
-	return bestMatch;
-}
-
-
-/*
-** void GLW_CreatePFD
-**
-** Helper function zeros out then fills in a PFD
-*/
-static void GLW_CreatePFD(PIXELFORMATDESCRIPTOR* pPFD, int colorbits, int depthbits, int stencilbits, qboolean stereo)
-{
-	PIXELFORMATDESCRIPTOR src =
-	{
-		sizeof(PIXELFORMATDESCRIPTOR),	// size of this pfd
-		1,								// version number
-		PFD_DRAW_TO_WINDOW |			// support window
-		PFD_SUPPORT_OPENGL |			// support OpenGL
-		PFD_DOUBLEBUFFER,				// double buffered
-		PFD_TYPE_RGBA,					// RGBA type
-		24,								// 24-bit color depth
-		0, 0, 0, 0, 0, 0,				// color bits ignored
-		0,								// no alpha buffer
-		0,								// shift bit ignored
-		0,								// no accumulation buffer
-		0, 0, 0, 0,						// accum bits ignored
-		24,								// 24-bit z-buffer	
-		8,								// 8-bit stencil buffer
-		0,								// no auxiliary buffer
-		PFD_MAIN_PLANE,					// main layer
-		0,								// reserved
-		0, 0, 0							// layer masks ignored
-	};
-
-	src.cColorBits = colorbits;
-	src.cDepthBits = depthbits;
-	src.cStencilBits = stencilbits;
-
-	if (!glw_state.cdsFullscreen)
-	{
-		src.dwFlags |= PFD_SUPPORT_COMPOSITION;
-	}
-
-	if (stereo)
-	{
-		Com_Printf("...attempting to use stereo\n");
-		src.dwFlags |= PFD_STEREO;
-		glw_state.config->stereoEnabled = qtrue;
-	}
-	else
-	{
-		glw_state.config->stereoEnabled = qfalse;
-	}
-
-	*pPFD = src;
-}
-
-
-/*
-** GLW_MakeContext
-*/
-static int GLW_MakeContext(PIXELFORMATDESCRIPTOR* pPFD)
-{
-	int pixelformat;
-
-	//
-	// don't putz around with pixelformat if it's already set (e.g. this is a soft
-	// reset of the graphics system)
-	//
-	if (!glw_state.pixelFormatSet)
-	{
-		//
-		// choose, set, and describe our desired pixel format.  If we're
-		// using a minidriver then we need to bypass the GDI functions,
-		// otherwise use the GDI functions.
-		//
-		if ((pixelformat = GLW_ChoosePFD(glw_state.hDC, pPFD)) == 0)
-		{
-			Com_Printf("...GLW_ChoosePFD failed\n");
-			return TRY_PFD_FAIL_SOFT;
-		}
-		Com_Printf("...PIXELFORMAT %d selected\n", pixelformat);
-
-		DescribePixelFormat(glw_state.hDC, pixelformat, sizeof(*pPFD), pPFD);
-
-		if (SetPixelFormat(glw_state.hDC, pixelformat, pPFD) == FALSE)
-		{
-			Com_Printf("...SetPixelFormat failed\n");
-			return TRY_PFD_FAIL_SOFT;
-		}
-
-		glw_state.pixelFormatSet = qtrue;
-	}
-
-	//
-	// startup the OpenGL subsystem by creating a context and making it current
-	//
-	if (!glw_state.hGLRC)
-	{
-		Com_Printf("...creating GL context: ");
-		if ((glw_state.hGLRC = qwglCreateContext(glw_state.hDC)) == 0)
-		{
-			Com_Printf("failed\n");
-
-			return TRY_PFD_FAIL_HARD;
-		}
-		Com_Printf("succeeded\n");
-
-		Com_Printf("...making context current: ");
-		if (!qwglMakeCurrent(glw_state.hDC, glw_state.hGLRC))
-		{
-			qwglDeleteContext(glw_state.hGLRC);
-			glw_state.hGLRC = NULL;
-			Com_Printf("failed\n");
-			return TRY_PFD_FAIL_HARD;
-		}
-		Com_Printf("succeeded\n");
-	}
-
-	return TRY_PFD_SUCCESS;
-}
-
-
-/*
-** GLW_InitOpenGLDriver
-**
-** - get a DC if one doesn't exist
-** - create an HGLRC if one doesn't exist
-*/
-static qboolean GLW_InitOpenGLDriver(int colorbits)
-{
-	int		tpfd;
-	int		depthbits, stencilbits;
-	static PIXELFORMATDESCRIPTOR pfd;	// save between frames since 'tr' gets cleared
-
-	Com_Printf("Initializing OpenGL driver\n");
-
-	//
-	// get a DC for our window if we don't already have one allocated
-	//
-	if (glw_state.hDC == NULL)
-	{
-		Com_Printf("...getting DC: ");
-
-		if ((glw_state.hDC = GetDC(g_wv.hWnd)) == NULL)
-		{
-			Com_Printf("failed\n");
-			return qfalse;
-		}
-		Com_Printf("succeeded\n");
-	}
-
-	//
-	// implicitly assume Z-buffer depth == desktop color depth
-	//
-	if (cl_depthbits->integer == 0) {
-		if (colorbits > 16) {
-			depthbits = 24;
-		}
-		else {
-			depthbits = 16;
-		}
-	}
-	else {
-		depthbits = cl_depthbits->integer;
-	}
-
-	//
-	// do not allow stencil if Z-buffer depth likely won't contain it
-	//
-	stencilbits = cl_stencilbits->integer;
-	if (depthbits < 24)
-	{
-		stencilbits = 0;
-	}
-
-	//
-	// make two attempts to set the PIXELFORMAT
-	//
-
-	//
-	// first attempt: r_colorbits, depthbits, and r_stencilbits
-	//
-	if (!glw_state.pixelFormatSet)
-	{
-		GLW_CreatePFD(&pfd, colorbits, depthbits, stencilbits, r_stereoEnabled->integer != 0);
-		if ((tpfd = GLW_MakeContext(&pfd)) != TRY_PFD_SUCCESS)
-		{
-			if (tpfd == TRY_PFD_FAIL_HARD)
-			{
-				Com_Printf(S_COLOR_YELLOW "...failed hard\n");
-				return qfalse;
-			}
-
-			//
-			// punt if we've already tried the desktop bit depth and no stencil bits
-			//
-			if ((r_colorbits->integer == glw_state.desktopBitsPixel) &&
-				(stencilbits == 0))
-			{
-				ReleaseDC(g_wv.hWnd, glw_state.hDC);
-				glw_state.hDC = NULL;
-
-				Com_Printf("...failed to find an appropriate PIXELFORMAT\n");
-
-				return qfalse;
-			}
-
-			//
-			// second attempt: desktop's color bits and no stencil
-			//
-			if (colorbits > glw_state.desktopBitsPixel)
-			{
-				colorbits = glw_state.desktopBitsPixel;
-			}
-			GLW_CreatePFD(&pfd, colorbits, depthbits, 0, r_stereoEnabled->integer != 0);
-			if (GLW_MakeContext(&pfd) != TRY_PFD_SUCCESS)
-			{
-				if (glw_state.hDC)
-				{
-					ReleaseDC(g_wv.hWnd, glw_state.hDC);
-					glw_state.hDC = NULL;
-				}
-
-				Com_Printf("...failed to find an appropriate PIXELFORMAT\n");
-
-				return qfalse;
-			}
-		}
-
-		/*
-		** report if stereo is desired but unavailable
-		*/
-		if (!(pfd.dwFlags & PFD_STEREO) && (r_stereoEnabled->integer != 0))
-		{
-			Com_Printf("...failed to select stereo pixel format\n");
-			glw_state.config->stereoEnabled = qfalse;
-		}
-	}
-
-	/*
-	** store PFD specifics
-	*/
-
-	glw_state.config->colorBits = (int)pfd.cColorBits;
-	glw_state.config->depthBits = (int)pfd.cDepthBits;
-	glw_state.config->stencilBits = (int)pfd.cStencilBits;
-
-	return qtrue;
-}
-#endif // USE_OPENGL_API
-
-
-/*
-** GLW_InitVulkanDriver
-*/
-#ifdef USE_VULKAN_API
-static qboolean GLW_InitVulkanDriver(int colorbits)
-{
-	int depthbits;
-	int stencilbits;
-
-	// implicitly assume Z-buffer depth == desktop color depth
-	if (cl_depthbits->integer == 0) {
-		if (colorbits > 16) {
-			depthbits = 24;
-		}
-		else {
-			depthbits = 16;
-		}
-	}
-	else {
-		depthbits = cl_depthbits->integer;
-	}
-
-	// do not allow stencil if Z-buffer depth likely won't contain it
-	stencilbits = cl_stencilbits->integer;
-	if (depthbits < 24) {
-		stencilbits = 0;
-	}
-
-	glw_state.config->colorBits = colorbits;
-	glw_state.config->depthBits = depthbits;
-	glw_state.config->stencilBits = stencilbits;
-
-	return qtrue;
-}
-#endif
 
 
 /*
@@ -634,7 +120,7 @@ static qboolean GLW_InitVulkanDriver(int colorbits)
 **
 ** Responsible for creating the Win32 window and initializing the OpenGL/Vulkan drivers.
 */
-static qboolean GLW_CreateWindow(int width, int height, int colorbits, qboolean cdsFullscreen, qboolean vulkan)
+static qboolean GLW_CreateWindow(int width, int height, int colorbits, qboolean cdsFullscreen)
 {
 	static qboolean s_classRegistered = qfalse;
 	RECT			r;
@@ -642,7 +128,6 @@ static qboolean GLW_CreateWindow(int width, int height, int colorbits, qboolean 
 	int				x, y, w, h;
 	int				exstyle;
 	qboolean		oldFullscreen;
-	qboolean		res = qfalse;
 	char windowTitle[sizeof(cl_title)  - 1 + 6] = { 0 };
 
 	//
@@ -779,28 +264,33 @@ static qboolean GLW_CreateWindow(int width, int height, int colorbits, qboolean 
 	if (colorbits == 0)
 		colorbits = dm_desktop.dmBitsPerPel;
 
-#ifdef USE_VULKAN_API
-	if (vulkan)
-		res = GLW_InitVulkanDriver(colorbits);
-#endif
-#ifdef USE_OPENGL_API
-	if (!vulkan)
-		res = GLW_InitOpenGLDriver(colorbits);
-#endif
 
-	if (!res)
-	{
-		//ShowWindow( g_wv.hWnd, SW_HIDE );
-		DestroyWindow(g_wv.hWnd);
-		g_wv.hWnd = NULL;
-		return qfalse;
+	int depthbits;
+	int stencilbits;
+
+	// implicitly assume Z-buffer depth == desktop color depth
+	if (cl_depthbits->integer == 0) {
+		if (colorbits > 16) {
+			depthbits = 24;
+		}
+		else {
+			depthbits = 16;
+		}
+	}
+	else {
+		depthbits = cl_depthbits->integer;
 	}
 
-	//SetForegroundWindow( g_wv.hWnd );
-	//SetFocus( g_wv.hWnd );
+	// do not allow stencil if Z-buffer depth likely won't contain it
+	stencilbits = cl_stencilbits->integer;
+	if (depthbits < 24) {
+		stencilbits = 0;
+	}
 
-	//ShowWindow( g_wv.hWnd, SW_SHOW );
-	//UpdateWindow( g_wv.hWnd );
+	glw_state.config->colorBits = colorbits;
+	glw_state.config->depthBits = depthbits;
+	glw_state.config->stencilBits = stencilbits;
+
 
 	return qtrue;
 }
@@ -1011,7 +501,7 @@ void UpdateMonitorInfo(const RECT* target)
 /*
 ** GLW_SetMode
 */
-static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean cdsFullscreen, qboolean vulkan)
+static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean cdsFullscreen)
 {
 	//HDC hDC;
 	RECT r;
@@ -1114,7 +604,7 @@ static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean
 		{
 			Com_Printf("...already fullscreen, avoiding redundant CDS\n");
 
-			if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qtrue, vulkan))
+			if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qtrue))
 			{
 				ResetDisplaySettings(qtrue);
 				glw_state.cdsFullscreen = qfalse;
@@ -1134,7 +624,7 @@ static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean
 			{
 				Com_Printf("ok\n");
 
-				if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qtrue, vulkan))
+				if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qtrue))
 				{
 					ResetDisplaySettings(qtrue);
 					glw_state.cdsFullscreen = qfalse;
@@ -1181,7 +671,7 @@ static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean
 				if (modeNum != -1 && (cdsRet = ApplyDisplaySettings(&devmode)) == DISP_CHANGE_SUCCESSFUL)
 				{
 					Com_Printf(" ok\n");
-					if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qtrue, vulkan))
+					if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qtrue))
 					{
 						ResetDisplaySettings(qtrue);
 						glw_state.cdsFullscreen = qfalse;
@@ -1197,7 +687,7 @@ static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean
 					ResetDisplaySettings(qtrue);
 					glw_state.cdsFullscreen = qfalse;
 					glw_state.config->isFullscreen = qfalse;
-					if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qfalse, vulkan))
+					if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qfalse))
 					{
 						return RSERR_INVALID_MODE;
 					}
@@ -1214,7 +704,7 @@ static rserr_t GLW_SetMode(int mode, const char* modeFS, int colorbits, qboolean
 			glw_state.cdsFullscreen = qfalse;
 		}
 
-		if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qfalse, vulkan))
+		if (!GLW_CreateWindow(config->vidWidth, config->vidHeight, colorbits, qfalse))
 		{
 			return RSERR_INVALID_MODE;
 		}
@@ -1588,35 +1078,33 @@ void GLimp_Shutdown(qboolean unloadDLL)
 }
 #endif // USE_OPENGL_API
 
-
-#ifdef USE_VULKAN_API
-static qboolean GLW_LoadVulkan(void)
+static qboolean GLW_LoadAPI(void)
 {
 	//
 	// load the driver and bind our function pointers to it
 	//
-	if (QVK_Init())
+	if (RE_Init())
 	{
 		qboolean cdsFullscreen = (r_fullscreen->integer != 0);
 
 		// create the window and set up the context
-		if (GLW_StartDriverAndSetMode(r_mode->integer, r_modeFullscreen->string, r_colorbits->integer, cdsFullscreen, qtrue) == RSERR_OK)
+		if (GLW_StartDriverAndSetMode(r_mode->integer, r_modeFullscreen->string, r_colorbits->integer, cdsFullscreen) == RSERR_OK)
 			return qtrue;
 	}
 
-	QVK_Shutdown(qtrue);
+	RE_Shutdown(qtrue);
 
 	return qfalse;
 }
 
 
-static qboolean GLW_StartVulkan(void)
+static qboolean GLW_StartAPI(void)
 {
 	//
 	// load and initialize Vulkan driver
 	//
-	if (!GLW_LoadVulkan()) {
-		Com_Error(ERR_VID_FATAL, "GLW_StartVulkan() - could not load Vulkan subsystem");
+	if (!GLW_LoadAPI()) {
+		Com_Error(ERR_VID_FATAL, "GLW_StartAPI() - could not load Vulkan subsystem");
 		return qfalse;
 	}
 
@@ -1625,7 +1113,7 @@ static qboolean GLW_StartVulkan(void)
 
 
 /*
-** VKimp_Init
+** GL_API_Init
 **
 ** This is the platform specific Vulkan initialization function.  It
 ** is responsible for loading Vulkan, initializing it, setting
@@ -1634,7 +1122,7 @@ static qboolean GLW_StartVulkan(void)
 ** to make sure that a functional Vulkan subsystem is operating
 ** when it returns to the ref.
 */
-void VKimp_Init(glconfig_t* config)
+void GL_API_Init(glconfig_t* config)
 {
 	Com_Printf("Initializing Vulkan subsystem\n");
 
@@ -1642,7 +1130,7 @@ void VKimp_Init(glconfig_t* config)
 	glw_state.config = config;
 
 	// load appropriate DLL and initialize subsystem
-	if (!GLW_StartVulkan())
+	if (!GLW_StartAPI())
 		return;
 
 	GLimp_DetectSteamOverlay();
@@ -1662,12 +1150,12 @@ void VKimp_Init(glconfig_t* config)
 
 
 /*
-** VKimp_Shutdown
+** GL_API_Shutdown
 **
 ** This routine does all OS specific shutdown procedures for the Vulkan
 ** subsystem.
 */
-void VKimp_Shutdown(qboolean unloadDLL)
+void GL_API_Shutdown(qboolean unloadDLL)
 {
 	IN_Shutdown();
 
@@ -1693,7 +1181,5 @@ void VKimp_Shutdown(qboolean unloadDLL)
 	}
 
 	// shutdown QVK subsystem
-	QVK_Shutdown(unloadDLL);
+	RE_Shutdown(unloadDLL);
 }
-#endif // USE_VULKAN_API
-

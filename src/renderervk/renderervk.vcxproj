@@ -66,6 +66,7 @@
     <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
     <TargetName>renderer</TargetName>
+    <IncludePath>$(VULKAN_SDK)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
@@ -76,6 +77,7 @@
     <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
     <TargetName>renderer</TargetName>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
@@ -198,6 +200,7 @@
     <ClCompile Include="..\renderercommon\tr_image_svg.c" />
     <ClCompile Include="..\renderercommon\tr_image_tga.c" />
     <ClCompile Include="..\renderercommon\tr_noise.c" />
+    <ClCompile Include="..\win32\win_qvk.c" />
     <ClCompile Include="tr_animation_mdm.c" />
     <ClCompile Include="tr_animation_mds.c" />
     <ClCompile Include="tr_backend.c" />
@@ -233,12 +236,6 @@
     <ClInclude Include="..\renderercommon\nanosvg\nanosvgrast.h" />
     <ClInclude Include="..\renderercommon\tr_public.h" />
     <ClInclude Include="..\renderercommon\tr_types.h" />
-    <ClInclude Include="..\renderercommon\vulkan\vk_platform.h" />
-    <ClInclude Include="..\renderercommon\vulkan\vulkan.h" />
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_core.h" />
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_win32.h" />
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_xlib.h" />
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_xlib_xrandr.h" />
     <ClInclude Include="tr_common.h" />
     <ClInclude Include="tr_local.h" />
     <ClInclude Include="vk.h" />

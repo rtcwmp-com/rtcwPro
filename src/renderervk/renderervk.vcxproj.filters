@@ -126,6 +126,9 @@
     <ClCompile Include="..\qcommon\puff.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\win32\win_qvk.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tr_common.h">
@@ -147,24 +150,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\renderercommon\tr_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\renderercommon\vulkan\vk_platform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\renderercommon\vulkan\vulkan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_win32.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_xlib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\renderercommon\vulkan\vulkan_xlib_xrandr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\renderercommon\nanosvg\nanosvg.h">

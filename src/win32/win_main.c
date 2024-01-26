@@ -54,7 +54,7 @@ Sys_LowPhysicalMemory()
 ==================
 */
 
-qboolean Sys_LowPhysicalMemory() {
+qboolean Sys_LowPhysicalMemory( void ) {
 	MEMORYSTATUS stat;
 	GlobalMemoryStatus( &stat );
 	return ( stat.dwTotalPhys <= MEM_THRESHOLD ) ? qtrue : qfalse;

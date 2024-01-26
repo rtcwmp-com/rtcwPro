@@ -708,13 +708,13 @@ static void InitOpenGL( void )
 	if ( glConfig.vidWidth == 0 )
 	{
 #ifdef USE_VULKAN
-		if ( !ri.VKimp_Init )
+		if ( !GL_API_Init )
 		{
 			ri.Error( ERR_FATAL, "Vulkan interface is not initialized" );
 		}
 
 		// This function is responsible for initializing a valid Vulkan subsystem.
-		ri.VKimp_Init( &glConfig );
+		GL_API_Init( &glConfig );
 
 		//ri.Cvar_Set( "r_highQualityVideo", "1" );
 		ri.Cvar_Set( "r_lastValidRenderer", glConfig.renderer_string );
@@ -2278,7 +2278,7 @@ static void RE_Shutdown( refShutdownCode_t code ) {
 		Com_Memset( &glState, 0, sizeof( glState ) );
 
 		if ( code != REF_KEEP_WINDOW ) {
-			ri.VKimp_Shutdown( code == REF_UNLOAD_DLL ? qtrue : qfalse );
+			GL_API_Shutdown( code == REF_UNLOAD_DLL ? qtrue : qfalse );
 			Com_Memset( &glConfig, 0, sizeof( glConfig ) );
 		}
 #else

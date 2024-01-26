@@ -745,13 +745,11 @@ size_t	CL_SaveJPGToBuffer(byte* buffer, size_t bufSize, int quality, int image_w
 void	CL_SaveJPG(const char* filename, int quality, int image_width, int image_height, byte* image_buffer, int padding);
 void	CL_LoadJPG(const char* filename, byte** pic, int* width, int* height);
 
-// Vulkan
-#ifdef USE_VULKAN_API
-void	VKimp_Init(glconfig_t* config);
-void	VKimp_Shutdown(qboolean unloadDLL);
-void* VK_GetInstanceProcAddr(VkInstance instance, const char* name);
-qboolean VK_CreateSurface(VkInstance instance, VkSurfaceKHR* pSurface);
-#endif
+// Graphics Layer API 
+void	GL_API_Init(glconfig_t* config);
+void	GL_API_Shutdown(qboolean unloadDLL);
+
+
 
 void HandleEvents(void);
 

@@ -27,10 +27,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ** two functions:
 **
 ** QVK_Init() - loads libraries, assigns function pointers, etc.
-** QVK_Shutdown() - unloads libraries, NULLs function pointers
+** RE_Shutdown() - unloads libraries, NULLs function pointers
 */
 
-#ifdef USE_VULKAN_API
+
 
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
@@ -39,18 +39,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "win_local.h"
 
 #define VK_USE_PLATFORM_WIN32_KHR
-#include "../renderercommon/vulkan/vulkan.h"
+#include "vulkan/vulkan.h"
 
 static PFN_vkGetInstanceProcAddr qvkGetInstanceProcAddr;
 static PFN_vkCreateWin32SurfaceKHR qvkCreateWin32SurfaceKHR;
 
 /*
-** QVK_Shutdown
+** RE_Shutdown
 **
 ** Unloads the specified DLL then nulls out all the proc pointers.  This
 ** is only called during a hard shutdown of the Vulkan subsystem (e.g. vid_restart).
 */
-void QVK_Shutdown( qboolean unloadDLL )
+void RE_Shutdown( qboolean unloadDLL )
 {
 	Com_Printf( "...shutting down QVK\n" );
 
@@ -123,7 +123,7 @@ static HINSTANCE load_vulkan_library( const char *dllname )
 ** operating systems we need to do the right thing, whatever that
 ** might be.
 */
-qboolean QVK_Init( void )
+qboolean RE_Init( void )
 {
 	Com_Printf( "...initializing QVK\n" );
 
@@ -176,4 +176,5 @@ qboolean QVK_Init( void )
 
 	return qtrue;
 }
-#endif // USE_VULKAN_API
+
+
