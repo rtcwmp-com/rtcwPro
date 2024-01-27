@@ -7,16 +7,26 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "botlib", "botlib\botlib.vcxproj", "{4E5F4E34-0E6A-4200-916F-D33805505B54}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame", "cgame\cgame.vcxproj", "{A16F9DCF-7F32-43AB-A044-74B7C660FC9B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454} = {48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}
+		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {64DCBC13-78A6-43E9-931D-B63FBB0421C7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extractfuncs", "extractfuncs\extractfuncs.vcxproj", "{E7BAACA8-3530-402D-9C27-947A36926100}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qagame", "game\game.vcxproj", "{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {64DCBC13-78A6-43E9-931D-B63FBB0421C7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer", "renderer\renderer.vcxproj", "{544C7EF5-2A74-4206-8B74-24D4FAD83048}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui", "ui\ui.vcxproj", "{64DCBC13-78A6-43E9-931D-B63FBB0421C7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wolf", "wolf.vcxproj", "{3ACD01D0-DCF1-46A5-A477-7E8524032A02}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {64DCBC13-78A6-43E9-931D-B63FBB0421C7}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logic", "Logic", "{90F8875C-E793-4C34-9F8C-11F249C324CC}"
 EndProject
