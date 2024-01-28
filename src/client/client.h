@@ -510,6 +510,7 @@ void CL_GetAutoUpdate( void );
 
 void CL_Disconnect_f( void );
 void CL_GetChallengePacket( void );
+void CL_Vid_Restart(refShutdownCode_t shutdownCode);
 void CL_Vid_Restart_f( void );
 void CL_Snd_Restart_f( void );
 void CL_StartDemoLoop( void );
@@ -524,7 +525,7 @@ void CL_GetPingInfo( int n, char *buf, int buflen );
 void CL_ClearPing( int n );
 int CL_GetPingQueueCount( void );
 
-void CL_ShutdownRef( void );
+void CL_ShutdownRef(refShutdownCode_t code);
 void CL_InitRef( void );
 qboolean CL_CDKeyValidate( const char *key, const char *checksum );
 int CL_ServerStatus( char *serverAddress, char *serverStatusString, int maxLen );

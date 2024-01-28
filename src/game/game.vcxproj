@@ -152,8 +152,10 @@
     </Link>
     <ProjectReference />
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"
-..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -180,7 +182,10 @@
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -230,7 +235,10 @@
       <ModuleDefinitionFile>./game.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>

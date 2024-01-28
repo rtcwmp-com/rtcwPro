@@ -201,6 +201,11 @@
     <ClCompile Include="..\renderercommon\tr_image_tga.c" />
     <ClCompile Include="..\renderercommon\tr_noise.c" />
     <ClCompile Include="..\win32\win_qvk.c" />
+    <ClCompile Include="shaders\bin2hex.c" />
+    <ClCompile Include="shaders\spirv\shader_data.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="tr_animation_mdm.c" />
     <ClCompile Include="tr_animation_mds.c" />
     <ClCompile Include="tr_backend.c" />
@@ -239,6 +244,25 @@
     <ClInclude Include="tr_common.h" />
     <ClInclude Include="tr_local.h" />
     <ClInclude Include="vk.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\bin2hex" />
+    <None Include="shaders\blend.frag" />
+    <None Include="shaders\bloom.frag" />
+    <None Include="shaders\blur.frag" />
+    <None Include="shaders\color.frag" />
+    <None Include="shaders\color.vert" />
+    <None Include="shaders\compile.bat" />
+    <None Include="shaders\dot.frag" />
+    <None Include="shaders\dot.vert" />
+    <None Include="shaders\fog.frag" />
+    <None Include="shaders\fog.vert" />
+    <None Include="shaders\gamma.frag" />
+    <None Include="shaders\gamma.vert" />
+    <None Include="shaders\gen_frag.tmpl" />
+    <None Include="shaders\gen_vert.tmpl" />
+    <None Include="shaders\light_frag.tmpl" />
+    <None Include="shaders\light_vert.tmpl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

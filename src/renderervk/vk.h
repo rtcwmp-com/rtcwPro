@@ -1,5 +1,5 @@
 #pragma once
-
+#define VK_USE_PLATFORM_WIN32_KHR
 #include "vulkan/vulkan.h"
 #include "tr_common.h"
 
@@ -286,7 +286,7 @@ void VBO_ClearQueue( void );
 
 typedef struct vk_tess_s {
 	VkCommandBuffer command_buffer;
-
+	qbool command_buffer_begin;
 	VkSemaphore image_acquired;
 	VkSemaphore rendering_finished;
 	VkFence rendering_finished_fence;
@@ -576,6 +576,9 @@ typedef struct {
 	uint32_t image_chunk_size;
 
 	uint32_t maxBoundDescriptorSets;
+	qboolean pipelines_init;
+	qboolean pipelines_init_first;
+	qboolean skip_this_frame;
 
 } Vk_Instance;
 

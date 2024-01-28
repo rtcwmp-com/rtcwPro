@@ -129,6 +129,12 @@
     <ClCompile Include="..\win32\win_qvk.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shaders\bin2hex.c">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\spirv\shader_data.c">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tr_common.h">
@@ -158,5 +164,58 @@
     <ClInclude Include="..\renderercommon\nanosvg\nanosvgrast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\bin2hex">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\blend.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\bloom.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\blur.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\color.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\color.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\compile.bat">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\dot.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\dot.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\fog.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\fog.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\gamma.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\gamma.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\gen_frag.tmpl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\gen_vert.tmpl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\light_frag.tmpl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="shaders\light_vert.tmpl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

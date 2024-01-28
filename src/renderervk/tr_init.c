@@ -2231,7 +2231,7 @@ static void RE_Shutdown( refShutdownCode_t code ) {
 	//}
 #endif
 	ri.Printf( PRINT_ALL, "RE_Shutdown( %i )\n", code );
-
+	ri.Cmd_UnregisterList(r_cmds, ARRAY_LEN(r_cmds));
 	ri.Cmd_UnregisterModule();
 
 	// Ridah, keep a backup of the current images if possible
@@ -2249,6 +2249,7 @@ static void RE_Shutdown( refShutdownCode_t code ) {
 				R_BackupModels();
 				//R_BackupShaders();
 				//R_BackupImages();
+				R_DeleteTextures();
 			}
 #ifdef USE_VULKAN
 			vk_release_resources();
@@ -2298,6 +2299,7 @@ static void RE_Shutdown( refShutdownCode_t code ) {
 
 	tr.registered = qfalse;
 	tr.inited = qfalse;
+	vk.pipelines_init = qfalse;
 }
 
 

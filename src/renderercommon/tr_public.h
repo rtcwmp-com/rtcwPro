@@ -236,6 +236,7 @@ typedef struct {
 	void	(*Cmd_RemoveCommand)( const char *name );
 
 	void	(*Cmd_RegisterList)( const cmdListItem_t* cmds, int count );
+	void	(*Cmd_UnregisterList)(const cmdListItem_t* cmds, int count);
 	void	(*Cmd_UnregisterModule)( void );
 
 	int		(*Cmd_Argc) (void);

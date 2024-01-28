@@ -119,7 +119,7 @@ void R_Fog( glfog_t *curfog ) {
 
 	qglClearColor( curfog->color[0], curfog->color[1], curfog->color[2], curfog->color[3] );
 #else
-	vk_clear_color( curfog->color );
+	//vk_clear_color( curfog->color );
 #endif
 }
 

@@ -360,7 +360,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 		}
 		longjmp( abortframe, -1 );
 	} else {
-		CL_Shutdown();
+		CL_Shutdown(va("Server fatal crashed: %s", com_errorMessage), qtrue);
 		SV_Shutdown( va( "Server fatal crashed: %s\n", com_errorMessage ) );
 	}
 
@@ -379,10 +379,11 @@ do the apropriate things.
 =============
 */
 void Com_Quit_f( void ) {
+	const char* p = Cmd_ArgsFrom(1);
 	// don't try to shutdown if we are in a recursive error
 	if ( !com_errorEntered ) {
 		SV_Shutdown( "Server quit\n" );
-		CL_Shutdown();
+		CL_Shutdown(p[0] ? p : "Client quit", qtrue);
 		Com_Shutdown();
 		FS_Shutdown( qtrue );
 	}
@@ -3265,7 +3266,7 @@ void Com_Frame(void) {
 			Sys_ShowConsole(com_viewlog->integer, qfalse);
 		}
 		else {
-			CL_Shutdown();
+			CL_Shutdown("", qfalse);
 			Sys_ShowConsole(1, qtrue);
 		}
 	}

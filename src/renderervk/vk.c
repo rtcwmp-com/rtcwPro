@@ -3943,6 +3943,8 @@ void vk_create_pipelines( void )
 	vk_alloc_persistent_pipelines();
 
 	vk.pipelines_world_base = vk.pipelines_count;
+	vk.pipelines_init = qtrue;
+	vk.pipelines_init_first = qtrue;
 }
 
 
@@ -4108,7 +4110,7 @@ static void vk_destroy_pipelines( qboolean resetCounter )
 void vk_shutdown( refShutdownCode_t code )
 {
 	int i, j, k, l;
-
+	qvkDeviceWaitIdle(vk.device);
 	if ( qvkQueuePresentKHR == NULL ) { // not fully initialized
 		goto __cleanup;
 	}
@@ -6290,6 +6292,8 @@ void vk_clear_color( const vec4_t color ) {
 	clear_rect[0].baseArrayLayer = 0;
 	clear_rect[0].layerCount = 1;
 	rect_count = 1;
+	if(clear_rect[0].rect.extent.width == 0)
+		return;
 
 #ifdef _DEBUG
 	// Split viewport rectangle into two non-overlapping rectangles.
@@ -6307,8 +6311,10 @@ void vk_clear_color( const vec4_t color ) {
 		rect_count = 2;
 	}
 #endif
-
-	qvkCmdClearAttachments( vk.cmd->command_buffer, 1, &attachment, rect_count, clear_rect );
+	if (vk.pipelines_init && vk.cmd->command_buffer_begin) {
+		qvkCmdClearAttachments(vk.cmd->command_buffer, 1, &attachment, rect_count, clear_rect);
+	}
+	
 }
 
 
@@ -6354,9 +6360,22 @@ void vk_update_mvp( const float *m ) {
 		Com_Memcpy( push_constants, m, sizeof( push_constants ) );
 	else
 		get_mvp_transform( push_constants );
-	qvkCmdPushConstants( vk.cmd->command_buffer, vk.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof( push_constants ), push_constants );
 
-	vk.stats.push_size += sizeof( push_constants );
+	if (vk.pipelines_init) {
+
+		if (vk.pipelines_init_first) {
+			vk.pipelines_init_first = qfalse;
+			vk.skip_this_frame = qtrue;
+			return;
+		}
+		if (!vk.cmd->command_buffer_begin) {
+			return;
+		}
+
+		qvkCmdPushConstants(vk.cmd->command_buffer, vk.pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(push_constants), push_constants);
+
+		vk.stats.push_size += sizeof(push_constants);
+	}
 }
 
 
@@ -6410,6 +6429,8 @@ uint32_t vk_tess_index( uint32_t numIndexes, const void *src ) {
 
 void vk_bind_index_buffer( VkBuffer buffer, uint32_t offset )
 {
+	if (!vk.cmd->command_buffer_begin)
+		return;
 	if ( vk.cmd->curr_index_buffer != buffer || vk.cmd->curr_index_offset != offset )
 		qvkCmdBindIndexBuffer( vk.cmd->command_buffer, buffer, offset, VK_INDEX_TYPE_UINT32 );
 
@@ -6426,6 +6447,8 @@ void vk_draw_indexed( uint32_t indexCount, uint32_t firstIndex )
 
 void vk_bind_index( void )
 {
+	if(vk.skip_this_frame)
+		return;
 #ifdef USE_VBO
 	if ( tess.vboIndex ) {
 		vk.cmd->num_indexes = 0;
@@ -6453,6 +6476,9 @@ void vk_bind_index_ext( const int numIndexes, const uint32_t *indexes )
 
 void vk_bind_geometry( uint32_t flags )
 {
+	if (vk.skip_this_frame || !vk.cmd->command_buffer_begin ) {
+		return;
+	}
 	//unsigned int size;
 	bind_base = -1;
 	bind_count = 0;
@@ -6606,6 +6632,8 @@ void vk_bind_descriptor_sets( void )
 {
 	uint32_t offsets[2], offset_count;
 	uint32_t start, end, count;
+	if (!vk.cmd->command_buffer_begin)
+		return;
 
 	start = vk.cmd->descriptor_set.start;
 	if ( start == ~0U )
@@ -6629,6 +6657,9 @@ void vk_bind_descriptor_sets( void )
 
 void vk_bind_pipeline( uint32_t pipeline ) {
 	VkPipeline vkpipe;
+	if (vk.skip_this_frame || !vk.cmd->command_buffer_begin) {
+		return;
+	}
 
 	vkpipe = vk_gen_pipeline( pipeline );
 
@@ -6645,7 +6676,7 @@ void vk_draw_geometry( Vk_Depth_Range depth_range, qboolean indexed ) {
 	VkRect2D scissor_rect;
 	VkViewport viewport;
 
-	if ( vk.geometry_buffer_size_new ) {
+	if ( vk.geometry_buffer_size_new || vk.skip_this_frame || !vk.cmd->command_buffer_begin) {
 		// geometry buffer overflow happened this frame
 		return;
 	}
@@ -6663,16 +6694,24 @@ void vk_draw_geometry( Vk_Depth_Range depth_range, qboolean indexed ) {
 			vk.cmd->scissor_rect = scissor_rect;
 		}
 
-		get_viewport( &viewport, depth_range );
-		qvkCmdSetViewport( vk.cmd->command_buffer, 0, 1, &viewport );
+		get_viewport(&viewport, depth_range);
+		if (viewport.width > 0.0f) {
+			qvkCmdSetViewport(vk.cmd->command_buffer, 0, 1, &viewport);
+		}
+		else {
+			return;
+		}
+		
 	}
 
 	// issue draw call(s)
 #ifdef USE_VBO
-	if ( tess.vboIndex )
+	if (tess.vboIndex)
 		VBO_RenderIBOItems();
 	else
 #endif
+		if (vk.pipelines_init_first)
+			return;
 	if ( indexed ) {
 		qvkCmdDrawIndexed( vk.cmd->command_buffer, vk.cmd->num_indexes, 1, 0, 0, 0 );
 	} else {
@@ -6855,18 +6894,21 @@ void vk_begin_frame( void )
 		vk.cmd = &vk.tess[ vk.cmd_index++ ];
 		vk.cmd_index %= NUM_COMMAND_BUFFERS;
 
+		vk.cmd->waitForFence = qfalse;
+		result = qvkWaitForFences(vk.device, 1, &vk.cmd->rendering_finished_fence, VK_TRUE, UINT64_MAX);
+		if (result != VK_SUCCESS) {
+			if (result == VK_ERROR_DEVICE_LOST) {
+				// silently discard previous command buffer
+				ri.Printf(PRINT_WARNING, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(result));
+			}
+			else {
+				ri.Error(ERR_FATAL, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(result));
+			}
+		}
+
 		if ( !ri.CL_IsMinimized() ) {
-			/*res = qvkWaitForFences(vk.device, 1, &vk.cmd->rendering_finished_fence, VK_FALSE, 1e10);
-			if (res != VK_SUCCESS) {
-				if (res == VK_ERROR_DEVICE_LOST) {
-					// silently discard previous command buffer
-					ri.Printf(PRINT_WARNING, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(res));
-				}
-				else {
-					ri.Error(ERR_FATAL, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(res));
-				}
-			}*/
-			result = qvkAcquireNextImageKHR( vk.device, vk.swapchain, 5 * 1000000000ULL, vk.cmd->image_acquired, VK_NULL_HANDLE, &vk.swapchain_image_index );
+
+			result = qvkAcquireNextImageKHR( vk.device, vk.swapchain, UINT64_MAX, vk.cmd->image_acquired, VK_NULL_HANDLE, &vk.swapchain_image_index );
 			// when running via RDP: "Application has already acquired the maximum number of images (0x2)"
 			// probably caused by "device lost" errors
 			if (result < 0 ) {
@@ -6882,16 +6924,6 @@ void vk_begin_frame( void )
 			vk.swapchain_image_index %= vk.swapchain_image_count;
 		}
 
-		vk.cmd->waitForFence = qfalse;
-		result = qvkWaitForFences( vk.device, 1, &vk.cmd->rendering_finished_fence, VK_FALSE, 1e10 );
-		if (result != VK_SUCCESS ) {
-			if (result == VK_ERROR_DEVICE_LOST ) {
-				// silently discard previous command buffer
-				ri.Printf( PRINT_WARNING, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(result) );
-			} else {
-				ri.Error( ERR_FATAL, "Vulkan: %s returned %s", "vkWaitForfences", vk_result_string(result) );
-			}
-		}
 	} else {
 		// current command buffer has been reset due to geometry buffer overflow/update
 		// so we will reuse it with current swapchain image as well
@@ -6905,6 +6937,7 @@ void vk_begin_frame( void )
 	begin_info.pInheritanceInfo = NULL;
 
 	VK_CHECK( qvkBeginCommandBuffer( vk.cmd->command_buffer, &begin_info ) );
+	vk.cmd->command_buffer_begin = qtrue;
 
 	// Ensure visibility of geometry buffers writes.
 	//record_buffer_memory_barrier( vk.cmd->command_buffer, vk.cmd->vertex_buffer, vk.cmd->vertex_buffer_offset, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT );
@@ -6999,14 +7032,17 @@ void vk_end_frame( void )
 	VkSubmitInfo submit_info;
 	VkResult result;
 
-	if ( vk.frame_count == 0 )
+	if (vk.frame_count == 0) {
+		ri.Printf(PRINT_ALL, "returned from frame_count\n");
 		return;
+	}
 
 	vk.frame_count = 0;
 
 	if ( vk.geometry_buffer_size_new )
 	{
 		vk_resize_geometry_buffer();
+		ri.Printf(PRINT_ALL, "returned from geometry_buffer_size_new\n");
 		return;
 	}
 
@@ -7052,6 +7088,7 @@ void vk_end_frame( void )
 	vk_end_render_pass();
 
 	VK_CHECK( qvkEndCommandBuffer( vk.cmd->command_buffer ) );
+	vk.cmd->command_buffer_begin = qfalse;
 
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.pNext = NULL;
@@ -7063,7 +7100,7 @@ void vk_end_frame( void )
 		submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
 		submit_info.signalSemaphoreCount = 1;
 		submit_info.pSignalSemaphores = &vk.cmd->rendering_finished;
-	} else {
+	 } else {
 		submit_info.waitSemaphoreCount = 0;
 		submit_info.pWaitSemaphores = NULL;
 		submit_info.pWaitDstStageMask = NULL;
@@ -7097,11 +7134,17 @@ void vk_end_frame( void )
 		} else if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
 			// swapchain re-creation needed
 			vk_restart_swapchain( __func__ );
-		} else {
+		}
+		else if (result == VK_ERROR_SURFACE_LOST_KHR) {
+			qvkDestroySurfaceKHR(vk_instance, vk_surface, NULL);
+			VK_CreateSurface(vk_instance, &vk_surface);
+			vk_restart_swapchain(__func__);
+		}else {
 			// or we don't
 			ri.Error( ERR_FATAL, "vkQueuePresentKHR returned %s", vk_result_string(result) );
 		}
 	}
+	vk.skip_this_frame = qfalse;
 }
 
 

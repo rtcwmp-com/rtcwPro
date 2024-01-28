@@ -1355,6 +1355,25 @@ void CL_ResetPureClientAtServer( void ) {
 	CL_AddReliableCommand( va( "vdr" ) );
 }
 
+
+/*
+=================
+CL_Vid_Restart_f
+
+Wrapper for CL_Vid_Restart
+=================
+*/
+static void CL_Vid_Restart_f(void) {
+
+	if (Q_stricmp(Cmd_Argv(1), "keep_window") == 0 || Q_stricmp(Cmd_Argv(1), "fast") == 0) {
+		// fast path: keep window
+		CL_Vid_Restart(REF_KEEP_WINDOW);
+	}
+	else {
+		CL_Vid_Restart(REF_DESTROY_WINDOW);
+	}
+}
+
 /*
 =================
 CL_Vid_Restart_f
@@ -1365,7 +1384,7 @@ we also have to reload the UI and CGame because the renderer
 doesn't know what graphics to reload
 =================
 */
-void CL_Vid_Restart_f( void ) {
+static void CL_Vid_Restart(refShutdownCode_t shutdownCode) {
 
 	// RF, don't show percent bar, since the memory usage will just sit at the same level anyway
 	Cvar_Set( "com_expectedhunkusage", "-1" );
@@ -1377,7 +1396,7 @@ void CL_Vid_Restart_f( void ) {
 	// shutdown the CGame
 	CL_ShutdownCGame();
 	// shutdown the renderer and clear the renderer interface
-	CL_ShutdownRef();
+	CL_ShutdownRef(shutdownCode);
 	// client is no longer pure untill new checksums are sent
 	CL_ResetPureClientAtServer();
 	// clear pak references
@@ -2741,11 +2760,20 @@ void QDECL CL_RefPrintf( int print_level, const char *fmt, ... ) {
 CL_ShutdownRef
 ============
 */
-void CL_ShutdownRef( void ) {
+void CL_ShutdownRef( refShutdownCode_t code ) {
 	if ( !re.Shutdown ) {
 		return;
 	}
-	re.Shutdown( qtrue );
+
+	if (code >= REF_DESTROY_WINDOW) { // +REF_UNLOAD_DLL
+		// shutdown sound system before renderer
+		// because it may depend from window handle
+		S_Shutdown();
+	}
+
+
+
+	re.Shutdown( code );
 	memset( &re, 0, sizeof( re ) );
 }
 
@@ -2986,6 +3014,11 @@ static void Ref_Cmd_RegisterList(const cmdListItem_t* cmds, int count) {
 	Cmd_RegisterList(cmds, count, MODULE_RENDERER);
 }
 
+static void Ref_Cmd_UnregisterList(const cmdListItem_t* cmds, int count) {
+	Cmd_UnregisterList(cmds, count, MODULE_RENDERER);
+}
+
+
 static void Ref_Cmd_UnregisterModule(void) {
 	Cmd_UnregisterModule(MODULE_RENDERER);
 }
@@ -3082,6 +3115,7 @@ void CL_InitRef( void ) {
 	rimp.Cmd_AddCommand = Cmd_AddCommand;
 	rimp.Cmd_RemoveCommand = Cmd_RemoveCommand;
 	rimp.Cmd_RegisterList = Ref_Cmd_RegisterList;
+	rimp.Cmd_UnregisterList = Ref_Cmd_UnregisterList;
 	rimp.Cmd_UnregisterModule = Ref_Cmd_UnregisterModule;
 	rimp.Cmd_Argc = Cmd_Argc;
 	rimp.Cmd_Argv = Cmd_Argv;
@@ -3314,6 +3348,112 @@ void CL_EatMe_f(void) {
 }
 
 //===========================================================================================
+
+
+/*
+** CL_GetModeInfo
+*/
+typedef struct vidmode_s
+{
+	const char* description;
+	int			width, height;
+	float		pixelAspect;		// pixel width / height
+} vidmode_t;
+
+
+
+
+static const vidmode_t cl_vidModes[] =
+{
+	{ "Mode  0: 320x240",			320,	240,	1 },
+	{ "Mode  1: 400x300",			400,	300,	1 },
+	{ "Mode  2: 512x384",			512,	384,	1 },
+	{ "Mode  3: 640x480",			640,	480,	1 },
+	{ "Mode  4: 800x600",			800,	600,	1 },
+	{ "Mode  5: 960x720",			960,	720,	1 },
+	{ "Mode  6: 1024x768",			1024,	768,	1 },
+	{ "Mode  7: 1152x864",			1152,	864,	1 },
+	{ "Mode  8: 1280x1024 (5:4)",	1280,	1024,	1 },
+	{ "Mode  9: 1600x1200",			1600,	1200,	1 },
+	{ "Mode 10: 2048x1536",			2048,	1536,	1 },
+	{ "Mode 11: 856x480 (wide)",	856,	480,	1 },
+	// extra modes:
+	{ "Mode 12: 1280x960",			1280,	960,	1 },
+	{ "Mode 13: 1280x720",			1280,	720,	1 },
+	{ "Mode 14: 1280x800 (16:10)",	1280,	800,	1 },
+	{ "Mode 15: 1366x768",			1366,	768,	1 },
+	{ "Mode 16: 1440x900 (16:10)",	1440,	900,	1 },
+	{ "Mode 17: 1600x900",			1600,	900,	1 },
+	{ "Mode 18: 1680x1050 (16:10)",	1680,	1050,	1 },
+	{ "Mode 19: 1920x1080",			1920,	1080,	1 },
+	{ "Mode 20: 1920x1200 (16:10)",	1920,	1200,	1 },
+	{ "Mode 21: 2560x1080 (21:9)",	2560,	1080,	1 },
+	{ "Mode 22: 3440x1440 (21:9)",	3440,	1440,	1 },
+	{ "Mode 23: 3840x2160 (4K UHD)",3840,	2160,	1 },
+	{ "Mode 24: 4096x2160 (4K)",	4096,	2160,	1 }
+};
+static const int s_numVidModes = ARRAY_LEN(cl_vidModes);
+
+qboolean CL_GetModeInfo(int* width, int* height, float* windowAspect, int mode, const char* modeFS, int dw, int dh, qboolean fullscreen)
+{
+	const	vidmode_t* vm;
+	float	pixelAspect;
+
+	// set dedicated fullscreen mode
+	if (fullscreen && *modeFS)
+		mode = atoi(modeFS);
+
+	if (mode < -2)
+		return qfalse;
+
+	if (mode >= s_numVidModes)
+		return qfalse;
+
+	// fix unknown desktop resolution
+	if (mode == -2 && (dw == 0 || dh == 0))
+		mode = 3; // 640x480
+
+	if (mode == -2) { // desktop resolution
+		*width = dw;
+		*height = dh;
+		pixelAspect = r_customaspect->value;
+	}
+	else if (mode == -1) { // custom resolution
+		*width = r_customwidth->integer;
+		*height = r_customheight->integer;
+		pixelAspect = r_customaspect->value;
+	}
+	else { // predefined resolution
+		vm = &cl_vidModes[mode];
+		*width = vm->width;
+		*height = vm->height;
+		pixelAspect = vm->pixelAspect;
+	}
+
+	*windowAspect = (float)*width / (*height * pixelAspect);
+
+	return qtrue;
+}
+
+
+/*
+** CL_ModeList_f
+*/
+static void CL_ModeList_f(void)
+{
+	int i;
+
+	Com_Printf("\n");
+	Com_Printf("Mode -2: Desktop Resolution\n");
+	Com_Printf("Mode -1: Custom Resolution (%ix%i)\n", r_customwidth->integer, r_customheight->integer);
+	Com_Printf("         Set r_customWidth and r_customHeight cvars to change\n");
+	Com_Printf("\n");
+	for (i = 0; i < s_numVidModes; i++)
+	{
+		Com_Printf("%s\n", cl_vidModes[i].description);
+	}
+	Com_Printf("\n");
+}
 
 /*
 ====================
@@ -3554,6 +3694,7 @@ void CL_Init( void ) {
 
 	//bani - we eat these commands to prevent exploits
 	Cmd_AddCommand("userinfo", CL_EatMe_f);
+	Cmd_AddCommand("modelist", CL_ModeList_f);
 
 	CL_InitRef();
 
@@ -3581,10 +3722,10 @@ void CL_Init( void ) {
 CL_Shutdown
 ===============
 */
-void CL_Shutdown( void ) {
+void CL_Shutdown(const char* finalmsg, qboolean quit) {
 	static qboolean recursive = qfalse;
 
-	Com_Printf( "----- CL_Shutdown -----\n" );
+	Com_Printf("----- Client Shutdown (%s) -----\n", finalmsg);
 
 	if ( recursive ) {
 		printf( "recursive shutdown\n" );
@@ -3595,7 +3736,7 @@ void CL_Shutdown( void ) {
 	CL_Disconnect( qtrue );
 
 	S_Shutdown();
-	CL_ShutdownRef();
+	CL_ShutdownRef(quit ? REF_UNLOAD_DLL : REF_DESTROY_WINDOW);
 
 	CL_ShutdownUI();
 
@@ -3618,6 +3759,7 @@ void CL_Shutdown( void ) {
 	Cmd_RemoveCommand( "serverstatus" );
 	Cmd_RemoveCommand( "showip" );
 	Cmd_RemoveCommand( "model" );
+	Cmd_RemoveCommand("modelist");
 
 	// Ridah, startup-caching system
 	Cmd_RemoveCommand( "cache_startgather" );
@@ -5253,87 +5395,6 @@ void CL_ActionGenerateTime(qboolean useFixedTime) {
 	cl.handle.actionTime = cl.serverTime + time;
 }
 
-/*
-** CL_GetModeInfo
-*/
-typedef struct vidmode_s
-{
-	const char* description;
-	int			width, height;
-	float		pixelAspect;		// pixel width / height
-} vidmode_t;
-
-static const vidmode_t cl_vidModes[] =
-{
-	{ "Mode  0: 320x240",			320,	240,	1 },
-	{ "Mode  1: 400x300",			400,	300,	1 },
-	{ "Mode  2: 512x384",			512,	384,	1 },
-	{ "Mode  3: 640x480",			640,	480,	1 },
-	{ "Mode  4: 800x600",			800,	600,	1 },
-	{ "Mode  5: 960x720",			960,	720,	1 },
-	{ "Mode  6: 1024x768",			1024,	768,	1 },
-	{ "Mode  7: 1152x864",			1152,	864,	1 },
-	{ "Mode  8: 1280x1024 (5:4)",	1280,	1024,	1 },
-	{ "Mode  9: 1600x1200",			1600,	1200,	1 },
-	{ "Mode 10: 2048x1536",			2048,	1536,	1 },
-	{ "Mode 11: 856x480 (wide)",	856,	480,	1 },
-	// extra modes:
-	{ "Mode 12: 1280x960",			1280,	960,	1 },
-	{ "Mode 13: 1280x720",			1280,	720,	1 },
-	{ "Mode 14: 1280x800 (16:10)",	1280,	800,	1 },
-	{ "Mode 15: 1366x768",			1366,	768,	1 },
-	{ "Mode 16: 1440x900 (16:10)",	1440,	900,	1 },
-	{ "Mode 17: 1600x900",			1600,	900,	1 },
-	{ "Mode 18: 1680x1050 (16:10)",	1680,	1050,	1 },
-	{ "Mode 19: 1920x1080",			1920,	1080,	1 },
-	{ "Mode 20: 1920x1200 (16:10)",	1920,	1200,	1 },
-	{ "Mode 21: 2560x1080 (21:9)",	2560,	1080,	1 },
-	{ "Mode 22: 3440x1440 (21:9)",	3440,	1440,	1 },
-	{ "Mode 23: 3840x2160 (4K UHD)",3840,	2160,	1 },
-	{ "Mode 24: 4096x2160 (4K)",	4096,	2160,	1 }
-};
-static const int s_numVidModes = ARRAY_LEN(cl_vidModes);
-
-qboolean CL_GetModeInfo(int* width, int* height, float* windowAspect, int mode, const char* modeFS, int dw, int dh, qboolean fullscreen)
-{
-	const	vidmode_t* vm;
-	float	pixelAspect;
-
-	// set dedicated fullscreen mode
-	if (fullscreen && *modeFS)
-		mode = atoi(modeFS);
-
-	if (mode < -2)
-		return qfalse;
-
-	if (mode >= s_numVidModes)
-		return qfalse;
-
-	// fix unknown desktop resolution
-	if (mode == -2 && (dw == 0 || dh == 0))
-		mode = 3; // 640x480
-
-	if (mode == -2) { // desktop resolution
-		*width = dw;
-		*height = dh;
-		pixelAspect = r_customaspect->value;
-	}
-	else if (mode == -1) { // custom resolution
-		*width = r_customwidth->integer;
-		*height = r_customheight->integer;
-		pixelAspect = r_customaspect->value;
-	}
-	else { // predefined resolution
-		vm = &cl_vidModes[mode];
-		*width = vm->width;
-		*height = vm->height;
-		pixelAspect = vm->pixelAspect;
-	}
-
-	*windowAspect = (float)*width / (*height * pixelAspect);
-
-	return qtrue;
-}
 
 
 
