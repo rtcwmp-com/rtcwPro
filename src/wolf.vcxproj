@@ -368,9 +368,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
-    <ClCompile Include="client\cl_jpeg.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="client\cl_keys.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
@@ -845,12 +842,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="win32\win_gamma.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="win32\win_glimp.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="win32\win_input.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
@@ -880,7 +871,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
-    <ClCompile Include="win32\win_qvk.c" />
     <ClCompile Include="win32\win_shared.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
@@ -1000,8 +990,8 @@
       <Project>{4e5f4e34-0e6a-4200-916f-d33805505b54}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="renderervk\renderervk.vcxproj">
-      <Project>{86977864-f26e-48b8-8abc-d699c66777c2}</Project>
+    <ProjectReference Include="renderer\renderer.vcxproj">
+      <Project>{544c7ef5-2a74-4206-8b74-24d4fad83048}</Project>
     </ProjectReference>
     <ProjectReference Include="splines\Splines.vcxproj">
       <Project>{b6842d42-fba7-4494-a393-802ca7e94351}</Project>

@@ -375,6 +375,8 @@
     <ClInclude Include="qcommon\q_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcommon\q_platform.h" />
+    <ClInclude Include="win32\glw_win.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wolf.rc" />
