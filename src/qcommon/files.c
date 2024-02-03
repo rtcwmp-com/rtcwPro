@@ -2587,6 +2587,7 @@ FS_Path_f
 */
 void FS_Path_f( void ) {
 	searchpath_t    *s;
+	searchpath_t* p;
 	int i;
 
 	Com_Printf( "Current search path:\n" );
@@ -2596,8 +2597,22 @@ void FS_Path_f( void ) {
 			if ( fs_numServerPaks ) {
 				if ( !FS_PakIsPure( s->pack ) ) {
 					Com_Printf( "    not on the pure list\n" );
+					// unload the pak
+					if (s->pack) {
+						unzClose(s->pack->handle);
+						Z_Free(s->pack->buildBuffer);
+						Z_Free(s->pack);
+					}
+					if (s->dir) {
+						Z_Free(s->dir);
+					}
+					p->next = s->next;
+					Z_Free(s);
+					s = p;
+
 				} else {
 					Com_Printf( "    on the pure list\n" );
+					p = s;
 				}
 			}
 		} else {
@@ -3885,7 +3900,7 @@ see show_bug.cgi?id=478
 =================
 */
 qboolean FS_ConditionalRestart( int checksumFeed ) {
-	if ( fs_gamedirvar->modified || checksumFeed != fs_checksumFeed ) {
+	if ( fs_gamedirvar->modified || checksumFeed != fs_checksumFeed || fs_numServerPaks) {
 		FS_Restart( checksumFeed );
 		return qtrue;
 	}

@@ -252,7 +252,7 @@
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
-      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Release\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Release\botlib;$(SolutionDir)..\deps\bin</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -304,7 +304,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Debug\botlib;$(SolutionDir)..\deps\bin</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>

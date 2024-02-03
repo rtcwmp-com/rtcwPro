@@ -1,17 +1,14 @@
 @echo off
 rem ***************************************************************************
-rem * This script will fetch openssl, strawberry-perl (for openssl build) and curl
+rem * This script will fetch:
+rem * openssl, strawberry-perl (for openssl build)
+rem * curl, and libjpeg-turbo
 rem * and build openssl and curl with openssl support
 rem ***************************************************************************
 
 :begin
   echo Compiler:
   echo.
-  echo vc10      - Use Visual Studio 2010
-  echo vc11      - Use Visual Studio 2012
-  echo vc12      - Use Visual Studio 2013
-  echo vc14      - Use Visual Studio 2015
-  echo vc14.1    - Use Visual Studio 2017
   echo vc14.2    - Use Visual Studio 2019
   echo vc14.3    - Use Visual Studio 2022
   echo.
@@ -34,41 +31,11 @@ rem ***************************************************************************
 
 :parseArgs
   if not "%vc_version%" == "" (
-    if /i "%vc_version%" == "vc10" (
-      set VC_VER=10.0
-      set VC_DESC=VC10
-      set "VC_PATH=Microsoft Visual Studio 10.0"
-    ) else if /i "%vc_version%" == "vc11" (
-      set VC_VER=11.0
-      set VC_DESC=VC11
-      set "VC_PATH=Microsoft Visual Studio 11.0"
-    ) else if /i "%vc_version%" == "vc12" (
-      set VC_VER=12.0
-      set VC_DESC=VC12
-      set "VC_PATH=Microsoft Visual Studio 12.0"
-    ) else if /i "%vc_version%" == "vc14" (
-      set VC_VER=14.0
-      set VC_DESC=VC14
-      set "VC_PATH=Microsoft Visual Studio 14.0"
-    ) else if /i "%vc_version%" == "vc14.1" (
-      set VC_VER=14.1
-      set VC_DESC=VC14.10
-	  set VC_generate=vc14.10
-
-      rem Determine the VC14.1 path based on the installed edition in descending
-      rem order (Enterprise, then Professional and finally Community)
-      if exist "%PF%\Microsoft Visual Studio\2017\Enterprise" (
-        set "VC_PATH=Microsoft Visual Studio\2017\Enterprise"
-      ) else if exist "%PF%\Microsoft Visual Studio\2017\Professional" (
-        set "VC_PATH=Microsoft Visual Studio\2017\Professional"
-      ) else (
-        set "VC_PATH=Microsoft Visual Studio\2017\Community"
-      )
-    ) else if /i "%vc_version%" == "vc14.2" (
+	if /i "%vc_version%" == "vc14.2" (
       set VC_VER=14.2
       set VC_DESC=VC14.20
 	  set VC_generate=vc14.20
-
+	  set "cmake_makefiles=Visual Studio 16 2019"
       rem Determine the VC14.2 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
       if exist "%PF%\Microsoft Visual Studio\2019\Enterprise" (
@@ -82,7 +49,7 @@ rem ***************************************************************************
       set VC_VER=14.3
       set VC_DESC=VC14.30
 	  set VC_generate=vc14.30
-
+	  set "cmake_makefiles=Visual Studio 17 2022"
       rem Determine the VC14.3 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
       if exist "%PF%\Microsoft Visual Studio\2022\Enterprise" (
@@ -92,8 +59,37 @@ rem ***************************************************************************
       ) else (
         set "VC_PATH=Microsoft Visual Studio\2022\Community"
       )
-    )
+    ) else (
+		echo Unsupported compiler
+		echo Recommend installing Visual Studio 2022 Community Edition - free
+		pause
+		exit
+	)
   )
+
+:checkEnvironment
+	if not exist "README.md" (
+		echo Error: Change directory to the rtcwPro repository before running this script
+		echo Recommend running this file by double clicking on it in the file explorer
+		pause
+		exit
+	)
+  
+	if not exist "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" (
+		echo "%PF%\%VC_PATH%\Common7\IDE\devenv.exe"
+		echo Error: could not find devenv.exe - Visual Studio
+		echo Recommend installing Visual Studio 2022 Community Edition - free
+		pause
+		exit
+	)
+	
+	where /q cmake
+	if %errorlevel% neq 0 (
+		echo Error: cmake not installed or not in the PATH environment variable
+		echo Recommend installing cmake using the cmake installer
+		pause
+		exit
+	)
 
 :fetchDeps
 	rem assume we are being called inside a project, do stuff inside a directory
@@ -174,8 +170,8 @@ rem ***************************************************************************
 	cd "%ROOT_DEP_DIR%\libjpeg-turbo"
 	mkdir build
 	cd build
-	call cmake -G"Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
-	call devenv libjpeg-turbo.sln /Build Release
+	call cmake -G"%cmake_makefiles%" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
+	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" libjpeg-turbo.sln /Build Release
 	call powershell "Get-ChildItem """*.h""" | copy-item -Destination """..\""
 	
 :harvest
