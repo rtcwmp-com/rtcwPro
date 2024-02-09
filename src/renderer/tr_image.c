@@ -1813,7 +1813,7 @@ void SaveJPG( char * filename, int quality, int image_width, int image_height, u
 	cinfo.image_width = image_width; /* image width and height, in pixels */
 	cinfo.image_height = image_height;
 	cinfo.input_components = 4;     /* # of color components per pixel */
-	cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
+	cinfo.in_color_space = JCS_EXT_RGBA; // JCS_RGB; /* colorspace of input image */
 	/* Now use the library's routine to set default compression parameters.
 	 * (You must set at least cinfo.in_color_space before calling this,
 	 * since the defaults depend on the source color space.)
