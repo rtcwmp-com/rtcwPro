@@ -1,11 +1,12 @@
 🛠️ Changelog Highlights:
 
-- Fixed Panzer Ammo Spawn Issue: No more worries about spawning with the wrong Panzer ammo
-- Debug Logging for ConfigString Changes: We've implemented debug logging to track down the elusive issues related to te_escape2 flags. This will help us pinpoint and squash those bugs for good.
-- Colored Player Names in Stats Output: Stand out on the battlefield with colored player names in the stats output. Show your unique identity and let the enemy know who they're up against!
-- Client HTTP Downloads from RtcwPub: Say goodbye to unreliable server downloads. We've integrated client HTTP downloads from RtcwPub to ensure a smooth and efficient download experience for all players.
+- Fixed panzer ammo issue where player loses 1 rocket when picking up ammo pack right after spawning
+- Debug logging for ConfigString changes
+- Colored player names in stats output
+- Client HTTP downloads from RtcwPub
 - Shoutcast Overlay: Shoutcast overlay added to enhance your broadcasting and spectating experience.
-- Backed Out Changes to Sten/Venom Overheat: We're fine-tuning the balance of the Sten and Venom weapons. Expect improvements as we work to ensure a fair and enjoyable gameplay experience.
+- Backed out pmext changes to sten/venom overheat
+- New bind for enemy spawn timer `/bind key timerset` will not automatically set spawn time for every map without the need for a map autoexec config
 
 🔧 Bug Fixes and Improvements:
 
