@@ -2858,6 +2858,7 @@ qboolean CG_HideWeapon(int weapon) {
 			hide = qfalse;
 			break;
 		case WP_GRENADE_PINEAPPLE:
+		case WP_GRENADE_LAUNCHER:
 			hide = qfalse;
 			break;
 		case WP_MEDIC_SYRINGE:
