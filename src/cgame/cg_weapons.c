@@ -2851,39 +2851,21 @@ qboolean CG_HideWeapon(int weapon) {
 	else {
 		switch (weapon) 
 		{
-		case WP_KNIFE:
-			hide = qfalse;
-			break;
-		case WP_KNIFE2:
-			hide = qfalse;
-			break;
-		case WP_GRENADE_PINEAPPLE:
-		case WP_GRENADE_LAUNCHER:
-			hide = qfalse;
-			break;
-		case WP_MEDIC_SYRINGE:
-			hide = qfalse;
-			break;
-		case WP_AMMO:
-			hide = qfalse;
-			break;
-		case WP_DYNAMITE:
-			hide = qfalse;
-			break;
-		case WP_DYNAMITE2:
-			hide = qfalse;
-			break;
-		case WP_MEDKIT:
-			hide = qfalse;
-			break;
-		case WP_PLIERS:
-			hide = qfalse;
-			break;
-		case WP_SMOKE_GRENADE:
-			hide = qfalse;
-			break;
-		default:
-			hide = qtrue;
+			case WP_KNIFE:
+			case WP_KNIFE2:
+			case WP_GRENADE_PINEAPPLE:
+			case WP_GRENADE_LAUNCHER:
+			case WP_MEDIC_SYRINGE:
+			case WP_AMMO:
+			case WP_DYNAMITE:
+			case WP_DYNAMITE2:
+			case WP_MEDKIT:
+			case WP_PLIERS:
+			case WP_SMOKE_GRENADE:
+				hide = qfalse;
+				break;
+			default:
+				hide = qtrue;
 		}
 	}
 
