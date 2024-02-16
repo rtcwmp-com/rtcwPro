@@ -3095,6 +3095,9 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 // reqSS
 void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
 
+// Get capabilities from the client
+qbool trap_GetValue(char* value, int valueSize, const char* key);
+
 enum
 {
 	BAR_LEFT = BIT(0),

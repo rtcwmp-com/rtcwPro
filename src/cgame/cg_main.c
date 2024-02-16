@@ -2924,8 +2924,17 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 			CG_execFile("autoexec_default");
 		}
 	}
-	trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut)); //call during CG_Init, pointer and size , do once
-	cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+
+	int hasTrap_GetValue = trap_Cvar_VariableIntegerValue("//trap_GetValue");
+
+	if (hasTrap_GetValue == 0) {
+		// Engine extensions are not supported on the client
+		return;
+	} else {
+		// Begin loading extensions...
+		trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut)); //call during CG_Init, pointer and size , do once
+		cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+	}
 	
 }
 
