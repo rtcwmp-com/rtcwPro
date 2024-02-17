@@ -2841,6 +2841,7 @@ void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 void		trap_Rest_Validate(void);
 void		trap_Rest_Build(const char *data);
+int         trap_Cvar_VariableIntegerValue(const char* var_name);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );

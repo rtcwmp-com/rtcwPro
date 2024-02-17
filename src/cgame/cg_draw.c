@@ -1086,6 +1086,7 @@ static float CG_DrawRespawnTimer(float y) {
 		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_BLUE)
 		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
+	else return y;
 
 	w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
