@@ -2931,9 +2931,25 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		// Engine extensions are not supported on the client
 		return;
 	} else {
-		// Begin loading extensions...
-		trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut)); //call during CG_Init, pointer and size , do once
-		cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+		// Begin loading supported extensions...
+		char extValue[11];
+		int syscallId;
+		if (trap_GetValue(extValue, sizeof(extValue), "trap_LocateInteropData") &&
+			sscanf(extValue, "%d", &syscallId) == 1 &&
+			syscallId != 0) {
+			memset(interopIn, 0, sizeof(interopIn));
+			memset(interopOut, 0, sizeof(interopOut));
+			trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut));
+		}
+
+		if (trap_GetValue(extValue, sizeof(extValue), "trap_CNQ3_NDP_Enable") &&
+			sscanf(extValue, "%d", &syscallId) == 1 &&
+			syscallId != 0) {
+			cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+		}
+		else {
+			cg.ndpDemoEnabled = qfalse;
+		}
 	}
 	
 }

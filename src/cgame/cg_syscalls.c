@@ -590,5 +590,5 @@ void trap_LocateInteropData(void *bufferIn, int bufferInSize, void *bufferOut, i
 }
 
 qbool trap_GetValue(char* value, int valueSize, const char* key) {
-	syscall(CG_EXT_GETVALUE, value, valueSize, key);
+	return syscall(CG_EXT_GETVALUE, value, valueSize, key);
 }
