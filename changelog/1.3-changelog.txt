@@ -6,7 +6,6 @@
 - Client HTTP downloads from RtcwPub
 - Shoutcast Overlay: Shoutcast overlay added to enhance your broadcasting and spectating experience.
 - Backed out pmext changes to sten/venom overheat
-- New bind for enemy spawn timer `/bind key timerset` will automatically set spawn time for every map without the need for a map autoexec config
 
 🔧 Bug Fixes and Improvements:
 
