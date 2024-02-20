@@ -50,7 +50,7 @@ size_t APIResultMessage(char* ptr, size_t size, size_t nmemb, void* userdata) {
  RtcwPro API Server Query
 ================
 */
-int API_Query(char* param, char* jsonText, int clientNumber) {
+void* API_Query(char* param, char* jsonText, int clientNumber) {
 
 	HTTP_APIInquiry_t* query_info = (HTTP_APIInquiry_t*)malloc(sizeof(HTTP_APIInquiry_t));
 
@@ -65,9 +65,7 @@ int API_Query(char* param, char* jsonText, int clientNumber) {
 		Threads_Create(API_HTTP_Query, query_info);
 	}
 
-	HTTP_APIInquiry_t* http_inquiry = (HTTP_APIInquiry_t*)malloc(sizeof(HTTP_APIInquiry_t));
-
-	return 0;
+	return;
 }
 
 /*
@@ -115,4 +113,5 @@ void* API_HTTP_Query(void* args) {
 	curl_slist_free_all(slist1);
 	slist1 = NULL;
 
+	return;
 }
