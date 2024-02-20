@@ -326,11 +326,11 @@ void CG_windowDraw( void ) {
 			CG_createControlsWindow();
 		}
 
-		if (demo_popupWindow.integer && cg.demoPlayback && !cg.advertisementDone && !demo_noAdvertisement.integer) {
-			cgs.demoPopUpInfo.show = SHOW_ON;
-			CG_createDemoPopUpWindow("Upload this demo: ^n/demoupload current <optional: comment>", 10);
-			cg.advertisementDone = qtrue;
-		}
+		//if (demo_popupWindow.integer && cg.demoPlayback && !cg.advertisementDone && !demo_noAdvertisement.integer) {
+		//	cgs.demoPopUpInfo.show = SHOW_ON;
+		//	CG_createDemoPopUpWindow("Upload this demo: ^n/demoupload current <optional: comment>", 10);
+		//	cg.advertisementDone = qtrue;
+		//}
 		// ~OSPx
 		return;
 	}
