@@ -231,6 +231,9 @@ typedef enum {
 
 	CG_REQUEST_SS, // reqSS
 
+	// engine extensions
+	// the mod should _never_ use these symbols
+	CG_EXT_GETVALUE = 700,
 	CG_EXT_LOCATEINTEROPDATA,
 	CG_EXT_NDP_ENABLE,
 	CG_EXT_NDP_SEEK,

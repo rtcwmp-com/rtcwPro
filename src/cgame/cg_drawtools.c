@@ -977,13 +977,14 @@ Returns character count, skiping color escape codes
 int CG_DrawStrlen( const char *str ) {
 	const char *s = str;
 	int count = 0;
-
-	while ( *s ) {
-		if ( Q_IsColorString( s ) ) {
-			s += 2;
-		} else {
-			count++;
-			s++;
+	if (s != NULL) {
+		while ( *s ) {
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+			} else {
+				count++;
+				s++;
+			}
 		}
 	}
 

@@ -2841,6 +2841,7 @@ void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 void		trap_Rest_Validate(void);
 void		trap_Rest_Build(const char *data);
+int         trap_Cvar_VariableIntegerValue(const char* var_name);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );
@@ -3094,6 +3095,9 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 
 // reqSS
 void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
+
+// Get capabilities from the client
+qbool trap_GetValue(char* value, int valueSize, const char* key);
 
 enum
 {
