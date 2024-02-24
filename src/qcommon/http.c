@@ -126,13 +126,13 @@ void* CL_HTTP_SSUpload(void* args) {
 	if (!fd)
 	{
 		Com_DPrintf("HTTP[fu]: cannot o/r\n");
-		return;
+		return NULL;
 	}
 
 	if (fstat(fileno(fd), &file_info) != 0)
 	{
 		Com_DPrintf("HTTP[fs]: cannot o/r\n");
-		return;
+		return NULL;
 	}
 
 	curl = curl_easy_init();
@@ -182,7 +182,7 @@ void* CL_HTTP_SSUpload(void* args) {
 
 	fclose(fd);
 	remove(SS_info->filename);
-	return;
+	return NULL;
 }
 
 

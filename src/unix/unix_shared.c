@@ -52,7 +52,7 @@ static char homePath[MAX_OSPATH];
 
 static void LIN_MicroSleep(int us)
 {
-	timespec req, rem;
+	struct timespec req, rem;
 	req.tv_sec = us / 1000000;
 	req.tv_nsec = (us % 1000000) * 1000;
 	while (clock_nanosleep(CLOCK_REALTIME, 0, &req, &rem) == EINTR) {

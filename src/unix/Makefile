@@ -6,7 +6,7 @@
 #	-fno-strict-aliasing -fstrength-reduce -DNDEBUG $(CFLAGSEXT)
 
 CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
--fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
+-fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -fcommon \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
 DCFLAGSREL := \
@@ -183,12 +183,10 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/include/
-#server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
-#server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz   -DCURL_STATICLIB  -lmysqlclient 
-server: LDFLAGS := -m32 -ldl -lm -L./../../libs/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz  -lmysqlclient 
+	$(CFLAGSREL) -m32 -g  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I../../deps/curl/build/include/ 
+server: LDFLAGS := -m32 -DCURL_STATICLIB
 server: $(SVOBJS)
-	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
+	$(CC) -o wolfded.x86 $(SVOBJS) ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a $(LDFLAGS)
 	strip -s wolfded.x86
 server-clean:
 	rm $(SVOBJS) 2> /dev/null ; exit 0
