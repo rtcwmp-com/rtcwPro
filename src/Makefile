@@ -2,7 +2,7 @@
 all: clean dependencies binaries assets models
 
 dependencies:
-	cd .. && fetch-dependencies.sh
+	cd .. && bash fetch-dependencies.sh
 
 binaries:
 	cd game && make all
