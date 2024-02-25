@@ -1,6 +1,6 @@
 CC = i686-w64-mingw32-gcc
 
-CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -fcommon \
+CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -fcommon \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce \
 -DWIN32 -D_WINDOWS -DC_ONLY -DGAMEDLL -I../../deps/jansson/build-win/include 

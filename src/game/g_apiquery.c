@@ -59,7 +59,7 @@ trap_HandleApiResponse
 Handle API Response
 ============
 */
-void trap_HandleApiResponse(int clientNum, char* response)
+void trap_HandleApiResponse(int clientNum, char* response, int size)
 {
 	gentity_t* ent;
 	ent = g_entities + clientNum;
@@ -86,7 +86,7 @@ void trap_HandleApiResponse(int clientNum, char* response)
 		}
 	}
 
-	if (ReadApiResultJson(response))
+	if (ReadApiResultJson(response, size))
 	{
 		// response is a json string so let's just strip off the special characters and add new lines
 		response = Q_StrReplace(response, "[", "");
@@ -204,7 +204,7 @@ ReadApiResultJson
 Check that the API response is a valid JSON
 ============
 */
-int ReadApiResultJson(char* data)
+int ReadApiResultJson(char* data, int size)
 {
 	json_t* root;
 	json_error_t error;
@@ -213,7 +213,7 @@ int ReadApiResultJson(char* data)
 	data = Q_StrReplace(data, "]\"", "]");
 	data = Q_StrReplace(data, "\\", "");
 
-	root = json_loads(data, 0, &error);
+	root = json_loadb(data, size, JSON_DISABLE_EOF_CHECK, &error);
 	if (!root)
 	{
 		fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);

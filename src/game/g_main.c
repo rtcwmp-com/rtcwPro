@@ -636,7 +636,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 0;
 
 	case G_RETURN_API_QUERY_RESPONSE:
-		trap_HandleApiResponse(arg0, (char*)arg1);
+		trap_HandleApiResponse(arg0, (char*)arg1, arg2);
 		return 0;
 	}
 

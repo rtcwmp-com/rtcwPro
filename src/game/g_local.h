@@ -1840,8 +1840,8 @@ int     trap_submit_curlPost( char* jsonfile, char* matchid );
 int		trap_HTTP_apiQuery(char* param, char* jsonText, int clientNumber);
 char*	G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGuid);
 void	Cmd_APIQuery(gentity_t* ent);
-void	trap_HandleApiResponse(int clientNum, char* response);
-int		ReadApiResultJson(char* data);
+void	trap_HandleApiResponse(int clientNum, char* response, int size);
+int		ReadApiResultJson(char* data, int size);
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );

@@ -5,7 +5,7 @@
 #	-falign-loops=2 -falign-jumps=2 -falign-functions=2 \
 #	-fno-strict-aliasing -fstrength-reduce -DNDEBUG $(CFLAGSEXT)
 
-CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
+CFLAGSREL = -g -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -fcommon \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
@@ -187,7 +187,7 @@ server: CFLAGS := \
 server: LDFLAGS := -m32 -DCURL_STATICLIB
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a $(LDFLAGS)
-	strip -s wolfded.x86
+#	strip -s wolfded.x86
 server-clean:
 	rm $(SVOBJS) 2> /dev/null ; exit 0
 	
