@@ -25,20 +25,41 @@ JANSSON_DIR=`pwd`/jansson
 
 cd $OPENSSL_DIR
 mkdir build
+mkdir build-win
 ./Configure --prefix=${OPENSSL_DIR}/build '-Wl,-rpath,$(LIBRPATH)' -m32 linux-x86 no-tests no-docs 
 make -j
 make install
 
+make clean
+./Configure --cross-compile-prefix=i686-w64-mingw32- --prefix=${OPENSSL_DIR}/build-win shared mingw -m32 no-idea no-tests no-docs
+make -j
+make install
+
+
 cd $CURL_DIR
 mkdir build
+mkdir build-win
 autoreconf -fi
 CFLAGS="-m32" PKG_CONFIG="pkg-config --static" ./configure --disable-shared --enable-static --without-libpsl --without-zlib --with-openssl=${OPENSSL_DIR}/build --prefix=${CURL_DIR}/build
 make -j LDFLAGS="-static -all-static"
 make install
 
+make clean
+autoreconf -fi
+CFLAGS="-m32" PKG_CONFIG="pkg-config --static" ./configure --disable-shared --enable-static --without-libpsl --without-zlib --with-openssl=${OPENSSL_DIR}/build-win --prefix=${CURL_DIR}/build-win --target=i686-w64-mingw32 --host=i686-w64-mingw32
+make -j LDFLAGS="-static -all-static -L${OPENSSL_DIR}/build-win/lib"
+make install
+
+
 cd $JANSSON_DIR
 mkdir build
+mkdir build-win
 autoreconf -i
 CFLAGS="-m32" ./configure --prefix=${JANSSON_DIR}/build
+make -j
+make install
+
+autoreconf -i
+CFLAGS="-m32" ./configure --prefix=${JANSSON_DIR}/build-win --target=i686-w64-mingw32 --host=i686-w64-mingw32
 make -j
 make install

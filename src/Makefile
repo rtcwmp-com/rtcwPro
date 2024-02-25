@@ -20,7 +20,6 @@ binaries-win:
 	cd game && make -f makefile.w32 all
 	cd cgame && make -f makefile.w32 all
 	cd ui && make -f makefile.w32 all
-	mkdir -p ../build/rtcwpro
 	mv game/qagame_mp_x86.dll ../build/rtcwpro
 	mv cgame/cgame_mp_x86.dll ../build/rtcwpro
 	mv ui/ui_mp_x86.dll ../build/rtcwpro	

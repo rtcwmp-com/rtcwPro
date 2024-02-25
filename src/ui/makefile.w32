@@ -1,8 +1,9 @@
 CC = i686-w64-mingw32-gcc
-CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium \
+CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -fcommon \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce \
--DWIN32 -D_WINDOWS -D_MBCS -D_USRDLL -DUI_EXPORTS -DC_ONLY
+-DWIN32 -D_WINDOWS -D_MBCS -D_USRDLL -DUI_EXPORTS -DC_ONLY \
+-I../../deps/jansson/build-win/include
 
 SOURCES = $(shell ls ui_*.c ../game/bg_misc.c ../qcommon/q_math.c ../qcommon/q_shared.c)
 MODULES = $(SOURCES:.c=.o)
@@ -10,7 +11,10 @@ MODULES = $(SOURCES:.c=.o)
 all: clean gameclean ui_mp_x86.dll
 
 gameclean:
-	rm -rf ../game/*.o rm -rf ../ui/*.o
+	rm -rf ../game/*.o
+	rm -rf ../ui/*.o 
+	rm -rf ../qcommon/*.o
+
 
 ui_mp_x86.dll: $(MODULES)
 	$(CC) -shared -lm -o $@ $?
