@@ -14,9 +14,15 @@ WORKDIR /home/game
 COPY --chown=game:game --from="rtcwpro/rtcw-base:1.0" /output/ /home/game
 
 RUN mkdir /home/game/dev && \
-    mkdir /home/game/rtcwpro && \
+    mkdir -p /home/game/rtcwpro/configs && \
     ln -sf /home/game/dev/wolfded.x86 /home/game/wolfded.x86 && \
-    ln -sf /home/game/dev/rtcwpro/ /home/game/rtcwpro/
+    ln -sf /home/game/dev/rtcwpro/qagame.mp.i386.so /home/game/rtcwpro/qagame.mp.i386.so && \
+    ln -sf /home/game/dev/rtcwpro/rtcwpro_assets.pk3 /home/game/rtcwpro/rtcwpro_assets.pk3 && \
+    ln -sf /home/game/dev/rtcwpro/rtcwpro_models.pk3 /home/game/rtcwpro/rtcwpro_models.pk3 && \
+    ln -sf /home/game/dev/rtcwpro/rtcwpro_bin.pk3 /home/game/rtcwpro/rtcwpro_bin.pk3 && \
+    ln -sf /home/game/dev/rtcwpro/GeoIP.dat /home/game/rtcwpro/GeoIP.dat && \
+    ln -sf /home/game/dev/rtcwpro/configs/defaultcomp.config /home/game/rtcwpro/configs/defaultcomp.config && \
+    ln -sf /home/game/dev/rtcwpro/configs/unlag.config /home/game/rtcwpro/configs/unlag.config 
 
 RUN git clone --depth 1 "https://github.com/msh100/rtcw-config.git" \
     /home/game/settings/

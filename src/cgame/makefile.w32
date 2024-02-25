@@ -13,7 +13,7 @@ gameclean:
 	rm -rf ../game/*.o ../ui/*.o ../cgame/*.o ../qcommon/*.o
 
 cgame_mp_x86.dll: $(MODULES)
-	$(CC) -shared -lm -o $@ $?
+	$(CC) --shared -static-libgcc -lm -o $@ $?
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@

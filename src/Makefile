@@ -1,5 +1,5 @@
 
-all: clean dependencies binaries assets models binaries-win
+all: clean dependencies binaries assets models binaries-win resources
 
 dependencies:
 	cd .. && bash fetch-dependencies.sh
@@ -31,6 +31,11 @@ assets:
 
 models:
 	cd ../Assets && mkdir -p models/multiplayer/medpack && cp medpack.jpg models/multiplayer/medpack && zip -r ../build/rtcwpro/rtcwpro_models.pk3 ./models rtcwpro_models.dat && rm -rf ./models
+
+resources:
+	cd ../ && mkdir -p build/rtcwpro/configs && cp configs/* build/rtcwpro/configs
+	cd ../ && cp GeoIP.dat build/rtcwpro/
+
 
 clean:
 	rm -rf ../deps
