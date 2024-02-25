@@ -34,11 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "bg_public.h"
 #include "g_public.h"
 #include "../../MAIN/ui_mp/menudef.h"
-#ifdef _WIN32
-#include "../qcommon/jansson_win/jansson.h"
-#else
-#include "../qcommon/jansson/jansson.h"
-#endif // _WIN32
+#include "jansson.h"
 
 //==================================================================
 
