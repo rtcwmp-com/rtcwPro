@@ -504,7 +504,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_knifeonly,	"vote_allow_knifeonly", "1", 0, 0, qfalse, qfalse },
 
 	// RTCWPro
-	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_screenShake, "g_screenShake", "100", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &shoutcastPassword, "shoutcastPassword", "none", CVAR_ARCHIVE, 0, qfalse },

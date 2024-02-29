@@ -136,7 +136,7 @@
 | vote_limit | `integer` | `0-99` | `3` | Limit number of votes client could call per round |
 | vote_percent | `integer` | `0-100` | `50` | Percent of votes needed to pass a vote |
 | g_antilag | `integer` | `0-1` | `0` | Enable/disable antilag |
-| g_screenShake | `integer` | `0-99` | `4` | Set the amount of screenshake at explosions clients will experience |
+| g_screenShake | `integer` | `0-100` | `100` | Set the percentage of screenshake at explosions clients will experience |
 | g_preciseHeadHitBox | `integer` | `0-1` | `1` | Enable/disable accurate head hit box animation |
 | g_stats_curl_submit | `integer` | `0-1` | `0` | Enable/disable submitting stats to remote URL | 
 | g_stats_curl_submit_URL | `string` | `N/A` | `https://rtcwproapi.donkanator.com/submit` | URL to submit to |
