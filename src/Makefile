@@ -1,5 +1,6 @@
 
 all: clean dependencies binaries assets models binaries-win resources
+all-valgrind: clean dependencies binaries-valgrind assets models binaries-win resources
 
 dependencies:
 	cd .. && bash fetch-dependencies.sh
@@ -24,6 +25,18 @@ binaries-win:
 	mv cgame/cgame_mp_x86.dll ../build/rtcwpro
 	mv ui/ui_mp_x86.dll ../build/rtcwpro	
 	cd ../build/rtcwpro && zip -r rtcwpro_bin.pk3 ./*.dll
+
+binaries-valgrind:
+	cd game && make -f makefile.valgrind all
+	cd cgame && make -f makefile.valgrind all
+	cd ui && make -f makefile.valgrind all
+	cd unix && make -f makefile.valgrind clean && make -f makefile.valgrind server
+	mkdir -p ../build/rtcwpro
+	mv game/qagame.mp.i386.so ../build/rtcwpro
+	mv cgame/cgame.mp.i386.so ../build/rtcwpro
+	mv ui/ui.mp.i386.so ../build/rtcwpro	
+	mv unix/wolfded.x86 ../build
+	cd ../build/rtcwpro && zip -r rtcwpro_bin.pk3 ./*.so
 
 
 assets:

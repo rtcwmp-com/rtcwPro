@@ -1,7 +1,7 @@
 #!/bin/bash
 addrs=(`hostname -I`)
 corepath=(`cat /proc/sys/kernel/core_pattern`)
-docker run -d \
+docker run -ti \
       	--mount type=bind,src=`pwd`/../build,dst=/home/game/dev \
       	--mount type=bind,src=${corepath%/*},dst=${corepath%/*} \
 	--ulimit core=-1 \
@@ -10,4 +10,4 @@ docker run -d \
 	-e "PASSWORD=war"   \
 	-e "REFEREEPASSWORD=pass123" \
 	-e "SERVERCONF=comp" \
-	rtcwpro/server-dev:1.0
+	rtcwpro/server-dev-valgrind:1.0
