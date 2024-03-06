@@ -179,9 +179,9 @@ fi
 
 # Rtcwpro uses a different binary which is provided in their package
 binary="/home/game/dev/wolfded.x86"
-valgrind_opts="--tool=memcheck --leak-check=full --track-origins=yes --log-file=/home/game/dev/valgrind.log"
+valgrind_opts="--tool=memcheck --leak-check=full --track-origins=yes --num-callers=20 --keep-debuginfo=yes --log-file=/home/game/dev/valgrind.log"
 # Exec into the game
-export PATH=$PATH:/usr/libexec/valgrind/
+echo RUN THIS:
 echo -e /usr/bin/valgrind ${valgrind_opts} ${binary} \
     +set dedicated 2 \
     +set fs_game "rtcwpro" \

@@ -53,7 +53,7 @@ We'll need docker and git at a minimum. `sudo apt-get install docker git`
 
 By default, `git clone <url>` will check out the master branch, but for development we'll use the develop branch of rtcwPro.
 
-Check out the rtcwPro develop branch: `git clone -b feature/dockerbuild https://github.com/rtcwmp-com/rtcwPro`
+Check out the rtcwPro develop branch: `git clone -b develop https://github.com/rtcwmp-com/rtcwPro`
 
 Change directory to the rtcwPro docker-scripts area: `cd rtcwPro/docker-scripts`
 
