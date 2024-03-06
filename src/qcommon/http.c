@@ -176,8 +176,9 @@ void* CL_HTTP_SSUpload(void* args) {
 
 		}
 
-		curl_easy_cleanup(curl);
+
 		curl_slist_free_all(headerlist);
+		curl_easy_cleanup(curl);
 	}
 
 	fclose(fd);

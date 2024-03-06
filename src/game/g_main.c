@@ -1444,8 +1444,8 @@ LoadMapList
 */
 void LoadMapList(void)
 {
-	char maps[MAX_MAPCONFIGSTRINGS];
-	char noext[MAX_QPATH];
+	char maps[MAX_MAPCONFIGSTRINGS] = {'\0'};
+	char noext[MAX_QPATH] = {'\0'};
 	int i;
 
 	level.mapcount = trap_FS_GetFileList("maps", ".bsp", maps, sizeof(maps));

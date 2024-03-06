@@ -49,6 +49,7 @@ static void signal_handler( int sig ) { // bk010104 - replace this... (NOTE TTim
 #ifndef DEDICATED
 	GLimp_Shutdown(); // bk010104 - shouldn't this be CL_Shutdown
 #endif
+	SV_Shutdown("");
 	Sys_Exit( 0 ); // bk010104 - abstraction NOTE TTimo send a 0 to avoid DOUBLE SIGNAL FAULT
 }
 

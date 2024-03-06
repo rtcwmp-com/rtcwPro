@@ -170,10 +170,12 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 		json_object_set_new(players, "alias", json_string(va("%s", alias)));
 		json_object_set_new(players, "team", json_string(va("%s", team)));
 		s = json_dumps(players, 0);
-		json_object_set(playerGuid, guid, json_string(s));
+		json_object_set_new(playerGuid, guid, json_string(s));
+		free(s);
 
 		s = json_dumps(playerGuid, 0);
-		json_object_set(jdata, "players", json_string(s));
+		json_object_set_new(jdata, "players", json_string(s));
+		free(s);
 		/*
 		{
 			"format": "v1",
@@ -188,13 +190,17 @@ char* G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGui
 		s = json_dumps(root, JSON_INDENT(2)); 
 		*/
 
-		free(s);
+		
 	}
-
-	char* replaceStrings = Q_StrReplace(json_dumps(jdata, 1), "\\", "");
+	s = json_dumps(jdata, 1);
+	char* replaceStrings = Q_StrReplace(s, "\\", "");
+	free(s);
 	replaceStrings = Q_StrReplace(replaceStrings, "\"{\"", "{\"");
 	replaceStrings = Q_StrReplace(replaceStrings, "\"}\"}\"", "\"}}");
 	replaceStrings = Q_StrReplace(replaceStrings, "\"}\",", "\"},");
+	json_decref(players);
+	json_decref(playerGuid);
+	json_decref(jdata);
 	return replaceStrings;
 }
 

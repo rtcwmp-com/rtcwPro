@@ -50,6 +50,8 @@ size_t APIResultMessage(char* data, size_t size, size_t nmemb, void* userdata) {
 	Com_Printf("Received response (integer=%d): %.*s\n", query_info->clientNumber, (int)(size * nmemb), query_info->response);
 
 	VM_Call(gvm, G_RETURN_API_QUERY_RESPONSE, query_info->clientNumber, query_info->response, realsize);
+	free(query_info->response);
+	free(query_info);
 
 	/* Return the number of bytes processed */
 	return realsize;
@@ -76,8 +78,6 @@ int API_Query(char* param, char* jsonText, int clientNumber) {
 
 		Threads_Create(API_HTTP_Query, query_info);
 	}
-
-	HTTP_APIInquiry_t* http_inquiry = (HTTP_APIInquiry_t*)malloc(sizeof(HTTP_APIInquiry_t));
 
 	return 0;
 }
@@ -122,9 +122,8 @@ void* API_HTTP_Query(void* args) {
 		Com_Printf("Query API: Curl Error return code: %s\n", curl_easy_strerror(ret));
 	}
 
-	curl_easy_cleanup(hnd);
-	hnd = NULL;
 	curl_slist_free_all(slist1);
 	slist1 = NULL;
-
+	curl_easy_cleanup(hnd);
+	hnd = NULL;
 }
