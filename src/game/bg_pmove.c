@@ -4181,8 +4181,7 @@ void PmoveSingle( pmove_t *pmove ) {
 			}
 			else
 			{
-				float fixedFrameTime, scale, decimalTest;
-				float result = 0;
+				float fixedFrametime, fractionalPart, scale, result;
 				int fps = pm->fixedphysicsfps;
 
 				if (fps > 333)
@@ -4194,17 +4193,20 @@ void PmoveSingle( pmove_t *pmove ) {
 					fps = 30;
 				}
 
-				fixedFrameTime = (int)(1000.0f / fps) * 0.001f;
-				decimalTest = pm->ps->gravity * fixedFrameTime;
+				fixedFrametime = (int)(1000.0f / fps) * 0.001f;
+				fractionalPart = pm->ps->gravity * fixedFrametime;
+				fractionalPart = rint(fractionalPart) - fractionalPart;
 
-				if (rint(decimalTest) - decimalTest < 0)
+				if (fractionalPart < 0)
 				{
-					scale = fixedFrameTime / pml.frametime;
-					result = (rint(decimalTest) - decimalTest) * -1;
-					result = result / scale;
-				}
+					scale = fixedFrametime / pml.frametime;
+					result = Q_fabs(fractionalPart) / scale;
 
-				pm->ps->velocity[2] += result;
+					if (Q_fabs(pm->ps->velocity[2] - pml.previous_velocity[2]) > result)
+					{
+						pm->ps->velocity[2] += result;
+					}
+				}
 			}
 		}
 		else
