@@ -1,0 +1,55 @@
+
+all: clean dependencies binaries assets models binaries-win resources
+all-valgrind: clean dependencies binaries-valgrind assets models binaries-win resources
+
+dependencies:
+	cd .. && bash fetch-dependencies.sh
+
+binaries:
+	cd game && make all
+	cd cgame && make all
+	cd ui && make all
+	cd unix && make clean && make server
+	mkdir -p ../build/rtcwpro
+	mv game/qagame.mp.i386.so ../build/rtcwpro
+	mv cgame/cgame.mp.i386.so ../build/rtcwpro
+	mv ui/ui.mp.i386.so ../build/rtcwpro	
+	mv unix/wolfded.x86 ../build
+	cd ../build/rtcwpro && zip -r rtcwpro_bin.pk3 ./*.so
+
+binaries-win:
+	cd game && make -f makefile.w32 all
+	cd cgame && make -f makefile.w32 all
+	cd ui && make -f makefile.w32 all
+	mv game/qagame_mp_x86.dll ../build/rtcwpro
+	mv cgame/cgame_mp_x86.dll ../build/rtcwpro
+	mv ui/ui_mp_x86.dll ../build/rtcwpro	
+	cd ../build/rtcwpro && zip -r rtcwpro_bin.pk3 ./*.dll
+
+binaries-valgrind:
+	cd game && make -f makefile.valgrind all
+	cd cgame && make -f makefile.valgrind all
+	cd ui && make -f makefile.valgrind all
+	cd unix && make -f makefile.valgrind clean && make -f makefile.valgrind server
+	mkdir -p ../build/rtcwpro
+	mv game/qagame.mp.i386.so ../build/rtcwpro
+	mv cgame/cgame.mp.i386.so ../build/rtcwpro
+	mv ui/ui.mp.i386.so ../build/rtcwpro	
+	mv unix/wolfded.x86 ../build
+	cd ../build/rtcwpro && zip -r rtcwpro_bin.pk3 ./*.so
+
+
+assets:
+	cd ../MAIN && zip -r ../build/rtcwpro/rtcwpro_assets.pk3 ./*
+
+models:
+	cd ../Assets && mkdir -p models/multiplayer/medpack && cp medpack.jpg models/multiplayer/medpack && zip -r ../build/rtcwpro/rtcwpro_models.pk3 ./models rtcwpro_models.dat && rm -rf ./models
+
+resources:
+	cd ../ && mkdir -p build/rtcwpro/configs && cp configs/* build/rtcwpro/configs
+	cd ../ && cp GeoIP.dat build/rtcwpro/
+
+
+clean:
+	rm -rf ../deps
+	rm -rf ../build

@@ -82,7 +82,7 @@ const char  *CG_PlaceString( int rank ) {
 	return str;
 }
 
-static ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, qboolean teamKill)
+ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, qboolean teamKill)
 {
 	clientInfo_t* self = &cgs.clientinfo[cg.clientNum];
 	Q_CleanStr(name);

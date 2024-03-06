@@ -315,6 +315,8 @@ qboolean    Sys_GetPacket( netadr_t *net_from, msg_t *net_message ) {
 	int protocol;
 	int err;
 
+	memset(&from, 0, sizeof(from));
+
 	for ( protocol = 0 ; protocol < 2 ; protocol++ )
 	{
 		if ( protocol == 0 ) {

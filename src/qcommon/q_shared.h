@@ -120,7 +120,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifndef ID_INLINE
 #if defined(NDEBUG) || defined(_WIN32)
-#define ID_INLINE __inline
+#define ID_INLINE static __inline
 #else
 #define ID_INLINE
 #endif

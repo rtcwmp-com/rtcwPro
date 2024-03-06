@@ -636,7 +636,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 0;
 
 	case G_RETURN_API_QUERY_RESPONSE:
-		trap_HandleApiResponse(arg0, (char*)arg1);
+		trap_HandleApiResponse(arg0, (char*)arg1, arg2);
 		return 0;
 	}
 
@@ -1444,8 +1444,8 @@ LoadMapList
 */
 void LoadMapList(void)
 {
-	char maps[MAX_MAPCONFIGSTRINGS];
-	char noext[MAX_QPATH];
+	char maps[MAX_MAPCONFIGSTRINGS] = {'\0'};
+	char noext[MAX_QPATH] = {'\0'};
 	int i;
 
 	level.mapcount = trap_FS_GetFileList("maps", ".bsp", maps, sizeof(maps));

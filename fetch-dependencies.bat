@@ -143,6 +143,20 @@ rem ***************************************************************************
 	) else (
 		set SKIP_JPEG=1
 	)
+	
+	if not exist "jansson" (
+		echo jansson...
+		call powershell "$source= (Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/akheron/jansson/releases)[0].zipball_url;"^
+						"Write-Host $source;"^
+						"$file=$(Split-Path -Path $source -Leaf);"^
+						"Invoke-WebRequest -Uri $source -Out $file;"^
+						"Get-ChildItem $file | move-item -Destination jansson.zip"
+		call powershell "Expand-Archive -Path """jansson.zip""" -DestinationPath """jansson""""
+		call powershell "Get-ChildItem """jansson\*\*""" | move-item -Destination """jansson\""
+		call powershell "rm jansson.zip"
+	) else (
+		set SKIP_JANSSON=1
+	)
 :buildDeps
 	call "%PF%\%VC_PATH%\VC\Auxiliary\Build\vcvars32.bat"
 	set ROOT_DEP_DIR=%cd%
@@ -165,7 +179,7 @@ rem ***************************************************************************
 	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" curl-all.sln /Build "DLL Release - DLL OpenSSL"
 :buildLibJPEG
 	if defined SKIP_JPEG (
-		goto harvest
+		goto buildJansson
 	)
 	cd "%ROOT_DEP_DIR%\libjpeg-turbo"
 	mkdir build
@@ -173,6 +187,16 @@ rem ***************************************************************************
 	call cmake -G"%cmake_makefiles%" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
 	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" libjpeg-turbo.sln /Build Release
 	call powershell "Get-ChildItem """*.h""" | copy-item -Destination """..\""
+	
+:buildJansson
+	if defined SKIP_JANSSON (
+		goto harvest
+	)
+	cd "%ROOT_DEP_DIR%\jansson"
+	mkdir build
+	cd build
+	call cmake -G"%cmake_makefiles%" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
+	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" jansson.sln /Build Release
 	
 :harvest
 	cd %ROOT_DEP_DIR%
@@ -189,5 +213,6 @@ rem ***************************************************************************
 	call powershell "Get-ChildItem """openssl\build\Win32\%VC_DESC%\DLL Release\*.exe""" | copy-item -Destination """bin\""
 	call powershell "Get-ChildItem """libjpeg-turbo\build\Release\*.dll""" | copy-item -Destination """bin\""
 	call powershell "Get-ChildItem """libjpeg-turbo\build\Release\*.lib""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """jansson\build\lib\Release\*.lib""" | copy-item -Destination """bin\""
 	echo Copy the DLL files from deps/bin to your RtcwPro install location where wolfMP.exe is
 	pause

@@ -34,11 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "bg_public.h"
 #include "g_public.h"
 #include "../../MAIN/ui_mp/menudef.h"
-#ifdef _WIN32
-#include "../qcommon/jansson_win/jansson.h"
-#else
-#include "../qcommon/jansson/jansson.h"
-#endif // _WIN32
+#include "jansson.h"
 
 //==================================================================
 
@@ -1844,8 +1840,8 @@ int     trap_submit_curlPost( char* jsonfile, char* matchid );
 int		trap_HTTP_apiQuery(char* param, char* jsonText, int clientNumber);
 char*	G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGuid);
 void	Cmd_APIQuery(gentity_t* ent);
-void	trap_HandleApiResponse(int clientNum, char* response);
-int		ReadApiResultJson(char* data);
+void	trap_HandleApiResponse(int clientNum, char* response, int size);
+int		ReadApiResultJson(char* data, int size);
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );
