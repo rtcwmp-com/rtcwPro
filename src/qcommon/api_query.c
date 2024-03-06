@@ -32,17 +32,29 @@ If you have questions concerning this license or the applicable additional terms
 #include "http.h"
 
 
-size_t APIResultMessage(char* ptr, size_t size, size_t nmemb, void* userdata) {
-	/* Cast the user data to an integer */
-	int clientNumber = *((int*)userdata);
+size_t APIResultMessage(char* data, size_t size, size_t nmemb, void* userdata) {
+	HTTP_APIInquiry_t* query_info = (HTTP_APIInquiry_t*)userdata;
+
+	size_t realsize = size * nmemb;
+
+	char* ptr = realloc(query_info->response, query_info->size + realsize + 1);
+	if (!ptr)
+		return 0;  /* out of memory! */
+
+	query_info->response = ptr;
+	memcpy(&(query_info->response[query_info->size]), data, realsize);
+	query_info->size += realsize;
+	query_info->response[query_info->size] = 0; //null terminate the response
 
 	/* Print the response along with the integer */
-	printf("Received response (integer=%d): %.*s\n", clientNumber, (int)(size * nmemb), ptr);
+	Com_Printf("Received response (integer=%d): %.*s\n", query_info->clientNumber, (int)(size * nmemb), query_info->response);
 
-	VM_Call(gvm, G_RETURN_API_QUERY_RESPONSE, clientNumber, ptr);
+	VM_Call(gvm, G_RETURN_API_QUERY_RESPONSE, query_info->clientNumber, query_info->response, realsize);
+	free(query_info->response);
+	free(query_info);
 
 	/* Return the number of bytes processed */
-	return size * nmemb;
+	return realsize;
 }
 
 /*
@@ -60,12 +72,12 @@ int API_Query(char* param, char* jsonText, int clientNumber) {
 		query_info->param = va("%s", param);
 		query_info->jsonText = va("%s", jsonText);
 		query_info->clientNumber = clientNumber;
+		query_info->size = 0;
+		query_info->response = NULL;
 		//query_info->callback = APIResultMessage;
 
 		Threads_Create(API_HTTP_Query, query_info);
 	}
-
-	HTTP_APIInquiry_t* http_inquiry = (HTTP_APIInquiry_t*)malloc(sizeof(HTTP_APIInquiry_t));
 
 	return 0;
 }
@@ -100,7 +112,7 @@ void* API_HTTP_Query(void* args) {
 	curl_easy_setopt(hnd, CURLOPT_USE_SSL, CURLUSESSL_TRY);
 	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
 	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, APIResultMessage);
-	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &query_info->clientNumber);
+	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, query_info);
 
 	//Com_Printf(va("Pro API: Client issued API Command %s\n", query_info->param));
 	ret = curl_easy_perform(hnd);
@@ -110,9 +122,8 @@ void* API_HTTP_Query(void* args) {
 		Com_Printf("Query API: Curl Error return code: %s\n", curl_easy_strerror(ret));
 	}
 
-	curl_easy_cleanup(hnd);
-	hnd = NULL;
 	curl_slist_free_all(slist1);
 	slist1 = NULL;
-
+	curl_easy_cleanup(hnd);
+	hnd = NULL;
 }
