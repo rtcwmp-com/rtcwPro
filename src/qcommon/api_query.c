@@ -47,7 +47,7 @@ size_t APIResultMessage(char* data, size_t size, size_t nmemb, void* userdata) {
 	query_info->response[query_info->size] = 0; //null terminate the response
 
 	/* Print the response along with the integer */
-	Com_Printf("Received response (integer=%d): %.*s\n", query_info->clientNumber, (int)(size * nmemb), query_info->response);
+	//Com_Printf("Received response (integer=%d): %.*s\n", query_info->clientNumber, (int)(size * nmemb), query_info->response);
 
 	VM_Call(gvm, G_RETURN_API_QUERY_RESPONSE, query_info->clientNumber, query_info->response, realsize);
 	free(query_info->response);
@@ -126,4 +126,6 @@ void* API_HTTP_Query(void* args) {
 	slist1 = NULL;
 	curl_easy_cleanup(hnd);
 	hnd = NULL;
+
+	return NULL;
 }
