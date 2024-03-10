@@ -18,12 +18,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -32,10 +32,12 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -103,8 +105,10 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" 
-copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -158,8 +162,10 @@ copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetE
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" 
-copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
