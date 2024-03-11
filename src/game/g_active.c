@@ -1734,14 +1734,12 @@ void ClientThink_real( gentity_t *ent ) {
 	// skip correction is all handled server-side now
 	// since that's the case, it makes no sense to store the extra info
 	// in the client's snapshot entity, so let's save a little bandwidth
-/*
 	if (g_smoothClients.integer) {
 		BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue );
 	}
 	else {
-*/
 		BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
-//	}
+	}
 //unlagged - smooth clients #2
 
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
@@ -2408,7 +2406,7 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// set the latest infor
 
-	if (g_antilag.integer < 2) // Nobo antilag or off
+	if (!g_antilag.integer) // antilag off
 	{
 		// RTCWPro
 		// Ridah, fixes jittery zombie movement
@@ -2419,7 +2417,7 @@ void ClientEndFrame( gentity_t *ent ) {
 			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, ((ent->r.svFlags & SVF_CASTAI) == 0));
 		}
 	}
-	else if (g_antilag.integer == 2) // Unlagged
+	else // Unlagged
 	{
 		//unlagged - smooth clients #2
 			// clients no longer do extrapolation if cg_smoothClients is 1, because

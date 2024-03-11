@@ -2442,7 +2442,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 	flags ^= EF_TELEPORT_BIT;
 	flags |= (client->ps.eFlags & EF_VOTED); // L0 - Fixes vote abuse by suicide and vote override..
 
-	if (g_antilag.integer == 2) // Unlagged
+	if (g_antilag.integer) // Unlagged
 	{
 		//unlagged - backward reconciliation #3
 		// we don't want players being backward-reconciled to the place they died

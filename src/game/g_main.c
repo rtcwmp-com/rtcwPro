@@ -3465,8 +3465,7 @@ void G_RunFrame( int levelTime ) {
 		}
 	} // End
 
-//	level.frameTime = trap_Milliseconds();
-	if (g_antilag.integer < 2) // not unlagged
+	if (!g_antilag.integer) // not unlagged
 		level.frameStartTime = trap_Milliseconds();
 
 	level.framenum++;
@@ -3617,7 +3616,7 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, move the AI
 	//AICast_StartServerFrame ( level.time );
 
-	if (g_antilag.integer == 2) // unlagged
+	if (g_antilag.integer) // unlagged
 	{
 		//unlagged - backward reconciliation #2
 		// NOW run the missiles, with all players backward-reconciled
@@ -3660,7 +3659,7 @@ void G_RunFrame( int levelTime ) {
 		}
 
 		G_UnTimeShiftAllClients( NULL );
-	//unlagged - backward reconciliation #2
+		//unlagged - backward reconciliation #2
 
 	}
 
@@ -3731,7 +3730,7 @@ void G_RunFrame( int levelTime ) {
 		HandleEmptyTeams();
 	}
 
-	if (g_antilag.integer == 2) // unlagged
+	if (g_antilag.integer) // unlagged
 	{
 		//unlagged - backward reconciliation #4
 		// record the time at the end of this frame - it should be about

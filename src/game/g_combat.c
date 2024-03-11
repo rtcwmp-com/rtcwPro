@@ -334,7 +334,7 @@ void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int 
 		return;
 	}
 
-	if (g_antilag.integer == 2)
+	if (g_antilag.integer)
 	{	
 		//unlagged - backward reconciliation #2
 		// make sure the body shows up in the client's current position
