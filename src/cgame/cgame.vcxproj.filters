@@ -101,6 +101,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cg_shoutcastoverlay.c" />
+    <ClCompile Include="cg_unlagged.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\main\ui\menudef.h" />

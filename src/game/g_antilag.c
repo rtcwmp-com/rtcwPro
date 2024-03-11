@@ -1,364 +1,285 @@
 /*
 ===========================================================================
-L0 / rtcwPub :: g_antilag.c
 
-	Antilag functionality.
-	Forks: Unfreeze -> s4ndmod -> wolfX -> main (1.4) and all in between.
+Return to Castle Wolfenstein multiplayer GPL Source Code
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-Created: 24. Mar / 2014
+This file is part of the Return to Castle Wolfenstein multiplayer GPL Source Code (RTCW MP Source Code).  
+
+RTCW MP Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RTCW MP Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with RTCW MP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the RTCW MP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW MP Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
 ===========================================================================
 */
 
 #include "g_local.h"
 
-/*
-RTCWPro - antilag refactor
-Credits: Nobo
-*/
+#define IS_ACTIVE( x ) ( \
+		x->r.linked == qtrue &&	\
+		x->client->ps.stats[STAT_HEALTH] > 0 &&	\
+		x->client->sess.sessionTeam != TEAM_SPECTATOR && \
+		( x->client->ps.pm_flags & PMF_LIMBO ) == 0	\
+		)
 
+// OSP -
+//	Aside from the inline edits, I also changed the client loops to poll only
+//  the active client slots on the server, rather than looping through every
+//  potential (and usually unused) slot.
+//
 
-/*
-============
-IsActiveClient
+void G_StoreClientPosition( gentity_t* ent ) {
+	int top, currentTime;
 
-Is the entity a client that's currently playing in the world (active)?
-============
-*/
-qboolean IsActiveClient(gentity_t* ent) {
-	return
-		ent->r.linked == qtrue &&
-		ent->client &&
-		ent->client->ps.stats[STAT_HEALTH] > 0 &&
-		ent->client->sess.sessionTeam != TEAM_SPECTATOR &&
-		(ent->client->ps.pm_flags & PMF_LIMBO) == 0;
-}
-
-/*
-============
-G_ResetTrail
-
-Resets the given client's trail (should be called from ClientBegin and when the teleport bit is toggled)
-Each trail node is populated using the client's current state within the server.
-============
-*/
-void G_ResetTrail(gentity_t* ent) {
-	int	i, time;
-
-	// we want to store half a second worth of trails (500ms)
-	const int trail_time_range_ms = 500;
-	const int time_interval = round((double)trail_time_range_ms / (double)NUM_CLIENT_TRAILS);
-
-	// fill up the origin trails with data (assume the current position
-	// for the last 1/2 second or so)
-	ent->client->trailHead = NUM_CLIENT_TRAILS - 1;
-
-	for (i = ent->client->trailHead, time = level.time; i >= 0; i--, time -= time_interval)
-	{
-		VectorCopy(ent->r.mins, ent->client->trail[i].mins);
-		VectorCopy(ent->r.maxs, ent->client->trail[i].maxs);
-		VectorCopy(ent->r.currentOrigin, ent->client->trail[i].currentOrigin);
-		ent->client->trail[i].time = time;
-		ent->client->trail[i].animInfo = ent->client->animationInfo;
-	}
-}
-
-
-/*
-============
-G_StoreTrail
-
-Store the client's current positional information (usually called every ClientThink)
-============
-*/
-void G_StoreTrail(gentity_t* ent) {
-	int newtime;
-
-	// only store trail nodes for actively playing clients.
-	// also, don't store if the level time hasn't been set yet (it'll happen next SV_Frame).
-	if (!IsActiveClient(ent) || !level.time || !level.previousTime)
-	{
+	if ( !IS_ACTIVE( ent ) ) {
 		return;
 	}
 
-	// 6ms is the minimum frame time for 125fps clients (average is 8ms).
-#define MINIMUM_TIME_BETWEEN_NODES 6
+	top = ent->client->topMarker;
 
-	// limit how often higher fps clients store trail nodes.
-	// otherwise we lose too much time-sensitive data that's required for higher ping players.
-	int time_since_last_store = ent->client->pers.cmd.serverTime - ent->client->last_trail_node_store_time;
-	ent->client->accum_trail_node_store_time += time_since_last_store;
-	ent->client->last_trail_node_store_time = ent->client->pers.cmd.serverTime;
-
-	if (ent->client->accum_trail_node_store_time < MINIMUM_TIME_BETWEEN_NODES)
-	{
-		return;
-	}
-	ent->client->accum_trail_node_store_time = 0;
-
-	// increment the head
-	ent->client->trailHead++;
-
-	if (ent->client->trailHead >= NUM_CLIENT_TRAILS)
-	{
-		ent->client->trailHead = 0;
+	// new frame, mark the old marker's time as the end of the last frame
+	if ( ent->client->clientMarkers[top].time < level.time ) {
+		ent->client->clientMarkers[top].time = level.previousTime;
+		top = ent->client->topMarker = ent->client->topMarker == MAX_CLIENT_MARKERS - 1 ? 0 : ent->client->topMarker + 1;
 	}
 
-	if (ent->r.svFlags & SVF_BOT)
-	{
-		// bots move only once per server frame (every 1000/sv_fps ms)
-		newtime = level.time;
-	}
-	else
-	{
-		// level.frameStartTime is set to trap_Milliseconds() within G_RunFrame.
-		//
-		// we want to store where the server thinks the client is after receiving and processing
-		// one of their usercmd packets (move command). trap_Milliseconds() is used for a more granular timestamp,
-		// since level.time is only ever incremented every 50-ish milliseconds (depends on sv_fps).
-		// 
-		// if level.time were used then clients with high fps, high maxpackets, and high rate would have
-		// many trail nodes with duplicate timestamps.
-		int realTimeSinceFrameStartTime = trap_Milliseconds() - level.frameStartTime;
-		newtime = level.previousTime + realTimeSinceFrameStartTime;
+	currentTime = level.previousTime + trap_Milliseconds() - level.frameTime;
+
+	if ( currentTime > level.time ) {
+		// owwie, we just went into the next frame... let's push them back
+		currentTime = level.time;
 	}
 
-	// store all the collision-detection info and the time
-	clientTrail_t* trail_node = &ent->client->trail[ent->client->trailHead];
-	VectorCopy(ent->r.mins, trail_node->mins);
-	VectorCopy(ent->r.maxs, trail_node->maxs);
-	VectorCopy(ent->r.currentOrigin, trail_node->currentOrigin);
-	trail_node->time = newtime;
-	trail_node->animInfo = ent->client->animationInfo;
+	VectorCopy( ent->r.mins,                        ent->client->clientMarkers[top].mins );
+	VectorCopy( ent->r.maxs,                        ent->client->clientMarkers[top].maxs );
+	VectorCopy( ent->r.currentOrigin,               ent->client->clientMarkers[top].origin );
+
+	// OSP - these timers appear to be questionable
+	ent->client->clientMarkers[top].servertime =    level.time;
+	ent->client->clientMarkers[top].time =          currentTime;
 }
 
-/*
-=================
-Interpolate
+static void G_AdjustSingleClientPosition( gentity_t* ent, int time ) {
+	int i, j;
 
-Interpolates along two vectors (start -> end).
-=================
-*/
-void InterpolateNobo(float frac, vec3_t start, vec3_t end, vec3_t out) {
-	float comp = 1.0f - frac;
+	if ( time > level.time ) {
+		time = level.time;
+	} // no lerping forward....
 
-	out[0] = start[0] * frac + end[0] * comp;
-	out[1] = start[1] * frac + end[1] * comp;
-	out[2] = start[2] * frac + end[2] * comp;
-}
-
-/*
-=================
-G_TimeShiftClientNobo
-
-Shifts a client back to where he was at the specified "time"
-=================
-*/
-void G_TimeShiftClientNobo(gentity_t* ent, int time) {
-	int	j, k;
-	qboolean found_trail_nodes_that_sandwich_time;
-
-	// this prevents looping through every trail node if we know none of them are <= time.
-	// the trail nodes are "sorted" by time, so if the oldest one isn't <= time, then none of them can be.
-	if (ent->client->trail[(ent->client->trailHead + 1) & (NUM_CLIENT_TRAILS - 1)].time > time) {
-		return;
-	}
-
-	// find two trail nodes in the trail whose times sandwich "time".
-	// this will check every trail node, even if the head starts at index 0.. it'll wrap around to NUM_CLIENT_TRAIL_NODES - 1 and decrease from there.
-	found_trail_nodes_that_sandwich_time = qfalse;
-	j = k = ent->client->trailHead;
-
-	do
-	{
-		if (ent->client->trail[j].time <= time)
-		{
-			found_trail_nodes_that_sandwich_time = j != k;
+	i = j = ent->client->topMarker;
+	do {
+		if ( ent->client->clientMarkers[i].time <= time ) {
 			break;
 		}
 
-		k = j;
-		j--;
+		j = i;
+		i = ( ( i > 0 ) ? ( i ) : ( MAX_CLIENT_MARKERS ) ) - 1;
+	} while ( i != ent->client->topMarker );
 
-		if (j < 0)
-		{
-			j = NUM_CLIENT_TRAILS - 1;
-		}
-	} 	while (j != ent->client->trailHead);
-
-	memset(&ent->client->saved_trail_node, 0, sizeof(clientTrail_t));
-
-	// we've found two trail nodes with times that "sandwich" the passed in "time"
-	if (found_trail_nodes_that_sandwich_time)
-	{
-		// save the current origin, bounding box and animation info; used to untimeshift the client once collision detection is complete
-		VectorCopy(ent->r.mins, ent->client->saved_trail_node.mins);
-		VectorCopy(ent->r.maxs, ent->client->saved_trail_node.maxs);
-		VectorCopy(ent->r.currentOrigin, ent->client->saved_trail_node.currentOrigin);
-		ent->client->saved_trail_node.animInfo = ent->client->animationInfo;
-
-		// calculate a fraction that will be used to shift the client's position back to the trail node that's nearest to "time"
-		float frac = (float)(time - ent->client->trail[j].time) / (float)(ent->client->trail[k].time - ent->client->trail[j].time);
-
-		// find the "best" origin between the sandwiching trail nodes via interpolation
-		InterpolateNobo(frac, ent->client->trail[j].currentOrigin, ent->client->trail[k].currentOrigin, ent->r.currentOrigin);
-		// find the "best" mins & maxs (crouching/standing).
-		// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
-		// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
-		int nearest_trail_node_index = frac < 0.5 ? j : k;
-		VectorCopy(ent->client->trail[nearest_trail_node_index].mins, ent->r.mins);
-		VectorCopy(ent->client->trail[nearest_trail_node_index].maxs, ent->r.maxs);
-		// use the trail node's animation info that's nearest "time" (for head hitbox).
-		// the current server animation code used for head hitboxes doesn't support interpolating
-		// between two different animation frames (i.e. crouch -> standing animation), so can't interpolate here either.
-		ent->client->animationInfo = ent->client->trail[nearest_trail_node_index].animInfo;
-
-		// this will recalculate absmin and absmax
-		trap_LinkEntity(ent);
-	}
-}
-
-
-/*
-=====================
-G_TimeShiftAllClientsNobo
-
-Move ALL clients back to where they were at the specified "time",
-except for "skip"
-=====================
-*/
-void G_TimeShiftAllClientsNobo(int time, gentity_t* skip) {
-	int			i;
-	gentity_t* ent;
-
-	// don't shift clients if "skip" (the client that's trying to timeshift everyone) is more than 500ms behind the current server time (very laggy).
-	if (level.time - time > 500)
-	{
+	if ( i == j ) { // oops, no valid stored markers
 		return;
 	}
 
-	// shift every client thats:
-	// not a spectator, not the "timeshifter" (skip), and not in limbo.
-	ent = &g_entities[0];
+	// OSP - I don't trust this caching, as the "warped" player's position updates potentially
+	//       wont be counted after his think until the next server frame, which will result
+	//       in a bad backupMarker
+//	if( ent->client->backupMarker.time != level.time ) {
+//		ent->client->backupMarker.time = level.time;
+	VectorCopy( ent->r.currentOrigin,    ent->client->backupMarker.origin );
+	VectorCopy( ent->r.mins,             ent->client->backupMarker.mins );
+	VectorCopy( ent->r.maxs,             ent->client->backupMarker.maxs );
+//	}
 
-	for (i = 0; i < MAX_CLIENTS; i++, ent++)
-	{
-		if (ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip)
-		{
-			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
-			{
-				G_TimeShiftClientNobo(ent, time);
-			}
-		}
+	if ( i != ent->client->topMarker ) {
+		float frac = ( (float)( ent->client->clientMarkers[j].time - time ) ) / ( ent->client->clientMarkers[j].time - ent->client->clientMarkers[i].time );
+
+		LerpPosition( ent->client->clientMarkers[j].origin,      ent->client->clientMarkers[i].origin,   frac,   ent->r.currentOrigin );
+		LerpPosition( ent->client->clientMarkers[j].mins,        ent->client->clientMarkers[i].mins,     frac,   ent->r.mins );
+		LerpPosition( ent->client->clientMarkers[j].maxs,        ent->client->clientMarkers[i].maxs,     frac,   ent->r.maxs );
+	} else {
+		VectorCopy( ent->client->clientMarkers[j].origin,       ent->r.currentOrigin );
+		VectorCopy( ent->client->clientMarkers[j].mins,         ent->r.mins );
+		VectorCopy( ent->client->clientMarkers[j].maxs,         ent->r.maxs );
 	}
+
+	trap_LinkEntity( ent );
 }
 
+static void G_ReAdjustSingleClientPosition( gentity_t* ent ) {
 
-/*
-===================
-G_UnTimeShiftClientNobo
+	// OSP - I don't trust this caching, as the "warped" player's position updates potentially
+	//       wont be counted after his think until the next server frame
+//	if( ent->client->backupMarker.time == level.time) {
+	VectorCopy( ent->client->backupMarker.origin,       ent->r.currentOrigin );
+	VectorCopy( ent->client->backupMarker.mins,         ent->r.mins );
+	VectorCopy( ent->client->backupMarker.maxs,         ent->r.maxs );
+	ent->client->backupMarker.servertime =  0;
 
-Move a client back to where he was before the time shift
-===================
-*/
-void G_UnTimeShiftClientNobo(gentity_t* ent) {
-
-	// if ent was time shifted
-	if (ent->client->saved_trail_node.mins[0])
-	{
-		// revert the time shift
-		VectorCopy(ent->client->saved_trail_node.mins, ent->r.mins);
-		VectorCopy(ent->client->saved_trail_node.maxs, ent->r.maxs);
-		VectorCopy(ent->client->saved_trail_node.currentOrigin, ent->r.currentOrigin);
-		ent->client->animationInfo = ent->client->saved_trail_node.animInfo;
-
-		// this will recalculate absmin and absmax
-		trap_LinkEntity(ent);
-	}
+	trap_LinkEntity( ent );
+//	}
 }
 
-/*
-=======================
-G_UnTimeShiftAllClientsNobo
-
-Move ALL the clients back to where they were before the time shift,
-except for "skip"
-=======================
-*/
-void G_UnTimeShiftAllClientsNobo(gentity_t* skip) {
-	int			i;
-	gentity_t* ent;
-
-	// unshift every client thats:
-	// not a spectator, not the "timeshifter" (skip), and not in limbo.
-	ent = &g_entities[0];
-
-	for (i = 0; i < MAX_CLIENTS; i++, ent++)
-	{
-		if (ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip)
-		{
-			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
-			{
-				G_UnTimeShiftClientNobo(ent);
-			}
-		}
-	}
-}
-
-
-// RTCWPro - unused for now
-#if 0
-
-void G_AttachBodyParts(gentity_t* ent) {
+void G_AdjustClientPositions( gentity_t* ent, int time, qboolean forward ) {
 	int i;
 	gentity_t   *list;
 
-	for (i = 0; i < level.numConnectedClients; i++) {
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
 		list = g_entities + level.sortedClients[i];
-		list->client->tempHead = (list != ent && IS_ACTIVE(list)) ? G_BuildHead(list) : NULL;
-	}
-}
-
-void G_DettachBodyParts(void) {
-	int i;
-	gentity_t   *list;
-
-	for (i = 0; i < level.numConnectedClients; i++) {
-		list = g_entities + level.sortedClients[i];
-		if (list->client->tempHead != NULL) {
-			G_FreeEntity(list->client->tempHead);
+		if ( list != ent && IS_ACTIVE( list ) ) {
+			if ( forward ) {
+				G_AdjustSingleClientPosition( list, time );
+			} else { G_ReAdjustSingleClientPosition( list );}
 		}
 	}
 }
 
-int G_SwitchBodyPartEntity(gentity_t* ent) {
-	if (ent->s.eType == ET_TEMPHEAD) {
+/*
+void G_ResetMarkers( gentity_t* ent ) {
+	int i, time;
+	char buffer[256];
+	float period;
+
+	trap_Cvar_VariableStringBuffer( "sv_fps", buffer, sizeof( buffer ) - 1 );
+
+	period = atoi( buffer );
+	period = ( period == 0 ) ? 50.0f : 1000.f / period;
+
+	ent->client->topMarker = MAX_CLIENT_MARKERS - 1;
+	for ( i = MAX_CLIENT_MARKERS, time = level.time; i >= 0; i--, time -= period ) {
+		ent->client->clientMarkers[i].servertime =  time;
+		ent->client->clientMarkers[i].time =        time;
+
+		VectorCopy( ent->r.mins,            ent->client->clientMarkers[i].mins );
+		VectorCopy( ent->r.maxs,            ent->client->clientMarkers[i].maxs );
+		VectorCopy( ent->r.currentOrigin,   ent->client->clientMarkers[i].origin );
+	}
+}
+*/
+
+void G_ResetMarkers(gentity_t *ent)
+{
+	int   i, time;
+	char  buffer[MAX_CVAR_VALUE_STRING];
+	float period;
+
+	trap_Cvar_VariableStringBuffer("sv_fps", buffer, sizeof(buffer) - 1);
+
+	period = atoi(buffer);
+	if (!period)
+	{
+		period = 50;
+	}
+	else
+	{
+		period = 1000.f / period;
+	}
+
+	ent->client->topMarker = MAX_CLIENT_MARKERS - 1;
+	for (i = MAX_CLIENT_MARKERS - 1, time = level.time; i >= 0; i--, time -= period)
+	{
+		VectorCopy(ent->r.mins, ent->client->clientMarkers[i].mins);
+		VectorCopy(ent->r.maxs, ent->client->clientMarkers[i].maxs);
+		VectorCopy(ent->r.currentOrigin, ent->client->clientMarkers[i].origin);
+		ent->client->clientMarkers[i].time = time;
+	}
+}
+
+void G_AttachBodyParts( gentity_t* ent ) {
+	int i;
+	gentity_t   *list;
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
+		list = g_entities + level.sortedClients[i];
+		list->client->tempHead = ( list != ent && IS_ACTIVE( list ) ) ? G_BuildHead( list ) : NULL;
+	}
+}
+
+void G_DettachBodyParts( void ) {
+	int i;
+	gentity_t   *list;
+
+	for ( i = 0; i < level.numConnectedClients; i++ ) {
+		list = g_entities + level.sortedClients[i];
+		if ( list->client->tempHead != NULL ) {
+			G_FreeEntity( list->client->tempHead );
+		}
+	}
+}
+
+int G_SwitchBodyPartEntity( gentity_t* ent ) {
+	if ( ent->s.eType == ET_TEMPHEAD ) {
 		return ent->parent - g_entities;
 	}
 	return ent - g_entities;
 }
 
-#define POSITION_READJUST										\
-	if (res != results->entityNum) {							\
-		VectorSubtract(end, start, dir);						\
-		VectorNormalizeFast(dir);								\
-																\
-		VectorMA(results->endpos, -1, dir, results->endpos);	\
+#define POSITION_READJUST											\
+	if ( res != results->entityNum ) {							   \
+		VectorSubtract( end, start, dir );						  \
+		VectorNormalizeFast( dir );								  \
+																	\
+		VectorMA( results->endpos, -1, dir, results->endpos );	  \
 		results->entityNum = res;								\
 	}
 
 // Run a trace with players in historical positions.
-void G_HistoricalTrace(gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask) {
+void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask ) {
+	trace_t tr;
+	gentity_t *other;
 	int res;
 	vec3_t dir;
 
-	G_AttachBodyParts(ent);
-	trap_Trace(results, start, mins, maxs, end, passEntityNum, contentmask);
+	if ( !g_antilag.integer || !ent->client ) {
+		G_AttachBodyParts( ent ) ;
 
-	res = G_SwitchBodyPartEntity(&g_entities[results->entityNum]);
-	POSITION_READJUST
+		trap_Trace( results, start, mins, maxs, end, passEntityNum, contentmask );
+
+		res = G_SwitchBodyPartEntity( &g_entities[results->entityNum] );
+		POSITION_READJUST
 
 		G_DettachBodyParts();
-	return;
-}
-#endif
+		return;
+	}
 
+	G_AdjustClientPositions( ent, ent->client->pers.cmd.serverTime, qtrue );
+
+	G_AttachBodyParts( ent ) ;
+
+	trap_Trace( results, start, mins, maxs, end, passEntityNum, contentmask );
+
+	res = G_SwitchBodyPartEntity( &g_entities[results->entityNum] );
+	POSITION_READJUST
+
+	G_DettachBodyParts();
+
+	G_AdjustClientPositions( ent, 0, qfalse );
+
+	if ( results->entityNum >= 0 && results->entityNum < MAX_CLIENTS && ( other = &g_entities[results->entityNum] )->inuse ) {
+		G_AttachBodyParts( ent ) ;
+
+		trap_Trace( &tr, start, mins, maxs, other->client->ps.origin, passEntityNum, contentmask );
+		res = G_SwitchBodyPartEntity( &g_entities[results->entityNum] );
+		POSITION_READJUST
+
+		if ( tr.entityNum != results->entityNum ) {
+			trap_Trace( results, start, mins, maxs, end, passEntityNum, contentmask );
+			res = G_SwitchBodyPartEntity( &g_entities[results->entityNum] );
+			POSITION_READJUST
+		}
+
+		G_DettachBodyParts();
+	}
+}

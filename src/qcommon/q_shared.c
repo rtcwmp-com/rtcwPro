@@ -1502,4 +1502,28 @@ void Q_ColorizeString(char colorCode, const char* inStr, char* outStr, size_t ou
 	outStr[outOffset] = 0;
 }
 
+//unlagged - attack prediction #3
+// moved from g_weapon.c
+/*
+======================
+SnapVectorTowards
+
+Round a vector to integers for more efficient network
+transmission, but make sure that it rounds towards a given point
+rather than blindly truncating.  This prevents it from truncating 
+into a wall.
+======================
+*/
+void SnapVectorTowards( vec3_t v, vec3_t to ) {
+	int		i;
+
+	for ( i = 0 ; i < 3 ; i++ ) {
+		if ( to[i] <= v[i] ) {
+			v[i] = (int)v[i];
+		} else {
+			v[i] = (int)v[i] + 1;
+		}
+	}
+}
+//unlagged - attack prediction #3
 

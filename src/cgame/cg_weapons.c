@@ -4758,6 +4758,10 @@ void CG_FireWeapon( centity_t *cent ) {
 			weap->ejectBrassFunc( cent );
 		}
 	} // jpw
+
+	//unlagged - attack prediction #1
+	CG_PredictWeaponEffects( cent );
+	//unlagged - attack prediction #1
 }
 
 
@@ -5894,7 +5898,10 @@ hit splashes (FIXME: random seed isn't synced anymore)
 		organized so that the pattern is more of a circle (with some degree of randomness)
 ================
 */
-static void CG_VenomPattern( vec3_t origin, vec3_t origin2, int otherEntNum ) {
+//unlagged - attack prediction
+// made this non-static for access from cg_unlagged.c
+//static void CG_VenomPattern( vec3_t origin, vec3_t origin2, int otherEntNum ) {
+void CG_VenomPattern( vec3_t origin, vec3_t origin2, int seed, int otherEntNum ) {
 	int i;
 	float r, u;
 	vec3_t end;
@@ -5908,8 +5915,12 @@ static void CG_VenomPattern( vec3_t origin, vec3_t origin2, int otherEntNum ) {
 
 	// generate the "random" spread pattern
 	for ( i = 0 ; i < DEFAULT_VENOM_COUNT ; i++ ) {
-		r = crandom() * DEFAULT_VENOM_SPREAD;
-		u = crandom() * DEFAULT_VENOM_SPREAD;
+		//unlagged - attack prediction
+		//r = crandom() * DEFAULT_VENOM_SPREAD;
+		//u = crandom() * DEFAULT_VENOM_SPREAD;
+		r = Q_crandom( &seed ) * DEFAULT_VENOM_SPREAD;
+		u = Q_crandom( &seed ) * DEFAULT_VENOM_SPREAD;
+		//unlagged - attack prediction
 		VectorMA( origin, 8192, forward, end );
 		VectorMA( end, r, right, end );
 		VectorMA( end, u, up, end );
@@ -5947,7 +5958,10 @@ void CG_VenomFire( entityState_t *es, qboolean fullmode ) {
 		}
 	}
 	if ( fullmode ) {
-		CG_VenomPattern( es->pos.trBase, es->origin2, es->otherEntityNum );
+		//unlagged - attack prediction
+		//CG_VenomPattern( es->pos.trBase, es->origin2, es->otherEntityNum );
+		CG_VenomPattern( es->pos.trBase, es->origin2, es->eventParm, es->otherEntityNum );
+		//unlagged - attack prediction
 	}
 }
 
@@ -6149,19 +6163,6 @@ static qboolean CG_CalcMuzzlePoint( int entityNum, vec3_t muzzle ) {
 
 }
 
-void SnapVectorTowards( vec3_t v, vec3_t to ) {
-	int i;
-
-	for ( i = 0 ; i < 3 ; i++ ) {
-		if ( to[i] <= v[i] ) {
-//			v[i] = (int)v[i];
-			v[i] = floor( v[i] );
-		} else {
-//			v[i] = (int)v[i] + 1;
-			v[i] = ceil( v[i] );
-		}
-	}
-}
 
 /**
  * @brief Renders bullet tracers if tracer option is valid.
@@ -6217,8 +6218,10 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 		VectorCopy( cg_entities[cg.snap->ps.viewlocked_entNum].currentState.pos.trBase, muzzle );
 		VectorMA( muzzle, 16, up, muzzle );
 
+		//unlagged
 		r = Q_crandom( &seed ) * MG42_SPREAD_MP;
 		u = Q_crandom( &seed ) * MG42_SPREAD_MP;
+		//unlagged
 
 		VectorMA( muzzle, 8192, forward, end );
 		VectorMA( end, r, right, end );

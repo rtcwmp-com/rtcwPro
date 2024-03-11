@@ -19,8 +19,7 @@ along with Unlagged source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-
-//Sago: For some reason the Niels version must use a different char set.
+//
 #include "g_local.h"
 
 /*
@@ -40,7 +39,6 @@ void G_ResetHistory( gentity_t *ent ) {
 		VectorCopy( ent->r.maxs, ent->client->history[i].maxs );
 		VectorCopy( ent->r.currentOrigin, ent->client->history[i].currentOrigin );
 		ent->client->history[i].leveltime = time;
-		ent->client->history[i].animInfo = ent->client->animationInfo;
 	}
 }
 
@@ -53,10 +51,9 @@ Keep track of where the client's been
 ============
 */
 void G_StoreHistory( gentity_t *ent ) {
-	//int		head, frametime;
-	int		head;
+	int		head, frametime;
 
-	//frametime = level.time - level.previousTime;
+	frametime = level.time - level.previousTime;
 
 	ent->client->historyHead++;
 	if ( ent->client->historyHead >= NUM_CLIENT_HISTORY ) {
@@ -69,11 +66,8 @@ void G_StoreHistory( gentity_t *ent ) {
 	VectorCopy( ent->r.mins, ent->client->history[head].mins );
 	VectorCopy( ent->r.maxs, ent->client->history[head].maxs );
 	VectorCopy( ent->s.pos.trBase, ent->client->history[head].currentOrigin );
-	if (!g_floatPlayerPosition.integer) {
-		SnapVector( ent->client->history[head].currentOrigin );
-	}
+	SnapVector( ent->client->history[head].currentOrigin );
 	ent->client->history[head].leveltime = level.time;
-	ent->client->history[head].animInfo = ent->client->animationInfo;
 }
 
 
@@ -102,21 +96,6 @@ static void TimeShiftLerp( float frac, vec3_t start, vec3_t end, vec3_t result )
 
 /*
 =================
-Interpolate
-
-Interpolates along two vectors (start -> end).
-=================
-*/
-void Interpolate(float frac, vec3_t start, vec3_t end, vec3_t out) {
-	float comp = 1.0f - frac;
-
-	out[0] = start[0] * frac + end[0] * comp;
-	out[1] = start[1] * frac + end[1] * comp;
-	out[2] = start[2] * frac + end[2] * comp;
-}
-
-/*
-=================
 G_TimeShiftClient
 
 Move a client back to where he was at the specified "time"
@@ -124,11 +103,11 @@ Move a client back to where he was at the specified "time"
 */
 void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *debugger ) {
 	int		j, k;
-	//char msg[2048];
+	char msg[2048];
 
 	// this will dump out the head index, and the time for all the stored positions
-
-	/*if (g_debugMode.integer) {
+/*
+	if ( debug ) {
 		char	str[MAX_STRING_CHARS];
 
 		Com_sprintf(str, sizeof(str), "print \"head: %d, %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n\"",
@@ -151,9 +130,9 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			ent->client->history[15].leveltime,
 			ent->client->history[16].leveltime);
 
-		trap_SendServerCommand(ent - g_entities, str);
+		trap_SendServerCommand( debugger - g_entities, str );
 	}
-	*/
+*/
 
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
@@ -179,7 +158,6 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			VectorCopy( ent->r.maxs, ent->client->saved.maxs );
 			VectorCopy( ent->r.currentOrigin, ent->client->saved.currentOrigin );
 			ent->client->saved.leveltime = level.time;
-			ent->client->saved.animInfo = ent->client->animationInfo;
 		}
 
 		// if we haven't wrapped back to the head, we've sandwiched, so
@@ -202,7 +180,7 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 				ent->client->history[j].maxs, ent->client->history[k].maxs,
 				ent->r.maxs );
 
-			/*if ( debug && debugger != NULL ) {
+			if ( debug && debugger != NULL ) {
 				// print some debugging stuff exactly like what the client does
 
 				// it starts with "Rec:" to let you know it backward-reconciled
@@ -223,28 +201,10 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 					level.time - time, level.time + debugger->client->frameOffset - time);
 
 				trap_SendServerCommand( debugger - g_entities, msg );
-			}*/
-
-			// ported from nobo antilag for custom head animations
-			// find the "best" origin between the sandwiching trail nodes via interpolation
-			//Interpolate(frac, ent->client->history[j].currentOrigin, ent->client->history[k].currentOrigin, ent->r.currentOrigin);
-			// find the "best" mins & maxs (crouching/standing).
-			// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
-			// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
-			int nearest_trail_node_index = frac < 0.5 ? j : k;
-			VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
-			VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
-			// use the trail node's animation info that's nearest "time" (for head hitbox).
-			// the current server animation code used for head hitboxes doesn't support interpolating
-			// between two different animation frames (i.e. crouch -> standing animation), so can't interpolate here either.
-			ent->client->animationInfo = ent->client->history[nearest_trail_node_index].animInfo;
+			}
 
 			// this will recalculate absmin and absmax
-			trap_LinkEntity(ent);
-
-			// some of the code needs to know that this entity was time shifted
-			ent->client->timeshiftTime = ent->client->history[j].leveltime;
-
+			trap_LinkEntity( ent );
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->r.currentOrigin );
@@ -253,10 +213,6 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 
 			// this will recalculate absmin and absmax
 			trap_LinkEntity( ent );
-
-			// some of the code needs to know that this entity was time shifted
-			ent->client->timeshiftTime = ent->client->history[k].leveltime;
-			ent->client->animationInfo = ent->client->history[k].animInfo;
 		}
 	}
 	else {
@@ -266,8 +222,21 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 		// print some debugging stuff exactly like what the client does
 
 		// it starts with "No rec:" to let you know it didn't backward-reconcile
-		//Sago: This code looks wierd
+		if ( debug && debugger != NULL ) {
+			Com_sprintf( msg, sizeof(msg),
+				"print \"^1No rec: time: %d, j: %d, k: %d, origin: %0.2f %0.2f %0.2f\n"
+				"^2frac: %0.4f, origin1: %0.2f %0.2f %0.2f, origin2: %0.2f %0.2f %0.2f\n"
+				"^7level.time: %d, est time: %d, level.time delta: %d, est real ping: %d\n\"",
+				time, level.time, level.time,
+				ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+				0.0f,
+				ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2], 
+				ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+				level.time, level.time + debugger->client->frameOffset,
+				level.time - time, level.time + debugger->client->frameOffset - time);
 
+			trap_SendServerCommand( debugger - g_entities, msg );
+		}
 	}
 }
 
@@ -283,20 +252,13 @@ except for "skip"
 void G_TimeShiftAllClients( int time, gentity_t *skip ) {
 	int			i;
 	gentity_t	*ent;
-	qboolean debug = ( skip != NULL && skip->client /*&& skip->client->pers.debugDelag*/ );
+	qboolean debug = ( skip != NULL && skip->client && 
+			skip->client->pers.debugDelag);
 
 	// for every client
 	ent = &g_entities[0];
 	for ( i = 0; i < MAX_CLIENTS; i++, ent++ ) {
-		if ( ent->client
-				&& ent->inuse
-				&& ent->client->sess.sessionTeam < TEAM_SPECTATOR
-				&& ent != skip
-				// do not timeshift eliminated clients, as
-				// G_TimeShiftClient() will re-link them when
-				// they're supposed to stay unlinked
-				//&& !ent->client->isEliminated
-				) {
+		if ( ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip ) {
 			G_TimeShiftClient( ent, time, debug, skip );
 		}
 	}
@@ -311,9 +273,12 @@ Decide what time to shift everyone back to, and do it
 ================
 */
 void G_DoTimeShiftFor( gentity_t *ent ) {	
-	//int wpflags[WP_NUM_WEAPONS] = { 0, 0, 2, 4, 0, 0, 8, 16, 0, 0, 0, 32, 0, 64 };
-
-	//int wpflag = wpflags[ent->client->ps.weapon];
+#ifndef MISSIONPACK
+	int wpflags[WP_NUM_WEAPONS] = { 0, 0, 2, 4, 0, 0, 8, 16, 0, 0, 0 };
+#else
+	int wpflags[WP_NUM_WEAPONS] = { 0, 0, 2, 4, 0, 0, 8, 16, 0, 0, 0, 32, 0, 64 };
+#endif
+	int wpflag = wpflags[ent->client->ps.weapon];
 	int time;
 
 	// don't time shift for mistakes or bots
@@ -321,13 +286,10 @@ void G_DoTimeShiftFor( gentity_t *ent ) {
 		return;
 	}
 
-	// if it's enabled server-side and the client wants it
-	// or wants it for this weapon (not doing this for Rtcw as we have pistol and SMG)
-	if ( g_delagHitscan.integer && ( ent->client->pers.antilag & 1)) { // || ent->client->pers.delag & wpflag ) ) {
+	// if it's enabled server-side and the client wants it or wants it for this weapon
+	if ( g_delagHitscan.integer && ( ent->client->pers.delag & 1 || ent->client->pers.delag & wpflag ) ) {
 		// do the full lag compensation, except what the client nudges
-		//time = ent->client->attackTime + ent->client->pers.cmdTimeNudge;
-		// don't allow the client to nudge anything
-		time = ent->client->attackTime;
+		time = ent->client->attackTime + ent->client->pers.cmdTimeNudge;
 	}
 	else {
 		// do just 50ms
@@ -353,13 +315,10 @@ void G_UnTimeShiftClient( gentity_t *ent ) {
 		VectorCopy( ent->client->saved.maxs, ent->r.maxs );
 		VectorCopy( ent->client->saved.currentOrigin, ent->r.currentOrigin );
 		ent->client->saved.leveltime = 0;
-		ent->client->animationInfo = ent->client->saved.animInfo;
 
 		// this will recalculate absmin and absmax
 		trap_LinkEntity( ent );
 	}
-
-	ent->client->timeshiftTime = 0;
 }
 
 
@@ -378,8 +337,7 @@ void G_UnTimeShiftAllClients( gentity_t *skip ) {
 	ent = &g_entities[0];
 	for ( i = 0; i < MAX_CLIENTS; i++, ent++) {
 		if ( ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip ) {
-			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
-				G_UnTimeShiftClient( ent );
+			G_UnTimeShiftClient( ent );
 		}
 	}
 }
@@ -455,7 +413,7 @@ qboolean G_PredictPlayerSlideMove( gentity_t *ent, float frametime ) {
 	float		into;
 	vec3_t		endVelocity;
 	vec3_t		endClipVelocity;
-//	vec3_t		worldUp = { 0.0f, 0.0f, 1.0f };
+	vec3_t		worldUp = { 0.0f, 0.0f, 1.0f };
 	
 	numbumps = 4;
 
@@ -609,8 +567,7 @@ Advance the given entity frametime seconds, stepping and sliding as appropriate
 #define	STEPSIZE 18
 
 void G_PredictPlayerStepSlideMove( gentity_t *ent, float frametime ) {
-	//vec3_t start_o, start_v, down_o, down_v;
-	vec3_t start_o, start_v;
+	vec3_t start_o, start_v, down_o, down_v;
 	vec3_t down, up;
 	trace_t trace;
 	float stepSize;
@@ -623,8 +580,8 @@ void G_PredictPlayerStepSlideMove( gentity_t *ent, float frametime ) {
 		return;
 	}
 
-	//VectorCopy( ent->s.pos.trBase, down_o);
-	//VectorCopy( ent->s.pos.trDelta, down_v);
+	VectorCopy( ent->s.pos.trBase, down_o);
+	VectorCopy( ent->s.pos.trDelta, down_v);
 
 	VectorCopy (start_o, up);
 	up[2] += STEPSIZE;

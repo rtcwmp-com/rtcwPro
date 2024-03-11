@@ -166,11 +166,18 @@ vmCvar_t url;
 
 vmCvar_t g_dbgRevive;
 
+//unlagged - server options
+vmCvar_t	g_delagHitscan;
+vmCvar_t	g_unlaggedVersion;
+vmCvar_t	g_truePing;
+vmCvar_t	g_lightningDamage;
+vmCvar_t	sv_fps;
+//unlagged - server options
+
 // rtcwpro begin
 //S4NDM4NN - fix errors when sv_fps is adjusted
 vmCvar_t g_screenShake;
 vmCvar_t g_preciseHeadHitBox;
-vmCvar_t sv_fps;
 //vmCvar_t g_gamelocked;	// Controls if referee locked the game so players can't join
 vmCvar_t sv_hostname;	// So it's more accesible
 vmCvar_t svx_serverStreaming; // So it's more accessible
@@ -353,8 +360,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_warmup, "g_warmup", "20", CVAR_ARCHIVE, 0, qtrue  },
 	{ &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
 
-	//S4NDM4NN - need to get sv_fps
-	{ &sv_fps, "sv_fps", "20", 0, 0,qfalse},
 	// NERVE - SMF
 	{ &g_warmupLatch, "g_warmupLatch", "1", 0, 0, qfalse },
 
@@ -557,7 +562,14 @@ cvarTable_t gameCvarTable[] = {
 
 	// unlagged
 	{ &g_floatPlayerPosition, "g_floatPlayerPosition", "1", CVAR_ARCHIVE, 0, qfalse},
+	//unlagged - server options
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_unlaggedVersion, "g_unlaggedVersion", "2.0", CVAR_ROM | CVAR_SERVERINFO, 0, qfalse },
+	{ &g_truePing, "g_truePing", "1", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_lightningDamage, "g_lightningDamage", "8", 0, 0, qtrue },
+	// it's CVAR_SYSTEMINFO so the client's sv_fps will be automagically set to its value
+	{ &sv_fps, "sv_fps", "20", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
+	//unlagged - server options
 	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse }
 };
 
@@ -3553,28 +3565,21 @@ void G_RunFrame( int levelTime ) {
 			continue;
 		}
 
+//unlagged - backward reconciliation #2
+		// we'll run missiles separately to save CPU in backward reconciliation
+/*
 		if ( ent->s.eType == ET_MISSILE
 			 || ent->s.eType == ET_FLAMEBARREL
 			 || ent->s.eType == ET_FP_PARTS
 			 || ent->s.eType == ET_FIRE_COLUMN
 			 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
 			 || ent->s.eType == ET_EXPLO_PART
-			 || ent->s.eType == ET_RAMJET
-		) {
-			// L0 - Pause dump
-			if ( level.paused == PAUSE_NONE ) {
-				G_RunMissile( ent );
-			} else {
-				// During a pause, gotta keep track of stuff in the air
-				ent->s.pos.trTime += level.time - level.previousTime;
-				// Keep pulsing right for dynmamite
-				if ( ent->methodOfDeath == MOD_DYNAMITE ) {
-					ent->s.effect1Time += level.time - level.previousTime;
-				}
-				G_RunThink( ent );
-			}
+			 || ent->s.eType == ET_RAMJET ) {
+			G_RunMissile( ent );
 			continue;
 		}
+*/
+//unlagged - backward reconciliation #2
 
 		// DHM - Nerve :: Server-side collision for flamethrower
 		if ( ent->s.eType == ET_FLAMETHROWER_CHUNK ) {
@@ -3631,13 +3636,32 @@ void G_RunFrame( int levelTime ) {
 				continue;
 			}
 
-			if (ent->s.eType == ET_MISSILE) {
-				G_RunMissile(ent);
+			if ( ent->s.eType == ET_MISSILE
+				 || ent->s.eType == ET_FLAMEBARREL
+				 || ent->s.eType == ET_FP_PARTS
+				 || ent->s.eType == ET_FIRE_COLUMN
+				 || ent->s.eType == ET_FIRE_COLUMN_SMOKE
+				 || ent->s.eType == ET_EXPLO_PART
+				 || ent->s.eType == ET_RAMJET ) {
+				// L0 - Pause dump
+				if (level.paused == PAUSE_NONE) {
+					G_RunMissile(ent);
+				}
+				else {
+					// During a pause, gotta keep track of stuff in the air
+					ent->s.pos.trTime += level.time - level.previousTime;
+					// Keep pulsing right for dynmamite
+					if (ent->methodOfDeath == MOD_DYNAMITE) {
+						ent->s.effect1Time += level.time - level.previousTime;
+					}
+					G_RunThink(ent);
+				}
 			}
 		}
 
-		G_UnTimeShiftAllClients(NULL);
-		//unlagged - backward reconciliation #2
+		G_UnTimeShiftAllClients( NULL );
+	//unlagged - backward reconciliation #2
+
 	}
 
 

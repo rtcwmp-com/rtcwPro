@@ -616,8 +616,6 @@ void respawn( gentity_t *ent ) {
 		ClientSpawn(ent, qfalse);
 	}
 
-	if (g_antilag.integer == 1) // Nobo antilag
-		G_ResetTrail(ent);
 
 	// DHM - Nerve :: Add back if we decide to have a spawn effect
 	// add a teleportation effect
@@ -1599,6 +1597,41 @@ void ClientUserinfoChanged(int clientNum) {
 		client->pers.predictItemPickup = qtrue;
 	}
 
+//unlagged - client options
+	// see if the player has opted out
+	s = Info_ValueForKey( userinfo, "cg_delag" );
+	if ( !atoi( s ) ) {
+		client->pers.delag = 0;
+	} else {
+		client->pers.delag = atoi( s );
+	}
+
+	// see if the player is nudging his shots
+	s = Info_ValueForKey( userinfo, "cg_cmdTimeNudge" );
+	client->pers.cmdTimeNudge = atoi( s );
+
+	// see if the player wants to debug the backward reconciliation
+	s = Info_ValueForKey( userinfo, "cg_debugDelag" );
+	if ( !atoi( s ) ) {
+		client->pers.debugDelag = qfalse;
+	}
+	else {
+		client->pers.debugDelag = qtrue;
+	}
+
+	// see if the player is simulating incoming latency
+	s = Info_ValueForKey( userinfo, "cg_latentSnaps" );
+	client->pers.latentSnaps = atoi( s );
+
+	// see if the player is simulating outgoing latency
+	s = Info_ValueForKey( userinfo, "cg_latentCmds" );
+	client->pers.latentCmds = atoi( s );
+
+	// see if the player is simulating outgoing packet loss
+	s = Info_ValueForKey( userinfo, "cg_plOut" );
+	client->pers.plOut = atoi( s );
+//unlagged - client options
+
 	// check the auto activation
 	s = Info_ValueForKey( userinfo, "cg_autoactivate" );
 	if ( !atoi( s ) ) {
@@ -2001,6 +2034,16 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// Trigger rest lookup
 	trap_SendServerCommand(clientNum, "revalidate");
+	
+	//unlagged - backward reconciliation #5
+	// announce it
+	if ( g_delagHitscan.integer ) {
+		trap_SendServerCommand( clientNum, "print \"Server is Unlagged: full lag compensation is ON!\n\"" );
+	}
+	else {
+		trap_SendServerCommand( clientNum, "print \"Server is Unlagged: full lag compensation is OFF!\n\"" );
+	}
+	//unlagged - backward reconciliation #5
 
 	return NULL;
 }
@@ -2069,8 +2112,6 @@ void ClientBegin( int clientNum ) {
 	// locate ent at a spawn point
 	ClientSpawn( ent, qfalse );
 
-	if (g_antilag.integer == 1) // Nobo antilag
-		G_ResetTrail(ent);
 
 	// Xian -- Changed below for team independant maxlives
 
@@ -2653,12 +2694,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 	ClientEndFrame( ent );
 
 	// clear entity state values
-	if (g_antilag.integer < 2) // Nobo antilag or off
-		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
-
-	else if (g_antilag.integer == 2) // Unlagged
-		BG_PlayerStateToEntityState(&client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
-
+	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 	//BG_PlayerStateToEntityStatePro(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 
 	// show_bug.cgi?id=569

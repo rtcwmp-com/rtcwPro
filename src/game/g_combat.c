@@ -336,9 +336,10 @@ void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int 
 
 	if (g_antilag.integer == 2)
 	{	
-		// Unlagged - backward reconciliation #2
+		//unlagged - backward reconciliation #2
 		// make sure the body shows up in the client's current position
-		G_UnTimeShiftClient(self);
+		G_UnTimeShiftClient( self );
+		//unlagged - backward reconciliation #2
 	}
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
@@ -766,6 +767,59 @@ int CheckArmor( gentity_t *ent, int damage, int dflags ) {
 	return save;
 }
 
+gentity_t* G_BuildHead( gentity_t *ent ) {
+	gentity_t* head;
+	orientation_t or;           // DHM - Nerve
+
+	head = G_Spawn();
+
+	if ( trap_GetTag( ent, NULL, "tag_head", &or ) ) {
+		G_SetOrigin( head, or.origin );
+	} else {
+		float height, dest;
+		vec3_t v, angles, forward, up, right;
+
+		G_SetOrigin( head, ent->r.currentOrigin );
+
+		if ( ent->client->ps.pm_flags & PMF_DUCKED ) { // closer fake offset for 'head' box when crouching
+			height = ent->client->ps.crouchViewHeight - 12;
+		} else {
+			height = ent->client->ps.viewheight;
+		}
+
+		// NERVE - SMF - this matches more closely with WolfMP models
+		VectorCopy( ent->client->ps.viewangles, angles );
+		if ( angles[PITCH] > 180 ) {
+			dest = ( -360 + angles[PITCH] ) * 0.75;
+		} else {
+			dest = angles[PITCH] * 0.75;
+		}
+		angles[PITCH] = dest;
+
+		AngleVectors( angles, forward, right, up );
+		VectorScale( forward, 5, v );
+		VectorMA( v, 18, up, v );
+
+		VectorAdd( v, head->r.currentOrigin, head->r.currentOrigin );
+		head->r.currentOrigin[2] += height / 2;
+		// -NERVE - SMF
+	}
+
+	VectorCopy( head->r.currentOrigin, head->s.origin );
+	VectorCopy( ent->r.currentAngles, head->s.angles );
+	VectorCopy( head->s.angles, head->s.apos.trBase );
+	VectorCopy( head->s.angles, head->s.apos.trDelta );
+	VectorSet( head->r.mins, -6, -6, -2 ); // JPW NERVE changed this z from -12 to -6 for crouching, also removed standing offset
+	VectorSet( head->r.maxs, 6, 6, 10 ); // changed this z from 0 to 6
+	head->clipmask = CONTENTS_SOLID;
+	head->r.contents = CONTENTS_SOLID;
+	head->parent = ent;
+	head->s.eType = ET_TEMPHEAD;
+
+	trap_LinkEntity( head );
+
+	return head;
+}
 /*
 ==============
 G_ArmorDamage

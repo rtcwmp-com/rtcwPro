@@ -590,6 +590,10 @@ typedef struct {
 #define PICKUP_TOUCH    1   // pickup items when touched
 #define PICKUP_FORCE    2   // pickup the next item when touched (and reset to PICKUP_ACTIVATE when done)
 
+//unlagged - true ping
+#define NUM_PING_SAMPLES 64
+//unlagged - true ping
+
 // client data that stays across multiple respawns, but is cleared
 // on each level change or team change at ClientBegin()
 typedef struct {
@@ -619,6 +623,25 @@ typedef struct {
 	int lastReinforceTime;              // DHM - Nerve :: last reinforcement
 
 	qboolean teamInfo;              // send team overlay updates?
+
+	//unlagged - client options
+	// these correspond with variables in the userinfo string
+	int			delag;
+	int			debugDelag;
+	int			cmdTimeNudge;
+	//unlagged - client options
+	//unlagged - lag simulation #2
+	int			latentSnaps;
+	int			latentCmds;
+	int			plOut;
+	usercmd_t	cmdqueue[MAX_LATENT_CMDS];
+	int			cmdhead;
+	//unlagged - lag simulation #2
+	//unlagged - true ping
+	int			realPing;
+	int			pingsamples[NUM_PING_SAMPLES];
+	int			samplehead;
+	//unlagged - true ping
 
 	qboolean bAutoReloadAux; // TTimo - auxiliary storage for pmoveExt_t::bAutoReload, to achieve persistance
 	// L0
@@ -658,11 +681,25 @@ typedef struct {
 	qboolean findMedic;
 	// g_alternatePing from rtcwPub
 	int	alternatePing;
-	int	pingsamples[NUM_PING_SAMPLES];
-	int	samplehead;
+	//int	pingsamples[NUM_PING_SAMPLES];
+	//int	samplehead;
 	unsigned int pingsample_counter;
 	int deathYaw;
 } clientPersistant_t;
+
+//unlagged - backward reconciliation #1
+// the size of history we'll keep
+#define NUM_CLIENT_HISTORY 17
+
+// everything we need to know to backward reconcile
+typedef struct {
+	vec3_t		mins, maxs;
+	vec3_t		currentOrigin;
+	int			leveltime;
+} clientHistory_t;
+//unlagged - backward reconciliation #1
+
+// everything we need to know to backward reconcile
 
 // L0 - antilag port
 #define NUM_CLIENT_TRAILS 64
@@ -699,19 +736,6 @@ typedef struct {
 #define MEDIC_SPECIAL_PICKUP_MOD    4   // JPW NERVE same thing for medic
 #define CMD_DEBOUNCE    5000    // 5s between cmds
 
-
-//unlagged - backward reconciliation #1
-// the size of history we'll keep
-#define NUM_CLIENT_HISTORY 17
-
-// everything we need to know to backward reconcile
-typedef struct {
-	vec3_t		mins, maxs;
-	vec3_t		currentOrigin;
-	int			leveltime;
-	clientAnimationInfo_t animInfo;
-} clientHistory_t;
-//unlagged - backward reconciliation #1
 // 
 // 
 // this structure is cleared on each ClientSpawn(),
@@ -728,9 +752,15 @@ struct gclient_s {
 
 	qboolean noclip;
 
-	int lastCmdTime;                // level.time of last usercmd_t, for EF_CONNECTION
+	//unlagged - smooth clients #1
+	// this is handled differently now
+	/*
+	int			lastCmdTime;		// level.time of last usercmd_t, for EF_CONNECTION
 									// we can't just use pers.lastCommand.time, because
 									// of the g_sycronousclients case
+	*/
+	//unlagged - smooth clients #1
+
 	int buttons;
 	int oldbuttons;
 	int latched_buttons;
@@ -862,6 +892,12 @@ struct gclient_s {
 	int			lastUpdateFrame;
 	//unlagged - smooth clients #1
 	qboolean        spawnprotected;
+
+
+	// g_antilag.c
+	int topMarker;
+	clientMarker_t clientMarkers[MAX_CLIENT_MARKERS];
+	clientMarker_t backupMarker;
 };
 
 //
@@ -949,7 +985,7 @@ typedef struct {
 	int time;                           // in msec
 	int previousTime;                   // so movers can back up when blocked
 	int frameTime;                      // Gordon: time the frame started, for antilag stuff
-	int frameStartTime;					// L0 - antilag port - actual time frame started
+	//int frameStartTime;					// L0 - antilag port - actual time frame started
 	int startTime;                      // level.time the map was started
 
 	int teamScores[TEAM_NUM_TEAMS];
@@ -1123,6 +1159,11 @@ typedef struct {
 
 	char tinfoAxis[1024];                       ///< sent as server command (limited to 1022 chars)
 	char tinfoAllies[1024];                     ///< sent as server command (limited to 1022 chars)
+	
+	//unlagged - backward reconciliation #4
+	// actual time this server frame started
+	int			frameStartTime;
+	//unlagged - backward reconciliation #4
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1251,7 +1292,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod );
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientItems( gentity_t *self );
-//gentity_t* G_BuildHead( gentity_t *ent ); // RTCWPro - unused
+gentity_t* G_BuildHead( gentity_t *ent ); // RTCWPro - unused
 
 // damage flags
 #define DAMAGE_RADIUS           0x00000001  // damage was indirect
@@ -1325,7 +1366,10 @@ void mg42_fire( gentity_t *other );
 //
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker );
 void CalcMuzzlePoint( gentity_t *ent, int weapon, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
-void SnapVectorTowards( vec3_t v, vec3_t to );
+//unlagged - attack prediction #3
+// we're making this available to both games
+//void SnapVectorTowards( vec3_t v, vec3_t to );
+//unlagged - attack prediction #3
 trace_t *CheckMeleeAttack( gentity_t *ent, float dist, qboolean isTest );
 gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenadeWPID );
 // Rafael
@@ -1342,6 +1386,16 @@ void FreeHeadEntity(gentity_t* ent);
 void UpdateHeadEntity(gentity_t* ent);
 void RemoveHeadEntity(gentity_t* ent);
 qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt);
+//unlagged - g_unlagged.c
+void G_ResetHistory( gentity_t *ent );
+void G_StoreHistory( gentity_t *ent );
+void G_TimeShiftAllClients( int time, gentity_t *skip );
+void G_UnTimeShiftAllClients( gentity_t *skip );
+void G_DoTimeShiftFor( gentity_t *ent );
+void G_UndoTimeShiftFor( gentity_t *ent );
+void G_UnTimeShiftClient( gentity_t *client );
+void G_PredictPlayerMove( gentity_t *ent, float frametime );
+//unlagged - g_unlagged.c
 
 //
 // g_client.c
@@ -1610,6 +1664,18 @@ extern vmCvar_t g_enableBreath;
 extern vmCvar_t g_smoothClients;
 extern vmCvar_t pmove_fixed;
 extern vmCvar_t pmove_msec;
+
+//unlagged - server options
+// some new server-side variables
+extern	vmCvar_t	g_delagHitscan;
+extern	vmCvar_t	g_unlaggedVersion;
+extern	vmCvar_t	g_truePing;
+// server admins can adjust this if they *believe* the lightning 
+// gun is too powerful with lag compensation
+extern	vmCvar_t	g_lightningDamage;
+// this is for convenience - using "sv_fps.integer" is nice :)
+extern	vmCvar_t	sv_fps;
+//unlagged - server options
 
 //Rafael
 extern vmCvar_t g_autoactivate;
@@ -2040,11 +2106,7 @@ typedef enum
 
 // g_antilag.c (g_antilag 1)
 //
-void G_ResetTrail(gentity_t* ent);
-void G_StoreTrail(gentity_t* ent);
-void G_TimeShiftAllClientsNobo(int time, gentity_t* skip);
-void G_UnTimeShiftAllClientsNobo(gentity_t* skip);
-//void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
+void G_HistoricalTrace( gentity_t* ent, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
 
 // g_unlagged.c (g_antilag 2)
 void G_ResetHistory(gentity_t* ent);

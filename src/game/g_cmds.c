@@ -80,17 +80,11 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		}
 		else
 		{
-			// RTCWPro
+			//unlagged - true ping
 			//ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
-			if (g_alternatePing.integer)
-			{
-				ping = cl->pers.alternatePing < 999 ? cl->pers.alternatePing : 999;
-			}
-			else
-			{
-				ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
-			}
-			// RTCWPro end
+			ping = cl->pers.realPing < 999 ? cl->pers.realPing : 999;
+			//unlagged - true ping
+
 		}
 
 		Com_sprintf(entry, sizeof(entry),

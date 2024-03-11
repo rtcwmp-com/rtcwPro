@@ -874,6 +874,10 @@ typedef struct {
 
 #define MAX_PREDICTED_EVENTS    16
 
+//unlagged - optimized prediction
+#define NUM_SAVED_STATES (CMD_BACKUP + 2)
+//unlagged - optimized prediction
+
 #define MAX_SPAWN_VARS          64
 #define MAX_SPAWN_VARS_CHARS    2048
 // OSPx - Draw HUDnames
@@ -1250,6 +1254,12 @@ typedef struct {
 
 	// RtcwPro shoutcast overlay
 	int lastKeyCatcher;
+//unlagged - optimized prediction
+	int			lastPredictedCommand;
+	int			lastServerTime;
+	playerState_t savedPmoveStates[NUM_SAVED_STATES];
+	int			stateHead, stateTail;
+//unlagged - optimized prediction
 } cg_t;
 
 
@@ -1942,6 +1952,10 @@ typedef struct {
 	int dumpStatsTime;
 	qboolean fKeyPressed[256];                          // Key status to get around console issues
 	int timescaleUpdate;                                // Timescale display for demo playback
+	//unlagged - client options
+	// this will be set to the server's g_delagHitscan
+	int				delagHitscan;
+	//unlagged - client options
 } cgs_t;
 
 //==============================================================================
@@ -2053,7 +2067,10 @@ extern vmCvar_t cg_noVoiceText;                     // NERVE - SMF
 extern vmCvar_t cg_enableBreath;
 extern vmCvar_t cg_autoactivate;
 extern vmCvar_t cg_emptyswitch;
-//extern vmCvar_t cg_smoothClients;
+//unlagged - smooth clients #2
+// this is done server-side now
+//extern	vmCvar_t		cg_smoothClients;
+//unlagged - smooth clients #2
 extern vmCvar_t pmove_fixed;
 extern vmCvar_t pmove_msec;
 
@@ -2129,6 +2146,21 @@ extern vmCvar_t cg_autoReload;
 extern vmCvar_t cg_antilag;
 
 extern vmCvar_t authLevel;
+
+//unlagged - client options
+extern	vmCvar_t		cg_delag;
+extern	vmCvar_t		cg_debugDelag;
+extern	vmCvar_t		cg_drawBBox;
+extern	vmCvar_t		cg_cmdTimeNudge;
+extern	vmCvar_t		sv_fps;
+extern	vmCvar_t		cg_projectileNudge;
+extern	vmCvar_t		cg_optimizePrediction;
+extern	vmCvar_t		cl_timeNudge;
+extern	vmCvar_t		cg_latentSnaps;
+extern	vmCvar_t		cg_latentCmds;
+extern	vmCvar_t		cg_plOut;
+//unlagged - client options
+
 // OSPx
 extern vmCvar_t cg_crosshairPulse;
 extern vmCvar_t	cg_showFlags;
@@ -2251,6 +2283,13 @@ extern vmCvar_t cg_shoutcastDrawHealth;
 extern vmCvar_t cg_shoutcastGrenadeTrail;
 
 extern vmCvar_t cg_showLimboMessage; // show/hide limbo message while dead
+
+//unlagged - cg_unlagged.c
+void CG_PredictWeaponEffects( centity_t *cent );
+void CG_AddBoundingBox( centity_t *cent );
+qboolean CG_Cvar_ClampInt( const char *name, vmCvar_t *vmCvar, int min, int max );
+//unlagged - cg_unlagged.c
+
 
 //
 // cg_main.c
@@ -2686,6 +2725,9 @@ void CG_RumbleEfx( float pitch, float yaw );
 // cg_snapshot.c
 //
 void CG_ProcessSnapshots( void );
+//unlagged - early transitioning
+void CG_TransitionEntity( centity_t *cent );
+//unlagged - early transitioning
 
 //
 // cg_spawn.c

@@ -137,19 +137,17 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 
 	// set angles
 	SetClientViewAngle( player, angles );
+//unlagged - backward reconciliation #3
+	// we don't want players being backward-reconciled back through teleporters
+	G_ResetHistory( player );
+//unlagged - backward reconciliation #3
 
 	// kill anything at the destination
 	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		G_KillBox( player );
 	}
 
-	// save results of pmove
-	if (g_antilag.integer < 2) // Nobo antilag or off
-		BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
-	//BG_PlayerStateToEntityStatePro(&player->client->ps, &player->s, level.time, qtrue); // RTCWPro
-	
-	else if (g_antilag.integer == 2) // unlagged
-		BG_PlayerStateToEntityState(&player->client->ps, &player->s, (qboolean)!g_floatPlayerPosition.integer);
+	BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
 
 	// use the precise origin for linking
 	VectorCopy( player->client->ps.origin, player->r.currentOrigin );
@@ -159,11 +157,6 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 
-	if (g_antilag.integer < 2) // Nobo antilag or off
-		G_ResetTrail(player);
-	else if (g_antilag.integer == 2) // unlagged
-		//unlagged - backward reconciliation #3
-		G_ResetHistory(player);
 
 }
 

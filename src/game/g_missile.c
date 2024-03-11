@@ -1376,6 +1376,10 @@ gentity_t *fire_flamechunk( gentity_t *self, vec3_t start, vec3_t dir ) {
 	bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN | SVF_NOCLIENT;
 	bolt->s.weapon = self->s.weapon;
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->methodOfDeath = MOD_FLAMETHROWER;
 	bolt->clipmask = MASK_MISSILESHOT;
@@ -1608,6 +1612,10 @@ gentity_t *fire_speargun( gentity_t *self, vec3_t start, vec3_t dir ) {
 
 	bolt->s.weapon = WP_SPEARGUN;
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->damage = 15;      // (SA) spear damage here
 	bolt->splashDamage = 0;
@@ -1660,6 +1668,10 @@ gentity_t *fire_rocket( gentity_t *self, vec3_t start, vec3_t dir ) {
 	}
 
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->damage = G_GetWeaponDamage( WP_ROCKET_LAUNCHER ); // JPW NERVE
 	bolt->splashDamage = G_GetWeaponDamage( WP_ROCKET_LAUNCHER ); // JPW NERVE
@@ -1712,6 +1724,10 @@ gentity_t *fire_flamebarrel( gentity_t *self, vec3_t start, vec3_t dir ) {
 	bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
 	bolt->s.weapon = WP_ROCKET_LAUNCHER;
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->damage = 100;
 	bolt->splashDamage = 20;
@@ -1874,6 +1890,10 @@ gentity_t *fire_mortar( gentity_t *self, vec3_t start, vec3_t dir ) {
 
 	bolt->s.weapon = WP_MORTAR;
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->damage = G_GetWeaponDamage( WP_MORTAR ); // JPW NERVE
 	bolt->splashDamage = G_GetWeaponDamage( WP_MORTAR ); // JPW NERVE
@@ -1916,6 +1936,10 @@ gentity_t *fire_nail( gentity_t *self, vec3_t start, vec3_t forward, vec3_t righ
 //	bolt->s.weapon = WP_NAILGUN;
 	bolt->s.weapon = WP_VENOM_FULL;
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->damage = G_GetWeaponDamage( WP_VENOM_FULL );
 //	bolt->methodOfDeath = MOD_NAIL;
@@ -1971,6 +1995,10 @@ gentity_t *fire_prox( gentity_t *self, vec3_t start, vec3_t dir ) {
 //	bolt->s.weapon = WP_PROX_LAUNCHER;
 	bolt->s.eFlags = 0;
 	bolt->r.ownerNum = self->s.number;
+	//unlagged - projectile nudge
+	// we'll need this for nudging projectiles later
+	bolt->s.otherEntityNum = self->s.number;
+	//unlagged - projectile nudge
 	bolt->parent = self;
 	bolt->damage = 0;
 	bolt->splashDamage = 100;
