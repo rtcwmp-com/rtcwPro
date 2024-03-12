@@ -413,6 +413,7 @@ typedef enum {
 #define EF_TELEPORT_BIT     0x00000004      // toggled every time the origin abruptly changes
 #define EF_MONSTER_EFFECT   0x00000008      // draw an aiChar dependant effect for this character
 #define EF_CAPSULE          0x00000010      // use capsule for collisions
+#define EF_PLAYER_EVENT		0x00000010
 #define EF_CROUCHING        0x00000020      // player is crouching
 #define EF_MG42_ACTIVE      0x00000040      // currently using an MG42
 #define EF_NODRAW           0x00000080      // may have an event, but no model (unspawned items)
