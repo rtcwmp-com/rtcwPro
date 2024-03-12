@@ -556,7 +556,6 @@ cvarTable_t gameCvarTable[] = {
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse }, // ET Port Players server info
 
 	// unlagged
-	{ &g_floatPlayerPosition, "g_floatPlayerPosition", "1", CVAR_ARCHIVE, 0, qfalse},
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse }
 };
@@ -3441,6 +3440,7 @@ void G_RunFrame( int levelTime ) {
 	gentity_t   *ent;
 	int msec;
 	int worldspawnflags, gt;
+	int start, end;
 
 	// if we are waiting for the level to restart, do nothing
 	if ( level.restarted ) {
@@ -3647,16 +3647,17 @@ void G_RunFrame( int levelTime ) {
 		//unlagged - backward reconciliation #2
 	}
 
-
-//start = trap_Milliseconds();
+	end = trap_Milliseconds();
+	
+	start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];
-	for ( i = 0 ; i < level.maxclients ; i++, ent++ ) {
+	for (i=0 ; i < level.maxclients ; i++, ent++ ) {
 		if ( ent->inuse ) {
 			ClientEndFrame( ent );
 		}
 	}
-//end = trap_Milliseconds();
+	end = trap_Milliseconds();
 
 	// see if it is time to do a tournement restart
 //	CheckTournament();

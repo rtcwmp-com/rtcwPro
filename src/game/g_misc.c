@@ -135,6 +135,14 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	// toggle the teleport bit so the client knows to not lerp
 	player->client->ps.eFlags ^= EF_TELEPORT_BIT;
 
+//unlagged - backward reconciliation #3
+	// we don't want players being backward-reconciled back through teleporters
+	
+	if (g_antilag.integer == 2)
+		G_ResetHistory( player );
+		
+//unlagged - backward reconciliation #3
+
 	// set angles
 	SetClientViewAngle( player, angles );
 
@@ -144,12 +152,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 	// save results of pmove
-	if (g_antilag.integer < 2) // Nobo antilag or off
-		BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
-	//BG_PlayerStateToEntityStatePro(&player->client->ps, &player->s, level.time, qtrue); // RTCWPro
-	
-	else if (g_antilag.integer == 2) // unlagged
-		BG_PlayerStateToEntityState(&player->client->ps, &player->s, (qboolean)!g_floatPlayerPosition.integer);
+	BG_PlayerStateToEntityState( &player->client->ps, &player->s, qtrue );
 
 	// use the precise origin for linking
 	VectorCopy( player->client->ps.origin, player->r.currentOrigin );
@@ -159,11 +162,8 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles ) {
 	}
 
 
-	if (g_antilag.integer < 2) // Nobo antilag or off
+	if (g_antilag.integer == 1)
 		G_ResetTrail(player);
-	else if (g_antilag.integer == 2) // unlagged
-		//unlagged - backward reconciliation #3
-		G_ResetHistory(player);
 
 }
 

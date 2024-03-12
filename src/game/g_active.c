@@ -749,43 +749,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 
 }
 
-/*
-==============
-SendPendingPredictableEvents
-==============
-*/
-void SendPendingPredictableEvents( playerState_t *ps ) {
-	/*
-	gentity_t *t;
-	int event, seq;
-	int extEvent, number;
-
-	// if there are still events pending
-	if ( ps->entityEventSequence < ps->eventSequence ) {
-		// create a temporary entity for this event which is sent to everyone
-		// except the client generated the event
-		seq = ps->entityEventSequence & (MAX_EVENTS-1);
-		event = ps->events[ seq ] | ( ( ps->entityEventSequence & 3 ) << 8 );
-		// set external event to zero before calling BG_PlayerStateToEntityState
-		extEvent = ps->externalEvent;
-		ps->externalEvent = 0;
-		// create temporary entity for event
-		t = G_TempEntity( ps->origin, event );
-		number = t->s.number;
-		BG_PlayerStateToEntityState( ps, &t->s, qtrue );
-		t->s.number = number;
-		t->s.eType = ET_EVENTS + event;
-		t->s.eFlags |= EF_PLAYER_EVENT;
-		t->s.otherEntityNum = ps->clientNum;
-		// send to everyone except the client who generated the event
-		t->r.svFlags |= SVF_NOTSINGLECLIENT;
-		t->r.singleClient = ps->clientNum;
-		// set back external event
-		ps->externalEvent = extEvent;
-	}
-	*/
-}
-
 // DHM - Nerve
 void WolfFindMedic( gentity_t *self ) {
 	int i, medic = -1;
@@ -994,6 +957,41 @@ void G_SwingAngles(float destination, float swingTolerance, float clampTolerance
 	}
 	else if (swing < -clampTolerance) {
 		*angle = AngleMod(destination + (clampTolerance - 1));
+	}
+}
+
+/*
+==============
+SendPendingPredictableEvents
+==============
+*/
+void SendPendingPredictableEvents( playerState_t *ps ) {
+	gentity_t *t;
+	int event, seq;
+	int extEvent, number;
+
+	// if there are still events pending
+	if ( ps->entityEventSequence < ps->eventSequence ) {
+		// create a temporary entity for this event which is sent to everyone
+		// except the client who generated the event
+		seq = ps->entityEventSequence & (MAX_PS_EVENTS-1);
+		event = ps->events[ seq ] | ( ( ps->entityEventSequence & 3 ) << 8 );
+		// set external event to zero before calling BG_PlayerStateToEntityState
+		extEvent = ps->externalEvent;
+		ps->externalEvent = 0;
+		// create temporary entity for event
+		t = G_TempEntity( ps->origin, event );
+		number = t->s.number;
+		BG_PlayerStateToEntityState( ps, &t->s, qtrue );
+		t->s.number = number;
+		t->s.eType = ET_EVENTS + event;
+		t->s.eFlags |= EF_PLAYER_EVENT;
+		t->s.otherEntityNum = ps->clientNum;
+		// send to everyone except the client who generated the event
+		t->r.svFlags |= SVF_NOTSINGLECLIENT;
+		t->r.singleClient = ps->clientNum;
+		// set back external event
+		ps->externalEvent = extEvent;
 	}
 }
 
@@ -1717,23 +1715,11 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	if (g_antilag.integer < 2) // Nobo antilag or off
-	{
-		if (g_smoothClients.integer) {
-			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
-		}
-		else {
-			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
-		}
+	if (g_smoothClients.integer) {
+		BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
 	}
-	else if (g_antilag.integer == 2) // Unlagged
-	{
-		if (g_smoothClients.integer) {
-			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
-		}
-		else {
-			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
-		}
+	else {
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
 	}
 
 	/*if (g_thinkStateLevelTime.integer) 
@@ -1746,6 +1732,8 @@ void ClientThink_real( gentity_t *ent ) {
 	}*/
 	// RTCWPro end
 
+	SendPendingPredictableEvents( &ent->client->ps );
+	
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
 	}
@@ -2395,7 +2383,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	}
 	// End ETL port
 
-
+	/*
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
 	if (level.time - ent->client->lastCmdTime > 1000) {
 		ent->s.eFlags |= EF_CONNECTION;
@@ -2403,6 +2391,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	else {
 		ent->s.eFlags &= ~EF_CONNECTION;
 	}
+	*/
 
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;   // FIXME: get rid of ent->health...
 
@@ -2423,8 +2412,10 @@ void ClientEndFrame( gentity_t *ent ) {
 	}
 	else if (g_antilag.integer == 2) // Unlagged
 	{
-		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
 
+		SendPendingPredictableEvents( &ent->client->ps );
+	
 		//unlagged - smooth clients #1
 			// mark as not missing updates initially
 		ent->client->ps.eFlags &= ~EF_CONNECTION;
@@ -2446,9 +2437,7 @@ void ClientEndFrame( gentity_t *ent ) {
 			// yep, missed one or more, so extrapolate the player's movement
 			G_PredictPlayerMove(ent, (float)frames / sv_fps.integer);
 			// save network bandwidth
-			if (!g_floatPlayerPosition.integer) {
-				SnapVector(ent->s.pos.trBase);
-			}
+			SnapVector(ent->s.pos.trBase);
 		}
 		//unlagged - smooth clients #1
 
