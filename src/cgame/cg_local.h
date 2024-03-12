@@ -2513,8 +2513,7 @@ void CG_Beam( centity_t *cent );
 //void CG_AdjustPositionForMover(const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t angles_in, vec3_t angles_out);
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t outDeltaAngles );
 
-void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							 char *tagName, int startIndex, vec3_t *offset );
+void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent, char *tagName, int startIndex, vec3_t *offset );
 void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent, char *tagName );
 
 

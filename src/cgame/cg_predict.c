@@ -932,9 +932,8 @@ void CG_PredictPlayerState( void ) {
 				cg.thisFrameTeleport = qfalse;
 			} else {
 				vec3_t adjusted; //vec3_t adjusted;
-				CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
-				//cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, cg.predictedPlayerState.viewangles, new_angles);
-				cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles );
+				CG_AdjustPositionForMover( cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted, deltaAngles );
+
 				// RF, add the deltaAngles (fixes jittery view while riding trains)
 				cg.predictedPlayerState.delta_angles[YAW] += ANGLE2SHORT( deltaAngles[YAW] );
 
@@ -1070,10 +1069,7 @@ void CG_PredictPlayerState( void ) {
 	}
 
 	// adjust for the movement of the groundentity
-	CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
-							   cg.predictedPlayerState.groundEntityNum,
-							//cg.physicsTime, cg.time, cg.predictedPlayerState.origin, cg.predictedPlayerState.viewangles, cg.predictedPlayerState.viewangles);
-							   cg.physicsTime, cg.time, cg.predictedPlayerState.origin, deltaAngles );
+	CG_AdjustPositionForMover( cg.predictedPlayerState.origin, cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.time, cg.predictedPlayerState.origin, deltaAngles );
 
 
 	// fire events and other transition triggered things
