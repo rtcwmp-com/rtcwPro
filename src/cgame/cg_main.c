@@ -42,6 +42,8 @@ displayContextDef_t cgDC;
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
 qboolean CG_CheckExecKey(int key);
+static byte interopIn[4096];
+static byte interopOut[4096];
 
 /*
 ================
@@ -93,6 +95,22 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_CheckExecKey(arg0);
 	case CG_RELAY_COMMAND:
 		return CG_RelayCommand((char*)arg0, arg1);
+	case CG_NDP_ANALYZE_COMMAND:
+		CG_NDP_AnalyzeCommand(arg0);
+		return 0;
+	case CG_NDP_GENERATE_COMMANDS:
+		//item timer commands
+		//special strings to synchronize 
+		return 0;
+	case CG_NDP_IS_CS_NEEDED:
+		return 0;
+	case CG_NDP_ANALYZE_SNAPSHOT:
+		CG_NDP_AnalyzeSnapshot(arg0);
+		return 0;
+	case CG_NDP_END_ANALYSIS:
+		CG_NDP_EndAnalysis((char*)arg0, arg1, arg2, (qboolean)arg3);
+		return 0;
+
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -272,6 +290,8 @@ vmCvar_t mp_item1;
 
 vmCvar_t cg_drawCompass;
 vmCvar_t cg_drawNotifyText;
+vmCvar_t cg_notifyTextLines;
+vmCvar_t cg_notifyPlayerOnly;
 vmCvar_t cg_quickMessageAlt;
 vmCvar_t cg_popupLimboMenu;
 vmCvar_t cg_descriptiveText;
@@ -347,6 +367,7 @@ vmCvar_t demo_infoWindow;
 vmCvar_t mv_sensitivity;
 
 vmCvar_t demo_controlsWindow;
+vmCvar_t demo_timelineWindow;
 vmCvar_t demo_popupWindow;
 vmCvar_t demo_showTimein;
 vmCvar_t demo_noAdvertisement;
@@ -387,7 +408,6 @@ vmCvar_t cg_reinforcementTimeProY;
 vmCvar_t cg_findMedic; // lock camera on medic at death
 vmCvar_t cg_hitsoundBodyStyle;
 vmCvar_t cg_hitsoundHeadStyle;
-vmCvar_t cg_pauseMusic;
 vmCvar_t cg_showPriorityText;
 vmCvar_t cg_priorityTextX;
 vmCvar_t cg_priorityTextY;
@@ -411,6 +431,23 @@ vmCvar_t cg_fragsY;
 vmCvar_t cg_fragsWidth;
 vmCvar_t cg_fixedphysicsfps;
 vmCvar_t cg_debugDamage;
+
+// shoutcast overlay
+vmCvar_t cg_shoutcastDrawPlayers;
+vmCvar_t cg_shoutcastDrawTeamNames;
+vmCvar_t cg_shoutcastRedScore;
+vmCvar_t cg_shoutcastBlueScore;
+vmCvar_t cg_shoutcastTeamNameRed;
+vmCvar_t cg_shoutcastTeamNameBlue;
+vmCvar_t cg_shoutcastDrawHealth;
+vmCvar_t cg_shoutcastGrenadeTrail;
+
+vmCvar_t cg_showLimboMessage;
+vmCvar_t cg_teamObituaryColors;
+vmCvar_t cg_teamObituaryColorSame;
+vmCvar_t cg_teamObituaryColorSameTK;
+vmCvar_t cg_teamObituaryColorEnemy;
+vmCvar_t cg_teamObituaryColorEnemyTK;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -686,9 +723,6 @@ cvarTable_t cvarTable[] = {
 	{ &cg_hitsoundBodyStyle, "cg_hitsoundBodyStyle", "1", CVAR_ARCHIVE },
 	{ &cg_hitsoundHeadStyle, "cg_hitsoundHeadStyle", "1", CVAR_ARCHIVE },
 
-	// pause music
-	//{ &cg_pauseMusic, "cg_pauseMusic", "1", CVAR_ARCHIVE },
-
 	// priority text (shows objective pickups as a popup)
 	{ &cg_showPriorityText, "cg_showPriorityText", "1", CVAR_ARCHIVE },
 	{ &cg_priorityTextX, "cg_priorityTextX", "0", CVAR_ARCHIVE },
@@ -696,10 +730,12 @@ cvarTable_t cvarTable[] = {
 
 	// notify text
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
-	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
+	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE }, // 5 lines * 8 height + 2 offset
 	{ &cg_notifyTextShadow, "cg_notifyTextShadow", "0", CVAR_ARCHIVE },
 	{ &cg_notifyTextWidth, "cg_notifyTextWidth", "8", CVAR_ARCHIVE },
 	{ &cg_notifyTextHeight, "cg_notifyTextHeight", "8", CVAR_ARCHIVE },
+	{ &cg_notifyTextLines, "cg_notifyTextLines", "5", CVAR_ARCHIVE },
+	{ &cg_notifyPlayerOnly, "cg_notifyPlayerOnly", "0", CVAR_ARCHIVE },
 
 	// chat
 	{ &cg_chatX, "cg_chatX", "0", CVAR_ARCHIVE },
@@ -735,9 +771,30 @@ cvarTable_t cvarTable[] = {
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
 	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
+	{ &demo_timelineWindow, "demo_timelineWindow", "0", CVAR_ARCHIVE },
 	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },
 	{ &demo_showTimein, "demo_showTimein", "1", CVAR_ARCHIVE },
-	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE }
+	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE },
+
+	// RtcwPro - shoutcast overlay
+	{ &cg_shoutcastDrawPlayers,     "cg_shoutcastDrawPlayers",     "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastDrawTeamNames,   "cg_shoutcastDrawTeamNames",   "1",           CVAR_ARCHIVE },
+	{ &cg_shoutcastRedScore,		"cg_shoutcastRedScore",		   "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastBlueScore,		"cg_shoutcastBlueScore",	   "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastTeamNameRed,     "cg_shoutcastTeamNameRed",     "Axis",        CVAR_ARCHIVE },
+	{ &cg_shoutcastTeamNameBlue,    "cg_shoutcastTeamNameBlue",    "Allies",      CVAR_ARCHIVE },
+	{ &cg_shoutcastDrawHealth,      "cg_shoutcastDrawHealth",      "0",           CVAR_ARCHIVE },
+	{ &cg_shoutcastGrenadeTrail,    "cg_shoutcastGrenadeTrail",    "0",           CVAR_ARCHIVE },
+
+	// show/hide limbo message while dead
+	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE },
+
+	// custom kill feed colors
+	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "green", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "mdgreen", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "red", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "mdred", CVAR_ARCHIVE }
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
@@ -1665,6 +1722,11 @@ static void CG_RegisterGraphics( void ) {
 
 	// RtcwPro objective icon with nopicmip option
 	cgs.media.treasureIcon = trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure");
+	cgs.media.skull = trap_R_RegisterShaderNoMip("gfx/2d/multi_dead");
+	cgs.media.alliesFlag = trap_R_RegisterShaderNoMip("ui_mp/assets/usa_flag.tga");
+	cgs.media.axisFlag = trap_R_RegisterShaderNoMip("ui_mp/assets/ger_flag.tga");
+	cgs.media.stopwatch1 = trap_R_RegisterShaderNoMip("sprites/stopwatch1.tga");
+	cgs.media.stopwatch2 = trap_R_RegisterShaderNoMip("sprites/stopwatch2.tga");
 
 	// draw triggers
 	cgs.media.transmitTrigger = trap_R_RegisterShaderNoMip("gfx/2d/transmitTrigger");
@@ -1674,14 +1736,14 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.customTrigger = trap_R_RegisterShaderNoMip("gfx/2d/customTrigger");
 	cgs.media.customTriggerEdges = trap_R_RegisterShaderNoMip("gfx/2d/customTriggerEdges");
 
-	// powerup shaders
-//	cgs.media.quadShader = trap_R_RegisterShader("powerups/quad" );
-//	cgs.media.quadWeaponShader = trap_R_RegisterShader("powerups/quadWeapon" );
-//	cgs.media.battleSuitShader = trap_R_RegisterShader("powerups/battleSuit" );
-//	cgs.media.battleWeaponShader = trap_R_RegisterShader("powerups/battleWeapon" );
-//	cgs.media.invisShader = trap_R_RegisterShader("powerups/invisibility" );
-//	cgs.media.regenShader = trap_R_RegisterShader("powerups/regen" );
-//	cgs.media.hastePuffShader = trap_R_RegisterShader("hasteSmokePuff" );
+	// Shoutcast shaders
+	cgs.media.medicIcon = trap_R_RegisterShaderNoMip("sprites/voicemedic");
+	cgs.media.ammoIcon = trap_R_RegisterShaderNoMip("sprites/voiceammo");
+
+	cgs.media.classPics[PC_SOLDIER] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_soldier");
+	cgs.media.classPics[PC_MEDIC] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_medic");
+	cgs.media.classPics[PC_ENGINEER] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_engineer");
+	cgs.media.classPics[PC_LT] = trap_R_RegisterShaderNoMip("gfx/limbo/ic_lieutenant");
 
 	// DHM - Nerve :: Allow flags again, will change later to more appropriate models
 	if ( cgs.gametype == GT_CTF || cgs.gametype >= GT_WOLF || cg_buildScript.integer ) {
@@ -2137,6 +2199,16 @@ qboolean CG_Asset_Parse( int handle ) {
 			cgDC.registerFont( tempStr, pointSize, &cgDC.Assets.bigFont );
 			continue;
 		}
+
+		// shoutcastFont
+		//if (Q_stricmp(token.string, "shoutcastFont") == 0) {
+		//	int pointSize;
+		//	if (!PC_String_Parse(handle, &tempStr) || !PC_Int_Parse(handle, &pointSize)) {
+		//		return qfalse;
+		//	}
+		//	cgDC.registerFont(tempStr, pointSize, &cgDC.Assets.shoutcastFont);
+		//	continue;
+		//}
 
 		// gradientbar
 		if ( Q_stricmp( token.string, "gradientbar" ) == 0 ) {
@@ -2773,7 +2845,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		cgs.fadeAlpha = 0;
 
 // JPW NERVE -- pick a direction for smoke drift on the client -- cheap trick because it can be different on different clients, but who cares?
-	cgs.smokeWindDir = crandom();
+	cgs.smokeWindDir = -1.0f; // RtcwPro always make smoke go south // crandom();
 // jpw
 
 	CG_ParseServerinfo();
@@ -2852,6 +2924,41 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 			CG_execFile("autoexec_default");
 		}
 	}
+
+	int hasTrap_GetValue = trap_Cvar_VariableIntegerValue("//trap_GetValue");
+
+	if (hasTrap_GetValue == 0) {
+		// Engine extensions are not supported on the client
+		return;
+	} else {
+		// Begin loading supported extensions...
+		char extValue[11];
+		int syscallId;
+		if (trap_GetValue(extValue, sizeof(extValue), "trap_LocateInteropData") &&
+			sscanf(extValue, "%d", &syscallId) == 1 &&
+			syscallId != 0) {
+			memset(interopIn, 0, sizeof(interopIn));
+			memset(interopOut, 0, sizeof(interopOut));
+			trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut));
+		}
+
+		if (trap_GetValue(extValue, sizeof(extValue), "trap_CNQ3_NDP_Enable") &&
+			sscanf(extValue, "%d", &syscallId) == 1 &&
+			syscallId != 0) {
+			cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+		}
+		else {
+			cg.ndpDemoEnabled = qfalse;
+		}
+	}
+	
+}
+
+static void SaveSession(void)
+{
+	float speed;
+	//What else needs to be saved? Pause states? 
+	trap_Cvar_Set("demo_SessionData", va("%d %f", m_currServerTime, cg_timescale.value ));
 }
 
 /*
@@ -2864,6 +2971,16 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
+		ndp_myKillsSize = 0;
+		ndp_alliesWinsSize = 0;
+		ndp_axisWinsSize = 0;
+		ndp_round1EndSize = 0;
+		ndp_round2EndSize = 0;
+		ndp_docDropSize = 0;
+		ndp_docPickupSize = 0;
+		SaveSession();
+	}
 }
 
 /*
@@ -2874,6 +2991,12 @@ L0 - we'll need this later on ..
 =================
 */
 qboolean CG_CheckExecKey(int key) {
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+	{
+		return CG_ShoutcastCheckExecKey(key, qfalse, qfalse);
+	}
+
 	return qfalse;
 }
 
@@ -2896,4 +3019,3 @@ qboolean CG_execFile(char* filename) {
 	trap_SendConsoleCommand(va("exec %s.cfg\n", filename));
 	return qtrue;
 }
-

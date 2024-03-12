@@ -38,11 +38,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../../MAIN/ui_mp/menudef.h" // For vote options
 
+#define SPRINTTIME 20000.0f
+
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.2.9" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.3" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -665,7 +667,7 @@ extern int weapAlts[];  // defined in bg_misc.c
 int BG_MaxAmmoForWeapon(weapon_t weaponNum);
 
 #define GetAmmoTableData( ammoIndex ) ( (ammotable_t*)( &ammoTable[ammoIndex] ) )
-
+#define IS_VALID_WEAPON(w) ((w) > WP_NONE && (w) < WP_NUM_WEAPONS)
 
 //----(SA)
 // for routines that need to check if a WP_ is </=/> a given set of weapons
@@ -1116,8 +1118,12 @@ typedef enum {
 	TEAM_NUM_TEAMS
 } team_t;
 
+#define NO_AIRSTRIKE    1
+#define NO_ARTILLERY    2
+
 // Time between location updates
-#define TEAM_LOCATION_UPDATE_TIME       1000
+#define TEAM_LOCATION_UPDATE_TIME       500 // default 1000
+
 // L0 - OSP stats dump / weapon stat info: mapping between MOD_ and WP_ types
 typedef enum extWeaponStats_s
 {
@@ -1847,5 +1853,15 @@ char* BG_GetClass(int classNum);
 #define HITSOUND_HEAD 1
 #define HITSOUND_BODY 2
 #define HITSOUND_TEAM 4
+
+
+typedef struct {
+	char* colorname;
+	vec4_t* color;
+	char colorCode[1];
+} colorTable_t;
+
+// Colors for crosshairs
+extern const colorTable_t OSP_Colortable[];
 
 #endif // ! ___BG_PUBLIC_H

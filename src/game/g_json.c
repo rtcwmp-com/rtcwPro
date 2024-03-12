@@ -95,6 +95,7 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             Q_CleanStr(n2);
             n2[15] = 0;
 
+            Q_strncpyz(level.disconnectStats[dc].aliasColored, cl->pers.netname, sizeof(level.disconnectStats[dc].aliasColored));
             Q_strncpyz(level.disconnectStats[dc].alias, n2, sizeof(level.disconnectStats[dc].alias));
 
             eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
@@ -104,7 +105,6 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             }
 
             level.disconnectStats[dc].guid = cl->sess.guid;
-            //level.disconnectStats[dc].alias = n2;
             level.disconnectStats[dc].sessionTeam = cl->sess.sessionTeam;
             level.disconnectStats[dc].start_time = cl->sess.start_time;
             level.disconnectStats[dc].rounds = cl->sess.rounds;
@@ -167,6 +167,7 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             Q_CleanStr(n2);
             n2[15] = 0;
 
+            Q_strncpyz(level.playerStats[i].aliasColored, cl->pers.netname, sizeof(level.playerStats[i].aliasColored));
             Q_strncpyz(level.playerStats[i].alias, n2, sizeof(level.playerStats[i].alias));
 
             eff = (cl->sess.deaths + cl->sess.kills == 0) ? 0 : 100 * cl->sess.kills / (cl->sess.deaths + cl->sess.kills);
@@ -176,7 +177,6 @@ void BuildPlayerStats(gclient_t *client, qboolean clientDisconnected)
             }
 
             level.playerStats[i].guid = cl->sess.guid;
-            //level.playerStats[i].alias = n2;
             level.playerStats[i].sessionTeam = cl->sess.sessionTeam;
             level.playerStats[i].start_time = cl->sess.start_time;
             level.playerStats[i].rounds = cl->sess.rounds;
@@ -489,6 +489,7 @@ int G_read_match_info( void )
             Q_strncpyz(MATCHID,json_string_value(jstattype),sizeof(MATCHID));
         }
         else {
+            json_decref(object);
             return 0;
         }
 
@@ -497,6 +498,7 @@ int G_read_match_info( void )
             Q_strncpyz(ROUNDID,json_string_value(jstattype),sizeof(ROUNDID));
         }
         else{
+            json_decref(object);
             return 0;
         }
 
@@ -505,12 +507,14 @@ int G_read_match_info( void )
             Q_strncpyz(level.jsonStatInfo.round_timelimit,json_string_value(jstattype),sizeof(level.jsonStatInfo.round_timelimit));
         }
         else{
+            json_decref(object);
             return 0;
         }
+        json_decref(object);
         return 1;
 
     }
-
+    json_decref(object);
     return 0;
 }
 /*
@@ -544,6 +548,7 @@ int G_check_before_submit( char* jsonfile)
         else {
             G_Printf("Stats API: Skipping file submission. Number of players under minPlayers.\n");
         }
+        json_decref(json);
 
     }
     return 0;
@@ -666,7 +671,6 @@ int G_read_round_jstats( void )
         return 0;
     }
 
-    object = json_object();
     if (json)
     {
         object = json_object_get(json, "serverinfo");
@@ -692,13 +696,12 @@ int G_read_round_jstats( void )
             Q_strncpyz(MATCHID,json_string_value(jstattype),sizeof(MATCHID));
         }
 
-        jstats = json_array();
         jstats = json_object_get(json, "stats");
 
 // dont forget to put in checks to make sure objects and arrays are true array/objs
         for(i = 0; i < json_array_size(jstats); i++)
         {
-            json_t *data,*pstats;
+            json_t *data;
 
             data = json_array_get(jstats, i);
             if(!json_is_object(data))
@@ -707,7 +710,6 @@ int G_read_round_jstats( void )
                 json_decref(data);
                 return 0;
             }
-            pstats = json_object();
             // loop over clients and see if we find a match for guid
         // TODO: Adjust for new GUID/player key
             for ( j = 0; j < level.numPlayingClients; j++ ) {
@@ -721,11 +723,10 @@ int G_read_round_jstats( void )
                 }
 
             } // j
-
+            
 
         } //  i
-
-        json_decref(data);
+        json_decref(json);
         return 1;
 
     }
@@ -750,7 +751,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *
     unsigned int m, dwWeaponMask = 0;
 	char strWeapInfo[MAX_STRING_CHARS] = { 0 };
 	time_t unixTime = time(NULL);
-    json_t* jdata = json_object();
+    json_t* jdata;
     json_t* jstats;
     json_t* jplayer;
     json_t* jcat;
@@ -789,6 +790,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *
 
             sprintf(pGUID, "%s", level.playerStats[j].guid);
 
+            json_object_set_new(jdata, "alias_colored", json_string(level.playerStats[j].aliasColored));
             json_object_set_new(jdata, "alias", json_string(level.playerStats[j].alias));
             json_object_set_new(jdata, "team", json_string((level.playerStats[j].sessionTeam == TEAM_RED) ? "Axis" : "Allied"));
             json_object_set_new(jdata, "start_time", json_integer(level.playerStats[j].start_time));
@@ -841,8 +843,7 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *
                     json_object_set_new(weapOb, "headshots", json_integer(level.playerStats[j].aWeaponStats[m].headshots));
                     json_object_set_new(weapOb, "hits", json_integer(level.playerStats[j].aWeaponStats[m].hits));
                     json_object_set_new(weapOb, "shots", json_integer(level.playerStats[j].aWeaponStats[m].atts));
-                    json_array_append(weapArray, weapOb);
-                    json_decref(weapOb);
+                    json_array_append_new(weapArray, weapOb);
                 }
             }
 
@@ -850,28 +851,27 @@ void G_jstatsByPlayers(qboolean wstats, qboolean clientDisconnected, gclient_t *
                 json_object_update(jdata, jcat);
             }
             else {
-                json_object_set(jdata, "categories", jcat);
+                json_object_set_new(jdata, "categories", jcat);
             }
 
             if (wstats) {
-                json_object_set(jdata, "wstats", weapArray);
-                json_object_set(jplayer, pGUID, jdata);
-                json_decref(weapArray);
+                json_object_set_new(jdata, "wstats", weapArray);
+                json_object_set_new(jplayer, pGUID, jdata);
             }
             else {
-                json_object_set(jplayer, pGUID, jdata);
+                json_object_set_new(jplayer, pGUID, jdata);
+                json_decref(weapArray);
             }
 
-
-            json_decref(jcat);
-            json_array_append(jstats, jplayer);
-            json_decref(jplayer);
+            json_array_append_new(jstats, jplayer);
         }
 
-        json_decref(jdata);
+        
 
         statString = json_dumps(jstats, 1);
+        json_decref(jstats);
     }
+    
 
     if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer && !clientDisconnected)
     {
@@ -940,7 +940,6 @@ void G_jstatsByTeam(qboolean wstats) {
     json_t* jteam;
     json_t* jplayer;
     json_t* weapOb;
-    json_t *root = json_object();
     json_t* weapArray;
     json_t* jcat;
 
@@ -1074,16 +1073,8 @@ void G_jstatsByTeam(qboolean wstats) {
             //trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile ); // for keeping weapon stats in playerstats
             free( s );
         }
-        else
-        {
-            rc = json_dump_file(root, "./test.json", 0);
-            if (rc) {
-                fprintf(stderr, "cannot save json to file\n");
-            }
-        }
 
 
-        json_decref( root );
 
         if (!wstats) {// write weapon stats separately
             G_jWeaponStats();
@@ -1109,7 +1100,6 @@ void G_jWeaponStats(void) {
     json_t* jwstat;
     json_t* jplayer;
     json_t* weapOb;
-    json_t *root = json_object();
     json_t* weapArray;
 
 
@@ -1157,8 +1147,12 @@ void G_jWeaponStats(void) {
 
     if (level.jsonStatInfo.gameStatslogFile && g_gameStatslog.integer) {
 
-        if (!CanAccessFile("Stats: writing weapon stats", level.jsonStatInfo.gameStatslogFileName))
+        if (!CanAccessFile("Stats: writing weapon stats", level.jsonStatInfo.gameStatslogFileName)){
+            json_decref(jwstat);
+            free(s);
             return;
+        }
+            
 
         trap_FS_Write( "\"wstats\": ", strlen( "\"wstats\": " ), level.jsonStatInfo.gameStatslogFile );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
@@ -1166,15 +1160,8 @@ void G_jWeaponStats(void) {
         trap_FS_Write( "\n", strlen( "\n" ), level.jsonStatInfo.gameStatslogFile );
         free( s );
     }
-    else {   // forget the comments above and write it to original test json file :)
-        rc = json_dump_file(root, "./test.json", 0);
-        if (rc) {
-            fprintf(stderr, "cannot save json to file\n");
-        }
-    }
 
-
-    json_decref( root );
+    json_decref(jwstat);
 }
 
 
@@ -1332,7 +1319,6 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
     }
    // trap_Cvar_VariableStringBuffer("stats_matchid",buf,sizeof(buf));
 
-    json_t *eventStats =  json_array();
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
     json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
@@ -1395,6 +1381,12 @@ void G_writeObjectiveEvent (gentity_t* agent,int objType) {
 
 void G_writeChatEvent(gentity_t* agent, const char* chatText)
 {
+    // if client wrote same thing as their last chat return to prevent spamming gamelog
+    if (!Q_stricmp(agent->client->sess.lastChatText, chatText))
+        return;
+
+    agent->client->sess.lastChatText = (char *)chatText;
+
     char* s;
     json_t* jdata = json_object();
     json_t* event = json_object();
@@ -1425,17 +1417,17 @@ void G_writeChatEvent(gentity_t* agent, const char* chatText)
 
 
 void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int eventType) {
+    // additional safety check
+    if ( g_gamestate.integer != GS_PLAYING ) {
+        return;
+    }
 
     char* s;
     //char buf[64];
     char* pclass;
     json_t *jdata = json_object();
-    json_t *event = json_object();
     time_t unixTime = time(NULL);
-    // additional safety check
-    if ( g_gamestate.integer != GS_PLAYING ) {
-        return;
-    }
+    
 
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
 
@@ -1528,8 +1520,10 @@ void G_writeGeneralEvent (gentity_t* agent,gentity_t* other, char* weapon, int e
 
     if (level.jsonStatInfo.gameStatslogFile) {
 
-        if (!CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName))
+        if (!CanAccessFile(va("Stats: writing %s event", LookupEventType(eventType)), level.jsonStatInfo.gameStatslogFileName)){
+            json_decref(jdata);
             return;
+        }
 
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
@@ -1689,9 +1683,7 @@ void G_writeGameLogEnd(void)
     char* s;
     //char buf[64];
     json_t *jdata = json_object();
-    json_t *event = json_object();
     time_t unixTime = time(NULL);
-    json_t *eventStats =  json_array();
     json_object_set_new(jdata, "unixtime",    json_string(va("%ld", unixTime)));
     json_object_set_new(jdata, "match_id",    json_string(va("%s",MATCHID)));
     json_object_set_new(jdata, "round_id",    json_string(va("%s",ROUNDID)));
@@ -1700,8 +1692,10 @@ void G_writeGameLogEnd(void)
 
     if (level.jsonStatInfo.gameStatslogFile) {
 
-        if (!CanAccessFile("Stats: writing game log end", level.jsonStatInfo.gameStatslogFileName))
+        if (!CanAccessFile("Stats: writing game log end", level.jsonStatInfo.gameStatslogFileName)){
+            json_decref(jdata);
             return;
+        }
 
         s = json_dumps( jdata, 0 );
         trap_FS_Write( s, strlen( s ), level.jsonStatInfo.gameStatslogFile );
@@ -1709,6 +1703,8 @@ void G_writeGameLogEnd(void)
         json_decref(jdata);
         free(s);
         trap_FS_Write( "],\n", strlen( "],\n" ), level.jsonStatInfo.gameStatslogFile );
+    }else{
+        json_decref(jdata);
     }
 
 }

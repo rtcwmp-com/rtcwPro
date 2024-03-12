@@ -8,10 +8,10 @@ Main objective: create a competition mod similar to OSP with updates for tournam
 
 To run a RtcwPro server (Linux only) you may use Msh Docker available here: https://github.com/msh100/rtcw
 
-To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.htm
+To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.php
 
 **Change Log**
- - 1.0/1.0.1
+ - 1.0/1.0.1 [changelog](changelog/1.0-changelog.txt)
    - corrected head hitboxes (RtcwPub port)
    - faster PK3 downloads (ioRtcw port)
    - unlag antilag
@@ -257,6 +257,13 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
     - server: Fixed physics for FPS (1.2.61 already released to a few servers)
     - server: Added /maps command
 
+- 1.2.8 [changelog](changelog/1.2.8-changelog.txt)
+  
+- 1.2.9 [changelog](changelog/1.2.9-changelog.txt)
+  
+- 1.3 [changelog](changelog/1.3-changelog.txt)
+  
+- 1.3.1 [changelog](changelog/1.3.1-changelog.txt)  
 
 If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
 

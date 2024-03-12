@@ -1,5 +1,5 @@
 //#include "../game/g_local.h"
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "../game/g_shared.h"
 #include "qcommon.h"
 #include "http.h"
@@ -340,10 +340,10 @@ void* submit_HTTP_curlPost(void* args) {
         Com_Printf("Stats API: Maximum retry limit reached. Request failed.\n");
     }
 
-    curl_easy_cleanup(hnd);
-    hnd = NULL;
     curl_slist_free_all(slist1);
     slist1 = NULL;
+    curl_easy_cleanup(hnd);
+    hnd = NULL;
 
     remove(stats_info->filename);
     return (int)ret;

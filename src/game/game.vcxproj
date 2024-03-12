@@ -37,36 +37,36 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -77,21 +77,27 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ProjectMacros.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -124,8 +130,8 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GAMEDLL;UNLAGGED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalUsingDirectories>..\qcommon\jansson_win;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
-      <AdditionalIncludeDirectories>..\qcommon\jansson_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>..\..\deps\jansson\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderOutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
       <ObjectFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ObjectFileName>
@@ -139,15 +145,17 @@
       <ProgramDatabaseFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>false</GenerateMapFile>
       <MapFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).map</MapFileName>
-      <AdditionalDependencies>..\qcommon\jansson_win\jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\qcommon\jansson_win\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\..\deps\bin\jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\deps\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
     </Link>
     <ProjectReference />
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"
-..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -165,6 +173,7 @@
       <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
       <ObjectFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>..\..\deps\jansson\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
@@ -172,9 +181,14 @@
       <ProgramDatabaseFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pdb</ProgramDatabaseFile>
       <MapFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).map</MapFileName>
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
+      <AdditionalLibraryDirectories>..\..\deps\bin\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\..\deps\bin\jansson.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -211,19 +225,24 @@
       <AssemblerListingLocation>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</AssemblerListingLocation>
       <ObjectFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>..\..\deps\jansson\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\qcommon\jansson_win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>../qcommon/jansson_win/jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\deps\bin\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\..\deps\bin\jansson.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <ProgramDatabaseFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pdb</ProgramDatabaseFile>
       <MapFileName>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).map</MapFileName>
       <ImportLibrary>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).lib</ImportLibrary>
+      <ModuleDefinitionFile>./game.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</Command>
+      <Command>powershell $pk3 = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3"""; if($pk3) { Rename-Item -Path $pk3 -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip""" }
+powershell Compress-Archive -update """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)"""  """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""
+powershell $zip = Get-Item -Path """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.zip"""; if($zip) {Rename-Item -Path $zip -NewName """$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3""" }
+powershell cp """$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)""" """$(RTCWBASE)\$(RTCW_MOD_NAME)"""</Command>
       <Message> Copying file to $(RTCWBASE)\$(RTCW_MOD_NAME) ..</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -253,6 +272,8 @@
     <ClCompile Include="..\botai\ai_team.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha.c" />
     <ClCompile Include="..\qcommon\crypto\sha-1\sha1.c" />
+    <ClCompile Include="..\qcommon\q_math.c" />
+    <ClCompile Include="..\qcommon\q_shared.c" />
     <ClCompile Include="ai_cast.c" />
     <ClCompile Include="ai_cast_characters.c" />
     <ClCompile Include="ai_cast_debug.c" />
@@ -297,7 +318,6 @@
     <ClCompile Include="g_script_actions.c" />
     <ClCompile Include="g_session.c" />
     <ClCompile Include="g_sha1.c" />
-    <ClCompile Include="g_shared.c" />
     <ClCompile Include="g_spawn.c" />
     <ClCompile Include="g_stats.c" />
     <ClCompile Include="g_svcmds.c" />
@@ -310,8 +330,6 @@
     <ClCompile Include="g_utils.c" />
     <ClCompile Include="g_vote.c" />
     <ClCompile Include="g_weapon.c" />
-    <ClCompile Include="q_math.c" />
-    <ClCompile Include="q_shared.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\botai\ai_chat.h" />
@@ -327,6 +345,7 @@
     <ClInclude Include="..\botai\syn.h" />
     <ClInclude Include="..\qcommon\crypto\sha-1\sha1.h" />
     <ClInclude Include="..\qcommon\jansson_win\jansson.h" />
+    <ClInclude Include="..\qcommon\q_shared.h" />
     <ClInclude Include="..\qcommon\threads.h" />
     <ClInclude Include="ai_cast.h" />
     <ClInclude Include="ai_cast_fight.h" />
@@ -347,7 +366,6 @@
     <ClInclude Include="g_shared.h" />
     <ClInclude Include="g_stats.h" />
     <ClInclude Include="g_team.h" />
-    <ClInclude Include="q_shared.h" />
     <ClInclude Include="surfaceflags.h" />
   </ItemGroup>
   <ItemGroup>

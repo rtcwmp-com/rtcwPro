@@ -1833,6 +1833,16 @@ extern void CG_SetupDlightstyles(void);
 #define DEBUGTIME
 #endif
 
+/**
+* @brief CG_SetLastKeyCatcher
+*/
+static void CG_SetLastKeyCatcher(void)
+{
+	int keyCatcher = trap_Key_GetCatcher();
+
+	cg.lastKeyCatcher = keyCatcher;
+}
+
 /*
 =================
 CG_DrawActiveFrame
@@ -1860,6 +1870,10 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 #endif
 	DEBUGTIME
 
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
+		CG_NDP_SetGameTime();
+	}
+		
 	// if we are only updating the screen as a loading
 	// pacifier, don't even try to read snapshots
 	if ( cg.infoScreenText[0] != 0 ) {
@@ -2047,6 +2061,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 	}
 
+	CG_SetLastKeyCatcher();
+
 	DEBUGTIME
 
 	// RTCWPro - complete OSP demo features
@@ -2060,4 +2076,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		cg.timein++;
 	}
 }
-

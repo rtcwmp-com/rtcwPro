@@ -553,12 +553,14 @@ void SV_SetCvarRestrictions(void) {
 
 	Cvar_Set("sv_restRunning", "1");
 
-	if (FS_FileExists(va("configs/%s.config", sv_GameConfig->string))) {
-		char line[MAX_CVAR_VALUE_STRING];
-		char* filepath = va("%s/configs/%s.config", path, sv_GameConfig->string);
+	char* filepath = va("%s/configs/%s.config", path, sv_GameConfig->string);
 
-		f = fopen(filepath, "r");
-		while (fgets(line, MAX_CVAR_VALUE_STRING, f) != NULL) {
+	if ((f = fopen(filepath, "r")) != NULL)
+	{
+		char line[MAX_CVAR_VALUE_STRING];
+
+		while (fgets(line, MAX_CVAR_VALUE_STRING, f) != NULL)
+		{
 			Cmd_TokenizeString(line);
 
 			if (!Q_stricmp(Cmd_Argv(0), "sv_cvar")) {

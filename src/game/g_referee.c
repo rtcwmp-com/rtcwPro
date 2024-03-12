@@ -326,7 +326,7 @@ void G_MakeShoutcaster(gentity_t* ent)
 		return;
 	}
 
-	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR)
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR && qfalse)
 	{
 		SetTeam(ent, "spectator", qtrue);
 	}

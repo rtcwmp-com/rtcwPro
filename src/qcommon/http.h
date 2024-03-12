@@ -131,6 +131,8 @@ typedef struct {
 	char* param;
 	char* jsonText;
 	int clientNumber;
+	size_t size;
+	char* response;
 
 	void (*callback)(char* fmt, ...);
 } HTTP_APIInquiry_t;

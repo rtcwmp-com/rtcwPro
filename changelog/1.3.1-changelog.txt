@@ -1,0 +1,12 @@
+🛠️ Enhancements:
+
+- shoutcast - added F1-12 follow keys for shoutcast mode - /scsfollow enters shoutcast input mode for F1-12 hotkeys, enter exits shoutcast input mode
+
+🔧 Bug Fixes:
+
+- fixed crosshair health bar of teammates
+- backed out pause music changes
+- shoutcast - revert small change that is messing up demo controls
+- shoutcast - turn off scs input mode if scs logs out
+
+No client changes made from 1.3.0 - updating client is not needed

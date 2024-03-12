@@ -30,22 +30,18 @@ If you have questions concerning this license or the applicable additional terms
 
 // g_local.h -- local definitions for game module
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
 #include "../../MAIN/ui_mp/menudef.h"
-#ifdef _WIN32
-#include "../qcommon/jansson_win/jansson.h"
-#else
-#include "../qcommon/jansson/jansson.h"
-#endif // _WIN32
+#include "jansson.h"
 
 //==================================================================
 
 // the "gameversion" client command will print this plus compile date
 //----(SA) Wolfenstein
 //#define GAMEVERSION "RtcwPro 1.0 beta"
-#define JSONGAMESTATVERSION "0.1.4"
+#define JSONGAMESTATVERSION "0.1.5"
 
 // done.
 
@@ -580,6 +576,7 @@ typedef struct {
 
 	int clientFlags;		// Sort some stuff based upon user settings
 	int specSpeed;
+	char* lastChatText;		// prevent spam chat text being saved to stats gamelog
 } clientSession_t;
 
 //
@@ -895,6 +892,7 @@ typedef struct jsonStatInfo_s {
 typedef struct {
 	team_t sessionTeam;
 	char *guid;
+	char aliasColored[MAX_NETNAME];
 	char alias[MAX_NETNAME];
 	int start_time;
 	int damage_given;
@@ -1120,6 +1118,8 @@ typedef struct {
 	jsonPlayerStats_t disconnectStats[12];
 	int disconnectCount;
 
+	char tinfoAxis[1024];                       ///< sent as server command (limited to 1022 chars)
+	char tinfoAllies[1024];                     ///< sent as server command (limited to 1022 chars)
 } level_locals_t;
 
 // OSPx - Team extras
@@ -1773,6 +1773,8 @@ extern vmCvar_t	g_ssWebhookId;
 extern vmCvar_t	g_ssWebhookToken;
 extern vmCvar_t	g_ssWaitTime;
 extern vmCvar_t	g_broadcastClients;
+extern vmCvar_t g_logConfigStringChanges;
+extern vmCvar_t g_playPauseMusic;
 
 // unlagged
 extern vmCvar_t g_floatPlayerPosition;
@@ -1838,8 +1840,8 @@ int     trap_submit_curlPost( char* jsonfile, char* matchid );
 int		trap_HTTP_apiQuery(char* param, char* jsonText, int clientNumber);
 char*	G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGuid);
 void	Cmd_APIQuery(gentity_t* ent);
-void	trap_HandleApiResponse(int clientNum, char* response);
-int		ReadApiResultJson(char* data);
+void	trap_HandleApiResponse(int clientNum, char* response, int size);
+int		ReadApiResultJson(char* data, int size);
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );
@@ -2118,7 +2120,6 @@ void DecolorString( char *in, char *out);
 // g_shared.c
 void setGuid( char *in, char *out );
 //void Q_decolorString(char *in, char *out);
-void AAPSound(char *sound);
 
 ///////////////////////
 // g_vote.c
@@ -2198,6 +2199,8 @@ void G_weaponRankings_cmd( gentity_t *ent, unsigned int dwCommand, qboolean stat
 void G_printMatchInfo( gentity_t *ent, qboolean fDump );
 void G_matchInfoDump( unsigned int dwDumpType );
 void G_statsall_cmd( gentity_t *ent, unsigned int dwCommand, qboolean fDump );
+void G_gameStatsPrint(gentity_t* ent);
+
 // json stat stuff
 enum eventList {
     eventSuicide=0,
@@ -2272,11 +2275,12 @@ void G_commands_cmd(gentity_t *ent);
 void G_commandsHelp_cmd(gentity_t *ent);
 //qboolean G_commandCheck(gentity_t *ent, const char *cmd, qboolean fDoAnytime);
 
-// now residing in g_utils.c  (previous declaration in g_admin.h)
+// g_utils.c
 //
+void AAPSound(char* sound);
 void CPSound(gentity_t *ent, char *sound);
 void APSound(char *sound);
-void APRSound(gentity_t *ent, char *sound);
+void APRSound(gentity_t* ent, char* sound);
 
 
 // Macros

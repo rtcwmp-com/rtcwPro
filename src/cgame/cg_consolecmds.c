@@ -355,6 +355,11 @@ static void CG_OpenLimbo_f( void ) {
 	int currentTeam;
 	char buf[32];
 
+	// No limbo menu in demos
+	if (cg.demoPlayback) {
+		return;
+	}
+
 	// set correct team, also set current team to detect if its changed
 	if ( cg.snap ) {
 		currentTeam = cg.snap->ps.persistant[PERS_TEAM] - 1;
@@ -467,6 +472,42 @@ static void CG_SetWeaponCrosshair_f( void ) {
 static void CG_ResetMaxSpeed_f(void)
 {
 	cg.resetmaxspeed = qtrue;
+}
+
+static void CG_SetBlueScore_f(void)
+{
+	char score[MAX_STRING_CHARS];
+
+	if (trap_Argc() < 2)
+	{
+		CG_Printf("Usage: setbluescore <score>\n");
+		return;
+	}
+
+	trap_Args(score, sizeof(score));
+
+	trap_Cvar_Set("cg_shoutcastBlueScore", score);
+}
+
+static void CG_SetRedScore_f(void)
+{
+	char score[MAX_STRING_CHARS];
+
+	if (trap_Argc() < 2)
+	{
+		CG_Printf("Usage: setredscore <score>\n");
+		return;
+	}
+
+	trap_Args(score, sizeof(score));
+
+	trap_Cvar_Set("cg_shoutcastRedScore", score);
+}
+
+static void CG_ToggleShoutcastFollow_f(void)
+{
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		CG_ToggleShoutcasterMode(1);
 }
 
 /*
@@ -746,7 +787,10 @@ static void CG_TimerSet_f(void) {
 		return;
 	}
 
-	if (trap_Argc() == 1)
+	trap_Cvar_Set("cg_spawnTimer_period", "30"); // just set a default value - cg_draw will use cg_red/bluelimbotime
+	trap_Cvar_Set("cg_spawnTimer_set", va("%i", (cg.time - cgs.levelStartTime)));
+
+	/*if (trap_Argc() == 1)
 	{
 		trap_Cvar_Set("cg_spawnTimer_set", "-1");
 	}
@@ -776,6 +820,7 @@ static void CG_TimerSet_f(void) {
 	{
 		CG_Printf("Usage: timerSet [seconds]\n");
 	}
+	*/
 }
 
 /**
@@ -868,6 +913,9 @@ static consoleCommand_t commands[] = {
 	{ "timerReset", CG_TimerReset_f },
 	{ "resetTimer", CG_TimerReset_f }, // keep ETPro compatibility
 	{ "resetmaxspeed", CG_ResetMaxSpeed_f },
+	{ "setbluescore", CG_SetBlueScore_f },
+	{ "setredscore", CG_SetRedScore_f },
+	{ "scsfollow", CG_ToggleShoutcastFollow_f },
 	// RTCWPro
 
 	// Arnout

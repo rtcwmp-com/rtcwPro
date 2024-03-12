@@ -447,6 +447,30 @@ char *G_createClientStats( gentity_t *refEnt ) {
 	return( va( "%d %s", (int)(refEnt - g_entities), strClientInfo) );
 }
 
+char* G_createGameStats(gentity_t* refEnt) {
+	char strClientInfo[MAX_STRING_CHARS] = { 0 };
+
+	if (!refEnt) {
+		return(NULL);
+	}
+
+	// Info
+	Q_strcat(strClientInfo, sizeof(strClientInfo),
+		va("%d %d %d %d %d %d %d %d %d",
+			refEnt->client->sess.kills,
+			refEnt->client->sess.deaths,
+			refEnt->client->sess.suicides,
+			refEnt->client->sess.damage_given,
+			refEnt->client->sess.damage_received,
+			refEnt->client->sess.gibs,
+			refEnt->client->sess.revives,
+			refEnt->client->sess.med_given,
+			refEnt->client->sess.ammo_given
+		));
+
+	return(va("%d %s", (int)(refEnt - g_entities), strClientInfo));
+}
+
 // Sends a player's stats to the requesting client.
 void G_statsPrint( gentity_t *ent, int nType ) {
 	int pid;
@@ -476,6 +500,24 @@ void G_statsPrint( gentity_t *ent, int nType ) {
 		}
 		CP( va( "%s %s\n", cmd, G_createStats( g_entities + pid ) ) );
 	}
+}
+
+void G_gameStatsPrint(gentity_t* ent)
+{
+	int pid;
+	char* cmd = "gamestats";
+	char arg[MAX_TOKEN_CHARS];
+
+	if (!ent || (ent->r.svFlags & SVF_BOT)) {
+		return;
+	}
+
+	// Find the player to poll stats.
+	trap_Argv(1, arg, sizeof(arg));
+	if ((pid = ClientNumberFromString(ent, arg)) == -1) {
+		return;
+	}
+	CP(va("%s %s\n", cmd, G_createGameStats(g_entities + pid)));
 }
 
 // Sends a player's stats to the requesting client.
@@ -669,6 +711,7 @@ void G_deleteStats( int nClient ) {
 	cl->sess.obj_killcarrier = 0;
 	cl->sess.obj_protectflag = 0;
 	cl->sess.knifeKills = 0;
+	cl->sess.lastChatText = "";
 
 	memset( &cl->sess.aWeaponStats, 0, sizeof( cl->sess.aWeaponStats ) );
 	trap_Cvar_Set( va( "wstats%i", nClient ), va( "%d", nClient ) );

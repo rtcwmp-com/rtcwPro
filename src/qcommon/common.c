@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // common.c -- misc functions used in client and server
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "database.h"
 #include "threads.h"
 #include "qcommon.h"
@@ -2201,6 +2201,7 @@ int Com_EventLoop( void ) {
 
 			evFrom = *(netadr_t *)ev.evPtr;
 			buf.cursize = ev.evPtrLength - sizeof( evFrom );
+			buf.time_received = Sys_Milliseconds(); // rtcwpro
 
 			// we must copy the contents of the message out, because
 			// the event buffers are only large enough to hold the
@@ -2215,6 +2216,17 @@ int Com_EventLoop( void ) {
 				Com_RunAndTimeServerPacket( &evFrom, &buf );
 			} else {
 				CL_PacketEvent( evFrom, &buf );
+			}
+			break;
+			// rtcwpro
+		case SE_STREAMED_PACKET:
+			evFrom = *(netadr_t*)ev.evPtr;
+			buf.cursize = ev.evPtrLength - sizeof(netadr_t);
+			buf.time_received = Sys_Milliseconds();
+
+			memcpy(buf.data, (byte *)ev.evPtr + sizeof(netadr_t), buf.cursize);
+			if (!com_sv_running->integer) {
+				CL_StreamedPacketEvent(evFrom, &buf);
 			}
 			break;
 		}
@@ -3986,6 +3998,22 @@ void Field_CompleteCommand( field_t *field ) {
 	Cvar_CommandCompletion( PrintMatches );
 }
 
+const char* Com_FormatBytes(uint64_t numBytes)
+{
+	const char* units[] = { "bytes", "KB", "MB", "GB" };
+	const float dividers[] = { 1.0f, (float)(1 << 10), (float)(1 << 20), (float)(1 << 30) };
+
+	int unit = 0;
+	for (uint64_t vi = numBytes; vi >= 1024; vi >>= 10) {
+		unit++;
+	}
+
+	const float vf = (float)numBytes / dividers[unit];
+
+	return va("%.3f %s", vf, units[unit]);
+}
+
+
 // new stuff (but found not essential at this time) for iortcw port of server defined dl rates
 /*
 static void Com_DetectAltivec(void)
@@ -4024,3 +4052,115 @@ void Com_ReadFromPipe( void )
 		Cbuf_ExecuteText( EXEC_APPEND, buffer );
 }
 */
+
+// rtcwpro - nobo's http
+// ===== http parsing =======
+
+http_response* http_parse(char* msg, int msg_len)
+{
+	static http_response response;
+	http_header* header;
+	char* header_name, * header_value, * response_code;
+
+	msg[msg_len] = 0;
+
+	if (response.headers)
+	{
+		header = response.headers;
+		while (header != NULL)
+		{
+			http_header* temp = header->next_header;
+
+			Z_Free(header->name);
+			Z_Free(header->value);
+			Z_Free(header);
+
+			header = temp;
+		}
+	}
+	memset(&response, 0, sizeof(http_response));
+
+	if (Q_stricmpn(msg, "http", 4))
+	{
+		return &response;
+	}
+
+	msg = strstr(msg, " ") + 1;
+	response_code = msg;
+	msg = strstr(msg, " ");
+	*msg = 0;
+	msg++;
+	msg = strstr(msg, "\r\n") + 2;
+
+	sscanf(response_code, "%i", &response.code);
+
+	do
+	{
+		if (Q_stricmpn(msg, "\r\n", 2) == 0)
+		{
+			response.body = msg + 2;
+			if (response.body && *response.body)
+			{
+				response.has_body = qtrue;
+			}
+			response.is_valid = qtrue;
+			break;
+		}
+
+		header_name = msg;
+
+		msg = strstr(msg, ": ");
+		*msg = 0;
+		msg += 2;
+		header_value = msg;
+
+		msg = strstr(msg, "\r\n");
+		if (msg)
+		{
+			*msg = 0;
+			msg += 2;
+		}
+
+		header = S_Malloc(sizeof(http_header));
+		header->name = CopyString(header_name);
+		header->value = CopyString(header_value);
+		header->next_header = NULL;
+
+		if (!response.headers)
+		{
+			response.headers = header;
+		}
+		else
+		{
+			http_header* new_header = response.headers;
+			while (new_header->next_header != NULL)
+			{
+				new_header = new_header->next_header;
+			}
+			new_header->next_header = header;
+		}
+	} while (msg && *msg);
+
+	for (header = response.headers; header != NULL; header = header->next_header)
+	{
+		if (Q_stricmp(header->name, "transfer-encoding") == 0)
+		{
+			if (Q_stricmp(header->value, "chunked") == 0)
+			{
+				response.chunked = qtrue;
+			}
+		}
+		else if (Q_stricmp(header->name, "content-length") == 0)
+		{
+			response.content_length = atoi(header->value);
+		}
+		else if (Q_stricmp(header->name, "accept-ranges") == 0 &&
+			Q_stricmp(header->value, "bytes") == 0)
+		{
+			response.accepts_range = qtrue;
+		}
+	}
+
+	return &response;
+}
+

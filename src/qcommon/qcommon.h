@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
-#include "dl_public.h" // L0 - HTTP downloads
 
 //Ignore __attribute__ on non-gcc platforms
 #ifndef __GNUC__
@@ -56,6 +55,7 @@ typedef struct {
 	int uncompsize;             // NERVE - SMF - net debugging
 	int readcount;
 	int bit;                    // for bitwise reads and writes
+	int time_received; // rtcwpro
 } msg_t;
 
 void MSG_Init( msg_t *buf, byte *data, int length );
@@ -179,6 +179,37 @@ typedef struct {
 	unsigned short port;
 	unsigned long	scope_id;	// Needed for IPv6 link-local addresses
 } netadr_t;
+
+// rtcwpro
+typedef struct
+{
+	int socket;
+	qboolean in_use;
+	netadr_t* address;
+	void(*failure_callback)(char*);
+} streamed_socket;
+
+typedef struct http_header_t
+{
+	char* name;
+	char* value;
+	struct http_header_t* next_header;
+} http_header;
+
+typedef struct
+{
+	struct http_header_t* headers;
+	char* body;
+	qboolean is_valid;
+	qboolean has_body;
+	int code;
+	qboolean chunked;
+	int content_length;
+	qboolean accepts_range;
+} http_response;
+
+http_response* http_parse(char* msg, int msg_len);
+// end
 
 void		NET_Restart(void);
 void        NET_Init( void );
@@ -716,6 +747,9 @@ int     FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );
 int     FS_Seek( fileHandle_t f, long offset, int origin );
 // seek on a file (doesn't work for zip files!!!!!!!!)
 
+qbool	FS_IsZipFile(fileHandle_t f);
+// tells us whether we opened a zip file
+
 qboolean FS_FilenameCompare( const char *s1, const char *s2 );
 
 const char *FS_GamePureChecksum( void );
@@ -847,6 +881,7 @@ int         Com_Filter( char *filter, char *name, int casesensitive );
 int         Com_FilterPath( char *filter, char *name, int casesensitive );
 int         Com_RealTime( qtime_t *qtime );
 qboolean    Com_SafeMode( void );
+const char* Com_FormatBytes(uint64_t numBytes);
 
 void        Com_StartupVariable( const char *match );
 void        Com_SetRecommended();
@@ -970,7 +1005,6 @@ void CL_InitKeyCommands( void );
 // config files, but the rest of client startup will happen later
 
 void CL_Init( void );
-void CL_ClearStaticDownload(void);
 void CL_Disconnect( qboolean showMainMenu );
 void CL_Shutdown( void );
 void CL_Frame( int msec );
@@ -985,6 +1019,8 @@ void CL_MouseEvent( int dx, int dy, int time );
 void CL_JoystickEvent( int axis, int value, int time );
 
 void CL_PacketEvent( netadr_t from, msg_t *msg );
+
+void CL_StreamedPacketEvent(netadr_t from, msg_t* msg); // rtcwpro
 
 void CL_ConsolePrint( char *text );
 
@@ -1073,7 +1109,8 @@ typedef enum {
 	SE_MOUSE,   // evValue and evValue2 are reletive signed x / y moves
 	SE_JOYSTICK_AXIS,   // evValue is an axis number and evValue2 is the current state (-127 to 127)
 	SE_CONSOLE, // evPtr is a char*
-	SE_PACKET   // evPtr is a netadr_t followed by data bytes to evPtrLength
+	SE_PACKET,   // evPtr is a netadr_t followed by data bytes to evPtrLength
+	SE_STREAMED_PACKET // evPtr is a netadr_t followed by data bytes to evPtrLength // rtcwpro
 } sysEventType_t;
 
 typedef struct {
@@ -1141,6 +1178,14 @@ void    Sys_ShowConsole( int level, qboolean quitOnClose );
 void    Sys_SetErrorText( const char *text );
 
 void    Sys_SendPacket( int length, const void *data, netadr_t to );
+
+// rtcwpro
+void	Sys_SendStreamedPacket(streamed_socket* ss, void* data, int length);
+void	Sys_ResendStreamedPacket(void);
+
+void	NET_CloseStreamedSocket(streamed_socket* ss);
+qboolean	NET_OpenStreamedSocket(streamed_socket** ss_out, netadr_t* to);
+// end
 
 qboolean    Sys_StringToAdr( const char *s, netadr_t *a );
 //Does NOT parse port numbers, only base addresses.
@@ -1310,6 +1355,13 @@ extern huffman_t clientHuffTables;
 #define RKVALD_TIME_PING_L  40000
 #define RKVALD_TIME_PING_S  20000
 #define RKVALD_TIME_OFF     -1
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+//#define Q_assert(Cond) do { if(!(Cond)) { if(Sys_IsDebuggerAttached()) __debugbreak(); else assert((Cond)); } } while(0)
+#define Q_assert(Cond)
+#else
+#define Q_assert(Cond)
+#endif
 
 #endif // _QCOMMON_H_
 

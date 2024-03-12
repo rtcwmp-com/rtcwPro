@@ -717,24 +717,53 @@ static void CG_GrenadeTrail( centity_t *ent, const weaponInfo_t *wi ) {
 
 	ent->trailTime = cg.time;
 
-	if ( contents & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
-		if ( contents & lastContents & CONTENTS_WATER ) {
-			CG_BubbleTrail( lastPos, origin, 2, 8 );
+	if (cgs.clientinfo[cg.clientNum].shoutStatus && cg_shoutcastGrenadeTrail.integer)
+	{
+		vec3_t colorStart = { 1.0f, 0.0f, 0.0f };
+		vec3_t colorEnd   = { 1.0f, 0.0f, 0.0f };
+
+		for (; t <= ent->trailTime; t += step)
+		{
+			BG_EvaluateTrajectory(&es->pos, t, origin);
+			ent->headJuncIndex = CG_AddTrailJunc(ent->headJuncIndex,
+			                                     cgs.media.railCoreShader,
+			                                     startTime,
+			                                     0,
+			                                     origin,
+			                                     cg_railTrailTime.integer,
+			                                     0.3f,
+			                                     0.0f,
+			                                     2,
+			                                     20,
+			                                     0,
+			                                     colorStart,
+			                                     colorEnd,
+			                                     0,
+			                                     0);
+			ent->lastTrailTime = cg.time;
 		}
-		return;
 	}
+	else
+	{
+		if ( contents & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
+			if ( contents & lastContents & CONTENTS_WATER ) {
+				CG_BubbleTrail( lastPos, origin, 2, 8 );
+			}
+			return;
+		}
 
-//----(SA)	trying this back on for DM
+	//----(SA)	trying this back on for DM
 
-	// spawn smoke junctions
-	for ( ; t <= ent->trailTime ; t += step ) {
-		BG_EvaluateTrajectory( &es->pos, t, origin );
-		ent->headJuncIndex = CG_AddSmokeJunc( ent->headJuncIndex,
-											  cgs.media.smokeTrailShader,
-											  origin,
-//												1500, 0.3, 10, 50 );
-											  1000, 0.3, 2, 20 );
-		ent->lastTrailTime = cg.time;
+		// spawn smoke junctions
+		for ( ; t <= ent->trailTime ; t += step ) {
+			BG_EvaluateTrajectory( &es->pos, t, origin );
+			ent->headJuncIndex = CG_AddSmokeJunc( ent->headJuncIndex,
+												  cgs.media.smokeTrailShader,
+												  origin,
+	//												1500, 0.3, 10, 50 );
+												  1000, 0.3, 2, 20 );
+			ent->lastTrailTime = cg.time;
+		}
 	}
 //----(SA)	end
 }
@@ -1159,6 +1188,8 @@ void CG_RegisterWeapon( int weaponNum ) {
 
 	weaponInfo->weaponIcon[0] = trap_R_RegisterShader( item->icon );
 	weaponInfo->weaponIcon[1] = trap_R_RegisterShader( va( "%s_select", item->icon ) );    // get the 'selected' icon as well
+	weaponInfo->weaponIcon[2] = trap_R_RegisterShader(va("%s_sc", item->icon));    // shoutcast overlay icon
+	weaponInfo->weaponIconScale = 1; // shoutcast overlay icon scale
 
 	// JOSEPH 4-17-00
 	weaponInfo->ammoIcon = trap_R_RegisterShader( item->ammoicon );
@@ -2820,38 +2851,21 @@ qboolean CG_HideWeapon(int weapon) {
 	else {
 		switch (weapon) 
 		{
-		case WP_KNIFE:
-			hide = qfalse;
-			break;
-		case WP_KNIFE2:
-			hide = qfalse;
-			break;
-		case WP_GRENADE_PINEAPPLE:
-			hide = qfalse;
-			break;
-		case WP_MEDIC_SYRINGE:
-			hide = qfalse;
-			break;
-		case WP_AMMO:
-			hide = qfalse;
-			break;
-		case WP_DYNAMITE:
-			hide = qfalse;
-			break;
-		case WP_DYNAMITE2:
-			hide = qfalse;
-			break;
-		case WP_MEDKIT:
-			hide = qfalse;
-			break;
-		case WP_PLIERS:
-			hide = qfalse;
-			break;
-		case WP_SMOKE_GRENADE:
-			hide = qfalse;
-			break;
-		default:
-			hide = qtrue;
+			case WP_KNIFE:
+			case WP_KNIFE2:
+			case WP_GRENADE_PINEAPPLE:
+			case WP_GRENADE_LAUNCHER:
+			case WP_MEDIC_SYRINGE:
+			case WP_AMMO:
+			case WP_DYNAMITE:
+			case WP_DYNAMITE2:
+			case WP_MEDKIT:
+			case WP_PLIERS:
+			case WP_SMOKE_GRENADE:
+				hide = qfalse;
+				break;
+			default:
+				hide = qtrue;
 		}
 	}
 

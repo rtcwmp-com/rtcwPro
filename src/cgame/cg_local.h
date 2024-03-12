@@ -37,11 +37,12 @@ If you have questions concerning this license or the applicable additional terms
  *
 */
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
 #include "../ui/keycodes.h"	// OSPx - Demo commands
+#include "cg_ndp.h"
 
 
 #define POWERUP_BLINKS      5
@@ -86,7 +87,7 @@ If you have questions concerning this license or the applicable additional terms
 #define TEAMCHAT_HEIGHT     8
 
 #define NOTIFY_WIDTH        80
-#define NOTIFY_HEIGHT       5
+#define MAX_NOTIFY_HEIGHT   32
 
 // very large characters
 #define GIANT_WIDTH         32
@@ -143,6 +144,7 @@ If you have questions concerning this license or the applicable additional terms
 #define WSTATE_OFF          0x04    // Window is completely shutdown
 #define WID_DEMOCONTROLS	0x01    // Demo Controls
 #define WID_DEMOPOPUP		0x02	// Demo Pop ups
+#define WID_DEMOTIMELINE	0x03	// Demo Timeline
 //#define WID_DEMOHELP		0x08	// Demo key control info
 
 typedef struct {
@@ -204,6 +206,12 @@ typedef struct {
 	int fadeTime;
 	int show;
 	int requestTime;
+} demoTimeline_t;
+
+typedef struct {
+	int fadeTime;
+	int show;
+	int requestTime;
 } demoPopupInfo_t;
 
 #define DEMO_THIRDPERSONUPDATE  0
@@ -212,18 +220,21 @@ typedef struct {
 
 // L0 - Commented out few vars
 typedef struct {
-	char strWS[WS_MAX][MAX_STRING_TOKENS];
-	char strExtra[2][MAX_STRING_TOKENS];
-	char strRank[MAX_STRING_TOKENS];
-//	char strSkillz[SK_NUM_SKILLS][MAX_STRING_TOKENS];
-	int cWeapons;
-	int cSkills;
 	qboolean fHasStats;
 	int nClientID;
 	int nRounds;
 	int fadeTime;
 	int show;
 	int requestTime;
+	int kills;
+	int deaths;
+	int suicides;
+	int damage_giv;
+	int damage_rec;
+	int gibs;
+	int revives;
+	int health_given;
+	int ammo_given;
 } gameStats_t;
 
 typedef struct {
@@ -683,7 +694,8 @@ typedef struct {
 
 	int clientNum;
 
-	char name[MAX_QPATH];
+	char name[MAX_NAME_LENGTH];
+	char cleanname[MAX_NAME_LENGTH];
 	team_t team;
 
 	int botSkill;                   // 0 = not bot, 1-5 = bot
@@ -814,8 +826,10 @@ typedef struct weaponInfo_s {
 	sfxHandle_t flashEchoSound[4];      //----(SA)	added - distant gun firing sound
 	sfxHandle_t lastShotSound[4];       // sound of the last shot can be different (mauser doesn't have bolt action on last shot for example)
 
-	qhandle_t weaponIcon[2];            //----(SA)	[0] is weap icon, [1] is highlight icon
+	qhandle_t weaponIcon[3];            //----(SA)	[0] is weap icon, [1] is highlight icon, [2] is shoutcast overlay icon
+	int weaponIconScale;
 	qhandle_t ammoIcon;
+	qhandle_t weaponSimpleIcon;
 
 	qhandle_t ammoModel;
 
@@ -1206,6 +1220,7 @@ typedef struct {
 	// Demo
 	qboolean revertToDefaultKeys;
 	qboolean advertisementDone;
+	cg_window_t* demoTimelineWindow;
 
 	// Priority Prints (Pop In prints)
 	int popinPrintTime;
@@ -1242,6 +1257,9 @@ typedef struct {
 
 	pmoveExt_t pmext;
 
+	// RtcwPro shoutcast overlay
+	int lastKeyCatcher;
+	qbool ndpDemoEnabled;
 } cg_t;
 
 
@@ -1773,7 +1791,22 @@ typedef struct {
 	qhandle_t customTrigger;
 	qhandle_t customTriggerEdges;
 
+	// Shoutcasting shaders
+	qhandle_t medicIcon;
+	qhandle_t ammoIcon;
+
+	//Demo timeline shaders
+	qhandle_t skull;
+	qhandle_t axisFlag;
+	qhandle_t alliesFlag;
+	qhandle_t stopwatch1;
+	qhandle_t stopwatch2;
+
+	qhandle_t classPics[4];
+
 } cgMedia_t;
+
+
 // OSPx - Pause states
 typedef enum {
 	PAUSE_NONE,
@@ -1853,14 +1886,14 @@ typedef struct {
 	int teamLastChatPos;
 
 	// New notify mechanism for obits
-	char notifyMsgs[NOTIFY_HEIGHT][NOTIFY_WIDTH * 3 + 1];
-	int notifyMsgTimes[NOTIFY_HEIGHT];
+	char notifyMsgs[MAX_NOTIFY_HEIGHT][NOTIFY_WIDTH * 3 + 1];
+	int notifyMsgTimes[MAX_NOTIFY_HEIGHT];
 	int notifyPos;
 	int notifyLastPos;
 
 	int cursorX;
 	int cursorY;
-	qboolean eventHandling;
+	int eventHandling;
 	qboolean mouseCaptured;
 	qboolean sizingHud;
 	void *capturedItem;
@@ -1926,6 +1959,7 @@ typedef struct {
 	int dumpStatsTime;
 	qboolean fKeyPressed[256];                          // Key status to get around console issues
 	int timescaleUpdate;                                // Timescale display for demo playback
+	demoTimeline_t demoTimeline;
 } cgs_t;
 
 //==============================================================================
@@ -2162,6 +2196,7 @@ extern vmCvar_t demo_avifpsF5;
 extern vmCvar_t demo_drawTimeScale;
 extern vmCvar_t demo_infoWindow;
 extern vmCvar_t demo_controlsWindow;
+extern vmCvar_t demo_timelineWindow;
 extern vmCvar_t demo_popupWindow;
 extern vmCvar_t demo_notifyWindow;
 extern vmCvar_t demo_showTimein;
@@ -2201,7 +2236,6 @@ extern vmCvar_t cg_reinforcementTimeProY;
 extern vmCvar_t cg_findMedic;
 extern vmCvar_t cg_hitsoundBodyStyle;
 extern vmCvar_t cg_hitsoundHeadStyle;
-extern vmCvar_t cg_pauseMusic;
 extern vmCvar_t cg_showPriorityText;
 extern vmCvar_t cg_priorityTextX;
 extern vmCvar_t cg_priorityTextY;
@@ -2225,8 +2259,22 @@ extern vmCvar_t cg_fragsWidth;
 extern vmCvar_t cg_fixedphysicsfps;
 extern vmCvar_t cg_debugDamage;
 
-//static void CG_TimerSet_f(void);
-//static void CG_TimerReset_f(void);
+// shoutcast overlay
+extern vmCvar_t cg_shoutcastDrawPlayers;
+extern vmCvar_t cg_shoutcastDrawTeamNames;
+extern vmCvar_t cg_shoutcastRedScore;
+extern vmCvar_t cg_shoutcastBlueScore;
+extern vmCvar_t cg_shoutcastTeamNameRed;
+extern vmCvar_t cg_shoutcastTeamNameBlue;
+extern vmCvar_t cg_shoutcastDrawHealth;
+extern vmCvar_t cg_shoutcastGrenadeTrail;
+
+extern vmCvar_t cg_showLimboMessage;			// show/hide limbo message while dead
+extern vmCvar_t cg_teamObituaryColors;			// custom colors in kill feed
+extern vmCvar_t cg_teamObituaryColorSame;		// same team color
+extern vmCvar_t cg_teamObituaryColorSameTK;		// same team TK color
+extern vmCvar_t cg_teamObituaryColorEnemy;		// enemy team color
+extern vmCvar_t cg_teamObituaryColorEnemyTK;	// enemy team TK color
 
 //
 // cg_main.c
@@ -2290,18 +2338,17 @@ void CG_DrawMotd();
 void CG_DrawPic( float x, float y, float width, float height, qhandle_t hShader );
 void CG_DrawRotatedPic( float x, float y, float width, float height, qhandle_t hShader, float angle );      // NERVE - SMF
 void CG_FilledBar( float x, float y, float w, float h, float *startColor, float *endColor, const float *bgColor, float frac, int flags );
+void CG_FilledBar2(float x, float y, float w, float h, float* startColor, float* endColor, const float* bgColor, const float* bdColor, float frac, int flags, qhandle_t icon);
+
 // JOSEPH 10-26-99
 void CG_DrawStretchPic( float x, float y, float width, float height, qhandle_t hShader );
 // END JOSEPH
-void CG_DrawString( float x, float y, const char *string,
-					float charWidth, float charHeight, const float *modulate );
+void CG_DrawString( float x, float y, const char *string, float charWidth, float charHeight, const float *modulate );
 
 
-void CG_DrawStringExt( int x, int y, const char *string, const float *setColor,
-					   qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars );
+void CG_DrawStringExt( int x, int y, const char *string, const float *setColor, qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars );
 // JOSEPH 4-17-00
-void CG_DrawStringExt2( int x, int y, const char *string, const float *setColor,
-						qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars );
+void CG_DrawStringExt2( int x, int y, const char *string, const float *setColor, qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars );
 // END JOSEPH
 void CG_DrawBigString( int x, int y, const char *s, float alpha );
 void CG_DrawBigStringColor( int x, int y, const char *s, vec4_t color );
@@ -2317,7 +2364,7 @@ float   *CG_FadeColor( int startMsec, int totalMsec );
 float *CG_TeamColor( int team );
 void CG_TileClear( void );
 void CG_ColorForHealth( vec4_t hcolor );
-void CG_GetColorForHealth( int health, int armor, vec4_t hcolor );
+void CG_GetColorForHealth( int health, vec4_t hcolor );
 
 float UI_ProportionalSizeScale( int style );
 int UI_ProportionalStringWidth( const char* str );
@@ -2325,6 +2372,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 
 // new hud stuff
 void CG_DrawRect( float x, float y, float width, float height, float size, const float *color );
+void CG_DrawRect_FixedBorder(float x, float y, float width, float height, int border, const float* color);
 void CG_DrawSides( float x, float y, float w, float h, float size );
 void CG_DrawTopBottom( float x, float y, float w, float h, float size );
 
@@ -2388,9 +2436,6 @@ qboolean CG_YourTeamHasFlag();
 qboolean CG_OtherTeamHasFlag();
 qhandle_t CG_StatusHandle( int task );
 void CG_Fade( int r, int g, int b, int a, float time );
-void CG_ShoutcasterItems();
-void CG_ShoutcasterDynamite(int num);
-
 
 // - Reinforcement offset
 //int CG_CalculateReinfTime(void);
@@ -2417,6 +2462,7 @@ void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, entityState_t *es, const vec3_t fireRiseDir );
 void CG_NewClientInfo( int clientNum );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
+float CG_GetPlayerMaxHealthFrac(int clientNum, int playerHealth, int class, int team);
 
 // Rafael particles
 extern qboolean initparticles;
@@ -2448,6 +2494,7 @@ void CG_PainEvent( centity_t *cent, int health, qboolean crouching );
 void CG_SetEntitySoundPosition( centity_t *cent );
 void CG_AddPacketEntities( void );
 void CG_Beam( centity_t *cent );
+void CG_PrintEntityStatep(const entityState_t* ent);
 
 //void CG_AdjustPositionForMover(const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t angles_in, vec3_t angles_out);
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, vec3_t outDeltaAngles );
@@ -2664,6 +2711,7 @@ void CG_RumbleEfx( float pitch, float yaw );
 // cg_snapshot.c
 //
 void CG_ProcessSnapshots( void );
+void CG_NDP_ProcessSnapshots( void );
 
 //
 // cg_spawn.c
@@ -2691,6 +2739,7 @@ void CG_demoView(void);
 qboolean CG_DrawScoreboard( void );
 void CG_DrawTourneyScoreboard( void );
 char* WM_TimeToString(float msec);
+qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum);
 
 //
 // cg_consolecmds.c
@@ -2720,6 +2769,7 @@ void CG_PlayBufferedVoiceChats();       // NERVE - SMF
 void CG_AddToNotify( const char *str );
 const char* CG_LocalizeServerCommand( const char *buf ); // L0 - So it's more accessible
 void CG_ParseReinforcementTimes(const char *pszReinfSeedString);
+void CG_ParseGameStats(void);
 
 //
 // cg_playerstate.c
@@ -2746,6 +2796,26 @@ void CG_windowInit( void );
 void CG_windowNormalizeOnText( cg_window_t *w );
 
 void CG_createWstatsMsgWindow( void );
+
+
+//cg_shoutcastoverlay.c
+
+void CG_DrawShoutcastPlayerList(void);
+void CG_DrawShoutcastPlayerStatus(void);
+void CG_DrawShoutcastTimer(void);
+//void CG_DrawShoutcastPowerups(void);
+void CG_RequestPlayerStats(int clientNum);
+void CG_ShoutcasterItems();
+void CG_ShoutcasterDynamite(int num);
+void CG_PlayerAmmoValue(int* ammo, int* clips, int* akimboammo, vec4_t** colorAmmo /*, vec4_t **colorClip*/);
+
+void CG_ToggleShoutcasterMode(int shoutcaster);
+//void CG_ShoutcastCheckKeyCatcher(int keycatcher);
+qboolean CG_Shoutcast_KeyHandling(int key, qboolean down);
+qboolean CG_ShoutcastCheckExecKey(int key, qboolean doaction, qboolean down);
+
+//qboolean CG_ShoutcastKeyHandler(int key);
+
 //===============================================
 
 //
@@ -2771,6 +2841,7 @@ void        trap_Cvar_Set( const char *var_name, const char *value );
 void        trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 void		trap_Rest_Validate(void);
 void		trap_Rest_Build(const char *data);
+int         trap_Cvar_VariableIntegerValue(const char* var_name);
 
 // ServerCommand and ConsoleCommand parameter access
 int         trap_Argc( void );
@@ -3025,3 +3096,22 @@ void CG_DrawRect_FixedBorder( float x, float y, float width, float height, int b
 // reqSS
 void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
 
+// Get capabilities from the client
+qbool trap_GetValue(char* value, int valueSize, const char* key);
+
+enum
+{
+	BAR_LEFT = BIT(0),
+	BAR_CENTER = BIT(1),
+	BAR_VERT = BIT(2),
+	BAR_NOHUDALPHA = BIT(3),
+	BAR_BG = BIT(4),
+	// different spacing modes for use w/ BAR_BG
+	BAR_BGSPACING_X0Y5 = BIT(5),
+	BAR_BGSPACING_X0Y0 = BIT(6),
+	BAR_LERP_COLOR = BIT(7),
+	BAR_BORDER = BIT(8),
+	BAR_BORDER_SMALL = BIT(9),
+	BAR_DECOR = BIT(10),
+	BAR_ICON = BIT(11),
+};

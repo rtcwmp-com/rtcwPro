@@ -6,8 +6,8 @@ CFLAGS = -Wall -fno-strict-aliasing -pipe -DUSE_ICON -DARCH_STRING="x86_64" -m64
     -DUSE_INTERNAL_JPEG -Icode/jpeg-8c -DBUILD_FREETYPE -Icode/freetype-2.9/include -DFT2_BUILD_LIBRARY \
     -DUSE_LOCAL_HEADERS  -Wformat=2 -Wformat-security -Wno-format-nonliteral \
     -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -MMD -DNDEBUG -O3 -ffast-math -fPIC
-#SOURCES = $(shell ls cg_*.c ../game/bg_animation.c ../game/bg_misc.c ../game/bg_pmove.c ../game/bg_stats.c ../game/bg_slidemove.c ../game/q_math.c ../game/q_shared.c ../ui/ui_shared.c)
-SOURCES = $(shell ls cg_*.c ../game/bg_animation.c ../game/bg_misc.c ../game/bg_pmove.c ../game/bg_slidemove.c ../game/q_math.c ../game/q_shared.c ../ui/ui_shared.c)
+#SOURCES = $(shell ls cg_*.c ../game/bg_animation.c ../game/bg_misc.c ../game/bg_pmove.c ../game/bg_stats.c ../game/bg_slidemove.c ../qcommon/q_math.c ../qcommon/q_shared.c ../ui/ui_shared.c)
+SOURCES = $(shell ls cg_*.c ../game/bg_animation.c ../game/bg_misc.c ../game/bg_pmove.c ../game/bg_slidemove.c ../qcommon/q_math.c ../qcommon/q_shared.c ../ui/ui_shared.c)
 MODULES = $(SOURCES:.c=.o)
 
 all: clean gameclean cgame.mp.x86_64.so

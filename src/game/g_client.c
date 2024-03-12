@@ -2509,7 +2509,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 	client->ps.crouchSpeedScale = 0.25;
 
 	// Rafael
-	client->ps.sprintTime = 20000;
+	client->ps.sprintTime = SPRINTTIME;
 	client->ps.sprintExertTime = 0;
 
 	client->ps.friction = 1.0;
@@ -2760,7 +2760,7 @@ void ClientDisconnect( int clientNum ) {
 			}
 
 			// Record the players stats if they /quit so we can reload or save them
-			if (g_gameStatslog.integer)
+			if (g_gameStatslog.integer && (ent->client->sess.sessionTeam == TEAM_BLUE || ent->client->sess.sessionTeam == TEAM_RED))
 			{
 				// record any player that disconnects
 				G_jstatsByPlayers(qtrue, qtrue, ent->client);

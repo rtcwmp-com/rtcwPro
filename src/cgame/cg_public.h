@@ -64,7 +64,8 @@ enum {
 	CGAME_EVENT_TEAMMENU,
 	CGAME_EVENT_SCOREBOARD,
 	CGAME_EVENT_EDITHUD,
-	CGAME_EVENT_DEMO               // OSP
+	CGAME_EVENT_DEMO, // RtcwPro demo port
+	CGAME_EVENT_SHOUTCAST // RtcwPro shoutcast overaly
 };
 
 
@@ -132,7 +133,6 @@ typedef enum {
 
 	CG_R_GETSKINMODEL,      // client allowed to view what the .skin loaded so they can set their model appropriately
 	CG_R_GETMODELSHADER,    // client allowed the shader handle for given model/surface (for things like debris inheriting shader from explosive)
-
 	CG_R_REGISTERFONT,
 	CG_R_CLEARSCENE,
 	CG_R_ADDREFENTITYTOSCENE,
@@ -229,7 +229,17 @@ typedef enum {
 	CG_R_BUILD,
 	// -NERVE - SMF
 
-	CG_REQUEST_SS // reqSS
+	CG_REQUEST_SS, // reqSS
+
+	// engine extensions
+	// the mod should _never_ use these symbols
+	CG_EXT_GETVALUE = 700,
+	CG_EXT_LOCATEINTEROPDATA,
+	CG_EXT_NDP_ENABLE,
+	CG_EXT_NDP_SEEK,
+	CG_EXT_NDP_READUNTIL,
+	CG_EXT_NDP_STARTVIDEO,
+	CG_EXT_NDP_STOPVIDEO
 } cgameImport_t;
 
 
@@ -292,6 +302,21 @@ typedef enum {
 
 	CG_RELAY_COMMAND,
 //	qboolean(*CG_RelayCommand)(const char type, int value);
+
+	CG_NDP_ANALYZE_COMMAND,
+// void CG_NDP_AnalyzeCommand(int serverTime);
+
+	CG_NDP_GENERATE_COMMANDS,
+// currently unused
+
+	CG_NDP_IS_CS_NEEDED,
+// currently unused
+
+	CG_NDP_ANALYZE_SNAPSHOT,
+// qbool CG_NDP_AnalyzeSnapshot(int progress);
+
+	CG_NDP_END_ANALYSIS
+// void CG_NDP_EndAnalysis(const char* filePath, int firstServerTime, int lastServerTime, qboolean videoRestart)
 
 } cgameExport_t;
 

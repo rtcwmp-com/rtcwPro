@@ -2144,6 +2144,11 @@ extern vec3_t playerMins, playerMaxs;
 void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
 	vec3_t dir, push;
 
+	// no push in pause state
+	if (self->client->ps.pm_type == PM_FREEZE || other->client->ps.pm_type == PM_FREEZE) {
+		return;
+	}
+
 	VectorSubtract( self->r.currentOrigin, other->r.currentOrigin, dir );
 	dir[2] = 0;
 	VectorNormalizeFast( dir );

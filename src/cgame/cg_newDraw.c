@@ -207,7 +207,7 @@ static void CG_DrawPlayerArmorValue( rectDef_t *rect, float scale, vec4_t color,
 	ps = &cg.snap->ps;
 
 	// NERVE - SMF - don't draw armor in wolfMP
-	if ( cgs.gametype >= GT_WOLF ) {
+	if ( cgs.gametype >= GT_WOLF) {
 		return;
 	}
 
@@ -291,7 +291,7 @@ static void CG_DrawPlayerWeaponIcon( rectDef_t *rect, qboolean drawHighlighted, 
 // jpw
 
 
-	if ( !cg_drawIcons.integer ) {
+	if ( !cg_drawIcons.integer || cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return;
 	}
 
@@ -415,6 +415,9 @@ static void CG_DrawPlayerAmmoIcon( rectDef_t *rect, qboolean draw2D ) {
 	playerState_t   *ps;
 	vec3_t angles;
 	vec3_t origin;
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
 
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
@@ -667,6 +670,9 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, float scale, vec4_t color, 
 	int weap, startx;
 	qboolean special = qfalse;
 	qboolean skipammo = qfalse;
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
 
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
@@ -1115,6 +1121,10 @@ static void CG_DrawPlayerHealth( rectDef_t *rect, float scale, vec4_t color, qha
 	vec4_t color2;
 
 	ps = &cg.snap->ps;
+
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
+
 /*
 	if ( cgs.gametype >= GT_WOLF && ( ps->pm_flags & PMF_FOLLOW ) ) {
         value = cgs.clientinfo[ ps->clientNum ].health;
@@ -2267,6 +2277,9 @@ static void CG_DrawFatigue( rectDef_t *rect, vec4_t color, int align ) {
 	float barFrac;  //, omBarFrac;
 	int flags = 0;
 
+	if (cgs.clientinfo[cg.clientNum].shoutStatus)
+		return;
+
 	barFrac = (float)cg.snap->ps.sprintTime / SPRINTTIME;
 //	omBarFrac = 1.0f-barFrac;
 
@@ -2360,7 +2373,7 @@ CG_OwnerDraw
 void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_y, int ownerDraw, int ownerDrawFlags, int align, float special, float scale, vec4_t color, qhandle_t shader, int textStyle ) {
 	rectDef_t rect;
 
-	if ( cg_drawStatus.integer == 0 ) {
+	if ( cg_drawStatus.integer == 0 || cgs.clientinfo[cg.clientNum].shoutStatus) {
 		return;
 	}
 
@@ -2579,58 +2592,51 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_
 void CG_MouseEvent( int x, int y ) {
 	int n;
 
-	switch (cgs.eventHandling) {
-	case CGAME_EVENT_DEMO:
-		cgs.cursorX += x;
-		if (cgs.cursorX < 0) {
-			cgs.cursorX = 0;
-		}
-		else if (cgs.cursorX > 640) {
-			cgs.cursorX = 640;
-		}
-		cgs.cursorY += y;
-		if (cgs.cursorY < 0) {
-			cgs.cursorY = 0;
-		}
-		else if (cgs.cursorY > 480) {
-			cgs.cursorY = 480;
-		}
-		break;
-		default:
-			if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
-				cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse) {
-				trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
-			return;
-		}
+	switch (cgs.eventHandling)
+	{
+		case CGAME_EVENT_NONE:
+		case CGAME_EVENT_TEAMMENU:
+		case CGAME_EVENT_SCOREBOARD:
+		case CGAME_EVENT_EDITHUD:
+			break;
+		case CGAME_EVENT_DEMO:
+			cgs.cursorX += x;
+			if (cgs.cursorX < 0) {
+				cgs.cursorX = 0;
+			}
+			else if (cgs.cursorX > SCREEN_WIDTH ) {
+				cgs.cursorX = SCREEN_WIDTH;
+			}
+			cgs.cursorY += y;
+			if (cgs.cursorY < 0) {
+				cgs.cursorY = 0;
+			}
+			else if (cgs.cursorY > SCREEN_HEIGHT ) {
+				cgs.cursorY = SCREEN_HEIGHT;
+			}
+			break;
+			default:
+				if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
+					cg.predictedPlayerState.pm_type == PM_SPECTATOR) && cg.showScores == qfalse && !cg.demoPlayback) {
+					trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
+					return;
+				}
 
-		cgs.cursorX += x;
-		if ( cgs.cursorX < 0 ) {
-			cgs.cursorX = 0;
-		} else if ( cgs.cursorX > 640 ) {
-			cgs.cursorX = 640;
-		}
 
-		cgs.cursorY += y;
-		if ( cgs.cursorY < 0 ) {
-			cgs.cursorY = 0;
-		} else if ( cgs.cursorY > 480 ) {
-			cgs.cursorY = 480;
-		}
+				n = Display_CursorType( cgs.cursorX, cgs.cursorY );
+				cgs.activeCursor = 0;
+				if ( n == CURSOR_ARROW ) {
+					cgs.activeCursor = cgs.media.selectCursor;
+				} else if ( n == CURSOR_SIZER ) {
+					cgs.activeCursor = cgs.media.sizeCursor;
+				}
 
-		n = Display_CursorType( cgs.cursorX, cgs.cursorY );
-		cgs.activeCursor = 0;
-		if ( n == CURSOR_ARROW ) {
-			cgs.activeCursor = cgs.media.selectCursor;
-		} else if ( n == CURSOR_SIZER ) {
-			cgs.activeCursor = cgs.media.sizeCursor;
-		}
-
-		if ( cgs.capturedItem ) {
-			Display_MouseMove( cgs.capturedItem, x, y );
-		} else {
-			Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
-		}
-		break;
+				if ( cgs.capturedItem ) {
+					Display_MouseMove( cgs.capturedItem, x, y );
+				} else {
+					Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
+				}
+				break;
 	}
 }
 
@@ -2667,7 +2673,8 @@ CG_EventHandling
 	  2 - hud editor
 
 */
-void CG_EventHandling( int type, qboolean forced ) {
+void CG_EventHandling( int type, qboolean forced )
+{
 	if (cg.demoPlayback && type == CGAME_EVENT_NONE && !forced) {
 		type = CGAME_EVENT_DEMO;
 	}
@@ -2676,16 +2683,28 @@ void CG_EventHandling( int type, qboolean forced ) {
 		trap_Cvar_Set("cl_bypassMouseInput", 0);
 	}
 
-	switch (type) {
-	/*case CGAME_EVENT_DEMO:
-		CG_ScoresUp_f();
-		break;*/
-	case CGAME_EVENT_NONE:
-		CG_HideTeamMenu();
-		break;
-	case CGAME_EVENT_TEAMMENU:
-	case CGAME_EVENT_SCOREBOARD:
-		break;
+	switch (type)
+	{
+		/*case CGAME_EVENT_DEMO:
+			CG_ScoresUp_f();
+			break;*/
+		case CGAME_EVENT_NONE:
+			CG_HideTeamMenu();
+			break;
+		case CGAME_EVENT_TEAMMENU:
+		case CGAME_EVENT_SCOREBOARD:
+			break;
+		case CGAME_EVENT_SHOUTCAST:
+			if (cgs.eventHandling == CGAME_EVENT_SHOUTCAST)
+			{
+				if (forced)
+				{
+					trap_UI_Popup("UIMENU_INGAME");
+				}
+
+				trap_Cvar_Set("cl_bypassmouseinput", "0");
+			}
+			break;
 	}
 
 	cgs.eventHandling = type;
@@ -2693,24 +2712,45 @@ void CG_EventHandling( int type, qboolean forced ) {
 	if (type == CGAME_EVENT_NONE) {
 		trap_Key_SetCatcher(trap_Key_GetCatcher() & ~KEYCATCH_CGAME);
 	}
+	else if (type == CGAME_EVENT_SHOUTCAST)
+	{
+		trap_Cvar_Set("cl_bypassmouseinput", "1");
+		trap_Key_SetCatcher(KEYCATCH_CGAME);
+	}
 }
 
-void CG_KeyEvent( int key, qboolean down ) {
-
+void CG_KeyEvent( int key, qboolean down ) 
+{
+	cgs.fKeyPressed[key] = down;
+	
 	if ( !down ) {
 		return;
 	}
+	
 
-	switch (cgs.eventHandling) {
 	// OSPx - Demo..
-	case CGAME_EVENT_DEMO:
-		CG_DemoClick(key);
-		return;
+	switch (cgs.eventHandling)
+	{
+		case CGAME_EVENT_NONE:
+		case CGAME_EVENT_TEAMMENU:
+		case CGAME_EVENT_SCOREBOARD:
+		case CGAME_EVENT_EDITHUD:
+			break;
+		case CGAME_EVENT_DEMO:
+			CG_DemoClick(key);
+			return;
+		case CGAME_EVENT_SHOUTCAST:
+			CG_Shoutcast_KeyHandling(key, down);
+			return;
+		default:
+			break;
 	}
 
-	if ( cg.predictedPlayerState.pm_type == PM_NORMAL || ( cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse ) ) {
-		CG_EventHandling( CGAME_EVENT_NONE, qfalse );
-		trap_Key_SetCatcher( 0 );
+	if ((cg.predictedPlayerState.pm_type == PM_NORMAL ||
+		(cg.predictedPlayerState.pm_type == PM_SPECTATOR && cg.showScores == qfalse)))
+	{
+		CG_EventHandling(CGAME_EVENT_NONE, qfalse);
+		trap_Key_SetCatcher(0);
 		return;
 	}
 
