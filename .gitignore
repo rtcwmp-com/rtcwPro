@@ -13,6 +13,9 @@
 src/Backup/*.*
 src/.vs/*.*
 src/rtcwpro/
+deps
+build
+src/Builds
 # we should not put dll / so / object files in the repo
 *.dll
 *.so
@@ -26,12 +29,15 @@ src/rtcwpro/
 /src/game/g_weapon_orig.c
 website/
 *.srctrl*
+/src/ProjectMacros.props
+*.user
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
 # Build results
 output/
+output-test/
 [Dd]ebug/
 [Dd]ebug_Dedicated/
 [Dd]ebugPublic/
