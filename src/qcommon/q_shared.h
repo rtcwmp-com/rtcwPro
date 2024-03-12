@@ -1232,7 +1232,7 @@ typedef enum
 #define MAX_WEAPONS             64  // (SA) and yet more!
 
 // Ridah, increased this
-//#define	MAX_PS_EVENTS			2
+#define	MAX_PS_EVENTS			2
 // ACK: I'd really like to make this 4, but that seems to cause network problems
 #define MAX_EVENTS              4   // max events per frame before we drop events
 //#define	MAX_EVENTS				2	// max events per frame before we drop events
