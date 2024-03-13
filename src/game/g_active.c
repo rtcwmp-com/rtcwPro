@@ -964,7 +964,7 @@ void G_SwingAngles(float destination, float swingTolerance, float clampTolerance
 ==============
 SendPendingPredictableEvents
 ==============
-*/
+
 void SendPendingPredictableEvents( playerState_t *ps ) {
 	gentity_t *t;
 	int event, seq;
@@ -994,6 +994,7 @@ void SendPendingPredictableEvents( playerState_t *ps ) {
 		ps->externalEvent = extEvent;
 	}
 }
+*/
 
 /*
 ===============
@@ -1732,7 +1733,7 @@ void ClientThink_real( gentity_t *ent ) {
 	}*/
 	// RTCWPro end
 
-	SendPendingPredictableEvents( &ent->client->ps );
+	//SendPendingPredictableEvents( &ent->client->ps );
 	
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
@@ -2409,7 +2410,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	{
 		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
 
-		SendPendingPredictableEvents( &ent->client->ps );
+		//SendPendingPredictableEvents( &ent->client->ps );
 	
 		//unlagged - smooth clients #1
 			// mark as not missing updates initially
