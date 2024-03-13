@@ -588,3 +588,7 @@ void trap_CNQ3_NDP_StopVideo(void) {
 void trap_LocateInteropData(void *bufferIn, int bufferInSize, void *bufferOut, int bufferOutSize) {
 	syscall(CG_EXT_LOCATEINTEROPDATA, bufferIn, bufferInSize, bufferOut, bufferOutSize);
 }
+
+qbool trap_GetValue(char* value, int valueSize, const char* key) {
+	syscall(CG_EXT_GETVALUE, value, valueSize, key);
+}

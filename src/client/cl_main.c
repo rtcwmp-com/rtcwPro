@@ -3415,6 +3415,9 @@ void CL_Init( void ) {
 	// RTCWPro
 	Cvar_Set("cl_checkversion", "17");
 
+	// Allow cgame to interrogate the client if it supports extensions
+	Cvar_Set("//trap_GetValue", "700");
+
 	// DHM - Nerve
 	autoupdateChecked = qfalse;
 	autoupdateStarted = qfalse;

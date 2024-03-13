@@ -576,6 +576,30 @@ void CL_CheckRestStatus(void) {
 	}
 }
 
+static qbool CL_CG_GetValue(char* value, int valueSize, const char* key)
+{
+	typedef struct { const char* name; int number; } syscall_t;
+	static const syscall_t syscalls[] = {
+		// syscalls
+		{ "trap_LocateInteropData", CG_EXT_LOCATEINTEROPDATA },
+		{ "trap_CNQ3_NDP_Enable", CG_EXT_NDP_ENABLE },
+		{ "trap_CNQ3_NDP_Seek", CG_EXT_NDP_SEEK },
+		{ "trap_CNQ3_NDP_ReadUntil", CG_EXT_NDP_READUNTIL },
+		{ "trap_CNQ3_NDP_StartVideo", CG_EXT_NDP_STARTVIDEO },
+		{ "trap_CNQ3_NDP_StopVideo", CG_EXT_NDP_STOPVIDEO }
+	};
+
+	for (int i = 0; i < ARRAY_LEN(syscalls); ++i) {
+		if (Q_stricmp(key, syscalls[i].name) == 0) {
+			Com_sprintf(value, valueSize, "%d", syscalls[i].number);
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
+
 /*
 ====================
 CL_CgameSystemCalls
@@ -990,6 +1014,11 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_REQUEST_SS:
 		CL_GenerateSS(VMA(1), VMA(2), VMA(3), VMA(4), VMA(5));
 		return 0;
+
+	case CG_EXT_GETVALUE:
+		return CL_CG_GetValue(VMA(1), args[2], VMA(3));
+
+
 	case CG_EXT_LOCATEINTEROPDATA:
 		interopBufferIn = VMA(1);
 		interopBufferInSize = args[2];
