@@ -3099,6 +3099,15 @@ void trap_RequestSS(char* address, char* hookid, char* hooktoken, char* waittime
 // Get capabilities from the client
 qbool trap_GetValue(char* value, int valueSize, const char* key);
 
+typedef struct {
+	int trap_LocateInteropData;
+	int trap_CNQ3_NDP_Enable;
+	int trap_CNQ3_NDP_Seek;
+	int trap_CNQ3_NDP_ReadUntil;
+	int trap_CNQ3_NDP_StartVideo;
+	int trap_CNQ3_NDP_StopVideo;
+} cgExt_t;
+
 enum
 {
 	BAR_LEFT = BIT(0),
