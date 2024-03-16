@@ -2774,6 +2774,59 @@ void CG_ClearTrails( void );
 extern qboolean initparticles;
 void CG_ClearParticles( void );
 
+#define GET_TRAP(Name) \
+	do { \
+		rtcwPro_ext.Name = 0; \
+		if (trap_GetValue(extValue, sizeof(extValue), #Name) && \
+			sscanf(extValue, "%d", &syscallId) == 1 && \
+			syscallId != 0) { \
+			rtcwPro_ext.Name = syscallId; \
+		} \
+	} while (0)
+
+
+void CG_LoadExtensions() {
+
+	cgExt_t rtcwPro_ext;
+
+	int hasTrap_GetValue = trap_Cvar_VariableIntegerValue("//trap_GetValue");
+
+	if (hasTrap_GetValue == 0) {
+		// Engine extensions are not supported on the client
+		return;
+	}
+	else {
+		// Begin loading supported extensions...
+		char extValue[11];
+		int syscallId;
+
+		GET_TRAP(trap_LocateInteropData);
+		if (rtcwPro_ext.trap_LocateInteropData){
+			memset(interopIn, 0, sizeof(interopIn));
+			memset(interopOut, 0, sizeof(interopOut));
+			trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut));
+		}
+
+		GET_TRAP(trap_CNQ3_NDP_Enable);
+		GET_TRAP(trap_CNQ3_NDP_Seek);
+		GET_TRAP(trap_CNQ3_NDP_ReadUntil);
+		GET_TRAP(trap_CNQ3_NDP_StartVideo);
+		GET_TRAP(trap_CNQ3_NDP_StopVideo);
+
+		if (rtcwPro_ext.trap_CNQ3_NDP_Enable &&
+			rtcwPro_ext.trap_CNQ3_NDP_Seek &&
+			rtcwPro_ext.trap_CNQ3_NDP_ReadUntil &&
+			rtcwPro_ext.trap_CNQ3_NDP_StartVideo &&
+			rtcwPro_ext.trap_CNQ3_NDP_StopVideo) {
+			cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+		}
+		else {
+			cg.ndpDemoEnabled = qfalse;
+		}
+	}
+}
+
+
 /*
 =================
 CG_Init
@@ -2925,32 +2978,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 		}
 	}
 
-	int hasTrap_GetValue = trap_Cvar_VariableIntegerValue("//trap_GetValue");
+	CG_LoadExtensions();
 
-	if (hasTrap_GetValue == 0) {
-		// Engine extensions are not supported on the client
-		return;
-	} else {
-		// Begin loading supported extensions...
-		char extValue[11];
-		int syscallId;
-		if (trap_GetValue(extValue, sizeof(extValue), "trap_LocateInteropData") &&
-			sscanf(extValue, "%d", &syscallId) == 1 &&
-			syscallId != 0) {
-			memset(interopIn, 0, sizeof(interopIn));
-			memset(interopOut, 0, sizeof(interopOut));
-			trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut));
-		}
 
-		if (trap_GetValue(extValue, sizeof(extValue), "trap_CNQ3_NDP_Enable") &&
-			sscanf(extValue, "%d", &syscallId) == 1 &&
-			syscallId != 0) {
-			cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
-		}
-		else {
-			cg.ndpDemoEnabled = qfalse;
-		}
-	}
 	
 }
 
