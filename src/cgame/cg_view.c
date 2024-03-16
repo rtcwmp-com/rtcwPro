@@ -872,7 +872,7 @@ void CG_zoomViewRevert_f(void) {
 	cg.zoomedBinoc = qfalse;
 	cg.zoomedScope = qfalse;
 	cg.zoomTime = 0;
-	cg.zoomval = 0;
+	//cg.zoomval = 0; // don't reset sniper zoom while scoped
 }
 
 /*
@@ -1494,7 +1494,8 @@ static int CG_CalcViewValues( void ) {
 
 	// field of view
 	// OSPx - Patched for zoomed POV
-	if (cg.zoomedFOV)
+	// Added check for cg.zoomval to prevent overriding sniper's zoom
+	if (cg.zoomedFOV && cg.zoomval == 0)
 		return CG_CalcZoomedFov();
 	else
 		// End
