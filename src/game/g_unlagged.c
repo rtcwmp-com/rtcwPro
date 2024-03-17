@@ -365,8 +365,8 @@ void G_UnTimeShiftAllClients( gentity_t *skip ) {
 	ent = &g_entities[0];
 	for ( i = 0; i < MAX_CLIENTS; i++, ent++) {
 		if ( ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip ) {
-			// if (!(ent->client->ps.pm_flags & PMF_LIMBO)) // ratmod had this
-			G_UnTimeShiftClient( ent );
+			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
+				G_UnTimeShiftClient( ent );
 		}
 	}
 }
