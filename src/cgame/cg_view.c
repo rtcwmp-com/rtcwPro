@@ -598,6 +598,12 @@ static void CG_OffsetFirstPersonView( void ) {
 			if ( ratio > 0 ) {
 				angles[PITCH] += ratio * cg.v_dmg_pitch;
 				angles[ROLL] += ratio * cg.v_dmg_roll;
+
+				// RtcwPro print damage feedback to rtcwconsole.log
+				if (cg_debugDamage.integer)
+				{
+					LogEntry("logs/debugDamage.log", va("[%s] -> ratio [ %f ] angles[PITCH]: [ %f ] angles[ROLL] [ %f ]\n\"", getDateTime(), ratio, angles[ROLL], angles[PITCH]));
+				}
 			}
 		}
 	}
@@ -866,7 +872,7 @@ void CG_zoomViewRevert_f(void) {
 	cg.zoomedBinoc = qfalse;
 	cg.zoomedScope = qfalse;
 	cg.zoomTime = 0;
-	cg.zoomval = 0;
+	//cg.zoomval = 0; // don't reset sniper zoom while scoped
 }
 
 /*
@@ -1488,7 +1494,8 @@ static int CG_CalcViewValues( void ) {
 
 	// field of view
 	// OSPx - Patched for zoomed POV
-	if (cg.zoomedFOV)
+	// Added check for cg.zoomval to prevent overriding sniper's zoom
+	if (cg.zoomedFOV && cg.zoomval == 0)
 		return CG_CalcZoomedFov();
 	else
 		// End
@@ -1827,6 +1834,16 @@ extern void CG_SetupDlightstyles(void);
 #define DEBUGTIME
 #endif
 
+/**
+* @brief CG_SetLastKeyCatcher
+*/
+static void CG_SetLastKeyCatcher(void)
+{
+	int keyCatcher = trap_Key_GetCatcher();
+
+	cg.lastKeyCatcher = keyCatcher;
+}
+
 /*
 =================
 CG_DrawActiveFrame
@@ -1854,6 +1871,10 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 #endif
 	DEBUGTIME
 
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
+		CG_NDP_SetGameTime();
+	}
+		
 	// if we are only updating the screen as a loading
 	// pacifier, don't even try to read snapshots
 	if ( cg.infoScreenText[0] != 0 ) {
@@ -2041,6 +2062,8 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 	}
 
+	CG_SetLastKeyCatcher();
+
 	DEBUGTIME
 
 	// RTCWPro - complete OSP demo features
@@ -2054,4 +2077,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		cg.timein++;
 	}
 }
-

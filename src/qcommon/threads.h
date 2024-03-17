@@ -28,19 +28,19 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __THREADS_H
 #define __THREADS_H
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 #ifdef __linux__
 	#include <gnu/lib-names.h>
 	#include <pthread.h>
 	#include <dlfcn.h>
-#elif WIN32
+#else //WIN32
 	#include <process.h>
-#elif defined( __MACOS__ )
-	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
-#elif defined( __APPLE__ )
-	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
+//#elif defined( __MACOS__ )
+//	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
+//#elif defined( __APPLE__ )
+//	#define LIBPTHREAD_SO "/usr/lib/libpthread.dylib"
 #endif
 
 //

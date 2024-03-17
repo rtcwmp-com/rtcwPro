@@ -3601,38 +3601,54 @@ static void UI_LoadDemos() {
 	char	dirlist[2048];
 	int		dirlen;
 	char*	dirptr;
+	char	game[60];
+
 	Com_sprintf( demoExt, sizeof( demoExt ), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
 	uiInfo.demoCount = trap_FS_GetFileList( "demos", demoExt, demolist, sizeof( demolist ) );
 
 	Com_sprintf( demoExt, sizeof( demoExt ), ".dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 
-	numdirs = trap_FS_GetFileList("../rtcwpro/demos", "/", dirlist, 2048 );
+	demoname = demolist;
+	for (i = 0; i < uiInfo.demoCount; i++, demoname += len + 1) {
+		len = strlen(demoname);
+		if (!Q_stricmp(demoname + len - strlen(demoExt), demoExt)) {
+			demoname[len - strlen(demoExt)] = '\0';
+		}
+		Com_sprintf(demoPathName, sizeof(demoPathName), "%s", demoname);
+		uiInfo.demoList[i] = String_Alloc(demoPathName);
+	}
+
+	trap_Cvar_VariableStringBuffer("fs_game", game, sizeof(game));
+
+	numdirs = trap_FS_GetFileList(va("../%s/demos", game), "/", dirlist, 2048 );
+
 	dirptr  = dirlist;
+
 	// iterate over all sub-directories
-	for (i=0; i<numdirs && uiInfo.demoCount < MAX_DEMOS; i++,dirptr+=dirlen+1)
+	for (i = 0; i < numdirs && uiInfo.demoCount < MAX_DEMOS; i++, dirptr += dirlen + 1)
 	{
 		dirlen = strlen(dirptr);
 
-		if (dirlen && dirptr[dirlen-1]=='/') dirptr[dirlen-1]='\0';
+		if (dirlen && dirptr[dirlen - 1] == '/') dirptr[dirlen - 1] = '\0';
 
-		if (!strcmp(dirptr,".") || !strcmp(dirptr,".."))
+		if (!strcmp(dirptr, ".") || !strcmp(dirptr, ".."))
 			continue;
 
 		// iterate all demo files in directory
 
-		numfiles = trap_FS_GetFileList( va("../rtcwpro/demos/%s",dirptr), demoExt, demolist, sizeof( demolist )  );
-		demoname  = demolist;
-		for (j=0; j<numfiles &&  uiInfo.demoCount < MAX_DEMOS;j++,demoname+=len+1)
+		numfiles = trap_FS_GetFileList(va("../%s/demos/%s", game, dirptr), demoExt, demolist, sizeof(demolist));
+		demoname = demolist;
+		for (j = 0; j < numfiles && uiInfo.demoCount < MAX_DEMOS; j++, demoname += len + 1)
 		{
-			len = strlen( demoname );
-			if ( !Q_stricmp( demoname +  len - strlen( demoExt ), demoExt ) ) {
-				demoname[len - strlen( demoExt )] = '\0';
+			len = strlen(demoname);
+			if (!Q_stricmp(demoname + len - strlen(demoExt), demoExt)) {
+				demoname[len - strlen(demoExt)] = '\0';
 			}
-			Com_sprintf( demoPathName, sizeof( demoPathName ), "%s/%s", dirptr, demoname );
+			Com_sprintf(demoPathName, sizeof(demoPathName), "%s/%s", dirptr, demoname);
 			//uiInfo.demoList[i+j] = String_Alloc( demoPathName );
-			uiInfo.demoList[uiInfo.demoCount] = String_Alloc( demoPathName );
-            //uiInfo.demoList[i+j] = String_Alloc( demoname );
+			uiInfo.demoList[uiInfo.demoCount] = String_Alloc(demoPathName);
+			//uiInfo.demoList[i+j] = String_Alloc( demoname );
 			uiInfo.demoCount++;
 		}
 	}

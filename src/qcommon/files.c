@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
  *****************************************************************************/
 
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 #include "unzip.h"
 
@@ -409,6 +409,9 @@ static FILE *FS_FileForHandle( fileHandle_t f ) {
 		Com_Error( ERR_DROP, "FS_FileForHandle: can't get FILE on zip file" );
 	}
 	if ( !fsh[f].handleFiles.file.o ) {
+
+		Com_Printf("FS_FileForHandle Error Filename: %s\n", fsh[f].name);
+
 		Com_Error( ERR_DROP, "FS_FileForHandle: NULL" );
 	}
 
@@ -1187,7 +1190,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 					// set the file position in the zip file (also sets the current file info)
 					unzSetCurrentFileInfoPosition( pak->handle, pakFile->pos );
 					// copy the file info into the unzip structure
-					Com_Memcpy( zfi, pak->handle, sizeof( unz_s ) );
+					memmove( zfi, pak->handle, sizeof( unz_s ) );
 					// we copy this back into the structure
 					zfi->file = temp;
 					// open the file in the zip
@@ -2584,6 +2587,7 @@ FS_Path_f
 */
 void FS_Path_f( void ) {
 	searchpath_t    *s;
+	searchpath_t* p;
 	int i;
 
 	Com_Printf( "Current search path:\n" );
@@ -2593,8 +2597,22 @@ void FS_Path_f( void ) {
 			if ( fs_numServerPaks ) {
 				if ( !FS_PakIsPure( s->pack ) ) {
 					Com_Printf( "    not on the pure list\n" );
+					// unload the pak
+					if (s->pack) {
+						unzClose(s->pack->handle);
+						Z_Free(s->pack->buildBuffer);
+						Z_Free(s->pack);
+					}
+					if (s->dir) {
+						Z_Free(s->dir);
+					}
+					p->next = s->next;
+					Z_Free(s);
+					s = p;
+
 				} else {
 					Com_Printf( "    on the pure list\n" );
+					p = s;
 				}
 			}
 		} else {
@@ -2797,7 +2815,6 @@ we are not interested in a download string format, we want something human-reada
 
 ================
 */
-qboolean CL_WWWBadChecksum(const char* pakname);
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 	searchpath_t    *sp;
 	qboolean havepak, badchecksum;
@@ -2856,21 +2873,6 @@ qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring ) {
 				// Do we have one with the same name?
 				if (FS_SV_FileExists(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
 					Q_strcat(neededpaks, len, " (local file exists with wrong checksum)");
-					// L0 - HTTP downloads
-
-#ifndef DEDICATED
-					// let the client subsystem track bad download redirects (dl file with wrong checksums)
-					// this is a bit ugly but the only other solution would have been callback passing..
-					if (CL_WWWBadChecksum(va("%s.pk3", fs_serverReferencedPakNames[i]))) {
-						// remove a potentially malicious download file
-						// (this is also intended to avoid expansion of the pk3 into a file with different checksum .. messes up wwwdl chkfail)
-						char* rmv = FS_BuildOSPath(fs_homepath->string, va("%s.pk3", fs_serverReferencedPakNames[i]), "");
-						rmv[strlen(rmv) - 1] = '\0';
-						FS_Remove(rmv);
-					}
-#endif
-
-					// End
 				}
 				Q_strcat(neededpaks, len, "\n");
 			}
@@ -2993,7 +2995,7 @@ static void FS_Startup( const char *gameName ) {
 		homePath = fs_basepath->string;
 	}
 	fs_homepath = Cvar_Get( "fs_homepath", homePath, CVAR_INIT );
-	fs_gamedirvar = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
+	fs_gamedirvar = Cvar_Get( "fs_game", "rtcwpro", CVAR_INIT | CVAR_SYSTEMINFO );
 	fs_restrict = Cvar_Get( "fs_restrict", "", CVAR_INIT );
 
 	// add search path elements in reverse priority order
@@ -3898,7 +3900,7 @@ see show_bug.cgi?id=478
 =================
 */
 qboolean FS_ConditionalRestart( int checksumFeed ) {
-	if ( fs_gamedirvar->modified || checksumFeed != fs_checksumFeed ) {
+	if ( fs_gamedirvar->modified || checksumFeed != fs_checksumFeed || fs_numServerPaks) {
 		FS_Restart( checksumFeed );
 		return qtrue;
 	}
@@ -4019,4 +4021,13 @@ qboolean FS_VerifyPak( const char *pak ) {
 		}
 	}
 	return qfalse;
+}
+
+qbool FS_IsZipFile(fileHandle_t f)
+{
+	if (f < 0 || f >= MAX_FILE_HANDLES) {
+		Com_Error(ERR_DROP, "FS_IsZipFile: out of range");
+	}
+
+	return fsh[f].zipFile;
 }

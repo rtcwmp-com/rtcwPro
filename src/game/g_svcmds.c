@@ -957,6 +957,79 @@ void Svcmd_Pause_f(qboolean pause) {
 }
 
 /*
+===========
+RTCWPro
+Requests Screenshot from client
+===========
+*/
+void Svcmd_RequestSS_f(void) {
+	char client_arg[256];
+	int	clientNum;
+	gentity_t* targetent;
+	char* datetime;
+	char cleanName[16];
+	char guid[64];
+
+	if (!G_Is_SV_Running())
+	{
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	if (!strlen(g_ssAddress.string) || (!Q_stricmp(g_ssAddress.string, "none")))
+	{
+		G_Printf("g_ssAddress is not set!\n");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookId.string) || (!Q_stricmp(g_ssWebhookId.string, "none")))
+	{
+		G_Printf("g_ssWebhookId is not set!\n");
+		return;
+	}
+
+	if (!strlen(g_ssWebhookToken.string) || (!Q_stricmp(g_ssWebhookToken.string, "none")))
+	{
+		G_Printf("g_ssWebhookToken is not set!\n");
+		return;
+	}
+
+	if (level.intermissiontime)
+	{
+		G_Printf("Cannot use this command during intermission!\n");
+		return;
+	}
+
+	trap_Argv(1, client_arg, sizeof(client_arg));
+
+	if (!strlen(client_arg))
+	{
+		G_Printf("Invalid client id!\n");
+		return;
+	}
+
+	clientNum = atoi(client_arg);
+	targetent = &g_entities[clientNum];
+
+	if (!targetent->client || targetent->client->pers.connected != CON_CONNECTED)
+	{
+		G_Printf("Invalid client id!\n");
+		return;
+	}
+
+	datetime = Delim_GetDateTime();
+	BG_cleanName(targetent->client->pers.netname, cleanName, 16, qfalse);
+	Q_strncpyz(guid, targetent->client->sess.guid, sizeof(guid));
+	memmove(guid, guid + 24, strlen(guid));
+	int waittime = 1;
+
+	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
+		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, waittime, datetime));
+
+	G_LogPrintf("Rcon requested %s_%s_%s.jpg from id %d\n", cleanName, datetime, guid, clientNum);
+}
+
+/*
 =================
 ConsoleCommand
 
@@ -1019,7 +1092,7 @@ qboolean    ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-	if ( Q_stricmp( cmd, "swap_teams" ) == 0 ) {
+	if ( Q_stricmp( cmd, "swapteams" ) == 0 ) {
 		Svcmd_SwapTeams_f();
 		return qtrue;
 	}
@@ -1029,7 +1102,7 @@ qboolean    ConsoleCommand( void ) {
 	// Shuffle
 	if ( Q_stricmp( cmd, "shuffle" ) == 0 ) {
 		Svcmd_Shuffle_f();
-	return qtrue;
+		return qtrue;
 	}
 	// Antilag
 	if ( Q_stricmp( cmd, "antilag" ) == 0 ) {
@@ -1046,6 +1119,12 @@ qboolean    ConsoleCommand( void ) {
 		Svcmd_Pause_f(qfalse);
 		return qtrue;
 	}
+	// reqss
+	if (Q_stricmp(cmd, "reqss") == 0) {
+		Svcmd_RequestSS_f();
+		return qtrue;
+	}
+
 	// RTCWPro
 	if ( g_dedicated.integer ) {
 		if ( Q_stricmp( cmd, "say" ) == 0 ) {

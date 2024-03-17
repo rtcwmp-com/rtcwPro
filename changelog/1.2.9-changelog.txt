@@ -1,0 +1,51 @@
+--------------
+client/cg
+--------------
+fixed village door shader for high picmip
+added missing shader for syringe icon
+added nopicmip options for smoke and objective icon
+added cg_debugdamage for logging
+moved misc logfile creation to common area for client and server
+fixed panzer magic ammo pickup
+#240 added cg_teamOverlayLatchedClass to show next spawn player class - cg_teamOverlayLatchedClass 1
+always draw fps/snapshot info at far right
+Hold ctrl to move borderless window 
+Borderless window support
+Add r_mode -2 to automatically use desktop resolution
+Fix lag on client startup caused by curl
+Parse alpha separately to get cg_hudAlpha working with new cvars
+Display speed graph inside lagometer - cg_lagometer 2
+make airstrike and arty smoke always go south like osp
+
+--------------
+shared
+--------------
+removed bobtimer from playerstate - playerstate is now same as vanilla - client is compatible with other mods now 
+added support for unique logfile filenames - default for dedicated server; client can use logfile 3
+
+--------------
+server
+--------------
+#378 added saving/reloading of stats upon player disconnect/reconnect
+implemented unlagged from q3ratmod - g_antilag 2 *** experimental only ***
+antiwarp change for lag_max_delta (ETL port)
+added support for multiple document objectives on a map (radar/delivery)
+added ratmod true ping logic to alternateping
+more logic to prevent writing to already submitted stats file
+fixed fps sten/venom overheating issues
+added g_usePreciseConsoleTime to record precise round time in console
+drop client on snapshot overflow - sv_dropClientOnOverflow 1
+#329 make g_knifeonly votable - knife fight instead of coin toss
+Fix clients appearing from thin air on some maps - g_broadcastClients 1
+lock the teams after /unpause
+#369 always record round winner - also fixed issue for #414
+fixed statsdump so it only plays sound at intermission (moved end of round sound to cg right after stats are recorded)
+fixed remaining grenades on revive when dying with ticking grenade
+
+--------------
+api stats
+--------------
+correct curl stats submission error and added retry loop
+#413 Add public chat to gamelog
+#414 prevent server crash after submitting stats file to api
+added api console commands /api [help/last/whois] - calls pro api and receives response 

@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // cvar.c -- dynamic variable tracking
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 cvar_t      *cvar_vars;
@@ -836,12 +836,18 @@ with the archive flag set to qtrue.
 */
 void Cvar_WriteVariables( fileHandle_t f ) {
 	cvar_t  *var;
-	char buffer[1024];
+	char buffer[MAX_CVARS];
 
 	for ( var = cvar_vars ; var ; var = var->next ) {
 		if ( Q_stricmp( var->name, "cl_cdkey" ) == 0 ) {
 			continue;
 		}
+
+		// rtcwpro
+		if (Q_stricmp(var->name, "sv_checkversion") == 0) {
+			continue;
+		}
+
 		if ( var->flags & CVAR_ARCHIVE ) {
 			// write the latched value, even if it hasn't taken effect yet
 			if ( var->latchedString ) {

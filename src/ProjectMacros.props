@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <RTCWBASE>C:\RtcwPro</RTCWBASE>
+    <RTCW_MOD_NAME>rtcwpro</RTCW_MOD_NAME>
+    <RTCWPRO_MP_LIB>$(ProjectName)_mp_$(PlatformShortName)$(TargetExt)</RTCWPRO_MP_LIB>
+    <RTCWPRO_BIN_DEV_PK3>..\..\libs\zip.exe -uj "$(RTCWBASE)\$(RTCW_MOD_NAME)\rtcwpro_bin.pk3" "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(RTCWPRO_MP_LIB)"</RTCWPRO_BIN_DEV_PK3>
+    <RTCWPRO_BIN_DEV_DEPLOY>copy $(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(RTCWPRO_MP_LIB) "$(RTCWBASE)\$(RTCW_MOD_NAME)"</RTCWPRO_BIN_DEV_DEPLOY>
+    <RTCWPRO_BIN_POST-BUILD>echo "Adding to PK3" &amp; $(RTCWPRO_BIN_DEV_PK3) &amp;&amp; echo "Adding to mod dir" &amp;  $(RTCWPRO_BIN_DEV_DEPLOY)</RTCWPRO_BIN_POST-BUILD>
+    <RTCWPRO_GAMECONFIG>defaultcomp</RTCWPRO_GAMECONFIG>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <Lib>
+      <OutputFile />
+    </Lib>
+    <ResourceCompile>
+      <ShowProgress>true</ShowProgress>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="RTCWBASE">
+      <Value>$(RTCWBASE)</Value>
+    </BuildMacro>
+    <BuildMacro Include="RTCW_MOD_NAME">
+      <Value>$(RTCW_MOD_NAME)</Value>
+    </BuildMacro>
+    <BuildMacro Include="RTCWPRO_MP_LIB">
+      <Value>$(RTCWPRO_MP_LIB)</Value>
+    </BuildMacro>
+    <BuildMacro Include="RTCWPRO_BIN_DEV_PK3">
+      <Value>$(RTCWPRO_BIN_DEV_PK3)</Value>
+    </BuildMacro>
+    <BuildMacro Include="RTCWPRO_BIN_DEV_DEPLOY">
+      <Value>$(RTCWPRO_BIN_DEV_DEPLOY)</Value>
+    </BuildMacro>
+    <BuildMacro Include="RTCWPRO_BIN_POST-BUILD">
+      <Value>$(RTCWPRO_BIN_POST-BUILD)</Value>
+    </BuildMacro>
+    <BuildMacro Include="RTCWPRO_GAMECONFIG">
+      <Value>$(RTCWPRO_GAMECONFIG)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

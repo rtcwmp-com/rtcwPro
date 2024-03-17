@@ -33,6 +33,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "../game/botlib.h"
 #include "../qcommon/threads.h"
 
+//pointer for the mod to the engine
+static const byte* interopBufferIn;
+static int interopBufferInSize;
+static byte* interopBufferOut;
+static int interopBufferOutSize;
+
 extern botlib_export_t *botlib_export;
 
 extern qboolean loadCamera( int camNum, const char *name );
@@ -122,6 +128,10 @@ CL_GetCurrentSnapshotNumber
 ====================
 */
 void    CL_GetCurrentSnapshotNumber( int *snapshotNumber, int *serverTime ) {
+	if (clc.newDemoPlayer) {
+		CL_NDP_GetCurrentSnapshotNumber(snapshotNumber, serverTime);
+		return;
+	}
 	*snapshotNumber = cl.snap.messageNum;
 	*serverTime = cl.snap.serverTime;
 }
@@ -132,6 +142,10 @@ CL_GetSnapshot
 ====================
 */
 qboolean    CL_GetSnapshot( int snapshotNumber, snapshot_t *snapshot ) {
+	if (clc.newDemoPlayer) {
+		return CL_NDP_GetSnapshot(snapshotNumber, snapshot);
+	}
+
 	clSnapshot_t    *clSnap;
 	int i, count;
 
@@ -306,6 +320,11 @@ Set up argc/argv for the given command
 ===================
 */
 qboolean CL_GetServerCommand( int serverCommandNumber ) {
+
+	if (clc.newDemoPlayer) {
+		return CL_NDP_GetServerCommand(serverCommandNumber);
+	}
+
 	char    *s;
 	char    *cmd;
 	static char bigConfigString[BIG_INFO_STRING];
@@ -546,14 +565,40 @@ void CL_CheckRestStatus(void) {
 			int violations = Cvar_ValidateRest();
 
 			if (violations > 0) {
-				Com_Printf(">> ^3You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
-				Com_Printf(">> ^3Please use /violations and correct them.\n");
+				Com_Printf("^5CVAR >>>>>\n");
+				Com_Printf("^5CVAR >>>>> You have %d setting%s violating server rules.\n", violations, (violations > 1 ? "s" : ""));
+				Com_Printf("^5CVAR >>>>> Please use /violations and correct them.\n");
+				Com_Printf("^5CVAR >>>>>\n");
 			}
 			cl.handle.warnedTime = cls.realtime + (violations < 1 ? RKVALD_TIME_PING_L : RKVALD_TIME_PING_S);
 			CL_AddReliableCommand(va("%s %s", CTL_RKVALD, violations < 1 ? RKVALD_OK : RKVALD_NOT_OK));
 		}
 	}
 }
+
+static qbool CL_CG_GetValue(char* value, int valueSize, const char* key)
+{
+	typedef struct { const char* name; int number; } syscall_t;
+	static const syscall_t syscalls[] = {
+		// syscalls
+		{ "trap_LocateInteropData", CG_EXT_LOCATEINTEROPDATA },
+		{ "trap_CNQ3_NDP_Enable", CG_EXT_NDP_ENABLE },
+		{ "trap_CNQ3_NDP_Seek", CG_EXT_NDP_SEEK },
+		{ "trap_CNQ3_NDP_ReadUntil", CG_EXT_NDP_READUNTIL },
+		{ "trap_CNQ3_NDP_StartVideo", CG_EXT_NDP_STARTVIDEO },
+		{ "trap_CNQ3_NDP_StopVideo", CG_EXT_NDP_STOPVIDEO }
+	};
+
+	for (int i = 0; i < ARRAY_LEN(syscalls); ++i) {
+		if (Q_stricmp(key, syscalls[i].name) == 0) {
+			Com_sprintf(value, valueSize, "%d", syscalls[i].number);
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
 
 /*
 ====================
@@ -586,6 +631,8 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_CVAR_VARIABLESTRINGBUFFER:
 		Cvar_VariableStringBuffer( VMA( 1 ), VMA( 2 ), args[3] );
 		return 0;
+	case CG_CVAR_VARIABLEINTEGERVALUE:
+		return Cvar_VariableIntegerValue(VMA(1));
 	case CG_ARGC:
 		return Cmd_Argc();
 	case CG_ARGV:
@@ -964,10 +1011,47 @@ int CL_CgameSystemCalls( int *args ) {
 		CL_SetRestStatus();
 		return 0;
 		// reqSS
-	case CG_REQ_SS:
-		//CL_RequestedSS(args[1]);
-		//CL_RequestedSS();
-		CL_RequestedSS( VMA(1));
+	case CG_REQUEST_SS:
+		CL_GenerateSS(VMA(1), VMA(2), VMA(3), VMA(4), VMA(5));
+		return 0;
+
+	case CG_EXT_GETVALUE:
+		return CL_CG_GetValue(VMA(1), args[2], VMA(3));
+
+	case CG_EXT_LOCATEINTEROPDATA:
+		interopBufferIn = VMA(1);
+		interopBufferInSize = args[2];
+		interopBufferOut = VMA(3);
+		interopBufferOutSize = args[4];
+		return 0;
+	case CG_EXT_NDP_ENABLE:
+		if (clc.demoplaying && cl_demoPlayer->integer) {
+			cls.cgameNewDemoPlayer = qtrue;
+			cls.cgvmCalls[CGVM_NDP_ANALYZE_COMMAND] = args[1];
+			cls.cgvmCalls[CGVM_NDP_GENERATE_COMMANDS] = args[2];
+			cls.cgvmCalls[CGVM_NDP_IS_CS_NEEDED] = args[3];
+			cls.cgvmCalls[CGVM_NDP_ANALYZE_SNAPSHOT] = args[4];
+			cls.cgvmCalls[CGVM_NDP_END_ANALYSIS] = args[5];
+			return qtrue;
+		}
+		else {
+			return qfalse;
+		}
+
+	case CG_EXT_NDP_SEEK:
+		return CL_NDP_Seek(args[1]);
+
+	case CG_EXT_NDP_READUNTIL:
+		CL_NDP_ReadUntil(args[1]);
+		return 0;
+
+	case CG_EXT_NDP_STARTVIDEO:
+		//Cvar_Set(cl_aviFrameRate->name, va("%d", (int)args[2]));
+		//return CL_OpenAVIForWriting(VMA(1));
+		return 0;
+
+	case CG_EXT_NDP_STOPVIDEO:
+		//CL_CloseAVI();
 		return 0;
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
@@ -1086,7 +1170,7 @@ void CL_InitCGame( void ) {
 	const char          *info;
 	const char          *mapname;
 	int t1, t2;
-
+	cls.cgameNewDemoPlayer = qfalse;
 	t1 = Sys_Milliseconds();
 
 	// put away the console
@@ -1274,6 +1358,10 @@ CL_SetCGameTime
 ==================
 */
 void CL_SetCGameTime( void ) {
+	if (clc.newDemoPlayer) {
+		CL_NDP_SetCGameTime();
+		return;
+	}
 	// getting a valid frame message ends the connection process
 	if ( cls.state != CA_ACTIVE ) {
 		if ( cls.state != CA_PRIMED ) {
@@ -1405,4 +1493,47 @@ qboolean CL_GetTag( int clientNum, char *tagname, orientation_t *or ) {
 	}
 
 	return VM_Call( cgvm, CG_GET_TAG, clientNum, tagname, or );
+}
+
+void CL_CGNDP_AnalyzeCommand(int serverTime)
+{
+	Q_assert(cls.cgameNewDemoPlayer);
+	VM_Call(cgvm, cls.cgvmCalls[CGVM_NDP_ANALYZE_COMMAND], serverTime);
+}
+
+
+void CL_CGNDP_GenerateCommands(const char** commands, int* numCommandBytes)
+{
+	Q_assert(cls.cgameNewDemoPlayer);
+	Q_assert(commands);
+	Q_assert(numCommandBytes);
+	VM_Call(cgvm, cls.cgvmCalls[CGVM_NDP_GENERATE_COMMANDS]);
+	*numCommandBytes = *(int*)interopBufferIn; //mod sharing pointer to the engine
+	*commands = (const char*)interopBufferIn + 4;
+	
+}
+
+
+qbool CL_CGNDP_IsConfigStringNeeded(int csIndex)
+{
+	Q_assert(cls.cgameNewDemoPlayer);
+	Q_assert(csIndex >= 0 && csIndex < MAX_CONFIGSTRINGS);
+	return (qbool)VM_Call(cgvm, cls.cgvmCalls[CGVM_NDP_IS_CS_NEEDED], csIndex);
+}
+
+
+qbool CL_CGNDP_AnalyzeSnapshot(int progress)
+{
+	Q_assert(cls.cgameNewDemoPlayer);
+	Q_assert(progress >= 0 && progress < 100);
+	return (qbool)VM_Call(cgvm, cls.cgvmCalls[CGVM_NDP_ANALYZE_SNAPSHOT], progress);
+}
+
+
+void CL_CGNDP_EndAnalysis(const char* filePath, int firstServerTime, int lastServerTime, qbool videoRestart)
+{
+	Q_assert(cls.cgameNewDemoPlayer);
+	Q_assert(lastServerTime > firstServerTime);
+	Q_strncpyz((char*)interopBufferOut, filePath, interopBufferOutSize);
+	VM_Call(cgvm, cls.cgvmCalls[CGVM_NDP_END_ANALYSIS], filePath, firstServerTime, lastServerTime, videoRestart);
 }

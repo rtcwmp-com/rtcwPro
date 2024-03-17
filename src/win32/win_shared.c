@@ -27,7 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "win_local.h"
 #include <lmerr.h>
@@ -57,6 +57,12 @@ int Sys_Milliseconds( void ) {
 	sys_curtime = timeGetTime() - sys_timeBase;
 
 	return sys_curtime;
+}
+
+void Sys_Sleep(int ms)
+{
+	if (ms >= 1)
+		Sleep(ms);
 }
 
 /*

@@ -427,6 +427,11 @@ of an interpolating one)
 ============
 */
 void CG_ProcessSnapshots( void ) {
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
+		CG_NDP_ProcessSnapshots();
+		return;
+	}
+
 	snapshot_t      *snap;
 	int n;
 
@@ -501,4 +506,109 @@ void CG_ProcessSnapshots( void ) {
 		CG_Error( "CG_ProcessSnapshots: cg.nextSnap->serverTime <= cg.time" );
 	}
 
+}
+
+
+void CG_NDP_ProcessSnapshots(void) {
+	snapshot_t* snap;
+	int i;
+
+	// see what the latest snapshot the client system has is
+	trap_GetCurrentSnapshotNumber(&cg.latestSnapshotNum, &cg.latestSnapshotTime);
+
+	if (!cg.snap || (cg.time < cg.oldTime)) {
+		cgs.processedSnapshotNum = cg.latestSnapshotNum - 2;
+		if (cg.nextSnap)
+			cgs.serverCommandSequence = cg.nextSnap->serverCommandSequence;
+		else if (cg.snap)
+			cgs.serverCommandSequence = cg.snap->serverCommandSequence;
+		cg.snap = NULL;
+		cg.nextSnap = NULL;
+		CG_NDP_ResetStateWhenBackInTime();
+		for (i = -1; i < MAX_GENTITIES; i++) {
+			centity_t* const cent = i < 0 ? &cg.predictedPlayerEntity : &cg_entities[i];
+
+			cent->trailTime = cg.time;
+			cent->currentValid = qfalse;
+			cent->interpolate = qfalse;
+			cent->muzzleFlashTime = cg.time - MUZZLE_FLASH_TIME - 1;
+			cent->previousEvent = 0;
+
+			if (cent->currentState.eType == ET_PLAYER) {
+				memset(&cent->pe, 0, sizeof(cent->pe));
+				cent->pe.legs.yawAngle = cent->lerpAngles[YAW];
+				cent->pe.torso.yawAngle = cent->lerpAngles[YAW];
+				cent->pe.torso.pitchAngle = cent->lerpAngles[PITCH];
+			}
+		}
+	}
+
+	// check if we have some transition between snapshots
+	if (!cg.snap) {
+		snap = CG_ReadNextSnapshot();
+		if (!snap)
+			return;
+
+		cg.snap = snap;
+		if (!(snap->snapFlags & SNAPFLAG_NOT_ACTIVE)) {
+			CG_SetInitialSnapshot(snap);
+		}
+		BG_PlayerStateToEntityState(&snap->ps, &cg_entities[snap->ps.clientNum].currentState, qfalse);
+		CG_BuildSolidList();
+		CG_ExecuteNewServerCommands(snap->serverCommandSequence);
+		CG_Respawn();
+
+		for (i = 0; i < cg.snap->numEntities; i++) {
+			entityState_t* state = &cg.snap->entities[i];
+			centity_t* cent = &cg_entities[state->number];
+
+			memcpy(&cent->currentState, state, sizeof(entityState_t));
+			cent->interpolate = qfalse;
+			cent->currentValid = qtrue;
+
+			// new logic here:
+			if (cent->currentState.eType > ET_EVENTS)
+				cent->previousEvent = 1;
+			else
+				cent->previousEvent = cent->currentState.event;
+		}
+	}
+
+	// loop until we either have a valid nextSnap with a serverTime
+	// greater than cg.time to interpolate towards, or we run
+	// out of available snapshots
+	do {
+		// if we don't have a nextframe, try and read a new one in
+		if (!cg.nextSnap) {
+			snap = CG_ReadNextSnapshot();
+
+			// if we still don't have a nextframe, we will just have to
+			// extrapolate
+			if (!snap) {
+				break;
+			}
+
+			CG_SetNextSnap(snap);
+		}
+
+		// if our time is < nextFrame's, we have a nice interpolating state
+		if (cg.time >= cg.snap->serverTime && cg.time < cg.nextSnap->serverTime) {
+			break;
+		}
+
+		// we have passed the transition from nextFrame to frame
+		CG_TransitionSnapshot();
+	} while (1);
+
+	// assert our valid conditions upon exiting
+	if (cg.snap == NULL) {
+		CG_Error("CG_ProcessSnapshots: cg.snap == NULL");
+	}
+	if (cg.time < cg.snap->serverTime) {
+		// this can happen right after a vid_restart
+		cg.time = cg.snap->serverTime;
+	}
+	if (cg.nextSnap != NULL && cg.nextSnap->serverTime <= cg.time) {
+		CG_Error("CG_ProcessSnapshots: cg.nextSnap->serverTime <= cg.time");
+	}
 }

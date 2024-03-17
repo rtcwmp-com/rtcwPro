@@ -91,6 +91,7 @@ static const vote_reference_t aVoteInfo[] = {
 	{ 0x1ff, "antilag",			G_AntiLag_v,		"Anti-Lag",						" <0|1>^7\n  Toggles Anti-Lag on the server" },
 	{ 0x1ff, "balancedteams",	G_BalancedTeams_v,	"Balanced Teams",				" <0|1>^7\n  Toggles team balance forcing" },
 	{ 0x1ff, "cointoss",		G_CoinToss_v,		"Coin Toss",					" ^7\n  Heads or Tails." },
+	{ 0x1ff, "knifeonly",		G_KnivesOnly_v,		"Knives Only",					" <0|1>^7\n  Toggles knives only for all players" },
 	{ 0, 0, NULL, 0 }
 };
 
@@ -545,7 +546,7 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
 		// nihi: check for matching maps
 		int mapMatch = G_FindMatchingMaps(ent, arg2);
 
-		if (mapMatch)
+		if (mapMatch >= 0)
 		{
 			CP(va("print \"^3 Loading map %s\n\"", level.maplist[mapMatch]));
 			Q_strncpyz(vmapname, level.maplist[mapMatch], sizeof(vmapname));
@@ -855,6 +856,32 @@ int G_BalancedTeams_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char
 	}
 
 	return( G_OK );
+}
+
+// *** Knives only ***
+int G_KnivesOnly_v(gentity_t* ent, unsigned int dwVoteIndex, char* arg, char* arg2, qboolean fRefereeCmd) {
+	// Vote request (vote is being initiated)
+	if (arg) {
+
+		if (g_gamestate.integer == GS_PLAYING || g_gamestate.integer == GS_WARMUP_COUNTDOWN || g_gamestate.integer == GS_INTERMISSION) {
+			G_refPrintf(ent, "^3Knives only can only be voted on during warmup!");
+			return(G_INVALID);
+		}
+
+		return(G_voteProcessOnOff(ent, arg, arg2, fRefereeCmd,
+			!!(g_knifeonly.integer),
+			vote_allow_knifeonly.integer,
+			dwVoteIndex));
+		// Vote action (vote has passed)
+	}
+	else {
+		// Knives only (g_knifeonly)
+		G_voteSetOnOff("Knives Only", "g_knifeonly");
+		trap_Cvar_Set("g_knifeonly", level.voteInfo.vote_value);
+		G_refKillAllPlayers(ent);
+	}
+
+	return(G_OK);
 }
 
 // *** Timelimit ***

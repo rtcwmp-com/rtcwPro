@@ -78,7 +78,7 @@ void G_loadMatchGame(void)
 
 	trap_SetConfigstring(CS_REINFSEEDS, strReinfSeeds);
     // write first respawn time
-    if (g_gameStatslog.integer) {
+    if (g_gameStatslog.integer && g_gamestate.integer == GS_PLAYING) {
         gentity_t *dummy = g_entities;
 
         G_writeGeneralEvent(dummy,dummy,"",teamFirstSpawn);
@@ -231,7 +231,7 @@ void G_delayPrint(gentity_t *dpent) {
 		break;
 	case DP_UNPAUSING:
 		if (level.paused == PAUSE_UNPAUSING) {
-			int cSeconds = 11 * 1000 - (level.time - dpent->timestamp);
+			int cSeconds = 12 * 1000 - (level.time - dpent->timestamp);
 
 			if (cSeconds > 1000) {
 				think_next = level.time + 1000;

@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 // bg_pmove.c -- both games player movement code
 // takes a playerstate and a usercmd as input and returns a modifed playerstate
 
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "bg_public.h"
 #include "bg_local.h"
 
@@ -1015,7 +1015,10 @@ static void PM_DeadMove( void ) {
 	// extra friction
 
 	forward = VectorLength( pm->ps->velocity );
-	forward -= 20;
+	// RTCWPro
+	//forward -= 20;
+	forward -= 2000 * pml.frametime;
+	// RTCWPro end
 	if ( forward <= 0 ) {
 		VectorClear( pm->ps->velocity );
 	} else {
@@ -1246,7 +1249,7 @@ static void PM_CrashLand( void ) {
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;
-	pm->ps->bobTimer = 0; // RTCWPro
+	pm->ps->quickGrenTime = 0; // RTCWPro hijack for bobtimer
 }
 
 
@@ -1554,11 +1557,12 @@ static void PM_Footsteps( void ) {
 	int animResult = -1;
 	// RTCWPro
 	int	maxBobTime;
+	extern int trap_Cvar_VariableIntegerValue(const char* var_name);
 	static qboolean is_dedicated_server = -1;
 
 	if (is_dedicated_server == -1) 
 	{
-		is_dedicated_server = pm->ps->fixBob;
+		is_dedicated_server = trap_Cvar_VariableIntegerValue("dedicated");
 	}
 
 	bobmove = 0.0f;
@@ -1776,8 +1780,8 @@ static void PM_Footsteps( void ) {
 	//pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
 	if (is_dedicated_server) 
 	{
-		pm->ps->bobTimer += pml.msec;
-		float bobScale = (float)pm->ps->bobTimer / (float)maxBobTime;
+		pm->ps->quickGrenTime += pml.msec; // RTCWPro hijack for bobtimer
+		float bobScale = (float)pm->ps->quickGrenTime / (float)maxBobTime;
 
 		// check for footstep / splash sounds
 		old = pm->ps->bobCycle;
@@ -2284,28 +2288,61 @@ PM_CoolWeapons
 void PM_CoolWeapons( void ) {
 	int wp;
 
-	for ( wp = 0; wp < WP_NUM_WEAPONS; wp++ ) {
+	for ( wp = 0; wp < WP_NUM_WEAPONS; wp++ )
+	{
 
 		// if you have the weapon
-		if ( COM_BitCheck( pm->ps->weapons, wp ) ) {
+		if ( COM_BitCheck( pm->ps->weapons, wp ) )
+		{
 			// and it's hot
-			if ( pm->ps->weapHeat[wp] ) {
+#if 0
+			if (pm->pmext->weapHeat[wp])
+			{
+				pm->pmext->weapHeat[wp] -= ((float)ammoTable[wp].coolRate * pml.frametime);
+
+				if (pm->pmext->weapHeat[wp] < 0) {
+					pm->pmext->weapHeat[wp] = 0;
+				}
+
+				if (ammoTable[pm->ps->weapon].maxHeat > 0)
+				{
+					pm->ps->curWeapHeat = (int)(floor((pm->pmext->weapHeat[pm->ps->weapon] / (double)ammoTable[pm->ps->weapon].maxHeat) * 255));
+				}
+				else
+				{
+					pm->ps->curWeapHeat = 0;
+				}
+
+				// sanity check weapon heat
+				if (pm->ps->curWeapHeat > 255)
+				{
+					pm->ps->curWeapHeat = 255;
+				}
+				else if (pm->ps->curWeapHeat < 0)
+				{
+					pm->ps->curWeapHeat = 0;
+				}
+			}
+#else
+
+			if ( pm->ps->weapHeat[wp] )
+			{
 				pm->ps->weapHeat[wp] -= ( (float)ammoTable[wp].coolRate * pml.frametime );
 
-				if ( pm->ps->weapHeat[wp] < 0 ) {
+				if ( pm->ps->weapHeat[wp] < 0 )
+				{
 					pm->ps->weapHeat[wp] = 0;
 				}
 
 			}
+
+			// a weapon is currently selected, convert current heat value to 0-255 range for client transmission
+			if ( pm->ps->weapon )
+			{
+				pm->ps->curWeapHeat = (((float)pm->ps->weapHeat[pm->ps->weapon] / (float)ammoTable[pm->ps->weapon].maxHeat)) * 255.0f;
+			}
+#endif
 		}
-	}
-
-	// a weapon is currently selected, convert current heat value to 0-255 range for client transmission
-	if ( pm->ps->weapon ) {
-		pm->ps->curWeapHeat = ( ( (float)pm->ps->weapHeat[pm->ps->weapon] / (float)ammoTable[pm->ps->weapon].maxHeat ) ) * 255.0f;
-
-//		if(pm->ps->weapHeat[pm->ps->weapon])
-//			Com_Printf("pm heat: %d, %d\n", pm->ps->weapHeat[pm->ps->weapon], pm->ps->curWeapHeat);
 	}
 
 }
@@ -3019,7 +3056,11 @@ static void PM_Weapon( void ) {
 
 	// add weapon heat
 	if ( ammoTable[pm->ps->weapon].maxHeat ) {
-		pm->ps->weapHeat[pm->ps->weapon] += ammoTable[pm->ps->weapon].nextShotTime;
+#if 0
+			pm->pmext->weapHeat[pm->ps->weapon] += (float)ammoTable[pm->ps->weapon].nextShotTime;
+#else
+			pm->ps->weapHeat[pm->ps->weapon] += ammoTable[pm->ps->weapon].nextShotTime;
+#endif
 	}
 
 	// first person weapon animations
@@ -3239,15 +3280,27 @@ static void PM_Weapon( void ) {
 	// check for overheat
 
 	// the weapon can overheat, and it's hot
-	if ( ammoTable[pm->ps->weapon].maxHeat && pm->ps->weapHeat[pm->ps->weapon] ) {
+#if 0
+	if (ammoTable[pm->ps->weapon].maxHeat && pm->pmext->weapHeat[pm->ps->weapon]) {
 		// it is overheating
-		if ( pm->ps->weapHeat[pm->ps->weapon] >= ammoTable[pm->ps->weapon].maxHeat ) {
-			pm->ps->weapHeat[pm->ps->weapon] = ammoTable[pm->ps->weapon].maxHeat;   // cap heat to max
+		if (pm->pmext->weapHeat[pm->ps->weapon] >= ammoTable[pm->ps->weapon].maxHeat) {
+			pm->pmext->weapHeat[pm->ps->weapon] = ammoTable[pm->ps->weapon].maxHeat;   // cap heat to max
 			PM_AddEvent( EV_WEAP_OVERHEAT );
 //			PM_StartWeaponAnim(WEAP_IDLE1);	// removed.  client handles anim in overheat event
 			addTime = 2000;     // force "heat recovery minimum" to 2 sec right now
 		}
 	}
+#else
+	if (ammoTable[pm->ps->weapon].maxHeat && pm->ps->weapHeat[pm->ps->weapon]) {
+		// it is overheating
+		if ( pm->ps->weapHeat[pm->ps->weapon] >= ammoTable[pm->ps->weapon].maxHeat ) {
+			pm->ps->weapHeat[pm->ps->weapon] = ammoTable[pm->ps->weapon].maxHeat;   // cap heat to max
+			PM_AddEvent(EV_WEAP_OVERHEAT);
+			//			PM_StartWeaponAnim(WEAP_IDLE1);	// removed.  client handles anim in overheat event
+			addTime = 2000;     // force "heat recovery minimum" to 2 sec right now
+		}
+	}
+#endif
 
 	if ( pm->ps->powerups[PW_HASTE] ) {
 		addTime /= 1.3;
@@ -4128,8 +4181,7 @@ void PmoveSingle( pmove_t *pmove ) {
 			}
 			else
 			{
-				float fixedFrameTime, scale, decimalTest;
-				float result = 0;
+				float fixedFrametime, fractionalPart, scale, result;
 				int fps = pm->fixedphysicsfps;
 
 				if (fps > 333)
@@ -4141,17 +4193,20 @@ void PmoveSingle( pmove_t *pmove ) {
 					fps = 30;
 				}
 
-				fixedFrameTime = (int)(1000.0f / fps) * 0.001f;
-				decimalTest = pm->ps->gravity * fixedFrameTime;
+				fixedFrametime = (int)(1000.0f / fps) * 0.001f;
+				fractionalPart = pm->ps->gravity * fixedFrametime;
+				fractionalPart = rint(fractionalPart) - fractionalPart;
 
-				if (rint(decimalTest) - decimalTest < 0)
+				if (fractionalPart < 0)
 				{
-					scale = fixedFrameTime / pml.frametime;
-					result = (rint(decimalTest) - decimalTest) * -1;
-					result = result / scale;
-				}
+					scale = fixedFrametime / pml.frametime;
+					result = Q_fabs(fractionalPart) / scale;
 
-				pm->ps->velocity[2] += result;
+					if (Q_fabs(pm->ps->velocity[2] - pml.previous_velocity[2]) > result)
+					{
+						pm->ps->velocity[2] += result;
+					}
+				}
 			}
 		}
 		else

@@ -345,6 +345,7 @@ static qboolean CG_ParseGibModels( const char *filename, clientInfo_t *ci ) {
 	}
 	if ( len >= sizeof( text ) - 1 ) {
 		CG_Printf( "File %s too long\n", filename );
+		trap_FS_FCloseFile( f ); // ioRtcw
 		return qfalse;
 	}
 	trap_FS_Read( text, len, f );
@@ -466,6 +467,7 @@ static qboolean CG_ParseAnimationFiles( const char *modelname, clientInfo_t *ci,
 	}
 	if ( len >= sizeof( text ) - 1 ) {
 		CG_Printf( "File %s too long\n", filename );
+		trap_FS_FCloseFile( f ); // ioRtcw
 		return qfalse;
 	}
 	trap_FS_Read( text, len, f );
@@ -498,6 +500,7 @@ static qboolean CG_ParseAnimationFiles( const char *modelname, clientInfo_t *ci,
 	}
 	if ( len >= sizeof( text ) - 1 ) {
 		CG_Printf( "File %s too long\n", filename );
+		trap_FS_FCloseFile( f ); // ioRtcw
 		return qfalse;
 	}
 	trap_FS_Read( text, len, f );
@@ -1144,6 +1147,8 @@ void CG_NewClientInfo( int clientNum ) {
 	// isolate the player's name
 	v = Info_ValueForKey( configstring, "n" );
 	Q_strncpyz( newInfo.name, v, sizeof( newInfo.name ) );
+	Q_strncpyz(newInfo.cleanname, v, sizeof(newInfo.cleanname));
+	Q_CleanStr(newInfo.cleanname);
 
 	// colors
 	v = Info_ValueForKey( configstring, "c1" );
@@ -1252,6 +1257,13 @@ void CG_NewClientInfo( int clientNum ) {
 			trap_Cvar_Set("cg_ui_voteFlags", "0");
 			// don't print a message as the MakeRef code already does a center print
 		}
+	}
+
+	// RtcwPro Shoutcaster toggle
+	// if shoutcast logs out turn off shoutcast mode
+	if (clientNum == cg.clientNum && !newInfo.shoutStatus && newInfo.shoutStatus != ci->shoutStatus)
+	{
+		CG_ToggleShoutcasterMode(0);
 	}
 
 	// RTCWPro - autoexec
@@ -1407,6 +1419,10 @@ void CG_RunLerpFrame( clientInfo_t *ci, lerpFrame_t *lf, int newAnimation, float
 
 		// get the next frame based on the animation
 		anim = lf->animation;
+
+		if ( !anim ) // ioRtcw
+			return;
+
 		if ( !anim->frameLerp ) {
 			return;     // shouldn't happen
 		}
@@ -2921,7 +2937,7 @@ void CG_Player( centity_t *cent ) {
 
 	shadow = qfalse;                                                // gjd added to make sure it was initialized
 	shadowPlane = 0.0;                                              // ditto
-//	VectorCopy( vec3_origin, playerOrigin );
+	VectorCopy( vec3_origin, playerOrigin ); // RtcwPro TODO why was this taken out in Nihi's original commit
 
 	// if set to invisible, skip
 	if ( cent->currentState.eFlags & EF_NODRAW ) {
@@ -3454,4 +3470,38 @@ qboolean CG_GetWeaponTag( int clientNum, char *tagname, orientation_t *or ) {
 	memcpy( or->axis, tempAxis, sizeof( vec3_t ) * 3 );
 
 	return qtrue;
+}
+
+/*
+Get player max health fraction
+*/
+float CG_GetPlayerMaxHealthFrac(int clientNum, int playerHealth, int class, int team)
+{
+	int i;
+	int maxHealth = 100;
+	float barFrac;
+
+	for (i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!cgs.clientinfo[i].infoValid)
+		{
+			continue;
+		}
+
+		if (cgs.clientinfo[i].team != team)
+		{
+			continue;
+		}
+
+		barFrac = (float)playerHealth / 100;
+
+		if (barFrac > 1.0) {
+			barFrac = 1.0;
+		}
+		else if (barFrac < 0) {
+			barFrac = 0;
+		}
+	}
+
+	return barFrac;
 }

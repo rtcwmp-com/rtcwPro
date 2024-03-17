@@ -57,7 +57,7 @@ If you have questions concerning this license or the applicable additional terms
 // FIXME TTimo should we gard this? most *nix system should comply?
 #include <termios.h>
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 #include "../renderer/tr_public.h"
 
@@ -436,8 +436,7 @@ void Sys_ConsoleInputInit() {
 				  characters  EOF,  EOL,  EOL2, ERASE, KILL, REPRINT,
 				  STATUS, and WERASE, and buffers by lines.
 		 ISIG: when any of the characters  INTR,  QUIT,  SUSP,  or
-				  DSUSP are received, generate the corresponding sig­
-				  nal
+				  DSUSP are received, generate the corresponding signal
 		*/
 		tc.c_lflag &= ~( ECHO | ICANON );
 		/*
@@ -1134,6 +1133,8 @@ sysEvent_t Sys_GetEvent( void ) {
 	char    *s;
 	msg_t netmsg;
 	netadr_t adr;
+
+	memset(&adr, 0, sizeof(adr));
 
 	// return if we have data
 	if ( eventHead > eventTail ) {

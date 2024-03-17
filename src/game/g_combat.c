@@ -314,26 +314,32 @@ player_die
 */
 void limbo( gentity_t *ent, qboolean makeCorpse ); // JPW NERVE
 
-void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
-	gentity_t   *ent;
+void player_die(gentity_t* self, gentity_t* inflictor, gentity_t* attacker, int damage, int meansOfDeath) {
+	gentity_t* ent;
 	// TTimo might be used uninitialized
 	int contents = 0;
 	int killer;
 	int i;
-	char        *killerName, *obit;
+	char* killerName, * obit;
 	qboolean nogib = qtrue;
-	gitem_t     *item = NULL; // JPW NERVE for flag drop
-	vec3_t launchvel,launchspot;      // JPW NERVE
-	gentity_t   *flag; // JPW NERVE
+	gitem_t* item = NULL; // JPW NERVE for flag drop
+	vec3_t launchvel, launchspot;      // JPW NERVE
+	gentity_t* flag; // JPW NERVE
 
-	if ( self->client->ps.pm_type == PM_DEAD ) {
+	if (self->client->ps.pm_type == PM_DEAD) {
 		return;
 	}
 
-	if ( level.intermissiontime ) {
+	if (level.intermissiontime) {
 		return;
 	}
 
+	if (g_antilag.integer == 2)
+	{	
+		// Unlagged - backward reconciliation #2
+		// make sure the body shows up in the client's current position
+		G_UnTimeShiftClient(self);
+	}
 
 	// L0 - OSP - death stats handled out-of-band of G_Damage for external calls
 	G_addStats( self, attacker, damage, meansOfDeath );
@@ -439,16 +445,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		} // End
 	}
 
-	//if (g_gamestate.integer == GS_PLAYING) { // euro guys want this during warmup like OSP
-
 	// broadcast the death event to everyone
 	ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
 	ent->s.eventParm = meansOfDeath;
 	ent->s.otherEntityNum = self->s.number;
 	ent->s.otherEntityNum2 = killer;
 	ent->r.svFlags = SVF_BROADCAST; // send to everyone
-
-	//}
 
 	self->enemy = attacker;
 
@@ -467,9 +469,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] -= ammoTable[self->s.weapon].uses;
 			
 			// RtcwPro Issue #345 Clear out empty weapon, change to next best weapon
-			//PM_SwitchIfEmpty();
-			if (self->client->ps.ammoclip[BG_FindClipForWeapon(self->s.weapon)] == 0)
-				G_AddEvent(self, EV_NOAMMO, 0);
+			if (!self->client->ps.ammoclip[BG_FindClipForWeapon(self->client->ps.weapon)])
+			{
+				// remove nade from weapon bank
+				COM_BitClear(self->client->ps.weapons, self->client->ps.weapon);
+			}
 		}
 	}
 // jpw
@@ -561,19 +565,24 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			//G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
-			trap_SendServerCommand(-1, va("cp \"^5Allies have lost %s!\n\" 2", self->message));
+
+			if (self->message != NULL)
+				G_matchPrintInfo(va("^5Allies have lost %s!", self->message), qfalse);
+
 			self->client->ps.powerups[PW_REDFLAG] = 0;
+			self->s.powerups = 0;
 		}
 		if ( self->client->ps.powerups[PW_BLUEFLAG] ) {
 			item = BG_FindItem( "Blue Flag" );
 			if ( !item ) {
 				item = BG_FindItem( "Objective" );
 			}
-			//G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
-			trap_SendServerCommand(-1, va("cp \"^5Axis have lost %s!\n\" 2", self->message));
+			
+			if (self->message != NULL)
+				G_matchPrintInfo(va("^5Axis have lost %s!", self->message), qfalse);
 
 			self->client->ps.powerups[PW_BLUEFLAG] = 0;
+			self->s.powerups = 0;
 		}
 
 		if ( item ) {
@@ -643,15 +652,27 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->limboDropWeapon = self->s.weapon; // store this so it can be dropped in limbo
 	}
 // jpw
-	self->s.angles[2] = 0;
+
+	// RtcwPro - store the value for player YAW so we can restore on revive
+	// the value STAT_DEAD_YAW can change with lookatkiller etc
+	self->client->pers.deathYaw = SHORT2ANGLE(self->client->pers.cmd.angles[YAW] + self->client->ps.delta_angles[YAW]);
+
+	//self->s.angles[2] = 0;
 	LookAtKiller( self, inflictor, attacker );
-
-	VectorCopy( self->s.angles, self->client->ps.viewangles );
+	self->client->ps.viewangles[0] = 0;
+	self->client->ps.viewangles[2] = 0;
+	//VectorCopy( self->s.angles, self->client->ps.viewangles ); // don't make the corpse look a different way
+	
 	self->s.loopSound = 0;
-
+	
 	trap_UnlinkEntity( self );
 	self->r.maxs[2] = 0;
-	self->client->ps.maxs[2] = 0;
+	self->client->ps.maxs[2] = 0; 
+
+	// ET Port
+	//self->r.maxs[2] = self->client->ps.crouchMaxZ;  //%	0;			// ydnar: so bodies don't clip into world
+	//self->client->ps.maxs[2] = self->client->ps.crouchMaxZ; //%	0;	// ydnar: so bodies don't clip into world
+	
 	trap_LinkEntity( self );
 
 	// don't allow respawn until the death anim is done
@@ -661,8 +682,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// remove powerups
 	memset( self->client->ps.powerups, 0, sizeof( self->client->ps.powerups ) );
 
-	// RTCWPro - set this up
-	self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+	// RTCWPro - update ready status
+	if (g_gamestate.integer == GS_WARMUP || g_gamestate.integer == GS_WAITING_FOR_PLAYERS) // only do this during warmup
+		self->client->ps.powerups[PW_READY] = (player_ready_status[self->client->ps.clientNum].isReady == 1) ? INT_MAX : 0;
+
 
 	// never gib in a nodrop
 	if ( self->health <= GIB_HEALTH && !( contents & CONTENTS_NODROP ) ) {
@@ -823,70 +846,24 @@ RTCWPro
 G_GetHitsoundStyle
 ==============
 */
-char* G_GetHitsoundStyle(int headStyle, int bodyStyle, qboolean headshot) {
+char* G_GetHitsoundStyle(int type, int style) {
 
-	if (headshot) 
+	switch (type)
 	{
-		switch (headStyle)
+	case HITSOUND_BODY:
+		if (!style)
 		{
-		case 0:
-			return "sound/hitsounds/hithead1.wav";
-			break;
-		case 1:
-			return "sound/hitsounds/hithead1.wav";
-			break;
-		case 2:
-			return "sound/hitsounds/hithead2.wav";
-			break;
-		case 3:
-			return "sound/hitsounds/hithead3.wav";
-			break;
-		case 4:
-			return "sound/hitsounds/hithead4.wav";
-			break;
-		case 5:
-			return "sound/hitsounds/hithead5.wav";
-			break;
-		case 6:
-			return "sound/hitsounds/hithead6.wav";
-			break;
-		case 7:
-			return "sound/hitsounds/hithead7.wav";
-			break;
-		case 8:
-			return "sound/hitsounds/hithead8.wav";
-			break;
-		default:
-			return "sound/hitsounds/hithead1.wav";
-			break;
+			return va("sound/hitsounds/hitbody1.wav");
 		}
-	}
-	else
-	{
-		switch (bodyStyle)
+		return va("sound/hitsounds/hitbody%i.wav", style);
+	case HITSOUND_HEAD:
+		if (!style)
 		{
-		case 0:
-			return "sound/hitsounds/hitbody1.wav";
-			break;
-		case 1:
-			return "sound/hitsounds/hitbody1.wav";
-			break;
-		case 2:
-			return "sound/hitsounds/hitbody2.wav";
-			break;
-		case 3:
-			return "sound/hitsounds/hitbody3.wav";
-			break;
-		case 4:
-			return "sound/hitsounds/hitbody4.wav";
-			break;
-		case 5:
-			return "sound/hitsounds/hitbody5.wav";
-			break;
-		default:
-			return "sound/hitsounds/hitbody1.wav";
-			break;
+			return va("sound/hitsounds/hithead.wav");
 		}
+		return va("sound/hitsounds/hithead%i.wav", style);
+	default:
+		return va("sound/hitsounds/hitbody1.wav");
 	}
 }
 
@@ -970,7 +947,7 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 				//hitEventType = HIT_HEADSHOT;
 
 				int headStyle = attacker->client->pers.hitSoundHeadStyle;
-				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(headStyle, 0, qtrue));
+				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(HITSOUND_HEAD, headStyle));
 			}
 		}
 		else 
@@ -981,7 +958,7 @@ void G_Hitsounds( gentity_t *target, gentity_t *attacker, int mod, qboolean head
 				//hitEventType = HIT_BODYSHOT;
 
 				int bodyStyle = attacker->client->pers.hitSoundBodyStyle;
-				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(0, bodyStyle, qfalse));
+				te->s.eventParm = G_SoundIndex(G_GetHitsoundStyle(HITSOUND_BODY, bodyStyle));
 			}
 		}
 
@@ -1159,6 +1136,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 			targ->client->ps.pm_time = t;
 			targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+
+			//if (g_debugDamage.integer) {
+			//	AP(va("print \"knockback: %i\n\"", t));
+			//}
 		}
 	}
 
@@ -1252,11 +1233,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			 && attacker->client->sess.sessionTeam != targ->client->sess.sessionTeam ) {
 			G_addStatsHeadShot( attacker, mod );
 		} // End
-	}
-
-	if ( g_debugDamage.integer ) {
-		G_Printf( "client: %i health: %i damage: %i mod: %i\n", targ->s.number, targ->health, take, mod); //, asave );
-		AP(va("print \"client:%i health:%i damage:%i mod: %i\n\"", targ->s.number, targ->health, take, mod));
 	}
 
 	// add to the damage inflicted on a player this frame

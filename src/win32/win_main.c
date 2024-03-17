@@ -1059,6 +1059,20 @@ sysEvent_t Sys_GetEvent( void ) {
 		Sys_QueEvent( 0, SE_PACKET, 0, 0, len, buf );
 	}
 
+	// rtcwpro
+	MSG_Init(&netmsg, sys_packetReceived, sizeof(sys_packetReceived));
+	if (Sys_GetStreamedPacket(&adr, &netmsg)) {
+		char* buf;
+		int len;
+
+		len = netmsg.cursize + sizeof(netadr_t);
+		buf = Z_Malloc(len);
+		memcpy(buf, (char*)&adr, sizeof(netadr_t));
+		memcpy(buf + sizeof(netadr_t), netmsg.data, netmsg.cursize);
+		Sys_QueEvent(0, SE_STREAMED_PACKET, 0, 0, len, buf);
+	}
+	// end
+
 	// return if we have data
 	if ( eventHead > eventTail ) {
 		eventTail++;
@@ -1293,7 +1307,7 @@ void Sys_Init( void ) {
 
 	Cvar_Set( "username", Sys_GetCurrentUser() );
 
-	//IN_Init();      // FIXME: not in dedicated? // RTCWPro - moved below
+	IN_Init();      // FIXME: not in dedicated?
 }
 
 
@@ -1336,10 +1350,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 	Com_Init( sys_cmdline );
 	NET_Init();
-
-#ifndef DEDICATED
-	IN_Init(); // RTCWPro - raw input must be initialized after video
-#endif
 
 	_getcwd( cwd, sizeof( cwd ) );
 	Com_Printf( "Working directory: %s\n", cwd );

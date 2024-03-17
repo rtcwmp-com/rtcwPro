@@ -857,6 +857,7 @@ BLUE_FLAG -- only trigger if player is carrying blue flag
 */
 
 void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
+	gentity_t* tmp;
 
 	if ( !other->client ) {
 		return;
@@ -864,9 +865,22 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 
 	if ( ent->spawnflags & RED_FLAG && other->client->ps.powerups[ PW_REDFLAG ] ) {
 
+		// support for two document maps
+		other->client->ps.powerups[PW_REDFLAG] = 0; // set to 0 as this objective has been captured
+		other->client->ps.powerups[PW_CAPPEDOBJ]++; // fix map scoreboard showing icon on doc carrier
+		// end two document maps
+
+		G_writeObjectiveEvent(other, objCapture);
+		other->client->sess.obj_captured++; // correctly keep track of user that capped documents
+
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
 
+		tmp = ent->parent;
+		ent->parent = other;
+
 		G_Script_ScriptEvent( ent, "death", "" );
+
+		ent->parent = tmp;
 
 		// Removes itself
 		ent->touch = NULL;
@@ -874,9 +888,23 @@ void Touch_flagonly( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 		ent->think = G_FreeEntity;
 	} else if ( ent->spawnflags & BLUE_FLAG && other->client->ps.powerups[ PW_BLUEFLAG ] )   {
 
+		// support for two document maps
+		other->client->ps.powerups[PW_BLUEFLAG] = 0; // set to 0 as this objective has been captured
+		other->client->ps.powerups[PW_CAPPEDOBJ]++; // fix map scoreboard showing icon on doc carrier
+		// end two document maps
+
+		G_writeObjectiveEvent(other, objCapture);
+		other->client->sess.obj_captured++; // correctly keep track of user that capped documents
+
 		AddScore( other, ent->accuracy ); // JPW NERVE set from map, defaults to 20
 
+
+		tmp = ent->parent;
+		ent->parent = other;
+
 		G_Script_ScriptEvent( ent, "death", "" );
+
+		ent->parent = tmp;
 
 		// Removes itself
 		ent->touch = NULL;

@@ -27,7 +27,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 
-#include "../game/q_shared.h"
+#include "q_shared.h"
 #include "qcommon.h"
 
 /*
@@ -682,7 +682,7 @@ void QDECL NET_OutOfBandData( netsrc_t sock, netadr_t adr, byte *format, int len
 
 	mbuf.data = string;
 	mbuf.cursize = len + 4;
-	Huff_Compress( &mbuf, 12 );
+	DynHuff_Compress( &mbuf, 12 );
 	// send the datagram
 	NET_SendPacket( sock, mbuf.cursize, mbuf.data, adr );
 }

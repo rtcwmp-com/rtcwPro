@@ -88,12 +88,12 @@ void Team_DroppedFlagThink( gentity_t *ent );
 void Team_FragBonuses( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker );
 void Team_CheckHurtCarrier( gentity_t *targ, gentity_t *attacker );
 void Team_InitGame( void );
-void Team_ReturnFlag( int team );
+void Team_ReturnFlag( gentity_t *ent );
 void Team_FreeEntity( gentity_t *ent );
 gentity_t *SelectCTFSpawnPoint( team_t team, int teamstate, vec3_t origin, vec3_t angles, int spawnObjective );
 gentity_t *Team_GetLocation( gentity_t *ent );
 qboolean Team_GetLocationMsg( gentity_t *ent, char *loc, int loclen );
-void TeamplayInfoMessage( gentity_t *ent );
+void TeamplayInfoMessage(team_t team);
 void CheckTeamStatus( void );
 
 int Pickup_Team( gentity_t *ent, gentity_t *other );

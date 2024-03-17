@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/time.h>
 #include <pwd.h>
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 //=============================================================================
@@ -49,6 +49,23 @@ static char installPath[MAX_OSPATH];
 
 // Used to determine where to store user-specific files
 static char homePath[MAX_OSPATH];
+
+static void LIN_MicroSleep(int us)
+{
+	struct timespec req, rem;
+	req.tv_sec = us / 1000000;
+	req.tv_nsec = (us % 1000000) * 1000;
+	while (clock_nanosleep(CLOCK_REALTIME, 0, &req, &rem) == EINTR) {
+		req = rem;
+	}
+}
+
+
+void Sys_Sleep(int ms)
+{
+	LIN_MicroSleep(ms * 1000);
+}
+
 
 /*
 ================

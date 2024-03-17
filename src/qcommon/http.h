@@ -55,8 +55,6 @@ If you have questions concerning this license or the applicable additional terms
 #define AUTH_INVALID_GUID	"0"		// sv_AuthStrictMode = 1 or 3
 #define AUTH_OK				"1"
 
-
-
 /*
 ===============
 HTTP_Reply
@@ -88,21 +86,31 @@ typedef struct {
 
 /*
 ============
-Lazy way for submitting SS...
+Lazy way for submitting SS..
 eventually use struct above
 ============
 */
 typedef struct {
-	char*	ip;
+	char* address;
+	char* hookid;
+	char* hooktoken;
+	char* waittime;
+	char* datetime;
+	char* name;
+	char* guid;
+	char* filepath;
 	char* filename;
-	char*	guid;
-	char*	name;
-	char* upfname;
-	FILE* fd;
 	void (*callback)(char* fmt, ...);
 } SS_info_t;
 
 
+/*
+============
+http_stats_t
+
+Structure for API stats
+============
+*/
 typedef struct {
     char* url;
 	char* filename;
@@ -110,23 +118,43 @@ typedef struct {
 	void (*callback)(char* fmt, ...);
 } http_stats_t;
 
+
+/*
+============
+HTTP_APIInquiry_t
+
+Structure for issuing inquiries and invoking callbacks.
+============
+*/
+typedef struct {
+	char* url;
+	char* param;
+	char* jsonText;
+	int clientNumber;
+	size_t size;
+	char* response;
+
+	void (*callback)(char* fmt, ...);
+} HTTP_APIInquiry_t;
+
 //
 // http_main.c
 //
 void* HTTP_Post(void* args);
 void* HTTP_Get(void* args);
+size_t HTTP_ParseReply(void* ptr, size_t size, size_t nmemb, struct HTTP_Reply_t* s);
 char* getCurrentPath(char* file);
-char* getFilePath(char* file); // reqSS
 
 //
 // http.c
 //
 void HTTP_AuthClient(char userinfo[MAX_INFO_STRING]);
-#ifndef DEDICATED
+#if 0 //#ifndef DEDICATED
 void HTTP_ClientNeedsUpdate(void);
 void HTTP_ClientGetMOTD(void);
 #endif
 void* CL_HTTP_SSUpload(void* args);
+
 //qboolean CL_HTTP_SSUpload(char* url, char* file, char* marker, char* marker2); // reqSS
 
 #endif // ~_S_HTTP

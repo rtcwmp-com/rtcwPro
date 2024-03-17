@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include "../game/q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 #ifdef _WIN32
@@ -314,6 +314,8 @@ qboolean    Sys_GetPacket( netadr_t *net_from, msg_t *net_message ) {
 	int net_socket;
 	int protocol;
 	int err;
+
+	memset(&from, 0, sizeof(from));
 
 	for ( protocol = 0 ; protocol < 2 ; protocol++ )
 	{

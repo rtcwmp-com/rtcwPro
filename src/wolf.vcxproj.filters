@@ -73,9 +73,6 @@
     <ClCompile Include="qcommon\net_chan.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="qcommon\net_ip.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="null\null_client.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,12 +80,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="null\null_snddma.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game\q_math.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game\q_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="client\snd_adpcm.c">
@@ -199,9 +190,6 @@
     <ClCompile Include="unix\unix_shared.c">
       <Filter>Source Files\unix</Filter>
     </ClCompile>
-    <ClCompile Include="qcommon\dl_main_curl.c">
-      <Filter>Source Files\downloads</Filter>
-    </ClCompile>
     <ClCompile Include="qcommon\http_main.c">
       <Filter>Source Files\http</Filter>
     </ClCompile>
@@ -238,7 +226,19 @@
     <ClCompile Include="client\cl_control.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\sv_control.c">
+    <ClCompile Include="qcommon\api_query.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\q_math.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\q_shared.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client\cl_demo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcommon\huffman_static.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -292,9 +292,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\ui\menudef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game\q_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="qcommon\qcommon.h">
@@ -378,6 +375,11 @@
     <ClInclude Include="qcommon\threads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcommon\q_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qcommon\q_platform.h" />
+    <ClInclude Include="win32\glw_win.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wolf.rc" />
@@ -396,9 +398,6 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{c944c97e-579c-47ab-b3fb-0750a8fb1e68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\downloads">
-      <UniqueIdentifier>{68b5f4ac-0b1e-46df-8daf-203e6d532fa1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\unix">
       <UniqueIdentifier>{c170c77b-2aa8-4a8c-b988-99923c3e44a0}</UniqueIdentifier>

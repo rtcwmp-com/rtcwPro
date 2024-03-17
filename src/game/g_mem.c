@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 // OSPx Note - Replaced default & ported this whole file from wolfX
 //
-#include "q_shared.h"
+#include "../qcommon/q_shared.h"
 #include "g_local.h"
 
 // Ridah, increased this (fixes Dan's crash)

@@ -31,32 +31,37 @@ If you have questions concerning this license or the applicable additional terms
 
 #define SCOREBOARD_WIDTH    ( 31 * BIGCHAR_WIDTH )
 
+#define COUNTRY_FLAG_RENDER_SIZE 16
+#define COUNTRY_FLAG_INDIVIDUAL_SIZE 32
+#define COUNTRY_FLAG_WIDTH 512
+
 /*
 =================
-OSPx - Country Flags
-
-Author: mcwf
+Scoreboard flags (WolfSE)
 =================
 */
-qboolean cf_draw(float x, float y, float fade, int clientNum) {
-
+qboolean WM_SE_DrawFlags(float x, float y, float fade, int clientNum) {
 	float alpha[4];
-	float flag_step = 32;
-	unsigned int flag_sd = 512;
-	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "country"));
+	unsigned int client_flag = atoi(Info_ValueForKey(CG_ConfigString(clientNum + CS_PLAYERS), "cc"));
 
-	if (client_flag < 255) {
-		float x1 = (float)((client_flag * (unsigned int)flag_step) % flag_sd);
-		float y1 = (float)(floor((client_flag * flag_step) / flag_sd) * flag_step);
-		float x2 = x1 + flag_step;
-		float y2 = y1 + flag_step;
-		alpha[0] = alpha[1] = alpha[2] = 1.0; alpha[3] = fade;
+	if (client_flag <= 255)
+	{
+		float x1 = (float)((client_flag * (unsigned int)COUNTRY_FLAG_INDIVIDUAL_SIZE) % COUNTRY_FLAG_WIDTH);
+		float y1 = (float)(floor((client_flag * COUNTRY_FLAG_INDIVIDUAL_SIZE) / COUNTRY_FLAG_WIDTH) * COUNTRY_FLAG_INDIVIDUAL_SIZE);
+		float x2 = x1 + COUNTRY_FLAG_INDIVIDUAL_SIZE;
+		float y2 = y1 + COUNTRY_FLAG_INDIVIDUAL_SIZE;
+		alpha[0] = alpha[1] = alpha[2] = alpha[3] = fade;
 
 		trap_R_SetColor(alpha);
-		CG_DrawPicST(x, y, flag_step, flag_step, x1 / flag_sd, y1 / flag_sd, x2 / flag_sd, y2 / flag_sd, cgs.media.countryFlags);
+
+		CG_DrawPicST(x, y - 12, COUNTRY_FLAG_RENDER_SIZE, COUNTRY_FLAG_RENDER_SIZE, x1 / COUNTRY_FLAG_WIDTH, y1 / COUNTRY_FLAG_WIDTH,
+			x2 / COUNTRY_FLAG_WIDTH, y2 / COUNTRY_FLAG_WIDTH, cgs.media.countryFlags);
+
 		trap_R_SetColor(NULL);
+
 		return qtrue;
 	}
+
 	return qfalse;
 }
 
@@ -70,7 +75,7 @@ int is_ready( int clientNum ) {
 
 	for ( i = 0 ; i < cgs.maxclients ; i++ ) {
 		if (cgs.clientinfo[i].team != TEAM_SPECTATOR && cgs.clientinfo[i].clientNum == clientNum) {
-			rdy = (cgs.clientinfo[clientNum].powerups & (1 << PW_READY) ) ? 1 : 0;
+			rdy = (cgs.clientinfo[clientNum].powerups & (1 << PW_READY)) ? 1 : 0;
 			//rdy = player_ready_status[clientNum].isReady;
 			return rdy;
 		}
@@ -254,7 +259,28 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 	if ( cg.snap->ps.pm_type != PM_INTERMISSION ) {
 		CG_DrawSmallString( x, y, CG_TranslateString( "Goals" ), fade );
 	}
-	CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // RTCWPro - time
+
+	// show server name and time/date
+	char scoreInfo[200];
+	scoreInfo[0] = 0;
+	
+	s = CG_ConfigString(CS_SERVERINFO);
+	Q_strcat(scoreInfo, sizeof(scoreInfo), va("^3Server: ^7%s  ", Q_CleanStr(Info_ValueForKey(s, "sv_hostname"))));
+	Q_strcat(scoreInfo, sizeof(scoreInfo), va("^3Time: ^7%s", CG_GetClock()));
+
+	// if intermission move it up a little
+	if (cg.snap->ps.pm_type == PM_INTERMISSION)
+		y -= 15;
+
+	int w = CG_DrawStrlen(scoreInfo) * TINYCHAR_WIDTH;
+	CG_DrawStringExt(615 - w, y + TINYCHAR_HEIGHT - 2, scoreInfo, colorWhite, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	//CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // RTCWPro - time
+
+	// if intermission move it back
+	if (cg.snap->ps.pm_type == PM_INTERMISSION)
+		y += 15;
+
 	y += SMALLCHAR_HEIGHT + 3;
 
 	// draw color bands
@@ -292,33 +318,11 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 			shader = "ui_mp/assets/portraits/allies_win";
 			flagshader = "ui_mp/assets/portraits/allies_win_flag.tga";
 			nameshader = "ui_mp/assets/portraits/text_allies.tga";
-
-			// RTCWPro - moved entirely in qa
-			/*if (!cg.latchVictorySound) {
-				cg.latchVictorySound = qtrue;
-				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/l_complete_2.wav"), CHAN_LOCAL_SOUND);
-                //trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
-				// RTCWPro - temporarily move those to qa
-				if (cg_announcer.integer) {
-					//trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winallies.wav"), CHAN_ANNOUNCER);
-					//trap_S_StartLocalSound(cgs.media.alliesWin, CHAN_ANNOUNCER);
-				}
-			}*/
 		} else {
 			str = "AXIS";
 			shader = "ui_mp/assets/portraits/axis_win";
 			flagshader = "ui_mp/assets/portraits/axis_win_flag.tga";
 			nameshader = "ui_mp/assets/portraits/text_axis.tga";
-
-			/*if (!cg.latchVictorySound ) {
-				cg.latchVictorySound = qtrue;
-				trap_S_StartLocalSound(trap_S_RegisterSound("sound/multiplayer/music/s_stinglow.wav"), CHAN_LOCAL_SOUND);
-				//trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
-				if (cg_announcer.integer) {
-					//trap_S_StartLocalSound(trap_S_RegisterSound("sound/match/winaxis.wav"), CHAN_ANNOUNCER);
-					//trap_S_StartLocalSound(cgs.media.axisWin, CHAN_ANNOUNCER);
-				}
-			}*/
 		}
 
 		y += SMALLCHAR_HEIGHT * ( ( rows - 2 ) / 2 );
@@ -486,8 +490,8 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 	offset = 0;
 
 	if ( ci->team != TEAM_SPECTATOR ) {
-		if ( ci->powerups & ( ( 1 << PW_REDFLAG ) | ( 1 << PW_BLUEFLAG ) ) ) {
-			CG_DrawPic( tempx - 4, y - 4, 24, 24, trap_R_RegisterShader( "models/multiplayer/treasure/treasure" ) );
+		if ( ci->powerups & ( ( 1 << PW_REDFLAG ) | ( 1 << PW_BLUEFLAG ) ) || (ci->powerups & ( 1 << PW_CAPPEDOBJ ) && cg.snap->ps.pm_type == PM_INTERMISSION)) {
+			CG_DrawPic(tempx - 4, y - 4, 24, 24, cgs.media.treasureIcon); // trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure") );
 			offset += 16;
 			tempx += 16;
 			maxchars -= 2;
@@ -504,7 +508,7 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 
 	// L0 - Ready
 	if ((cgs.gamestate == GS_WARMUP || cgs.gamestate == GS_WARMUP_COUNTDOWN) && cgs.readyState) {
-		char *rdy = ( ( is_ready(ci->clientNum) ) ? "^2!" : "^n?");
+		char *rdy = ( ( is_ready(ci->clientNum) ) ? "^2!" : "^1?");
 
 		if (ci->team != TEAM_SPECTATOR)
 			CG_DrawSmallString( tempx-11, y, va( "%s", rdy ), fade );
@@ -513,13 +517,14 @@ static void WM_DrawClientScore( int x, int y, score_t *score, float *color, floa
 	// OSPx - Country Flags
 	if ((score->ping != -1) && (score->ping != 999) && (cg_showFlags.integer))
 	{
-		if (cf_draw(tempx - 6, y - 7, fade, ci->clientNum))
+		if (WM_SE_DrawFlags(tempx + 2, y + 13, fade, ci->clientNum)) //tempx - 6, y - 7, fade, ci->clientNum))
 		{
 			offset += 14;
 			tempx += 18;
 			maxchars -= 2;
 		}
 	}
+
 	// draw name
 	CG_DrawStringExt( tempx, y, ci->name, hcolor, qfalse, qfalse, SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, maxchars );
 	tempx += INFO_PLAYER_WIDTH - offset;

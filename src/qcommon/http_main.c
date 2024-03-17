@@ -115,21 +115,6 @@ char* getCurrentPath(char* file) {
 
 /*
 ===============
-RTCWPro - new (lazy) way
-to get path to ss
-
-getFilePath
-===============
-*/
-char* getFilePath(char* file) {
-	char* basepath = Cvar_VariableString("fs_basepath");
-	char* fs = Cvar_VariableString("fs_game");
-
-	return va("%s/%s/screenshots/%s.jpg", basepath, fs, file);
-}
-
-/*
-===============
 HTTP_Post
 
 Posts a request and returns a response.

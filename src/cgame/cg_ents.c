@@ -40,6 +40,62 @@ If you have questions concerning this license or the applicable additional terms
 extern int propellerModel;
 ///////////////////////
 
+void CG_PrintEntityStatep(const entityState_t* ent)
+{
+	Com_Printf("number %d\n", ent->number);
+	Com_Printf("eType %d\n", ent->eType);
+	Com_Printf("eFlags %d\n", ent->eFlags);
+
+	Com_Printf("pos.trType %d\n", ent->pos.trType);
+	Com_Printf("pos.trTime %d\n", ent->pos.trTime);
+	Com_Printf("pos.trDuration %d\n", ent->pos.trDuration);
+	Com_Printf("pos.trBase %f %f %f\n", ent->pos.trBase[0], ent->pos.trBase[1], ent->pos.trBase[2]);
+	Com_Printf("pos.trDelta %f %f %f\n", ent->pos.trDelta[0], ent->pos.trDelta[1], ent->pos.trDelta[2]);
+	Com_Printf("apos.trType %d\n", ent->apos.trType);
+	Com_Printf("apos.trTime %d\n", ent->apos.trTime);
+	Com_Printf("apos.trDuration %d\n", ent->apos.trDuration);
+	Com_Printf("apos.trBase %f %f %f\n", ent->apos.trBase[0], ent->apos.trBase[1], ent->apos.trBase[2]);
+	Com_Printf("apos.trDelta %f %f %f\n", ent->apos.trDelta[0], ent->apos.trDelta[1], ent->apos.trDelta[2]);
+
+
+	Com_Printf("time %d\n", ent->time);
+	Com_Printf("time2 %d\n", ent->time2);
+
+	Com_Printf("origin %f %f %f\n", ent->origin[0], ent->origin[1], ent->origin[2]);
+	Com_Printf("origin2 %f %f %f\n", ent->origin2[0], ent->origin2[1], ent->origin2[2]);
+
+	Com_Printf("angles %f %f %f\n", ent->angles[0], ent->angles[1], ent->angles[2]);
+	Com_Printf("angles2 %f %f %f\n", ent->angles2[0], ent->angles2[1], ent->angles2[2]);
+
+	Com_Printf("otherEntityNum %d\n", ent->otherEntityNum);
+	Com_Printf("otherEntityNum2 %d\n", ent->otherEntityNum2);
+	Com_Printf("groundEntityNum %d\n", ent->groundEntityNum);
+	Com_Printf("constantLight %d\n", ent->constantLight);  //FIXME r g b intensity
+	Com_Printf("dl_intensity %d\n", ent->dl_intensity);
+	Com_Printf("loopSound %d\n", ent->loopSound);
+	Com_Printf("modelindex %d\n", ent->modelindex);
+	Com_Printf("modelindex2 %d\n", ent->modelindex2);
+	Com_Printf("clientNum %d\n", ent->clientNum);
+	Com_Printf("frame %d\n", ent->frame);
+	Com_Printf("solid %d\n", ent->solid);
+	Com_Printf("event %d\n", ent->event);
+	Com_Printf("eventParm %d\n", ent->eventParm);
+	Com_Printf("eventSequence %d\n", ent->eventSequence);
+	Com_Printf("events[0-3] %d %d %d %d\n", ent->events[0], ent->events[1], ent->events[2], ent->events[3]);
+	Com_Printf("eventParms[0-3] %d %d %d %d\n", ent->eventParms[0], ent->eventParms[1], ent->eventParms[2], ent->eventParms[3]);
+	Com_Printf("powerups %d\n", ent->powerups);
+	Com_Printf("weapon %d\n", ent->weapon);
+	Com_Printf("legsAnim %d\n", ent->legsAnim);
+	Com_Printf("torsoAnim %d\n", ent->torsoAnim);
+	Com_Printf("density %d\n", ent->density);
+	Com_Printf("dmgFlags %d\n", ent->dmgFlags);
+
+
+	Com_Printf("--------------------------\n");
+}
+
+
+
 /*
 ======================
 CG_PositionEntityOnTag
@@ -1025,7 +1081,7 @@ static void CG_Missile( centity_t *cent ) {
 	const weaponInfo_t      *weapon;
 
 	s1 = &cent->currentState;
-	if ( s1->weapon > WP_NUM_WEAPONS ) {
+	if ( s1->weapon >= WP_NUM_WEAPONS ) { // ioRtcw >=
 		s1->weapon = 0;
 	}
 	weapon = &cg_weapons[s1->weapon];

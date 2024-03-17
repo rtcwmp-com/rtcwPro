@@ -280,6 +280,7 @@ void Weapon_MagicAmmo( gentity_t *ent ) {
 RTCWPro
 This is taken out of Weapon_Syringe
 so it can be used for other stuff
+NOTE: this is only used for testing and user has to be a referee
 ================
 */
 qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
@@ -311,8 +312,13 @@ qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
 
 	ClientSpawn(traceEnt, qtrue);
 
-	// L0 - antilag
-	G_ResetTrail(traceEnt);
+	// Antilag
+	if (g_antilag.integer == 1) // Nobo antilag
+		G_ResetTrail(traceEnt);
+	else if (g_antilag.integer == 2) // unlagged
+		G_ResetHistory(traceEnt);
+	// end
+
 
 	memcpy(traceEnt->client->ps.ammo, ammo, sizeof(int) * MAX_WEAPONS);
 	memcpy(traceEnt->client->ps.ammoclip, ammoclip, sizeof(int) * MAX_WEAPONS);
@@ -421,8 +427,11 @@ void Weapon_Syringe( gentity_t *ent ) {
 
 				ClientSpawn( traceEnt, qtrue );
 
-				// L0 - Antilag
-				G_ResetTrail(traceEnt);
+				// Antilag
+				if (g_antilag.integer == 1) // Nobo antilag
+					G_ResetTrail(traceEnt);
+				else if (g_antilag.integer == 2) // unlagged
+					G_ResetHistory(traceEnt);
 				// end
 
 				memcpy( traceEnt->client->ps.ammo,ammo,sizeof( int ) * MAX_WEAPONS );
@@ -682,20 +691,28 @@ void Weapon_Engineer( gentity_t *ent ) {
 							if ( hit->track ) {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near %s!", hit->track ) ) );
 								G_matchPrintInfo(va("^5Dynamite planted near %s!", hit->track), qfalse);
-								ent->client->sess.dyn_planted++;
-								if (g_gameStatslog.integer) {
-                                    //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
-                                    G_writeObjectiveEvent(ent, objDynPlant  );
 
+								if (g_gamestate.integer == GS_PLAYING)
+								{
+									ent->client->sess.dyn_planted++;
+									if (g_gameStatslog.integer) {
+										//G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+										G_writeObjectiveEvent(ent, objDynPlant);
+
+									}
 								}
 							} else {
 								trap_SendServerCommand( -1, va( "cp \"%s\" 1", va( "Dynamite planted near objective #%d!", hit->count ) ) );
 								G_matchPrintInfo(va("^5Dynamite planted near objective #%d!", hit->count), qfalse);
-								ent->client->sess.dyn_planted++;
-								if (g_gameStatslog.integer) {
-                                   //G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
-                                   G_writeObjectiveEvent(ent, objDynPlant  );
+								
+								if (g_gamestate.integer == GS_PLAYING)
+								{
+									ent->client->sess.dyn_planted++;
+									if (g_gameStatslog.integer) {
+										//G_writeObjectiveEvent((( hit->spawnflags & AXIS_OBJECTIVE ) && ( ent->client->sess.sessionTeam == TEAM_BLUE )) ? "Allied" : "Axis", "Dynamite planted", va("%s",ent->client->pers.netname)   );
+										G_writeObjectiveEvent(ent, objDynPlant);
 
+									}
 								}
 							}
 						}
@@ -705,9 +722,8 @@ void Weapon_Engineer( gentity_t *ent ) {
 							 te->s.teamNum && ( te->s.teamNum != ent->client->sess.sessionTeam ) ) {
 							AddScore( traceEnt->parent, WOLF_DYNAMITE_PLANT ); // give drop score to guy who dropped it
 							traceEnt->parent = ent; // give explode score to guy who armed it
-							G_writeObjectiveEvent(traceEnt->parent, objDestroyed);
-							ent->client->sess.obj_destroyed++;
-//	jpw pulled					hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
+
+//	jpw pulled				hit->spawnflags |= OBJECTIVE_DESTROYED; // this is pretty kludgy but we can't test it in explode fn
 						}
 // jpw
 					}
@@ -768,11 +784,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 									trap_SendServerCommand(-1, "cp \"Axis engineer disarmed the Dynamite!\n\"");
 									G_matchPrintInfo(va("^5Axis defused dynamite near %s!", hit->track), qfalse);
 
-									ent->client->sess.dyn_defused++;
+									if (g_gamestate.integer == GS_PLAYING)
+									{
+										ent->client->sess.dyn_defused++;
 
-									if (g_gameStatslog.integer) {
-										G_writeObjectiveEvent(ent, objDynDefuse);
-										//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										if (g_gameStatslog.integer) {
+											G_writeObjectiveEvent(ent, objDynDefuse);
+											//G_writeObjectiveEvent("Axis", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										}
 									}
 
 									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/axis/g-dynamite_defused.wav");
@@ -788,11 +807,14 @@ void Weapon_Engineer( gentity_t *ent ) {
 									trap_SendServerCommand(-1, "cp \"Allied engineer disarmed the Dynamite!\n\"");
 									G_matchPrintInfo(va("^5Allies defused dynamite near %s!", hit->track), qfalse);
 
-									ent->client->sess.dyn_defused++;
+									if (g_gamestate.integer == GS_PLAYING)
+									{
+										ent->client->sess.dyn_defused++;
 
-									if (g_gameStatslog.integer) {
-										G_writeObjectiveEvent(ent, objDynDefuse);
-										// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										if (g_gameStatslog.integer) {
+											G_writeObjectiveEvent(ent, objDynDefuse);
+											// G_writeObjectiveEvent("Allies", "Dynamite defused", va("%s",ent->client->pers.netname)  );
+										}
 									}
 
 									traceEnt->s.eventParm = G_SoundIndex("sound/multiplayer/allies/a-dynamite_defused.wav");
@@ -813,14 +835,15 @@ void Weapon_Engineer( gentity_t *ent ) {
 // (close air support should *always* drop parallel to friendly lines, tho accidents do happen)
 extern void G_ExplodeMissile( gentity_t *ent );
 
-void G_AirStrikeExplode( gentity_t *self ) {
+void G_AirStrikeExplode(gentity_t* self) {
 
 	self->r.svFlags &= ~SVF_NOCLIENT;
 	self->r.svFlags |= SVF_BROADCAST;
+
 	// RTCWPro - moved here due to rogue bombs that never truly exploded
-    self->damage = 400;
-    self->splashDamage = 400;
-    self->splashRadius = 400;
+	self->damage = 400;
+	self->splashDamage = 400;
+	self->splashRadius = 400;
     // end addition
 	self->think = G_ExplodeMissile;
 	self->nextthink = level.time + 50;
@@ -1106,8 +1129,8 @@ void Weapon_Artillery( gentity_t *ent ) {
 				bomb->r.svFlags     = SVF_USE_CURRENT_ORIGIN | SVF_BROADCAST;
 				bomb->classname = "props_explosion"; // was "air strike"
 				bomb->damage        = 0; // maybe should un-hard-code these?
-				bomb->splashDamage  = 90;
-				bomb->splashRadius  = 50;
+				bomb->splashDamage  = 0; // RtcwPro no damage for prop explosion
+				bomb->splashRadius  = 0; // RtcwPro no damage for prop explosion
 //		bomb->s.weapon	= WP_SMOKE_GRENADE;
 				// TTimo ambiguous else
 				if ( ent->client != NULL ) { // set team color on smoke
@@ -1121,9 +1144,9 @@ void Weapon_Artillery( gentity_t *ent ) {
 			} else {
 				bomb->nextthink = level.time + 8950 + 2000 * i + crandom() * 800;
 				bomb->classname = "air strike";
-				bomb->damage        = 0;
-				bomb->splashDamage  = 400;
-				bomb->splashRadius  = 400;
+				bomb->damage        = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashDamage  = 0; // RtcwPro no damage until airstrikeexplode is called
+				bomb->splashRadius  = 0; // RtcwPro no damage until airstrikeexplode is called
 			}
 			bomb->methodOfDeath         = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
 			bomb->splashMethodOfDeath   = MOD_ARTILLERY; // RtcwPro changed from MOD_AIRSTRIKE
@@ -1489,142 +1512,6 @@ float G_GetWeaponSpread( int weapon ) {
 
 #define SNOOPER_SPREAD  G_GetWeaponSpread( WP_SNOOPERSCOPE )
 #define SNOOPER_DAMAGE  G_GetWeaponDamage( WP_SNOOPERSCOPE ) // JPW
-
-/*
-==============
-SP5_Fire
-
-  dead code
-==============
-*/
-void SP5_Fire( gentity_t *ent, float aimSpreadScale ) {
-	// TTimo unused
-//	static int	seed = 0x92;
-
-	float spread = 400;         // these used to be passed in
-	int damage;
-
-	trace_t tr;
-	vec3_t end;
-	float r;
-	float u;
-	gentity_t       *tent;
-	gentity_t       *traceEnt;
-
-/*
-	// first do a very short, high-accuracy trace
-	VectorMA (muzzleTrace, 128, forward, end);
-	trap_Trace (&tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT);
-	// then if that fails do a longer wild shot
-	if ( tr.fraction == 1 )	// didn't hit anything
-	{
-		{
-			vec3_t	vec;
-			float	len;
-
-			VectorMA (muzzleTrace, 4096, forward, end);
-			trap_Trace (&tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT);
-			VectorSubtract (muzzleTrace, tr.endpos, vec);
-			len = VectorLength (vec);
-
-			if (len > 400)
-				spread = 400;
-			else
-				spread = len;
-
-			VectorClear (end);
-		}
-*/
-	spread *= aimSpreadScale;
-
-	r = crandom() * spread;
-	u = crandom() * spread;
-	VectorMA( muzzleTrace, 4096, forward, end );
-	VectorMA( end, r, right, end );
-	VectorMA( end, u, up, end );
-
-	trap_Trace( &tr, muzzleTrace, NULL, NULL, end, ent->s.number, MASK_SHOT );
-	if ( tr.surfaceFlags & SURF_NOIMPACT ) {
-		return;
-	}
-//	}
-
-	traceEnt = &g_entities[ tr.entityNum ];
-
-	// snap the endpos to integers, but nudged towards the line
-	SnapVectorTowards( tr.endpos, muzzleTrace );
-
-	// send bullet impact
-	if ( traceEnt->takedamage && traceEnt->client && !( traceEnt->flags & ( FL_DEFENSE_GUARD | FL_WARZOMBIECHARGE ) ) ) {
-		tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
-		tent->s.eventParm = traceEnt->s.number;
-		if ( LogAccuracyHit( traceEnt, ent ) ) {
-			ent->client->ps.persistant[PERS_ACCURACY_HITS]++;
-		}
-	} else if ( ( traceEnt->flags & FL_WARZOMBIECHARGE ) && ( rand() % 3 ) == 0 ) {   // hit every other bullet when charging
-		tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_FLESH );
-		tent->s.eventParm = traceEnt->s.number;
-		if ( LogAccuracyHit( traceEnt, ent ) ) {
-			ent->client->ps.persistant[PERS_ACCURACY_HITS]++;
-		}
-	} else {
-		// Ridah, bullet impact should reflect off surface
-		vec3_t reflect;
-		float dot;
-
-		if ( traceEnt->flags & ( FL_DEFENSE_GUARD | FL_WARZOMBIECHARGE ) ) {
-			// reflect off sheild
-			VectorSubtract( tr.endpos, traceEnt->r.currentOrigin, reflect );
-			VectorNormalize( reflect );
-			VectorMA( traceEnt->r.currentOrigin, 15, reflect, reflect );
-			tent = G_TempEntity( reflect, EV_BULLET_HIT_WALL );
-		} else {
-			tent = G_TempEntity( tr.endpos, EV_BULLET_HIT_WALL );
-		}
-
-		dot = DotProduct( forward, tr.plane.normal );
-		VectorMA( forward, -2 * dot, tr.plane.normal, reflect );
-		VectorNormalize( reflect );
-
-		tent->s.eventParm = DirToByte( reflect );
-		// done.
-	}
-	tent->s.otherEntityNum = ent->s.number;
-
-	if ( traceEnt->takedamage ) {
-		qboolean reflectBool = qfalse;
-		vec3_t trDir;
-
-		if ( traceEnt->flags & FL_DEFENSE_GUARD ) {
-			// if we are facing the direction the bullet came from, then reflect it
-			AngleVectors( traceEnt->s.apos.trBase, trDir, NULL, NULL );
-			if ( DotProduct( forward, trDir ) < 0.6 ) {
-				reflectBool = qtrue;
-			}
-		}
-
-		//----(SA)	moved these up so damage sent in Bullet_Fire() will be valid
-		damage = G_GetWeaponDamage( WP_SILENCER ) + ( random() * 15 );  // JPW giving 40-55
-		damage *= s_quadFactor;
-
-		if ( reflectBool ) {
-			// reflect this bullet
-			G_AddEvent( traceEnt, EV_GENERAL_SOUND, level.bulletRicochetSound );
-			CalcMuzzlePoints( traceEnt, traceEnt->s.weapon );
-			Bullet_Fire( traceEnt, 1000, damage );
-		} else {
-			// Ridah, don't hurt team-mates
-			// DHM - Nerve :: only in single player
-			if ( ent->client && traceEnt->client && g_gametype.integer == GT_SINGLE_PLAYER && ( traceEnt->r.svFlags & SVF_CASTAI ) && ( ent->r.svFlags & SVF_CASTAI ) && AICast_SameTeam( AICast_GetCastState( ent->s.number ), traceEnt->s.number ) ) {
-				// AI's don't hurt members of their own team
-				return;
-			}
-			// done.
-			G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, 0, MOD_SILENCER );
-		}
-	}
-}
-
 
 void RubbleFlagCheck( gentity_t *ent, trace_t tr ) {
 	qboolean is_valid = qfalse;
@@ -1998,9 +1885,19 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	if (ent->client)
 	{
 		// antilag lerp if enough delay between client and server.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		// RTCWPro added cg_antilag client check (RtCW pub port)
+		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
-			G_TimeShiftAllClients(ent->client->pers.cmd.serverTime, ent);
+			if (g_antilag.integer == 1) // Nobo antilag
+			{
+				//if (g_debugMode.integer) CPx(ent->client->ps.clientNum, "print \"nobo antilag\n\"");
+				G_TimeShiftAllClientsNobo(ent->client->pers.cmd.serverTime, ent);
+			}
+			else if (g_antilag.integer == 2) // Unlagged
+			{
+				//if (g_debugMode.integer) CPx(ent->client->ps.clientNum, "print \"unlagged antilag\n\"");
+				G_DoTimeShiftFor(ent);
+			}
 		}
 
 		// update head entitiy positions and link them into the world (for headshots).
@@ -2013,9 +1910,13 @@ void Bullet_Fire(gentity_t* ent, float spread, int damage) {
 	if (ent->client)
 	{
 		// restore all client positions to before the antilag lerp.
-		if (g_antilag.integer && !(ent->r.svFlags & SVF_BOT))
+		// RTCWPro added cg_antilag client check (RtCW pub port)
+		if (g_antilag.integer && (ent->client->pers.antilag) && !(ent->r.svFlags & SVF_BOT))
 		{
-			G_UnTimeShiftAllClients(ent);
+			if (g_antilag.integer == 1) // Nobo antilag
+				G_UnTimeShiftAllClientsNobo(ent);
+			else if (g_antilag.integer == 2) // Unlagged
+				G_UndoTimeShiftFor(ent);
 		}
 
 		// unlink all head entities so they don't collide with players.
@@ -2376,7 +2277,7 @@ gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenType ) {
 
 		te = G_TempEntity( m->s.pos.trBase, EV_GLOBAL_SOUND );
 		te->s.eventParm = G_SoundIndex( "sound/multiplayer/airstrike_01.wav" );
-		te->r.svFlags |= SVF_BROADCAST | SVF_USE_CURRENT_ORIGIN;
+		te->r.svFlags |= SVF_BROADCAST;
 	}
 	// jpw
 
@@ -2443,11 +2344,14 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 
 	// RTCWPro - leaving this intact
 
-	// L0 Antilag
-    if ( g_antilag.integer && ent->client &&
-        !(ent->r.svFlags & SVF_BOT) ) {
-        G_TimeShiftAllClients( ent->client->pers.cmd.serverTime, ent );
-    } // end
+	// Antilag
+    if ( g_antilag.integer && ent->client && !(ent->r.svFlags & SVF_BOT) )
+	{
+		if (g_antilag.integer == 1) // Nobo antilag
+			G_TimeShiftAllClientsNobo(ent->client->pers.cmd.serverTime, ent);
+		else if (g_antilag.integer == 2) // Unlagged
+			G_DoTimeShiftFor(ent);
+	} // end
 
 	oldScore = ent->client->ps.persistant[PERS_SCORE];
 
@@ -2470,12 +2374,14 @@ void VenomPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 
 	}
 
-
-	// L0 - Antilag
-    if ( g_antilag.integer && ent->client &&
-        !(ent->r.svFlags & SVF_BOT) ) {
-        G_UnTimeShiftAllClients( ent );
-    } // end
+	// Antilag
+	if (g_antilag.integer && ent->client && !(ent->r.svFlags & SVF_BOT))
+	{
+		if (g_antilag.integer == 1) // Nobo antilag
+			G_UnTimeShiftAllClientsNobo(ent);
+		else if (g_antilag.integer == 2) // Unlagged
+			G_UndoTimeShiftFor(ent);
+	} // end
 }
 
 /*
@@ -3005,14 +2911,3 @@ void FireWeapon( gentity_t *ent ) {
 	if ( g_gamestate.integer == GS_PLAYING )
 		ent->client->sess.aWeaponStats[BG_WeapStatForWeapon( ent->s.weapon )].atts += shots;
 }
-
-
-
-
-
-
-
-
-
-
-

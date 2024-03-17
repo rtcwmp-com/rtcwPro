@@ -277,13 +277,6 @@ void IN_ButtonUp( void ) {
 }
 
 void IN_CenterView( void ) {
-	qboolean ok = qtrue;
-	if ( cgvm ) {
-		ok = VM_Call( cgvm, CG_CHECKCENTERVIEW );
-	}
-	if ( ok ) {
-		cl.viewangles[PITCH] = -SHORT2ANGLE( cl.snap.ps.delta_angles[PITCH] );
-	}
 }
 
 void IN_Notebook( void ) {
@@ -753,7 +746,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	}
 
 	// If we are downloading, we send no less than 50ms between packets
-	if ( *cls.downloadTempName &&
+	if ( *clc.downloadTempName &&
 		 cls.realtime - clc.lastPacketSentTime < 50 ) {
 		return qfalse;
 	}
@@ -762,7 +755,7 @@ qboolean CL_ReadyToSendPacket( void ) {
 	// one packet a second
 	if ( cls.state != CA_ACTIVE &&
 		 cls.state != CA_PRIMED &&
-		 !*cls.downloadTempName &&
+		 !*clc.downloadTempName &&
 		 cls.realtime - clc.lastPacketSentTime < 1000 ) {
 		return qfalse;
 	}
@@ -967,7 +960,6 @@ CL_InitInput
 ============
 */
 void CL_InitInput( void ) {
-	Cmd_AddCommand( "centerview",IN_CenterView );
 
 	Cmd_AddCommand( "+moveup",IN_UpDown );
 	Cmd_AddCommand( "-moveup",IN_UpUp );

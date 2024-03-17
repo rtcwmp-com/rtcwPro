@@ -79,20 +79,7 @@ cvar_t  *sv_gameskill;
 
 cvar_t  *sv_showAverageBPS;     // NERVE - SMF - net debugging
 
-// Anti-Wallhack
-cvar_t* wh_active;
-cvar_t* wh_bbox_horz;
-cvar_t* wh_bbox_vert;
-cvar_t* wh_add_xy;
-cvar_t* wh_check_fov;
-
-// -> HTTP downloads
-cvar_t* sv_wwwDownload;	// server does a www dl redirect
-cvar_t* sv_wwwBaseURL;		// base URL for redirect
-							// tell clients to perform their downloads while disconnected from the server
-							// this gets you a better throughput, but you loose the ability to control the download usage
-cvar_t* sv_wwwDlDisconnected;
-cvar_t* sv_wwwFallbackURL;	// URL to send to if an http/ftp fails or is refused client side
+// Start RtcwPro
 
 // Streaming
 cvar_t* sv_StreamingToken;
@@ -105,14 +92,13 @@ cvar_t* sv_AuthStrictMode;
 // Cvar Restrictions
 cvar_t* sv_GameConfig;
 
-// reqSS
-cvar_t* sv_ssEnable;
-cvar_t* sv_ssMinTime;
-cvar_t* sv_ssMaxTime;
-//cvar_t* sv_ssQuality;
-
 cvar_t* sv_checkVersion;
 cvar_t* sv_restRunning;
+cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix knockback bug
+
+cvar_t* sv_dropClientOnOverflow;
+
+// End RtcwPro
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
 
@@ -717,6 +703,14 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	}
 #endif
 
+	if (sv_serverTimeReset->integer)
+	{
+		if (svs.time < 2000)
+		{
+			return qfalse;
+		}
+	}
+
 	exactFrom = from;
 	if (from.type == NA_IP) {
 		from.ip[3] = 0; // xx.xx.xx.0
@@ -765,7 +759,7 @@ qboolean SV_CheckDRDoS(netadr_t from) {
 	oldest = 0;
 	oldestTime = 0x7fffffff;
 	for (i = 0; i < MAX_INFO_RECEIPTS; i++, receipt++) {
-		if (receipt->time + 1400 > svs.time) {
+		if (receipt->time + 2000 > svs.time) {
 			if (receipt->time) {
 				// When the server starts, all receipt times are at zero.  Furthermore,
 				// svs.time is close to zero.  We check that the receipt time is already
@@ -912,7 +906,7 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	MSG_ReadLong( msg );        // skip the -1 marker
 
 	if ( !Q_strncmp( "connect", &msg->data[4], 7 ) ) {
-		Huff_Decompress( msg, 12 );
+		DynHuff_Decompress( msg, 12 );
 	}
 
 	s = MSG_ReadStringLine( msg );
@@ -1299,9 +1293,6 @@ void SV_Frame( int msec ) {
 
 	// send a heartbeat to the master if needed
 	SV_MasterHeartbeat( HEARTBEAT_GAME );
-
-	// reqSS
-	autoSSTime();
 }
 /*
 ==================

@@ -13,17 +13,31 @@
 src/Backup/*.*
 src/.vs/*.*
 src/rtcwpro/
+deps
+build
+src/Builds
 # we should not put dll / so / object files in the repo
 *.dll
 *.so
 *.o
 *.pk3
+/src/servercache.dat
+/src/main/authkey
+/libs/libcurl/out/build/x64-Debug
+/libs/mongo-c-driver/out/build/x64-Debug
+/src/game/g_missile_vanilla.c
+/src/game/g_weapon_orig.c
+website/
+*.srctrl*
+/src/ProjectMacros.props
+*.user
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-website/
 
 # Build results
 output/
+output-test/
 [Dd]ebug/
 [Dd]ebug_Dedicated/
 [Dd]ebugPublic/
@@ -347,6 +361,3 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
-*.pk3
-/src/servercache.dat
-/src/main/authkey

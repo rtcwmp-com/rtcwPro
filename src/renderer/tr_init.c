@@ -200,6 +200,8 @@ int max_polys;
 cvar_t  *r_maxpolyverts;
 int max_polyverts;
 
+cvar_t	*r_noborder; // rtcwpro - borderless window
+
 void ( APIENTRY * qglMultiTexCoord2fARB )( GLenum texture, GLfloat s, GLfloat t );
 void ( APIENTRY * qglActiveTextureARB )( GLenum texture );
 void ( APIENTRY * qglClientActiveTextureARB )( GLenum texture );
@@ -400,17 +402,46 @@ vidmode_t r_vidModes[] =
 };
 static int s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
-qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode ) {
+qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode, int dw, int dh) {
 	vidmode_t   *vm;
+	float pixelAspect;
 
-	if ( mode < -1 ) {
+	if (mode < -2) // rtcwpro - r_mode -2
+	{
 		return qfalse;
 	}
-	if ( mode >= s_numVidModes ) {
+
+	if (mode >= s_numVidModes) 
+	{
 		return qfalse;
 	}
 
-	if ( mode == -1 ) {
+#ifdef _WIN32
+	if (mode == -2)
+	{
+		*width = dw;
+		*height = dh;
+		pixelAspect = r_customaspect->value;
+	}
+	else if (mode == -1)
+	{
+		*width = r_customwidth->integer;
+		*height = r_customheight->integer;
+		pixelAspect = r_customaspect->value;
+	}
+	else
+	{
+		vm = &r_vidModes[mode];
+		*width = vm->width;
+		*height = vm->height;
+		pixelAspect = vm->pixelAspect;
+	}
+
+	*windowAspect = (float)*width / (*height * pixelAspect);
+	return qtrue;
+#else
+	if (mode == -1) 
+	{
 		*width = r_customwidth->integer;
 		*height = r_customheight->integer;
 		*windowAspect = r_customaspect->value;
@@ -419,11 +450,13 @@ qboolean R_GetModeInfo( int *width, int *height, float *windowAspect, int mode )
 
 	vm = &r_vidModes[mode];
 
-	*width  = vm->width;
+	*width = vm->width;
 	*height = vm->height;
-	*windowAspect = (float)vm->width / ( vm->height * vm->pixelAspect );
+	*windowAspect = (float)vm->width / (vm->height * vm->pixelAspect);
 
 	return qtrue;
+#endif
+	// rtcwpro - end
 }
 
 /*
@@ -693,6 +726,18 @@ void R_ScreenShot_f( void ) {
 	}
 }
 
+/*
+================
+RTCWPro - reqSS
+================
+*/
+void R_GenerateSS_f(char* filename) {
+	char* filepath[MAX_OSPATH];
+
+	Com_sprintf(filepath, sizeof(filepath), "screenshots/%s.jpg", filename);
+	R_TakeScreenshotJPEG(0, 0, glConfig.vidWidth, glConfig.vidHeight, filepath);
+}
+
 void R_ScreenShotJPEG_f(void) {
 	char checkname[MAX_OSPATH];
 	int len;
@@ -709,6 +754,14 @@ void R_ScreenShotJPEG_f(void) {
 	}
 	else {
 		silent = qfalse;
+	}
+
+	// RTCWPro - make a turn here coz the code below is just brain dead
+	if (!strcmp(ri.Cmd_Argv(1), "reqss")) {
+		if (strlen(ri.Cmd_Argv(2))) {
+			R_GenerateSS_f(ri.Cmd_Argv(2));
+		}
+		return;
 	}
 
 	if (ri.Cmd_Argc() == 2 && !silent) {
@@ -748,20 +801,6 @@ void R_ScreenShotJPEG_f(void) {
 	if (!silent) {
 		ri.Printf(PRINT_ALL, "Wrote %s\n", checkname);
 	}
-}
-
-void R_ScreenShotJPEG2_f(void) {
-	char checkname[MAX_OSPATH];
-
-	if (!strlen(ri.Cmd_Argv(1))) {
-		return;
-	}
-
-	// explicit filename
-	Com_sprintf(checkname, MAX_OSPATH, "screenshots/%s.jpg", ri.Cmd_Argv(1));
-
-	R_TakeScreenshotJPEG(0, 0, glConfig.vidWidth, glConfig.vidHeight, checkname);
-
 }
 
 //============================================================================
@@ -1075,7 +1114,7 @@ void R_Register( void ) {
 	//   with r_cache enabled, non-win32 OSes were leaking 24Mb per R_Init..
 	r_cache = ri.Cvar_Get( "r_cache", "1", CVAR_LATCH );  // leaving it as this for backwards compability. but it caches models and shaders also
 	// TTimo show_bug.cgi?id=570
-	r_cacheShaders = ri.Cvar_Get( "r_cacheShaders", "0", CVAR_LATCH );
+	r_cacheShaders = ri.Cvar_Get( "r_cacheShaders", "0", CVAR_CHEAT);
 
 	r_cacheModels = ri.Cvar_Get( "r_cacheModels", "1", CVAR_LATCH );
 	r_compressModels = ri.Cvar_Get( "r_compressModels", "0", 0 );     // converts MD3 -> MDC at run-time
@@ -1127,11 +1166,12 @@ void R_Register( void ) {
 	r_shadows = ri.Cvar_Get( "cg_shadows", "1", 0 );
 	r_shadows = ri.Cvar_Get( "cg_shadows", "1", 0 );
 	r_portalsky = ri.Cvar_Get( "cg_skybox", "1", 0 );
-
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va( "%d", MAX_POLYS ), 0 );
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va( "%d", MAX_POLYVERTS ), 0 );
-
 	r_highQualityVideo = ri.Cvar_Get( "r_highQualityVideo", "1", CVAR_ARCHIVE );
+
+	r_noborder = ri.Cvar_Get("r_noborder", "0", CVAR_ARCHIVE | CVAR_LATCH); // rtcwpro - borderless window
+
 	// make sure all the commands added here are also
 	// removed in R_Shutdown
 	ri.Cmd_AddCommand( "imagelist", R_ImageList_f );
@@ -1141,7 +1181,6 @@ void R_Register( void ) {
 	ri.Cmd_AddCommand( "modelist", R_ModeList_f );
 	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );
 	ri.Cmd_AddCommand( "screenshotJPEG", R_ScreenShotJPEG_f );
-	ri.Cmd_AddCommand("8autogenerates", R_ScreenShotJPEG2_f);
 	ri.Cmd_AddCommand( "gfxinfo", GfxInfo_f );
 	ri.Cmd_AddCommand( "taginfo", R_TagInfo_f );
 

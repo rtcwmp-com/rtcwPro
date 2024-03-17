@@ -1,0 +1,13 @@
+🛠️ Changelog Highlights:
+
+- Fixed panzer ammo issue where player loses 1 rocket when picking up ammo pack right after spawning
+- Debug logging for ConfigString changes
+- Colored player names in stats output
+- Client HTTP downloads from RtcwPub
+- Shoutcast Overlay: Shoutcast overlay added to enhance your broadcasting and spectating experience.
+- Backed out pmext changes to sten/venom overheat
+
+🔧 Bug Fixes and Improvements:
+
+Backed out original HTTP downloads that didn't work.
+Various under-the-hood optimizations and stability improvements.

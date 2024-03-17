@@ -485,7 +485,7 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			}
 		}
 
-		if (e < sv_maxclients->integer) {
+		/*if (e < sv_maxclients->integer) {
 			sharedEntity_t* client;
 
 			if (e == frame->ps.clientNum) {
@@ -502,7 +502,7 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 					continue;
 				}
 			}
-		}
+		}*/
 
 		// add it
 		SV_AddEntToSnapshot( svEnt, ent, eNums );
@@ -633,11 +633,11 @@ static void SV_BuildClientSnapshot( client_t *client ) {
 		state = &svs.snapshotEntities[svs.nextSnapshotEntities % svs.numSnapshotEntities];
 		*state = ent->s;
 
-		if (wh_active->integer && entityNumbers.snapshotEntities[i] < sv_maxclients->integer) {
+		/*if (wh_active->integer && entityNumbers.snapshotEntities[i] < sv_maxclients->integer) {
 			if (SV_PositionChanged(entityNumbers.snapshotEntities[i])) {
 				SV_RestorePos(entityNumbers.snapshotEntities[i]);
 			}
-		}
+		}*/
 
 		svs.nextSnapshotEntities++;
 		// this should never hit, map should always be restarted first in SV_Frame
@@ -760,7 +760,7 @@ Also called by SV_FinalMessage
 =======================
 */
 void SV_SendClientSnapshot( client_t *client ) {
-	byte msg_buf[MAX_MSGLEN];
+	byte msg_buf[MAX_MSGLEN] = {'\0'};
 	msg_t msg;
 
 	// build the snapshot
@@ -787,15 +787,18 @@ void SV_SendClientSnapshot( client_t *client ) {
 	SV_WriteSnapshotToClient( client, &msg );
 
 	// Add any download data if the client is downloading
-	if (sv_wwwDownload->integer) {
-	  SV_WriteDownloadToClient( client, &msg );
-	}
-	//SV_WriteDownloadToClient( client, &msg );
+	SV_WriteDownloadToClient( client, &msg );
 
 	// check for overflow
 	if ( msg.overflowed ) {
 		Com_Printf( "WARNING: msg overflowed for %s\n", client->name );
 		MSG_Clear( &msg );
+
+		if (sv_dropClientOnOverflow->integer)
+		{
+			SV_DropClient(client, "Msg overflowed");
+			return; // avoid server crash
+		}
 	}
 
 	SV_SendMessageToClient( &msg, client );
