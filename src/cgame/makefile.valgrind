@@ -3,7 +3,8 @@ CC = gcc
 
 CFLAGS = -g -pipe -fsigned-char -DNDEBUG -O0 -m32 \
 -fcommon -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
--falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DCGAMEDLL
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DCGAMEDLL \
+-I../../deps/jansson/build/include
 
 LDFLAGS = -shared -ldl -lm
 

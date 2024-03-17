@@ -1,7 +1,8 @@
 CC = gcc
 CFLAGS = -pipe -fsigned-char -DNDEBUG -O6 -m32 \
 -fcommon -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
--falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC \
+-I../../deps/jansson/build/include
 
 LDFLAGS = -shared -ldl -lm
 
