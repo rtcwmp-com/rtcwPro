@@ -2509,14 +2509,18 @@ void CL_Frame( int msec ) {
 	// drop the connection
 	CL_CheckTimeout();
 
-	// send intentions now
-	CL_SendCmd();
 
 	// resend a connection request if necessary
 	CL_CheckForResend();
 
+}
+
+void CL_Render() {
 	// decide on the serverTime to render
 	CL_SetCGameTime();
+
+	// send intentions now
+	CL_SendCmd();
 
 	// update the screen
 	SCR_UpdateScreen();

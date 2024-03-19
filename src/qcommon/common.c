@@ -3166,86 +3166,106 @@ void Com_Frame(void) {
 		timeBeforeFirstEvents = Sys_Milliseconds();
 	}
 
-	// L0 - Fix maxfps abuse..
-	/*if (com_maxfps->integer > 125)
-		Cvar_Set("com_maxfps", "125");*/
+	const int dt = 8;
+	static unsigned int accumulator = 0;
+	static int currentTime = 0;
+	if (currentTime == 0) {
+		currentTime = Sys_Milliseconds();
+	}
 
-	// we may want to spin here if things are going too fast
-	if (!com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer) {
+	int newTime = Sys_Milliseconds();
+
+	int frameTime = newTime - currentTime;
+
+	if (frameTime > 250) {
+		frameTime = 250;
+	}
+
+	currentTime = newTime;
+
+	accumulator += frameTime;
+
+
+
+	while (accumulator >= dt) {
+
+
+		//
+		// server side
+		//
+		if (com_speeds->integer) {
+			timeBeforeServer = Sys_Milliseconds();
+		}
+
+		SV_Frame(dt);
+
+		// if "dedicated" has been modified, start up
+		// or shut down the client system.
+		// Do this after the server may have started,
+		// but before the client tries to auto-connect
+		if (com_dedicated->modified) {
+			// get the latched value
+			Cvar_Get("dedicated", "0", 0);
+			com_dedicated->modified = qfalse;
+			if (!com_dedicated->integer) {
+				CL_Init();
+				Sys_ShowConsole(com_viewlog->integer, qfalse);
+			}
+			else {
+				CL_Shutdown();
+				Sys_ShowConsole(1, qtrue);
+			}
+		}
+
+		//
+		// client system
+		//
+		if (!com_dedicated->integer) {
+			//
+			// run event loop a second time to get server to client packets
+			// without a frame of latency
+			//
+			if (com_speeds->integer) {
+				timeBeforeEvents = Sys_Milliseconds();
+			}
+
+			//
+			// client side
+			//
+			if (com_speeds->integer) {
+				timeBeforeClient = Sys_Milliseconds();
+			}
+
+			CL_Frame(dt);
+
+			if (com_speeds->integer) {
+				timeAfter = Sys_Milliseconds();
+			}
+		}
+
+
+		accumulator -= dt;
+	}
+	if (com_maxfps->integer) {
 		minMsec = 1000 / com_maxfps->integer;
 	}
 	else {
 		minMsec = 1;
 	}
+
+	// gather the events in the frame
 	do {
 		com_frameTime = Com_EventLoop();
 		if (lastTime > com_frameTime) {
-			lastTime = com_frameTime;       // possible on first frame
+			lastTime = com_frameTime;
 		}
 		msec = com_frameTime - lastTime;
 	} while (msec < minMsec);
+	lastTime = com_frameTime;
 	Cbuf_Execute();
 
-	lastTime = com_frameTime;
+	CL_Render();
 
-	// mess with msec if needed
-	com_frameMsec = msec;
-	msec = Com_ModifyMsec(msec);
-
-	//
-	// server side
-	//
-	if (com_speeds->integer) {
-		timeBeforeServer = Sys_Milliseconds();
-	}
-
-	SV_Frame(msec);
-
-	// if "dedicated" has been modified, start up
-	// or shut down the client system.
-	// Do this after the server may have started,
-	// but before the client tries to auto-connect
-	if (com_dedicated->modified) {
-		// get the latched value
-		Cvar_Get("dedicated", "0", 0);
-		com_dedicated->modified = qfalse;
-		if (!com_dedicated->integer) {
-			CL_Init();
-			Sys_ShowConsole(com_viewlog->integer, qfalse);
-		}
-		else {
-			CL_Shutdown();
-			Sys_ShowConsole(1, qtrue);
-		}
-	}
-
-	//
-	// client system
-	//
-	if (!com_dedicated->integer) {
-		//
-		// run event loop a second time to get server to client packets
-		// without a frame of latency
-		//
-		if (com_speeds->integer) {
-			timeBeforeEvents = Sys_Milliseconds();
-		}
-		Com_EventLoop();
-		Cbuf_Execute();
-
-		//
-		// client side
-		//
-		if (com_speeds->integer) {
-			timeBeforeClient = Sys_Milliseconds();
-		}
-
-		CL_Frame(msec);
-
-		if (com_speeds->integer) {
-			timeAfter = Sys_Milliseconds();
-		}
-	}
 
 	//
 	// report timing information
