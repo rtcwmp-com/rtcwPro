@@ -10,6 +10,16 @@ To run a RtcwPro server (Linux only) you may use Msh Docker available here: http
 
 To install RtcwPro client follow these instructions: https://rtcwpro.com/install-instructions.php
 
+If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
+
+RtcwPro Dev Team
+-nihilist, KrazyKaze, Tarator, Snappas
+
+Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, crumbs, and Spaztik
+
+Additional credits for public code: Nobo, Nico, suburb, jinx, rhea, OpenJK, ETLegacy, ETpub, Jaymod, ioquake, iortcw.
+Installer powered by Advanced Installer: https://www.advancedinstaller.com/
+
 **Change Log**
  - 1.0/1.0.1 [changelog](changelog/1.0-changelog.txt)
    - corrected head hitboxes (RtcwPub port)
@@ -264,12 +274,3 @@ To install RtcwPro client follow these instructions: https://rtcwpro.com/install
 - 1.3 [changelog](changelog/1.3-changelog.txt)
   
 - 1.3.1 [changelog](changelog/1.3.1-changelog.txt)  
-
-If you have any questions/comments/concerns then feel free to reach out to us on Discord: https://discord.gg/fn9JVWnbTx
-
-RtcwPro Dev Team
--nihilist, KrazyKaze, Tarator
-
-Contributions from Nate, Dutchmeat, Nobo, S4NDM4NN, crumbs, and Spaztik
-Additional credits for public code: Nobo, Nico, suburb, jinx, rhea, OpenJK, ETLegacy, ETpub, Jaymod, ioquake, iortcw.
-Installer powered by Advanced Installer: https://www.advancedinstaller.com/
