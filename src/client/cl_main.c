@@ -2513,14 +2513,16 @@ void CL_Frame( int msec ) {
 	// resend a connection request if necessary
 	CL_CheckForResend();
 
+	// send intentions now
+	CL_SendCmd();
 }
 
 void CL_Render() {
+	// we create commands even if a demo is playing,
+	CL_CreateNewCommands();
+
 	// decide on the serverTime to render
 	CL_SetCGameTime();
-
-	// send intentions now
-	CL_SendCmd();
 
 	// update the screen
 	SCR_UpdateScreen();

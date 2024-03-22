@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 
-#define CMD_BACKUP          64
+#define CMD_BACKUP          256
 #define CMD_MASK            ( CMD_BACKUP - 1 )
 // allow a lot of command backups for very fast systems
 // multiple commands may be combined into a single packet, so this

@@ -940,9 +940,6 @@ void CL_SendCmd( void ) {
 		return;
 	}
 
-	// we create commands even if a demo is playing,
-	CL_CreateNewCommands();
-
 	// don't send a packet if the last packet was sent too recently
 	if ( !CL_ReadyToSendPacket() ) {
 		if ( cl_showSend->integer ) {
