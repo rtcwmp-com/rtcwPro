@@ -184,7 +184,7 @@ server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
 	$(CFLAGSREL) -m32 -g  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I../../deps/curl/build/include/ 
-server: LDFLAGS := -m32 -DCURL_STATICLIB
+server: LDFLAGS := -m32 -DCURL_STATICLIB -ldl -lpthread
 server: $(SVOBJS)
 	$(CC) -o wolfded.x86 $(SVOBJS) ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a $(LDFLAGS)
 #	strip -s wolfded.x86
