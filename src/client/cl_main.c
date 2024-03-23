@@ -2518,11 +2518,14 @@ void CL_Frame( int msec ) {
 }
 
 void CL_Render() {
-	// we create commands even if a demo is playing,
-	CL_CreateNewCommands();
 
 	// decide on the serverTime to render
 	CL_SetCGameTime();
+
+	
+	// we create commands even if a demo is playing,
+	CL_CreateNewCommands();
+
 
 	// update the screen
 	SCR_UpdateScreen();
