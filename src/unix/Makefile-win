@@ -104,7 +104,7 @@ UNIXCLIENTOBJS := \
 	../unix/linux_qgl.o ../unix/linux_glimp.o ../unix/linux_joystick.o \
 	../unix/linux_snd.o
 UNIXOBJS := \
-	../unix/linux_common.o ../unix/unix_main.o ../unix/unix_net.o \
+	../unix/unix_main.o ../unix/unix_net.o \
 	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \

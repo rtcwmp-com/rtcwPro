@@ -69,9 +69,6 @@ void MD4Init( MD4_CTX * );
 void MD4Update( MD4_CTX *, const unsigned char *, unsigned int );
 void MD4Final( unsigned char [16], MD4_CTX * );
 
-void Com_Memset( void* dest, const int val, const size_t count );
-void Com_Memcpy( void* dest, const void* src, const size_t count );
-
 /* MD4C.C - RSA Data Security, Inc., MD4 message-digest algorithm */
 /* Copyright (C) 1990-2, RSA Data Security, Inc. All rights reserved.
 
@@ -154,7 +151,7 @@ void MD4Update( MD4_CTX *context, const unsigned char *input, unsigned int input
 
 	/* Transform as many times as possible.*/
 	if ( inputLen >= partLen ) {
-		Com_Memcpy( (POINTER)&context->buffer[index], (POINTER)input, partLen );
+		memcpy( (POINTER)&context->buffer[index], (POINTER)input, partLen );
 		MD4Transform( context->state, context->buffer );
 
 		for ( i = partLen; i + 63 < inputLen; i += 64 )
@@ -166,7 +163,7 @@ void MD4Update( MD4_CTX *context, const unsigned char *input, unsigned int input
 	}
 
 	/* Buffer remaining input */
-	Com_Memcpy( (POINTER)&context->buffer[index], (POINTER)&input[i], inputLen - i );
+	memcpy( (POINTER)&context->buffer[index], (POINTER)&input[i], inputLen - i );
 }
 
 
@@ -190,7 +187,7 @@ void MD4Final( unsigned char digest[16], MD4_CTX *context ) {
 	Encode( digest, context->state, 16 );
 
 	/* Zeroize sensitive information.*/
-	Com_Memset( (POINTER)context, 0, sizeof( *context ) );
+	memset( (POINTER)context, 0, sizeof( *context ) );
 }
 
 
@@ -260,7 +257,7 @@ static void MD4Transform( UINT4 state[4], const unsigned char block[64] ) {
 	state[3] += d;
 
 	/* Zeroize sensitive information.*/
-	Com_Memset( (POINTER)x, 0, sizeof( x ) );
+	memset( (POINTER)x, 0, sizeof( x ) );
 }
 
 

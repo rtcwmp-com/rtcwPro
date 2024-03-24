@@ -163,9 +163,6 @@
     <ClCompile Include="win32\win_wndproc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unix\linux_common.c">
-      <Filter>Source Files\unix</Filter>
-    </ClCompile>
     <ClCompile Include="unix\linux_glimp.c">
       <Filter>Source Files\unix</Filter>
     </ClCompile>
