@@ -1,15 +1,13 @@
 #include "ui_mp/menudef.h"
 
-
 // Demoplayback Menu //
-
 
 #define T_SCALE1	.25
 
 #define WINDOW_X		95
-#define WINDOW_Y		40
+#define WINDOW_Y		95
 #define WINDOW_WIDTH	450
-#define WINDOW_HEIGHT	370
+#define WINDOW_HEIGHT	320
 
 #define MGREY		.5 .5 .5
 #define LGREY		.9 .9 .9 1
@@ -18,485 +16,394 @@
 #define HILIT_ENTR	.1 .2 .37 1
 #define HILIT_EXIT	.3 .5 .2 .3
 
-
-menuDef {
-	name "demos_menu"
-	rect 0 0 640 480
-	visible 1
-	fullscreen 1
-    focusColor LGREY
-    style 1
-    border 1
-
-	onOpen {
-		show back;
-		show ui_back;
-		hide grpmessage
-	}
-
-	onClose {
-		setitemcolor gotobar backcolor MGREY .0
-	}
-
-	
-	itemDef {
-		name ui_back
-		style WINDOW_STYLE_SHADER
+	menuDef {
+		name "demos_menu"
 		rect 0 0 640 480
-		background "ui_mp/assets/menu_start"
-		visible 1
-		decoration
-	}
-
-
-// Back Bar	//
-
-	itemDef {
-		name gotobar
-		style 2
-		rect 0 445 640 20 
-		textscale .4
-		textalignx 60
-		textaligny 21        
-		style 2
-		border 4
-		bordercolor MGREY 0
-		bordersize 2
-		backcolor MGREY 0
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name back
-		text "BACK"
-		type 1
-		style 0	
-		textstyle 6
-		rect 30 450 40 14 
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .25		
-		textalignx 6
-		textaligny 12
-		visible 1 
-
-		action {
-			setitemcolor gotobar backcolor MGREY 0;
-			close demos_list;
-			close demos_menu;
-			open main
-		}
-			
-		mouseEnter {
-			show message_back;
-			setitemcolor gotobar backcolor MGREY .5
-		}
-		
-		mouseExit {
-			hide message_back;
-			setitemcolor gotobar backcolor MGREY 0
-		}	
-	}
-
-// Messages //
-
-	itemDef {
-		name message_back
-		group grpmessage
-		style 0 
-		rect 320 437 128 30
-		textstyle 1
-		textalign 1
-		textalignx 0
-		textaligny 25
-		textfont UI_FONT_NORMAL
-		textscale .25
-		text "EXIT TO MAIN MENU"
-		decoration 
 		visible 0
-	}
-}
-
-
-
-
-
-menuDef {
-    name "demos_load"
-    visible 0
-    fullscreen 0
-    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
-	focusColor 1 .75 0 1
-	style 1
-	border 0
-
-	onOpen {
-		hide back
-	}
-
-	itemDef {
-		name currentdir
-		text "LOADING DEMO"
- 		type 1
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		rect $evalfloat(.5*WINDOW_WIDTH-80) $evalfloat(.5*WINDOW_HEIGHT-12) 160 24
-		textfont UI_FONT_NORMAL
-		textscale .25
-		textalign ITEM_ALIGN_CENTER
-		textalignx 80
-		textaligny 15
+		fullscreen 0
+		focusColor LGREY
+		style 1
 		border 1
-		bordercolor BORDER_DEF
-		backcolor BACK_DEF
-		forecolor LGREY
-		visible 1
-		decoration
-	}
-}
+		onOpen { show back; show ui_back; hide grpmessage }
+		onClose { setitemcolor gotobar backcolor MGREY .0 }
+		
+/*		itemDef {
+			name ui_back
+			style WINDOW_STYLE_SHADER
+			rect 0 0 640 480
+			background "ui_mp/assets/menu_start"
+			visible 1
+			decoration
+		}
+*/
+	// Back Bar	//
+		itemDef {
+			name gotobar
+			style 2
+			rect 0 445 640 20 
+			textscale .4
+			textalignx 60
+			textaligny 21
+			style 2
+			border 4
+			bordercolor MGREY 0
+			bordersize 2
+			backcolor MGREY 0
+			visible 1
+			decoration
+		}
+		itemDef {
+			name back
+			text "BACK"
+			type 1
+			style 0	
+			textstyle 6
+			rect 30 450 100 128 
+			textalign 0
+			textfont UI_FONT_NORMAL
+			textscale .25		
+			textalignx 6
+			textaligny 12
+			visible 1 
+			action { setitemcolor gotobar backcolor MGREY 0;
+				show mainmenus; close demos_list; close demos_menu }
+			mouseEnter { show message_back;
+				setitemcolor gotobar backcolor MGREY .5 }
+			mouseExit { hide message_back; 
+				setitemcolor gotobar backcolor MGREY 0 }
+		}
 
-
-
-
-
-menuDef {
-    name "demos_list"
-    visible 0
-    fullscreen 0
-    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
-	focusColor 1 .75 0 1
-	style 1
-	border 1
-
-	onOpen {
-		hide grpmessage;
-		uiScript LoadDemos
-	}
-
-	onEsc {
-		close demos_list;
-		close demos_menu;
-		open main
-	}
-
-
-	/////////////
-
-
-	itemDef {
-		name window
-		rect 0 2 WINDOW_WIDTH $evalint(WINDOW_HEIGHT-4)
-		style WINDOW_STYLE_FILLED
-		border 1
-		bordercolor MGREY .5
-		backcolor 0 0 0 .25
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name windowtitle
-		text "DEMO PLAYBACK"
- 		type 1
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		rect 2 4 $evalint(WINDOW_WIDTH-4) 20
-		textalign ITEM_ALIGN_CENTER
-		textfont UI_FONT_NORMAL
-		textscale .25
-		textalignx $evalfloat(.5*(WINDOW_WIDTH-4))
-		textaligny 13
-		border 1
-		bordercolor BORDER_DEF
-		backcolor BACK_DEF
-		forecolor LGREY
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name windowtitle
-		text "Directory:"
- 		type 1
-		style 0
-		textstyle 3
-		rect 10 25 76 20
-		textfont UI_FONT_NORMAL
-		textscale .25
-		textalignx 10
-		textaligny 16
-		forecolor LGREY
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name currentdir
-		cvar "ui_demoDir"
- 		type 1
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		rect 80 25 $evalint(WINDOW_WIDTH-4-80) 20
-		textfont UI_FONT_NORMAL
-		textscale .25
-		textalignx 6
-		textaligny 14
-		border 1
-		bordercolor MGREY .5
-		backcolor 1 1 1 .07
-		forecolor .9 .9 .55 1
-		visible 1
-		decoration
-	}
-
-
-	/////////////
-
-
-	itemDef {
-		name windowtitle
-		text "DEMOS:"
- 		type 1
-		style 0
-		textstyle 3
-		rect 10 47 76 20
-		textfont UI_FONT_NORMAL
-		textscale .25
-		textalignx 18
-		textaligny 12
-		forecolor LGREY
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name demolist
-		type ITEM_TYPE_LISTBOX
-		textfont UI_FONT_NORMAL
-		elementwidth $evalint(WINDOW_WIDTH-40)
-		elementheight 12
-		elementtype LISTBOX_TEXT
-		feeder FEEDER_DEMOS
-		rect 80 47 $evalint(WINDOW_WIDTH-4-80) $evalint(WINDOW_HEIGHT-47-23-4)
-		style WINDOW_STYLE_FILLED
-		textaligny -3
-		textscale .2
-		backcolor 1 1 1 .07
-		border 1
-		bordercolor MGREY .5
-		outlinecolor BACK_DEF
-		visible 1
-		columns	1 2 $evalint(WINDOW_WIDTH-40-2) 64
-		doubleclick {
-			play "sound/misc/nomenu.wav";
-			uiScript RunDemo;
+	// Messages //
+		itemDef {
+			name message_back
+			group grpmessage
+			style 0 
+			rect 320 437 128 30
+			textstyle 1
+			textalign 1
+			textalignx 0
+			textaligny 25
+			textfont UI_FONT_NORMAL
+			textscale .25
+			text "EXIT TO MAIN MENU"
+			decoration 
+			visible 0
 		}
 	}
 
+	menuDef {
+		name "demos_load"
+		visible 0
+		fullscreen 0
+		rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+		focusColor 1 .75 0 1
+		style 1
+		border 0
+		onOpen { hide back }
+
+		itemDef {
+			name currentdir
+			text "LOADING DEMO"
+			type 1
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			rect $evalfloat(.5*WINDOW_WIDTH-80) $evalfloat(.5*WINDOW_HEIGHT-12) 160 24
+			textfont UI_FONT_NORMAL
+			textscale .25
+			textalign ITEM_ALIGN_CENTER
+			textalignx 80
+			textaligny 15
+			border 1
+			bordercolor BORDER_DEF
+			backcolor BACK_DEF
+			forecolor LGREY
+			visible 1
+			decoration
+		}
+	}
+
+	menuDef {
+		name "demos_list"
+		visible 0
+		fullscreen 0
+		rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+		focusColor 1 .75 0 1
+		style 1
+		border 1
+		onOpen { hide grpmessage; uiScript LoadDemos }
+		onESC { close demos_menu; close demos_list }
+
+	/////////////
+		itemDef {
+			name window
+			//rect 0 2 WINDOW_WIDTH $evalint(WINDOW_HEIGHT-4)
+			rect 0 2 WINDOW_WIDTH $evalint(WINDOW_HEIGHT)
+			style WINDOW_STYLE_FILLED
+			border 1
+			bordercolor MGREY .5
+			backcolor 0 0 0 .25
+			visible 1
+			decoration
+		}
+
+		itemDef {
+			name windowtitle
+			text "DEMO PLAYBACK"
+			type 1
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			rect 2 4 $evalint(WINDOW_WIDTH-4) 20
+			textalign ITEM_ALIGN_CENTER
+			textfont UI_FONT_NORMAL
+			textscale .25
+			textalignx $evalfloat(.5*(WINDOW_WIDTH-4))
+			textaligny 13
+			border 1
+			bordercolor BORDER_DEF
+			backcolor BACK_DEF
+			forecolor LGREY
+			visible 1
+			decoration
+		}
+
+		itemDef {
+			name windowtitle
+			text "Directory:"
+			type 1
+			style 0
+			textstyle 3
+			rect 10 25 76 20
+			textfont UI_FONT_NORMAL
+			textscale .25
+			textalignx 10
+			textaligny 16
+			forecolor LGREY
+			visible 1
+			decoration
+		}
+
+		itemDef {
+			name currentdir
+			cvar "ui_demoDir"
+			type 1
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			rect 80 25 $evalint(WINDOW_WIDTH-4-80) 20
+			textfont UI_FONT_NORMAL
+			textscale .25
+			textalignx 6
+			textaligny 14
+			border 1
+			bordercolor MGREY .5
+			backcolor 1 1 1 .07
+			forecolor .9 .9 .55 1
+			visible 1
+			decoration
+		}
+
+	/////////////
+		itemDef {
+			name windowtitle
+			text "DEMOS:"
+			type 1
+			style 0
+			textstyle 3
+			rect 10 47 76 20
+			textfont UI_FONT_NORMAL
+			textscale .25
+			textalignx 18
+			textaligny 12
+			forecolor LGREY
+			visible 1
+			decoration
+		}
+		itemDef {
+			name demolist
+			type ITEM_TYPE_LISTBOX
+			textfont UI_FONT_NORMAL
+			elementwidth $evalint(WINDOW_WIDTH-40)
+			elementheight 12
+			elementtype LISTBOX_TEXT
+			feeder FEEDER_DEMOS
+			rect 80 47 $evalint(WINDOW_WIDTH-4-80) $evalint(WINDOW_HEIGHT-47-23-4)
+			style WINDOW_STYLE_FILLED
+			textaligny -3
+			textscale .2
+			backcolor 1 1 1 .07
+			border 1
+			bordercolor MGREY .5
+			outlinecolor BACK_DEF
+			visible 1
+			columns	1 2 $evalint(WINDOW_WIDTH-40-2) 64
+			doubleclick { play "sound/misc/nomenu.wav"; uiScript RunDemo }
+		}
 
 	// Buttons
-
-
-	itemDef {
-		name btn_timedemo
-		type ITEM_TYPE_YESNO
-		text "Timedemo:"
-		tooltip "Used to benchmark demo playback (normally is not used)"
-		cvar "timedemo"
-		rect 6 $evalint(WINDOW_HEIGHT-21) 94 15
-		textalign ITEM_ALIGN_RIGHT
-		textalignx 64
-		textaligny 11
-		textfont UI_FONT_NORMAL
-		textscale .22
-		style WINDOW_STYLE_FILLED
-		forecolor .9 .9 .55 1
-		backcolor 1 1 1 .07
-		visible 1
-	}
-
-/*
-	itemDef {
-		name bttn_renamedemo
-		text "Rename Demo"
-		type ITEM_TYPE_BUTTON
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		border 1
-		bordercolor BORDER_DEF
-		rect 6 $evalint(WINDOW_HEIGHT-23) 120 17
-		textalign 1
-		textalignx 60
-		textaligny 12
-		textfont UI_FONT_NORMAL
-		textscale T_SCALE1
-		backcolor BACK_DEF
-		mouseEnter { setitemcolor bttn_renamedemo backcolor HILIT_ENTR }
-		mouseExit { setitemcolor bttn_renamedemo backcolor HILIT_EXIT }
-
-		visible 0
-		action {
-			play "sound/misc/nomenu.wav";
-			uiScript RunDemo;
+		itemDef {
+			name btn_timedemo
+			type ITEM_TYPE_YESNO
+			text "Timedemo:"
+			tooltip "Used to benchmark demo playback (normally is not used)"
+			cvar "timedemo"
+			rect 6 $evalint(WINDOW_HEIGHT-21) 94 15
+			textalign ITEM_ALIGN_RIGHT
+			textalignx 64
+			textaligny 11
+			textfont UI_FONT_NORMAL
+			textscale .22
+			style WINDOW_STYLE_FILLED
+			forecolor .9 .9 .55 1
+			backcolor 1 1 1 .07
+			visible 1
 		}
-	}
+
+/*		itemDef {
+			name bttn_renamedemo
+			text "Rename Demo"
+			type ITEM_TYPE_BUTTON
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			border 1
+			bordercolor BORDER_DEF
+			rect 6 $evalint(WINDOW_HEIGHT-23) 120 17
+			textalign 1
+			textalignx 60
+			textaligny 12
+			textfont UI_FONT_NORMAL
+			textscale T_SCALE1
+			backcolor BACK_DEF
+			mouseEnter { setitemcolor bttn_renamedemo backcolor HILIT_ENTR }
+			mouseExit { setitemcolor bttn_renamedemo backcolor HILIT_EXIT }
+			visible 0
+			action { play "sound/misc/nomenu.wav"; uiScript RunDemo }
+		}
 */
-	itemDef {
-		name btn_playdemo
-		text "PLAY DEMO"
-		tooltip "Play selected demo, or change selected directory. Note: you can double-click selections for the same effect."
-		type ITEM_TYPE_BUTTON
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		border 1
-		bordercolor BORDER_DEF
-		rect $evalfloat(.5*WINDOW_WIDTH-60) $evalint(WINDOW_HEIGHT-23) 120 17
-		textalign 1
-		textalignx 60
-		textaligny 12
-		textfont UI_FONT_NORMAL
-		textscale T_SCALE1
-		backcolor BACK_DEF
-		mouseEnter { setitemcolor btn_playdemo backcolor HILIT_ENTR }
-		mouseExit { setitemcolor btn_playdemo backcolor HILIT_EXIT }
-		visible 1
-		action {
-			play "sound/misc/nomenu.wav";
-			uiScript RunDemo
+		itemDef {
+			name btn_playdemo
+			text "PLAY DEMO"
+			tooltip "Play selected demo, or change selected directory. Note: you can double-click selections for the same effect."
+			type ITEM_TYPE_BUTTON
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			border 1
+			bordercolor BORDER_DEF
+			rect $evalfloat(.5*WINDOW_WIDTH-60) $evalint(WINDOW_HEIGHT-23) 120 17
+			textalign 1
+			textalignx 60
+			textaligny 12
+			textfont UI_FONT_NORMAL
+			textscale T_SCALE1
+			backcolor BACK_DEF
+			mouseEnter { setitemcolor btn_playdemo backcolor HILIT_ENTR }
+			mouseExit { setitemcolor btn_playdemo backcolor HILIT_EXIT }
+			visible 1
+			action { play "sound/misc/nomenu.wav"; uiScript RunDemo }
+		}
+		itemDef {
+			name btn_deletedemo
+			text "Delete Demo"
+			type ITEM_TYPE_BUTTON
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			border 1
+			bordercolor BORDER_DEF
+			rect $evalint(WINDOW_WIDTH-126) $evalint(WINDOW_HEIGHT-23) 120 17
+			textalign 1
+			textalignx 60
+			textaligny 12
+			textfont UI_FONT_NORMAL
+			textscale T_SCALE1
+			backcolor BACK_DEF
+			mouseEnter { setitemcolor btn_deletedemo backcolor HILIT_ENTR }
+			mouseExit { setitemcolor btn_deletedemo backcolor HILIT_EXIT }
+			visible 0
+			action { play "sound/misc/nomenu.wav"; uiScript DeleteDemo_Show }
 		}
 	}
-
-	itemDef {
-		name btn_deletedemo
-		text "Delete Demo"
-		type ITEM_TYPE_BUTTON
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		border 1
-		bordercolor BORDER_DEF
-		rect $evalint(WINDOW_WIDTH-126) $evalint(WINDOW_HEIGHT-23) 120 17
-		textalign 1
-		textalignx 60
-		textaligny 12
-		textfont UI_FONT_NORMAL
-		textscale T_SCALE1
-		backcolor BACK_DEF
-		mouseEnter { setitemcolor btn_deletedemo backcolor HILIT_ENTR }
-		mouseExit { setitemcolor btn_deletedemo backcolor HILIT_EXIT }
-
-		visible 0
-		action {
-			play "sound/misc/nomenu.wav";
-			uiScript DeleteDemo_Show
-		}
-	}
-}
-
-
 
 // DELETE Demo pop-up... currently not used :(
 /*
-menuDef {
-    name "demos_delete"
-    visible 0
-    fullscreen 0
-    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
-	focusColor 1 .75 0 1
-	style 1
-	border 0
-
-
-	onClose {
-		open demos_list;
-	}
-
-	onEsc {
-		close demos_delete;
-	}
+	menuDef {
+		name "demos_delete"
+		visible 0
+		fullscreen 0
+		rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+		focusColor 1 .75 0 1
+		style 1
+		border 0
+		onClose { open demos_list }
+		onESC { close demos_delete }
 
 	/////////////
-
-
-	itemDef {
-		name window
-		rect $evalfloat(.5*WINDOW_WIDTH-160) $evalfloat(.5*WINDOW_HEIGHT-50) 320 100
-		style WINDOW_STYLE_FILLED
-		border 1
-		bordercolor MGREY .5
-		backcolor 0 0 0 .25
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name windowtitle
-		text "DELETE DEMO"
- 		type 1
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		rect $evalfloat(.5*WINDOW_WIDTH-160+2) $evalfloat(.5*WINDOW_HEIGHT-50+4) $evalint(320-4) 20
-		textalign ITEM_ALIGN_CENTER
-		textfont UI_FONT_NORMAL
-		textscale .25
-		textalignx $evalfloat(.5*(320-4))
-		textaligny 13
-		border 1
-		bordercolor BORDER_DEF
-		backcolor BACK_DEF
-		forecolor LGREY
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name btn_delete
-		text "DELETE"
-		type ITEM_TYPE_BUTTON
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		border 1
-		bordercolor BORDER_DEF
-		rect $evalfloat(.3333*WINDOW_WIDTH-60) $evalfloat(.5*WINDOW_HEIGHT+50-23) 120 17
-		textalign 1
-		textalignx 60
-		textaligny 12
-		textfont UI_FONT_NORMAL
-		textscale T_SCALE1
-		backcolor BACK_DEF
-		mouseEnter { setitemcolor btn_delete backcolor HILIT_ENTR }
-		mouseExit { setitemcolor btn_delete backcolor HILIT_EXIT }
-		visible 1
-		action {
-			play "sound/misc/nomenu.wav";
-			uiScript DeleteDemo;
-			close demos_delete
+		itemDef {
+			name window
+			rect $evalfloat(.5*WINDOW_WIDTH-160) $evalfloat(.5*WINDOW_HEIGHT-50) 320 100
+			style WINDOW_STYLE_FILLED
+			border 1
+			bordercolor MGREY .5
+			backcolor 0 0 0 .25
+			visible 1
+			decoration
+		}
+		itemDef {
+			name windowtitle
+			text "DELETE DEMO"
+			type 1
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			rect $evalfloat(.5*WINDOW_WIDTH-160+2) $evalfloat(.5*WINDOW_HEIGHT-50+4) $evalint(320-4) 20
+			textalign ITEM_ALIGN_CENTER
+			textfont UI_FONT_NORMAL
+			textscale .25
+			textalignx $evalfloat(.5*(320-4))
+			textaligny 13
+			border 1
+			bordercolor BORDER_DEF
+			backcolor BACK_DEF
+			forecolor LGREY
+			visible 1
+			decoration
+		}
+		itemDef {
+			name btn_delete
+			text "DELETE"
+			type ITEM_TYPE_BUTTON
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			border 1
+			bordercolor BORDER_DEF
+			rect $evalfloat(.3333*WINDOW_WIDTH-60) $evalfloat(.5*WINDOW_HEIGHT+50-23) 120 17
+			textalign 1
+			textalignx 60
+			textaligny 12
+			textfont UI_FONT_NORMAL
+			textscale T_SCALE1
+			backcolor BACK_DEF
+			mouseEnter { setitemcolor btn_delete backcolor HILIT_ENTR }
+			mouseExit { setitemcolor btn_delete backcolor HILIT_EXIT }
+			visible 1
+			action { play "sound/misc/nomenu.wav";
+				uiScript DeleteDemo; close demos_delete }
+		}
+		itemDef {
+			name btn_cancel
+			text "Cancel"
+			type ITEM_TYPE_BUTTON
+			style WINDOW_STYLE_FILLED
+			textstyle 3
+			border 1
+			bordercolor BORDER_DEF
+			rect $evalfloat(.66667*WINDOW_WIDTH-60) $evalfloat(.5*WINDOW_HEIGHT+50-23) 120 17
+			textalign 1
+			textalignx 60
+			textaligny 12
+			textfont UI_FONT_NORMAL
+			textscale T_SCALE1
+			backcolor BACK_DEF
+			mouseEnter { setitemcolor btn_cancel backcolor HILIT_ENTR }
+			mouseExit { setitemcolor btn_cancel backcolor HILIT_EXIT }
+			visible 1
+			action { play "sound/misc/nomenu.wav"; close demos_delete }
 		}
 	}
-
-	itemDef {
-		name btn_cancel
-		text "Cancel"
-		type ITEM_TYPE_BUTTON
-		style WINDOW_STYLE_FILLED
-		textstyle 3
-		border 1
-		bordercolor BORDER_DEF
-		rect $evalfloat(.66667*WINDOW_WIDTH-60) $evalfloat(.5*WINDOW_HEIGHT+50-23) 120 17
-		textalign 1
-		textalignx 60
-		textaligny 12
-		textfont UI_FONT_NORMAL
-		textscale T_SCALE1
-		backcolor BACK_DEF
-		mouseEnter { setitemcolor btn_cancel backcolor HILIT_ENTR }
-		mouseExit { setitemcolor btn_cancel backcolor HILIT_EXIT }
-		visible 1
-		action {
-			play "sound/misc/nomenu.wav";
-			close demos_delete
-		}
-	}
-
-}
 */

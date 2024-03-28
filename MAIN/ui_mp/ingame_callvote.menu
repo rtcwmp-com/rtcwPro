@@ -12,7 +12,7 @@ menuDef {
 	visible 0
 	fullscreen 0
 	rect 150 125 343 276
-	outOfBoundsClick			// this closes the window if it gets a click out of the rectangle
+	outOfBoundsClick		// this closes the window if it gets a click out of the rectangle
 	focusColor 1 .75 0 1
 	style 1
 	border 1
@@ -31,7 +31,6 @@ menuDef {
 		visible 1
 		decoration
 	}
-
 	itemDef {
 		name window2
 		group grpControlbutton
@@ -44,11 +43,8 @@ menuDef {
 		decoration
 	}
 
-
 	////////////////////
-	//
-	// 	BUTTONS
-	//
+	// BUTTONS
 	itemDef {
 		name ctr_changemap
 		group grpControlbutton
@@ -157,7 +153,7 @@ menuDef {
 ////////////////////////////////////////////////////////////////////////////
 
 	///////////////////
-	// 	  NEW MAP
+	// NEW MAP
 	///////////////////
 	itemDef {
 		name map
@@ -210,7 +206,7 @@ menuDef {
 		rect 116 249 100 15
 		textfont UI_FONT_NORMAL
 		textalign 1
-		textalignx 50		// center
+		textalignx 50	// center
 		textaligny 11
 		backcolor .3 .5 .2 .3
 		visible 0
@@ -219,9 +215,8 @@ menuDef {
 		action { uiScript voteMap ; uiScript closeingame }
 	}
 
-
 	//////////////////
-	//     MISC
+	// MISC
 	//////////////////
 	itemDef {
 		name misc
@@ -509,9 +504,8 @@ menuDef {
 		action { exec "cmd callvote matchreset" ; uiScript closeingame }
 	}
 	
-
 	/////////////////////
-	//     REFEREE
+	// REFEREE
 	/////////////////////
 	itemDef {
 		name ref
@@ -563,7 +557,7 @@ menuDef {
 		rect 116 249 100 15
 		textfont UI_FONT_NORMAL
 		textalign 1
-		textalignx 50		// center
+		textalignx 50	// center
 		textaligny 11
 		backcolor .3 .5 .2 .3
 		visible 0
@@ -572,9 +566,8 @@ menuDef {
 		action { uiScript voteReferee ; uiScript closeingame }
 	}
 
-
 	///////////////////
-	// 	   KICK
+	// KICK
 	///////////////////
 	itemDef {
 		name kick
@@ -626,7 +619,7 @@ menuDef {
 		rect 116 249 100 15
 		textfont UI_FONT_NORMAL
 		textalign 1
-		textalignx 50		// center
+		textalignx 50	// center
 		textaligny 11
 		backcolor .3 .5 .2 .3
 		visible 0
@@ -635,9 +628,8 @@ menuDef {
 		action { uiScript voteKick ; uiScript closeingame }
 	}
 
-
 	//////////////////////
-	//     GAMETYPE
+	// GAMETYPE
 	//////////////////////
 	itemDef {
 		name type
@@ -675,7 +667,5 @@ menuDef {
 		bordercolor .1 .1 .1 .25
 		action { uiScript voteGame ; uiScript closeingame }
 	}
-
 }
-
 }
