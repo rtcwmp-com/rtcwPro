@@ -1717,23 +1717,11 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	if (g_antilag.integer < 2) // Nobo antilag or off
-	{
-		if (g_smoothClients.integer) {
-			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
-		}
-		else {
-			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
-		}
+	if (g_smoothClients.integer) {
+		BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
 	}
-	else if (g_antilag.integer == 2) // Unlagged
-	{
-		if (g_smoothClients.integer) {
-			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
-		}
-		else {
-			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
-		}
+	else {
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
 	}
 
 	/*if (g_thinkStateLevelTime.integer) 
@@ -2144,6 +2132,11 @@ extern vec3_t playerMins, playerMaxs;
 void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
 	vec3_t dir, push;
 
+	// no push in pause state
+	if (self->client->ps.pm_type == PM_FREEZE || other->client->ps.pm_type == PM_FREEZE) {
+		return;
+	}
+
 	VectorSubtract( self->r.currentOrigin, other->r.currentOrigin, dir );
 	dir[2] = 0;
 	VectorNormalizeFast( dir );
@@ -2390,7 +2383,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	}
 	// End ETL port
 
-
+	/*
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
 	if (level.time - ent->client->lastCmdTime > 1000) {
 		ent->s.eFlags |= EF_CONNECTION;
@@ -2398,6 +2391,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	else {
 		ent->s.eFlags &= ~EF_CONNECTION;
 	}
+	*/
 
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;   // FIXME: get rid of ent->health...
 
@@ -2418,7 +2412,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	}
 	else if (g_antilag.integer == 2) // Unlagged
 	{
-		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
 
 		//unlagged - smooth clients #1
 			// mark as not missing updates initially
@@ -2441,9 +2435,7 @@ void ClientEndFrame( gentity_t *ent ) {
 			// yep, missed one or more, so extrapolate the player's movement
 			G_PredictPlayerMove(ent, (float)frames / sv_fps.integer);
 			// save network bandwidth
-			if (!g_floatPlayerPosition.integer) {
-				SnapVector(ent->s.pos.trBase);
-			}
+			SnapVector(ent->s.pos.trBase);
 		}
 		//unlagged - smooth clients #1
 

@@ -851,11 +851,8 @@ struct gclient_s {
 	clientHistory_t	saved;			// used to restore after time shift
 	// an approximation of the actual server time we received this
 	// command (not in 50ms increments)
-	int	frameOffset;
-
-	// the level.time to which this client was shifted, or 0 if it isn't timeshifted
-	int timeshiftTime;
-	//unlagged - backward reconciliation #1
+	int			frameOffset;
+//unlagged - backward reconciliation #1
 
 	//unlagged - smooth clients #1
 	// the last frame number we got an update from this client
@@ -1780,7 +1777,6 @@ extern vmCvar_t g_logConfigStringChanges;
 extern vmCvar_t g_playPauseMusic;
 
 // unlagged
-extern vmCvar_t g_floatPlayerPosition;
 extern vmCvar_t	g_delagHitscan;
 extern vmCvar_t g_maxExtrapolatedFrames;
 

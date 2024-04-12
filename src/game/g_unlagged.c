@@ -53,10 +53,9 @@ Keep track of where the client's been
 ============
 */
 void G_StoreHistory( gentity_t *ent ) {
-	//int		head, frametime;
-	int		head;
+	int		head, frametime;
 
-	//frametime = level.time - level.previousTime;
+	frametime = level.time - level.previousTime;
 
 	ent->client->historyHead++;
 	if ( ent->client->historyHead >= NUM_CLIENT_HISTORY ) {
@@ -69,9 +68,7 @@ void G_StoreHistory( gentity_t *ent ) {
 	VectorCopy( ent->r.mins, ent->client->history[head].mins );
 	VectorCopy( ent->r.maxs, ent->client->history[head].maxs );
 	VectorCopy( ent->s.pos.trBase, ent->client->history[head].currentOrigin );
-	if (!g_floatPlayerPosition.integer) {
-		SnapVector( ent->client->history[head].currentOrigin );
-	}
+	SnapVector( ent->client->history[head].currentOrigin );
 	ent->client->history[head].leveltime = level.time;
 	ent->client->history[head].animInfo = ent->client->animationInfo;
 }
@@ -102,21 +99,6 @@ static void TimeShiftLerp( float frac, vec3_t start, vec3_t end, vec3_t result )
 
 /*
 =================
-Interpolate
-
-Interpolates along two vectors (start -> end).
-=================
-*/
-void Interpolate(float frac, vec3_t start, vec3_t end, vec3_t out) {
-	float comp = 1.0f - frac;
-
-	out[0] = start[0] * frac + end[0] * comp;
-	out[1] = start[1] * frac + end[1] * comp;
-	out[2] = start[2] * frac + end[2] * comp;
-}
-
-/*
-=================
 G_TimeShiftClient
 
 Move a client back to where he was at the specified "time"
@@ -124,7 +106,7 @@ Move a client back to where he was at the specified "time"
 */
 void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *debugger ) {
 	int		j, k;
-	//char msg[2048];
+	char msg[2048];
 
 	// this will dump out the head index, and the time for all the stored positions
 
@@ -232,8 +214,6 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			// it doesn't make sense to interpolate mins and maxs. the server either thinks the client
 			// is crouching or not, and updates the mins & maxs immediately. there's no inbetween.
 			int nearest_trail_node_index = frac < 0.5 ? j : k;
-			VectorCopy(ent->client->history[nearest_trail_node_index].mins, ent->r.mins);
-			VectorCopy(ent->client->history[nearest_trail_node_index].maxs, ent->r.maxs);
 			// use the trail node's animation info that's nearest "time" (for head hitbox).
 			// the current server animation code used for head hitboxes doesn't support interpolating
 			// between two different animation frames (i.e. crouch -> standing animation), so can't interpolate here either.
@@ -241,9 +221,6 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 
 			// this will recalculate absmin and absmax
 			trap_LinkEntity(ent);
-
-			// some of the code needs to know that this entity was time shifted
-			ent->client->timeshiftTime = ent->client->history[j].leveltime;
 
 		} else {
 			// we wrapped, so grab the earliest
@@ -254,8 +231,6 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 			// this will recalculate absmin and absmax
 			trap_LinkEntity( ent );
 
-			// some of the code needs to know that this entity was time shifted
-			ent->client->timeshiftTime = ent->client->history[k].leveltime;
 			ent->client->animationInfo = ent->client->history[k].animInfo;
 		}
 	}
@@ -266,8 +241,21 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 		// print some debugging stuff exactly like what the client does
 
 		// it starts with "No rec:" to let you know it didn't backward-reconcile
-		//Sago: This code looks wierd
+		/*if ( debug && debugger != NULL ) {
+			Com_sprintf( msg, sizeof(msg),
+				"print \"^1No rec: time: %d, j: %d, k: %d, origin: %0.2f %0.2f %0.2f\n"
+				"^2frac: %0.4f, origin1: %0.2f %0.2f %0.2f, origin2: %0.2f %0.2f %0.2f\n"
+				"^7level.time: %d, est time: %d, level.time delta: %d, est real ping: %d\n\"",
+				time, level.time, level.time,
+				ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+				0.0f,
+				ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2], 
+				ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+				level.time, level.time + debugger->client->frameOffset,
+				level.time - time, level.time + debugger->client->frameOffset - time);
 
+			trap_SendServerCommand( debugger - g_entities, msg );
+		}*/
 	}
 }
 
@@ -283,7 +271,7 @@ except for "skip"
 void G_TimeShiftAllClients( int time, gentity_t *skip ) {
 	int			i;
 	gentity_t	*ent;
-	qboolean debug = ( skip != NULL && skip->client /*&& skip->client->pers.debugDelag*/ );
+	qboolean debug = ( skip != NULL && skip->client ); //&& skip->client->pers.debugDelag
 
 	// for every client
 	ent = &g_entities[0];
@@ -359,7 +347,6 @@ void G_UnTimeShiftClient( gentity_t *ent ) {
 		trap_LinkEntity( ent );
 	}
 
-	ent->client->timeshiftTime = 0;
 }
 
 
@@ -455,7 +442,7 @@ qboolean G_PredictPlayerSlideMove( gentity_t *ent, float frametime ) {
 	float		into;
 	vec3_t		endVelocity;
 	vec3_t		endClipVelocity;
-//	vec3_t		worldUp = { 0.0f, 0.0f, 1.0f };
+	vec3_t		worldUp = { 0.0f, 0.0f, 1.0f };
 	
 	numbumps = 4;
 
@@ -609,8 +596,7 @@ Advance the given entity frametime seconds, stepping and sliding as appropriate
 #define	STEPSIZE 18
 
 void G_PredictPlayerStepSlideMove( gentity_t *ent, float frametime ) {
-	//vec3_t start_o, start_v, down_o, down_v;
-	vec3_t start_o, start_v;
+	vec3_t start_o, start_v, down_o, down_v;
 	vec3_t down, up;
 	trace_t trace;
 	float stepSize;
@@ -623,8 +609,8 @@ void G_PredictPlayerStepSlideMove( gentity_t *ent, float frametime ) {
 		return;
 	}
 
-	//VectorCopy( ent->s.pos.trBase, down_o);
-	//VectorCopy( ent->s.pos.trDelta, down_v);
+	VectorCopy( ent->s.pos.trBase, down_o);
+	VectorCopy( ent->s.pos.trDelta, down_v);
 
 	VectorCopy (start_o, up);
 	up[2] += STEPSIZE;

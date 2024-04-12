@@ -1999,6 +1999,16 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	// count current clients and rank for scoreboard
 	CalculateRanks();
 
+//unlagged - backward reconciliation #5
+	// announce it
+	if ( g_delagHitscan.integer ) {
+		trap_SendServerCommand( clientNum, "print \"This server is Unlagged: full lag compensation is ON!\n\"" );
+	}
+	else {
+		trap_SendServerCommand( clientNum, "print \"This server is Unlagged: full lag compensation is OFF!\n\"" );
+	}
+//unlagged - backward reconciliation #5
+
 	// Trigger rest lookup
 	trap_SendServerCommand(clientNum, "revalidate");
 
@@ -2653,11 +2663,7 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 	ClientEndFrame( ent );
 
 	// clear entity state values
-	if (g_antilag.integer < 2) // Nobo antilag or off
-		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
-
-	else if (g_antilag.integer == 2) // Unlagged
-		BG_PlayerStateToEntityState(&client->ps, &ent->s, (qboolean)!g_floatPlayerPosition.integer);
+	BG_PlayerStateToEntityState(&client->ps, &ent->s, qtrue);
 
 	//BG_PlayerStateToEntityStatePro(&client->ps, &ent->s, level.time, qtrue); // RTCWPro
 
