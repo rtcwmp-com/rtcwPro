@@ -1,8 +1,8 @@
 CC = gcc
 
 
-CFLAGS =  -pipe -fsigned-char -DNDEBUG -O6 -mtune=pentiumpro -march=pentium -m32 \
--fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
+CFLAGS =  -pipe -fsigned-char -DNDEBUG -O6 -m32 \
+-fcommon -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -I./../qcommon/jansson/
 
 LDFLAGS = -I./../qcommon/jansson 
@@ -19,6 +19,7 @@ all: gameclean qagame.mp.i386.so
 gameclean:
 	rm -rf *.o ../botai/*.o
 	rm -rf ../qcommon/crypto/sha-1/*.o
+	rm -rf ../qcommon/*.o
 
 qagame.mp.i386.so: $(MODULES)
 	$(CC)  -shared -m32 -ldl -lm -o $@ $? $(LDFLAGS)

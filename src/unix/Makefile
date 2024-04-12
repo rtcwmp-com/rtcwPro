@@ -5,8 +5,8 @@
 #	-falign-loops=2 -falign-jumps=2 -falign-functions=2 \
 #	-fno-strict-aliasing -fstrength-reduce -DNDEBUG $(CFLAGSEXT)
 
-CFLAGSREL = -pipe -m32 -fsigned-char -DNDEBUG -O6  \
--fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 \
+CFLAGSREL = -g -pipe -m32 -fsigned-char -DNDEBUG -O6  \
+-fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -fcommon \
 -falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
 
 DCFLAGSREL := \
