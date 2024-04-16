@@ -815,14 +815,35 @@ Edit fields and command line history/completion
 
 #define MAX_EDIT_LINE   256
 typedef struct {
-	int cursor;
-	int scroll;
-	int widthInChars;
-	char buffer[MAX_EDIT_LINE];
+	char	buffer[MAX_EDIT_LINE];
+	int		cursor;
+	int		scroll;
+	int		widthInChars;
+	int		acOffset;		// auto-completion letter index with the leading slash present
+	int		acLength;		// auto-completion letter count
+	int		acStartArg;		// auto-completion command token index
+	int		acCompArg;		// auto-completion argument token index
 } field_t;
 
 void Field_Clear( field_t *edit );
 void Field_CompleteCommand( field_t *edit );
+
+#define COMMAND_HISTORY		32
+typedef struct {
+	field_t	commands[COMMAND_HISTORY];
+	int		next;		// the last line in the history buffer, not masked
+	int		display;	// the line being displayed from history buffer
+	// will be <= nextHistoryLine
+} history_t;
+
+void History_Clear(history_t* history, int width);
+void History_SaveCommand(history_t* history, const field_t* edit);
+void History_GetPreviousCommand(field_t* edit, history_t* history);
+void History_GetNextCommand(field_t* edit, history_t* history, int width);
+void History_LoadFromFile(history_t* history);
+void History_SaveToFile(const history_t* history);
+
+const char* Q_itohex(uint64_t number, qbool uppercase, qbool prefix);
 
 /*
 ==============================================================
@@ -866,7 +887,6 @@ void        Com_EndRedirect( void );
 void QDECL Com_Printf( const char *fmt, ... );
 void QDECL Com_DPrintf( const char *fmt, ... );
 void QDECL Com_Error( int code, const char *fmt, ... );
-void        Com_Quit_f( void );
 int         Com_EventLoop( void );
 int         Com_Milliseconds( void );   // will be journaled properly
 unsigned    Com_BlockChecksum( const void *buffer, int length );
@@ -884,6 +904,7 @@ void        Com_SetRecommended();
 // if match is NULL, all set commands will be executed, otherwise
 // only a set with the exact name.  Only used during startup.
 
+void		Com_Quit(int status);
 
 extern cvar_t  *com_developer;
 extern cvar_t  *com_dedicated;
@@ -1147,7 +1168,7 @@ void    *Sys_GetBotLibAPI( void *parms );
 char    *Sys_GetCurrentUser( void );
 
 void QDECL Sys_Error( const char *error, ... );
-void    Sys_Quit( void );
+void    Sys_Quit( int status );
 char    *Sys_GetClipboardData( void );  // note that this isn't journaled...
 
 void    Sys_Print( const char *msg );
@@ -1156,6 +1177,11 @@ void    Sys_Print( const char *msg );
 // Sys_Milliseconds should only be used for profiling purposes,
 // any game related timing information should come from event timestamps
 int     Sys_Milliseconds( void );
+
+qbool	Sys_HardReboot(); // qtrue when the server can restart itself
+
+qbool	Sys_HasRtcwProParent();					// qtrue if a child of RtcwPro
+int		Sys_GetUptimeSeconds(qbool parent);	// negative if not available
 
 void    Sys_SnapVector( float *v );
 

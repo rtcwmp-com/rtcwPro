@@ -166,6 +166,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #endif
 
+#if defined(_MSC_VER)
+#include <sal.h>
+#define PRINTF_FORMAT_STRING _Printf_format_string_
+#else
+#define PRINTF_FORMAT_STRING
+#endif
+
 //======================= MAC OS X SERVER DEFINES =====================
 
 #if defined( MACOS_X )

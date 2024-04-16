@@ -103,6 +103,8 @@ typedef struct {
 	float ucompAve;
 	int ucompNum;
 	// -NERVE - SMF
+
+	int mapLoadTime;
 } server_t;
 
 typedef struct {
@@ -356,6 +358,8 @@ extern cvar_t* sv_restRunning;
 extern cvar_t* sv_serverTimeReset;	// ET Legacy port reset svs.time on map load to fix knockback bug
 
 extern cvar_t* sv_dropClientOnOverflow; // drop client when msg.overflow in sv_snapshot
+
+extern cvar_t* sv_minRestartDelay;
 
 // End RtcwPro
 //===========================================================
