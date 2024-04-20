@@ -2194,6 +2194,10 @@ void WolfReviveBbox( gentity_t *self ) {
 
 					// Reset value so we don't continue to warp them
 					self->props_frame_state = -1;
+
+					// reset push velocity, otherwise player will fly away if is velocity too strong
+					VectorClear(self->s.pos.trDelta);
+					VectorClear(self->client->ps.velocity);
 				}
 			} else if ( hit->health > 0 ) {
 				if ( hit->s.number != self->s.number ) {
