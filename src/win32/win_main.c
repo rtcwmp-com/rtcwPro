@@ -156,7 +156,7 @@ void QDECL Sys_Error( const char *error, ... ) {
 	// wait for the user to quit
 	while ( 1 ) {
 		if ( !GetMessage( &msg, NULL, 0, 0 ) ) {
-			Com_Quit_f();
+			Com_Quit(1);
 		}
 		TranslateMessage( &msg );
 		DispatchMessage( &msg );
@@ -172,12 +172,12 @@ void QDECL Sys_Error( const char *error, ... ) {
 Sys_Quit
 ==============
 */
-void Sys_Quit( void ) {
+void Sys_Quit( int status ) {
 	timeEndPeriod( 1 );
 	IN_Shutdown();
 	Sys_DestroyConsole();
 
-	exit( 0 );
+	exit( status );
 }
 
 /*
@@ -1022,7 +1022,7 @@ sysEvent_t Sys_GetEvent( void ) {
 	// pump the message loop
 	while ( PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) ) {
 		if ( !GetMessage( &msg, NULL, 0, 0 ) ) {
-			Com_Quit_f();
+			Com_Quit(0);
 		}
 
 		// save the msg time, because wndprocs don't have access to the timestamp
