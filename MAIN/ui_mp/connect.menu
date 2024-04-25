@@ -1,26 +1,21 @@
 #include "ui_mp/menudef.h"
-
-
 {
-
-menuDef {
-	name "Connect"
-	background "gfx/2d/black.tga"
-	rect 0 0 640 480
-	fullScreen MENU_FALSE
-	visible MENU_FALSE
-	style WINDOW_STYLE_SHADER
-
-	itemDef {
-		name window
-		group connect
-		rect 475 390 142 80
-		//rect 175 250 300 175
-		background "gfx/2d/rtcwpro.tga"
-		visible MENU_TRUE
+	menuDef {
+		name "Connect"
+		background "gfx/2d/black.tga"
+		rect 0 0 640 480
+		fullScreen MENU_FALSE
+		visible MENU_FALSE
 		style WINDOW_STYLE_SHADER
-		decoration
-	}
 
-}	// menuDef
+		itemDef {
+			name window
+			group connect
+			rect 475 390 142 80
+			background "gfx/2d/rtcwpro.tga"
+			visible MENU_TRUE
+			style WINDOW_STYLE_SHADER
+			decoration
+		}
+	}	// menuDef
 }	// context

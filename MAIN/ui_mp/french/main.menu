@@ -1,475 +1,364 @@
 #include "ui_mp/menudef.h"
-
 {
-	assetGlobalDef
-	{
+	assetGlobalDef {
 		font "fonts/normal" 16
 		smallFont "fonts/smallFont" 12
-		bigFont "fonts/bigFont" 24
+		bigFont "fonts/bigFont" 32
 		cursor "ui_mp/assets/3_cursor3"
 		gradientBar "ui_mp/assets/gradientbar2.tga"
 		itemFocusSound "sound/misc/menu2.wav"	// sound for item getting focus (via keyboard or mouse )
-
-		fadeClamp 1.0	// sets the fadeup alpha
+		fadeClamp 1.0		// sets the fadeup alpha
 		fadeCycle 1		// how often fade happens in milliseconds
 		fadeAmount 0.1	// amount to adjust alpha per cycle
-
 		shadowColor 0.1 0.1 0.1 0.25	// shadow color
 	}
 
+	menuDef {
+		name "main"
+		fullScreen 1
+		rect 0 0 640 480	// Size and position of the menu
+		background "gfx/2d/black"
+		soundLoop "sound/music/x_action.wav"
+		visible 1			// Visible on open
+		focusColor .9 .3 .3 .8	// Menu focus color for text and items
+		onESC { show mainmenus }
+		onOpen {
+			setitemcolor fadebox backcolor 0 0 0 1; fadeout fadebox;
+			show mainmenus; uiScript stopRefresh; checkautoupdate }
 
-
-
-
-menuDef {
-	name "main"
-//	background "menuback_cw"		// Spinning Circle Background
-	fullScreen 1				
-	rect 0 0 640 480				// Size and position of the menu
-	visible 1						// Visible on open
-	focusColor .9 .85 1 .8			// Menu focus color for text and items
-	soundloop ""
-
-	onOpen { 
-		setitemcolor fadebox backcolor 0 0 0 1;
-		playlooped "sound/music/x_action.wav";
-		fadeout fadebox;
-		uiScript stopRefresh;
-		checkautoupdate
-	}
-
-	onESC { open quit_popmenu }
-
-
-
-	itemDef {
-		name modelselection 		//Precache player model	
-		ownerdraw UI_PLAYERMODEL	//Ownerdraw for player models
-		rect 0 0 0 0 
-		style 1
-		decoration 
-		visible 1
-	}
-
-	itemDef {
-		name backimage2
-		style WINDOW_STYLE_SHADER
-		rect 0 0 640 480
-		background "backimage2"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name video_over1
-		style WINDOW_STYLE_SHADER
-		rect 230 0 410 480
-		background "video_over1"
-		visible 1
-		decoration
-	}
-
-
-	itemDef {
-		name testmodel_aflag1
-		type ITEM_TYPE_MODEL
-		rect 150 0 800 600 
-		model_angle 90
-		model_origin 100 100 100
-		asset_model "models/mapobjects/flag/flag_americanui.MD3"
-		model_animplay 0 114 0 10
-		model_fovx 40
-		model_fovy 40
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name band2
-		style WINDOW_STYLE_SHADER
-		rect 360 20 128 640
-		background "band2"
-		visible 1
-		decoration
-	}
-	
-
-	itemDef {
-		name bands
-		style WINDOW_STYLE_SHADER
-		rect 200 -480 640 1024
-		background "bands"
-		visible 1
-		decoration
-	}
-
-
-	itemDef {
-		name backimage4					// left side image with black gradient  
-		style WINDOW_STYLE_SHADER
-		rect 0 0 343 480
-		background "backimage4"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name testmodel_nflag1
-		type ITEM_TYPE_MODEL
-		rect -350 -30 800 600 
-		model_angle -130
-		model_origin 100 100 100
-		asset_model "models/mapobjects/flag/flag_naziui.MD3"
-		model_animplay 0 114 0 10
-		model_fovx 40
-		model_fovy 40
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name BLACKGRAD
-		style WINDOW_STYLE_SHADER
-		rect 0 -4 640 132
-		background "BLACKGRAD"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name BLACKGRAD2
-		style WINDOW_STYLE_SHADER
-		rect 0 370 640 -128
-		background "BLACKGRAD"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name FLAME
-		style WINDOW_STYLE_SHADER
-		rect 210 20 220 67
-		background "fLAME"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name testmodel_icon_burn
-		type ITEM_TYPE_MODEL
-		rect 140 266 360 326
-		model_angle 90
-		model_origin 0 0 0
-		asset_model "models/mapobjects/ui/icon_burn.MD3"
-		model_fovx 90
-		model_fovy 90
-		visible 1
-		decoration
-	}
-
-
-	itemDef {
-		name WOLFFLAMELOGO
-		style WINDOW_STYLE_SHADER
-		rect 200 -5 240 120
-		background "WOLFFLAMELOGO"
-		visible 1
-		decoration
-	}
-
-
-	itemDef {
-		name WOLFICON
-		style WINDOW_STYLE_SHADER
-		rect 220 380 200 100
-		background "WOLFICON"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name gold_line
-		style WINDOW_STYLE_SHADER
-		rect 0 410 250 10
-		background "gold_line"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name gold_line
-		style WINDOW_STYLE_SHADER
-		rect 390 410 250 10
-		background "gold_line"
-		visible 1
-		decoration
-	}
-
-
-	itemDef {
-		name gold_line
-		style WINDOW_STYLE_SHADER
-		rect 0 76 226 10
-		background "gold_line"
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name gold_line
-		style WINDOW_STYLE_SHADER
-		rect 414 76 230 10
-		background "gold_line"
-		visible 1
-		decoration
-	}
-
-
-
-	//	MULTIPLAYER	//
-
-	itemDef {
-		name playselection
-		text "MULTIJOUEUR"
-		tooltip "Rechercher des parties sur internet, configurer les options internet, ou demarrer son propre serveur"
-		type 1
-		style 0
-		textstyle 6
-		rect 12 398 90 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255
-		textalignx 4
-		textaligny 10
-		forecolor .9 .9 .9 1
-		visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			close main;
-			open multi_menu;
-			open joinserver
+		itemDef {
+			name RtcwProLOGO
+			style WINDOW_STYLE_SHADER
+			rect 103 150 433 245
+			background "gfx/2d/rtcwpro"
+			forecolor 1 1 1 0.2
+			visible 1
+			decoration
 		}
-   	}
 
-
-	//	VIEW DEMOS	//
-
-	itemDef {
-		name demos
-		text "REGARDER DEMOS"
-		tooltip "Regarder des demos enregistrees"
-		type 1
-		style 0
-		textstyle 6
-		rect 124 398 90 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255
-		textalignx 7
-		textaligny 10
-		forecolor .9 .9 .9 1
-		visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			close main;
-			open demos_menu;
-			open demos_list
+		itemDef {
+			name testmodel_aflag1
+			type ITEM_TYPE_MODEL
+			rect 150 0 800 600
+			model_angle 90
+			model_origin 100 100 100
+			asset_model "models/mapobjects/flag/flag_americanui.MD3"
+			model_animplay 0 114 0 10
+			model_fovx 40
+			model_fovy 40
+			visible 1
+			decoration
 		}
-	}
-
-
-	//	OPTIONS	// 
-
-	itemDef {
-		name options
-		text "OPTIONS"
-		tooltip "Modifier les options de jeu"
-		type 1
-		style 0
-		textstyle 6
-		rect 426 398 56 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255
-		textalignx 2
-		textaligny 10
-		forecolor .9 .9 .9 1
-		visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			close main;
-			open setup_menu;
-			open control_menu
-		} 
-	}
-
-
-
-	//	CREDITS	//
-
-	itemDef {
-		name credits
-		text "CRÉDITS"
-		tooltip "Regarder credits de parties"
-		type 1
-		style 0
-		textstyle 6
-		rect 510 398 52 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255
-		textalignx 0
-		textaligny 10
-		forecolor .9 .9 .9 .9
-		visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			close main;
-			open credit
+		itemDef {
+			name testmodel_nflag1
+			type ITEM_TYPE_MODEL
+			rect -350 -30 800 600
+			model_angle -130
+			model_origin 100 100 100
+			asset_model "models/mapobjects/flag/flag_naziui.MD3"
+			model_animplay 0 114 0 10
+			model_fovx 40
+			model_fovy 40
+			visible 1
+			decoration
 		}
-	}
 
-
-
-	//	QUIT	//
-
-	itemDef {
-		name quit
-		text "QUITTER"
-		tooltip "Quitter Return to Castle Wolfenstein"
-		type 1	
-		style 0
-		textstyle 6
-		rect 590 398 32 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255
-		textalignx 2
-		textaligny 10
-		forecolor .9 .9 .9 .9
-		visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			open quit_popmenu
+		itemDef {
+			name BLACKGRAD
+			style WINDOW_STYLE_SHADER
+			rect 0 -4 640 132
+			background "BLACKGRAD"
+			visible 1
+			decoration
 		}
-	}
+		itemDef {
+			name FLAME
+			style 3
+			rect 210 20 220 67
+			background "fLAME"
+			visible 1
+			decoration
+		}
+		itemDef {
+			name WOLFFLAMELOGO
+			style 3
+			rect 192 -12 256 128
+			background "WOLFFLAMELOGO"
+			visible 1
+			decoration
+		}
 
+		itemDef {
+			name USAAWS
+			group mainmenus
+			rect 68 110 190 10
+			text "Virginia Server ^6#3^7 NA (aws.wolfdm.xyz)"
+			type 1
+			style 0
+			textstyle 3
+			textalign 2
+			textfont UI_FONT_SMALL
+			textscale .200
+			textalignx 190
+			forecolor 1 1 1 1
+			visible 1
+			action { exec "connect aws.wolfdm.xyz" }
+		}
+		itemDef {
+			name USAAzure
+			group mainmenus
+			rect 68 140 190 10
+			text "RtCWPro ^1NA^7 (azure.wolfdm.xyz)"
+			type 1
+			style 0
+			textstyle 3
+			textalign 2
+			textalignx 190
+			textfont UI_FONT_SMALL
+			textscale .200
+			forecolor 1 1 1 1
+			visible 1
+			action { exec "connect azure.wolfdm.xyz" }
+		}
+		itemDef {
+			name USAMiami
+			group mainmenus
+			rect 68 170 190 10
+			text "LATAMPRO ^1NA^7 Miami (rtcwpub.com)"
+			type 1
+			style 0
+			textstyle 3
+			textalign 2
+			textalignx 190
+			textfont UI_FONT_SMALL
+			textscale .200
+			forecolor 1 1 1 1
+			visible 1
+			action { exec "connect wolfdm.xyz" }
+		}
+		itemDef {
+			name Netherlands
+			group mainmenus
+			rect 380 110 150 10
+			text "Netherlands Gather (nl.rtcw.eu)"
+			type 1
+			style 0
+			textstyle 3
+			textalign 0
+			textfont UI_FONT_SMALL
+			textscale .200
+			forecolor 1 1 1 1
+			visible 1
+			action { exec "connect nl.rtcw.eu" }
+		}
+		itemDef {
+			name Britain
+			group mainmenus
+			rect 380 140 150 10
+			text "Britain Gather (uk.rtcw.eu)"
+			type 1
+			style 0
+			textstyle 3
+			textalign 0
+			textfont UI_FONT_SMALL
+			textscale .200
+			forecolor 1 1 1 1
+			visible 1
+			action { exec "connect uk.rtcw.eu" }
+		}
+		itemDef {
+			name Germany
+			group mainmenus
+			rect 380 170 150 10
+			text "Germany Gather (de.rtcw.eu)"
+			type 1
+			style 0
+			textstyle 3
+			textalign 0
+			textfont UI_FONT_SMALL
+			textscale .200
+			forecolor 1 1 1 1
+			visible 1
+			action { exec "connect de.rtcw.eu" }
+		}
 
+	//MULTIPLAYER
+		itemDef {
+			name playselection
+			group mainmenus
+			text "MULTIJOUEUR"
+			tooltip "Rechercher des parties sur internet, configurer les options internet, ou demarrer son propre serveur"
+			type 1
+			style 0
+			textstyle 3
+			rect 300 200 250 30
+			textalign 1
+			textfont UI_FONT_BIG
+			textscale .350
+			textalignx 20
+			textaligny 10
+			forecolor 1 .6 0 1
+			backcolor .5 .5 .5 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { open multi_menu; open joinserver }
+		}
 
-	//	SINGLE PLAYER	//
+	// VIEW DEMOS
+		itemDef {
+			name demos
+			group mainmenus
+			text "REGARDER DEMOS"
+			tooltip "Regarder des demos enregistrees"
+			type 1
+			style 0
+			textstyle 3
+			rect 300 230 250 30
+			textalign 1
+			textfont UI_FONT_BIG
+			textscale .350
+			textalignx 20
+			textaligny 10
+			forecolor 1 .6 0 1
+			backcolor .5 .5 .5 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { open demos_menu; open demos_list; hide mainmenus }
+		}
 
-	itemDef {
-		name play
-		text "JEU SOLO"
-		type 1
-		style 0		
-		textstyle 6
-		rect 3 420 100 14 
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .255		
-		textalignx 7
-		textaligny 10
-		forecolor 1 1 1 1
-		visible 0
+	// OPTIONS
+		itemDef {
+			name options
+			group mainmenus
+			text "OPTIONS"
+			tooltip "Modifier les options de jeu"
+			type 1
+			style 0
+			textstyle 3
+			rect 300 260 250 30
+			textalign 1
+			textfont UI_FONT_BIG
+			textscale .350
+			textalignx 20
+			textaligny 10
+			forecolor 1 .6 0 1
+			backcolor .5 .5 .5 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { open setup_menu; open control_menu }
+		}
 
-		action {
-			play "sound/misc/zap.wav";
-			open single_player_menu
+	// CREDITS
+		itemDef {
+			name credits
+			group mainmenus
+			text "CRÉDITS"
+			tooltip "Regarder crédits de parties"
+			type 1
+			style 0
+			textstyle 3
+			rect 300 290 250 30
+			textalign 1
+			textfont UI_FONT_BIG
+			textscale .350
+			textalignx 20
+			textaligny 10
+			forecolor 1 .6 0 1
+			backcolor .5 .5 .5 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { open credit }
+		}
+
+	// QUIT
+		itemDef {
+			name quit
+			group mainmenus
+			text "QUITTER"
+			tooltip "Quitter RtcwPro"
+			type 1
+			style 0
+			textstyle 3
+			rect 300 320 250 30
+			textalign 1
+			textfont UI_FONT_BIG
+			textscale .350
+			textalignx 20
+			textaligny 10
+			forecolor 1 .6 0 1
+			backcolor .5 .5 .5 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { open quit_popmenu }
+		}
+
+		itemDef {
+			name fadebox	// Box for fading in menus
+			style WINDOW_STYLE_FILLED
+			background "ui_mp/assets/fadebox.tga"
+			forecolor 0 0 0 1
+			backcolor 0 0 0 1
+			rect 0 0 640 480
+			visible 1
+			decoration
+		}
+
+		itemDef {
+			name window
+			text "Wolfenstein Multiplayer"
+			type 0
+			style 2
+			textstyle 6
+			rect 5 465 250 14
+			autowrapped
+			textalign 0
+			textfont UI_FONT_NORMAL
+			textscale .2552
+			textalignx 2
+			textaligny 10
+			forecolor .937 .702 0.2 1
+			visible 1
+			decoration
+		}
+
+		itemDef {
+			name rtcwpro_sourceurl
+			text "Source"	// show the cvar below
+			//cvar ui_gameversion
+			tooltip "RtcwPro Version"
+			tooltipaligny -40
+			type 1
+			style 2
+			rect 545 450 170 14
+			textalign 0
+			textfont UI_FONT_NORMAL
+			textstyle ITEM_TEXTSTYLE_UNDERLINED
+			textscale .2552
+			textalignx 2
+			textaligny 10
+			forecolor 0.961 0 0 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { uiScript openModSource }
+		}
+		itemDef {
+			name rtcwpro_modurl
+			text "RtcwPro.com"
+			tooltip "RtcwPro.com"
+			tooltipaligny -40
+			type 1
+			style 0
+			rect 545 465 170 14
+			textalign 0
+			textfont UI_FONT_NORMAL
+			textstyle ITEM_TEXTSTYLE_UNDERLINED
+			textscale .2552
+			textalignx 2
+			textaligny 10
+			forecolor 1 0.62 0.1 1
+			visible 1
+			mouseEnter { fadein message_accept }
+			action { play "sound/multiplayer/radar_loop02.wav"; uiScript openModURL }
 		}
 	}
-
-
-
-
-	itemDef {
-      	name fadebox					// Box for fading in menus
-      	style WINDOW_STYLE_FILLED
- 		background "ui_mp/assets/fadebox.tga"
-		forecolor 0 0 0 1
-		backcolor 0 0 0 1
-		rect 0 0 640 480
-      	visible 1
-		decoration
-    }
-
-	itemDef {
-		name window
-		text "Multijoueur Wolfenstein"
-		type 0
-		style 0	
-		textstyle 6
-		rect 5 465 250 14
-		autowrapped
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textscale .2552
-		textalignx 2
-		textaligny 10
-		forecolor .937 .702 0.2 1
-      	visible 1
-		decoration
-    }
-
-	itemDef {
-		name osp_gfx
-		style WINDOW_STYLE_SHADER
-		rect 280 200 339 191
-		background "gfx/2d/rtcwpro.tga"
-		forecolor 1 1 1 0.2
-		visible 1
-		decoration
-	}
-
-	itemDef {
-		name rtcwpro_sourceurl
-		text "Source" // show the cvar below
-		//cvar ui_gameversion
-		tooltip "RtcwPro Version"
-		tooltipaligny -40
-		type 1
-		style 0	
-		rect 545 450 170 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textstyle ITEM_TEXTSTYLE_UNDERLINED
-		textscale .2552
-		textalignx 2
-		textaligny 10
-		forecolor 0.961 0 0 1
-      	visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			uiScript openModSource
-		}
-    }
-
-	itemDef {
-		name rtcwpro_modurl
-		text "RtcwPro.com"
-		tooltip "RtcwPro.com"
-		tooltipaligny -40
-		type 1
-		style 0
-		rect 515 465 170 14
-		textalign 0
-		textfont UI_FONT_NORMAL
-		textstyle ITEM_TEXTSTYLE_UNDERLINED
-		textscale .2552
-		textalignx 2
-		textaligny 10
-		forecolor 1 0.62 0.1 1
-		visible 1
-		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			uiScript openModURL
-		}
-    }
 }
-
