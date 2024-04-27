@@ -247,6 +247,9 @@
     <ClCompile Include="unix\linux_tty.c">
       <Filter>Source Files\unix</Filter>
     </ClCompile>
+    <ClCompile Include="win32\win_exception.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">

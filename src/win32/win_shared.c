@@ -466,3 +466,14 @@ char *Sys_GetCurrentUser( void ) {
 
 	return s_userName;
 }
+
+qbool Sys_IsDebuggerAttached()
+{
+	return IsDebuggerPresent();
+}
+
+void Sys_Crash(const char* message, const char* file, int line, const char* function)
+{
+	const ULONG_PTR args[4] = { (ULONG_PTR)message, (ULONG_PTR)file, (ULONG_PTR)line, (ULONG_PTR)function };
+	RaiseException(RTCWPRO_WINDOWS_EXCEPTION_CODE, EXCEPTION_NONCONTINUABLE, ARRAY_LEN(args), args);
+}

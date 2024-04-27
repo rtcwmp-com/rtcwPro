@@ -1245,6 +1245,29 @@ int Sys_GetHighQualityCPU();
 void Sys_Chmod( char *file, int mode );
 #endif
 
+#define RTCWPRO_WINDOWS_EXCEPTION_CODE 0xDEADBEEF
+
+#define DIE(Message) Sys_Crash(Message, __FILE__, __LINE__, __FUNCTION__)
+
+#if defined(_MSC_VER)
+#define ASSERT_OR_DIE(Condition, Message) \
+	do { \
+		if (!(Condition)) { \
+			if (Sys_IsDebuggerAttached()) \
+				__debugbreak(); \
+			else \
+				Sys_Crash(Message, __FILE__, __LINE__, __FUNCTION__); \
+		} \
+	} while (false)
+#else
+#define ASSERT_OR_DIE(Condition, Message) \
+	do { \
+		if (!(Condition)) \
+			Sys_Crash(Message, __FILE__, __LINE__, __FUNCTION__); \
+	} while (false)
+#endif
+
+
 // huffman.cpp - id's original code
 // used for out-of-band (OOB) datagrams with dynamically created trees
 void DynHuff_Compress(msg_t* buf, int offset);
