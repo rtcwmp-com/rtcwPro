@@ -1,5 +1,8 @@
 FROM ubuntu:22.04
 
+ARG BRANCH
+ENV BRANCH=${BRANCH}
+
 ENV DEBIAN_FRONTEND noninteractive
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
@@ -8,13 +11,19 @@ RUN dpkg --add-architecture i386 && \
 
 RUN useradd -ms /bin/bash compile
 
+RUN mkdir /output
+RUN chown compile:compile /output
+
 USER compile
 WORKDIR /home/compile
 
 RUN mkdir -p /home/compile/build && \
     ln -sf /home/compile/mnt/ /home/compile/build 
 
-COPY --chown=compile:compile scripts/make-develop-valgrind.sh /home/compile/start
+COPY --chown=compile:compile scripts/make-all.sh /home/compile/start
+
 RUN chmod +x /home/compile/start
 
-ENTRYPOINT ["/home/compile/start"]
+RUN bash /home/compile/start ${BRANCH}
+
+RUN mv /home/compile/rtcwpro/build /output/

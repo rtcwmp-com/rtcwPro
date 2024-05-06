@@ -84,7 +84,7 @@ COMMONOBJS := \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
 	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o \
-	../qcommon/api_query.o ../qcommon/huffman_static.o
+	../qcommon/api_query.o ../qcommon/json.o ../qcommon/huffman_static.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -104,7 +104,7 @@ UNIXCLIENTOBJS := \
 	../unix/linux_qgl.o ../unix/linux_glimp.o ../unix/linux_joystick.o \
 	../unix/linux_snd.o
 UNIXOBJS := \
-	../unix/linux_common.o ../unix/unix_main.o ../unix/unix_net.o \
+	../unix/linux_common.o ../unix/unix_main.o ../unix/linux_tty.o ../unix/unix_net.o \
 	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \
@@ -183,10 +183,10 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL)  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I../../deps/curl/build/include/ 
+	$(CFLAGSREL)  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I../../deps/libunwind/build/include/ -I../../deps/curl/build/include/ 
 server: LDFLAGS := -lm -m32 -DCURL_STATICLIB
 server: $(SVOBJS)
-	$(CC) -o wolfded.x86 $(SVOBJS) ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a $(LDFLAGS)
+	$(CC) -o wolfded.x86 $(SVOBJS) ../../deps/libunwind/build/lib/libunwind.a ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a $(LDFLAGS)
 #	strip -s wolfded.x86
 server-clean:
 	rm $(SVOBJS) 2> /dev/null ; exit 0

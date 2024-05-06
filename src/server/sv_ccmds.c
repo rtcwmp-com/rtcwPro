@@ -368,15 +368,14 @@ static void SV_MapRestart_f( void ) {
 	}
 
 	// check for changes in variables that can't just be restarted
-	// check for maxclients change
-	if ( sv_maxclients->modified ) {
-		char mapname[MAX_QPATH];
-
-		Com_Printf( "sv_maxclients variable change -- restarting.\n" );
+	// dwl: If the game lasts more than two hours, then when restarting map have to restart the server
+//	if (sv_maxclients->modified || sv_gametype->modified || (svs.time > 2 * 60 * 60 * 1000)) {
+	if (sv_maxclients->modified || (svs.time > 2 * 60 * 60 * 1000)) {
+		Com_Printf("variable change -- restarting.\n");
 		// restart the map the slow way
-		Q_strncpyz( mapname, Cvar_VariableString( "mapname" ), sizeof( mapname ) );
-
-		SV_SpawnServer( mapname, qfalse );
+		char mapname[MAX_QPATH];
+		Q_strncpyz(mapname, Cvar_VariableString("mapname"), sizeof(mapname));
+		SV_SpawnServer(mapname, qfalse);
 		return;
 	}
 
@@ -1026,6 +1025,52 @@ static void SV_LoadGameConfig_f( void ) {
 
 //===========================================================
 
+static const char* SV_FormatUptime(int seconds)
+{
+	static char result[32];
+
+	const int unitCount = 4;
+	static const char* units[4] = { "s", "m", "h", "d" };
+	static const int divisors[4] = { 1, 60, 60, 24 };
+
+	if (seconds <= 0)
+		return "nada";
+
+	int uptime[4] = { seconds, 0, 0, 0 };
+	for (int i = 1; i < unitCount; ++i) {
+		uptime[i] = uptime[i - 1] / divisors[i];
+		uptime[i - 1] -= uptime[i] * divisors[i];
+	}
+
+	result[0] = '\0';
+	for (int i = unitCount - 1; i >= 0; --i) {
+		if (uptime[i] <= 0)
+			continue;
+
+		Q_strcat(result, sizeof(result), va("%d%s", uptime[i], units[i]));
+		if (i > 0 && uptime[i - 1] > 0)
+			Q_strcat(result, sizeof(result), " ");
+	}
+
+	return result;
+}
+
+static void SV_Uptime_f(void)
+{
+	if (Sys_HasRtcwProParent()) {
+		const int parentTime = Sys_GetUptimeSeconds(qtrue);
+		Com_Printf("Parent process : %s\n", parentTime >= 0 ? SV_FormatUptime(parentTime) : "unknown");
+	}
+
+	const int childTime = Sys_GetUptimeSeconds(qfalse);
+	Com_Printf("This process   : %s\n", childTime >= 0 ? SV_FormatUptime(childTime) : "unknown");
+
+	int mapTime = -1;
+	if (Cvar_VariableIntegerValue("sv_running"))
+		mapTime = (Sys_Milliseconds() - sv.mapLoadTime) / 1000;
+	Com_Printf("Current map    : %s\n", mapTime >= 0 ? SV_FormatUptime(mapTime) : "no map loaded");
+}
+
 /*
 ==================
 SV_AddOperatorCommands
@@ -1065,7 +1110,7 @@ void SV_AddOperatorCommands( void ) {
 	if ( com_dedicated->integer ) {
 		Cmd_AddCommand( "say", SV_ConSay_f );
 	}
-
+	Cmd_AddCommand("uptime", SV_Uptime_f);
 /*
 	Cmd_AddCommand("rehashbans", SV_RehashBans_f);
 	Cmd_AddCommand("listbans", SV_ListBans_f);

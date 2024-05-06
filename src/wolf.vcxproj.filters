@@ -241,6 +241,15 @@
     <ClCompile Include="qcommon\huffman_static.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="qcommon\json.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unix\linux_tty.c">
+      <Filter>Source Files\unix</Filter>
+    </ClCompile>
+    <ClCompile Include="win32\win_exception.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A3D\a3dWrapperdp.h">
@@ -380,6 +389,9 @@
     </ClInclude>
     <ClInclude Include="qcommon\q_platform.h" />
     <ClInclude Include="win32\glw_win.h" />
+    <ClInclude Include="qcommon\crash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wolf.rc" />

@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN dpkg --add-architecture i386 && \
@@ -14,7 +14,7 @@ WORKDIR /home/compile
 RUN mkdir -p /home/compile/build && \
     ln -sf /home/compile/mnt/ /home/compile/build 
 
-COPY --chown=compile:compile scripts/make-develop-valgrind.sh /home/compile/start
+COPY --chown=compile:compile scripts/make-develop-18.sh /home/compile/start
 RUN chmod +x /home/compile/start
 
 ENTRYPOINT ["/home/compile/start"]
