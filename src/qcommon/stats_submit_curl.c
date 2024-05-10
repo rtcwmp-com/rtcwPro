@@ -253,11 +253,14 @@ int submit_curlPost( char* jsonfile, char* matchid ) {
 
     Cvar_VariableStringBuffer( "g_stats_curl_submit_URL", url, sizeof( url ) );
     if (stats_info) {
-        stats_info->url = url;
-	    stats_info->matchid = va("matchid: %s", matchid);
-	    stats_info->filename = outfile;
+        stats_info->url = (char*)malloc(strlen(url) + 1);
+        if (stats_info->url) {
+            strcpy(stats_info->url, url);
+            stats_info->matchid = va("matchid: %s", matchid);
+            stats_info->filename = outfile;
 
-	    Threads_Create(submit_HTTP_curlPost, stats_info);
+            Threads_Create(submit_HTTP_curlPost, stats_info);
+        }
     }
 }
 
@@ -346,6 +349,8 @@ void* submit_HTTP_curlPost(void* args) {
     hnd = NULL;
 
     remove(stats_info->filename);
+    free(stats_info->url);
+    free(stats_info);
     return (int)ret;
 
 }
