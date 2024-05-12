@@ -368,9 +368,7 @@ static void SV_MapRestart_f( void ) {
 	}
 
 	// check for changes in variables that can't just be restarted
-	// dwl: If the game lasts more than two hours, then when restarting map have to restart the server
-//	if (sv_maxclients->modified || sv_gametype->modified || (svs.time > 2 * 60 * 60 * 1000)) {
-	if (sv_maxclients->modified || (svs.time > 2 * 60 * 60 * 1000)) {
+	if (sv_maxclients->modified) {
 		Com_Printf("variable change -- restarting.\n");
 		// restart the map the slow way
 		char mapname[MAX_QPATH];
