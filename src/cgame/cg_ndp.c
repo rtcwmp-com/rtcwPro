@@ -41,6 +41,7 @@ qbool isRtcwProV128 = qfalse;
 qbool isRtcwProV129 = qfalse;
 qbool isRtcwProV130 = qfalse;
 qbool isRtcw10 = qfalse;
+qbool gameVersionFound = qfalse;
 
 /*
 =================
@@ -52,7 +53,6 @@ If we know what it is we don't need to look for it again
 =================
 */
 
-static qbool gameVersionFound = qfalse;
 qbool CG_NDP_FindGameVersion(void) {
 	const char* info = CG_ConfigString(CS_SERVERINFO);
 	char* current_gamename = Info_ValueForKey(info, "gamename");

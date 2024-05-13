@@ -2977,6 +2977,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 			CG_execFile("autoexec_default");
 		}
 	}
+	else {
+		// Reset the last demo's game version found
+		gameVersionFound = qfalse;
+	}
 
 	CG_LoadExtensions();
 
