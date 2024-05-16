@@ -3570,7 +3570,9 @@ void G_RunFrame( int levelTime ) {
 		) {
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
-				G_RunMissile( ent );
+				if (g_antilag.integer != 2) {
+					G_RunMissile(ent);
+				}
 			} else {
 				// During a pause, gotta keep track of stuff in the air
 				ent->s.pos.trTime += level.time - level.previousTime;
@@ -3638,7 +3640,7 @@ void G_RunFrame( int levelTime ) {
 				continue;
 			}
 
-			if (ent->s.eType == ET_MISSILE) {
+			if (level.paused == PAUSE_NONE && ent->s.eType == ET_MISSILE) {
 				G_RunMissile(ent);
 			}
 		}

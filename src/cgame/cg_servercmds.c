@@ -141,7 +141,7 @@ static void CG_ParseTeamInfo( void ) {
 		//demo playback tinfos
 		
 		//OSP, bani
-		if (!isRtcwPro) {
+		if (!isRtcwPro && gameVersionFound) {
 
 			// NERVE - SMF
 			cg.identifyClientNum = atoi(CG_Argv(1));

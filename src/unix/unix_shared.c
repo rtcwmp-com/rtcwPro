@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <dlfcn.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -35,9 +37,21 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <pwd.h>
+#if defined(__linux__)
+#include <sys/sysinfo.h>
+#elif defined(__FreeBSD__)
+#include <sys/user.h>
+#include <sys/sysctl.h>
+#endif
+#include <inttypes.h>
+#ifdef DEDICATED
+#include <sys/wait.h>
+#endif
 
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
+
+#include "linux_local.h"
 
 //=============================================================================
 
@@ -96,6 +110,222 @@ int Sys_Milliseconds( void ) {
 	curtime = ( tp.tv_sec - sys_timeBase ) * 1000 + tp.tv_usec / 1000;
 
 	return curtime;
+}
+
+
+qbool Sys_HardReboot()
+{
+#ifdef DEDICATED
+	return qtrue;
+#else
+	return qfalse;
+#endif
+}
+
+
+#ifdef DEDICATED
+
+
+static int Lin_RunProcess(char** argv)
+{
+	const pid_t pid = fork();
+	if (pid == 0) {
+		if (execve(argv[0], argv, NULL) == -1) {
+			fprintf(stderr, "failed to launch child process: %s\n", strerror(errno));
+			_exit(1); // quit without calling atexit handlers
+			return 0;
+		}
+	}
+
+	int status;
+	while (waitpid(pid, &status, WNOHANG) == 0)
+		sleep(1); // in seconds
+
+	return WEXITSTATUS(status);
+}
+
+
+void Lin_HardRebootHandler(int argc, char** argv)
+{
+	for (int i = 0; i < argc; ++i) {
+		if (!Q_stricmp(argv[i], "nohardreboot")) {
+			return;
+		}
+	}
+
+	static char* args[256];
+	if (argc + 2 >= sizeof(args) / sizeof(args[0])) {
+		fprintf(stderr, "too many arguments: %d\n", argc);
+		_exit(1); // quit without calling atexit handlers
+		return;
+}
+
+	for (int i = 0; i < argc; ++i)
+		args[i] = argv[i];
+	args[argc + 0] = (char*)"nohardreboot";
+	args[argc + 1] = NULL;
+
+	SIG_InitParent();
+
+	for (;;) {
+		if (Lin_RunProcess(args) == 0)
+			_exit(0); // quit without calling atexit handlers
+	}
+}
+
+
+#endif
+
+
+static qbool lin_hasParent = qfalse;
+static pid_t lix_parentPid;
+
+
+static const char* Lin_GetExeName(const char* path)
+{
+	const char* lastSlash = strrchr(path, '/');
+	if (lastSlash == NULL)
+		return path;
+
+	return lastSlash + 1;
+}
+
+
+void Lin_TrackParentProcess()
+{
+#if defined(__linux__)
+
+	static char cmdLine[1024];
+
+	char fileName[128];
+	Com_sprintf(fileName, sizeof(fileName), "/proc/%d/cmdline", (int)getppid());
+
+	const int fd = open(fileName, O_RDONLY);
+	if (fd == -1)
+		return;
+
+	const qbool hasCmdLine = read(fd, cmdLine, sizeof(cmdLine)) > 0;
+	close(fd);
+
+	if (!hasCmdLine)
+		return;
+
+	cmdLine[sizeof(cmdLine) - 1] = '\0';
+	lin_hasParent = strcmp(Lin_GetExeName(cmdLine), Lin_GetExeName(q_argv[0])) == 0;
+
+#elif defined(__FreeBSD__)
+
+	static char cmdLine[1024];
+
+	int mib[4];
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_ARGS;
+	mib[3] = getppid();
+	size_t length = sizeof(cmdLine);
+	if (sysctl(mib, 4, cmdLine, &length, NULL, 0) != 0)
+		return;
+
+	cmdLine[sizeof(cmdLine) - 1] = '\0';
+	lin_hasParent = strcmp(Lin_GetExeName(cmdLine), Lin_GetExeName(q_argv[0])) == 0;
+
+#endif
+}
+
+
+qbool Sys_HasRtcwProParent()
+{
+	return lin_hasParent;
+}
+
+
+static int Sys_GetProcessUptime(pid_t pid)
+{
+#if defined(__linux__)
+
+	// length must be in sync with the fscanf call!
+	static char word[256];
+
+	// The process start time is the 22nd column and
+	// encoded as jiffies after system boot.
+	const int jiffiesPerSec = sysconf(_SC_CLK_TCK);
+	if (jiffiesPerSec <= 0)
+		return -1;
+
+	char fileName[128];
+	Com_sprintf(fileName, sizeof(fileName), "/proc/%" PRIu64 "/stat", (uint64_t)pid);
+	FILE* const file = fopen(fileName, "r");
+	if (file == NULL)
+		return -1;
+
+	for (int i = 0; i < 21; ++i) {
+		if (fscanf(file, "%255s", word) != 1) {
+			fclose(file);
+			return -1;
+		}
+	}
+
+	int64_t jiffies;
+	const qbool success = fscanf(file, "%" PRId64, &jiffies) == 1;
+	fclose(file);
+
+	if (!success)
+		return -1;
+
+	const int64_t secondsSinceBoot = jiffies / (int64_t)jiffiesPerSec;
+	struct sysinfo info;
+	sysinfo(&info);
+	const int64_t uptime = (int64_t)info.uptime - secondsSinceBoot;
+
+	return (int)uptime;
+
+#elif defined(__FreeBSD__)
+
+	int mib[4];
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PID;
+	mib[3] = pid;
+	struct kinfo_proc kp;
+	size_t len = sizeof(kp);
+	if (sysctl(mib, 4, &kp, &len, NULL, 0) != 0) {
+		return -1;
+	}
+
+	struct timeval now;
+	gettimeofday(&now, NULL);
+
+	return (int)(now.tv_sec - kp.ki_start.tv_sec);
+
+#else
+
+	return -1;
+
+#endif
+}
+
+int Sys_GetUptimeSeconds(qbool parent)
+{
+	return Sys_GetProcessUptime(parent ? getppid() : getpid());
+}
+
+void Sys_LoadHistory()
+{
+#ifdef DEDICATED
+	History_LoadFromFile(tty_GetHistory());
+#else
+	History_LoadFromFile(&g_history);
+#endif
+}
+
+
+void Sys_SaveHistory()
+{
+#ifdef DEDICATED
+	History_SaveToFile(tty_GetHistory());
+#else
+	History_SaveToFile(&g_history);
+#endif
 }
 
 #if !defined( DEDICATED )

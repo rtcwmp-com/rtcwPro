@@ -109,6 +109,8 @@ cvar_t  *cl_notebook;
 
 cvar_t  *com_hunkused;      // Ridah
 
+static cvar_t* con_history;
+
 // com_speeds times
 int time_game;
 int time_frontend;          // renderer frontend time
@@ -354,18 +356,35 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Quit_f( void ) {
+
+void Com_Quit(int status)
+{
+/* TODO: Save & restore history
+#ifndef DEDICATED
+	// note that cvar_modifiedFlags's CVAR_ARCHIVE bit is set when a bind is modified
+	if (com_frameNumber > 0 && (cvar_modifiedFlags & CVAR_ARCHIVE) != 0)
+		Com_WriteConfigToFile("q3config.cfg", qfalse);
+#endif
+	Sys_SaveHistory();
+*/
 	// don't try to shutdown if we are in a recursive error
 	if ( !com_errorEntered ) {
-		SV_Shutdown( "Server quit\n" );
+		SV_Shutdown("Server quit");
+#ifndef DEDICATED
 		CL_Shutdown();
+#endif
 		Com_Shutdown();
 		FS_Shutdown( qtrue );
 	}
-	Sys_Quit();
+
+	Sys_Quit(status);
 }
 
 
+static void Com_Quit_f(void)
+{
+	Com_Quit(0);
+}
 
 /*
 ============================================================================
@@ -3726,6 +3745,198 @@ void Field_CompleteCommand( field_t *field ) {
 	Cmd_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion( PrintMatches );
 }
+
+/* TODO: finish command history save/restore */
+void History_Clear(history_t* history, int width)
+{
+	for (int i = 0; i < COMMAND_HISTORY; ++i) {
+		Field_Clear(&history->commands[i]);
+		history->commands[i].widthInChars = width;
+	}
+}
+
+
+static int LengthWithoutTrailingWhitespace(const char* s)
+{
+	int i = (int)strlen(s);
+	while (i--) {
+		if (s[i] != ' ' && s[i] != '\t')
+			return i + 1;
+	}
+
+	return 0;
+}
+
+
+void History_SaveCommand(history_t* history, const field_t* edit)
+{
+	// Avoid having the same command twice in a row.
+	// Unfortunately, this has to be case sensitive since case might matter for some commands.
+	if (history->next > 0) {
+		// The real proper way to ignore whitespace is to tokenize both strings and compare the
+		// argument count and then each argument with a case sensitive comparison,
+		// but there's only one tokenizer data instance...
+		// Instead, we only ignore the trailing whitespace.
+		const int lengthCur = LengthWithoutTrailingWhitespace(edit->buffer);
+		if (lengthCur == 0) {
+			history->display = history->next;
+			return;
+		}
+
+		const int prevLine = (history->next - 1) % COMMAND_HISTORY;
+		const int lengthPrev = LengthWithoutTrailingWhitespace(history->commands[prevLine].buffer);
+		if (lengthCur == lengthPrev && strncmp(edit->buffer, history->commands[prevLine].buffer, lengthCur) == 0) {
+			history->display = history->next;
+			return;
+		}
+	}
+
+	// copy the line
+	history->commands[history->next % COMMAND_HISTORY] = *edit;
+	++history->next;
+	history->display = history->next;
+}
+
+
+void History_GetPreviousCommand(field_t* edit, history_t* history)
+{
+	if (history->next - history->display < COMMAND_HISTORY && history->display > 0)
+		--history->display;
+	*edit = history->commands[history->display % COMMAND_HISTORY];
+}
+
+
+void History_GetNextCommand(field_t* edit, history_t* history, int width)
+{
+	++history->display;
+	if (history->display < history->next) {
+		*edit = history->commands[history->display % COMMAND_HISTORY];
+		return;
+	}
+
+	history->display = history->next;
+	Field_Clear(edit);
+	edit->widthInChars = width;
+}
+
+
+// It makes no sense for both executables to share the same command history.
+#if defined(DEDICATED)
+#define HISTORY_PATH "rtcwprosvcmdhistory"
+#else
+#define HISTORY_PATH "rtcwprocmdhistory"
+#endif
+
+
+void History_LoadFromFile(history_t* history)
+{
+	fileHandle_t f;
+	FS_FOpenFileRead(HISTORY_PATH, &f, qfalse);
+	if (f == 0)
+		return;
+
+	int count;
+	if (FS_Read(&count, sizeof(int), f) != sizeof(int) ||
+		count <= 0 ||
+		count > COMMAND_HISTORY) {
+		FS_FCloseFile(f);
+		return;
+	}
+
+	int lengths[COMMAND_HISTORY];
+	const int lengthBytes = sizeof(int) * count;
+	if (FS_Read(lengths, lengthBytes, f) != lengthBytes) {
+		FS_FCloseFile(f);
+		return;
+	}
+
+	for (int i = 0; i < count; ++i) {
+		const int l = lengths[i];
+		if (l <= 0 ||
+			FS_Read(history->commands[i].buffer, l, f) != l) {
+			FS_FCloseFile(f);
+			return;
+		}
+		history->commands[i].buffer[l] = '\0';
+		history->commands[i].cursor = l;
+	}
+
+	history->next = count;
+	history->display = count;
+	const int totalCount = ARRAY_LEN(history->commands);
+	for (int i = count; i < totalCount; ++i) {
+		history->commands[i].buffer[0] = '\0';
+	}
+
+	FS_FCloseFile(f);
+}
+
+
+void History_SaveToFile(const history_t* history)
+{
+	if (con_history->integer == 0)
+		return;
+
+	const fileHandle_t f = FS_FOpenFileWrite(HISTORY_PATH);
+	if (f == 0)
+		return;
+
+	int count = 0;
+	int lengths[COMMAND_HISTORY];
+	const int totalCount = ARRAY_LEN(history->commands);
+	for (int i = 0; i < totalCount; ++i) {
+		const char* const s = history->commands[(history->display + i) % COMMAND_HISTORY].buffer;
+		if (*s == '\0')
+			continue;
+
+		lengths[count++] = strlen(s);
+	}
+
+	FS_Write(&count, sizeof(count), f);
+	FS_Write(lengths, sizeof(int) * count, f);
+	for (int i = 0, j = 0; i < totalCount; ++i) {
+		const char* const s = history->commands[(history->display + i) % COMMAND_HISTORY].buffer;
+		if (*s == '\0')
+			continue;
+
+		FS_Write(s, lengths[j++], f);
+	}
+
+	FS_FCloseFile(f);
+}
+
+
+const char* Q_itohex(uint64_t number, qbool uppercase, qbool prefix)
+{
+	static const char* luts[2] = { "0123456789abcdef", "0123456789ABCDEF" };
+	static char buffer[19];
+	const int maxLength = 16;
+
+	const char* const lut = luts[uppercase == 0 ? 0 : 1];
+	uint64_t x = number;
+	int i = maxLength + 2;
+	buffer[i] = '\0';
+	while (i--) {
+		buffer[i] = lut[x & 15];
+		x >>= 4;
+	}
+
+	int startOffset = 2;
+	for (i = 2; i < maxLength + 1; i++, startOffset++) {
+		if (buffer[i] != '0')
+			break;
+	}
+
+	if (prefix) {
+		startOffset -= 2;
+		buffer[startOffset + 0] = '0';
+		buffer[startOffset + 1] = 'x';
+	}
+
+	return buffer + startOffset;
+}
+
+
 
 const char* Com_FormatBytes(uint64_t numBytes)
 {

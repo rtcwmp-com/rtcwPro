@@ -689,6 +689,8 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	Hunk_SetMark();
 
+	sv.mapLoadTime = Sys_Milliseconds();
+
 	Cvar_Set( "sv_serverRestarting", "0" );
 
 	Com_Printf( "-----------------------------------\n" );
@@ -986,6 +988,8 @@ void SV_Init( void ) {
 
 	// drop client on msg.overflow in sv_snapshot
 	sv_dropClientOnOverflow = Cvar_Get("sv_dropClientOnOverflow", "1", CVAR_ARCHIVE);
+
+	sv_minRestartDelay = Cvar_Get("sv_minRestartDelay", "2", CVAR_ARCHIVE); //min. hours to wait before restarting the server
 
 	// End RtcwPro
 	

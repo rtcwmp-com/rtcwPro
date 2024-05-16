@@ -115,6 +115,45 @@ void Sys_MicroSleep(int us)
 	}
 }
 
+int Sys_GetUptimeSeconds(qbool parent)
+{
+	if (parent)
+		return -1;
+
+	FILETIME startFileTime;
+	FILETIME trash[3];
+	if (GetProcessTimes(GetCurrentProcess(), &startFileTime, &trash[0], &trash[1], &trash[2]) == 0)
+		return -1;
+
+	SYSTEMTIME endSystemTime;
+	GetSystemTime(&endSystemTime);
+
+	FILETIME endFileTime;
+	if (SystemTimeToFileTime(&endSystemTime, &endFileTime) == 0)
+		return -1;
+
+	// 1 FILETIME unit is 100-nanoseconds
+	ULARGE_INTEGER start, end;
+	start.LowPart = startFileTime.dwLowDateTime;
+	start.HighPart = startFileTime.dwHighDateTime;
+	end.LowPart = endFileTime.dwLowDateTime;
+	end.HighPart = endFileTime.dwHighDateTime;
+	const int seconds = (int)((end.QuadPart - start.QuadPart) / 1e7);
+
+	return seconds;
+}
+
+qbool Sys_HardReboot()
+{
+	return qfalse;
+}
+
+
+qbool Sys_HasRtcwProParent()
+{
+	return qfalse;
+}
+
 /*
 ================
 Sys_SnapVector
@@ -440,4 +479,15 @@ char *Sys_GetCurrentUser( void ) {
 	}
 
 	return s_userName;
+}
+
+qbool Sys_IsDebuggerAttached()
+{
+	return IsDebuggerPresent();
+}
+
+void Sys_Crash(const char* message, const char* file, int line, const char* function)
+{
+	const ULONG_PTR args[4] = { (ULONG_PTR)message, (ULONG_PTR)file, (ULONG_PTR)line, (ULONG_PTR)function };
+	RaiseException(RTCWPRO_WINDOWS_EXCEPTION_CODE, EXCEPTION_NONCONTINUABLE, ARRAY_LEN(args), args);
 }

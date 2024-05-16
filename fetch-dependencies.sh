@@ -22,6 +22,13 @@ rm $VER
 mv *jansson* jansson
 JANSSON_DIR=`pwd`/jansson
 
+VER=$(curl --silent -qI https://github.com/libunwind/libunwind/releases/latest | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}');
+wget https://api.github.com/repos/libunwind/libunwind/tarball/$VER
+tar xvfz $VER
+rm $VER
+mv *libunwind* libunwind
+LIBUNWIND_DIR=`pwd`/libunwind
+
 
 cd $OPENSSL_DIR
 mkdir build
@@ -61,5 +68,14 @@ make install
 
 autoreconf -i
 CFLAGS="-m32" ./configure --prefix=${JANSSON_DIR}/build-win --target=i686-w64-mingw32 --host=i686-w64-mingw32
+make -j
+make install
+
+cd $LIBUNWIND_DIR
+mkdir build
+autoreconf -i
+export CC="gcc -m32"
+export CXX="g++ -m32"
+./configure --host=i686-pc-linux-gnu --prefix=${LIBUNWIND_DIR}/build --disable-documentation --disable-tests
 make -j
 make install

@@ -726,7 +726,24 @@ menuDef {
 		textfont UI_FONT_SMALL
 		textscale .2
 		textstyle 2
-		text "Nihilist / KrAzYkAzE / Dutchmeat / Tarator / S4ndm4nn"
+		text "Nihilist / KrAzYkAzE / Tarator / Snappas"
+		textalign ITEM_ALIGN_CENTER
+		visible 0
+		decoration
+	}
+
+	itemDef {
+		name osp1
+		group grpnervecredit
+		rect 300 375 440 10
+		style 1
+		textalign 1
+		textalignx 20
+		textaligny 9
+		textfont UI_FONT_SMALL
+		textscale .2
+		textstyle 2
+		text "contributions from Nate, Nobo, Crumbs, Dutchmeat, & S4ndm4nn"
 		textalign ITEM_ALIGN_CENTER
 		visible 0
 		decoration
