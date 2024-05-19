@@ -3195,7 +3195,6 @@ void Com_Frame(void) {
 
 	accumulator += frameTime;
 
-	cls.frametime = frameTime;
 
 	while (accumulator >= dt) {
 

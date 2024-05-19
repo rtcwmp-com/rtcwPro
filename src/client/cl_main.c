@@ -2494,7 +2494,7 @@ void CL_Frame( int msec ) {
 	cls.realFrametime = msec;
 
 	// decide the simulation time
-	//cls.frametime = msec;
+	cls.frametime = msec;
 
 	cls.realtime += msec;
 

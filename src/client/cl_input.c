@@ -628,8 +628,10 @@ void CL_FinishMove( usercmd_t *cmd ) {
 	// can be determined without allowing cheating
 	cmd->serverTime = cl.serverTime;
 
-	for ( i = 0 ; i < 3 ; i++ ) {
-		cmd->angles[i] = ANGLE2SHORT( cl.viewangles[i] );
+	if (!(cmd->angles[0]) && !(cmd->angles[1]) && !(cmd->angles[2])) {
+		for (i = 0; i < 3; i++) {
+			cmd->angles[i] = ANGLE2SHORT(cl.viewangles[i]);
+		}
 	}
 }
 
