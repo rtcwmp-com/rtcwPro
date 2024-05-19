@@ -349,6 +349,9 @@ void* submit_HTTP_curlPost(void* args) {
     curl_easy_cleanup(hnd);
     hnd = NULL;
 
+    if (fileinfo.readptr) {
+        free(fileinfo.readptr);
+    }
     remove(stats_info->filename);
     free(stats_info->url);
     free(stats_info);
