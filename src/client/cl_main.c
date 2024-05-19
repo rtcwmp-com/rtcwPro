@@ -2494,9 +2494,9 @@ void CL_Frame( int msec ) {
 	cls.realFrametime = msec;
 
 	// decide the simulation time
-	cls.frametime = msec;
+	//cls.frametime = msec;
 
-	cls.realtime += cls.frametime;
+	cls.realtime += msec;
 
 	if ( cl_timegraph->integer ) {
 		SCR_DebugGraph( cls.realFrametime * 0.25, 0 );
@@ -2515,6 +2515,8 @@ void CL_Frame( int msec ) {
 
 	// send intentions now
 	CL_SendCmd();
+	memset(&cl.currentCmd, 0, sizeof(cl.currentCmd));
+	cl.cmdNumber++;
 }
 
 void CL_Render() {

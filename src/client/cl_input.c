@@ -647,18 +647,18 @@ usercmd_t CL_CreateCmd( void ) {
 	// keyboard angle adjustment
 	CL_AdjustAngles();
 
-	memset( &cmd, 0, sizeof( cmd ) );
+	
 
-	CL_CmdButtons( &cmd );
+	CL_CmdButtons( &cl.currentCmd );
 
 	// get basic movement from keyboard
-	CL_KeyMove( &cmd );
+	CL_KeyMove( &cl.currentCmd);
 
 	// get basic movement from mouse
-	CL_MouseMove( &cmd );
+	CL_MouseMove( &cl.currentCmd);
 
 	// get basic movement from joystick
-	CL_JoystickMove( &cmd );
+	CL_JoystickMove( &cl.currentCmd);
 
 	// check to make sure the angles haven't wrapped
 	if ( cl.viewangles[PITCH] - oldAngles[PITCH] > 90 ) {
@@ -676,7 +676,7 @@ usercmd_t CL_CreateCmd( void ) {
 	cl_recoilPitch->value = 0;
 
 	// store out the final values
-	CL_FinishMove( &cmd );
+	CL_FinishMove( &cl.currentCmd);
 
 	// draw debug graphs of turning for mouse testing
 	if ( cl_debugMove->integer ) {
@@ -688,7 +688,7 @@ usercmd_t CL_CreateCmd( void ) {
 		}
 	}
 
-	return cmd;
+	return cl.currentCmd;
 }
 
 
@@ -719,10 +719,10 @@ void CL_CreateNewCommands( void ) {
 
 
 	// generate a command for this frame
-	cl.cmdNumber++;
+	
 	cmdNum = cl.cmdNumber & CMD_MASK;
 	cl.cmds[cmdNum] = CL_CreateCmd();
-	cmd = &cl.cmds[cmdNum];
+
 }
 
 /*

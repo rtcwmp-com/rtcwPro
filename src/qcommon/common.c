@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "database.h"
 #include "threads.h"
 #include "qcommon.h"
+#include "../client/client.h"
 #ifndef  DEDICATED
 #include "md5.h"
 #endif // ! DEDICATED
@@ -3194,7 +3195,7 @@ void Com_Frame(void) {
 
 	accumulator += frameTime;
 
-
+	cls.frametime = frameTime;
 
 	while (accumulator >= dt) {
 
