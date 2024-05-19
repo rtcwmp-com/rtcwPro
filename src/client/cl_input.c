@@ -615,7 +615,9 @@ void CL_FinishMove( usercmd_t *cmd ) {
 	int i;
 
 	// copy the state that the cgame is currently sending
-	cmd->weapon = cl.cgameUserCmdValue;
+	if (!(cmd->weapon)) { // dont overwrite this every rendered frame 
+		cmd->weapon = cl.cgameUserCmdValue;
+	}
 
 	cmd->holdable = cl.cgameUserHoldableValue;  //----(SA)	modified
 
