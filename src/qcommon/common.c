@@ -75,7 +75,7 @@ cvar_t  *com_timescale;
 cvar_t  *com_fixedtime;
 cvar_t  *com_dropsim;       // 0.0 to 1.0, simulated packet drops
 cvar_t  *com_journal;
-cvar_t  *com_maxfps;
+cvar_t  *cl_fps;
 cvar_t	*com_pipefile;
 cvar_t  *com_timedemo;
 cvar_t  *com_sv_running;
@@ -2630,7 +2630,7 @@ void Com_Init( char *commandLine ) {
 	// init commands and vars
 	//
 	//com_altivec = Cvar_Get ("com_altivec", "1", CVAR_ARCHIVE);
-	com_maxfps = Cvar_Get( "com_maxfps", "125", CVAR_ARCHIVE ); // RtcwPro unlatched this for forcefps equivalent - cvar restrictions keep players inline //| CVAR_LATCH );
+	cl_fps = Cvar_Get( "cl_fps", "1000", CVAR_ARCHIVE ); // RtcwPro unlatched this for forcefps equivalent - cvar restrictions keep players inline //| CVAR_LATCH );
 	com_blood = Cvar_Get( "com_blood", "1", CVAR_ARCHIVE );
 
 	com_developer = Cvar_Get( "developer", "0", CVAR_TEMP );
@@ -2946,8 +2946,8 @@ void Com_Frame( void ) {
 				minMsec = 1000 / com_maxfpsMinimized->integer;
 			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
 				minMsec = 1000 / com_maxfpsUnfocused->integer;
-			else if(com_maxfps->integer > 0)
-				minMsec = 1000 / com_maxfps->integer;
+			else if(cl_fps->integer > 0)
+				minMsec = 1000 / cl_fps->integer;
 			else
 				minMsec = 1;
 
@@ -3255,8 +3255,8 @@ void Com_Frame(void) {
 
 		accumulator -= dt;
 	}
-	if (com_maxfps->integer) {
-		minMsec = 1000 / com_maxfps->integer;
+	if (cl_fps->integer) {
+		minMsec = 1000 / cl_fps->integer;
 	}
 	else {
 		minMsec = 1;
@@ -3361,8 +3361,8 @@ void Com_Frame( void ) {
 				minMsec = 1000 / com_maxfpsMinimized->integer;
 			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
 				minMsec = 1000 / com_maxfpsUnfocused->integer;
-			else if(com_maxfps->integer > 0)
-				minMsec = 1000 / com_maxfps->integer;
+			else if(cl_fps->integer > 0)
+				minMsec = 1000 / cl_fps->integer;
 			else
 				minMsec = 1;
 
