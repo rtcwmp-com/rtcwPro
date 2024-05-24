@@ -1170,13 +1170,8 @@ qboolean SV_CheckPaused( void ) {
 static void SV_IntegerOverflowShutDown(const char* msg)
 {
 	//Inform connected players why the server disconnected
-	for (int i = 0; i < sv_maxclients->integer; ++i) {
-		client_t* cl = &svs.clients[i];
-		if (cl->state >= CS_CONNECTED) {
-			SV_DropClient(cl, msg);
-		}
-	}
-
+	SV_FinalMessage(msg, qtrue);
+	
 	if (Sys_HardReboot())
 		Com_Quit(1);
 
@@ -1243,10 +1238,11 @@ void SV_Frame( int msec ) {
 			const qbool isBot = (cl->netchan.remoteAddress.type == NA_BOT) || (cl->gentity && (cl->gentity->r.svFlags & SVF_BOT));
 			if (!isBot) {
 				if (cl->gentity) {
-					if (cl->gentity->s.teamNum != TEAM_SPECTATOR) { //don't count spectators toward player count
+					playerState_t* ps = SV_GameClientNum(i);
+					if (ps->teamNum != TEAM_SPECTATOR) { //don't count spectators toward player count
 						connectedHumans++;
 					}
-					if (cl->gentity->s.powerups & PW_READY) { //don't restart if players are ready
+					if (cl->gentity->s.powerups & (1 << PW_READY)) { //don't restart if players are ready
 						safeToRestart = qfalse;
 						break;
 					}
