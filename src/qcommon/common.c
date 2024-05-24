@@ -32,7 +32,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "database.h"
 #include "threads.h"
 #include "qcommon.h"
-#include "../client/client.h"
 #ifndef  DEDICATED
 #include "md5.h"
 #endif // ! DEDICATED
@@ -75,7 +74,7 @@ cvar_t  *com_timescale;
 cvar_t  *com_fixedtime;
 cvar_t  *com_dropsim;       // 0.0 to 1.0, simulated packet drops
 cvar_t  *com_journal;
-cvar_t  *cl_fps;
+cvar_t  *com_maxfps;
 cvar_t	*com_pipefile;
 cvar_t  *com_timedemo;
 cvar_t  *com_sv_running;
@@ -278,6 +277,16 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	static int lastErrorTime;
 	static int errorCount;
 	int currentTime;
+
+#if 0   //#if defined(_WIN32) && defined(_DEBUG)
+	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
+		if ( !com_noErrorInterrupt->integer ) {
+			__asm {
+				int 0x03
+			}
+		}
+	}
+#endif
 
 	// when we are running automated scripts, make sure we
 	// know if anything failed
@@ -2630,7 +2639,7 @@ void Com_Init( char *commandLine ) {
 	// init commands and vars
 	//
 	//com_altivec = Cvar_Get ("com_altivec", "1", CVAR_ARCHIVE);
-	cl_fps = Cvar_Get( "cl_fps", "1000", CVAR_ARCHIVE ); // RtcwPro unlatched this for forcefps equivalent - cvar restrictions keep players inline //| CVAR_LATCH );
+	com_maxfps = Cvar_Get( "com_maxfps", "125", CVAR_ARCHIVE ); // RtcwPro unlatched this for forcefps equivalent - cvar restrictions keep players inline //| CVAR_LATCH );
 	com_blood = Cvar_Get( "com_blood", "1", CVAR_ARCHIVE );
 
 	com_developer = Cvar_Get( "developer", "0", CVAR_TEMP );
@@ -2946,8 +2955,8 @@ void Com_Frame( void ) {
 				minMsec = 1000 / com_maxfpsMinimized->integer;
 			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
 				minMsec = 1000 / com_maxfpsUnfocused->integer;
-			else if(cl_fps->integer > 0)
-				minMsec = 1000 / cl_fps->integer;
+			else if(com_maxfps->integer > 0)
+				minMsec = 1000 / com_maxfps->integer;
 			else
 				minMsec = 1;
 
@@ -3176,105 +3185,86 @@ void Com_Frame(void) {
 		timeBeforeFirstEvents = Sys_Milliseconds();
 	}
 
-	const int dt = 8;
-	static unsigned int accumulator = 0;
-	static int currentTime = 0;
-	if (currentTime == 0) {
-		currentTime = Sys_Milliseconds();
-	}
+	// L0 - Fix maxfps abuse..
+	/*if (com_maxfps->integer > 125)
+		Cvar_Set("com_maxfps", "125");*/
 
-	int newTime = Sys_Milliseconds();
-
-	int frameTime = newTime - currentTime;
-
-	if (frameTime > 250) {
-		frameTime = 250;
-	}
-
-	currentTime = newTime;
-
-	accumulator += frameTime;
-
-
-	while (accumulator >= dt) {
-
-
-		//
-		// server side
-		//
-		if (com_speeds->integer) {
-			timeBeforeServer = Sys_Milliseconds();
-		}
-
-		SV_Frame(dt);
-
-		// if "dedicated" has been modified, start up
-		// or shut down the client system.
-		// Do this after the server may have started,
-		// but before the client tries to auto-connect
-		if (com_dedicated->modified) {
-			// get the latched value
-			Cvar_Get("dedicated", "0", 0);
-			com_dedicated->modified = qfalse;
-			if (!com_dedicated->integer) {
-				CL_Init();
-				Sys_ShowConsole(com_viewlog->integer, qfalse);
-			}
-			else {
-				CL_Shutdown();
-				Sys_ShowConsole(1, qtrue);
-			}
-		}
-
-		//
-		// client system
-		//
-		if (!com_dedicated->integer) {
-			//
-			// run event loop a second time to get server to client packets
-			// without a frame of latency
-			//
-			if (com_speeds->integer) {
-				timeBeforeEvents = Sys_Milliseconds();
-			}
-
-			//
-			// client side
-			//
-			if (com_speeds->integer) {
-				timeBeforeClient = Sys_Milliseconds();
-			}
-
-			CL_Frame(dt);
-
-			if (com_speeds->integer) {
-				timeAfter = Sys_Milliseconds();
-			}
-		}
-
-
-		accumulator -= dt;
-	}
-	if (cl_fps->integer) {
-		minMsec = 1000 / cl_fps->integer;
+	// we may want to spin here if things are going too fast
+	if (!com_dedicated->integer && com_maxfps->integer > 0 && !com_timedemo->integer) {
+		minMsec = 1000 / com_maxfps->integer;
 	}
 	else {
 		minMsec = 1;
 	}
-
-	// gather the events in the frame
 	do {
 		com_frameTime = Com_EventLoop();
 		if (lastTime > com_frameTime) {
-			lastTime = com_frameTime;
+			lastTime = com_frameTime;       // possible on first frame
 		}
 		msec = com_frameTime - lastTime;
 	} while (msec < minMsec);
-	lastTime = com_frameTime;
 	Cbuf_Execute();
 
-	CL_Render();
+	lastTime = com_frameTime;
 
+	// mess with msec if needed
+	com_frameMsec = msec;
+	msec = Com_ModifyMsec(msec);
+
+	//
+	// server side
+	//
+	if (com_speeds->integer) {
+		timeBeforeServer = Sys_Milliseconds();
+	}
+
+	SV_Frame(msec);
+
+	// if "dedicated" has been modified, start up
+	// or shut down the client system.
+	// Do this after the server may have started,
+	// but before the client tries to auto-connect
+	if (com_dedicated->modified) {
+		// get the latched value
+		Cvar_Get("dedicated", "0", 0);
+		com_dedicated->modified = qfalse;
+		if (!com_dedicated->integer) {
+			CL_Init();
+			Sys_ShowConsole(com_viewlog->integer, qfalse);
+		}
+		else {
+			CL_Shutdown();
+			Sys_ShowConsole(1, qtrue);
+		}
+	}
+
+	//
+	// client system
+	//
+	if (!com_dedicated->integer) {
+		//
+		// run event loop a second time to get server to client packets
+		// without a frame of latency
+		//
+		if (com_speeds->integer) {
+			timeBeforeEvents = Sys_Milliseconds();
+		}
+		Com_EventLoop();
+		Cbuf_Execute();
+
+		//
+		// client side
+		//
+		if (com_speeds->integer) {
+			timeBeforeClient = Sys_Milliseconds();
+		}
+
+		CL_Frame(msec);
+
+		if (com_speeds->integer) {
+			timeAfter = Sys_Milliseconds();
+		}
+	}
 
 	//
 	// report timing information
@@ -3361,8 +3351,8 @@ void Com_Frame( void ) {
 				minMsec = 1000 / com_maxfpsMinimized->integer;
 			else if(com_unfocused->integer && com_maxfpsUnfocused->integer > 0)
 				minMsec = 1000 / com_maxfpsUnfocused->integer;
-			else if(cl_fps->integer > 0)
-				minMsec = 1000 / cl_fps->integer;
+			else if(com_maxfps->integer > 0)
+				minMsec = 1000 / com_maxfps->integer;
 			else
 				minMsec = 1;
 
@@ -3533,6 +3523,246 @@ void Com_Shutdown( void ) {
 #endif
 }
 
+#if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD
+#if ( ( !id386 ) && ( !defined __i386__ ) ) // rcg010212 - for PPC
+
+void Com_Memcpy( void* dest, const void* src, const size_t count ) {
+	memcpy( dest, src, count );
+}
+
+void Com_Memset( void* dest, const int val, const size_t count ) {
+	memset( dest, val, count );
+}
+
+#else
+
+typedef enum
+{
+	PRE_READ,                                   // prefetch assuming that buffer is used for reading only
+	PRE_WRITE,                                  // prefetch assuming that buffer is used for writing only
+	PRE_READ_WRITE                              // prefetch assuming that buffer is used for both reading and writing
+} e_prefetch;
+
+void Com_Prefetch( const void *s, const unsigned int bytes, e_prefetch type );
+
+#define EMMS_INSTRUCTION    __asm emms
+
+void _copyDWord( unsigned int* dest, const unsigned int constant, const unsigned int count ) {
+	__asm
+	{
+		mov edx,dest
+		mov eax,constant
+		mov ecx,count
+		and     ecx,~7
+		jz padding
+		sub ecx,8
+		jmp loopu
+		align   16
+loopu:
+		test    [edx + ecx * 4 + 28],ebx        // fetch next block destination to L1 cache
+		mov     [edx + ecx * 4 + 0],eax
+		mov     [edx + ecx * 4 + 4],eax
+		mov     [edx + ecx * 4 + 8],eax
+		mov     [edx + ecx * 4 + 12],eax
+		mov     [edx + ecx * 4 + 16],eax
+		mov     [edx + ecx * 4 + 20],eax
+		mov     [edx + ecx * 4 + 24],eax
+		mov     [edx + ecx * 4 + 28],eax
+		sub ecx,8
+		jge loopu
+padding:    mov ecx,count
+		mov ebx,ecx
+		and     ecx,7
+		jz outta
+		and     ebx,~7
+		lea edx,[edx + ebx * 4]                 // advance dest pointer
+		test    [edx + 0],eax                   // fetch destination to L1 cache
+		cmp ecx,4
+		jl skip4
+		mov     [edx + 0],eax
+		mov     [edx + 4],eax
+		mov     [edx + 8],eax
+		mov     [edx + 12],eax
+		add edx,16
+		sub ecx,4
+skip4:      cmp ecx,2
+		jl skip2
+		mov     [edx + 0],eax
+		mov     [edx + 4],eax
+		add edx,8
+		sub ecx,2
+skip2:      cmp ecx,1
+		jl outta
+		mov     [edx + 0],eax
+outta:
+	}
+}
+
+// optimized memory copy routine that handles all alignment
+// cases and block sizes efficiently
+void Com_Memcpy( void* dest, const void* src, const size_t count ) {
+	Com_Prefetch( src, count, PRE_READ );
+	__asm
+	{
+		push edi
+		push esi
+		mov ecx,count
+		cmp ecx,0                           // count = 0 check (just to be on the safe side)
+		je outta
+		mov edx,dest
+		mov ebx,src
+		cmp ecx,32                          // padding only?
+		jl padding
+
+		mov edi,ecx
+		and     edi,~31                 // edi = count&~31
+		sub edi,32
+
+		align 16
+loopMisAligned:
+		mov eax,[ebx + edi + 0 + 0 * 8]
+		mov esi,[ebx + edi + 4 + 0 * 8]
+		mov     [edx + edi + 0 + 0 * 8],eax
+		mov     [edx + edi + 4 + 0 * 8],esi
+		mov eax,[ebx + edi + 0 + 1 * 8]
+		mov esi,[ebx + edi + 4 + 1 * 8]
+		mov     [edx + edi + 0 + 1 * 8],eax
+		mov     [edx + edi + 4 + 1 * 8],esi
+		mov eax,[ebx + edi + 0 + 2 * 8]
+		mov esi,[ebx + edi + 4 + 2 * 8]
+		mov     [edx + edi + 0 + 2 * 8],eax
+		mov     [edx + edi + 4 + 2 * 8],esi
+		mov eax,[ebx + edi + 0 + 3 * 8]
+		mov esi,[ebx + edi + 4 + 3 * 8]
+		mov     [edx + edi + 0 + 3 * 8],eax
+		mov     [edx + edi + 4 + 3 * 8],esi
+		sub edi,32
+		jge loopMisAligned
+
+		mov edi,ecx
+		and     edi,~31
+		add ebx,edi                     // increase src pointer
+		add edx,edi                     // increase dst pointer
+		and     ecx,31                  // new count
+		jz outta                        // if count = 0, get outta here
+
+padding:
+		cmp ecx,16
+		jl skip16
+		mov eax,dword ptr [ebx]
+		mov dword ptr [edx],eax
+		mov eax,dword ptr [ebx + 4]
+		mov dword ptr [edx + 4],eax
+		mov eax,dword ptr [ebx + 8]
+		mov dword ptr [edx + 8],eax
+		mov eax,dword ptr [ebx + 12]
+		mov dword ptr [edx + 12],eax
+		sub ecx,16
+		add ebx,16
+		add edx,16
+skip16:
+		cmp ecx,8
+		jl skip8
+		mov eax,dword ptr [ebx]
+		mov dword ptr [edx],eax
+		mov eax,dword ptr [ebx + 4]
+		sub ecx,8
+		mov dword ptr [edx + 4],eax
+		add ebx,8
+		add edx,8
+skip8:
+		cmp ecx,4
+		jl skip4
+		mov eax,dword ptr [ebx]     // here 4-7 bytes
+		add ebx,4
+		sub ecx,4
+		mov dword ptr [edx],eax
+		add edx,4
+skip4:                          // 0-3 remaining bytes
+		cmp ecx,2
+		jl skip2
+		mov ax,word ptr [ebx]       // two bytes
+		cmp ecx,3                   // less than 3?
+		mov word ptr [edx],ax
+		jl outta
+		mov al,byte ptr [ebx + 2]   // last byte
+		mov byte ptr [edx + 2],al
+		jmp outta
+skip2:
+		cmp ecx,1
+		jl outta
+		mov al,byte ptr [ebx]
+		mov byte ptr [edx],al
+outta:
+		pop esi
+		pop edi
+	}
+}
+
+void Com_Memset( void* dest, const int val, const size_t count ) {
+	unsigned int fillval;
+
+	if ( count < 8 ) {
+		__asm
+		{
+			mov edx,dest
+			mov eax, val
+			mov ah,al
+			mov ebx,eax
+			and     ebx, 0xffff
+			shl eax,16
+			add eax,ebx                 // eax now contains pattern
+			mov ecx,count
+			cmp ecx,4
+			jl skip4
+			mov     [edx],eax           // copy first dword
+			add edx,4
+			sub ecx,4
+skip4:  cmp ecx,2
+			jl skip2
+			mov word ptr [edx],ax       // copy 2 bytes
+			add edx,2
+			sub ecx,2
+skip2:  cmp ecx,0
+			je skip1
+			mov byte ptr [edx],al       // copy single byte
+skip1:
+		}
+		return;
+	}
+
+	fillval = val;
+
+	fillval = fillval | ( fillval << 8 );
+	fillval = fillval | ( fillval << 16 );        // fill dword with 8-bit pattern
+
+	_copyDWord( (unsigned int*)( dest ),fillval, count / 4 );
+
+	__asm                                   // padding of 0-3 bytes
+	{
+		mov ecx,count
+		mov eax,ecx
+		and     ecx,3
+		jz skipA
+		and     eax,~3
+		mov ebx,dest
+		add ebx,eax
+		mov eax,fillval
+		cmp ecx,2
+		jl skipB
+		mov word ptr [ebx],ax
+		cmp ecx,2
+		je skipA
+		mov byte ptr [ebx + 2],al
+		jmp skipA
+skipB:
+		cmp ecx,0
+		je skipA
+		mov byte ptr [ebx],al
+skipA:
+	}
+}
+
 qboolean Com_Memcmp( const void *src0, const void *src1, const unsigned int count ) {
 	unsigned int i;
 	// MMX version anyone?
@@ -3562,6 +3792,46 @@ qboolean Com_Memcmp( const void *src0, const void *src1, const unsigned int coun
 
 	return qtrue;
 }
+
+void Com_Prefetch( const void *s, const unsigned int bytes, e_prefetch type ) {
+	// write buffer prefetching is performed only if
+	// the processor benefits from it. Read and read/write
+	// prefetching is always performed.
+
+	switch ( type )
+	{
+	case PRE_WRITE: break;
+	case PRE_READ:
+	case PRE_READ_WRITE:
+
+		__asm
+		{
+			mov ebx,s
+			mov ecx,bytes
+			cmp ecx,4096                    // clamp to 4kB
+			jle skipClamp
+			mov ecx,4096
+skipClamp:
+			add ecx,0x1f
+			shr ecx,5                       // number of cache lines
+			jz skip
+			jmp loopie
+
+			align 16
+loopie: test byte ptr [ebx],al
+			add ebx,32
+			dec ecx
+			jnz loopie
+skip:
+		}
+
+		break;
+	}
+}
+
+#endif
+#endif // bk001208 - memset/memcpy assembly, Q_acos needed (RC4)
+//------------------------------------------------------------------------
 
 
 /*

@@ -227,10 +227,9 @@ static struct fdata readfile_content(char* jsonfile) {
         if (buffer)
         {
             read_length=fread (buffer, 1, length, f);
-            buffer[length] = '\0';
         }
         fclose (f);
-        
+        buffer[length]= '\0';
     }
 
     if (buffer)
@@ -349,9 +348,6 @@ void* submit_HTTP_curlPost(void* args) {
     curl_easy_cleanup(hnd);
     hnd = NULL;
 
-    if (fileinfo.readptr) {
-        free(fileinfo.readptr);
-    }
     remove(stats_info->filename);
     free(stats_info->url);
     free(stats_info);
