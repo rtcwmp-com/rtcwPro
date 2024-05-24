@@ -1029,6 +1029,11 @@ void Svcmd_RequestSS_f(void) {
 	G_LogPrintf("Rcon requested %s_%s_%s.jpg from id %d\n", cleanName, datetime, guid, clientNum);
 }
 
+//console/rcon ref commands
+void Svcmd_Ref_f(void) {
+	G_ref_cmd(NULL, 0, 0);
+}
+
 /*
 =================
 ConsoleCommand
@@ -1122,6 +1127,12 @@ qboolean    ConsoleCommand( void ) {
 	// reqss
 	if (Q_stricmp(cmd, "reqss") == 0) {
 		Svcmd_RequestSS_f();
+		return qtrue;
+	}
+
+	// ref commands
+	if (Q_stricmp(cmd, "ref") == 0) {
+		Svcmd_Ref_f();
 		return qtrue;
 	}
 
