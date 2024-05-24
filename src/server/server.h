@@ -360,6 +360,7 @@ extern cvar_t* sv_serverTimeReset;	// ET Legacy port reset svs.time on map load 
 extern cvar_t* sv_dropClientOnOverflow; // drop client when msg.overflow in sv_snapshot
 
 extern cvar_t* sv_minRestartDelay;
+extern cvar_t* sv_minRestartPlayers;
 
 // End RtcwPro
 //===========================================================

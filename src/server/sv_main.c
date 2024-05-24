@@ -99,7 +99,7 @@ cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix
 cvar_t* sv_dropClientOnOverflow;
 
 cvar_t* sv_minRestartDelay;	// min. time before restart in hours
-
+cvar_t* sv_minRestartPlayers;	//min. in-game players to stop restarting the server
 // End RtcwPro
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
@@ -1169,6 +1169,14 @@ qboolean SV_CheckPaused( void ) {
 
 static void SV_IntegerOverflowShutDown(const char* msg)
 {
+	//Inform connected players why the server disconnected
+	for (int i = 0; i < sv_maxclients->integer; ++i) {
+		client_t* cl = &svs.clients[i];
+		if (cl->state >= CS_CONNECTED) {
+			SV_DropClient(cl, msg);
+		}
+	}
+
 	if (Sys_HardReboot())
 		Com_Quit(1);
 
@@ -1227,14 +1235,26 @@ void SV_Frame( int msec ) {
 		NET_Sleep( frameMsec - sv.timeResidual );
 		return;
 	}
-	qbool hasHuman = qfalse;
+	qbool safeToRestart = qtrue;
+	int connectedHumans = 0;
 	for (int i = 0; i < sv_maxclients->integer; ++i) {
 		client_t* cl = &svs.clients[i];
 		if (cl->state >= CS_CONNECTED) {
 			const qbool isBot = (cl->netchan.remoteAddress.type == NA_BOT) || (cl->gentity && (cl->gentity->r.svFlags & SVF_BOT));
 			if (!isBot) {
-				hasHuman = qtrue;
-				break;
+				if (cl->gentity) {
+					if (cl->gentity->s.teamNum != TEAM_SPECTATOR) { //don't count spectators toward player count
+						connectedHumans++;
+					}
+					if (cl->gentity->s.powerups & PW_READY) { //don't restart if players are ready
+						safeToRestart = qfalse;
+						break;
+					}
+					if (connectedHumans >= sv_minRestartPlayers->integer) { //don't restart if more than x players are in game
+						safeToRestart = qfalse;
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -1247,7 +1267,7 @@ void SV_Frame( int msec ) {
 	// Absolute max. time with signed 32-bits: 0x7FFFFFFF ms ~ 24.86 days.
 	const int maxRebootTime = 0x7FC9117F; // 1 hour before max. time
 	const int minRebootTime = 60 * 60 * 1000 * sv_minRestartDelay->integer;	// the cvar's unit is hours
-	if (svs.time >= minRebootTime && !hasHuman) {
+	if (svs.time >= minRebootTime && safeToRestart) {
 		SV_IntegerOverflowShutDown("Restarting server early to avoid time wrapping and/or precision issues");
 		return;
 	}

@@ -990,7 +990,7 @@ void SV_Init( void ) {
 	sv_dropClientOnOverflow = Cvar_Get("sv_dropClientOnOverflow", "1", CVAR_ARCHIVE);
 
 	sv_minRestartDelay = Cvar_Get("sv_minRestartDelay", "2", CVAR_ARCHIVE); //min. hours to wait before restarting the server
-
+	sv_minRestartPlayers = Cvar_Get("sv_minRestartPlayers", "3", CVAR_ARCHIVE); //min. in-game players to stop restarting the server
 	// End RtcwPro
 	
 
