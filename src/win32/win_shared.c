@@ -45,18 +45,32 @@ If you have questions concerning this license or the applicable additional terms
 Sys_Milliseconds
 ================
 */
-int sys_timeBase;
-int Sys_Milliseconds( void ) {
-	int sys_curtime;
-	static qboolean initialized = qfalse;
+int Sys_Milliseconds()
+{
+	static int sys_timeBase = 0;
 
-	if ( !initialized ) {
+	if (!sys_timeBase)
 		sys_timeBase = timeGetTime();
-		initialized = qtrue;
-	}
-	sys_curtime = timeGetTime() - sys_timeBase;
 
-	return sys_curtime;
+	return (timeGetTime() - sys_timeBase);
+}
+
+int64_t Sys_Microseconds()
+{
+	static qbool initialized = qfalse;
+	static LARGE_INTEGER start;
+	static LARGE_INTEGER freq;
+
+	if (!initialized) {
+		initialized = qtrue;
+		QueryPerformanceFrequency(&freq);
+		QueryPerformanceCounter(&start);
+	}
+
+	LARGE_INTEGER now;
+	QueryPerformanceCounter(&now);
+
+	return ((now.QuadPart - start.QuadPart) * 1000000LL) / freq.QuadPart;
 }
 
 void Sys_Sleep(int ms)

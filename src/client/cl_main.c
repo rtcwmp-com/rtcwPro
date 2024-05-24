@@ -2496,7 +2496,7 @@ void CL_Frame( int msec ) {
 	// decide the simulation time
 	cls.frametime = msec;
 
-	cls.realtime += cls.frametime;
+	cls.realtime += msec;
 
 	if ( cl_timegraph->integer ) {
 		SCR_DebugGraph( cls.realFrametime * 0.25, 0 );
@@ -2509,14 +2509,25 @@ void CL_Frame( int msec ) {
 	// drop the connection
 	CL_CheckTimeout();
 
-	// send intentions now
-	CL_SendCmd();
 
 	// resend a connection request if necessary
 	CL_CheckForResend();
 
+	// send intentions now
+	CL_SendCmd();
+	memset(&cl.currentCmd, 0, sizeof(cl.currentCmd));
+	cl.cmdNumber++;
+}
+
+void CL_Render() {
+
 	// decide on the serverTime to render
 	CL_SetCGameTime();
+
+	
+	// we create commands even if a demo is playing,
+	CL_CreateNewCommands();
+
 
 	// update the screen
 	SCR_UpdateScreen();
