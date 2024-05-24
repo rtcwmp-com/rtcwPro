@@ -10,6 +10,7 @@
 #include <time.h>
 
 #ifdef _WIN32 
+#include <io.h>
 inline int access(const char* pathname, int mode) {
     return _access(pathname, mode);
 }
@@ -926,7 +927,7 @@ Output the end of round stats in Json format with team array ...
 
 void G_jstatsByTeam(qboolean wstats) {
 
-    int i, j, eff,rc;
+    int i, j, eff;
 	float tot_acc = 0.00f;
 	char* s;
 	gclient_t *cl;
@@ -1092,7 +1093,7 @@ Output the weapon stats for each player
 
 void G_jWeaponStats(void) {
 
-    int i, j, rc;
+    int i, j;
 	char* s;
     char pGUID[64];
     unsigned int m, dwWeaponMask = 0;

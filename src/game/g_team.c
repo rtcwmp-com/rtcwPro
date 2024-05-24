@@ -410,14 +410,6 @@ void Team_ReturnFlag( gentity_t *ent ) {
 	G_matchPrintInfo(va("The %s flag has returned!\n", (team == TEAM_RED ? "Axis" : "Allied")), qfalse);
 }
 
-void Team_FreeEntity( gentity_t *ent ) {
-	if ( ent->item->giTag == PW_REDFLAG ) {
-		Team_ReturnFlag( TEAM_RED );
-	} else if ( ent->item->giTag == PW_BLUEFLAG ) {
-		Team_ReturnFlag( TEAM_BLUE );
-	}
-}
-
 /*
 ==============
 Team_DroppedFlagThink
