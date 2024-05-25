@@ -1183,6 +1183,38 @@ static void SV_IntegerOverflowShutDown(const char* msg)
 	Cbuf_AddText(va("map %s\n", mapName));
 }
 
+int SV_GetConnectedClients(void) {
+	int connectedClients = 0;
+	//clientSnapshot_t* frame;
+	client_t* cl;
+	playerState_t* ps;
+	int i;
+
+	for (i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++) {
+		if (!cl->state) {
+			continue;
+		}
+
+		if (cl->state < CS_CONNECTED) {
+			continue;
+		}
+
+		ps = SV_GameClientNum(i);
+
+		if (ps->persistant[PERS_TEAM] != TEAM_SPECTATOR) {
+			connectedClients++;
+		}
+
+		/*frame = &cl->frames[cl->netchan.outgoingSequence & PACKET_MASK];
+		if (frame->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) { //don't count spectators toward player count
+			connectedHumans++;
+		}*/
+	}
+
+	//Com_Printf("cc: %i\n", connectedClients);
+	return connectedClients;
+}
+
 /*
 ==================
 SV_Frame
@@ -1231,22 +1263,18 @@ void SV_Frame( int msec ) {
 		return;
 	}
 	qbool safeToRestart = qtrue;
-	int connectedHumans = 0;
+	int connectedHumans = SV_GetConnectedClients();
+	if (connectedHumans >= sv_minRestartPlayers->integer) { //don't restart if more than x players are in game
+		safeToRestart = qfalse;
+	}
+
 	for (int i = 0; i < sv_maxclients->integer; ++i) {
 		client_t* cl = &svs.clients[i];
 		if (cl->state >= CS_CONNECTED) {
 			const qbool isBot = (cl->netchan.remoteAddress.type == NA_BOT) || (cl->gentity && (cl->gentity->r.svFlags & SVF_BOT));
 			if (!isBot) {
-				if (cl->gentity) {
-					playerState_t* ps = SV_GameClientNum(i);
-					if (ps->teamNum != TEAM_SPECTATOR) { //don't count spectators toward player count
-						connectedHumans++;
-					}
+				if (cl->gentity) {				
 					if (cl->gentity->s.powerups & (1 << PW_READY)) { //don't restart if players are ready
-						safeToRestart = qfalse;
-						break;
-					}
-					if (connectedHumans >= sv_minRestartPlayers->integer) { //don't restart if more than x players are in game
 						safeToRestart = qfalse;
 						break;
 					}
