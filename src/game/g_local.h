@@ -856,6 +856,7 @@ struct gclient_s {
 	int			lastUpdateFrame;
 	//unlagged - smooth clients #1
 	qboolean        spawnprotected;
+	int lastRevivePushTime; //revive push at fixed interval for sv_fps
 };
 
 //
