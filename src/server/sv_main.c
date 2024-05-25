@@ -1201,7 +1201,7 @@ int SV_GetConnectedClients(void) {
 
 		ps = SV_GameClientNum(i);
 
-		if (ps->persistant[PERS_TEAM] != TEAM_SPECTATOR) {
+		if (ps->persistant[PERS_TEAM] != TEAM_SPECTATOR && ps->persistant[PERS_TEAM] != TEAM_FREE) {
 			connectedClients++;
 		}
 
