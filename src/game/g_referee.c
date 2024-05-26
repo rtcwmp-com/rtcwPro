@@ -920,8 +920,8 @@ void G_refRequestSS(gentity_t* ent) {
 	trap_SendServerCommand(targetent - g_entities, va("reqss %s %s %s %i %s",
 		g_ssAddress.string, g_ssWebhookId.string, g_ssWebhookToken.string, g_ssWaitTime.integer, datetime));
 
-	CP(va("print \"^7Requested %s_%s_%s.jpg from id %d\"", cleanName, datetime, guid, pid));
-	CP(va("print \"^7Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
+	G_refPrintf(ent, "^7Requested %s_%s_%s.jpg from id %d\"", cleanName, datetime, guid, pid));
+	G_refPrintf(ent, "^7Request will be processed in %i seconds\n\"", g_ssWaitTime.integer));
 
 	G_LogPrintf("Referee %s requested %s_%s_%s.jpg from id %d\n", ent->client->pers.netname, cleanName, datetime, guid, pid);
 
