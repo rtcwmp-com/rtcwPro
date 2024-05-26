@@ -1260,6 +1260,7 @@ typedef struct {
 	// RtcwPro shoutcast overlay
 	int lastKeyCatcher;
 	qbool ndpDemoEnabled;
+	qbool ext_getClientAngles;
 } cg_t;
 
 
@@ -3001,6 +3002,7 @@ qboolean    trap_GetServerCommand( int serverCommandNumber );
 int         trap_GetCurrentCmdNumber( void );
 
 qboolean    trap_GetUserCmd( int cmdNumber, usercmd_t *ucmd );
+qboolean    trap_GetClientAngles(vec3_t angles);
 
 // used for the weapon/holdable select and zoom
 void        trap_SetUserCmdValue( int stateValue, int holdValue, float sensitivityScale, int mpSetup, int mpIdentClient );
@@ -3106,6 +3108,7 @@ typedef struct {
 	int trap_CNQ3_NDP_ReadUntil;
 	int trap_CNQ3_NDP_StartVideo;
 	int trap_CNQ3_NDP_StopVideo;
+	int trap_GetClientAngles;
 } cgExt_t;
 
 enum
