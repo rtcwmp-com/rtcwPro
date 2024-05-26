@@ -164,6 +164,7 @@ typedef struct {
 	// -NERVE - SMF
 
 	clientHandle_t handle;
+	qbool prevAttack;
 } clientActive_t;
 
 extern clientActive_t cl;

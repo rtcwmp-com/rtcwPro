@@ -592,3 +592,7 @@ void trap_LocateInteropData(void *bufferIn, int bufferInSize, void *bufferOut, i
 qbool trap_GetValue(char* value, int valueSize, const char* key) {
 	return syscall(CG_EXT_GETVALUE, value, valueSize, key);
 }
+
+qbool trap_GetClientAngles(vec3_t angles) {
+	return syscall(CG_EXT_GETCLIENTANGLES, angles);
+}

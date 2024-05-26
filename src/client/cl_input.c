@@ -623,16 +623,25 @@ void CL_FinishMove( usercmd_t *cmd ) {
 
 	cmd->mpSetup = cl.cgameMpSetup;             // NERVE - SMF
 	cmd->identClient = cl.cgameMpIdentClient;   // NERVE - SMF
-
-	// send the current server time so the amount of movement
-	// can be determined without allowing cheating
-	cmd->serverTime = cl.serverTime;
-
-	if (!(cmd->angles[0]) && !(cmd->angles[1]) && !(cmd->angles[2])) {
+	
+	if (!cl.prevAttack && kb[KB_BUTTONS0].active) {
+		//use the latest angles for the first shot
 		for (i = 0; i < 3; i++) {
 			cmd->angles[i] = ANGLE2SHORT(cl.viewangles[i]);
 		}
 	}
+	else {
+		if (!(cmd->angles[0]) && !(cmd->angles[1]) && !(cmd->angles[2])) {
+			for (i = 0; i < 3; i++) {
+				cmd->angles[i] = ANGLE2SHORT(cl.viewangles[i]);
+			}
+		}
+	}
+	// send the current server time so the amount of movement
+	// can be determined without allowing cheating
+	cmd->serverTime = cl.serverTime;
+
+	cl.prevAttack = kb[KB_BUTTONS0].active;
 }
 
 
