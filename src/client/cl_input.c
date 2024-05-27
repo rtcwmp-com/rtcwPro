@@ -615,9 +615,7 @@ void CL_FinishMove( usercmd_t *cmd ) {
 	int i;
 
 	// copy the state that the cgame is currently sending
-	if (!(cmd->weapon)) { // dont overwrite this every rendered frame 
-		cmd->weapon = cl.cgameUserCmdValue;
-	}
+	cmd->weapon = cl.cgameUserCmdValue;
 
 	cmd->holdable = cl.cgameUserHoldableValue;  //----(SA)	modified
 
@@ -628,10 +626,8 @@ void CL_FinishMove( usercmd_t *cmd ) {
 	// can be determined without allowing cheating
 	cmd->serverTime = cl.serverTime;
 
-	if (!(cmd->angles[0]) && !(cmd->angles[1]) && !(cmd->angles[2])) {
-		for (i = 0; i < 3; i++) {
-			cmd->angles[i] = ANGLE2SHORT(cl.viewangles[i]);
-		}
+	for ( i = 0 ; i < 3 ; i++ ) {
+		cmd->angles[i] = ANGLE2SHORT( cl.viewangles[i] );
 	}
 }
 
@@ -651,18 +647,18 @@ usercmd_t CL_CreateCmd( void ) {
 	// keyboard angle adjustment
 	CL_AdjustAngles();
 
-	
+	memset( &cmd, 0, sizeof( cmd ) );
 
-	CL_CmdButtons( &cl.currentCmd );
+	CL_CmdButtons( &cmd );
 
 	// get basic movement from keyboard
-	CL_KeyMove( &cl.currentCmd);
+	CL_KeyMove( &cmd );
 
 	// get basic movement from mouse
-	CL_MouseMove( &cl.currentCmd);
+	CL_MouseMove( &cmd );
 
 	// get basic movement from joystick
-	CL_JoystickMove( &cl.currentCmd);
+	CL_JoystickMove( &cmd );
 
 	// check to make sure the angles haven't wrapped
 	if ( cl.viewangles[PITCH] - oldAngles[PITCH] > 90 ) {
@@ -680,7 +676,7 @@ usercmd_t CL_CreateCmd( void ) {
 	cl_recoilPitch->value = 0;
 
 	// store out the final values
-	CL_FinishMove( &cl.currentCmd);
+	CL_FinishMove( &cmd );
 
 	// draw debug graphs of turning for mouse testing
 	if ( cl_debugMove->integer ) {
@@ -692,7 +688,7 @@ usercmd_t CL_CreateCmd( void ) {
 		}
 	}
 
-	return cl.currentCmd;
+	return cmd;
 }
 
 
@@ -723,10 +719,10 @@ void CL_CreateNewCommands( void ) {
 
 
 	// generate a command for this frame
-	
+	cl.cmdNumber++;
 	cmdNum = cl.cmdNumber & CMD_MASK;
 	cl.cmds[cmdNum] = CL_CreateCmd();
-
+	cmd = &cl.cmds[cmdNum];
 }
 
 /*
@@ -943,6 +939,9 @@ void CL_SendCmd( void ) {
 	if ( com_sv_running->integer && sv_paused->integer && cl_paused->integer ) {
 		return;
 	}
+
+	// we create commands even if a demo is playing,
+	CL_CreateNewCommands();
 
 	// don't send a packet if the last packet was sent too recently
 	if ( !CL_ReadyToSendPacket() ) {

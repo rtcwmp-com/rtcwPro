@@ -544,7 +544,6 @@ int G_check_before_submit( char* jsonfile)
       //  Can add more conditions but for now based only on number of players
         jstats = json_object_get(json, "stats");
         if (json_array_size(jstats) >= minPlayers) {
-            json_decref(json);
             return 1;
         }
         else {

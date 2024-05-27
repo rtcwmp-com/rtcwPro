@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #define _QCOMMON_H_
 
 #include "../qcommon/cm_public.h"
-#include <stdint.h>
 
 //Ignore __attribute__ on non-gcc platforms
 #ifndef __GNUC__
@@ -1025,8 +1024,6 @@ void CL_Init( void );
 void CL_Disconnect( qboolean showMainMenu );
 void CL_Shutdown( void );
 void CL_Frame( int msec );
-void CL_Render(void);
-void CL_CreateNewCommands(void);
 qboolean CL_GameCommand( void );
 void CL_KeyEvent( int key, qboolean down, unsigned time );
 
@@ -1180,9 +1177,6 @@ void    Sys_Print( const char *msg );
 // Sys_Milliseconds should only be used for profiling purposes,
 // any game related timing information should come from event timestamps
 int     Sys_Milliseconds( void );
-int64_t	Sys_Microseconds();
-void	Sys_Sleep(int ms);
-void	Sys_MicroSleep(int us);
 
 qbool	Sys_HardReboot(); // qtrue when the server can restart itself
 
