@@ -71,15 +71,7 @@ void CL_GetGlconfig( glconfig_t *glconfig ) {
 	*glconfig = cls.glconfig;
 }
 
-/*
-====================
-CL_GetClientAngles
-====================
-*/
-qboolean CL_GetClientAngles(vec3_t userAngles) {
-	userAngles = cl.viewangles;
-	return qtrue;
-}
+
 /*
 ====================
 CL_GetUserCmd
@@ -593,9 +585,8 @@ static qbool CL_CG_GetValue(char* value, int valueSize, const char* key)
 		{ "trap_CNQ3_NDP_Enable", CG_EXT_NDP_ENABLE },
 		{ "trap_CNQ3_NDP_Seek", CG_EXT_NDP_SEEK },
 		{ "trap_CNQ3_NDP_ReadUntil", CG_EXT_NDP_READUNTIL },
-		{ "trap_GetClientAngles", CG_EXT_GETCLIENTANGLES }
-		//{ "trap_CNQ3_NDP_StartVideo", CG_EXT_NDP_STARTVIDEO }, //not implemented yet
-		//{ "trap_CNQ3_NDP_StopVideo", CG_EXT_NDP_STOPVIDEO }
+		{ "trap_CNQ3_NDP_StartVideo", CG_EXT_NDP_STARTVIDEO },
+		{ "trap_CNQ3_NDP_StopVideo", CG_EXT_NDP_STOPVIDEO }
 	};
 
 	for (int i = 0; i < ARRAY_LEN(syscalls); ++i) {
@@ -1062,10 +1053,6 @@ int CL_CgameSystemCalls( int *args ) {
 	case CG_EXT_NDP_STOPVIDEO:
 		//CL_CloseAVI();
 		return 0;
-
-	case CG_EXT_GETCLIENTANGLES:
-		return CL_GetClientAngles(VMA(1));
-
 	default:
 		Com_Error( ERR_DROP, "Bad cgame system trap: %i", args[0] );
 	}

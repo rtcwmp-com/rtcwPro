@@ -680,18 +680,6 @@ void CG_PredictPlayerState( void ) {
 		cg.predictedPlayerState.aiState = cg_animState.integer - 1;
 	}
 
-	vec3_t clAngles;
-	// Get user angles from client directly (extension)
-	if (cg.ext_getClientAngles 
-		&& !(cg_pmove.ps->eFlags & EF_MG42_ACTIVE) 
-		&& cg.snap->ps.pm_type != PM_INTERMISSION
-		&& !(cg.snap->ps.pm_flags & PMF_LIMBO)) {
-		trap_GetClientAngles(clAngles);
-		for (int i = 0; i < 3; i++) {
-			cg.predictedPlayerState.viewangles[i] = clAngles[i];
-		}
-	}
-
 	// run cmds
 	moved = qfalse;
 	for ( cmdNum = current - CMD_BACKUP + 1 ; cmdNum <= current ; cmdNum++ ) {

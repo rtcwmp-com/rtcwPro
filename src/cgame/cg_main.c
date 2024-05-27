@@ -2810,27 +2810,18 @@ void CG_LoadExtensions() {
 		GET_TRAP(trap_CNQ3_NDP_Enable);
 		GET_TRAP(trap_CNQ3_NDP_Seek);
 		GET_TRAP(trap_CNQ3_NDP_ReadUntil);
+		GET_TRAP(trap_CNQ3_NDP_StartVideo);
+		GET_TRAP(trap_CNQ3_NDP_StopVideo);
 
 		if (rtcwPro_ext.trap_CNQ3_NDP_Enable &&
 			rtcwPro_ext.trap_CNQ3_NDP_Seek &&
-			rtcwPro_ext.trap_CNQ3_NDP_ReadUntil) {
+			rtcwPro_ext.trap_CNQ3_NDP_ReadUntil &&
+			rtcwPro_ext.trap_CNQ3_NDP_StartVideo &&
+			rtcwPro_ext.trap_CNQ3_NDP_StopVideo) {
 			cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
 		}
 		else {
 			cg.ndpDemoEnabled = qfalse;
-		}
-
-		//GET_TRAP(trap_CNQ3_NDP_StartVideo);
-		//GET_TRAP(trap_CNQ3_NDP_StopVideo);
-		//rtcwPro_ext.trap_CNQ3_NDP_StartVideo //not implemented
-		//rtcwPro_ext.trap_CNQ3_NDP_StopVideo
-
-		GET_TRAP(trap_GetClientAngles);
-		if (rtcwPro_ext.trap_GetClientAngles) {
-			cg.ext_getClientAngles = qtrue;
-		}
-		else {
-			cg.ext_getClientAngles = qfalse;
 		}
 	}
 }
