@@ -4118,11 +4118,6 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
 		SnapVector( s->pos.trBase );
 	}
 
-	VectorCopy(ps->velocity, s->pos.trDelta);
-	if (snap) {
-		SnapVector(s->pos.trDelta);
-	}
-
 	s->apos.trType = TR_INTERPOLATE;
 	VectorCopy( ps->viewangles, s->apos.trBase );
 	if ( snap ) {
@@ -4135,7 +4130,6 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
 		s->angles2[YAW] = ps->movementDir;
 	}
 
-	s->angles2[PITCH] = 0;
 	s->legsAnim     = ps->legsAnim;
 	s->torsoAnim    = ps->torsoAnim;
 	s->clientNum    = ps->clientNum;    // ET_PLAYER looks here instead of at number

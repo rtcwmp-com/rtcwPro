@@ -1714,21 +1714,14 @@ void ClientThink_real( gentity_t *ent ) {
 		ent->r.eventTime = level.time;
 	}
 
-	if (g_antilag.integer < 2) // Nobo antilag or off
-	{
-		// RTCWPro
-		// Ridah, fixes jittery zombie movement
-		if (g_smoothClients.integer) {
-			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
-		}
-		else {
-			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
-		}
-    }
-	else if (g_antilag.integer == 2) // Unlagged
-	{
+	// RTCWPro
+	// Ridah, fixes jittery zombie movement
+	if (g_smoothClients.integer) {
+		BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+	}
+	else {
 		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
-    }
+	}
 
 	/*if (g_thinkStateLevelTime.integer) 
 	{
