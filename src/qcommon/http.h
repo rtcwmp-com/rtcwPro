@@ -98,6 +98,7 @@ typedef struct {
 	char* datetime;
 	char* name;
 	char* guid;
+	char* protocol;
 	char* filepath;
 	char* filename;
 	void (*callback)(char* fmt, ...);

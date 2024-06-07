@@ -109,6 +109,7 @@ void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime,
 		SS_info->datetime = va("TIME: %s", datetime);
 		SS_info->name = va("NAME: %s", cleanName);
 		SS_info->guid = va("GUID: %s", guid);
+		SS_info->protocol = va("PROT: %i", GAME_PROTOCOL_VERSION),
 		SS_info->filepath = filepath;
 		SS_info->filename = filename;
 
