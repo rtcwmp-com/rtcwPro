@@ -100,6 +100,7 @@ cvar_t* sv_dropClientOnOverflow;
 
 cvar_t* sv_minRestartDelay;	// min. time before restart in hours
 cvar_t* sv_minRestartPlayers;	//min. in-game players to stop restarting the server
+int sv_lastMapChange = 0;
 // End RtcwPro
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
@@ -1291,7 +1292,8 @@ void SV_Frame( int msec ) {
 	// Absolute max. time with signed 32-bits: 0x7FFFFFFF ms ~ 24.86 days.
 	const int maxRebootTime = 0x7FC9117F; // 1 hour before max. time
 	const int minRebootTime = 60 * 60 * 1000 * sv_minRestartDelay->integer;	// the cvar's unit is hours
-	if (svs.time >= minRebootTime && safeToRestart) {
+	const int minLastMapChange = Sys_Milliseconds() - (2 * 60 * 1000); // 2 min ago
+	if ((svs.time >= minRebootTime) && safeToRestart && (minLastMapChange >= sv_lastMapChange)) {
 		SV_IntegerOverflowShutDown("Restarting server early to avoid time wrapping and/or precision issues");
 		return;
 	}

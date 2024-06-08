@@ -427,6 +427,8 @@ int SV_RateMsec( client_t *client ) ;
 void SV_Heartbeat_f( void );
 void SV_SetCvarRestrictions(void);
 
+extern int sv_lastMapChange;
+
 //
 // sv_snapshot.c
 //
