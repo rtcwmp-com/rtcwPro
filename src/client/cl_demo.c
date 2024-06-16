@@ -511,7 +511,7 @@ static void ParseGamestate()
 	cl.gameState.dataCount = currSnap->numConfigStringBytes;
 	CL_InitCGame();
 	if (!cls.cgameNewDemoPlayer) {
-		Drop("Sorry, this mod doesn't support the new demo player");
+		Drop("Sorry, this mod doesn't support the new demo player. Use cl_demoPlayer 0");
 	}
 	cls.cgameStarted = qtrue;
 	cls.state = CA_ACTIVE;
