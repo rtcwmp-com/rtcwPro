@@ -2532,6 +2532,9 @@ void ClientSpawn(gentity_t *ent, qboolean revived) {
 
 	client->ps.clientNum = index;
 
+	//set last update frame for the new respawned client
+	client->lastUpdateFrame = level.framenum;
+
 	trap_GetUsercmd( client - level.clients, &ent->client->pers.cmd );  // NERVE - SMF - moved this up here
 
 	SetWolfUserVars( ent, NULL );           // NERVE - SMF

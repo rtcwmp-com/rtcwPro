@@ -485,9 +485,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	client->oldbuttons = client->buttons;
 	client->buttons = ucmd->buttons;
 
-	//update last frame for spec unlagged CI sprite on respawn
-	client->lastUpdateFrame = level.framenum;
-
 //----(SA)	added
 	client->oldwbuttons = client->wbuttons;
 	client->wbuttons = ucmd->wbuttons;
