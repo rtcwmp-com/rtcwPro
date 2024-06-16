@@ -43,6 +43,7 @@ extern qbool isRtcwPro;
 extern qbool isRtcwProV128;
 extern qbool isRtcwProV129;
 extern qbool isRtcwProV130;
+extern qbool isRtcwProV140;
 extern qbool gameVersionFound;
 extern int m_currServerTime;
 extern int m_firstServerTime;

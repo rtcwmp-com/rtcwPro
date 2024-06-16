@@ -40,6 +40,7 @@ qbool isRtcwPro = qfalse;
 qbool isRtcwProV128 = qfalse;
 qbool isRtcwProV129 = qfalse;
 qbool isRtcwProV130 = qfalse;
+qbool isRtcwProV140 = qfalse;
 qbool isRtcw10 = qfalse;
 qbool gameVersionFound = qfalse;
 
@@ -64,8 +65,9 @@ qbool CG_NDP_FindGameVersion(void) {
 	isRtcwProV128 = (Q_strncmp(current_gamename, "RtcwPro 1.2.8", strlen("RtcwPro 1.2.8")) == 0);
 	isRtcwProV129 = (Q_strncmp(current_gamename, "RtcwPro 1.2.9", strlen("RtcwPro 1.2.9")) == 0);
 	isRtcwProV130 = (Q_strncmp(current_gamename, "RtcwPro 1.3", strlen("RtcwPro 1.3")) == 0);
+	isRtcwProV140 = (Q_strncmp(current_gamename, "RtcwPro 1.4", strlen("RtcwPro 1.4")) == 0);
 	//earlier versions all use 1.2.8 tinfo
-	if (isRtcwPro && !isRtcwProV128 && !isRtcwProV129 && !isRtcwProV130) {
+	if (isRtcwPro && !isRtcwProV128 && !isRtcwProV129 && !isRtcwProV130 && !isRtcwProV140) {
 		isRtcwProV128 = qtrue;
 	}
 	gameVersionFound = qtrue;

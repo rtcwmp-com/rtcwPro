@@ -224,7 +224,7 @@ static void CG_ParseTeamInfo( void ) {
 				}
 				return;
 			}
-			if (isRtcwProV130) {
+			if (isRtcwProV130 || isRtcwProV140) {
 				int teamInfoPlayers = Q_atoi(CG_Argv(1));
 
 				numSortedTeamPlayers = teamInfoPlayers;
