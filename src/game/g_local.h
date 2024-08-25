@@ -1777,6 +1777,7 @@ extern vmCvar_t g_playPauseMusic;
 // unlagged
 extern vmCvar_t	g_delagHitscan;
 extern vmCvar_t g_maxExtrapolatedFrames;
+extern vmCvar_t	g_maxLagCompensation;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

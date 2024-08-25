@@ -305,6 +305,7 @@ vmCvar_t g_playPauseMusic; // play music during pause
 vmCvar_t g_floatPlayerPosition;
 vmCvar_t g_delagHitscan;
 vmCvar_t g_maxExtrapolatedFrames;
+vmCvar_t g_maxLagCompensation;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -557,7 +558,8 @@ cvarTable_t gameCvarTable[] = {
 
 	// unlagged
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
-	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse }
+	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse },
+	{ &g_maxLagCompensation, "g_maxLagCompensation", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue }
 };
 
 // bk001129 - made static to avoid aliasing
