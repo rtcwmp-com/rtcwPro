@@ -61,7 +61,7 @@ void Controls_GetConfig( void );
 /*
 	OSPx - HUD names ETpro port
 */
-int	numnames = 0;
+static int numnames = 0;
 
 typedef struct {
 	float x;
