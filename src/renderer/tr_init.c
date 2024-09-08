@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 //#endif
 
 glconfig_t glConfig;
+glinfo_t	glInfo;
 glstate_t glState;
 
 static void GfxInfo_f( void );
@@ -1443,3 +1444,39 @@ refexport_t *GetRefAPI( int apiVersion, refimport_t *rimp ) {
 	return &re;
 }
 
+
+// r_mode
+#define VIDEOMODE_DESKTOPRES	0	// no mode change, render size = desktop size
+#define VIDEOMODE_UPSCALE		1	// no mode change, render size < desktop size
+#define VIDEOMODE_CHANGE		2	// mode change - only makes sense for CRT users
+#define VIDEOMODE_MAX			2
+
+void R_ConfigureVideoMode( int desktopWidth, int desktopHeight )
+{
+	glInfo.winFullscreen = !!r_fullscreen->integer;
+	glInfo.vidFullscreen = r_fullscreen->integer && r_mode->integer == VIDEOMODE_CHANGE;
+
+	if (r_fullscreen->integer && r_mode->integer == VIDEOMODE_DESKTOPRES) {
+		glConfig.vidWidth = desktopWidth;
+		glConfig.vidHeight = desktopHeight;
+		glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
+		glInfo.winWidth = desktopWidth;
+		glInfo.winHeight = desktopHeight;
+		return;
+	}
+
+	if (r_fullscreen->integer && r_mode->integer == VIDEOMODE_UPSCALE) {
+		glConfig.vidWidth = r_customwidth->integer;
+		glConfig.vidHeight = r_customheight->integer;
+		glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
+		glInfo.winWidth = desktopWidth;
+		glInfo.winHeight = desktopHeight;
+		return;
+	}
+		
+	glConfig.vidWidth = r_customwidth->integer;
+	glConfig.vidHeight = r_customheight->integer;
+	glConfig.windowAspect = (float)glConfig.vidWidth / (float)glConfig.vidHeight;
+	glInfo.winWidth = r_customwidth->integer;
+	glInfo.winHeight = r_customheight->integer;
+}

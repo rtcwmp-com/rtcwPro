@@ -1848,4 +1848,25 @@ void *R_Hunk_Begin( void );
 void R_Hunk_End( void );
 void R_FreeImageBuffer( void );
 
+// the "private" glconfig: implementation specifics for the renderer
+typedef struct glinfo_s {
+	// used by platform layer
+	qbool winFullscreen;			// the window takes the entire screen
+	qbool vidFullscreen;			// change the video mode
+	int displayFrequency;
+	int winWidth, winHeight;
+
+	// used by renderer
+	int maxTextureSize;
+	int maxAnisotropy;
+	qbool depthFadeSupport;
+	qbool mipGenSupport;
+	qbool alphaToCoverageSupport;
+	int msaaSampleCount;		// active number of samples, can differ from r_msaa->integer
+} glinfo_t;
+
+extern glinfo_t glInfo;
+
+void	R_ConfigureVideoMode( int desktopWidth, int desktopHeight );	// writes to glConfig and glInfo
+
 #endif //TR_LOCAL_H (THIS MUST BE LAST!!)

@@ -149,11 +149,13 @@ void S_TransferStereo16( unsigned long *pbuf, int endtime ) {
 	while ( ls_paintedtime < endtime )
 	{
 		// handle recirculating buffer issues
-		lpos = ls_paintedtime & ( ( dma.samples >> 1 ) - 1 );
+		//lpos = ls_paintedtime & ( ( dma.samples >> 1 ) - 1 );
+		lpos = ls_paintedtime % (dma.samples / dma.channels);
 
 		snd_out = (short *) pbuf + ( lpos << 1 );
 
-		snd_linear_count = ( dma.samples >> 1 ) - lpos;
+		//snd_linear_count = ( dma.samples >> 1 ) - lpos;
+		snd_linear_count = (dma.samples / dma.channels) - lpos;
 		if ( ls_paintedtime + snd_linear_count > endtime ) {
 			snd_linear_count = endtime - ls_paintedtime;
 		}
