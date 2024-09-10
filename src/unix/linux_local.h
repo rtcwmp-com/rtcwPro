@@ -47,6 +47,7 @@ history_t* tty_GetHistory();
 
 void Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
 qboolean Sys_GetPacket( netadr_t *net_from, msg_t *net_message );
+qboolean	Sys_GetStreamedPacket(netadr_t* net_from, msg_t* net_message); // rtcwpro
 void Sys_SendKeyEvents( void );
 
 // Input subsystem
@@ -70,6 +71,10 @@ char *strlwr( char *s );
 void	SIG_InitChild();
 void	SIG_InitParent();
 void	SIG_Frame();
+
+void sdl_Frame();
+void sdl_PollEvents();
+qbool sdl_Init();
 
 extern int		q_argc;
 extern char** q_argv;

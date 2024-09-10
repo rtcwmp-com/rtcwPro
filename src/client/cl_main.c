@@ -1550,7 +1550,7 @@ qboolean CL_BeginHttpDownload()
 		return qfalse;
 	}
 
-	Sleep(3000);
+	Sys_Sleep(3000);
 
 	ss->failure_callback = HttpFailureCallback;
 	Q_strncpyz(download_filename, COM_SkipPath(local_file_name), sizeof(download_filename));

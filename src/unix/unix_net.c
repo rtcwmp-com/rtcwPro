@@ -559,6 +559,10 @@ void Sys_SendPacket( int length, const void *data, netadr_t to ) {
 	int				ret = SOCKET_ERROR;
 	struct sockaddr_storage	addr;
 
+	if( to.type == NA_BROADCAST_IPX ){
+		return;
+	}
+
 	if( to.type != NA_BROADCAST && to.type != NA_IP)
 	{
 		Com_Error( ERR_FATAL, "Sys_SendPacket: bad address type" );
@@ -716,18 +720,12 @@ SOCKET NET_IPSocket( char *net_interface, int port, int *err ) {
 		Com_Printf( "Opening IP socket: 0.0.0.0:%i\n", port );
 	}
 
-	if( ( newsocket = socket( PF_INET, SOCK_DGRAM, IPPROTO_UDP ) ) == INVALID_SOCKET ) {
+	if( ( newsocket = socket( PF_INET, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP ) ) == INVALID_SOCKET ) {
 		*err = socketError;
 		Com_Printf( "WARNING: NET_IPSocket: socket: %s\n", NET_ErrorString() );
 		return newsocket;
 	}
-	// make it non-blocking
-	if( ioctlsocket( newsocket, FIONBIO, &_true ) == SOCKET_ERROR ) {
-		Com_Printf( "WARNING: NET_IPSocket: ioctl FIONBIO: %s\n", NET_ErrorString() );
-		*err = socketError;
-		closesocket(newsocket);
-		return INVALID_SOCKET;
-	}
+
 
 	// make it broadcast capable
 	if( setsockopt( newsocket, SOL_SOCKET, SO_BROADCAST, (char *) &i, sizeof(i) ) == SOCKET_ERROR ) {
@@ -1488,4 +1486,316 @@ NET_Restart_f
 void NET_Restart_f(void)
 {
 	NET_Config(qtrue);
+}
+
+/*
+==================================
+Streamed Sockets
+==================================
+*/
+
+#define MAX_STREAMED_SOCKETS 1
+streamed_socket streamed_sockets[MAX_STREAMED_SOCKETS];
+
+void NET_CloseStreamedSocket(streamed_socket *ss)
+{
+	int socket;
+
+	if (!ss)
+	{
+		return;
+	}
+
+	if (!ss->in_use)
+	{
+		return;
+	}
+
+	socket = ss->socket;
+
+	close(ss->socket);
+	ss->in_use = qfalse;
+	ss->socket = -1;
+
+	Com_Printf("NET_CloseStreamedSocket closed %s, %i\n", NET_AdrToString(*ss->address), socket);
+}
+
+qboolean NET_OpenStreamedSocket(streamed_socket **ss_out, netadr_t *to)
+{
+	struct sockaddr_in addr;
+	int i;
+	int err;
+	streamed_socket *ss;
+	qboolean non_blocking = qtrue;
+	int keep_alive = 1;
+	socklen_t keep_alive_len = sizeof(keep_alive);
+
+	for (i = 0; i < MAX_STREAMED_SOCKETS; ++i)
+	{
+		ss = streamed_sockets + i;
+
+		if (!ss->in_use)
+		{
+			ss->address = to;
+			break;
+		}
+		else if (NET_CompareAdr(*ss->address, *to))
+		{
+			Com_Printf("NET_OpenStreamedSocket re-using %s, %i\n", NET_AdrToString(*ss->address), ss->socket);
+			*ss_out = ss;
+			return qtrue;
+		}
+	}
+
+	if (ss->in_use)
+	{
+		Com_Printf("NET_OpenStreamedSocket: no more streamed sockets available\n");
+		return qfalse;
+	}
+
+	if ((ss->socket = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP)) == -1)
+	{
+		Com_Printf("NET_OpenStreamedSocket socket: %s\n", NET_ErrorString());
+		return qfalse;
+	}
+
+	NetadrToSockadr(ss->address, &addr);
+
+	if (setsockopt(ss->socket, SOL_SOCKET, SO_KEEPALIVE, &keep_alive, keep_alive_len) == -1)
+	{
+		Com_Printf("NET_OpenStreamedSocket setsockopt SO_KEEPALIVE: %s\n", NET_ErrorString());
+		NET_CloseStreamedSocket(ss);
+		return qfalse;
+	}
+
+
+	Com_Printf("NET_OpenStreamedSocket connecting\n");
+
+	if (connect(ss->socket, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+	{
+		err = errno;
+		if (err != EINPROGRESS)
+		{
+			Com_Printf("NET_OpenStreamedSocket connect: %s\n", NET_ErrorString());
+			NET_CloseStreamedSocket(ss);
+			return qfalse;
+		}
+		else
+		{
+			Com_Printf("NET_OpenStreamedSocket blocking call: %s, %i\n", NET_AdrToString(*to), ss->socket);
+		}
+	}
+	else
+	{
+		Com_Printf("NET_OpenStreamedSocket connected: %s, %i\n", NET_AdrToString(*to), ss->socket);
+	}
+
+	ss->in_use = qtrue;
+	*ss_out = ss;
+
+	return qtrue;
+}
+
+typedef struct
+{
+	streamed_socket *ss;
+	void *data;
+	int data_length;
+	int ready_time;
+	qboolean free_data;
+	qboolean in_use;
+	int max_attempts;
+	int attempts;
+	int milliseconds_until_resend;
+} queued_streamed_packet;
+
+#define MAX_QUEUED_PACKETS 1
+queued_streamed_packet queued_packets[MAX_QUEUED_PACKETS] = { 0 };
+int queue_index;
+
+void FreeQueuedStreamedPacket(queued_streamed_packet *streamed_packet, qboolean close_socket)
+{
+	if (streamed_packet->in_use)
+	{
+		Com_Printf("Freeing queued streamed packet ");
+
+		if (close_socket)
+		{
+			NET_CloseStreamedSocket(streamed_packet->ss);
+			Com_Printf("and closing the socket\n");
+		}
+		else
+		{
+			Com_Printf("and not closing the socket (so response from server can be received)\n");
+		}
+
+		if (streamed_packet->free_data)
+		{
+			Z_Free(streamed_packet->data);
+		}
+
+		memset(streamed_packet, 0, sizeof(queued_streamed_packet));
+	}
+}
+
+void QueueStreamedPacket(streamed_socket *ss, void *data, int data_length, int milliseconds_until_resend, qboolean free_data, int max_attempts)
+{
+	queued_streamed_packet *streamed_packet;
+
+	if (queue_index >= MAX_QUEUED_PACKETS)
+	{
+		queue_index = 0;
+	}
+
+	streamed_packet = queued_packets + queue_index;
+
+	FreeQueuedStreamedPacket(streamed_packet, qtrue);
+
+	streamed_packet->ss = ss;
+	streamed_packet->data = data;
+	streamed_packet->data_length = data_length; 
+	streamed_packet->milliseconds_until_resend = milliseconds_until_resend;
+	streamed_packet->ready_time = milliseconds_until_resend + Sys_Milliseconds();
+	streamed_packet->free_data = free_data;
+	streamed_packet->in_use = qtrue;
+	streamed_packet->max_attempts = max_attempts;
+
+	Cbuf_AddText(va("resendStreamedPacket %i\n", queue_index++));
+}
+
+void Sys_SendStreamedPacket(streamed_socket *ss, void *data, int length)
+{
+	int err;
+
+	if (!ss)
+	{
+		Com_Printf("Sys_SendStreamedPacket null streamed_socket\n");
+		return;
+	}
+
+	if (!ss->in_use)
+	{
+		Com_Printf("Sys_SendStreamedPacket socket is not in use\n");
+		return;
+	}
+
+	if (send(ss->socket, data, length, 0) == -1)
+	{
+		err = errno;
+		if (err == EAGAIN)
+		{
+			QueueStreamedPacket(ss, data, length, 1000, qfalse, 5);
+			Com_Printf("Sys_SendStreamedPacket queued streamed packet: %i\n", ss->socket);
+		}
+		else if (err != EWOULDBLOCK)
+		{
+			NET_CloseStreamedSocket(ss);
+			Com_Printf("Sys_SendStreamedPacket send: %s\n", NET_ErrorString());
+		}
+	}
+}
+
+void Sys_ResendStreamedPacket(void)
+{
+	int index, err;
+	queued_streamed_packet *streamed_packet;
+
+	if (Cmd_Argc() != 2)
+	{
+		return;
+	}
+
+	index = atoi(Cmd_Argv(1));
+	streamed_packet = queued_packets + index;
+
+	if (!streamed_packet->in_use)
+	{
+		return;
+	}
+
+	if (streamed_packet->ready_time > Sys_Milliseconds())
+	{
+		// waiting is probably a bad idea as it leaves remaining cmd text in exec buffer..
+		// but it's the only way to prevent looping in Cbuf_Execute until the ready_time is reached
+		Cbuf_AddText(va("wait ; resendStreamedPacket %i\n", index));
+		return;
+	}
+
+	if (send(streamed_packet->ss->socket, streamed_packet->data, streamed_packet->data_length, 0) == -1)
+	{
+		err = errno;
+		if (err == EAGAIN)
+		{
+			if (++streamed_packet->attempts >= streamed_packet->max_attempts)
+			{
+				FreeQueuedStreamedPacket(streamed_packet, qtrue);
+			}
+			else
+			{
+				streamed_packet->ready_time = Sys_Milliseconds() + streamed_packet->milliseconds_until_resend;
+
+				Com_Printf("Sys_ResendStreamedPacket resending streamed packet in %i milliseconds: %i\n", streamed_packet->milliseconds_until_resend, streamed_packet->ss->socket);
+
+				// waiting is probably a bad idea as it leaves remaining cmd text in exec buffer..
+				// but it's the only way to prevent looping in Cbuf_Execute until the ready_time is reached
+				Cbuf_AddText(va("wait ; resendStreamedPacket %i\n", index));
+			}
+		}
+		else if (err != EWOULDBLOCK)
+		{
+			FreeQueuedStreamedPacket(streamed_packet, qtrue);
+			Com_Printf("Sys_ResendStreamedPacket send: %s\n", NET_ErrorString());
+		}
+	}
+	else
+	{
+		FreeQueuedStreamedPacket(streamed_packet, qfalse);
+	}
+}
+
+qboolean Sys_GetStreamedPacket(netadr_t *net_from, msg_t *msg)
+{
+	int ret, err, i;
+
+	for (i = 0; i < MAX_STREAMED_SOCKETS; ++i)
+	{
+		streamed_socket *ss = streamed_sockets + i;
+
+		if (!ss->in_use)
+		{
+			continue;
+		}
+
+		ret = recv(ss->socket, msg->data, 1024, 0);
+		if (ret == -1)
+		{
+			err = errno;
+			if (err != EWOULDBLOCK && err != EAGAIN)
+			{
+				Com_Printf("Sys_GetStreamedPacket recv: %s\n", NET_ErrorString());
+				NET_CloseStreamedSocket(ss);
+			}
+			continue;
+		}
+		else if (ret == 0)
+		{
+			// connection has been closed (keepalive timeout)
+			Com_Printf("Sys_GetStreamedPacket connection has been closed (keepalive timeout)\n", NET_ErrorString());
+			NET_CloseStreamedSocket(ss);
+			continue;
+		}
+		else if (ret >= msg->maxsize)
+		{
+			Com_Printf("Sys_GetStreamedPacket recv: oversized packet\n");
+			continue;
+		}
+
+		*net_from = *ss->address;
+		msg->cursize = ret;
+		msg->data[msg->cursize] = 0;
+
+		return qtrue;
+	}
+
+	return qfalse;
 }

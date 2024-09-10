@@ -7,7 +7,7 @@
 
 CFLAGSREL = -g -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -fcommon \
--falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL 
 
 DCFLAGSREL := \
 	 -pipe -m32 -march=pentium4 -g -fomit-frame-pointer -ffast-math \
@@ -41,19 +41,6 @@ BOTLIBOBJS := \
 	../botlib/be_interface.o ../botlib/l_crc.o ../botlib/l_libvar.o \
 	../botlib/l_log.o ../botlib/l_memory.o ../botlib/l_precomp.o \
 	../botlib/l_script.o ../botlib/l_struct.o
-JPGLIBOBJS := \
-	../jpeg-6/jcapimin.o ../jpeg-6/jchuff.o ../jpeg-6/jcinit.o \
-	../jpeg-6/jccoefct.o ../jpeg-6/jccolor.o ../jpeg-6/jfdctflt.o \
-	../jpeg-6/jcdctmgr.o ../jpeg-6/jcphuff.o ../jpeg-6/jcmainct.o \
-	../jpeg-6/jcmarker.o ../jpeg-6/jcmaster.o ../jpeg-6/jcomapi.o \
-	../jpeg-6/jcparam.o ../jpeg-6/jcprepct.o ../jpeg-6/jcsample.o \
-	../jpeg-6/jdapimin.o ../jpeg-6/jdapistd.o ../jpeg-6/jdatasrc.o \
-	../jpeg-6/jdcoefct.o ../jpeg-6/jdcolor.o ../jpeg-6/jddctmgr.o \
-	../jpeg-6/jdhuff.o ../jpeg-6/jdinput.o ../jpeg-6/jdmainct.o \
-	../jpeg-6/jdmarker.o ../jpeg-6/jdmaster.o ../jpeg-6/jdpostct.o \
-	../jpeg-6/jdsample.o ../jpeg-6/jdtrans.o ../jpeg-6/jerror.o \
-	../jpeg-6/jidctflt.o ../jpeg-6/jmemmgr.o ../jpeg-6/jmemnobs.o \
-	../jpeg-6/jutils.o
 ASMOBJS := \
 	../unix/ftol.o ../unix/snapvector.o
 INLINEOBJS := \
@@ -76,7 +63,8 @@ CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \
 	../client/cl_net_chan.o ../client/cl_parse.o ../client/cl_scrn.o \
-	../client/cl_ui.o ../client/cl_events.o ../client/cl_control.o
+	../client/cl_ui.o ../client/cl_events.o ../client/cl_control.o \
+	../client/cl_demo.o
 COMMONOBJS := \
 	../qcommon/cm_load.o ../qcommon/cm_patch.o ../qcommon/cm_polylib.o \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
@@ -84,7 +72,7 @@ COMMONOBJS := \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
 	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o \
-	../qcommon/api_query.o ../qcommon/json.o ../qcommon/huffman_static.o
+	../qcommon/api_query.o ../qcommon/json.o ../qcommon/huffman_static.o ../qcommon/md5.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -101,8 +89,9 @@ SHAREDOBJS := \
 DEDOBJS := \
 	../null/null_client.o ../null/null_input.o ../null/null_snddma.o
 UNIXCLIENTOBJS := \
-	../unix/linux_qgl.o ../unix/linux_glimp.o ../unix/linux_joystick.o \
-	../unix/linux_snd.o
+	../unix/linux_qgl.o ../unix/sdl_glimp.o ../unix/sdl_input.o ../unix/sdl_core.o \
+	../unix/sdl_snd.o
+
 UNIXOBJS := \
 	../unix/linux_common.o ../unix/unix_main.o ../unix/linux_tty.o ../unix/unix_net.o \
 	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
@@ -116,9 +105,9 @@ WINOBJS := \
 #####################################################################
 
 CLOBJS := \
-	$(SPLINEOBJS) $(BOTLIBOBJS) $(JPGLIBOBJS) $(ASMOBJS) $(INLINEOBJS) \
-	$(RENDEROBJS) $(CLIENTOBJS) $(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) \
-	$(UNIXOBJS) $(UNIXCLIENTOBJS) $(VMOBJS) $(SHAREDOBJS)
+	$(SPLINEOBJS) $(BOTLIBOBJS) $(ASMOBJS) $(INLINEOBJS) \
+	$(CLIENTOBJS) $(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) \
+	$(UNIXOBJS) $(UNIXCLIENTOBJS) $(RENDEROBJS) $(VMOBJS) $(SHAREDOBJS)
 CLWINOBJS := \
 	$(SPLINEOBJS) $(BOTLIBOBJS) $(JPGLIBOBJS) $(RENDEROBJS) $(CLIENTOBJS) \
 	$(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) $(WINOBJS) $(WINCLIENTOBJS) \
@@ -134,13 +123,14 @@ SVWINOBJS := \
 
 client: CC := gcc
 client: NASM := nasm
-client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+
+client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I../../deps/libunwind/build/include/ -I../../deps/curl/build/include/  -I../../deps/libjpeg-turbo/build/ 
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
-	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl  -lmysqlclient 
+	 -m32 -ldl -lm -lstdc++ -lSDL2 -lc
 client: $(CLOBJS)
-	$(CC) -o wolfMP.x86 $(CLOBJS) $(LDFLAGS)
-	strip -s wolfMP.x86
+	$(CC) -g -o wolfMP.x86 $(CLOBJS) ../../deps/libunwind/build/lib/libunwind.a ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a  ../../deps/libjpeg-turbo/build/libturbojpeg.a $(LDFLAGS)
+	#strip -s wolfMP.x86
 client-clean:
 	rm $(CLOBJS) 2> /dev/null ; exit 0
 	
@@ -165,12 +155,12 @@ client-clean:
 client-w32: CC := i686-w64-mingw32-gcc-win32
 client-w32: CXX := i686-w64-mingw32-g++-win32
 client-w32: CFLAGS := \
-	$(CFLAGSREL) -DBOTLIB -DDLL_ONLY -DCPUSTRING=\"`uname -m`\" \
-	-U__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING \
-	-DCURL_STATICLIB
+	$(CFLAGSREL) -masm=intel -DBOTLIB -DDLL_ONLY \
+	-D__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING \
+	-DCURL_STATICLIB -I../../deps/libjpeg-turbo/build-win/ -I../../deps/curl/build-win/include
 client-w32: CPPFLAGS := $(CFLAGS)
 client-w32: LDFLAGS := \
-	 -lwinmm -lopengl32 -lgdi32 -lws2_32 -static-libgcc `$(CXX) \
+	 -lwinmm -lopengl32 -lgdi32 -lws2_32 -static-libgcc -L../../deps/libjpeg-turbo/build-win/ -lturbojpeg -L../../deps/curl/build-win/ -lcurl `$(CXX) \
 	-print-file-name=libstdc++.a`
 client-w32: $(CLWINOBJS)
 	$(CXX) -o wolfMP.exe $(CLWINOBJS) $(LDFLAGS)

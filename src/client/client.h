@@ -698,6 +698,7 @@ int CL_NDP_Seek(int serverTime);
 void CL_NDP_ReadUntil(int serverTime);
 void CL_NDP_HandleError();
 
+void	Sys_Sleep( int ms );
 
 
 #endif // !__CLIENT_H
