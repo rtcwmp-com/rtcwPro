@@ -30,7 +30,7 @@ menuDef {
 	focusColor .9 .85 1 .8			// Menu focus color for text and items
 	soundloop ""
 
-	onOpen { 
+	onOpen {
 		setitemcolor fadebox backcolor 0 0 0 1;
 		playlooped "sound/music/x_action.wav";
 		fadeout fadebox;
@@ -45,9 +45,9 @@ menuDef {
 	itemDef {
 		name modelselection 		//Precache player model	
 		ownerdraw UI_PLAYERMODEL	//Ownerdraw for player models
-		rect 0 0 0 0 
+		rect 0 0 0 0
 		style 1
-		decoration 
+		decoration
 		visible 1
 	}
 
@@ -73,7 +73,7 @@ menuDef {
 	itemDef {
 		name testmodel_aflag1
 		type ITEM_TYPE_MODEL
-		rect 150 0 800 600 
+		rect 150 0 800 600
 		model_angle 90
 		model_origin 100 100 100
 		asset_model "models/mapobjects/flag/flag_americanui.MD3"
@@ -105,7 +105,7 @@ menuDef {
 
 
 	itemDef {
-		name backimage4					// left side image with black gradient  
+		name backimage4					// left side image with black gradient
 		style WINDOW_STYLE_SHADER
 		rect 0 0 343 480
 		background "backimage4"
@@ -116,7 +116,7 @@ menuDef {
 	itemDef {
 		name testmodel_nflag1
 		type ITEM_TYPE_MODEL
-		rect -350 -30 800 600 
+		rect -350 -30 800 600
 		model_angle -130
 		model_origin 100 100 100
 		asset_model "models/mapobjects/flag/flag_naziui.MD3"
@@ -250,7 +250,7 @@ menuDef {
 			open multi_menu;
 			open joinserver
 		}
-   	}
+	}
 
 
 	//	VIEW DEMOS	//
@@ -280,7 +280,7 @@ menuDef {
 	}
 
 
-	//	OPTIONS	// 
+	//	OPTIONS	//
 
 	itemDef {
 		name options
@@ -303,7 +303,7 @@ menuDef {
 			close main;
 			open setup_menu;
 			open control_menu
-		} 
+		}
 	}
 
 
@@ -362,15 +362,15 @@ menuDef {
 
 
 	itemDef {
-      	name fadebox					// Box for fading in menus
-      	style WINDOW_STYLE_FILLED
- 		background "ui_mp/assets/fadebox.tga"
+	name fadebox					// Box for fading in menus
+	style WINDOW_STYLE_FILLED
+		background "ui_mp/assets/fadebox.tga"
 		forecolor 0 0 0 1
 		backcolor 0 0 0 1
 		rect 0 0 640 480
-      	visible 1
+	visible 1
 		decoration
-    }
+}
 
 	itemDef {
 		name window
@@ -386,9 +386,9 @@ menuDef {
 		textalignx 2
 		textaligny 10
 		forecolor .937 .702 0.2 1
-      	visible 1
+	visible 1
 		decoration
-    }
+}
 
 	itemDef {
 		name rtcwpro_sourceurl
@@ -406,13 +406,13 @@ menuDef {
 		textalignx 2
 		textaligny 10
 		forecolor 0.961 0 0 1
-      	visible 1
+	visible 1
 		mouseEnter { fadein message_accept }
 		action {
 			play "sound/misc/zap.wav";
 			uiScript openModSource
 		}
-    }
+}
 
 	itemDef {
 		name rtcwpro_modurl
@@ -435,6 +435,6 @@ menuDef {
 			play "sound/misc/zap.wav";
 			uiScript openModURL
 		}
-    }
+}
 }
 

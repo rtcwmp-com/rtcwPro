@@ -68,7 +68,7 @@ menuDef {
 
 ////////////////////////
 //
-//       LOOK
+//	LOOK
 //
 ////////////////////////
 	itemDef {
@@ -98,14 +98,14 @@ menuDef {
 		type 1
 		style 0	
 		textstyle 6
-		rect 222.5 -12 64 14 
+		rect 222.5 -12 64 14
 		textalign ITEM_ALIGN_CENTER
 		textfont UI_FONT_NORMAL
 		textscale .25		
 		textalignx 2
 		textaligny 12
 		forecolor .9 .9 .9 1
-		visible 1 
+		visible 1
 		decoration
 	}
 
@@ -305,7 +305,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MOVE
+//	MOVE
 //
 ////////////////////////
 	itemDef {
@@ -574,7 +574,7 @@ menuDef {
 		backcolor 1 1 1 .07
 		visible 0
 		mouseenter { show keyBindStatus }
-		mouseexit { hide keyBindStatus } 
+		mouseexit { hide keyBindStatus }
 	}
 
 	itemDef {
@@ -600,7 +600,7 @@ menuDef {
 
 ////////////////////////
 //
-//       SHOOT
+//	SHOOT
 //
 ////////////////////////
 	itemDef {
@@ -915,7 +915,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MISC
+//	MISC
 //
 ////////////////////////
 	itemDef {
@@ -1232,7 +1232,7 @@ menuDef {
 
 ////////////////////////
 //
-//       CHAT
+//	CHAT
 //
 ////////////////////////
 	itemDef {
@@ -1359,7 +1359,7 @@ menuDef {
 
 ////////////////////////
 //
-//      MULTIVIEW
+//	MULTIVIEW
 //
 ////////////////////////
 	itemDef {
@@ -1507,7 +1507,7 @@ menuDef {
 
 	itemDef {
 		name yesno_message
-		rect 0 322 640 30 
+		rect 0 322 640 30
 		text "Elegir el objeto a activar como Sí o No"
 		forecolor 1 .75 0 1
 		textfont UI_FONT_NORMAL
@@ -1521,7 +1521,7 @@ menuDef {
 
 	itemDef {
 		name slider_message
-		rect 0 322 640 30 
+		rect 0 322 640 30
 		text "Desplaza la barra para Aumentar o Disminuir"
 		forecolor 1 .75 0 1
 		textfont UI_FONT_NORMAL
@@ -1535,7 +1535,7 @@ menuDef {
 
 	itemDef {
 		name floater_message
-		rect 0 322 640 30 
+		rect 0 322 640 30
 		text "Pulsa ENTER o CLICK para Cambiar"
 		forecolor 1 .75 0 1
 		textfont UI_FONT_NORMAL
@@ -1554,7 +1554,7 @@ menuDef {
 		forecolor 0 0 0 1
 		backcolor 0 0 0 1
 		rect 0 0 640 480
-		visible 1 
+		visible 1
 		decoration
 	}
 

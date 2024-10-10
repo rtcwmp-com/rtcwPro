@@ -7,16 +7,16 @@
 {
 \\ Server Creation \\
 
-  menuDef {
-    	name "multi_menu"
-    	visible 0
-    	fullscreen 1
-    	rect 186 0 454 480
- 	focusColor .9 .9 .9 1
-    	style 1
-    	border 1
+menuDef {
+	name "multi_menu"
+	visible 0
+	fullscreen 1
+	rect 186 0 454 480
+	focusColor .9 .9 .9 1
+	style 1
+	border 1
 	soundloop ""
-      	style WINDOW_STYLE_FILLED
+	style WINDOW_STYLE_FILLED
 	forecolor 0 0 0 0
 	backcolor 0 0 0 0
 
@@ -36,35 +36,35 @@
 //////////////// new wolf
 
 itemDef {
-      	name menu_select					// menu_select
-      	style WINDOW_STYLE_SHADER
-      	rect 0 0 640 480
-     	background "menu_select"
-      	visible 1
+	name menu_select					// menu_select
+	style WINDOW_STYLE_SHADER
+	rect 0 0 640 480
+	background "menu_select"
+	visible 1
 	decoration
-    	}
+	}
 
 
 
 
 itemDef {
-      name band2					// band2
-      style WINDOW_STYLE_SHADER
-      rect 360 20 128 640
-    	background "band2"
-     	visible 1
+name band2					// band2
+style WINDOW_STYLE_SHADER
+rect 360 20 128 640
+	background "band2"
+	visible 1
 	decoration
 }
 
 
 itemDef {
-      	name bands					// bands
-      	style WINDOW_STYLE_SHADER
-      	rect 0 -480 640 1024
-     	background "bands"
-      	visible 1
+	name bands					// bands
+	style WINDOW_STYLE_SHADER
+	rect 0 -480 640 1024
+	background "bands"
+	visible 1
 	decoration
-    	}
+	}
 
 
 itemDef {
@@ -137,7 +137,7 @@ itemDef {
 	name			create_server
 	text			"SERVER ERSTELLEN"
 	textfont	UI_FONT_NORMAL
- 	type			1
+	type			1
 	style			0
 	textstyle		6
 	rect			426 90 100 14
@@ -187,7 +187,7 @@ itemDef {
 	name			Multi_Setup
 	text			"MEHRSPIELER-SETUP"
 	textfont	UI_FONT_NORMAL
- 	type			1
+	type			1
 	style			0
 	textstyle		6
 	rect			248 90 120 14
@@ -215,30 +215,30 @@ itemDef {
 
 
 itemDef {
-      	name gotobar
-      	style 2
-      	rect 0 445 640 20
-      	textscale 0.4
-      	textalign 0		// center
-      	textalignx 60        	// x alignment point for text
-         // use it to offset left/right text from the edge
-         // or to center the text on a different point
-      	textaligny 21
-      	style 2
-      	border 4
-      	bordercolor 0.5 0.5 0.5 0.0
-      	bordersize 2
-      	backcolor 0.5 0.5 .5 0.0
-      	visible 1
-      	mouseEnter { setcolor backcolor .5 0.5 0.5 .5 }
-      	mouseExit { setcolor backcolor .5 .5 .5 .0 }
-      	decoration
-    	}
+	name gotobar
+	style 2
+	rect 0 445 640 20
+	textscale 0.4
+	textalign 0		// center
+	textalignx 60	// x alignment point for text
+			// use it to offset left/right text from the edge
+			// or to center the text on a different point
+	textaligny 21
+	style 2
+	border 4
+	bordercolor 0.5 0.5 0.5 0.0
+	bordersize 2
+	backcolor 0.5 0.5 .5 0.0
+	visible 1
+	mouseEnter { setcolor backcolor .5 0.5 0.5 .5 }
+	mouseExit { setcolor backcolor .5 .5 .5 .0 }
+	decoration
+	}
 
 itemDef {
-      name back
-      text "ZURÜCK"
- 	type 1
+name back
+text "ZURÜCK"
+	type 1
 	style 0
 	textstyle 6
 	rect 30 450 40 14
@@ -250,7 +250,7 @@ itemDef {
 	forecolor .9 .9 .9 .9
 	visible 1
 
-     	action {
+	action {
 		close createserver ;
 		close joinserver ;
 		close multi_setup ;
@@ -263,12 +263,12 @@ itemDef {
 		show back_alt ;
 		show message_back
 	}
-    }
+}
 
 itemDef {
-     name back_alt
-     text "ZURÜCK"
- 	type 1
+name back_alt
+text "ZURÜCK"
+	type 1
 	style 0
 	textstyle 6
 	rect 30 450 40 14
@@ -290,12 +290,12 @@ itemDef {
 		open main
 	}
 
-     	mouseExit {
+	mouseExit {
 		hide back_alt ;
 		show back ;
 		hide message_back
 	}
-    }
+}
 
 //	MESSAGES	//
 
@@ -553,15 +553,15 @@ itemDef {
 
 
 itemDef {
-      	name fadebox
-      	style WINDOW_STYLE_FILLED
- 	background "ui_mp/assets/fadebox.tga"
+	name fadebox
+	style WINDOW_STYLE_FILLED
+	background "ui_mp/assets/fadebox.tga"
 	forecolor 0 0 0 1
 	backcolor 0 0 0 1
 	rect 0 0 640 480
-      	visible 1
+	visible 1
 	decoration
-    	}
+	}
 
 
 }

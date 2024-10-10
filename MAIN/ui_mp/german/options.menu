@@ -31,7 +31,7 @@ menuDef
 
 
 //////////////////////////
-//     PERFORMANCE
+//	PERFORMANCE
 //////////////////////////
 	itemDef {
 		name ctr_performance
@@ -283,7 +283,7 @@ menuDef
 
 
 //////////////////////////
-//       VIEW
+//	VIEW
 //////////////////////////
 	itemDef {
 		name ctr_view
@@ -798,7 +798,7 @@ menuDef
 		style WINDOW_STYLE_FILLED
 		backcolor 1 1 1 .07
 		visible 0
-   	}
+	}
 
 	itemDef {
 		name xhair
@@ -846,7 +846,7 @@ menuDef
 	itemDef {
 		name xhair
 		group grpOptions
- 		type ITEM_TYPE_MULTI
+		type ITEM_TYPE_MULTI
 		text "Sekundäre Farbe:"
 		tooltip "Farbe des Sekundären Fadenkreuzes"
 		cvar "cg_crosshairColorAlt"

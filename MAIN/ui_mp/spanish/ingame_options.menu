@@ -243,7 +243,7 @@ menuDef {
 
 
 //////////////////////////
-//       VIEW
+//	VIEW
 //////////////////////////
 	itemDef {
 		name ctr_view
@@ -349,7 +349,7 @@ menuDef {
 //		textalignx 143
 //		textaligny 17
 //		textfont UI_FONT_NORMAL
-//		textscale .25	 
+//		textscale .25	
 //		visible 1
 //		action { exec "loadhud" }
 //	}
@@ -731,7 +731,7 @@ menuDef {
 		style WINDOW_STYLE_FILLED
 		backcolor 1 1 1 .07
 		visible 0
-   	}
+	}
 
 	itemDef {
 		name xhair
@@ -767,7 +767,7 @@ menuDef {
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 	}
@@ -775,7 +775,7 @@ menuDef {
 	itemDef {
 		name xhair
 		group grpOptions
- 		type ITEM_TYPE_MULTI
+		type ITEM_TYPE_MULTI
 		text "Color Secundario :"
 		tooltip "Set the color for the secondary crosshair"
 		cvar "cg_crosshairColorAlt"
@@ -806,7 +806,7 @@ menuDef {
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 	}

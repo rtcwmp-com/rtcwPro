@@ -5,10 +5,10 @@
 	loadMenu { "ui_mp/main.menu" }
 	loadMenu { "ui_mp/demos.menu" }
 	loadMenu { "ui_mp/multi.menu" }			// NERVE - ATS
- 	loadMenu { "ui_mp/joinserver.menu" }	// NERVE - SMF - commented in for multiplayer
+	loadMenu { "ui_mp/joinserver.menu" }	// NERVE - SMF - commented in for multiplayer
 	loadMenu { "ui_mp/multi_setup.menu" }	// NERVE - ATS
- 	loadMenu { "ui_mp/setup.menu" }
- 	loadMenu { "ui_mp/createserver.menu" }	// NERVE - SMF - commented in for multiplayer
+	loadMenu { "ui_mp/setup.menu" }
+	loadMenu { "ui_mp/createserver.menu" }	// NERVE - SMF - commented in for multiplayer
 	loadMenu { "ui_mp/controls.menu" }
 	loadMenu { "ui_mp/cdkey.menu" }
 	loadMenu { "ui_mp/system.menu" }

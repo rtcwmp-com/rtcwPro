@@ -16,7 +16,7 @@ assetGlobalDef {
 
 	shadowColor 0.1 0.1 0.1 0.25	// shadow color
 }
-							   
+							
 
 \\ INGAME MENU \\
 
@@ -38,7 +38,7 @@ menuDef {
 	}
 
 	////////////////////
-	//    GRAPHICS
+	//	GRAPHICS
 	////////////////////
 	itemDef {
 		name BLACKGRAD
@@ -96,9 +96,9 @@ menuDef {
 
 
 	/////////////////////
-	//     BUTTONS
+	//	BUTTONS
 	/////////////////////
-	itemdef	{
+	itemdef {
 		name about
 		text "OPEN LIMBO MENU"	
 		tooltip "Gameplay selection and options"
@@ -115,7 +115,7 @@ menuDef {
 		visible 1
 		action { close ingame; exec OpenLimboMenu }
 		mouseEnter { setitemcolor about backcolor .15 .1 .1 .7 }
-		mouseExit { setitemcolor about backcolor .4 .4 .4 .6  }
+		mouseExit { setitemcolor about backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {
@@ -134,7 +134,7 @@ menuDef {
 		visible 0
 		action { open ingame_loadsave }
 		mouseEnter { setitemcolor player backcolor .15 .1 .1 .7 }
-		mouseExit { setitemcolor player backcolor .4 .4 .4 .6  }
+		mouseExit { setitemcolor player backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {
@@ -145,7 +145,7 @@ menuDef {
 		rect 177 90 75 20
 		textstyle 6
 		textalign 1
-		textalignx 36      
+		textalignx 36
 		textaligny 14
 		textfont UI_FONT_NORMAL
 		textscale .25
@@ -154,7 +154,7 @@ menuDef {
 		visible 1
 		action { open ingame_callvote }
 		mouseEnter { setitemcolor controls backcolor .15 .1 .1 .7 }
-		mouseExit {setitemcolor controls backcolor .4 .4 .4 .6  }
+		mouseExit {setitemcolor controls backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {
@@ -174,7 +174,7 @@ menuDef {
 		visible 1
 		action { open ingame_controls }
 		mouseEnter { setitemcolor controls backcolor .15 .1 .1 .7 }
-		mouseExit { setitemcolor controls backcolor .4 .4 .4 .6  }
+		mouseExit { setitemcolor controls backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {
@@ -194,7 +194,7 @@ menuDef {
 		visible 1
 		action { open ingame_options }
 		mouseEnter { setitemcolor options backcolor .15 .1 .1 .7 }
-		mouseExit { setitemcolor options backcolor .4 .4 .4 .6  }
+		mouseExit { setitemcolor options backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {
@@ -214,7 +214,7 @@ menuDef {
 		visible 1
 		action { open ingame_system }
 		mouseEnter { setitemcolor system backcolor .15 .1 .1 .7 }
-		mouseExit { setitemcolor system backcolor .4 .4 .4 .6  }
+		mouseExit { setitemcolor system backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {
@@ -222,7 +222,7 @@ menuDef {
 		text "EXIT"
 		tooltip "Exit server/Wolfenstein"
 		type 1
-		rect 585  90 58 20
+		rect 585 90 58 20
 		textstyle 6
 		textalign 1
 		textalignx 29
@@ -234,7 +234,7 @@ menuDef {
 		visible 1
 		action { open ingame_leave }
 		mouseEnter { setitemcolor leave backcolor .15 .1 .1 .7 }
-		mouseExit { setitemcolor leave backcolor .4 .4 .4 .6  }
+		mouseExit { setitemcolor leave backcolor .4 .4 .4 .6 }
 	}
 
 	itemDef {

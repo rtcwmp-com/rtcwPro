@@ -5,7 +5,7 @@
 //
 
 {
-\\ CALL VOTE MENU \\ 
+\\ CALL VOTE MENU \\
 
 menuDef {
 	name "ingame_callvote"
@@ -157,13 +157,13 @@ menuDef {
 ////////////////////////////////////////////////////////////////////////////
 
 	///////////////////
-	// 	  NEW MAP
+	//	NEW MAP
 	///////////////////
 	itemDef {
 		name map
 		group grpCallVote
 		text "New Map:"
-		ownerdraw UI_ALLMAPS_SELECTION 
+		ownerdraw UI_ALLMAPS_SELECTION
 		textscale .25
 		rect 140 25 110 20
 		textfont UI_FONT_NORMAL
@@ -221,7 +221,7 @@ menuDef {
 
 
 	//////////////////
-	//     MISC
+	//	MISC
 	//////////////////
 	itemDef {
 		name misc
@@ -511,7 +511,7 @@ menuDef {
 	
 
 	/////////////////////
-	//     REFEREE
+	//	REFEREE
 	/////////////////////
 	itemDef {
 		name ref
@@ -574,7 +574,7 @@ menuDef {
 
 
 	///////////////////
-	// 	   KICK
+	//	KICK
 	///////////////////
 	itemDef {
 		name kick
@@ -637,7 +637,7 @@ menuDef {
 
 
 	//////////////////////
-	//     GAMETYPE
+	//	GAMETYPE
 	//////////////////////
 	itemDef {
 		name type

@@ -31,13 +31,13 @@ menuDef
 
 
 //////////////////////////
-//     PERFORMANCE
+//	PERFORMANCE
 //////////////////////////
 	itemDef {
 		name ctr_performance
 		group grpSystembutton
 		text "Performances"
-		tooltip "Modifier les  options de performances"
+		tooltip "Modifier les options de performances"
 		type 1
 		textfont UI_FONT_NORMAL
 		textscale .25
@@ -283,7 +283,7 @@ menuDef
 
 
 //////////////////////////
-//       VIEW
+//	VIEW
 //////////////////////////
 	itemDef {
 		name ctr_view
@@ -397,7 +397,7 @@ menuDef
 //		textalignx 128
 //		textaligny 10
 //		textfont UI_FONT_NORMAL
-//		textscale .25	 
+//		textscale .25	
 //		backcolor 1 1 1 .07
 //		visible 0
 //	}
@@ -515,7 +515,7 @@ menuDef
 		group grpOptions
 		type ITEM_TYPE_YESNO
 		text "Utiliser le format JPEG pour les autoscreenshot :"
-		tooltip "Utiliser le format JPG a ma demande d'un  \"autoscreenshot\" command"
+		tooltip "Utiliser le format JPG a ma demande d'un \"autoscreenshot\" command"
 		cvar "cg_useScreenshotJPEG"
 		rect 84 165 271 12
 		textalign ITEM_ALIGN_RIGHT
@@ -813,7 +813,7 @@ menuDef
 		style WINDOW_STYLE_FILLED
 		backcolor 1 1 1 .07
 		visible 0
-   	}
+	}
 
 	itemDef {
 		name xhair
@@ -851,7 +851,7 @@ menuDef
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 		mouseEnter { show floater_message }
@@ -861,7 +861,7 @@ menuDef
 	itemDef {
 		name xhair
 		group grpOptions
- 		type ITEM_TYPE_MULTI
+		type ITEM_TYPE_MULTI
 		text "Couleur secondaire :"
 		tooltip "Selectionner la couleur secondaire du viseur"
 		cvar "cg_crosshairColorAlt"
@@ -894,7 +894,7 @@ menuDef
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 		mouseEnter { show floater_message }
