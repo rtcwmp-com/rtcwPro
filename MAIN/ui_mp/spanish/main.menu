@@ -24,30 +24,28 @@
 menuDef {
 	name "main"
 //	background "menuback_cw"		// Spinning Circle Background
-	fullScreen 1				
+	fullScreen 1
 	rect 0 0 640 480				// Size and position of the menu
 	visible 1						// Visible on open
 	focusColor .9 .85 1 .8			// Menu focus color for text and items
 	soundloop ""
-
-	onOpen { 
+	onOpen {
 		setitemcolor fadebox backcolor 0 0 0 1;
 		playlooped "sound/music/x_action.wav";
 		fadeout fadebox;
 		uiScript stopRefresh;
 		checkautoupdate
 	}
-
 	onESC { open quit_popmenu }
 
 
 
 	itemDef {
-		name modelselection 		//Precache player model	
+		name modelselection 		//Precache player model
 		ownerdraw UI_PLAYERMODEL	//Ownerdraw for player models
-		rect 0 0 0 0 
+		rect 0 0 0 0
 		style 1
-		decoration 
+		decoration
 		visible 1
 	}
 
@@ -73,7 +71,7 @@ menuDef {
 	itemDef {
 		name testmodel_aflag1
 		type ITEM_TYPE_MODEL
-		rect 150 0 800 600 
+		rect 150 0 800 600
 		model_angle 90
 		model_origin 100 100 100
 		asset_model "models/mapobjects/flag/flag_americanui.MD3"
@@ -92,7 +90,6 @@ menuDef {
 		visible 1
 		decoration
 	}
-	
 
 	itemDef {
 		name bands
@@ -105,7 +102,7 @@ menuDef {
 
 
 	itemDef {
-		name backimage4					// left side image with black gradient  
+		name backimage4					// left side image with black gradient
 		style WINDOW_STYLE_SHADER
 		rect 0 0 343 480
 		background "backimage4"
@@ -116,7 +113,7 @@ menuDef {
 	itemDef {
 		name testmodel_nflag1
 		type ITEM_TYPE_MODEL
-		rect -350 -30 800 600 
+		rect -350 -30 800 600
 		model_angle -130
 		model_origin 100 100 100
 		asset_model "models/mapobjects/flag/flag_naziui.MD3"
@@ -225,9 +222,7 @@ menuDef {
 	}
 
 
-
 	//	MULTIPLAYER	//
-
 	itemDef {
 		name playselection
 		text "MULTIJUGADOR"
@@ -244,13 +239,10 @@ menuDef {
 		forecolor .9 .9 .9 1
 		visible 1
 		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			close main;
-			open multi_menu;
-			open joinserver
-		}
-   	}
+		action { play "sound/misc/zap.wav";
+			close main; open multi_menu;
+			open joinserver }
+	}
 
 
 	//	VIEW DEMOS	//
@@ -280,11 +272,11 @@ menuDef {
 	}
 
 
-	//	OPTIONS	// 
+	//	OPTIONS	//
 
 	itemDef {
 		name options
-		text "OPCIONES"		
+		text "OPCIONES"
 		tooltip "Editar opciones y ajustes de jugador"
 		type 1
 		style 0
@@ -303,7 +295,7 @@ menuDef {
 			close main;
 			open setup_menu;
 			open control_menu
-		} 
+		}
 	}
 
 
@@ -340,7 +332,7 @@ menuDef {
 		name quit
 		text "SALIR"
 		tooltip "Salir de Return to Castle Wolfenstein"
-		type 1	
+		type 1
 		style 0
 		textstyle 6
 		rect 590 398 32 14
@@ -359,24 +351,22 @@ menuDef {
 	}
 
 
-
 	//	SINGLE PLAYER	//
 
 	itemDef {
 		name play
 		text "SINGLE PLAYER"
 		type 1
-		style 0		
+		style 0
 		textstyle 6
-		rect 3 420 100 14 
+		rect 3 420 100 14
 		textalign 0
 		textfont UI_FONT_NORMAL
-		textscale .255		
+		textscale .255
 		textalignx 7
 		textaligny 10
 		forecolor 1 1 1 1
 		visible 0
-
 		action {
 			play "sound/misc/zap.wav";
 			open single_player_menu
@@ -384,24 +374,22 @@ menuDef {
 	}
 
 
-
-
 	itemDef {
-      	name fadebox					// Box for fading in menus
-      	style WINDOW_STYLE_FILLED
- 		background "ui_mp/assets/fadebox.tga"
+		name fadebox		// Box for fading in menus
+		style WINDOW_STYLE_FILLED
+		background "ui_mp/assets/fadebox.tga"
 		forecolor 0 0 0 1
 		backcolor 0 0 0 1
 		rect 0 0 640 480
-      	visible 1
+		visible 1
 		decoration
-    }
+	}
 
 	itemDef {
 		name window
 		text "Wolfenstein Multijugador"
 		type 0
-		style 0	
+		style 0
 		textstyle 6
 		rect 5 465 250 14
 		autowrapped
@@ -411,9 +399,9 @@ menuDef {
 		textalignx 2
 		textaligny 10
 		forecolor .937 .702 0.2 1
-      	visible 1
+		visible 1
 		decoration
-    }
+	}
 
 	itemDef {
 		name osp_gfx
@@ -427,12 +415,12 @@ menuDef {
 
 	itemDef {
 		name rtcwpro_sourceurl
-		text "Source" // show the cvar below
+		text "Source"	// show the cvar below
 		//cvar ui_gameversion
 		tooltip "RtcwPro Version"
 		tooltipaligny -40
 		type 1
-		style 0	
+		style 0
 		rect 545 450 170 14
 		textalign 0
 		textfont UI_FONT_NORMAL
@@ -441,13 +429,11 @@ menuDef {
 		textalignx 2
 		textaligny 10
 		forecolor 0.961 0 0 1
-      	visible 1
+		visible 1
 		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			uiScript openModSource
-		}
-    }
+		action { play "sound/misc/zap.wav";
+			uiScript openModSource }
+	}
 
 	itemDef {
 		name rtcwpro_modurl
@@ -466,10 +452,7 @@ menuDef {
 		forecolor 1 0.62 0.1 1
 		visible 1
 		mouseEnter { fadein message_accept }
-		action {
-			play "sound/misc/zap.wav";
-			uiScript openModURL
-		}
-    }
+		action { play "sound/misc/zap.wav";
+			uiScript openModURL }
+	}
 }
-

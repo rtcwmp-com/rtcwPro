@@ -16,7 +16,7 @@ menuDef
 	onEsc { close options_menu ; close setup_menu ; open main }
 
 
-	
+
 	itemDef {
 		name window
 		group grpSystembutton
@@ -281,9 +281,8 @@ menuDef
 	}
 
 
-
 //////////////////////////
-//       VIEW
+//	VIEW
 //////////////////////////
 	itemDef {
 		name ctr_view
@@ -368,7 +367,7 @@ menuDef
 	}
 
 	itemDef {
-		name view				
+		name view
 		group grpOptions
 		type ITEM_TYPE_YESNO
 		text "Sólo chat de equipo: "
@@ -399,7 +398,7 @@ menuDef
 //		textalignx 128
 //		textaligny 10
 //		textfont UI_FONT_NORMAL
-//		textscale .25	 
+//		textscale .25
 //		backcolor 1 1 1 .07
 //		visible 0
 //	}
@@ -782,7 +781,7 @@ menuDef
 		style WINDOW_STYLE_FILLED
 		backcolor 1 1 1 .07
 		visible 0
-   	}
+	}
 
 	itemDef {
 		name xhair
@@ -818,7 +817,7 @@ menuDef
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 	}
@@ -826,7 +825,7 @@ menuDef
 	itemDef {
 		name xhair
 		group grpOptions
- 		type ITEM_TYPE_MULTI
+		type ITEM_TYPE_MULTI
 		text "Color Secundario :"
 		tooltip "Set the color for the secondary crosshair"
 		cvar "cg_crosshairColorAlt"
@@ -857,11 +856,9 @@ menuDef
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 	}
-
 }
-
 }

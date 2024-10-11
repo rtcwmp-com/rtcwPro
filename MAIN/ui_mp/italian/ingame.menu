@@ -6,7 +6,7 @@ assetGlobalDef {
 	smallFont "fonts/smallfont" 12				// font
 	bigFont "fonts/bigfont" 20					// font
 	handwritingFont "fonts/handfont" 17			// font (pt size needs to be diff than the others)
-	cursor "ui_mp/assets/3_cursor3"				// cursor	
+	cursor "ui_mp/assets/3_cursor3"				// cursor
 	gradientBar "ui_mp/assets/gradientbar2.tga"	// gradient bar
 	itemFocusSound "sound/misc/menu2.wav"		// sound for item getting focus (via keyboard or mouse )
 
@@ -16,7 +16,7 @@ assetGlobalDef {
 
 	shadowColor 0.1 0.1 0.1 0.25	// shadow color
 }
-							   
+
 
 \\ INGAME MENU \\
 
@@ -38,7 +38,7 @@ menuDef {
 	}
 
 	////////////////////
-	//    GRAPHICS
+	//	GRAPHICS
 	////////////////////
 	itemDef {
 		name BLACKGRAD
@@ -96,11 +96,11 @@ menuDef {
 
 
 	/////////////////////
-	//     BUTTONS
+	//	BUTTONS
 	/////////////////////
-	itemdef	{
+	itemdef {
 		name about
-		text "OPEN LIMBO MENU"	
+		text "OPEN LIMBO MENU"
 		tooltip "Imposta la tua classe e la tua arma"
 		rect 10 90 128 20
 		type 1
@@ -145,7 +145,7 @@ menuDef {
 		rect 177 90 75 20
 		textstyle 6
 		textalign 1
-		textalignx 36      
+		textalignx 36
 		textaligny 14
 		textfont UI_FONT_NORMAL
 		textscale .25
@@ -268,7 +268,5 @@ menuDef {
 		visible 1
 		decoration
 	}
-
 }
-
 }
