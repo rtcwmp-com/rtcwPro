@@ -1,0 +1,22 @@
+* text=auto eol=lf
+
+*.bat text
+*.shader text
+*.txt text
+*.menu text
+*.pl text
+*.py text
+*.proto text
+*.inc text
+*.lst text
+*.cfg text
+*.rc text
+*.def text
+
+.gitignore text
+CVARLIST.md text
+README.md text
+SECURITY.md text
+
+*.exe binary
+ccache binary
