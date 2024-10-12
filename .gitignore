@@ -21,6 +21,9 @@ src/Builds
 *.so
 *.o
 *.pk3
+*.res
+*.lib
+.vscode/
 /src/servercache.dat
 /src/main/authkey
 /libs/libcurl/out/build/x64-Debug

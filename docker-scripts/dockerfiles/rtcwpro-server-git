@@ -18,7 +18,7 @@ WORKDIR /home/game
 
 RUN mkdir /home/game/main
 COPY --chown=game:game --from="msh100/rtcw" /home/game/main /home/game/main
-COPY --chown=game:game --from=image /output/build/. /home/game/
+COPY --chown=game:game build/. /home/game
 
 RUN git clone --depth 1 "https://github.com/msh100/rtcw-config.git" \
     /home/game/settings/

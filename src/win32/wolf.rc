@@ -62,7 +62,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "win32\\wolf.ico"
+IDI_ICON1               ICON                    "wolf.ico"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////

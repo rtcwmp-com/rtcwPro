@@ -43,8 +43,6 @@ BOTLIBOBJS := \
 	../botlib/l_script.o ../botlib/l_struct.o
 ASMOBJS := \
 	../unix/ftol.o ../unix/snapvector.o
-INLINEOBJS := \
-	../unix/matha.o ../unix/snd_mixa.o
 RENDEROBJS := \
 	../renderer/tr_animation.o ../renderer/tr_backend.o \
 	../renderer/tr_bsp.o ../renderer/tr_cmds.o \
@@ -97,7 +95,7 @@ UNIXOBJS := \
 	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \
-	../win32/win_qgl.o ../win32/win_snd.o ../win32/linux_threads.o
+	../win32/win_qgl.o ../win32/win_snd.o ../win32/win_threads.o ../win32/win_exception.o
 WINOBJS := \
 	../win32/win_main.o ../win32/win_net.o ../win32/win_syscon.o \
 	../win32/win_wndproc.o ../win32/win_shared.o
@@ -105,7 +103,7 @@ WINOBJS := \
 #####################################################################
 
 CLOBJS := \
-	$(SPLINEOBJS) $(BOTLIBOBJS) $(ASMOBJS) $(INLINEOBJS) \
+	$(SPLINEOBJS) $(BOTLIBOBJS) $(ASMOBJS) \
 	$(CLIENTOBJS) $(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) \
 	$(UNIXOBJS) $(UNIXCLIENTOBJS) $(RENDEROBJS) $(VMOBJS) $(SHAREDOBJS)
 CLWINOBJS := \
@@ -136,35 +134,23 @@ client-clean:
 	
 #####################################################################
 
-# FIXME: this needs a symlink from include/gl to include/GL since win32
-# paths arent case sensitive - maybe fix in renderer/qgl.h
-# FIXME: jmorecfg.h defines INT32 and conflicts with mingws basetsd.h
-# included by windows.h - adjusted basetsd.h for now but should be
-# really fixed in jmorecfg.h (libjpeg update?)
-# FIXME: is uname -m suitable for CPUSTRING?
-# FIXME: had to undef __i386__ to avoid msvc style inline asm - probably
-# not the cleanest solution
-# NOTE: dinput.h and dsound.h missing from mingw but available
-# from dx80_mgw.zip at http://alleg.sourceforge.net/wip.html
-#/home/greg/RTCWxMod/OSPx/cross-make.sh
-#/home/greg/Downloads/cross-tools/bin/i386-mingw32msvc-gcc
-#client-w32: CC := i686-w64-mingw32-gcc 
-#client-w32: CXX := i686-w64-mingw32-g++
-#client-w32: CC := i386-mingw32msvc-gcc
-#client-w32: CXX := i386-mingw32msvc-g++
+# This builds the windows client with mingw but mingw doesn't support windows' exception handling
+#   may need to exclude win_exception's things to get it to build again, or just don't use it.  
+# Makefile-win uses clang-cl to build in msvc mode with Safe Exception Handling support
 client-w32: CC := i686-w64-mingw32-gcc-win32
 client-w32: CXX := i686-w64-mingw32-g++-win32
 client-w32: CFLAGS := \
-	$(CFLAGSREL) -masm=intel -DBOTLIB -DDLL_ONLY \
-	-D__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING \
-	-DCURL_STATICLIB -I../../deps/libjpeg-turbo/build-win/ -I../../deps/curl/build-win/include
+	$(CFLAGSREL) -g  -DBOTLIB -DDLL_ONLY \
+	-D__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING -D__MINGW32__  \
+	 -I../../deps/libjpeg-turbo/build-win/ -I../../deps/curl-win/curl/include
 client-w32: CPPFLAGS := $(CFLAGS)
 client-w32: LDFLAGS := \
-	 -lwinmm -lopengl32 -lgdi32 -lws2_32 -static-libgcc -L../../deps/libjpeg-turbo/build-win/ -lturbojpeg -L../../deps/curl/build-win/ -lcurl `$(CXX) \
-	-print-file-name=libstdc++.a`
+	  -g -lwinmm -lopengl32 -lgdi32  -static-libgcc  \
+	 `$(CXX) -print-file-name=libstdc++.a` -lws2_32 -lcrypt32 -L../../deps/curl-win/curl/lib -lcurl -mwindows
 client-w32: $(CLWINOBJS)
-	$(CXX) -o wolfMP.exe $(CLWINOBJS) $(LDFLAGS)
-	strip -s wolfMP.exe
+	$(CXX) -o wolfMP.exe $(CLWINOBJS) \
+	 ../../deps/libjpeg-turbo/build-win/libturbojpeg.a /usr/i686-w64-mingw32/lib/libversion.a  $(LDFLAGS)
+	#strip -s wolfMP.exe
 client-w32-clean:
 	rm $(CLWINOBJS) 2> /dev/null ; exit 0
 

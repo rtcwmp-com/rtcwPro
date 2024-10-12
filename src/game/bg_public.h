@@ -1169,7 +1169,7 @@ typedef struct {
 	int isReady;
 } player_ready_status_t;
 
-player_ready_status_t player_ready_status[MAX_CLIENTS];
+extern player_ready_status_t player_ready_status[];
 
 // How many players on the overlay
 #define TEAM_MAXOVERLAY     10 // RtcwPro changed this to 10
