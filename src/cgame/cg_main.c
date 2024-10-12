@@ -449,6 +449,12 @@ vmCvar_t cg_teamObituaryColorSameTK;
 vmCvar_t cg_teamObituaryColorEnemy;
 vmCvar_t cg_teamObituaryColorEnemyTK;
 
+vmCvar_t g_maxLagCompensation;
+vmCvar_t g_delagHitscan;
+vmCvar_t g_fixedphysicsfps;
+vmCvar_t g_allowEnemySpawnTimer;
+vmCvar_t stats_matchid;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -794,7 +800,16 @@ cvarTable_t cvarTable[] = {
 	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "green", CVAR_ARCHIVE },
 	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "mdgreen", CVAR_ARCHIVE },
 	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "red", CVAR_ARCHIVE },
-	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "mdred", CVAR_ARCHIVE }
+	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "mdred", CVAR_ARCHIVE }, 
+
+		//CVAR_SERVERINFO things
+	{ &g_maxLagCompensation, "g_maxLagCompensation", "", CVAR_SERVERINFO },
+	{ &g_delagHitscan, "g_delagHitscan", "", CVAR_SERVERINFO },
+	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "", CVAR_SERVERINFO },
+	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "", CVAR_SERVERINFO },
+	{ &stats_matchid, "stats_matchid", "", CVAR_SERVERINFO }
+
+	
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
