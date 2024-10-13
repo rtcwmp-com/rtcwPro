@@ -13,7 +13,7 @@ binaries:
 	cd game && make all
 	cd cgame && make all
 	cd ui && make all
-	cd unix && make clean && make server && make client 
+	cd unix && make clean && make server && make clean && make client 
 	mv game/qagame.mp.i386.so ../build/rtcwpro
 	mv cgame/cgame.mp.i386.so ../build/rtcwpro
 	mv ui/ui.mp.i386.so ../build/rtcwpro	
