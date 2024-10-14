@@ -351,6 +351,6 @@ void* submit_HTTP_curlPost(void* args) {
     remove(stats_info->filename);
     free(stats_info->url);
     free(stats_info);
-    return (int)ret;
+    return 0;
 
 }

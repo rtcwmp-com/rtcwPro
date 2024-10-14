@@ -448,8 +448,8 @@ void Snd_Memset( void* dest, const int val, const size_t count );
 #define Snd_Memset Com_Memset
 #endif
 
-void Com_Memset( void* dest, const int val, const size_t count );
-void Com_Memcpy( void* dest, const void* src, const size_t count );
+#define Com_Memset memset
+#define Com_Memcpy memcpy
 
 #define CIN_system  1
 #define CIN_loop    2
@@ -1759,7 +1759,7 @@ typedef enum {
 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
-qboolean clientIsConnected;
+extern qboolean clientIsConnected;
 
 #if defined(_WIN32) || defined(_WIN64)
 /* We are on Windows */

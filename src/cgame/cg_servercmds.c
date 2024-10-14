@@ -315,6 +315,17 @@ void CG_ParseServerinfo( void ) {
 
 	// TTimo - make this available for ingame_callvote
 	trap_Cvar_Set( "cg_ui_voteFlags", Info_ValueForKey( info, "g_voteFlags" ) );
+
+	//grab the CVAR_SERVERINFO things out of the config string
+	trap_Cvar_Set( "sv_fps", Info_ValueForKey( info, "sv_fps" ) );
+	trap_Cvar_Set( "g_maxLagCompensation", Info_ValueForKey( info, "g_maxLagCompensation" ) );
+	trap_Cvar_Set( "sv_minRestartDelay", Info_ValueForKey( info, "sv_minRestartDelay" ) );
+	trap_Cvar_Set( "sv_minRestartPlayers", Info_ValueForKey( info, "sv_minRestartPlayers" ) );
+	trap_Cvar_Set( "g_delagHitscan", Info_ValueForKey( info, "g_delagHitscan" ) );
+	trap_Cvar_Set( "g_fixedphysicsfps", Info_ValueForKey( info, "g_fixedphysicsfps" ) );
+	trap_Cvar_Set( "g_allowEnemySpawnTimer", Info_ValueForKey( info, "g_allowEnemySpawnTimer" ) );
+	trap_Cvar_Set( "stats_matchid", Info_ValueForKey( info, "stats_matchid" ) );
+	trap_Cvar_Set( "version", Info_ValueForKey( info, "version" ) );
 }
 
 /*

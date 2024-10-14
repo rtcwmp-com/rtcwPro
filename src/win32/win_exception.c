@@ -27,7 +27,7 @@ along with Challenge Quake 3. If not, see <https://www.gnu.org/licenses/>.
 #include "../client/client.h"
 #endif
 #include "win_local.h"
-#include <DbgHelp.h>
+#include <dbghelp.h>
 #include <strsafe.h>
 
 
