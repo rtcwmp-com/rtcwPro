@@ -68,7 +68,7 @@ menuDef {
 
 ////////////////////////
 //
-//       LOOK
+//	LOOK
 //
 ////////////////////////
 	itemDef {
@@ -87,7 +87,7 @@ menuDef {
 		border 1
 		bordercolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show look }
+		action { hide grpControls; show look }
 		mouseEnter { setitemcolor ctr_look backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_look backcolor .37 .1 .1 1 }
 	}
@@ -96,16 +96,16 @@ menuDef {
 		name look
 		text "COMMANDES"
 		type 1
-		style 0	
+		style 0
 		textstyle 6
-		rect 222.5 -12 64 14 
+		rect 222.5 -12 64 14
 		textalign ITEM_ALIGN_CENTER
 		textfont UI_FONT_NORMAL
-		textscale .25		
+		textscale .25
 		textalignx 2
 		textaligny 12
 		forecolor .9 .9 .9 1
-		visible 1 
+		visible 1
 		decoration
 	}
 
@@ -278,7 +278,7 @@ menuDef {
 		backcolor 1 1 1 .07
 		visible 0
 		mouseenter	{ show floater_message }
-		mouseexit	{ hide floater_message }	
+		mouseexit	{ hide floater_message }
 	}
 
 	itemDef {
@@ -298,14 +298,14 @@ menuDef {
 		backcolor 1 1 1 .07
 		visible 0
 		mouseenter { show floater_message }
-		mouseexit { hide floater_message }	
+		mouseexit { hide floater_message }
 	}
 
 
 
 ////////////////////////
 //
-//       MOVE
+//	MOVE
 //
 ////////////////////////
 	itemDef {
@@ -325,7 +325,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show move }
+		action { hide grpControls; show move }
 		mouseEnter { setitemcolor ctr_move backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_move backcolor .37 .1 .1 1 }
 	}
@@ -574,7 +574,7 @@ menuDef {
 		backcolor 1 1 1 .07
 		visible 0
 		mouseenter { show keyBindStatus }
-		mouseexit { hide keyBindStatus } 
+		mouseexit { hide keyBindStatus }
 	}
 
 	itemDef {
@@ -600,7 +600,7 @@ menuDef {
 
 ////////////////////////
 //
-//       SHOOT
+//	SHOOT
 //
 ////////////////////////
 	itemDef {
@@ -619,7 +619,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show shoot }
+		action { hide grpControls; show shoot }
 		mouseEnter { setitemcolor ctr_shoot backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_shoot backcolor .37 .1 .1 1 }
 	}
@@ -915,7 +915,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MISC
+//	MISC
 //
 ////////////////////////
 	itemDef {
@@ -934,7 +934,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show misc }
+		action { hide grpControls; show misc }
 		mouseEnter { setitemcolor ctr_miscellaneous backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_miscellaneous backcolor .37 .1 .1 1 }
 	}
@@ -1232,7 +1232,7 @@ menuDef {
 
 ////////////////////////
 //
-//       CHAT
+//	CHAT
 //
 ////////////////////////
 	itemDef {
@@ -1252,7 +1252,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show chat }
+		action { hide grpControls; show chat }
 		mouseEnter { setitemcolor ctr_chat backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_chat backcolor .37 .1 .1 1 }
 	}
@@ -1359,7 +1359,7 @@ menuDef {
 
 ////////////////////////
 //
-//      MULTIVIEW
+//	MULTIVIEW
 //
 ////////////////////////
 	itemDef {
@@ -1378,7 +1378,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show mv }
+		action { hide grpControls; show mv }
 		mouseEnter { setitemcolor ctr_mv backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_mv backcolor .37 .1 .1 1 }
 	}
@@ -1507,7 +1507,7 @@ menuDef {
 
 	itemDef {
 		name yesno_message
-		rect 0 322 640 30 
+		rect 0 322 640 30
 		text "Choisir l'element pour selectionner oui ou non"
 		forecolor 1 .75 0 1
 		textfont UI_FONT_NORMAL
@@ -1521,7 +1521,7 @@ menuDef {
 
 	itemDef {
 		name slider_message
-		rect 0 322 640 30 
+		rect 0 322 640 30
 		text "Tirez le glisseur pour agrandir et rapetisser la fenetre"
 		forecolor 1 .75 0 1
 		textfont UI_FONT_NORMAL
@@ -1535,7 +1535,7 @@ menuDef {
 
 	itemDef {
 		name floater_message
-		rect 0 322 640 30 
+		rect 0 322 640 30
 		text "Appuyez entree ou cliquez pour changer"
 		forecolor 1 .75 0 1
 		textfont UI_FONT_NORMAL
@@ -1554,7 +1554,7 @@ menuDef {
 		forecolor 0 0 0 1
 		backcolor 0 0 0 1
 		rect 0 0 640 480
-		visible 1 
+		visible 1
 		decoration
 	}
 

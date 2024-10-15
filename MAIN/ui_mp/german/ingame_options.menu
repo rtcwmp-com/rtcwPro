@@ -12,7 +12,7 @@ menuDef {
 	focusColor 1 .75 0 1
 	style 1
 	border 1
-	onopen { setCvar cg_draw2D "0"; hide grpOptions ; show view }
+	onopen { setCvar cg_draw2D "0"; hide grpOptions; show view }
 	onClose { setCvar cg_draw2D "1" }
 	onEsc { setCvar cg_draw2D "1" }
 
@@ -58,7 +58,7 @@ menuDef {
 		textaligny 10
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpOptions ; show performance }
+		action { hide grpOptions; show performance }
 		mouseEnter { setitemcolor ctr_performance backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_performance backcolor .37 .1 .1 1 }
 	}
@@ -243,7 +243,7 @@ menuDef {
 
 
 //////////////////////////
-//       VIEW
+//	VIEW
 //////////////////////////
 	itemDef {
 		name ctr_view
@@ -259,7 +259,7 @@ menuDef {
 		textaligny 10
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpOptions ; show view }
+		action { hide grpOptions; show view }
 		mouseEnter { setitemcolor ctr_view backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_view backcolor .37 .1 .1 1 }
 	}
@@ -585,7 +585,7 @@ menuDef {
 		textaligny 10
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpOptions ; show xhair }
+		action { hide grpOptions; show xhair }
 		mouseEnter { setitemcolor ctr_xhair backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_xhair backcolor .37 .1 .1 1 }
 	}
@@ -714,7 +714,7 @@ menuDef {
 		style WINDOW_STYLE_FILLED
 		backcolor 1 1 1 .07
 		visible 0
-   	}
+	}
 
 	itemDef {
 		name xhair
@@ -758,7 +758,7 @@ menuDef {
 	itemDef {
 		name xhair
 		group grpOptions
- 		type ITEM_TYPE_MULTI
+		type ITEM_TYPE_MULTI
 		text "Sekundäre Farbe:"
 		tooltip "Farbe des Sekundären Fadenkreuzes"
 		cvar "cg_crosshairColorAlt"

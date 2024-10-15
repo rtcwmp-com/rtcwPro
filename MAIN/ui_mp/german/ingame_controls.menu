@@ -13,7 +13,7 @@ menuDef {
 	style 1
 	border 1
 	onClose { setCvar cg_draw2D "1"; uiScript saveControls }
-	onopen { hide grpControls ; show look ; setCvar cg_draw2D "0"; uiScript loadControls }
+	onopen { hide grpControls; show look; setCvar cg_draw2D "0"; uiScript loadControls }
 	onEsc { setCvar cg_draw2D "1"; uiScript saveControls }
 
 
@@ -60,7 +60,7 @@ menuDef {
 
 ////////////////////////
 //
-//       LOOK
+//	LOOK
 //
 ////////////////////////
 	itemDef {
@@ -79,7 +79,7 @@ menuDef {
 		border 1
 		bordercolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show look }
+		action { hide grpControls; show look }
 		mouseEnter { setitemcolor ctr_look backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_look backcolor .37 .1 .1 1 }
 	}
@@ -274,7 +274,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MOVE
+//	MOVE
 //
 ////////////////////////
 	itemDef {
@@ -294,7 +294,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show move }
+		action { hide grpControls; show move }
 		mouseEnter { setitemcolor ctr_move backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_move backcolor .37 .1 .1 1 }
 	}
@@ -564,7 +564,7 @@ menuDef {
 
 ////////////////////////
 //
-//       SHOOT
+//	SHOOT
 //
 ////////////////////////
 	itemDef {
@@ -583,7 +583,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show shoot }
+		action { hide grpControls; show shoot }
 		mouseEnter { setitemcolor ctr_shoot backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_shoot backcolor .37 .1 .1 1 }
 	}
@@ -818,7 +818,7 @@ menuDef {
 		group grpControls
 		type ITEM_TYPE_BIND
 		text "Spezial Waffe 1 :"
-		tooltip "L: kleiner Luftangriff; M: Spritze ; I: Werkzeug"
+		tooltip "L: kleiner Luftangriff; M: Spritze; I: Werkzeug"
 		cvar "weaponbank 5"
 		rect 22 210 400 12
 		textalign ITEM_ALIGN_RIGHT
@@ -838,7 +838,7 @@ menuDef {
 		group grpControls
 		type ITEM_TYPE_BIND
 		text "Spezial Waffe 2 :"
-		tooltip "L: Munitionspack; M: Medipack ; I: Dynamit"
+		tooltip "L: Munitionspack; M: Medipack; I: Dynamit"
 		cvar "weaponbank 6"
 		rect 22 225 400 12
 		textalign ITEM_ALIGN_RIGHT
@@ -875,7 +875,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MISC
+//	MISC
 //
 ////////////////////////
 	itemDef {
@@ -894,7 +894,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show misc }
+		action { hide grpControls; show misc }
 		mouseEnter { setitemcolor ctr_miscellaneous backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_miscellaneous backcolor .37 .1 .1 1 }
 	}
@@ -1188,7 +1188,7 @@ menuDef {
 
 ////////////////////////
 //
-//       CHAT
+//	CHAT
 //
 ////////////////////////
 	itemDef {
@@ -1208,7 +1208,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show chat }
+		action { hide grpControls; show chat }
 		mouseEnter { setitemcolor ctr_chat backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_chat backcolor .37 .1 .1 1 }
 	}
@@ -1315,7 +1315,7 @@ menuDef {
 
 ////////////////////////
 //
-//      MULTIVIEW
+//	MULTIVIEW
 //
 ////////////////////////
 	itemDef {
@@ -1334,7 +1334,7 @@ menuDef {
 		bordercolor .1 .1 .1 0
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpControls ; show mv }
+		action { hide grpControls; show mv }
 		mouseEnter { setitemcolor ctr_mv backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_mv backcolor .37 .1 .1 1 }
 	}

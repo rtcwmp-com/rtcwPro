@@ -100,16 +100,16 @@ assetGlobalDef {
 		type 1
 		text "Deutsche Menüführung von [pH*Deus]"
 		rect 635 75 5 15
-   		textalign ITEM_ALIGN_RIGHT
-  		textalignx 0
-   		textaligny 0
-		textfont	UI_FONT_NORMAL
+		textalign ITEM_ALIGN_RIGHT
+		textalignx 0
+		textaligny 0
+		textfont UI_FONT_NORMAL
 		textscale .18
 		style 1
-   		forecolor 1 1 1 1
-   		visible MENU_TRUE
+		forecolor 1 1 1 1
+		visible MENU_TRUE
 		decoration
-    		}
+		}
 
 	/////////////////////
 	//     BUTTONS

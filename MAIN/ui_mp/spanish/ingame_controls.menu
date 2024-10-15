@@ -60,7 +60,7 @@ menuDef {
 
 ////////////////////////
 //
-//       LOOK
+//	LOOK
 //
 ////////////////////////
 	itemDef {
@@ -274,7 +274,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MOVE
+//	MOVE
 //
 ////////////////////////
 	itemDef {
@@ -537,7 +537,7 @@ menuDef {
 		backcolor 1 1 1 .07
 		visible 0
 		mouseenter { show keyBindStatus }
-		mouseexit { hide keyBindStatus } 
+		mouseexit { hide keyBindStatus }
 	}
 
 	itemDef {
@@ -563,7 +563,7 @@ menuDef {
 
 ////////////////////////
 //
-//       SHOOT
+//	SHOOT
 //
 ////////////////////////
 	itemDef {
@@ -872,7 +872,7 @@ menuDef {
 
 ////////////////////////
 //
-//       MISC
+//	MISC
 //
 ////////////////////////
 	itemDef {
@@ -1183,7 +1183,7 @@ menuDef {
 
 ////////////////////////
 //
-//       CHAT
+//	CHAT
 //
 ////////////////////////
 	itemDef {

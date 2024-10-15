@@ -12,7 +12,7 @@ menuDef {
 	focusColor 1 .75 0 1
 	style 1
 	border 1
-	onopen { setCvar cg_draw2D "0"; hide grpOptions ; show view }
+	onopen { setCvar cg_draw2D "0"; hide grpOptions; show view }
 	onClose { setCvar cg_draw2D "1" }
 	onEsc { setCvar cg_draw2D "1" }
 
@@ -58,7 +58,7 @@ menuDef {
 		textaligny 10
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpOptions ; show performance }
+		action { hide grpOptions; show performance }
 		mouseEnter { setitemcolor ctr_performance backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_performance backcolor .37 .1 .1 1 }
 	}
@@ -243,7 +243,7 @@ menuDef {
 
 
 //////////////////////////
-//       VIEW
+//	VIEW
 //////////////////////////
 	itemDef {
 		name ctr_view
@@ -259,7 +259,7 @@ menuDef {
 		textaligny 10
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpOptions ; show view }
+		action { hide grpOptions; show view }
 		mouseEnter { setitemcolor ctr_view backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_view backcolor .37 .1 .1 1 }
 	}
@@ -320,7 +320,7 @@ menuDef {
 	}
 
 	itemDef {
-		name view				
+		name view
 		group grpOptions
 		type ITEM_TYPE_YESNO
 		text "Messages d'equipiers seulement :"
@@ -349,7 +349,7 @@ menuDef {
 //		textalignx 143
 //		textaligny 17
 //		textfont UI_FONT_NORMAL
-//		textscale .25	 
+//		textscale .25
 //		visible 1
 //		action { exec "loadhud" }
 //	}
@@ -602,7 +602,7 @@ menuDef {
 		textaligny 10
 		backcolor .1 .1 .1 0
 		visible 1
-		action { hide grpOptions ; show xhair }
+		action { hide grpOptions; show xhair }
 		mouseEnter { setitemcolor ctr_xhair backcolor .1 .37 .1 1 }
 		mouseExit { setitemcolor ctr_xhair backcolor .37 .1 .1 1 }
 	}
@@ -731,7 +731,7 @@ menuDef {
 		style WINDOW_STYLE_FILLED
 		backcolor 1 1 1 .07
 		visible 0
-   	}
+	}
 
 	itemDef {
 		name xhair
@@ -767,7 +767,7 @@ menuDef {
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 	}
@@ -775,7 +775,7 @@ menuDef {
 	itemDef {
 		name xhair
 		group grpOptions
- 		type ITEM_TYPE_MULTI
+		type ITEM_TYPE_MULTI
 		text "Couleur secondaire :"
 		tooltip "Selectionner la couleur secondaire du viseur"
 		cvar "cg_crosshairColorAlt"
@@ -806,7 +806,7 @@ menuDef {
 		textfont UI_FONT_NORMAL
 		textscale .25
 		style WINDOW_STYLE_FILLED
-		backcolor 1 1 1 .07            
+		backcolor 1 1 1 .07
 		forecolor 1 1 0.9 1
 		visible 0
 	}
