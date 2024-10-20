@@ -82,6 +82,14 @@ rem ***************************************************************************
 		pause
 		exit
 	)
+	
+	where /q cmake
+	if %errorlevel% neq 0 (
+		echo Error: cmake not installed or not in the PATH environment variable
+		echo Recommend installing cmake using the cmake installer
+		pause
+		exit
+	)
 
 :fetchDeps
 	rem assume we are being called inside a project, do stuff inside a directory
