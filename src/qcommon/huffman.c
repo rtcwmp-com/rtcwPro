@@ -34,26 +34,39 @@ If you have questions concerning this license or the applicable additional terms
 #include "q_shared.h"
 #include "qcommon.h"
 
-static int bloc = 0;
+#define HMAX			256		/* Maximum symbol */
+#define NYT				HMAX	/* NYT = Not Yet Transmitted */
+#define INTERNAL_NODE	(HMAX+1)
 
-void    Huff_putBit( int bit, byte *fout, int *offset ) {
-	bloc = *offset;
-	if ( ( bloc & 7 ) == 0 ) {
-		fout[( bloc >> 3 )] = 0;
-	}
-	fout[( bloc >> 3 )] |= bit << ( bloc & 7 );
-	bloc++;
-	*offset = bloc;
-}
+static int			bloc = 0;
 
-int     Huff_getBit( byte *fin, int *offset ) {
-	int t;
-	bloc = *offset;
-	t = ( fin[( bloc >> 3 )] >> ( bloc & 7 ) ) & 0x1;
-	bloc++;
-	*offset = bloc;
-	return t;
-}
+typedef struct nodetype {
+	struct    nodetype* left, * right, * parent; /* tree structure */
+	struct    nodetype* next, * prev; /* doubly-linked list */
+	struct    nodetype** head; /* highest ranked node in block */
+	int        weight;
+	int        symbol;
+} node_t;
+
+typedef struct {
+	int            blocNode;
+	int            blocPtrs;
+
+	node_t* tree;
+	node_t* lhead;
+	node_t* ltail;
+	node_t* loc[HMAX + 1];
+	node_t** freelist;
+
+	node_t         nodeList[768];
+	node_t* nodePtrs[768];
+} huff_t;
+
+typedef struct {
+	huff_t        compressor;
+	huff_t        decompressor;
+} huffman_t;
+
 
 /* Add a bit to the output file (buffered) */
 static void add_bit( char bit, byte *fout ) {
@@ -190,7 +203,7 @@ static void increment( huff_t* huff, node_t *node ) {
 	}
 }
 
-void Huff_addRef( huff_t* huff, byte ch ) {
+static void Huff_addRef(huff_t* huff, byte ch) {
 	node_t *tnode, *tnode2;
 	if ( huff->loc[ch] == NULL ) { /* if this is the first transmission of this node */
 		tnode = &( huff->nodeList[huff->blocNode++] );
@@ -260,7 +273,7 @@ void Huff_addRef( huff_t* huff, byte ch ) {
 }
 
 /* Get a symbol */
-int Huff_Receive( node_t *node, int *ch, byte *fin ) {
+static int Huff_Receive(node_t* node, int* ch, byte* fin) {
 	while ( node && node->symbol == INTERNAL_NODE ) {
 		if ( get_bit( fin ) ) {
 			node = node->right;
@@ -270,29 +283,10 @@ int Huff_Receive( node_t *node, int *ch, byte *fin ) {
 	}
 	if ( !node ) {
 		return 0;
-//		Com_Error(ERR_DROP, "Illegal tree!\n");
 	}
 	return ( *ch = node->symbol );
 }
 
-/* Get a symbol */
-void Huff_offsetReceive( node_t *node, int *ch, byte *fin, int *offset ) {
-	bloc = *offset;
-	while ( node && node->symbol == INTERNAL_NODE ) {
-		if ( get_bit( fin ) ) {
-			node = node->right;
-		} else {
-			node = node->left;
-		}
-	}
-	if ( !node ) {
-		*ch = 0;
-		return;
-//		Com_Error(ERR_DROP, "Illegal tree!\n");
-	}
-	*ch = node->symbol;
-	*offset = bloc;
-}
 
 /* Send the prefix code for this node */
 static void send( node_t *node, node_t *child, byte *fout ) {
@@ -308,8 +302,9 @@ static void send( node_t *node, node_t *child, byte *fout ) {
 	}
 }
 
+
 /* Send a symbol */
-void Huff_transmit( huff_t *huff, int ch, byte *fout ) {
+static void Huff_transmit(huff_t* huff, int ch, byte* fout) {
 	int i;
 	if ( huff->loc[ch] == NULL ) {
 		/* node_t hasn't been transmitted, send a NYT, then the symbol */
@@ -322,13 +317,8 @@ void Huff_transmit( huff_t *huff, int ch, byte *fout ) {
 	}
 }
 
-void Huff_offsetTransmit( huff_t *huff, int ch, byte *fout, int *offset ) {
-	bloc = *offset;
-	send( huff->loc[ch], NULL, fout );
-	*offset = bloc;
-}
 
-void Huff_Decompress( msg_t *mbuf, int offset ) {
+void DynHuff_Decompress(msg_t* mbuf, int offset) {
 	int ch, cch, i, j, size;
 	byte seq[65536];
 	byte*       buffer;
@@ -380,12 +370,10 @@ void Huff_Decompress( msg_t *mbuf, int offset ) {
 	Com_Memcpy( mbuf->data + offset, seq, cch );
 }
 
-extern int oldsize;
-
-void Huff_Compress( msg_t *mbuf, int offset ) {
+void DynHuff_Compress(msg_t* mbuf, int offset) {
 	int i, ch, size;
 	byte seq[65536];
-	byte*       buffer;
+	byte* buffer;
 	huff_t huff;
 
 	size = mbuf->cursize - offset;
@@ -415,30 +403,9 @@ void Huff_Compress( msg_t *mbuf, int offset ) {
 		Huff_addRef( &huff, (byte)ch );                               /* Do update */
 	}
 
-	bloc += 8;                                              // next byte
+	bloc += 8; // next byte
 
-	mbuf->cursize = ( bloc >> 3 ) + offset;
-	Com_Memcpy( mbuf->data + offset, seq, ( bloc >> 3 ) );
-}
-
-void Huff_Init( huffman_t *huff ) {
-
-	Com_Memset( &huff->compressor, 0, sizeof( huff_t ) );
-	Com_Memset( &huff->decompressor, 0, sizeof( huff_t ) );
-
-	// Initialize the tree & list with the NYT node
-	huff->decompressor.tree = huff->decompressor.lhead = huff->decompressor.ltail = huff->decompressor.loc[NYT] = &( huff->decompressor.nodeList[huff->decompressor.blocNode++] );
-	huff->decompressor.tree->symbol = NYT;
-	huff->decompressor.tree->weight = 0;
-	huff->decompressor.lhead->next = huff->decompressor.lhead->prev = NULL;
-	huff->decompressor.tree->parent = huff->decompressor.tree->left = huff->decompressor.tree->right = NULL;
-
-	// Add the NYT (not yet transmitted) node into the tree/list */
-	huff->compressor.tree = huff->compressor.lhead = huff->compressor.loc[NYT] =  &( huff->compressor.nodeList[huff->compressor.blocNode++] );
-	huff->compressor.tree->symbol = NYT;
-	huff->compressor.tree->weight = 0;
-	huff->compressor.lhead->next = huff->compressor.lhead->prev = NULL;
-	huff->compressor.tree->parent = huff->compressor.tree->left = huff->compressor.tree->right = NULL;
-	huff->compressor.loc[NYT] = huff->compressor.tree;
+	mbuf->cursize = (bloc >> 3) + offset;
+	Com_Memcpy(mbuf->data + offset, seq, (bloc >> 3));
 }
 

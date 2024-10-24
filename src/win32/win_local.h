@@ -82,6 +82,11 @@ void    IN_Frame( void );
 
 void	IN_RawInput_MouseRead(HANDLE in_device_handle); // RTCWPro - raw input
 
+// crash handling
+void WIN_InstallExceptionHandlers();
+void WIN_RegisterExceptionCommands();
+void WIN_EndTimePeriod();
+
 // window procedure
 LONG WINAPI MainWndProc(
 	HWND hWnd,

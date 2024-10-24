@@ -163,16 +163,19 @@ void CG_ClearParticles( void ) {
 
 	oldtime = cg.time;
 
-	// Ridah, init the shaderAnims
-	for ( i = 0; shaderAnimNames[i]; i++ ) {
-		int j;
+	// Demo playback clear particles doesn't need to register them again
+	if ( !numShaderAnims ) {
+		// Ridah, init the shaderAnims
+		for ( i = 0; shaderAnimNames[i]; i++ ) {
+			int j;
 
-		for ( j = 0; j < shaderAnimCounts[i]; j++ ) {
-			shaderAnims[i][j] = trap_R_RegisterShader( va( "%s%i", shaderAnimNames[i], j + 1 ) );
+			for ( j = 0; j < shaderAnimCounts[i]; j++ ) {
+				shaderAnims[i][j] = trap_R_RegisterShader( va( "%s%i", shaderAnimNames[i], j + 1 ) );
+			}
 		}
+		numShaderAnims = i;
+		// done.
 	}
-	numShaderAnims = i;
-	// done.
 
 	initparticles = qtrue;
 }

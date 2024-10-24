@@ -527,7 +527,6 @@ int G_Map_v( gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2, qb
     int numMatches = 0;
     int mapIndex = -1;
     char vmapname[MAX_STRING_TOKENS]; // not necessary as we could use maplist directly...
-    int i;
 
 	// Vote request (vote is being initiated)
 	if ( arg ) {

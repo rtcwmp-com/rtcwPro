@@ -689,6 +689,8 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	Hunk_SetMark();
 
+	sv.mapLoadTime = Sys_Milliseconds();
+
 	Cvar_Set( "sv_serverRestarting", "0" );
 
 	Com_Printf( "-----------------------------------\n" );
@@ -903,11 +905,8 @@ void SV_Init( void ) {
 	// server vars
 	sv_rconPassword = Cvar_Get( "rconPassword", "", CVAR_TEMP );
 	sv_privatePassword = Cvar_Get( "sv_privatePassword", "", CVAR_TEMP );
-#ifndef UPDATE_SERVER
-	sv_fps = Cvar_Get( "sv_fps", "20", CVAR_TEMP );
-#else
-	sv_fps = Cvar_Get( "sv_fps", "60", CVAR_TEMP ); // this allows faster downloads
-#endif
+
+	sv_fps = Cvar_Get( "sv_fps", "20", CVAR_TEMP | CVAR_SERVERINFO);
 	sv_timeout = Cvar_Get( "sv_timeout", "240", CVAR_TEMP );
 	sv_zombietime = Cvar_Get( "sv_zombietime", "2", CVAR_TEMP );
 	Cvar_Get( "nextmap", "", CVAR_TEMP );
@@ -987,6 +986,10 @@ void SV_Init( void ) {
 	// drop client on msg.overflow in sv_snapshot
 	sv_dropClientOnOverflow = Cvar_Get("sv_dropClientOnOverflow", "1", CVAR_ARCHIVE);
 
+	sv_minRestartDelay = Cvar_Get("sv_minRestartDelay", "2", CVAR_ARCHIVE | CVAR_SERVERINFO); //min. hours to wait before restarting the server
+	sv_minRestartPlayers = Cvar_Get("sv_minRestartPlayers", "3", CVAR_ARCHIVE | CVAR_SERVERINFO); //min. in-game players to stop restarting the server
+
+	
 	// End RtcwPro
 	
 

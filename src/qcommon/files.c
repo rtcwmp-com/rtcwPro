@@ -1190,7 +1190,7 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 					// set the file position in the zip file (also sets the current file info)
 					unzSetCurrentFileInfoPosition( pak->handle, pakFile->pos );
 					// copy the file info into the unzip structure
-					Com_Memcpy( zfi, pak->handle, sizeof( unz_s ) );
+					memmove( zfi, pak->handle, sizeof( unz_s ) );
 					// we copy this back into the structure
 					zfi->file = temp;
 					// open the file in the zip
@@ -2587,6 +2587,7 @@ FS_Path_f
 */
 void FS_Path_f( void ) {
 	searchpath_t    *s;
+	searchpath_t* p;
 	int i;
 
 	Com_Printf( "Current search path:\n" );
@@ -2596,8 +2597,22 @@ void FS_Path_f( void ) {
 			if ( fs_numServerPaks ) {
 				if ( !FS_PakIsPure( s->pack ) ) {
 					Com_Printf( "    not on the pure list\n" );
+					// unload the pak
+					if (s->pack) {
+						unzClose(s->pack->handle);
+						Z_Free(s->pack->buildBuffer);
+						Z_Free(s->pack);
+					}
+					if (s->dir) {
+						Z_Free(s->dir);
+					}
+					p->next = s->next;
+					Z_Free(s);
+					s = p;
+
 				} else {
 					Com_Printf( "    on the pure list\n" );
+					p = s;
 				}
 			}
 		} else {
@@ -2980,7 +2995,7 @@ static void FS_Startup( const char *gameName ) {
 		homePath = fs_basepath->string;
 	}
 	fs_homepath = Cvar_Get( "fs_homepath", homePath, CVAR_INIT );
-	fs_gamedirvar = Cvar_Get( "fs_game", "", CVAR_INIT | CVAR_SYSTEMINFO );
+	fs_gamedirvar = Cvar_Get( "fs_game", "rtcwpro", CVAR_INIT | CVAR_SYSTEMINFO );
 	fs_restrict = Cvar_Get( "fs_restrict", "", CVAR_INIT );
 
 	// add search path elements in reverse priority order
@@ -3885,7 +3900,7 @@ see show_bug.cgi?id=478
 =================
 */
 qboolean FS_ConditionalRestart( int checksumFeed ) {
-	if ( fs_gamedirvar->modified || checksumFeed != fs_checksumFeed ) {
+	if ( fs_gamedirvar->modified || checksumFeed != fs_checksumFeed || fs_numServerPaks) {
 		FS_Restart( checksumFeed );
 		return qtrue;
 	}
@@ -4006,4 +4021,13 @@ qboolean FS_VerifyPak( const char *pak ) {
 		}
 	}
 	return qfalse;
+}
+
+qbool FS_IsZipFile(fileHandle_t f)
+{
+	if (f < 0 || f >= MAX_FILE_HANDLES) {
+		Com_Error(ERR_DROP, "FS_IsZipFile: out of range");
+	}
+
+	return fsh[f].zipFile;
 }

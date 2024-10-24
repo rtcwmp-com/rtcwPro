@@ -28,8 +28,26 @@ If you have questions concerning this license or the applicable additional terms
 
 // linux_local.h: Linux-specific Quake3 header file
 
+
+#include "../qcommon/q_shared.h"
+#include "../qcommon/qcommon.h"
+#ifndef DEDICATED
+#include "../client/client.h"
+#endif
+
+void		Lin_HardRebootHandler(int argc, char** argv);
+void		Lin_TrackParentProcess();
+void		Lin_ConsoleInputInit();
+void		Lin_ConsoleInputShutdown();
+const char* Lin_ConsoleInput();
+
+qbool		tty_Enabled();
+void		tty_Hide();
+history_t* tty_GetHistory();
+
 void Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
 qboolean Sys_GetPacket( netadr_t *net_from, msg_t *net_message );
+qboolean	Sys_GetStreamedPacket(netadr_t* net_from, msg_t* net_message); // rtcwpro
 void Sys_SendKeyEvents( void );
 
 // Input subsystem
@@ -50,4 +68,13 @@ void QGL_Shutdown( void );
 char *strlwr( char *s );
 
 // signals.c
-void InitSig( void );
+void	SIG_InitChild();
+void	SIG_InitParent();
+void	SIG_Frame();
+
+void sdl_Frame();
+void sdl_PollEvents();
+qbool sdl_Init();
+
+extern int		q_argc;
+extern char** q_argv;

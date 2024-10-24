@@ -285,7 +285,7 @@ NOTE: this is only used for testing and user has to be a referee
 */
 qboolean ReviveEntity(gentity_t* ent, gentity_t* traceEnt)
 {
-	vec3_t   org, maxs;
+	vec3_t   org;
 	trace_t  tr;
 	int      healamt, headshot, oldweapon, oldweaponstate, oldclasstime = 0;
 	qboolean usedSyringe = qfalse;          // DHM - Nerve

@@ -295,7 +295,7 @@ void SV_DirectConnect( netadr_t from ) {
 	int startIndex;
 	char* denied;
 	int count;
-	char guid[GUID_LEN];
+	char guid[GUID_LEN] = {'\0'};
 	//char* guid;
 	char* ip;
 	char restricted_cvars[BIG_INFO_STRING];
@@ -682,7 +682,7 @@ void SV_SendClientGameState( client_t *client ) {
 	int start;
 	entityState_t   *base, nullstate;
 	msg_t msg;
-	byte msgBuffer[MAX_MSGLEN];
+	byte msgBuffer[MAX_MSGLEN] = {'\0'};
 
 	Com_DPrintf( "SV_SendClientGameState() for %s\n", client->name );
 	Com_DPrintf( "Going from CS_CONNECTED to CS_PRIMED for %s\n", client->name );
@@ -766,7 +766,7 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 	client->deltaMessage = -1;
 	client->nextSnapshotTime = svs.time;    // generate a snapshot immediately
 	if (cmd)
-		memcpy(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
+		memmove(&client->lastUsercmd, cmd, sizeof(client->lastUsercmd));
 	else
 		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
 
@@ -1140,7 +1140,7 @@ int SV_SendDownloadMessages(void)
 	int i, numDLs = 0, retval;
 	client_t *cl;
 	msg_t msg;
-	byte msgBuffer[MAX_MSGLEN];
+	byte msgBuffer[MAX_MSGLEN] = {'\0'};
 
 	for(i=0, cl = svs.clients ; i < sv_maxclients->integer ; i++, cl++)
 	{

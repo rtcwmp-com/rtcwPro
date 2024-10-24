@@ -137,6 +137,11 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 	}
 	*/
 
+	//Clamp max backward reconcilation time 
+	if (level.time - time > g_maxLagCompensation.integer) {
+		time = level.time + g_maxLagCompensation.integer;
+	}
+
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
 	j = k = ent->client->historyHead;
@@ -259,6 +264,24 @@ void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *deb
 	}
 }
 
+static qbool PlayerIsVisible(gentity_t* attacker, gentity_t* target) {
+
+	vec3_t attackerMuzzlePoint;
+	VectorCopy(attacker->s.pos.trBase, attackerMuzzlePoint);
+	attackerMuzzlePoint[2] += attacker->client->ps.viewheight;
+
+	vec3_t targetMuzzlePoint;
+	VectorCopy(target->s.pos.trBase, targetMuzzlePoint);
+	targetMuzzlePoint[2] += target->client->ps.viewheight;
+
+	trace_t trace;
+	gentity_t* traceEnt = NULL;
+	trap_Trace(&trace, attackerMuzzlePoint, NULL, NULL, targetMuzzlePoint, attacker->s.number, MASK_SHOT);
+	traceEnt = &g_entities[trace.entityNum];
+
+	return (traceEnt == target);
+}
+
 
 /*
 =====================
@@ -280,11 +303,22 @@ void G_TimeShiftAllClients( int time, gentity_t *skip ) {
 				&& ent->inuse
 				&& ent->client->sess.sessionTeam < TEAM_SPECTATOR
 				&& ent != skip
+				&& ent->health > 0
+				&& !(ent->client->ps.pm_flags & PMF_LIMBO)
 				// do not timeshift eliminated clients, as
 				// G_TimeShiftClient() will re-link them when
 				// they're supposed to stay unlinked
 				//&& !ent->client->isEliminated
 				) {
+
+			//If the target is not visible to the attacker, don't time shift him
+			//e.g. just ran behind a wall 
+			if (skip != NULL) {
+				if (!PlayerIsVisible(skip, ent)) {
+					continue;
+				}
+			}
+
 			G_TimeShiftClient( ent, time, debug, skip );
 		}
 	}
@@ -364,8 +398,13 @@ void G_UnTimeShiftAllClients( gentity_t *skip ) {
 
 	ent = &g_entities[0];
 	for ( i = 0; i < MAX_CLIENTS; i++, ent++) {
-		if ( ent->client && ent->inuse && ent->client->sess.sessionTeam < TEAM_SPECTATOR && ent != skip ) {
-			if (!(ent->client->ps.pm_flags & PMF_LIMBO))
+		if ( ent->client 
+			&& ent->inuse
+			&& ent->client->sess.sessionTeam < TEAM_SPECTATOR
+			&& ent != skip
+			&& ent->health > 0
+			&& !(ent->client->ps.pm_flags & PMF_LIMBO)
+			){
 				G_UnTimeShiftClient( ent );
 		}
 	}

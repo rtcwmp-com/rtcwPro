@@ -938,7 +938,8 @@ int SV_GameSystemCalls( int *args ) {
 		return submit_curlPost( (char *)VMA( 1 ), (char *)VMA( 2 ) );
 
 	case G_API_QUERY:
-		return API_Query((char*)VMA(1), (char*)VMA(2), args[3]);
+		API_Query((char*)VMA(1), (char*)VMA(2), args[3]);
+		return 0;
 
 	default:
 		Com_Error( ERR_DROP, "Bad game system trap: %i", args[0] );

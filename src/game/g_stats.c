@@ -711,6 +711,7 @@ void G_deleteStats( int nClient ) {
 	cl->sess.obj_killcarrier = 0;
 	cl->sess.obj_protectflag = 0;
 	cl->sess.knifeKills = 0;
+	cl->sess.lastChatText = "";
 
 	memset( &cl->sess.aWeaponStats, 0, sizeof( cl->sess.aWeaponStats ) );
 	trap_Cvar_Set( va( "wstats%i", nClient ), va( "%d", nClient ) );

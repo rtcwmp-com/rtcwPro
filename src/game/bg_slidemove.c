@@ -53,16 +53,16 @@ qboolean    PM_SlideMove( qboolean gravity ) {
 	vec3_t dir;
 	float d;
 	int numplanes;
-	vec3_t planes[MAX_CLIP_PLANES];
-	vec3_t primal_velocity;
-	vec3_t clipVelocity;
+	vec3_t planes[MAX_CLIP_PLANES] = {0.0f};
+	vec3_t primal_velocity = {0.0f};
+	vec3_t clipVelocity = {0.0f};
 	int i, j, k;
 	trace_t trace;
-	vec3_t end;
+	vec3_t end = {0.0f};
 	float time_left;
 	float into;
-	vec3_t endVelocity;
-	vec3_t endClipVelocity;
+	vec3_t endVelocity = {0.0f};
+	vec3_t endClipVelocity = {0.0f};
 
 	numbumps = 4;
 
@@ -94,6 +94,7 @@ qboolean    PM_SlideMove( qboolean gravity ) {
 	VectorNormalize2( pm->ps->velocity, planes[numplanes] );
 	numplanes++;
 
+	memset(&trace, 0, sizeof(trace));
 	for ( bumpcount = 0 ; bumpcount < numbumps ; bumpcount++ ) {
 
 		// calculate position we are trying to move to

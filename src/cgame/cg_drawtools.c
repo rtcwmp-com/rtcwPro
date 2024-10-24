@@ -977,13 +977,14 @@ Returns character count, skiping color escape codes
 int CG_DrawStrlen( const char *str ) {
 	const char *s = str;
 	int count = 0;
-
-	while ( *s ) {
-		if ( Q_IsColorString( s ) ) {
-			s += 2;
-		} else {
-			count++;
-			s++;
+	if (s != NULL) {
+		while ( *s ) {
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+			} else {
+				count++;
+				s++;
+			}
 		}
 	}
 
@@ -1193,16 +1194,16 @@ void CG_ColorForHealth( vec4_t hcolor ) {
 ==================
 RTCWPro
 CG_GetClock
-Returns realtime in the format "hh:mm:ss"
+Returns realtime in the format "hh:mm:ss dd Mon yyyy"
 ==================
 */
 char* CG_GetClock(void) {
-	static char displayTime[19] = { 0 };
+	static char displayTime[30] = { 0 };
 	qtime_t     tm;
 
 	trap_RealTime(&tm);
 	displayTime[0] = '\0';
-	Q_strcat(displayTime, sizeof(displayTime), va("%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec));
+	Q_strcat(displayTime, sizeof(displayTime), va("%02d:%02d:%02d %02d %s %d", tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_mday, aMonths[tm.tm_mon], 1900 + tm.tm_year));
 
 	return displayTime;
 }

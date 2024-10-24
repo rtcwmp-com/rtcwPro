@@ -59,313 +59,100 @@ int Sys_Milliseconds( void ) {
 	return sys_curtime;
 }
 
+void Sys_Sleep(int ms)
+{
+	if (ms >= 1)
+		Sleep(ms);
+}
+
+void Sys_MicroSleep(int us)
+{
+	if (us <= 50)
+		return;
+
+	us -= 50;
+
+	LARGE_INTEGER frequency;
+	LARGE_INTEGER endTime;
+	QueryPerformanceCounter(&endTime);
+	QueryPerformanceFrequency(&frequency);
+	endTime.QuadPart += ((LONGLONG)us * frequency.QuadPart) / 1000000LL;
+
+	// reminder: we call timeBeginPeriod(1) at init
+	// Sleep(1) will generally last 1000-2000 us,
+	// but in some cases quite a bit more (I've seen up to 3500 us)
+	// because threads can take longer to wake up
+	const LONGLONG thresholdUS = (LONGLONG)Cvar_Get("r_sleepThreshold", "2500", CVAR_ARCHIVE)->integer;
+	const LONGLONG bigSleepTicks = (thresholdUS * frequency.QuadPart) / 1000000LL;
+
+	for (;;) {
+		LARGE_INTEGER currentTime;
+		QueryPerformanceCounter(&currentTime);
+		const LONGLONG remainingTicks = endTime.QuadPart - currentTime.QuadPart;
+		if (remainingTicks <= 0) {
+			break;
+		}
+		if (remainingTicks >= bigSleepTicks) {
+			Sleep(1);
+		}
+		else {
+			YieldProcessor();
+		}
+	}
+}
+
+int Sys_GetUptimeSeconds(qbool parent)
+{
+	if (parent)
+		return -1;
+
+	FILETIME startFileTime;
+	FILETIME trash[3];
+	if (GetProcessTimes(GetCurrentProcess(), &startFileTime, &trash[0], &trash[1], &trash[2]) == 0)
+		return -1;
+
+	SYSTEMTIME endSystemTime;
+	GetSystemTime(&endSystemTime);
+
+	FILETIME endFileTime;
+	if (SystemTimeToFileTime(&endSystemTime, &endFileTime) == 0)
+		return -1;
+
+	// 1 FILETIME unit is 100-nanoseconds
+	ULARGE_INTEGER start, end;
+	start.LowPart = startFileTime.dwLowDateTime;
+	start.HighPart = startFileTime.dwHighDateTime;
+	end.LowPart = endFileTime.dwLowDateTime;
+	end.HighPart = endFileTime.dwHighDateTime;
+	const int seconds = (int)((end.QuadPart - start.QuadPart) / 1e7);
+
+	return seconds;
+}
+
+qbool Sys_HardReboot()
+{
+	return qfalse;
+}
+
+
+qbool Sys_HasRtcwProParent()
+{
+	return qfalse;
+}
+
 /*
 ================
 Sys_SnapVector
 ================
 */
 long fastftol( float f ) {
-	static int tmp;
-	__asm fld f
-	__asm fistp tmp
-	__asm mov eax, tmp
+	return (long)f;
 }
 
 void Sys_SnapVector( float *v ) {
-	int i;
-	float f;
-
-	f = *v;
-	__asm fld f;
-	__asm fistp i;
-	*v = i;
-	v++;
-	f = *v;
-	__asm fld f;
-	__asm fistp i;
-	*v = i;
-	v++;
-	f = *v;
-	__asm fld f;
-	__asm fistp i;
-	*v = i;
-	/*
-	*v = fastftol(*v);
-	v++;
-	*v = fastftol(*v);
-	v++;
-	*v = fastftol(*v);
-	*/
+//unused
 }
 
-/*
-**
-** Disable all optimizations temporarily so this code works correctly!
-**
-*/
-#pragma optimize( "", off )
-
-/*
-** --------------------------------------------------------------------------------
-**
-** PROCESSOR STUFF
-**
-** --------------------------------------------------------------------------------
-*/
-static void CPUID( int func, unsigned regs[4] ) {
-	unsigned regEAX, regEBX, regECX, regEDX;
-
-	__asm mov eax, func
-	__asm __emit 00fh
-	__asm __emit 0a2h
-	__asm mov regEAX, eax
-	__asm mov regEBX, ebx
-	__asm mov regECX, ecx
-	__asm mov regEDX, edx
-
-	regs[0] = regEAX;
-	regs[1] = regEBX;
-	regs[2] = regECX;
-	regs[3] = regEDX;
-}
-
-static int IsPentium( void ) {
-	__asm
-	{
-		pushfd                      // save eflags
-		pop eax
-		test eax, 0x00200000        // check ID bit
-		jz set21                    // bit 21 is not set, so jump to set_21
-		and     eax, 0xffdfffff     // clear bit 21
-		push eax                    // save new value in register
-		popfd                       // store new value in flags
-		pushfd
-		pop eax
-		test eax, 0x00200000        // check ID bit
-		jz good
-		jmp err                     // cpuid not supported
-set21:
-		or      eax, 0x00200000     // set ID bit
-		push eax                    // store new value
-		popfd                       // store new value in EFLAGS
-		pushfd
-		pop eax
-		test eax, 0x00200000        // if bit 21 is on
-		jnz good
-		jmp err
-	}
-
-err:
-	return qfalse;
-good:
-	return qtrue;
-}
-
-static int Is3DNOW( void ) {
-	unsigned regs[4];
-	char pstring[16];
-	char processorString[13];
-
-	// get name of processor
-	CPUID( 0, ( unsigned int * ) pstring );
-	processorString[0] = pstring[4];
-	processorString[1] = pstring[5];
-	processorString[2] = pstring[6];
-	processorString[3] = pstring[7];
-	processorString[4] = pstring[12];
-	processorString[5] = pstring[13];
-	processorString[6] = pstring[14];
-	processorString[7] = pstring[15];
-	processorString[8] = pstring[8];
-	processorString[9] = pstring[9];
-	processorString[10] = pstring[10];
-	processorString[11] = pstring[11];
-	processorString[12] = 0;
-
-//  REMOVED because you can have 3DNow! on non-AMD systems
-//	if ( strcmp( processorString, "AuthenticAMD" ) )
-//		return qfalse;
-
-	// check AMD-specific functions
-	CPUID( 0x80000000, regs );
-	if ( regs[0] < 0x80000000 ) {
-		return qfalse;
-	}
-
-	// bit 31 of EDX denotes 3DNOW! support
-	CPUID( 0x80000001, regs );
-	if ( regs[3] & ( 1 << 31 ) ) {
-		return qtrue;
-	}
-
-	return qfalse;
-}
-
-static int IsKNI( void ) {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 25 of EDX denotes KNI existence
-	if ( regs[3] & ( 1 << 25 ) ) {
-		return qtrue;
-	}
-
-	return qfalse;
-}
-
-static int IsMMX( void ) {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-
-	// bit 23 of EDX denotes MMX existence
-	if ( regs[3] & ( 1 << 23 ) ) {
-		return qtrue;
-	}
-	return qfalse;
-}
-
-static int IsP3() {
-	unsigned regs[4];
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-	if ( regs[0] < 6 ) {
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x1 ) ) {
-		return qfalse;    // fp
-	}
-
-	if ( !( regs[3] & 0x8000 ) ) { // cmov
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x800000 ) ) { // mmx
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x2000000 ) ) { // simd
-		return qfalse;
-	}
-
-	return qtrue;
-}
-
-static int IsAthlon() {
-	unsigned regs[4];
-	char pstring[16];
-	char processorString[13];
-
-	// get name of processor
-	CPUID( 0, ( unsigned int * ) pstring );
-	processorString[0] = pstring[4];
-	processorString[1] = pstring[5];
-	processorString[2] = pstring[6];
-	processorString[3] = pstring[7];
-	processorString[4] = pstring[12];
-	processorString[5] = pstring[13];
-	processorString[6] = pstring[14];
-	processorString[7] = pstring[15];
-	processorString[8] = pstring[8];
-	processorString[9] = pstring[9];
-	processorString[10] = pstring[10];
-	processorString[11] = pstring[11];
-	processorString[12] = 0;
-
-	if ( strcmp( processorString, "AuthenticAMD" ) ) {
-		return qfalse;
-	}
-
-	CPUID( 0x80000000, regs );
-
-	if ( regs[0] < 0x80000001 ) {
-		return qfalse;
-	}
-
-	// get CPU feature bits
-	CPUID( 1, regs );
-	if ( regs[0] < 6 ) {
-		return qfalse;
-	}
-
-	CPUID( 0x80000001, regs );
-
-	if ( !( regs[3] & 0x1 ) ) {
-		return qfalse;    // fp
-	}
-
-	if ( !( regs[3] & 0x8000 ) ) { // cmov
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x800000 ) ) { // mmx
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x400000 ) ) { // k7 mmx
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x80000000 ) ) { // 3dnow
-		return qfalse;
-	}
-
-	if ( !( regs[3] & 0x40000000 ) ) { // advanced 3dnow
-		return qfalse;
-	}
-
-	return qtrue;
-}
-
-int Sys_GetProcessorId( void ) {
-#if defined _M_ALPHA
-	return CPUID_AXP;
-#elif !defined _M_IX86
-	return CPUID_GENERIC;
-#else
-
-	// verify we're at least a Pentium or 486 w/ CPUID support
-	if ( !IsPentium() ) {
-		return CPUID_INTEL_UNSUPPORTED;
-	}
-
-	// check for MMX
-	if ( !IsMMX() ) {
-		// Pentium or PPro
-		return CPUID_INTEL_PENTIUM;
-	}
-
-	// see if we're an AMD 3DNOW! processor
-	if ( Is3DNOW() ) {
-		return CPUID_AMD_3DNOW;
-	}
-
-	// see if we're an Intel Katmai
-	if ( IsKNI() ) {
-		return CPUID_INTEL_KATMAI;
-	}
-
-	// by default we're functionally a vanilla Pentium/MMX or P2/MMX
-	return CPUID_INTEL_MMX;
-
-#endif
-}
-
-int Sys_GetHighQualityCPU() {
-	return ( !IsP3() && !IsAthlon() ) ? 0 : 1;
-}
-
-/*
-**
-** Re-enable optimizations back to what they were
-**
-*/
-#pragma optimize( "", on )
 
 
 //============================================
@@ -384,4 +171,22 @@ char *Sys_GetCurrentUser( void ) {
 	}
 
 	return s_userName;
+}
+
+qbool Sys_IsDebuggerAttached()
+{
+	return IsDebuggerPresent();
+}
+
+void Sys_Crash(const char* message, const char* file, int line, const char* function)
+{
+	const ULONG_PTR args[4] = { (ULONG_PTR)message, (ULONG_PTR)file, (ULONG_PTR)line, (ULONG_PTR)function };
+	RaiseException(RTCWPRO_WINDOWS_EXCEPTION_CODE, EXCEPTION_NONCONTINUABLE, ARRAY_LEN(args), args);
+}
+
+char* Sys_GetScreenshotPath(char* filename){
+	char* basepath = Cvar_VariableString("fs_basepath");
+	char* gamepath = Cvar_VariableString("fs_game");
+
+	return va("%s/%s/screenshots/%s.jpg", basepath, gamepath, filename);
 }

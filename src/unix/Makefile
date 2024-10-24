@@ -7,7 +7,7 @@
 
 CFLAGSREL = -g -pipe -m32 -fsigned-char -DNDEBUG -O6  \
 -fomit-frame-pointer -ffast-math -falign-loops=2 -falign-jumps=2 -fcommon \
--falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL -DDEDICATED
+-falign-functions=2 -fno-strict-aliasing -fstrength-reduce -fPIC -DGAMEDLL 
 
 DCFLAGSREL := \
 	 -pipe -m32 -march=pentium4 -g -fomit-frame-pointer -ffast-math \
@@ -41,23 +41,8 @@ BOTLIBOBJS := \
 	../botlib/be_interface.o ../botlib/l_crc.o ../botlib/l_libvar.o \
 	../botlib/l_log.o ../botlib/l_memory.o ../botlib/l_precomp.o \
 	../botlib/l_script.o ../botlib/l_struct.o
-JPGLIBOBJS := \
-	../jpeg-6/jcapimin.o ../jpeg-6/jchuff.o ../jpeg-6/jcinit.o \
-	../jpeg-6/jccoefct.o ../jpeg-6/jccolor.o ../jpeg-6/jfdctflt.o \
-	../jpeg-6/jcdctmgr.o ../jpeg-6/jcphuff.o ../jpeg-6/jcmainct.o \
-	../jpeg-6/jcmarker.o ../jpeg-6/jcmaster.o ../jpeg-6/jcomapi.o \
-	../jpeg-6/jcparam.o ../jpeg-6/jcprepct.o ../jpeg-6/jcsample.o \
-	../jpeg-6/jdapimin.o ../jpeg-6/jdapistd.o ../jpeg-6/jdatasrc.o \
-	../jpeg-6/jdcoefct.o ../jpeg-6/jdcolor.o ../jpeg-6/jddctmgr.o \
-	../jpeg-6/jdhuff.o ../jpeg-6/jdinput.o ../jpeg-6/jdmainct.o \
-	../jpeg-6/jdmarker.o ../jpeg-6/jdmaster.o ../jpeg-6/jdpostct.o \
-	../jpeg-6/jdsample.o ../jpeg-6/jdtrans.o ../jpeg-6/jerror.o \
-	../jpeg-6/jidctflt.o ../jpeg-6/jmemmgr.o ../jpeg-6/jmemnobs.o \
-	../jpeg-6/jutils.o
 ASMOBJS := \
 	../unix/ftol.o ../unix/snapvector.o
-INLINEOBJS := \
-	../unix/matha.o ../unix/snd_mixa.o
 RENDEROBJS := \
 	../renderer/tr_animation.o ../renderer/tr_backend.o \
 	../renderer/tr_bsp.o ../renderer/tr_cmds.o \
@@ -76,7 +61,8 @@ CLIENTOBJS := \
 	../client/cl_cgame.o ../client/cl_cin.o ../client/cl_console.o \
 	../client/cl_input.o ../client/cl_keys.o ../client/cl_main.o \
 	../client/cl_net_chan.o ../client/cl_parse.o ../client/cl_scrn.o \
-	../client/cl_ui.o ../client/cl_events.o ../client/cl_control.o
+	../client/cl_ui.o ../client/cl_events.o ../client/cl_control.o \
+	../client/cl_demo.o
 COMMONOBJS := \
 	../qcommon/cm_load.o ../qcommon/cm_patch.o ../qcommon/cm_polylib.o \
 	../qcommon/cm_test.o ../qcommon/cm_trace.o ../qcommon/cmd.o \
@@ -84,7 +70,7 @@ COMMONOBJS := \
 	../qcommon/md4.o ../qcommon/msg.o ../qcommon/net_chan.o \
 	../qcommon/huffman.o ../qcommon/unzip.o ../qcommon/db_main.o \
 	../qcommon/db_mysql.o ../qcommon/http.o ../qcommon/http_main.o ../qcommon/stats_submit_curl.o \
-	../qcommon/api_query.o
+	../qcommon/api_query.o ../qcommon/json.o ../qcommon/huffman_static.o ../qcommon/md5.o
 SOUNDOBJS := \
 	../client/snd_adpcm.o ../client/snd_dma.o ../client/snd_mem.o \
 	../client/snd_mix.o ../client/snd_wavelet.o
@@ -101,14 +87,15 @@ SHAREDOBJS := \
 DEDOBJS := \
 	../null/null_client.o ../null/null_input.o ../null/null_snddma.o
 UNIXCLIENTOBJS := \
-	../unix/linux_qgl.o ../unix/linux_glimp.o ../unix/linux_joystick.o \
-	../unix/linux_snd.o
+	../unix/linux_qgl.o ../unix/sdl_glimp.o ../unix/sdl_input.o ../unix/sdl_core.o \
+	../unix/sdl_snd.o
+
 UNIXOBJS := \
-	../unix/linux_common.o ../unix/unix_main.o ../unix/unix_net.o \
+	../unix/linux_common.o ../unix/unix_main.o ../unix/linux_tty.o ../unix/unix_net.o \
 	../unix/unix_shared.o ../unix/linux_signals.o ../unix/linux_threads.o
 WINCLIENTOBJS := \
 	../win32/win_gamma.o ../win32/win_glimp.o ../win32/win_input.o \
-	../win32/win_qgl.o ../win32/win_snd.o ../win32/linux_threads.o
+	../win32/win_qgl.o ../win32/win_snd.o ../win32/win_threads.o ../win32/win_exception.o
 WINOBJS := \
 	../win32/win_main.o ../win32/win_net.o ../win32/win_syscon.o \
 	../win32/win_wndproc.o ../win32/win_shared.o
@@ -116,9 +103,9 @@ WINOBJS := \
 #####################################################################
 
 CLOBJS := \
-	$(SPLINEOBJS) $(BOTLIBOBJS) $(JPGLIBOBJS) $(ASMOBJS) $(INLINEOBJS) \
-	$(RENDEROBJS) $(CLIENTOBJS) $(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) \
-	$(UNIXOBJS) $(UNIXCLIENTOBJS) $(VMOBJS) $(SHAREDOBJS)
+	$(SPLINEOBJS) $(BOTLIBOBJS) $(ASMOBJS) \
+	$(CLIENTOBJS) $(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) \
+	$(UNIXOBJS) $(UNIXCLIENTOBJS) $(RENDEROBJS) $(VMOBJS) $(SHAREDOBJS)
 CLWINOBJS := \
 	$(SPLINEOBJS) $(BOTLIBOBJS) $(JPGLIBOBJS) $(RENDEROBJS) $(CLIENTOBJS) \
 	$(COMMONOBJS) $(SOUNDOBJS) $(SERVEROBJS) $(WINOBJS) $(WINCLIENTOBJS) \
@@ -134,47 +121,36 @@ SVWINOBJS := \
 
 client: CC := gcc
 client: NASM := nasm
-client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I./../../libs/curl-7.75.0/include/
+
+client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I../../deps/libunwind/build/include/ -I../../deps/curl/build/include/  -I../../deps/libjpeg-turbo/build/ 
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
-	 -m32 -lX11 -lXext -lXxf86dga -lXxf86vm -ldl -lm -lstdc++ -L./../../libs/curl-7.75.0/lib/.libs -lcurl -lssl -lcrypto -ldl  -lmysqlclient 
+	 -m32 -ldl -lm -lstdc++ -lSDL2 -lc
 client: $(CLOBJS)
-	$(CC) -o wolfMP.x86 $(CLOBJS) $(LDFLAGS)
-	strip -s wolfMP.x86
+	$(CC) -g -o wolfMP.x86 $(CLOBJS) ../../deps/libunwind/build/lib/libunwind.a ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a  ../../deps/libjpeg-turbo/build/libturbojpeg.a $(LDFLAGS)
+	#strip -s wolfMP.x86
 client-clean:
 	rm $(CLOBJS) 2> /dev/null ; exit 0
 	
 #####################################################################
 
-# FIXME: this needs a symlink from include/gl to include/GL since win32
-# paths arent case sensitive - maybe fix in renderer/qgl.h
-# FIXME: jmorecfg.h defines INT32 and conflicts with mingws basetsd.h
-# included by windows.h - adjusted basetsd.h for now but should be
-# really fixed in jmorecfg.h (libjpeg update?)
-# FIXME: is uname -m suitable for CPUSTRING?
-# FIXME: had to undef __i386__ to avoid msvc style inline asm - probably
-# not the cleanest solution
-# NOTE: dinput.h and dsound.h missing from mingw but available
-# from dx80_mgw.zip at http://alleg.sourceforge.net/wip.html
-#/home/greg/RTCWxMod/OSPx/cross-make.sh
-#/home/greg/Downloads/cross-tools/bin/i386-mingw32msvc-gcc
-#client-w32: CC := i686-w64-mingw32-gcc 
-#client-w32: CXX := i686-w64-mingw32-g++
-#client-w32: CC := i386-mingw32msvc-gcc
-#client-w32: CXX := i386-mingw32msvc-g++
+# This builds the windows client with mingw but mingw doesn't support windows' exception handling
+#   may need to exclude win_exception's things to get it to build again, or just don't use it.  
+# Makefile-win uses clang-cl to build in msvc mode with Safe Exception Handling support
 client-w32: CC := i686-w64-mingw32-gcc-win32
 client-w32: CXX := i686-w64-mingw32-g++-win32
 client-w32: CFLAGS := \
-	$(CFLAGSREL) -DBOTLIB -DDLL_ONLY -DCPUSTRING=\"`uname -m`\" \
-	-U__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING \
-	-DCURL_STATICLIB
+	$(CFLAGSREL) -g  -DBOTLIB -DDLL_ONLY \
+	-D__i386__ -DWIN32 -DSPI_SCREENSAVERRUNNING=SPI_SETSCREENSAVERRUNNING -D__MINGW32__  \
+	 -I../../deps/libjpeg-turbo/build-win/ -I../../deps/curl-win/curl/include
 client-w32: CPPFLAGS := $(CFLAGS)
 client-w32: LDFLAGS := \
-	 -lwinmm -lopengl32 -lgdi32 -lws2_32 -static-libgcc `$(CXX) \
-	-print-file-name=libstdc++.a`
+	  -g -lwinmm -lopengl32 -lgdi32  -static-libgcc  \
+	 `$(CXX) -print-file-name=libstdc++.a` -lws2_32 -lcrypt32 -L../../deps/curl-win/curl/lib -lcurl -mwindows
 client-w32: $(CLWINOBJS)
-	$(CXX) -o wolfMP.exe $(CLWINOBJS) $(LDFLAGS)
-	strip -s wolfMP.exe
+	$(CXX) -o wolfMP.exe $(CLWINOBJS) \
+	 ../../deps/libjpeg-turbo/build-win/libturbojpeg.a /usr/i686-w64-mingw32/lib/libversion.a  $(LDFLAGS)
+	#strip -s wolfMP.exe
 client-w32-clean:
 	rm $(CLWINOBJS) 2> /dev/null ; exit 0
 
@@ -183,13 +159,11 @@ client-w32-clean:
 server: CC := gcc
 server: NASM := nasm 
 server: CFLAGS := \
-	$(CFLAGSREL) -m32  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I./../../libs/include/
-#server: LDFLAGS := -m32 -ldl -lm -L..\..\libs\curl-7.29.0\lib\libcurl -lcurl -lmysqlclient 
-#server: LDFLAGS := -m32 -ldl -lm -L./../../libs/curl-7.75.0/lib/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz   -DCURL_STATICLIB  -lmysqlclient 
-server: LDFLAGS := -m32 -ldl -lm -L./../../libs/.libs/ -lcurl -lssl -lcrypto -ldl -lm -lz  -lmysqlclient 
+	$(CFLAGSREL) -m32 -g  -DBOTLIB -DDEDICATED -DC_ONLY -DDLL_ONLY -I../../deps/libunwind/build/include/ -I../../deps/curl/build/include/ 
+server: LDFLAGS := -m32 -DCURL_STATICLIB -ldl -lpthread
 server: $(SVOBJS)
-	$(CC) -o wolfded.x86 $(SVOBJS) $(LDFLAGS)
-	strip -s wolfded.x86
+	$(CC) -o wolfded.x86 $(SVOBJS) ../../deps/libunwind/build/lib/libunwind.a ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a $(LDFLAGS)
+#	strip -s wolfded.x86
 server-clean:
 	rm $(SVOBJS) 2> /dev/null ; exit 0
 	

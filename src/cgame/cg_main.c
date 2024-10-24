@@ -42,6 +42,8 @@ displayContextDef_t cgDC;
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
 qboolean CG_CheckExecKey(int key);
+static byte interopIn[4096];
+static byte interopOut[4096];
 
 /*
 ================
@@ -93,6 +95,22 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return CG_CheckExecKey(arg0);
 	case CG_RELAY_COMMAND:
 		return CG_RelayCommand((char*)arg0, arg1);
+	case CG_NDP_ANALYZE_COMMAND:
+		CG_NDP_AnalyzeCommand(arg0);
+		return 0;
+	case CG_NDP_GENERATE_COMMANDS:
+		//item timer commands
+		//special strings to synchronize 
+		return 0;
+	case CG_NDP_IS_CS_NEEDED:
+		return 0;
+	case CG_NDP_ANALYZE_SNAPSHOT:
+		CG_NDP_AnalyzeSnapshot(arg0);
+		return 0;
+	case CG_NDP_END_ANALYSIS:
+		CG_NDP_EndAnalysis((char*)arg0, arg1, arg2, (qboolean)arg3);
+		return 0;
+
 	default:
 		CG_Error( "vmMain: unknown command %i", command );
 		break;
@@ -272,6 +290,8 @@ vmCvar_t mp_item1;
 
 vmCvar_t cg_drawCompass;
 vmCvar_t cg_drawNotifyText;
+vmCvar_t cg_notifyTextLines;
+vmCvar_t cg_notifyPlayerOnly;
 vmCvar_t cg_quickMessageAlt;
 vmCvar_t cg_popupLimboMenu;
 vmCvar_t cg_descriptiveText;
@@ -347,6 +367,7 @@ vmCvar_t demo_infoWindow;
 vmCvar_t mv_sensitivity;
 
 vmCvar_t demo_controlsWindow;
+vmCvar_t demo_timelineWindow;
 vmCvar_t demo_popupWindow;
 vmCvar_t demo_showTimein;
 vmCvar_t demo_noAdvertisement;
@@ -422,6 +443,17 @@ vmCvar_t cg_shoutcastDrawHealth;
 vmCvar_t cg_shoutcastGrenadeTrail;
 
 vmCvar_t cg_showLimboMessage;
+vmCvar_t cg_teamObituaryColors;
+vmCvar_t cg_teamObituaryColorSame;
+vmCvar_t cg_teamObituaryColorSameTK;
+vmCvar_t cg_teamObituaryColorEnemy;
+vmCvar_t cg_teamObituaryColorEnemyTK;
+
+vmCvar_t g_maxLagCompensation;
+vmCvar_t g_delagHitscan;
+vmCvar_t g_fixedphysicsfps;
+vmCvar_t g_allowEnemySpawnTimer;
+vmCvar_t stats_matchid;
 
 typedef struct {
 	vmCvar_t    *vmCvar;
@@ -704,10 +736,12 @@ cvarTable_t cvarTable[] = {
 
 	// notify text
 	{ &cg_notifyTextX, "cg_notifyTextX", "0", CVAR_ARCHIVE },
-	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE },
+	{ &cg_notifyTextY, "cg_notifyTextY", "42", CVAR_ARCHIVE }, // 5 lines * 8 height + 2 offset
 	{ &cg_notifyTextShadow, "cg_notifyTextShadow", "0", CVAR_ARCHIVE },
 	{ &cg_notifyTextWidth, "cg_notifyTextWidth", "8", CVAR_ARCHIVE },
 	{ &cg_notifyTextHeight, "cg_notifyTextHeight", "8", CVAR_ARCHIVE },
+	{ &cg_notifyTextLines, "cg_notifyTextLines", "5", CVAR_ARCHIVE },
+	{ &cg_notifyPlayerOnly, "cg_notifyPlayerOnly", "0", CVAR_ARCHIVE },
 
 	// chat
 	{ &cg_chatX, "cg_chatX", "0", CVAR_ARCHIVE },
@@ -743,6 +777,7 @@ cvarTable_t cvarTable[] = {
 	// RTCWPro - complete OSP demo features
 	{ &demo_infoWindow, "demo_infoWindow", "0", CVAR_ARCHIVE },
 	{ &demo_controlsWindow, "demo_controlsWindow", "1", CVAR_ARCHIVE },
+	{ &demo_timelineWindow, "demo_timelineWindow", "0", CVAR_ARCHIVE },
 	{ &demo_popupWindow, "demo_popupWindow", "1", CVAR_ARCHIVE },
 	{ &demo_showTimein, "demo_showTimein", "1", CVAR_ARCHIVE },
 	{ &demo_noAdvertisement, "demo_noAdvertisement", "0", CVAR_ARCHIVE },
@@ -758,7 +793,23 @@ cvarTable_t cvarTable[] = {
 	{ &cg_shoutcastGrenadeTrail,    "cg_shoutcastGrenadeTrail",    "0",           CVAR_ARCHIVE },
 
 	// show/hide limbo message while dead
-	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE }
+	{ &cg_showLimboMessage, "cg_showLimboMessage", "1", CVAR_ARCHIVE },
+
+	// custom kill feed colors
+	{ &cg_teamObituaryColors, "cg_teamObituaryColors", "0", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSame, "cg_teamObituaryColorSame", "green", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorSameTK, "cg_teamObituaryColorSameTK", "mdgreen", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemy, "cg_teamObituaryColorEnemy", "red", CVAR_ARCHIVE },
+	{ &cg_teamObituaryColorEnemyTK, "cg_teamObituaryColorEnemyTK", "mdred", CVAR_ARCHIVE }, 
+
+		//CVAR_SERVERINFO things
+	{ &g_maxLagCompensation, "g_maxLagCompensation", "", CVAR_SERVERINFO },
+	{ &g_delagHitscan, "g_delagHitscan", "", CVAR_SERVERINFO },
+	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "", CVAR_SERVERINFO },
+	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "", CVAR_SERVERINFO },
+	{ &stats_matchid, "stats_matchid", "", CVAR_SERVERINFO }
+
+	
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
 
@@ -1686,6 +1737,11 @@ static void CG_RegisterGraphics( void ) {
 
 	// RtcwPro objective icon with nopicmip option
 	cgs.media.treasureIcon = trap_R_RegisterShaderNoMip("models/multiplayer/treasure/treasure");
+	cgs.media.skull = trap_R_RegisterShaderNoMip("gfx/2d/multi_dead");
+	cgs.media.alliesFlag = trap_R_RegisterShaderNoMip("ui_mp/assets/usa_flag.tga");
+	cgs.media.axisFlag = trap_R_RegisterShaderNoMip("ui_mp/assets/ger_flag.tga");
+	cgs.media.stopwatch1 = trap_R_RegisterShaderNoMip("sprites/stopwatch1.tga");
+	cgs.media.stopwatch2 = trap_R_RegisterShaderNoMip("sprites/stopwatch2.tga");
 
 	// draw triggers
 	cgs.media.transmitTrigger = trap_R_RegisterShaderNoMip("gfx/2d/transmitTrigger");
@@ -2733,6 +2789,59 @@ void CG_ClearTrails( void );
 extern qboolean initparticles;
 void CG_ClearParticles( void );
 
+#define GET_TRAP(Name) \
+	do { \
+		rtcwPro_ext.Name = 0; \
+		if (trap_GetValue(extValue, sizeof(extValue), #Name) && \
+			sscanf(extValue, "%d", &syscallId) == 1 && \
+			syscallId != 0) { \
+			rtcwPro_ext.Name = syscallId; \
+		} \
+	} while (0)
+
+
+void CG_LoadExtensions() {
+
+	cgExt_t rtcwPro_ext;
+
+	int hasTrap_GetValue = trap_Cvar_VariableIntegerValue("//trap_GetValue");
+
+	if (hasTrap_GetValue == 0) {
+		// Engine extensions are not supported on the client
+		return;
+	}
+	else {
+		// Begin loading supported extensions...
+		char extValue[11];
+		int syscallId;
+
+		GET_TRAP(trap_LocateInteropData);
+		if (rtcwPro_ext.trap_LocateInteropData){
+			memset(interopIn, 0, sizeof(interopIn));
+			memset(interopOut, 0, sizeof(interopOut));
+			trap_LocateInteropData(interopIn, sizeof(interopIn), interopOut, sizeof(interopOut));
+		}
+
+		GET_TRAP(trap_CNQ3_NDP_Enable);
+		GET_TRAP(trap_CNQ3_NDP_Seek);
+		GET_TRAP(trap_CNQ3_NDP_ReadUntil);
+		GET_TRAP(trap_CNQ3_NDP_StartVideo);
+		GET_TRAP(trap_CNQ3_NDP_StopVideo);
+
+		if (rtcwPro_ext.trap_CNQ3_NDP_Enable &&
+			rtcwPro_ext.trap_CNQ3_NDP_Seek &&
+			rtcwPro_ext.trap_CNQ3_NDP_ReadUntil &&
+			rtcwPro_ext.trap_CNQ3_NDP_StartVideo &&
+			rtcwPro_ext.trap_CNQ3_NDP_StopVideo) {
+			cg.ndpDemoEnabled = trap_CNQ3_NDP_Enable();
+		}
+		else {
+			cg.ndpDemoEnabled = qfalse;
+		}
+	}
+}
+
+
 /*
 =================
 CG_Init
@@ -2883,6 +2992,22 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 			CG_execFile("autoexec_default");
 		}
 	}
+	else {
+		// Reset the last demo's game version found
+		gameVersionFound = qfalse;
+	}
+
+	CG_LoadExtensions();
+
+
+	
+}
+
+static void SaveSession(void)
+{
+	float speed;
+	//What else needs to be saved? Pause states? 
+	trap_Cvar_Set("demo_SessionData", va("%d %f", m_currServerTime, cg_timescale.value ));
 }
 
 /*
@@ -2895,6 +3020,16 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
+		ndp_myKillsSize = 0;
+		ndp_alliesWinsSize = 0;
+		ndp_axisWinsSize = 0;
+		ndp_round1EndSize = 0;
+		ndp_round2EndSize = 0;
+		ndp_docDropSize = 0;
+		ndp_docPickupSize = 0;
+		SaveSession();
+	}
 }
 
 /*
@@ -2933,4 +3068,3 @@ qboolean CG_execFile(char* filename) {
 	trap_SendConsoleCommand(va("exec %s.cfg\n", filename));
 	return qtrue;
 }
-

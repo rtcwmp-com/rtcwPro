@@ -1,0 +1,35 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y wget libc6:i386 unzip bbe git gdb-multiarch gcc
+
+RUN useradd -ms /bin/bash game
+
+USER game
+WORKDIR /home/game
+
+COPY --chown=game:game --from="rtcwpro/rtcw-base:1.0" /output/ /home/game
+
+RUN mkdir /home/game/dev && \
+    mkdir -p /home/game/rtcwpro/configs && \
+    ln -sf /home/game/dev/wolfded.x86 /home/game/wolfded.x86 && \
+    ln -sf /home/game/dev/rtcwpro/qagame.mp.i386.so /home/game/rtcwpro/qagame.mp.i386.so && \
+    ln -sf /home/game/dev/rtcwpro/rtcwpro_assets.pk3 /home/game/rtcwpro/rtcwpro_assets.pk3 && \
+    ln -sf /home/game/dev/rtcwpro/rtcwpro_models.pk3 /home/game/rtcwpro/rtcwpro_models.pk3 && \
+    ln -sf /home/game/dev/rtcwpro/rtcwpro_bin.pk3 /home/game/rtcwpro/rtcwpro_bin.pk3 && \
+    ln -sf /home/game/dev/rtcwpro/GeoIP.dat /home/game/rtcwpro/GeoIP.dat && \
+    ln -sf /home/game/dev/rtcwpro/configs/defaultcomp.config /home/game/rtcwpro/configs/defaultcomp.config && \
+    ln -sf /home/game/dev/rtcwpro/configs/unlag.config /home/game/rtcwpro/configs/unlag.config 
+
+RUN git clone --depth 1 "https://github.com/msh100/rtcw-config.git" \
+    /home/game/settings/
+
+COPY --chown=game:game scripts/entrypoint.sh /home/game/start
+RUN chmod +x /home/game/start
+
+EXPOSE 27960/udp
+
+ENTRYPOINT ["/home/game/start"]

@@ -153,7 +153,7 @@ void GeoIP_open(void) {
 
 void GeoIP_close(void) {
 	if (gidb != NULL) {
-		G_Free(gidb->cache);
+		free(gidb->cache);
 		gidb->cache = NULL;
 		G_Free(gidb);
 		gidb = NULL;

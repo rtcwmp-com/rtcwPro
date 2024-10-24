@@ -452,7 +452,6 @@ void Cmd_God_f( gentity_t *ent ) {
 }
 
 void Cmd_GetOBJ(gentity_t* ent) {
-	char team[64];
 	gentity_t* axisObj = NULL, * alliesObj = NULL;
 
 	if (!CheatsOk(ent)) // devmap only

@@ -100,10 +100,17 @@
     <ClCompile Include="..\qcommon\q_shared.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cg_shoutcastoverlay.c" />
+    <ClCompile Include="cg_shoutcastoverlay.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cg_ndp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\main\ui\menudef.h" />
+    <ClInclude Include="..\..\main\ui\menudef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\game\bg_local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -128,7 +135,12 @@
     <ClInclude Include="..\ui\ui_shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\qcommon\q_shared.h" />
+    <ClInclude Include="..\qcommon\q_shared.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cg_ndp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cgame.def" />

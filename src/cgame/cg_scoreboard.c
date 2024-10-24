@@ -259,7 +259,28 @@ int WM_DrawObjectives( int x, int y, int width, float fade ) {
 	if ( cg.snap->ps.pm_type != PM_INTERMISSION ) {
 		CG_DrawSmallString( x, y, CG_TranslateString( "Goals" ), fade );
 	}
-	CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // RTCWPro - time
+
+	// show server name and time/date
+	char scoreInfo[200];
+	scoreInfo[0] = 0;
+	
+	s = CG_ConfigString(CS_SERVERINFO);
+	Q_strcat(scoreInfo, sizeof(scoreInfo), va("^3Server: ^7%s  ", Q_CleanStr(Info_ValueForKey(s, "sv_hostname"))));
+	Q_strcat(scoreInfo, sizeof(scoreInfo), va("^3Time: ^7%s", CG_GetClock()));
+
+	// if intermission move it up a little
+	if (cg.snap->ps.pm_type == PM_INTERMISSION)
+		y -= 15;
+
+	int w = CG_DrawStrlen(scoreInfo) * TINYCHAR_WIDTH;
+	CG_DrawStringExt(615 - w, y + TINYCHAR_HEIGHT - 2, scoreInfo, colorWhite, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 0);
+
+	//CG_DrawSmallString(x + 530, y, CG_GetClock(), fade); // RTCWPro - time
+
+	// if intermission move it back
+	if (cg.snap->ps.pm_type == PM_INTERMISSION)
+		y += 15;
+
 	y += SMALLCHAR_HEIGHT + 3;
 
 	// draw color bands

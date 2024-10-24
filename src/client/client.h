@@ -233,6 +233,7 @@ typedef struct {
 	qboolean demowaiting;       // don't record until a non-delta message is received
 	qboolean firstDemoFrameSkipped;
 	fileHandle_t demofile;
+	qboolean newDemoPlayer;
 
 	qboolean waverecording;
 	fileHandle_t wavefile;
@@ -292,6 +293,23 @@ typedef struct {
 } serverAddress_t;
 
 #define MAX_AUTOUPDATE_SERVERS  5
+
+// CGame VM calls that are extensions
+enum {
+	CGVM_NDP_END_ANALYSIS,
+	CGVM_NDP_ANALYZE_SNAPSHOT,
+	CGVM_NDP_ANALYZE_COMMAND,
+	CGVM_NDP_GENERATE_COMMANDS, // generate synchronization commands
+	CGVM_NDP_IS_CS_NEEDED,      // does this config string need to be re-submitted?
+	CGVM_COUNT
+};
+
+// UI VM calls that are extensions
+enum {
+	UIVM_ERROR_CALLBACK, // forward errors to UI?
+	UIVM_COUNT
+};
+
 typedef struct {
 	connstate_t state;              // connection status
 	int keyCatchers;                // bit flags
@@ -350,6 +368,14 @@ typedef struct {
 	qhandle_t whiteShader;
 	qhandle_t consoleShader;
 	qhandle_t consoleShader2;       // NERVE - SMF - merged from WolfSP
+
+	// extensions VM calls indices
+	// 0 when not available
+	int			cgvmCalls[CGVM_COUNT];
+	int			uivmCalls[UIVM_COUNT];
+
+	// extension: new demo player supported by the mod
+	qbool		cgameNewDemoPlayer;
 } clientStatic_t;
 
 extern clientStatic_t cls;
@@ -424,6 +450,7 @@ extern cvar_t* cl_activatelean; // RTCWPro
 extern cvar_t* cl_httpDomain;
 extern cvar_t* cl_httpPath;
  
+extern cvar_t* cl_demoPlayer;
 
 //=================================================
 
@@ -622,6 +649,12 @@ void CL_CGameRendering( stereoFrame_t stereo );
 void CL_SetCGameTime( void );
 void CL_FirstSnapshot( void );
 void CL_UpdateLevelHunkUsage( void );
+void CL_ConfigstringModified();
+void CL_CGNDP_EndAnalysis(const char* filePath, int firstServerTime, int lastServerTime, qbool videoRestart);
+qbool CL_CGNDP_AnalyzeSnapshot(int progress); // qtrue when a server pause is active
+void CL_CGNDP_AnalyzeCommand(int serverTime);
+void CL_CGNDP_GenerateCommands(const char** commands, int* numCommandBytes);
+qbool CL_CGNDP_IsConfigStringNeeded(int csIndex);
 
 //
 // cl_events.c
@@ -652,6 +685,23 @@ qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 // RTCWPro - cl_control.c - source: Nate (rtcwMP)
 //
 void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime, char* datetime);
+
+//
+// cl_demo.c
+//
+void CL_NDP_PlayDemo(qbool videoRestart);
+void CL_NDP_SetCGameTime();
+void CL_NDP_GetCurrentSnapshotNumber(int* snapshotNumber, int* serverTime);
+qbool CL_NDP_GetSnapshot(int snapshotNumber, snapshot_t* snapshot);
+qbool CL_NDP_GetServerCommand(int serverCommandNumber);
+int CL_NDP_Seek(int serverTime);
+void CL_NDP_ReadUntil(int serverTime);
+void CL_NDP_HandleError();
+
+void	Sys_Sleep( int ms );
+
+char* Sys_GetScreenshotPath(char* filename);
+
 
 #endif // !__CLIENT_H
 

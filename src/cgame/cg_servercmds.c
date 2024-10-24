@@ -94,46 +94,177 @@ static void CG_ParseTeamInfo( void ) {
 	int i;
 	int client;
 
-	// NERVE - SMF
-	//cg.identifyClientNum = Q_atoi(CG_Argv(1));
-	//cg.identifyClientHealth = Q_atoi(CG_Argv(2));
-	// -NERVE - SMF
+	if (!cg.demoPlayback) {
+		//Current rtcwpro tinfo
 
-	int teamInfoPlayers = Q_atoi(CG_Argv(1));
+		int teamInfoPlayers = Q_atoi(CG_Argv(1));
 
-	numSortedTeamPlayers = teamInfoPlayers;
+		numSortedTeamPlayers = teamInfoPlayers;
 
-	if (teamInfoPlayers < 0 || teamInfoPlayers >= MAX_CLIENTS)
-	{
-		CG_Printf("CG_ParseTeamInfo: teamInfoPlayers out of range (%i)\n", teamInfoPlayers);
-		return;
-	}
-
-	for (i = 0 ; i < teamInfoPlayers ; i++)
-	{
-		client = Q_atoi(CG_Argv(i * TEAMINFOARGS + 2));
-
-		if (client < 0 || client >= MAX_CLIENTS)
+		if (teamInfoPlayers < 0 || teamInfoPlayers >= MAX_CLIENTS)
 		{
-			CG_Printf("CG_ParseTeamInfo: bad client number: %i\n", client);
+			CG_Printf("CG_ParseTeamInfo: teamInfoPlayers out of range (%i)\n", teamInfoPlayers);
 			return;
 		}
 
-		sortedTeamPlayers[i] = client;
+		for (i = 0; i < teamInfoPlayers; i++)
+		{
+			client = Q_atoi(CG_Argv(i * TEAMINFOARGS + 2));
 
-		cgs.clientinfo[client].location = Q_atoi(CG_Argv(i * TEAMINFOARGS + 3));
-		cgs.clientinfo[client].health = Q_atoi(CG_Argv(i * TEAMINFOARGS + 4));
-		cgs.clientinfo[client].powerups = Q_atoi(CG_Argv(i * TEAMINFOARGS + 5));
+			if (client < 0 || client >= MAX_CLIENTS)
+			{
+				CG_Printf("CG_ParseTeamInfo: bad client number: %i\n", client);
+				return;
+			}
 
-		cg_entities[client].currentState.teamNum = Q_atoi(CG_Argv(i * TEAMINFOARGS + 6));
+			sortedTeamPlayers[i] = client;
 
-		cgs.clientinfo[client].playerAmmo = Q_atoi(CG_Argv(i * TEAMINFOARGS + 7));
-		cgs.clientinfo[client].playerAmmoClip = Q_atoi(CG_Argv(i * TEAMINFOARGS + 8));
-		cgs.clientinfo[client].playerNades = Q_atoi(CG_Argv(i * TEAMINFOARGS + 9));
-		cgs.clientinfo[client].playerWeapon = Q_atoi(CG_Argv(i * TEAMINFOARGS + 10));
-		cgs.clientinfo[client].playerLimbo = Q_atoi(CG_Argv(i * TEAMINFOARGS + 11));
-		player_ready_status[client].isReady = Q_atoi(CG_Argv(i * TEAMINFOARGS + 12));
-		cgs.clientinfo[client].latchedClass = Q_atoi(CG_Argv(i * TEAMINFOARGS + 13));
+			cgs.clientinfo[client].location = Q_atoi(CG_Argv(i * TEAMINFOARGS + 3));
+			cgs.clientinfo[client].health = Q_atoi(CG_Argv(i * TEAMINFOARGS + 4));
+			cgs.clientinfo[client].powerups = Q_atoi(CG_Argv(i * TEAMINFOARGS + 5));
+
+			cg_entities[client].currentState.teamNum = Q_atoi(CG_Argv(i * TEAMINFOARGS + 6));
+
+			cgs.clientinfo[client].playerAmmo = Q_atoi(CG_Argv(i * TEAMINFOARGS + 7));
+			cgs.clientinfo[client].playerAmmoClip = Q_atoi(CG_Argv(i * TEAMINFOARGS + 8));
+			cgs.clientinfo[client].playerNades = Q_atoi(CG_Argv(i * TEAMINFOARGS + 9));
+			cgs.clientinfo[client].playerWeapon = Q_atoi(CG_Argv(i * TEAMINFOARGS + 10));
+			cgs.clientinfo[client].playerLimbo = Q_atoi(CG_Argv(i * TEAMINFOARGS + 11));
+			player_ready_status[client].isReady = Q_atoi(CG_Argv(i * TEAMINFOARGS + 12));
+			cgs.clientinfo[client].latchedClass = Q_atoi(CG_Argv(i * TEAMINFOARGS + 13));
+
+		}
+
+		
+	}
+	else {
+		//demo playback tinfos
+		
+		//OSP, bani
+		if (!isRtcwPro && gameVersionFound) {
+
+			// NERVE - SMF
+			cg.identifyClientNum = atoi(CG_Argv(1));
+			cg.identifyClientHealth = atoi(CG_Argv(2));
+			// -NERVE - SMF
+
+			numSortedTeamPlayers = atoi(CG_Argv(3));
+
+			for (i = 0; i < numSortedTeamPlayers; i++) {
+				client = atoi(CG_Argv(i * 5 + 4));
+
+				sortedTeamPlayers[i] = client;
+
+				cgs.clientinfo[client].location = atoi(CG_Argv(i * 5 + 5));
+				cgs.clientinfo[client].health = atoi(CG_Argv(i * 5 + 6));
+				cgs.clientinfo[client].powerups = atoi(CG_Argv(i * 5 + 7));
+
+				cg_entities[client].currentState.teamNum = atoi(CG_Argv(i * 5 + 8));
+			}
+			return;
+		}
+		else {
+			//1.1.2 to 1.2.8
+			if (isRtcwProV128) {
+
+				// NERVE - SMF
+				cg.identifyClientNum = atoi(CG_Argv(1));
+				cg.identifyClientHealth = atoi(CG_Argv(2));
+				// -NERVE - SMF
+
+				numSortedTeamPlayers = atoi(CG_Argv(3));
+
+				for (i = 0; i < numSortedTeamPlayers; i++) {
+					client = atoi(CG_Argv(i * 11 + 4));
+
+					sortedTeamPlayers[i] = client;
+
+					cgs.clientinfo[client].location = atoi(CG_Argv(i * 11 + 5));
+					cgs.clientinfo[client].health = atoi(CG_Argv(i * 11 + 6));
+					cgs.clientinfo[client].powerups = atoi(CG_Argv(i * 11 + 7));
+
+					cg_entities[client].currentState.teamNum = atoi(CG_Argv(i * 11 + 8));
+
+					cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * 11 + 9));
+					cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * 11 + 10));
+					cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * 11 + 11));
+					cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * 11 + 12));
+					cgs.clientinfo[client].playerLimbo = atoi(CG_Argv(i * 11 + 13));
+					player_ready_status[client].isReady = atoi(CG_Argv(i * 11 + 14));
+				}
+				return;
+			}
+			if (isRtcwProV129) {
+
+				// NERVE - SMF
+				cg.identifyClientNum = atoi(CG_Argv(1));
+				cg.identifyClientHealth = atoi(CG_Argv(2));
+				// -NERVE - SMF
+
+				numSortedTeamPlayers = atoi(CG_Argv(3));
+
+				for (i = 0; i < numSortedTeamPlayers; i++) {
+					client = atoi(CG_Argv(i * TEAMINFOARGS + 4));
+
+					sortedTeamPlayers[i] = client;
+
+					cgs.clientinfo[client].location = atoi(CG_Argv(i * TEAMINFOARGS + 5));
+					cgs.clientinfo[client].health = atoi(CG_Argv(i * TEAMINFOARGS + 6));
+					cgs.clientinfo[client].powerups = atoi(CG_Argv(i * TEAMINFOARGS + 7));
+
+					cg_entities[client].currentState.teamNum = atoi(CG_Argv(i * TEAMINFOARGS + 8));
+
+					cgs.clientinfo[client].playerAmmo = atoi(CG_Argv(i * TEAMINFOARGS + 9));
+					cgs.clientinfo[client].playerAmmoClip = atoi(CG_Argv(i * TEAMINFOARGS + 10));
+					cgs.clientinfo[client].playerNades = atoi(CG_Argv(i * TEAMINFOARGS + 11));
+					cgs.clientinfo[client].playerWeapon = atoi(CG_Argv(i * TEAMINFOARGS + 12));
+					cgs.clientinfo[client].playerLimbo = atoi(CG_Argv(i * TEAMINFOARGS + 13));
+					player_ready_status[client].isReady = atoi(CG_Argv(i * TEAMINFOARGS + 14));
+					cgs.clientinfo[client].latchedClass = atoi(CG_Argv(i * TEAMINFOARGS + 15));
+				}
+				return;
+			}
+			if (isRtcwProV130 || isRtcwProV140) {
+				int teamInfoPlayers = Q_atoi(CG_Argv(1));
+
+				numSortedTeamPlayers = teamInfoPlayers;
+
+				if (teamInfoPlayers < 0 || teamInfoPlayers >= MAX_CLIENTS)
+				{
+					CG_Printf("CG_ParseTeamInfo: teamInfoPlayers out of range (%i)\n", teamInfoPlayers);
+					return;
+				}
+
+				for (i = 0; i < teamInfoPlayers; i++)
+				{
+					client = Q_atoi(CG_Argv(i * TEAMINFOARGS + 2));
+
+					if (client < 0 || client >= MAX_CLIENTS)
+					{
+						CG_Printf("CG_ParseTeamInfo: bad client number: %i\n", client);
+						return;
+					}
+
+					sortedTeamPlayers[i] = client;
+
+					cgs.clientinfo[client].location = Q_atoi(CG_Argv(i * TEAMINFOARGS + 3));
+					cgs.clientinfo[client].health = Q_atoi(CG_Argv(i * TEAMINFOARGS + 4));
+					cgs.clientinfo[client].powerups = Q_atoi(CG_Argv(i * TEAMINFOARGS + 5));
+
+					cg_entities[client].currentState.teamNum = Q_atoi(CG_Argv(i * TEAMINFOARGS + 6));
+
+					cgs.clientinfo[client].playerAmmo = Q_atoi(CG_Argv(i * TEAMINFOARGS + 7));
+					cgs.clientinfo[client].playerAmmoClip = Q_atoi(CG_Argv(i * TEAMINFOARGS + 8));
+					cgs.clientinfo[client].playerNades = Q_atoi(CG_Argv(i * TEAMINFOARGS + 9));
+					cgs.clientinfo[client].playerWeapon = Q_atoi(CG_Argv(i * TEAMINFOARGS + 10));
+					cgs.clientinfo[client].playerLimbo = Q_atoi(CG_Argv(i * TEAMINFOARGS + 11));
+					player_ready_status[client].isReady = Q_atoi(CG_Argv(i * TEAMINFOARGS + 12));
+					cgs.clientinfo[client].latchedClass = Q_atoi(CG_Argv(i * TEAMINFOARGS + 13));
+
+				}
+				return;
+			}
+		}
 	}
 }
 
@@ -184,6 +315,17 @@ void CG_ParseServerinfo( void ) {
 
 	// TTimo - make this available for ingame_callvote
 	trap_Cvar_Set( "cg_ui_voteFlags", Info_ValueForKey( info, "g_voteFlags" ) );
+
+	//grab the CVAR_SERVERINFO things out of the config string
+	trap_Cvar_Set( "sv_fps", Info_ValueForKey( info, "sv_fps" ) );
+	trap_Cvar_Set( "g_maxLagCompensation", Info_ValueForKey( info, "g_maxLagCompensation" ) );
+	trap_Cvar_Set( "sv_minRestartDelay", Info_ValueForKey( info, "sv_minRestartDelay" ) );
+	trap_Cvar_Set( "sv_minRestartPlayers", Info_ValueForKey( info, "sv_minRestartPlayers" ) );
+	trap_Cvar_Set( "g_delagHitscan", Info_ValueForKey( info, "g_delagHitscan" ) );
+	trap_Cvar_Set( "g_fixedphysicsfps", Info_ValueForKey( info, "g_fixedphysicsfps" ) );
+	trap_Cvar_Set( "g_allowEnemySpawnTimer", Info_ValueForKey( info, "g_allowEnemySpawnTimer" ) );
+	trap_Cvar_Set( "stats_matchid", Info_ValueForKey( info, "stats_matchid" ) );
+	trap_Cvar_Set( "version", Info_ValueForKey( info, "version" ) );
 }
 
 /*
@@ -644,7 +786,25 @@ void CG_AddToNotify( const char *str ) {
 	trap_Cvar_VariableStringBuffer( "con_notifytime", var, sizeof( var ) );
 	notifytime = atof( var ) * 1000;
 
-	chatHeight = NOTIFY_HEIGHT;
+	trap_Cvar_VariableStringBuffer("cg_notifyTextLines", var, sizeof(var));
+	chatHeight = atoi( var );
+	if (chatHeight > MAX_NOTIFY_HEIGHT) {
+		chatHeight = MAX_NOTIFY_HEIGHT;
+	}
+
+	if (cg.demoPlayback) {
+		trap_Cvar_VariableStringBuffer("cg_notifyPlayerOnly", var, sizeof(var));
+		int notifyPlayerOnly = atoi(var);
+		if (notifyPlayerOnly) {
+			char* playerName = Info_ValueForKey(CG_ConfigString(CS_PLAYERS + cg.snap->ps.clientNum), "n");
+			if (strlen(playerName)) {
+				if (strstr(str, playerName) == NULL) {
+					return;
+				}
+			}
+		}
+	}
+
 
 	if ( chatHeight <= 0 || notifytime <= 0 ) {
 		// team chat disabled, dump into normal chat
@@ -2361,6 +2521,7 @@ static void CG_ServerCommand( void ) {
 	}
 
 	// ydnar: bug 267: server sends this command when it's about to kill the current server, before the client can reconnect
+	//TODO: if demo is recording, stop recording and start a new demo after server respawn (eliminate multiple gamestates in a demo) 
 	if (!Q_stricmp(cmd, "spawnserver")) {
 		cg.serverRespawning = qtrue;
 		return;

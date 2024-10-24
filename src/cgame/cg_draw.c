@@ -61,7 +61,7 @@ void Controls_GetConfig( void );
 /*
 	OSPx - HUD names ETpro port
 */
-int	numnames = 0;
+static int numnames = 0;
 
 typedef struct {
 	float x;
@@ -205,7 +205,8 @@ void CG_Text_Paint( float x, float y, float scale, vec4_t color, const char *tex
 	}
 	useScale = scale * font->glyphScale;
 
-	color[3] *= cg_hudAlpha.value;  // (SA) adjust for cg_hudalpha
+	if (!cgs.clientinfo[cg.clientNum].shoutStatus)
+		color[3] *= cg_hudAlpha.value;  // (SA) adjust for cg_hudalpha
 
 	if ( text ) {
 		const char *s = text;
@@ -1085,6 +1086,7 @@ static float CG_DrawRespawnTimer(float y) {
 		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_BLUE)
 		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
+	else return y;
 
 	w = CG_DrawStrlen(str) * TINYCHAR_WIDTH;
 
@@ -1152,8 +1154,8 @@ static float CG_DrawEnemyTimer(float y) {
 
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) { 
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) { 
-			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
-				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+			//int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer : 
+			int period = (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
 
 			if (period > 0) { // prevent division by 0 for weird cases like limbtotime < 1000
 				seconds = msec / 1000;
@@ -1388,8 +1390,8 @@ static float CG_DrawProEnemyTimer(float y) {
 
 	if (cg_spawnTimer_set.integer != -1 && cgs.gamestate == GS_PLAYING && !cgs.clientinfo[cg.clientNum].shoutStatus) {
 		if (cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW)) {
-			int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer :
-				(cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
+			//int period = cg_spawnTimer_period.integer > 0 ? cg_spawnTimer_period.integer :
+			int period = (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED ? cg_bluelimbotime.integer / 1000 : cg_redlimbotime.integer / 1000);
 
 			if (period > 0) { // prevent division by 0 for weird cases like limbtotime < 1000
 				seconds = msec / 1000;
@@ -1700,7 +1702,11 @@ static void CG_DrawNotify( void ) {
 		notifytime = 100.0f;
 	}
 
-	chatHeight = NOTIFY_HEIGHT;
+	trap_Cvar_VariableStringBuffer("cg_notifyTextLines", var, sizeof(var));
+	chatHeight = atoi(var);
+	if (chatHeight > MAX_NOTIFY_HEIGHT) {
+		chatHeight = MAX_NOTIFY_HEIGHT;
+	}
 
 	if ( cgs.notifyLastPos != cgs.notifyPos ) {
 		if ( cg.time - cgs.notifyMsgTimes[cgs.notifyLastPos % chatHeight] > notifytime ) {
@@ -1866,6 +1872,8 @@ static void CG_DrawDisconnect( void ) {
 
 #define MAX_LAGOMETER_PING  900
 #define MAX_LAGOMETER_RANGE 300
+#define MAX_SPEEDMETER_SPEED 1024
+#define MAX_SPEEDMETER_RANGE 128
 
 /*
 ==============
@@ -1874,7 +1882,7 @@ CG_DrawLagometer
 */
 static void CG_DrawLagometer( void ) {
 	// RTCWPro
-	int a, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i;
+	int a = 0, x = cg_lagometerX.integer, y = cg_lagometerY.integer, i = 0;
 	float v;
 	float ax, ay, aw, ah, mid, range;
 	int color;
@@ -1913,45 +1921,46 @@ static void CG_DrawLagometer( void ) {
 	vscale = range / MAX_LAGOMETER_RANGE;
 
 	// rtcwpro - speed
-	if (cg_lagometer.integer > 1)
-	{
-		static vec_t speed;
+	a = 0;
+	if (cg_lagometer.integer > 1) { 
+		static vec_t speed, speedHistory[MAX_SPEEDMETER_RANGE];
 		float vscale2, range2, v2;
 		vec4_t color2;
+		int j = 0;
 
 		BG_ParseColorCvar("ltgrey", color2, 0.8);
 
-		speed = sqrt(cg.predictedPlayerState.velocity[0] * cg.predictedPlayerState.velocity[0] +
-			cg.predictedPlayerState.velocity[1] * cg.predictedPlayerState.velocity[1]);
+		speed = VectorLength(cg.predictedPlayerState.velocity);
 
-		if (speed != speed)
-		{
+		if (speed != speed) {
 			speed = 0;
 		}
 
 		range2 = ah;
-		vscale2 = range2 / 2048;
+		vscale2 = range2 / (cg_lagometer.integer * MAX_SPEEDMETER_SPEED);
 
-		for (a = 0; a < aw; a++)
-		{
-			v2 = speed;
+		for (j = MAX_SPEEDMETER_RANGE - 1; j > 0; j--) {
+			speedHistory[j] = speedHistory[j - 1];
+		}
 
-			if (v2 > 0)
-			{
+		speedHistory[0] = speed;
+
+		for (a = 0; a < aw; a++) {
+			v2 = speedHistory[a];
+
+			if (v2 > 0) {
 				trap_R_SetColor(color2);
 
 				v2 = v2 * vscale2;
-
-				if (v2 > range2)
-				{
-					v2 = range2;
-				}
+				v2 = (v2 > range2) ? range2 : v2;
 
 				trap_R_DrawStretchPic(ax + aw - a, ay + ah - v2, 1, v2, 0, 0, 0, 0, cgs.media.whiteShader);
 			}
 		}
 	}
+	// end
 
+	a = 0;
 	// draw the frame interpoalte / extrapolate graph
 	for ( a = 0 ; a < aw ; a++ ) {
 		i = ( lagometer.frameCount - 1 - a ) & ( LAG_SAMPLES - 1 );
@@ -1982,7 +1991,7 @@ static void CG_DrawLagometer( void ) {
 	// draw the snapshot latency / drop graph
 	range = ah / 2;
 	vscale = range / MAX_LAGOMETER_PING;
-
+	a = 0;
 	for ( a = 0 ; a < aw ; a++ ) {
 		i = ( lagometer.snapshotCount - 1 - a ) & ( LAG_SAMPLES - 1 );
 		v = lagometer.snapshotSamples[i];
@@ -2822,7 +2831,7 @@ void CG_DrawPlayerAmmo(float *color, int weapon, int playerAmmo, int playerAmmoC
 	const char* s;
 	float w;
 
-	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2) {
+	if (weapon == WP_GRENADE_PINEAPPLE || weapon == WP_GRENADE_LAUNCHER || weapon == WP_KNIFE || weapon == WP_KNIFE2 || weapon == WP_NONE) {
 		s = va("G:%i", playerNades);
 		w = CG_DrawStrlen(s) * TINYCHAR_WIDTH;
 		CG_DrawStringExt(320 - w / 2, 205, s, color, qfalse, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20);
@@ -3078,6 +3087,9 @@ static void CG_DrawVote( void ) {
 		s = va( CG_TranslateString( "YES(%s):%i, NO(%s):%i" ), str1, cgs.voteYes, str2, cgs.voteNo );
 		CG_DrawStringExt( 8, 214, s, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 60 );
 	} else {
+		s = va(CG_TranslateString("VOTE(%i):%s"), sec, cgs.voteString); //show the countdown and what the vote is for after voting
+		CG_DrawStringExt(8, 200, s, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 60);
+
 		s = va( CG_TranslateString( "Y:%i, N:%i" ), cgs.voteYes, cgs.voteNo );
 		CG_DrawStringExt( 8, 214, s, color, qtrue, qfalse, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 20 );
 	}
@@ -3534,11 +3546,15 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^1" ), sec + 1 );
-	if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
-	if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
-	if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
-	if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
-	if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
+
+	if (cg_announcer.integer)
+	{
+		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
+		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
+		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
+		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
+		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
+	}
 
 	w = CG_DrawStrlen( s );
 	CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );
@@ -4588,6 +4604,16 @@ static void CG_Draw2D( void ) {
 
 	if ( cg_draw2D.integer == 0) {
 		return;
+	}
+
+	if (cg.demoPlayback) {
+		if (cg_draw2D.integer == 2) {
+			CG_DrawCrosshair();
+			CG_DrawNotify();
+			CG_DrawCenterString();
+			CG_windowDraw();
+			return;
+		}
 	}
 
 	CG_ScreenFade();

@@ -98,6 +98,9 @@ cvar_t* sv_serverTimeReset;  // ET Legacy port reset svs.time on map load to fix
 
 cvar_t* sv_dropClientOnOverflow;
 
+cvar_t* sv_minRestartDelay;	// min. time before restart in hours
+cvar_t* sv_minRestartPlayers;	//min. in-game players to stop restarting the server
+int sv_lastMapChange = 0;
 // End RtcwPro
 
 void SVC_GameCompleteStatus( netadr_t from );       // NERVE - SMF
@@ -906,7 +909,7 @@ void SV_ConnectionlessPacket( netadr_t from, msg_t *msg ) {
 	MSG_ReadLong( msg );        // skip the -1 marker
 
 	if ( !Q_strncmp( "connect", &msg->data[4], 7 ) ) {
-		Huff_Decompress( msg, 12 );
+		DynHuff_Decompress( msg, 12 );
 	}
 
 	s = MSG_ReadStringLine( msg );
@@ -1165,6 +1168,54 @@ qboolean SV_CheckPaused( void ) {
 	return qtrue;
 }
 
+static void SV_IntegerOverflowShutDown(const char* msg)
+{
+	//Inform connected players why the server disconnected
+	SV_FinalMessage(msg, qtrue);
+	
+	if (Sys_HardReboot())
+		Com_Quit(1);
+
+	// save the map name in case it gets cleared during the shut down
+	char mapName[MAX_QPATH];
+	Q_strncpyz(mapName, Cvar_VariableString("mapname"), sizeof(mapName));
+
+	SV_Shutdown(msg);
+	Cbuf_AddText(va("map %s\n", mapName));
+}
+
+int SV_GetConnectedClients(void) {
+	int connectedClients = 0;
+	//clientSnapshot_t* frame;
+	client_t* cl;
+	playerState_t* ps;
+	int i;
+
+	for (i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++) {
+		if (!cl->state) {
+			continue;
+		}
+
+		if (cl->state < CS_CONNECTED) {
+			continue;
+		}
+
+		ps = SV_GameClientNum(i);
+
+		if (ps->persistant[PERS_TEAM] != TEAM_SPECTATOR && ps->persistant[PERS_TEAM] != TEAM_FREE) {
+			connectedClients++;
+		}
+
+		/*frame = &cl->frames[cl->netchan.outgoingSequence & PACKET_MASK];
+		if (frame->ps.persistant[PERS_TEAM] != TEAM_SPECTATOR) { //don't count spectators toward player count
+			connectedHumans++;
+		}*/
+	}
+
+	//Com_Printf("cc: %i\n", connectedClients);
+	return connectedClients;
+}
+
 /*
 ==================
 SV_Frame
@@ -1212,28 +1263,52 @@ void SV_Frame( int msec ) {
 		NET_Sleep( frameMsec - sv.timeResidual );
 		return;
 	}
+	qbool safeToRestart = qtrue;
+	int connectedHumans = SV_GetConnectedClients();
+	if (connectedHumans >= sv_minRestartPlayers->integer) { //don't restart if more than x players are in game
+		safeToRestart = qfalse;
+	}
 
-	// if time is about to hit the 32nd bit, kick all clients
-	// and clear sv.time, rather
-	// than checking for negative time wraparound everywhere.
-	// 2giga-milliseconds = 23 days, so it won't be too often
-	if ( svs.time > 0x70000000 ) {
-		Q_strncpyz( mapname, sv_mapname->string, MAX_QPATH );
-		SV_Shutdown( "Restarting server due to time wrapping" );
-		// TTimo
-		// show_bug.cgi?id=388
-		// there won't be a map_restart if you have shut down the server
-		// since it doesn't restart a non-running server
-		// instead, re-run the current map
-		Cbuf_AddText( va( "map %s\n", mapname ) );
+	for (int i = 0; i < sv_maxclients->integer; ++i) {
+		client_t* cl = &svs.clients[i];
+		if (cl->state >= CS_CONNECTED) {
+			const qbool isBot = (cl->netchan.remoteAddress.type == NA_BOT) || (cl->gentity && (cl->gentity->r.svFlags & SVF_BOT));
+			if (!isBot) {
+				if (cl->gentity) {				
+					if (cl->gentity->s.powerups & (1 << PW_READY)) { //don't restart if players are ready
+						safeToRestart = qfalse;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// The shader time is stored as a floating-point number.
+	// Some mods may still have code like "sin(cg.time / 1000.0f)".
+	// IEEE 754 floats have a 23-bit mantissa.
+	// Rounding errors will start after roughly ((1<<23) / (60*1000)) ~ 139.8 minutes.
+	// All timestamps here are in milli-seconds, like svs.time.
+	// Absolute max. time with signed 32-bits: 0x7FFFFFFF ms ~ 24.86 days.
+	const int maxRebootTime = 0x7FC9117F; // 1 hour before max. time
+	const int minRebootTime = 60 * 60 * 1000 * sv_minRestartDelay->integer;	// the cvar's unit is hours
+	const int minLastMapChange = Sys_Milliseconds() - (2 * 60 * 1000); // 2 min ago
+	if ((svs.time >= minRebootTime) && safeToRestart && (minLastMapChange >= sv_lastMapChange)) {
+		SV_IntegerOverflowShutDown("Restarting server early to avoid time wrapping and/or precision issues");
 		return;
 	}
+
+	// If the time is close to hitting the 32nd bit, kick all clients and clear svs.time
+	// rather than checking for negative time wraparound everywhere.
+	// No, resetting the time on map change like ioq3 does is not on the cards. It breaks stuff.
+	if (svs.time >= maxRebootTime) {
+		SV_IntegerOverflowShutDown("Restarting server due to time wrapping");
+		return;
+	}
+
 	// this can happen considerably earlier when lots of clients play and the map doesn't change
-	if ( svs.nextSnapshotEntities >= 0x7FFFFFFE - svs.numSnapshotEntities ) {
-		Q_strncpyz( mapname, sv_mapname->string, MAX_QPATH );
-		SV_Shutdown( "Restarting server due to numSnapshotEntities wrapping" );
-		// TTimo see above
-		Cbuf_AddText( va( "map %s\n", mapname ) );
+	if (svs.nextSnapshotEntities >= 0x7FFFFFFE - svs.numSnapshotEntities) {
+		SV_IntegerOverflowShutDown("Restarting server due to numSnapshotEntities wrapping");
 		return;
 	}
 

@@ -103,9 +103,6 @@ float   MSG_ReadAngle16( msg_t *sb );
 void    MSG_ReadData( msg_t *sb, void *buffer, int size );
 
 
-void MSG_WriteDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s *to );
-void MSG_ReadDeltaUsercmd( msg_t *msg, struct usercmd_s *from, struct usercmd_s *to );
-
 void MSG_WriteDeltaUsercmdKey( msg_t *msg, int key, usercmd_t *from, usercmd_t *to );
 void MSG_ReadDeltaUsercmdKey( msg_t *msg, int key, usercmd_t *from, usercmd_t *to );
 
@@ -117,8 +114,6 @@ void MSG_ReadDeltaEntity( msg_t *msg, entityState_t *from, entityState_t *to,
 void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct playerState_s *to );
 void MSG_ReadDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct playerState_s *to );
 
-
-void MSG_ReportChangeVectors_f( void );
 
 //============================================================================
 
@@ -747,6 +742,9 @@ int     FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );
 int     FS_Seek( fileHandle_t f, long offset, int origin );
 // seek on a file (doesn't work for zip files!!!!!!!!)
 
+qbool	FS_IsZipFile(fileHandle_t f);
+// tells us whether we opened a zip file
+
 qboolean FS_FilenameCompare( const char *s1, const char *s2 );
 
 const char *FS_GamePureChecksum( void );
@@ -817,14 +815,35 @@ Edit fields and command line history/completion
 
 #define MAX_EDIT_LINE   256
 typedef struct {
-	int cursor;
-	int scroll;
-	int widthInChars;
-	char buffer[MAX_EDIT_LINE];
+	char	buffer[MAX_EDIT_LINE];
+	int		cursor;
+	int		scroll;
+	int		widthInChars;
+	int		acOffset;		// auto-completion letter index with the leading slash present
+	int		acLength;		// auto-completion letter count
+	int		acStartArg;		// auto-completion command token index
+	int		acCompArg;		// auto-completion argument token index
 } field_t;
 
 void Field_Clear( field_t *edit );
 void Field_CompleteCommand( field_t *edit );
+
+#define COMMAND_HISTORY		32
+typedef struct {
+	field_t	commands[COMMAND_HISTORY];
+	int		next;		// the last line in the history buffer, not masked
+	int		display;	// the line being displayed from history buffer
+	// will be <= nextHistoryLine
+} history_t;
+
+void History_Clear(history_t* history, int width);
+void History_SaveCommand(history_t* history, const field_t* edit);
+void History_GetPreviousCommand(field_t* edit, history_t* history);
+void History_GetNextCommand(field_t* edit, history_t* history, int width);
+void History_LoadFromFile(history_t* history);
+void History_SaveToFile(const history_t* history);
+
+const char* Q_itohex(uint64_t number, qbool uppercase, qbool prefix);
 
 /*
 ==============================================================
@@ -868,7 +887,6 @@ void        Com_EndRedirect( void );
 void QDECL Com_Printf( const char *fmt, ... );
 void QDECL Com_DPrintf( const char *fmt, ... );
 void QDECL Com_Error( int code, const char *fmt, ... );
-void        Com_Quit_f( void );
 int         Com_EventLoop( void );
 int         Com_Milliseconds( void );   // will be journaled properly
 unsigned    Com_BlockChecksum( const void *buffer, int length );
@@ -878,6 +896,7 @@ int         Com_Filter( char *filter, char *name, int casesensitive );
 int         Com_FilterPath( char *filter, char *name, int casesensitive );
 int         Com_RealTime( qtime_t *qtime );
 qboolean    Com_SafeMode( void );
+const char* Com_FormatBytes(uint64_t numBytes);
 
 void        Com_StartupVariable( const char *match );
 void        Com_SetRecommended();
@@ -885,6 +904,7 @@ void        Com_SetRecommended();
 // if match is NULL, all set commands will be executed, otherwise
 // only a set with the exact name.  Only used during startup.
 
+void		Com_Quit(int status);
 
 extern cvar_t  *com_developer;
 extern cvar_t  *com_dedicated;
@@ -1148,7 +1168,7 @@ void    *Sys_GetBotLibAPI( void *parms );
 char    *Sys_GetCurrentUser( void );
 
 void QDECL Sys_Error( const char *error, ... );
-void    Sys_Quit( void );
+void    Sys_Quit( int status );
 char    *Sys_GetClipboardData( void );  // note that this isn't journaled...
 
 void    Sys_Print( const char *msg );
@@ -1157,6 +1177,11 @@ void    Sys_Print( const char *msg );
 // Sys_Milliseconds should only be used for profiling purposes,
 // any game related timing information should come from event timestamps
 int     Sys_Milliseconds( void );
+
+qbool	Sys_HardReboot(); // qtrue when the server can restart itself
+
+qbool	Sys_HasRtcwProParent();					// qtrue if a child of RtcwPro
+int		Sys_GetUptimeSeconds(qbool parent);	// negative if not available
 
 void    Sys_SnapVector( float *v );
 
@@ -1220,54 +1245,40 @@ int Sys_GetHighQualityCPU();
 void Sys_Chmod( char *file, int mode );
 #endif
 
-/* This is based on the Adaptive Huffman algorithm described in Sayood's Data
- * Compression book.  The ranks are not actually stored, but implicitly defined
- * by the location of a node within a doubly-linked list */
+#define RTCWPRO_WINDOWS_EXCEPTION_CODE 0xDEADBEEF
 
-#define NYT HMAX                    /* NYT = Not Yet Transmitted */
-#define INTERNAL_NODE ( HMAX + 1 )
+#define DIE(Message) Sys_Crash(Message, __FILE__, __LINE__, __FUNCTION__)
 
-typedef struct nodetype {
-	struct  nodetype *left, *right, *parent; /* tree structure */
-	struct  nodetype *next, *prev; /* doubly-linked list */
-	struct  nodetype **head; /* highest ranked node in block */
-	int weight;
-	int symbol;
-} node_t;
+#if defined(_MSC_VER)
+#define ASSERT_OR_DIE(Condition, Message) \
+	do { \
+		if (!(Condition)) { \
+			if (Sys_IsDebuggerAttached()) \
+				__debugbreak(); \
+			else \
+				Sys_Crash(Message, __FILE__, __LINE__, __FUNCTION__); \
+		} \
+	} while (false)
+#else
+#define ASSERT_OR_DIE(Condition, Message) \
+	do { \
+		if (!(Condition)) \
+			Sys_Crash(Message, __FILE__, __LINE__, __FUNCTION__); \
+	} while (false)
+#endif
 
-#define HMAX 256 /* Maximum symbol */
 
-typedef struct {
-	int blocNode;
-	int blocPtrs;
+// huffman.cpp - id's original code
+// used for out-of-band (OOB) datagrams with dynamically created trees
+void DynHuff_Compress(msg_t* buf, int offset);
+void DynHuff_Decompress(msg_t* buf, int offset);
 
-	node_t*     tree;
-	node_t*     lhead;
-	node_t*     ltail;
-	node_t*     loc[HMAX + 1];
-	node_t**    freelist;
-
-	node_t nodeList[768];
-	node_t*     nodePtrs[768];
-} huff_t;
-
-typedef struct {
-	huff_t compressor;
-	huff_t decompressor;
-} huffman_t;
-
-void    Huff_Compress( msg_t *buf, int offset );
-void    Huff_Decompress( msg_t *buf, int offset );
-void    Huff_Init( huffman_t *huff );
-void    Huff_addRef( huff_t* huff, byte ch );
-int     Huff_Receive( node_t *node, int *ch, byte *fin );
-void    Huff_transmit( huff_t *huff, int ch, byte *fout );
-void    Huff_offsetReceive( node_t *node, int *ch, byte *fin, int *offset );
-void    Huff_offsetTransmit( huff_t *huff, int ch, byte *fout, int *offset );
-void    Huff_putBit( int bit, byte *fout, int *offset );
-int     Huff_getBit( byte *fout, int *offset );
-
-extern huffman_t clientHuffTables;
+// huffman_static.cpp - new CNQ3 code
+// used for every other case with a predefined static tree
+int StatHuff_ReadBit(byte* buffer, int bitIndex);                 // returns the bit read
+void StatHuff_WriteBit(int bit, byte* buffer, int bitIndex);
+int StatHuff_ReadSymbol(int* symbol, byte* buffer, int bitIndex); // returns the number of bits read
+int StatHuff_WriteSymbol(int symbol, byte* buffer, int bitIndex); // returns the number of bits written
 
 #define SV_ENCODE_START     4
 #define SV_DECODE_START     12
@@ -1351,6 +1362,13 @@ extern huffman_t clientHuffTables;
 #define RKVALD_TIME_PING_L  40000
 #define RKVALD_TIME_PING_S  20000
 #define RKVALD_TIME_OFF     -1
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+//#define Q_assert(Cond) do { if(!(Cond)) { if(Sys_IsDebuggerAttached()) __debugbreak(); else assert((Cond)); } } while(0)
+#define Q_assert(Cond)
+#else
+#define Q_assert(Cond)
+#endif
 
 #endif // _QCOMMON_H_
 

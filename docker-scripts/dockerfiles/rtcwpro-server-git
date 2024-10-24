@@ -1,0 +1,31 @@
+
+ARG IMAGE
+FROM ${IMAGE} as image
+
+FROM ubuntu:22.04
+
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y wget libc6:i386 unzip bbe git 
+
+RUN useradd -ms /bin/bash game
+
+USER game
+WORKDIR /home/game
+
+RUN mkdir /home/game/main
+COPY --chown=game:game --from="msh100/rtcw" /home/game/main /home/game/main
+COPY --chown=game:game build/. /home/game
+
+RUN git clone --depth 1 "https://github.com/msh100/rtcw-config.git" \
+    /home/game/settings/
+
+COPY --chown=game:game scripts/entrypoint.sh /home/game/start
+RUN chmod +x /home/game/start
+
+EXPOSE 27960/udp
+
+ENTRYPOINT ["/home/game/start"]

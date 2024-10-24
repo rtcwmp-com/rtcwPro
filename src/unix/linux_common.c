@@ -38,6 +38,7 @@ If you have questions concerning this license or the applicable additional terms
  */
 
 #include <unistd.h>   // AH - for size_t
+#include <string.h>
 
 // bk001207 - we need something under Linux, too. Mac?
 #if 1 // defined(C_ONLY) // bk010102 - dedicated?

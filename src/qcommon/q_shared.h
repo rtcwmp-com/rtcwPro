@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
-#define Q3_VERSION      "RtcwPro 1.3.0.17"  // RTCWPro
+#define Q3_VERSION      "RtcwPro 1.4.0.2"  // RTCWPro
 
 // 1.41b-MP: fix autodl sploit
 // 1.4-MP : (== 1.34)
@@ -120,7 +120,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #ifndef ID_INLINE
 #if defined(NDEBUG) || defined(_WIN32)
-#define ID_INLINE __inline
+#define ID_INLINE static __inline
 #else
 #define ID_INLINE
 #endif
@@ -164,6 +164,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #define PATH_SEP '\\'
 
+#endif
+
+#if defined(_MSC_VER)
+#include <sal.h>
+#define PRINTF_FORMAT_STRING _Printf_format_string_
+#else
+#define PRINTF_FORMAT_STRING
 #endif
 
 //======================= MAC OS X SERVER DEFINES =====================
@@ -287,6 +294,12 @@ static inline float idSqrt( float x ) {
 typedef unsigned char byte;
 
 typedef enum {qfalse, qtrue}    qboolean;
+typedef qboolean qbool;
+
+typedef unsigned char      uint8_t;
+typedef unsigned short     uint16_t;
+typedef unsigned int       uint32_t;
+typedef unsigned long long uint64_t;
 
 typedef int qhandle_t;
 typedef int sfxHandle_t;
@@ -435,8 +448,8 @@ void Snd_Memset( void* dest, const int val, const size_t count );
 #define Snd_Memset Com_Memset
 #endif
 
-void Com_Memset( void* dest, const int val, const size_t count );
-void Com_Memcpy( void* dest, const void* src, const size_t count );
+#define Com_Memset memset
+#define Com_Memcpy memcpy
 
 #define CIN_system  1
 #define CIN_loop    2
@@ -1226,7 +1239,7 @@ typedef enum
 #define MAX_WEAPONS             64  // (SA) and yet more!
 
 // Ridah, increased this
-//#define	MAX_PS_EVENTS			2
+#define	MAX_PS_EVENTS			2
 // ACK: I'd really like to make this 4, but that seems to cause network problems
 #define MAX_EVENTS              4   // max events per frame before we drop events
 //#define	MAX_EVENTS				2	// max events per frame before we drop events
@@ -1746,7 +1759,7 @@ typedef enum {
 
 // Indicates if client is connected or not.
 // Deals with Bloom issues as well as just identifying if extra stuff should be ran..
-qboolean clientIsConnected;
+extern qboolean clientIsConnected;
 
 #if defined(_WIN32) || defined(_WIN64)
 /* We are on Windows */
