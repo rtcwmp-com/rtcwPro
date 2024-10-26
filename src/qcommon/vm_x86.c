@@ -73,10 +73,21 @@ AsmCall
 =================
 */
 #ifdef _WIN32
-__declspec( naked ) void AsmCall( void ) {
 	static int programStack;
 	static int     *opStack;
 	static int syscallNum;
+void callAsmCall( void ) {
+
+	// save the stack to allow recursive VM entry
+	currentVM->programStack = programStack - 4;
+	*( int * )( (byte *)currentVM->dataBase + programStack + 4 ) = syscallNum;
+//VM_LogSyscalls(  (int *)((byte *)currentVM->dataBase + programStack + 4) );
+	*( opStack + 1 ) = currentVM->systemCall( ( int * )( (byte *)currentVM->dataBase + programStack + 4 ) );
+
+}
+
+__declspec( naked ) void AsmCall( void ) {
+
 
 	__asm {
 		mov eax, dword ptr [edi]
@@ -102,13 +113,8 @@ systemCall:
 		push ecx
 		push esi                        // we may call recursively, so the
 		push edi                        // statics aren't guaranteed to be around
+		call callAsmCall
 	}
-
-	// save the stack to allow recursive VM entry
-	currentVM->programStack = programStack - 4;
-	*( int * )( (byte *)currentVM->dataBase + programStack + 4 ) = syscallNum;
-//VM_LogSyscalls(  (int *)((byte *)currentVM->dataBase + programStack + 4) );
-	*( opStack + 1 ) = currentVM->systemCall( ( int * )( (byte *)currentVM->dataBase + programStack + 4 ) );
 
 	_asm {
 		pop edi

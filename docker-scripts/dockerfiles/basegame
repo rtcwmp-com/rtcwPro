@@ -1,0 +1,30 @@
+FROM ubuntu:22.04 AS basegame
+
+ENV DEBIAN_FRONTEND noninteractive
+
+ARG STEAM_USER
+ARG STEAM_PASS
+ARG GUARDCODE
+
+RUN : "${STEAM_USER:?STEAM_USER is required.}"
+RUN : "${STEAM_PASS:?STEAM_PASS is required.}"
+
+RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \
+    echo steam steam/license note '' | debconf-set-selections
+
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y steamcmd wget unzip
+
+RUN /usr/games/steamcmd \
+    +@sSteamCmdForcePlatformType windows \
+    +force_install_dir /gamefiles/ \
+    +login "${STEAM_USER}" "${STEAM_PASS}" "${GUARDCODE}" \
+    +app_update 9010 \
+    +quit
+
+RUN mkdir -p /output/main/ && \
+    cp /gamefiles/Main/mp_*.pk3 /output/main/ && \
+    cp /gamefiles/Main/pak0.pk3 /output/main/
+

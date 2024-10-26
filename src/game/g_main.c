@@ -305,6 +305,8 @@ vmCvar_t g_playPauseMusic; // play music during pause
 vmCvar_t g_floatPlayerPosition;
 vmCvar_t g_delagHitscan;
 vmCvar_t g_maxExtrapolatedFrames;
+vmCvar_t g_maxLagCompensation;
+vmCvar_t g_delagMissiles;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -504,7 +506,7 @@ cvarTable_t gameCvarTable[] = {
 	{ &vote_allow_knifeonly,	"vote_allow_knifeonly", "1", 0, 0, qfalse, qfalse },
 
 	// RTCWPro
-	{ &g_screenShake, "g_screenShake", "4", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_screenShake, "g_screenShake", "100", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_antiWarp, "g_antiWarp", "0", CVAR_LATCH, qtrue },
 	{ &refereePassword, "refereePassword", "none", CVAR_ARCHIVE, 0, qfalse },
 	{ &shoutcastPassword, "shoutcastPassword", "none", CVAR_ARCHIVE, 0, qfalse },
@@ -557,7 +559,9 @@ cvarTable_t gameCvarTable[] = {
 
 	// unlagged
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
-	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse }
+	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse },
+	{ &g_maxLagCompensation, "g_maxLagCompensation", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_delagMissiles, "g_delagMissiles", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -635,7 +639,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 0;
 
 	case G_RETURN_API_QUERY_RESPONSE:
-		trap_HandleApiResponse(arg0, (char*)arg1);
+		trap_HandleApiResponse(arg0, (char*)arg1, arg2);
 		return 0;
 	}
 
@@ -1443,8 +1447,8 @@ LoadMapList
 */
 void LoadMapList(void)
 {
-	char maps[MAX_MAPCONFIGSTRINGS];
-	char noext[MAX_QPATH];
+	char maps[MAX_MAPCONFIGSTRINGS] = {'\0'};
+	char noext[MAX_QPATH] = {'\0'};
 	int i;
 
 	level.mapcount = trap_FS_GetFileList("maps", ".bsp", maps, sizeof(maps));
@@ -1508,6 +1512,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	srand( randomSeed );
+
+	//load a file inside the pk3s to become referenced paks for pure check
+	trap_FS_FOpenFile("rtcwpro_models.dat", &i, FS_READ);
+	trap_FS_FCloseFile(i);
+
+	trap_FS_FOpenFile("rtcwpro_assets.dat", &i, FS_READ);
+	trap_FS_FCloseFile(i);
 
 	G_RegisterCvars();
 
@@ -3563,7 +3574,9 @@ void G_RunFrame( int levelTime ) {
 		) {
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
-				G_RunMissile( ent );
+				if (g_antilag.integer != 2 || g_delagMissiles.integer == 0) {
+					G_RunMissile(ent);
+				}
 			} else {
 				// During a pause, gotta keep track of stuff in the air
 				ent->s.pos.trTime += level.time - level.previousTime;
@@ -3612,7 +3625,7 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, move the AI
 	//AICast_StartServerFrame ( level.time );
 
-	if (g_antilag.integer == 2) // unlagged
+	if (g_antilag.integer == 2 && g_delagMissiles.integer == 1) // unlagged
 	{
 		//unlagged - backward reconciliation #2
 		// NOW run the missiles, with all players backward-reconciled
@@ -3631,7 +3644,7 @@ void G_RunFrame( int levelTime ) {
 				continue;
 			}
 
-			if (ent->s.eType == ET_MISSILE) {
+			if (level.paused == PAUSE_NONE && ent->s.eType == ET_MISSILE) {
 				G_RunMissile(ent);
 			}
 		}
@@ -3641,11 +3654,11 @@ void G_RunFrame( int levelTime ) {
 	}
 
 	end = trap_Milliseconds();
-
+  
 	start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];
-	for ( i = 0 ; i < level.maxclients ; i++, ent++ ) {
+	for (i=0 ; i < level.maxclients ; i++, ent++ ) {
 		if ( ent->inuse ) {
 			ClientEndFrame( ent );
 		}

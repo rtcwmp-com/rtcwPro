@@ -34,7 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "qcommon.h"
 #ifndef  DEDICATED
 #include "md5.h"
-#endif // ! DEDICATED
+#else // ! DEDICATED
+#include "../server/server.h"
+#endif
 #include <setjmp.h>
 #ifndef  _WIN32
 #include <stdint.h>
@@ -88,10 +90,6 @@ cvar_t  *com_introPlayed;
 cvar_t  *cl_paused;
 cvar_t  *sv_paused;
 cvar_t  *com_cameraMode;
-#ifdef _WIN32
-// new stuff for iortcw port of server defined dl rates
-cvar_t  *sv_dlRate;
-#endif
 cvar_t	*com_unfocused;
 cvar_t	*com_maxfpsUnfocused;
 cvar_t	*com_minimized;
@@ -109,6 +107,8 @@ cvar_t  *cl_notebook;
 
 cvar_t  *com_hunkused;      // Ridah
 
+static cvar_t* con_history;
+
 // com_speeds times
 int time_game;
 int time_frontend;          // renderer frontend time
@@ -125,6 +125,7 @@ char com_errorMessage[MAXPRINTMSG];
 
 void Com_WriteConfig_f( void );
 void CIN_CloseAllVideos();
+qboolean clientIsConnected = qfalse;
 
 //============================================================================
 
@@ -364,18 +365,35 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Quit_f( void ) {
+
+void Com_Quit(int status)
+{
+/* TODO: Save & restore history
+#ifndef DEDICATED
+	// note that cvar_modifiedFlags's CVAR_ARCHIVE bit is set when a bind is modified
+	if (com_frameNumber > 0 && (cvar_modifiedFlags & CVAR_ARCHIVE) != 0)
+		Com_WriteConfigToFile("q3config.cfg", qfalse);
+#endif
+	Sys_SaveHistory();
+*/
 	// don't try to shutdown if we are in a recursive error
 	if ( !com_errorEntered ) {
-		SV_Shutdown( "Server quit\n" );
+		SV_Shutdown("Server quit");
+#ifndef DEDICATED
 		CL_Shutdown();
+#endif
 		Com_Shutdown();
 		FS_Shutdown( qtrue );
 	}
-	Sys_Quit();
+
+	Sys_Quit(status);
 }
 
 
+static void Com_Quit_f(void)
+{
+	Com_Quit(0);
+}
 
 /*
 ============================================================================
@@ -2516,7 +2534,7 @@ void Com_SetRecommended() {
 	// will use this for recommended settings as well.. do i outside the lower check so it gets done even with command line stuff
 	cv = Cvar_Get( "r_highQualityVideo", "1", CVAR_ARCHIVE );
 	goodVideo = ( cv && cv->integer );
-	goodCPU = Sys_GetHighQualityCPU();
+	goodCPU = qtrue;
 
 	if ( goodVideo && goodCPU ) {
 		Com_Printf( "Found high quality video and CPU\n" );
@@ -2642,9 +2660,6 @@ void Com_Init( char *commandLine ) {
 	com_maxfpsMinimized = Cvar_Get( "com_maxfpsMinimized", "0", CVAR_ARCHIVE );
 	com_abnormalExit = Cvar_Get( "com_abnormalExit", "0", CVAR_ROM );
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
-	#ifdef _WIN32
-	    sv_dlRate = Cvar_Get ("sv_dlRate", "100", CVAR_ARCHIVE);
-	#endif
 
 	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
 	cl_paused = Cvar_Get( "cl_paused", "0", CVAR_ROM );
@@ -2675,7 +2690,6 @@ void Com_Init( char *commandLine ) {
 		Cmd_AddCommand( "freeze", Com_Freeze_f );
 	}
 	Cmd_AddCommand( "quit", Com_Quit_f );
-	Cmd_AddCommand( "changeVectors", MSG_ReportChangeVectors_f );
 	Cmd_AddCommand( "writeconfig", Com_WriteConfig_f );
 
 	s = va( "%s %s %s", Q3_VERSION, CPUSTRING, __DATE__ );
@@ -3505,314 +3519,6 @@ void Com_Shutdown( void ) {
 #endif
 }
 
-#if !( defined __linux__ || defined __FreeBSD__ )  // r010123 - include FreeBSD
-#if ( ( !id386 ) && ( !defined __i386__ ) ) // rcg010212 - for PPC
-
-void Com_Memcpy( void* dest, const void* src, const size_t count ) {
-	memcpy( dest, src, count );
-}
-
-void Com_Memset( void* dest, const int val, const size_t count ) {
-	memset( dest, val, count );
-}
-
-#else
-
-typedef enum
-{
-	PRE_READ,                                   // prefetch assuming that buffer is used for reading only
-	PRE_WRITE,                                  // prefetch assuming that buffer is used for writing only
-	PRE_READ_WRITE                              // prefetch assuming that buffer is used for both reading and writing
-} e_prefetch;
-
-void Com_Prefetch( const void *s, const unsigned int bytes, e_prefetch type );
-
-#define EMMS_INSTRUCTION    __asm emms
-
-void _copyDWord( unsigned int* dest, const unsigned int constant, const unsigned int count ) {
-	__asm
-	{
-		mov edx,dest
-		mov eax,constant
-		mov ecx,count
-		and     ecx,~7
-		jz padding
-		sub ecx,8
-		jmp loopu
-		align   16
-loopu:
-		test    [edx + ecx * 4 + 28],ebx        // fetch next block destination to L1 cache
-		mov     [edx + ecx * 4 + 0],eax
-		mov     [edx + ecx * 4 + 4],eax
-		mov     [edx + ecx * 4 + 8],eax
-		mov     [edx + ecx * 4 + 12],eax
-		mov     [edx + ecx * 4 + 16],eax
-		mov     [edx + ecx * 4 + 20],eax
-		mov     [edx + ecx * 4 + 24],eax
-		mov     [edx + ecx * 4 + 28],eax
-		sub ecx,8
-		jge loopu
-padding:    mov ecx,count
-		mov ebx,ecx
-		and     ecx,7
-		jz outta
-		and     ebx,~7
-		lea edx,[edx + ebx * 4]                 // advance dest pointer
-		test    [edx + 0],eax                   // fetch destination to L1 cache
-		cmp ecx,4
-		jl skip4
-		mov     [edx + 0],eax
-		mov     [edx + 4],eax
-		mov     [edx + 8],eax
-		mov     [edx + 12],eax
-		add edx,16
-		sub ecx,4
-skip4:      cmp ecx,2
-		jl skip2
-		mov     [edx + 0],eax
-		mov     [edx + 4],eax
-		add edx,8
-		sub ecx,2
-skip2:      cmp ecx,1
-		jl outta
-		mov     [edx + 0],eax
-outta:
-	}
-}
-
-// optimized memory copy routine that handles all alignment
-// cases and block sizes efficiently
-void Com_Memcpy( void* dest, const void* src, const size_t count ) {
-	Com_Prefetch( src, count, PRE_READ );
-	__asm
-	{
-		push edi
-		push esi
-		mov ecx,count
-		cmp ecx,0                           // count = 0 check (just to be on the safe side)
-		je outta
-		mov edx,dest
-		mov ebx,src
-		cmp ecx,32                          // padding only?
-		jl padding
-
-		mov edi,ecx
-		and     edi,~31                 // edi = count&~31
-		sub edi,32
-
-		align 16
-loopMisAligned:
-		mov eax,[ebx + edi + 0 + 0 * 8]
-		mov esi,[ebx + edi + 4 + 0 * 8]
-		mov     [edx + edi + 0 + 0 * 8],eax
-		mov     [edx + edi + 4 + 0 * 8],esi
-		mov eax,[ebx + edi + 0 + 1 * 8]
-		mov esi,[ebx + edi + 4 + 1 * 8]
-		mov     [edx + edi + 0 + 1 * 8],eax
-		mov     [edx + edi + 4 + 1 * 8],esi
-		mov eax,[ebx + edi + 0 + 2 * 8]
-		mov esi,[ebx + edi + 4 + 2 * 8]
-		mov     [edx + edi + 0 + 2 * 8],eax
-		mov     [edx + edi + 4 + 2 * 8],esi
-		mov eax,[ebx + edi + 0 + 3 * 8]
-		mov esi,[ebx + edi + 4 + 3 * 8]
-		mov     [edx + edi + 0 + 3 * 8],eax
-		mov     [edx + edi + 4 + 3 * 8],esi
-		sub edi,32
-		jge loopMisAligned
-
-		mov edi,ecx
-		and     edi,~31
-		add ebx,edi                     // increase src pointer
-		add edx,edi                     // increase dst pointer
-		and     ecx,31                  // new count
-		jz outta                        // if count = 0, get outta here
-
-padding:
-		cmp ecx,16
-		jl skip16
-		mov eax,dword ptr [ebx]
-		mov dword ptr [edx],eax
-		mov eax,dword ptr [ebx + 4]
-		mov dword ptr [edx + 4],eax
-		mov eax,dword ptr [ebx + 8]
-		mov dword ptr [edx + 8],eax
-		mov eax,dword ptr [ebx + 12]
-		mov dword ptr [edx + 12],eax
-		sub ecx,16
-		add ebx,16
-		add edx,16
-skip16:
-		cmp ecx,8
-		jl skip8
-		mov eax,dword ptr [ebx]
-		mov dword ptr [edx],eax
-		mov eax,dword ptr [ebx + 4]
-		sub ecx,8
-		mov dword ptr [edx + 4],eax
-		add ebx,8
-		add edx,8
-skip8:
-		cmp ecx,4
-		jl skip4
-		mov eax,dword ptr [ebx]     // here 4-7 bytes
-		add ebx,4
-		sub ecx,4
-		mov dword ptr [edx],eax
-		add edx,4
-skip4:                          // 0-3 remaining bytes
-		cmp ecx,2
-		jl skip2
-		mov ax,word ptr [ebx]       // two bytes
-		cmp ecx,3                   // less than 3?
-		mov word ptr [edx],ax
-		jl outta
-		mov al,byte ptr [ebx + 2]   // last byte
-		mov byte ptr [edx + 2],al
-		jmp outta
-skip2:
-		cmp ecx,1
-		jl outta
-		mov al,byte ptr [ebx]
-		mov byte ptr [edx],al
-outta:
-		pop esi
-		pop edi
-	}
-}
-
-void Com_Memset( void* dest, const int val, const size_t count ) {
-	unsigned int fillval;
-
-	if ( count < 8 ) {
-		__asm
-		{
-			mov edx,dest
-			mov eax, val
-			mov ah,al
-			mov ebx,eax
-			and     ebx, 0xffff
-			shl eax,16
-			add eax,ebx                 // eax now contains pattern
-			mov ecx,count
-			cmp ecx,4
-			jl skip4
-			mov     [edx],eax           // copy first dword
-			add edx,4
-			sub ecx,4
-skip4:  cmp ecx,2
-			jl skip2
-			mov word ptr [edx],ax       // copy 2 bytes
-			add edx,2
-			sub ecx,2
-skip2:  cmp ecx,0
-			je skip1
-			mov byte ptr [edx],al       // copy single byte
-skip1:
-		}
-		return;
-	}
-
-	fillval = val;
-
-	fillval = fillval | ( fillval << 8 );
-	fillval = fillval | ( fillval << 16 );        // fill dword with 8-bit pattern
-
-	_copyDWord( (unsigned int*)( dest ),fillval, count / 4 );
-
-	__asm                                   // padding of 0-3 bytes
-	{
-		mov ecx,count
-		mov eax,ecx
-		and     ecx,3
-		jz skipA
-		and     eax,~3
-		mov ebx,dest
-		add ebx,eax
-		mov eax,fillval
-		cmp ecx,2
-		jl skipB
-		mov word ptr [ebx],ax
-		cmp ecx,2
-		je skipA
-		mov byte ptr [ebx + 2],al
-		jmp skipA
-skipB:
-		cmp ecx,0
-		je skipA
-		mov byte ptr [ebx],al
-skipA:
-	}
-}
-
-qboolean Com_Memcmp( const void *src0, const void *src1, const unsigned int count ) {
-	unsigned int i;
-	// MMX version anyone?
-
-	if ( count >= 16 ) {
-		unsigned int *dw = (unsigned int*)( src0 );
-		unsigned int *sw = (unsigned int*)( src1 );
-
-		unsigned int nm2 = count / 16;
-		for ( i = 0; i < nm2; i += 4 )
-		{
-			unsigned int tmp = ( dw[i + 0] - sw[i + 0] ) | ( dw[i + 1] - sw[i + 1] ) |
-							   ( dw[i + 2] - sw[i + 2] ) | ( dw[i + 3] - sw[i + 3] );
-			if ( tmp ) {
-				return qfalse;
-			}
-		}
-	}
-	if ( count & 15 ) {
-		byte *d = (byte*)src0;
-		byte *s = (byte*)src1;
-		for ( i = count & 0xfffffff0; i < count; i++ )
-			if ( d[i] != s[i] ) {
-				return qfalse;
-			}
-	}
-
-	return qtrue;
-}
-
-void Com_Prefetch( const void *s, const unsigned int bytes, e_prefetch type ) {
-	// write buffer prefetching is performed only if
-	// the processor benefits from it. Read and read/write
-	// prefetching is always performed.
-
-	switch ( type )
-	{
-	case PRE_WRITE: break;
-	case PRE_READ:
-	case PRE_READ_WRITE:
-
-		__asm
-		{
-			mov ebx,s
-			mov ecx,bytes
-			cmp ecx,4096                    // clamp to 4kB
-			jle skipClamp
-			mov ecx,4096
-skipClamp:
-			add ecx,0x1f
-			shr ecx,5                       // number of cache lines
-			jz skip
-			jmp loopie
-
-			align 16
-loopie: test byte ptr [ebx],al
-			add ebx,32
-			dec ecx
-			jnz loopie
-skip:
-		}
-
-		break;
-	}
-}
-
-#endif
-#endif // bk001208 - memset/memcpy assembly, Q_acos needed (RC4)
 //------------------------------------------------------------------------
 
 
@@ -3997,6 +3703,214 @@ void Field_CompleteCommand( field_t *field ) {
 	Cmd_CommandCompletion( PrintMatches );
 	Cvar_CommandCompletion( PrintMatches );
 }
+
+/* TODO: finish command history save/restore */
+void History_Clear(history_t* history, int width)
+{
+	for (int i = 0; i < COMMAND_HISTORY; ++i) {
+		Field_Clear(&history->commands[i]);
+		history->commands[i].widthInChars = width;
+	}
+}
+
+
+static int LengthWithoutTrailingWhitespace(const char* s)
+{
+	int i = (int)strlen(s);
+	while (i--) {
+		if (s[i] != ' ' && s[i] != '\t')
+			return i + 1;
+	}
+
+	return 0;
+}
+
+
+void History_SaveCommand(history_t* history, const field_t* edit)
+{
+	// Avoid having the same command twice in a row.
+	// Unfortunately, this has to be case sensitive since case might matter for some commands.
+	if (history->next > 0) {
+		// The real proper way to ignore whitespace is to tokenize both strings and compare the
+		// argument count and then each argument with a case sensitive comparison,
+		// but there's only one tokenizer data instance...
+		// Instead, we only ignore the trailing whitespace.
+		const int lengthCur = LengthWithoutTrailingWhitespace(edit->buffer);
+		if (lengthCur == 0) {
+			history->display = history->next;
+			return;
+		}
+
+		const int prevLine = (history->next - 1) % COMMAND_HISTORY;
+		const int lengthPrev = LengthWithoutTrailingWhitespace(history->commands[prevLine].buffer);
+		if (lengthCur == lengthPrev && strncmp(edit->buffer, history->commands[prevLine].buffer, lengthCur) == 0) {
+			history->display = history->next;
+			return;
+		}
+	}
+
+	// copy the line
+	history->commands[history->next % COMMAND_HISTORY] = *edit;
+	++history->next;
+	history->display = history->next;
+}
+
+
+void History_GetPreviousCommand(field_t* edit, history_t* history)
+{
+	if (history->next - history->display < COMMAND_HISTORY && history->display > 0)
+		--history->display;
+	*edit = history->commands[history->display % COMMAND_HISTORY];
+}
+
+
+void History_GetNextCommand(field_t* edit, history_t* history, int width)
+{
+	++history->display;
+	if (history->display < history->next) {
+		*edit = history->commands[history->display % COMMAND_HISTORY];
+		return;
+	}
+
+	history->display = history->next;
+	Field_Clear(edit);
+	edit->widthInChars = width;
+}
+
+
+// It makes no sense for both executables to share the same command history.
+#if defined(DEDICATED)
+#define HISTORY_PATH "rtcwprosvcmdhistory"
+#else
+#define HISTORY_PATH "rtcwprocmdhistory"
+#endif
+
+
+void History_LoadFromFile(history_t* history)
+{
+	fileHandle_t f;
+	FS_FOpenFileRead(HISTORY_PATH, &f, qfalse);
+	if (f == 0)
+		return;
+
+	int count;
+	if (FS_Read(&count, sizeof(int), f) != sizeof(int) ||
+		count <= 0 ||
+		count > COMMAND_HISTORY) {
+		FS_FCloseFile(f);
+		return;
+	}
+
+	int lengths[COMMAND_HISTORY];
+	const int lengthBytes = sizeof(int) * count;
+	if (FS_Read(lengths, lengthBytes, f) != lengthBytes) {
+		FS_FCloseFile(f);
+		return;
+	}
+
+	for (int i = 0; i < count; ++i) {
+		const int l = lengths[i];
+		if (l <= 0 ||
+			FS_Read(history->commands[i].buffer, l, f) != l) {
+			FS_FCloseFile(f);
+			return;
+		}
+		history->commands[i].buffer[l] = '\0';
+		history->commands[i].cursor = l;
+	}
+
+	history->next = count;
+	history->display = count;
+	const int totalCount = ARRAY_LEN(history->commands);
+	for (int i = count; i < totalCount; ++i) {
+		history->commands[i].buffer[0] = '\0';
+	}
+
+	FS_FCloseFile(f);
+}
+
+
+void History_SaveToFile(const history_t* history)
+{
+	if (con_history->integer == 0)
+		return;
+
+	const fileHandle_t f = FS_FOpenFileWrite(HISTORY_PATH);
+	if (f == 0)
+		return;
+
+	int count = 0;
+	int lengths[COMMAND_HISTORY];
+	const int totalCount = ARRAY_LEN(history->commands);
+	for (int i = 0; i < totalCount; ++i) {
+		const char* const s = history->commands[(history->display + i) % COMMAND_HISTORY].buffer;
+		if (*s == '\0')
+			continue;
+
+		lengths[count++] = strlen(s);
+	}
+
+	FS_Write(&count, sizeof(count), f);
+	FS_Write(lengths, sizeof(int) * count, f);
+	for (int i = 0, j = 0; i < totalCount; ++i) {
+		const char* const s = history->commands[(history->display + i) % COMMAND_HISTORY].buffer;
+		if (*s == '\0')
+			continue;
+
+		FS_Write(s, lengths[j++], f);
+	}
+
+	FS_FCloseFile(f);
+}
+
+
+const char* Q_itohex(uint64_t number, qbool uppercase, qbool prefix)
+{
+	static const char* luts[2] = { "0123456789abcdef", "0123456789ABCDEF" };
+	static char buffer[19];
+	const int maxLength = 16;
+
+	const char* const lut = luts[uppercase == 0 ? 0 : 1];
+	uint64_t x = number;
+	int i = maxLength + 2;
+	buffer[i] = '\0';
+	while (i--) {
+		buffer[i] = lut[x & 15];
+		x >>= 4;
+	}
+
+	int startOffset = 2;
+	for (i = 2; i < maxLength + 1; i++, startOffset++) {
+		if (buffer[i] != '0')
+			break;
+	}
+
+	if (prefix) {
+		startOffset -= 2;
+		buffer[startOffset + 0] = '0';
+		buffer[startOffset + 1] = 'x';
+	}
+
+	return buffer + startOffset;
+}
+
+
+
+const char* Com_FormatBytes(uint64_t numBytes)
+{
+	const char* units[] = { "bytes", "KB", "MB", "GB" };
+	const float dividers[] = { 1.0f, (float)(1 << 10), (float)(1 << 20), (float)(1 << 30) };
+
+	int unit = 0;
+	for (uint64_t vi = numBytes; vi >= 1024; vi >>= 10) {
+		unit++;
+	}
+
+	const float vf = (float)numBytes / dividers[unit];
+
+	return va("%.3f %s", vf, units[unit]);
+}
+
 
 // new stuff (but found not essential at this time) for iortcw port of server defined dl rates
 /*

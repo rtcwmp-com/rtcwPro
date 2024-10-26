@@ -25,22 +25,22 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -49,18 +49,22 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="ProjectMacros.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="ProjectMacros.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -71,6 +75,7 @@
     <IntDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\intermediate\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <TargetName>$(ProjectName)MP</TargetName>
+    <IncludePath>$(SolutionDir)..\deps\libjpeg-turbo;$(SolutionDir)..\deps\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</OutDir>
@@ -78,18 +83,21 @@
     <LinkIncremental>false</LinkIncremental>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <TargetName>$(ProjectName)MP</TargetName>
+    <IncludePath>$(SolutionDir)..\..\libjpeg-turbo;..\..\..\deps\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">
     <OutDir>$(SolutionDir)Builds\Release\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\Release\$(ProjectName)\intermediate\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)DED</TargetName>
+    <IncludePath>$(SolutionDir)..\deps\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
     <OutDir>$(SolutionDir)Builds\Debug\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\Debug\$(ProjectName)\intermediate\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <TargetName>$(ProjectName)DED</TargetName>
+    <IncludePath>$(SolutionDir)..\deps\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -102,7 +110,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;CURL_STATICLIB;_DEBUG;_WINDOWS;__USEA3D;__A3D_GEOM;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;CURL_STATICLIB;_DEBUG;_WINDOWS;__USEA3D;__A3D_GEOM;_CRT_SECURE_NO_WARNINGS;USE_VULKAN_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader />
       <PrecompiledHeaderOutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pch</PrecompiledHeaderOutputFile>
@@ -114,7 +122,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../deps/libjpeg-turbo</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -122,8 +130,8 @@
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;Version.lib;libcurl.lib;jpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -137,7 +145,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Debug\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\deps\bin;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -156,7 +164,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <PreprocessorDefinitions>WIN32;CURL_STATICLIB;NDEBUG;_WINDOWS;__USEA3D;__A3D_GEOM;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;CURL_STATICLIB;NDEBUG;_WINDOWS;__USEA3D;__A3D_GEOM;_CRT_SECURE_NO_WARNINGS;USE_VULKAN_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -169,15 +177,15 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <BrowseInformationFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\</BrowseInformationFile>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\deps\libjpeg-turbo\;..\deps\curl\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;Version.lib;jpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -191,7 +199,7 @@
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
-      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Release\libcurl;$(SolutionDir)Builds\Release\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\deps\bin;$(SolutionDir)Builds\Release\botlib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\$(Configuration)\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -222,7 +230,6 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <BrowseInformationFile>$(SolutionDir)Builds\Release\$(ProjectName)\</BrowseInformationFile>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ResourceCompile>
@@ -230,8 +237,8 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;botlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;Version.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;msvcrt.lib;libcmtd.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -245,7 +252,7 @@
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
-      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Release\libcurl;$(SolutionDir)Builds\Release\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Release\botlib;$(SolutionDir)..\deps\bin</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\Release\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -275,7 +282,6 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\libs\libcurl\include;..\libs\mysql\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -283,8 +289,8 @@
       <ResourceOutputFileName>win32\winquake.res</ResourceOutputFileName>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;..\libs\mysql\lib\win32\libmysqld.lib;botlib.lib;libcurl-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies>winmm.lib;wsock32.lib;botlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>botlib.lib;winmm.lib;ws2_32.lib;botlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;Version.lib;botlib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -298,7 +304,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProfileGuidedDatabase>$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName).pgd</ProfileGuidedDatabase>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>..\libs\mysql\lib\win32;$(SolutionDir)Builds\Debug\libcurl;$(SolutionDir)Builds\Debug\botlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Builds\Debug\botlib;$(SolutionDir)..\deps\bin</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)Builds\Debug\$(ProjectName)\$(TargetName)$(TargetExt)" "$(RTCWBASE)"</Command>
@@ -340,6 +346,10 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
     <ClCompile Include="client\cl_control.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="client\cl_demo.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -576,6 +586,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="qcommon\json.c" />
     <ClCompile Include="qcommon\cvar.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
@@ -607,6 +618,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="qcommon\huffman_static.c" />
     <ClCompile Include="qcommon\md4.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</BrowseInformation>
@@ -814,6 +826,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="unix\linux_tty.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="unix\unix_main.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -832,6 +850,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="win32\win_exception.c" />
     <ClCompile Include="win32\win_input.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">Disabled</Optimization>
@@ -922,6 +941,7 @@
     <ClInclude Include="qcommon\cm_patch.h" />
     <ClInclude Include="qcommon\cm_polylib.h" />
     <ClInclude Include="qcommon\cm_public.h" />
+    <ClInclude Include="qcommon\crash.h" />
     <ClInclude Include="qcommon\database.h" />
     <ClInclude Include="qcommon\dl_local.h" />
     <ClInclude Include="qcommon\dl_public.h" />
@@ -932,6 +952,7 @@
     <ClInclude Include="qcommon\md5.h" />
     <ClInclude Include="qcommon\qcommon.h" />
     <ClInclude Include="qcommon\qfiles.h" />
+    <ClInclude Include="qcommon\q_platform.h" />
     <ClInclude Include="qcommon\q_shared.h" />
     <ClInclude Include="qcommon\threads.h" />
     <ClInclude Include="qcommon\unzip.h" />
@@ -961,6 +982,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Dedicated|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="win32\glw_win.h" />
     <ClInclude Include="win32\win_local.h" />
   </ItemGroup>
   <ItemGroup>
@@ -980,7 +1002,6 @@
     </ProjectReference>
     <ProjectReference Include="renderer\renderer.vcxproj">
       <Project>{544c7ef5-2a74-4206-8b74-24d4fad83048}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="splines\Splines.vcxproj">
       <Project>{b6842d42-fba7-4494-a393-802ca7e94351}</Project>
@@ -988,7 +1009,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wolf.rc" />
+    <ResourceCompile Include="win32\wolf.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="win32\wolf.ico" />

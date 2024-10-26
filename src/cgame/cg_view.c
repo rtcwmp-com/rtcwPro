@@ -872,7 +872,7 @@ void CG_zoomViewRevert_f(void) {
 	cg.zoomedBinoc = qfalse;
 	cg.zoomedScope = qfalse;
 	cg.zoomTime = 0;
-	cg.zoomval = 0;
+	//cg.zoomval = 0; // don't reset sniper zoom while scoped
 }
 
 /*
@@ -1494,7 +1494,8 @@ static int CG_CalcViewValues( void ) {
 
 	// field of view
 	// OSPx - Patched for zoomed POV
-	if (cg.zoomedFOV)
+	// Added check for cg.zoomval to prevent overriding sniper's zoom
+	if (cg.zoomedFOV && cg.zoomval == 0)
 		return CG_CalcZoomedFov();
 	else
 		// End
@@ -1870,6 +1871,10 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 #endif
 	DEBUGTIME
 
+	if (cg.demoPlayback && cg.ndpDemoEnabled) {
+		CG_NDP_SetGameTime();
+	}
+		
 	// if we are only updating the screen as a loading
 	// pacifier, don't even try to read snapshots
 	if ( cg.infoScreenText[0] != 0 ) {

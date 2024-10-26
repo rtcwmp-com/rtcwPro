@@ -1,0 +1,24 @@
+Build the basegame with steam's rtcw pk3s, you'll need an account that has purchased rtcw. Tag it as rtcw-base to appear in docker images ls
+docker build --build-arg STEAM_USER="XXXXXXXX" --build-arg STEAM_PASS="XXXXXXXXXXXXX"  -t rtcwpro/rtcw-base:1.0 -f basegame .
+
+If you have steam multi-factor authentication, youll need to run the command again with the guard code you received as a --build-arg GUARDCODE=XXXXX:
+docker build --build-arg STEAM_USER="YOUR USERNAME" --build-arg STEAM_PASS="YOUR PW" --build-arg GUARDCODE=<GUARD CODE FROM EMAIL> -t rtcwpro/rtcw-base:1.0 -f basegame .
+
+Build the dev rtcw server:
+docker build -t rtcwpro/server-dev:1.0 -f rtcwpro-server-dev .
+
+Run a msh100 equivalent server using development binaries
+docker run --mount type=bind,src=`pwd`../build,dst=/home/game/dev   -p "<YOUR IP>:27960:27960/udp"   -e "MAPS=adlernest_b3:te_escape2:te_frostbite"   -e "PASSWORD=war"   -e "REFEREEPASSWORD=pass123" -e "SERVERCONF=comp" rtcwpro/server-dev:1.0
+
+Attach to a running docker image:
+docker ps
+<container id> shown
+docker exec -i -t <container id> /bin/bash
+
+
+Create the build image
+docker build -t rtcwpro/compile-dev:1.0 -f rtcwpro-compile-develop .
+
+docker run --mount type=bind,src=`pwd`../build,dst=/home/compile/mnt rtcwpro/compile-dev:1.0
+
+

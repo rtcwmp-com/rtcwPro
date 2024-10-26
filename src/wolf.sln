@@ -1,22 +1,32 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30523.141
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Splines", "splines\Splines.vcxproj", "{B6842D42-FBA7-4494-A393-802CA7E94351}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "botlib", "botlib\botlib.vcxproj", "{4E5F4E34-0E6A-4200-916F-D33805505B54}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame", "cgame\cgame.vcxproj", "{A16F9DCF-7F32-43AB-A044-74B7C660FC9B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454} = {48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}
+		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {64DCBC13-78A6-43E9-931D-B63FBB0421C7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extractfuncs", "extractfuncs\extractfuncs.vcxproj", "{E7BAACA8-3530-402D-9C27-947A36926100}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qagame", "game\game.vcxproj", "{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {64DCBC13-78A6-43E9-931D-B63FBB0421C7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer", "renderer\renderer.vcxproj", "{544C7EF5-2A74-4206-8B74-24D4FAD83048}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui", "ui\ui.vcxproj", "{64DCBC13-78A6-43E9-931D-B63FBB0421C7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wolf", "wolf.vcxproj", "{3ACD01D0-DCF1-46A5-A477-7E8524032A02}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64DCBC13-78A6-43E9-931D-B63FBB0421C7} = {64DCBC13-78A6-43E9-931D-B63FBB0421C7}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logic", "Logic", "{90F8875C-E793-4C34-9F8C-11F249C324CC}"
 EndProject
@@ -206,10 +216,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "old", "old", "{5D9883F6-91A
 		..\Assets\old\wpro.xcf = ..\Assets\old\wpro.xcf
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{B0BAA294-50FC-46AE-8279-B0D3E9F272A8}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "libcurl\lib\libcurl.vcxproj", "{DFB320DF-A095-3FA7-87D3-A77507483089}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Dedicated|Win32 = Debug Dedicated|Win32
@@ -324,8 +330,8 @@ Global
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.MinSizeRel|Win32.Build.0 = Debug Dedicated|Win32
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.MinSizeRel|x64.ActiveCfg = Release|x64
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.MinSizeRel|x64.Build.0 = Release|x64
-		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release Dedicated|Win32.ActiveCfg = Release|Win32
-		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release Dedicated|Win32.Build.0 = Release|Win32
+		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release Dedicated|Win32.ActiveCfg = Debug|Win32
+		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release Dedicated|Win32.Build.0 = Debug|Win32
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release Dedicated|x64.ActiveCfg = Release|x64
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release Dedicated|x64.Build.0 = Release|x64
 		{48C7DB05-4C5E-4AF5-B4EE-D04E6E6C8454}.Release|Win32.ActiveCfg = Release|Win32
@@ -398,26 +404,6 @@ Global
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.RelWithDebInfo|Win32.Build.0 = Release|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.RelWithDebInfo|x64.ActiveCfg = Release|Win32
 		{3ACD01D0-DCF1-46A5-A477-7E8524032A02}.RelWithDebInfo|x64.Build.0 = Release|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug Dedicated|Win32.ActiveCfg = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug Dedicated|Win32.Build.0 = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug Dedicated|x64.ActiveCfg = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug Dedicated|x64.Build.0 = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug|Win32.ActiveCfg = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug|Win32.Build.0 = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Debug|x64.ActiveCfg = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.MinSizeRel|x64.ActiveCfg = MinSizeRel|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release Dedicated|Win32.ActiveCfg = Release|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release Dedicated|Win32.Build.0 = Release|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release Dedicated|x64.ActiveCfg = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release Dedicated|x64.Build.0 = Debug|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release|Win32.ActiveCfg = Release|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release|Win32.Build.0 = Release|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.Release|x64.ActiveCfg = Release|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
-		{DFB320DF-A095-3FA7-87D3-A77507483089}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -447,7 +433,6 @@ Global
 		{CCFA4742-B66D-4FAA-B8DF-C350B2B41DD4} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
 		{CFB3A9B3-6921-4244-839C-B20C9040171A} = {36E26727-3A97-445C-91EE-CE60A3F65B34}
 		{5D9883F6-91A8-440E-9942-F9BBF5C8806B} = {7C21B9CB-6BFD-4996-86E3-79391FBD8F4C}
-		{DFB320DF-A095-3FA7-87D3-A77507483089} = {B0BAA294-50FC-46AE-8279-B0D3E9F272A8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ED097182-3E06-48EF-98DD-99CA0795FF83}

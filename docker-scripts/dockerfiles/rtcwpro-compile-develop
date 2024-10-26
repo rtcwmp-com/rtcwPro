@@ -1,0 +1,20 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y wget libc6:i386 zip unzip git gdb-multiarch gcc cmake perl curl gcc-multilib autoconf libtool nasm mingw-w64 g++
+
+RUN useradd -ms /bin/bash compile
+
+USER compile
+WORKDIR /home/compile
+
+RUN mkdir -p /home/compile/build && \
+    ln -sf /home/compile/mnt/ /home/compile/build 
+
+COPY --chown=compile:compile scripts/make-develop.sh /home/compile/start
+RUN chmod +x /home/compile/start
+
+ENTRYPOINT ["/home/compile/start"]

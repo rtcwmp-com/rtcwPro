@@ -46,9 +46,9 @@ void M_think( gentity_t *ent );
 void Shaker_think( gentity_t *ent ) {
 	vec3_t vec;      // muzzlebounce, JPW NERVE no longer used
 	gentity_t   *player;
-	float len, radius = ent->splashDamage, bounceamt;
+	float len, radius = ent->splashDamage, bounceamt, percentage;
 	int i;
-	//char cmd[64];       //DAJ
+	char cmd[64];       //DAJ
 /* JPW NERVE used for trigger_concussive_dust, currently not working
 	vec3_t		mins, maxs; // JPW NERVE
 	static vec3_t	range; // JPW NERVE
@@ -119,13 +119,15 @@ void Shaker_think( gentity_t *ent ) {
 		if ( len > radius ) { // largest bomb blast = 600
 			continue;
 		}
-		bounceamt = 1.0f - (len/radius);
+		//bounceamt = 1.0f - (len/radius);
 		// NERVE - SMF - client side camera shake
 		//DAJ BUGFIX va() not doing %f's correctly
-//		bounceamt = min( 1.0f, 1.0f - ( len / radius ) );
+		percentage = ( !g_screenShake.integer ) ? 1.0 : (float)g_screenShake.integer / 100.0;
+		bounceamt = min( 1.0f, 1.0f - ( len / radius ) );
+		Com_sprintf( cmd, sizeof(cmd), "shake %.4f", bounceamt * min( 1.0, percentage ) );   //DAJ
 //		sprintf( cmd, "shake %.4f", bounceamt );   //DAJ
-	//	trap_SendServerCommand( player->s.clientNum, cmd );
-		trap_SendServerCommand( player->s.clientNum, va( "shake %f", min( 1.f, bounceamt)));
+		trap_SendServerCommand( player->s.clientNum, cmd );
+		//trap_SendServerCommand( player->s.clientNum, va( "shake %f", min( 1.f, bounceamt)));
 //DAJ BUGFIX		trap_SendServerCommand( player->s.clientNum, va( "shake %f", &bounceamt));
 	}
 }
@@ -896,8 +898,8 @@ void G_ExplodeMissile( gentity_t *ent ) {
 			ent->s.weapon == WP_GRENADE_PINEAPPLE || ent->s.weapon == WP_ROCKET_LAUNCHER || ent->s.weapon == WP_MORTAR ||
 			ent->s.weapon == WP_ARTY) {
 			// RTCWPro custom screen shake
-			//Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
-			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * (!g_screenShake.integer ? 1 : g_screenShake.integer));
+			Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * 4);
+			//Ground_Shaker(ent->r.currentOrigin, ent->splashDamage * (!g_screenShake.integer ? 1 : g_screenShake.integer));
 		}
 		return;
 	}

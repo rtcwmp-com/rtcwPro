@@ -98,6 +98,7 @@ typedef struct {
 	char* datetime;
 	char* name;
 	char* guid;
+	char* protocol;
 	char* filepath;
 	char* filename;
 	void (*callback)(char* fmt, ...);
@@ -131,6 +132,8 @@ typedef struct {
 	char* param;
 	char* jsonText;
 	int clientNumber;
+	size_t size;
+	char* response;
 
 	void (*callback)(char* fmt, ...);
 } HTTP_APIInquiry_t;

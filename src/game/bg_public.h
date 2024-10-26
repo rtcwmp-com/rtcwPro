@@ -44,7 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 // second version that must match between game and cgame
 
 #define GAME_VERSION        "RTCW-MP"
-#define GAMEVERSION			"RtcwPro 1.3" // this will print on the server and show up as the RtcwPro version
+#define GAMEVERSION			"RtcwPro 1.4" // this will print on the server and show up as the RtcwPro version
 #define GAMESTR "i0cgsdYL3hpeOGkoGmA2TxzJ8LbbU1HpbkZo8B3kFG2bRKjZ"
 #define DEFAULT_GRAVITY     800
 #define FORCE_LIMBO_HEALTH  -150 // JPW NERVE
@@ -413,6 +413,7 @@ typedef enum {
 #define EF_TELEPORT_BIT     0x00000004      // toggled every time the origin abruptly changes
 #define EF_MONSTER_EFFECT   0x00000008      // draw an aiChar dependant effect for this character
 #define EF_CAPSULE          0x00000010      // use capsule for collisions
+//#define EF_PLAYER_EVENT		0x00000010  // Unlagged prediction flag - not used right now
 #define EF_CROUCHING        0x00000020      // player is crouching
 #define EF_MG42_ACTIVE      0x00000040      // currently using an MG42
 #define EF_NODRAW           0x00000080      // may have an event, but no model (unspawned items)
@@ -1168,7 +1169,7 @@ typedef struct {
 	int isReady;
 } player_ready_status_t;
 
-player_ready_status_t player_ready_status[MAX_CLIENTS];
+extern player_ready_status_t player_ready_status[];
 
 // How many players on the overlay
 #define TEAM_MAXOVERLAY     10 // RtcwPro changed this to 10
@@ -1853,5 +1854,15 @@ char* BG_GetClass(int classNum);
 #define HITSOUND_HEAD 1
 #define HITSOUND_BODY 2
 #define HITSOUND_TEAM 4
+
+
+typedef struct {
+	char* colorname;
+	vec4_t* color;
+	char colorCode[1];
+} colorTable_t;
+
+// Colors for crosshairs
+extern const colorTable_t OSP_Colortable[];
 
 #endif // ! ___BG_PUBLIC_H

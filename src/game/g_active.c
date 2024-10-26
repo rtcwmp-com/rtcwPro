@@ -749,43 +749,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 
 }
 
-/*
-==============
-SendPendingPredictableEvents
-==============
-*/
-void SendPendingPredictableEvents( playerState_t *ps ) {
-	/*
-	gentity_t *t;
-	int event, seq;
-	int extEvent, number;
-
-	// if there are still events pending
-	if ( ps->entityEventSequence < ps->eventSequence ) {
-		// create a temporary entity for this event which is sent to everyone
-		// except the client generated the event
-		seq = ps->entityEventSequence & (MAX_EVENTS-1);
-		event = ps->events[ seq ] | ( ( ps->entityEventSequence & 3 ) << 8 );
-		// set external event to zero before calling BG_PlayerStateToEntityState
-		extEvent = ps->externalEvent;
-		ps->externalEvent = 0;
-		// create temporary entity for event
-		t = G_TempEntity( ps->origin, event );
-		number = t->s.number;
-		BG_PlayerStateToEntityState( ps, &t->s, qtrue );
-		t->s.number = number;
-		t->s.eType = ET_EVENTS + event;
-		t->s.eFlags |= EF_PLAYER_EVENT;
-		t->s.otherEntityNum = ps->clientNum;
-		// send to everyone except the client who generated the event
-		t->r.svFlags |= SVF_NOTSINGLECLIENT;
-		t->r.singleClient = ps->clientNum;
-		// set back external event
-		ps->externalEvent = extEvent;
-	}
-	*/
-}
-
 // DHM - Nerve
 void WolfFindMedic( gentity_t *self ) {
 	int i, medic = -1;
@@ -996,6 +959,42 @@ void G_SwingAngles(float destination, float swingTolerance, float clampTolerance
 		*angle = AngleMod(destination + (clampTolerance - 1));
 	}
 }
+
+/*
+==============
+SendPendingPredictableEvents
+==============
+
+void SendPendingPredictableEvents( playerState_t *ps ) {
+	gentity_t *t;
+	int event, seq;
+	int extEvent, number;
+
+	// if there are still events pending
+	if ( ps->entityEventSequence < ps->eventSequence ) {
+		// create a temporary entity for this event which is sent to everyone
+		// except the client who generated the event
+		seq = ps->entityEventSequence & (MAX_PS_EVENTS-1);
+		event = ps->events[ seq ] | ( ( ps->entityEventSequence & 3 ) << 8 );
+		// set external event to zero before calling BG_PlayerStateToEntityState
+		extEvent = ps->externalEvent;
+		ps->externalEvent = 0;
+		// create temporary entity for event
+		t = G_TempEntity( ps->origin, event );
+		number = t->s.number;
+		BG_PlayerStateToEntityState( ps, &t->s, qtrue );
+		t->s.number = number;
+		t->s.eType = ET_EVENTS + event;
+		t->s.eFlags |= EF_PLAYER_EVENT;
+		t->s.otherEntityNum = ps->clientNum;
+		// send to everyone except the client who generated the event
+		t->r.svFlags |= SVF_NOTSINGLECLIENT;
+		t->r.singleClient = ps->clientNum;
+		// set back external event
+		ps->externalEvent = extEvent;
+	}
+}
+*/
 
 /*
 ===============
@@ -1734,6 +1733,8 @@ void ClientThink_real( gentity_t *ent ) {
 	}*/
 	// RTCWPro end
 
+	//SendPendingPredictableEvents( &ent->client->ps );
+	
 	if ( !( ent->client->ps.eFlags & EF_FIRING ) ) {
 		client->fireHeld = qfalse;      // for grapple
 	}
@@ -2132,8 +2133,17 @@ extern vec3_t playerMins, playerMaxs;
 void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
 	vec3_t dir, push;
 
-	// no push in pause state
-	if (self->client->ps.pm_type == PM_FREEZE || other->client->ps.pm_type == PM_FREEZE) {
+	if (self->client && other->client) {
+		// no push in pause state
+		if (self->client->ps.pm_type == PM_FREEZE || other->client->ps.pm_type == PM_FREEZE) {
+			return;
+		}
+	}
+
+	// apply push effect only every 50ms to match sv_fps 20 behavior
+	// scaling the speed to match higher framerates results in smaller push overall as friction has more effect on lower speeds
+	if ((self->client && self->client->lastRevivePushTime + 50 > level.time) 
+		|| (other->client && other->client->lastRevivePushTime + 50 > level.time))	{
 		return;
 	}
 
@@ -2146,6 +2156,7 @@ void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
 	if ( self->client ) {
 		VectorAdd( self->s.pos.trDelta, push, self->s.pos.trDelta );
 		VectorAdd( self->client->ps.velocity, push, self->client->ps.velocity );
+		self->client->lastRevivePushTime = level.time - (level.time % 50);
 	}
 
 	VectorScale( dir, -WR_PUSHAMOUNT, push );
@@ -2155,6 +2166,7 @@ void WolfRevivePushEnt( gentity_t *self, gentity_t *other ) {
 	//VectorAdd( other->client->ps.velocity, push, other->client->ps.velocity );
 	if ( other->client ) {
 		VectorAdd( other->client->ps.velocity, push, other->client->ps.velocity );
+		other->client->lastRevivePushTime = level.time - (level.time % 50);
 	}
 }
 
@@ -2191,6 +2203,10 @@ void WolfReviveBbox( gentity_t *self ) {
 
 					// Reset value so we don't continue to warp them
 					self->props_frame_state = -1;
+
+					// reset push velocity, otherwise player will fly away if is velocity too strong
+					VectorClear(self->s.pos.trDelta);
+					VectorClear(self->client->ps.velocity);
 				}
 			} else if ( hit->health > 0 ) {
 				if ( hit->s.number != self->s.number ) {
@@ -2414,6 +2430,8 @@ void ClientEndFrame( gentity_t *ent ) {
 	{
 		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
 
+		//SendPendingPredictableEvents( &ent->client->ps );
+	
 		//unlagged - smooth clients #1
 			// mark as not missing updates initially
 		ent->client->ps.eFlags &= ~EF_CONNECTION;

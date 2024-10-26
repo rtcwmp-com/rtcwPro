@@ -112,6 +112,7 @@ cvar_t* cl_activatelean; // RTCWPro
 // rtcwpro - http redirect
 cvar_t* cl_httpDomain;
 cvar_t* cl_httpPath;
+cvar_t* cl_demoPlayer; // NDP
 
 clientActive_t cl;
 clientConnection_t clc;
@@ -566,14 +567,10 @@ void CL_WriteWaveFilePacket() {
 	}
 }
 
-/*
-====================
-CL_PlayDemo_f
 
-demo <demoname>
-====================
-*/
-void CL_PlayDemo_f( void ) {
+
+void CL_PlayDemo(qbool videoRestart)
+{
 	char name[MAX_OSPATH], extension[32];
 	char        *arg;
 
@@ -620,6 +617,14 @@ void CL_PlayDemo_f( void ) {
 
 	Q_strncpyz( cls.servername, Cmd_Argv( 1 ), sizeof( cls.servername ) );
 
+	if (cl_demoPlayer->integer) {
+		//while (CL_MapDownload_Active()) {
+		//	Sys_Sleep(50);
+		//}
+		CL_NDP_PlayDemo(videoRestart);
+		return;
+	}
+
 	// read demo messages until connected
 	while ( cls.state >= CA_CONNECTED && cls.state < CA_PRIMED ) {
 		CL_ReadDemoMessage();
@@ -634,6 +639,17 @@ void CL_PlayDemo_f( void ) {
 		CL_WriteWaveClose();
 		clc.waverecording = qfalse;
 	}
+}
+
+/*
+====================
+CL_PlayDemo_f
+
+demo <demoname>
+====================
+*/
+void CL_PlayDemo_f(void) {
+	CL_PlayDemo(qfalse);
 }
 
 /*
@@ -1362,8 +1378,15 @@ void CL_Vid_Restart_f( void ) {
 	// startup all the client stuff
 	CL_StartHunkUsers();
 
+	// we don't really technically need to run everything again,
+	// but trying to optimize parts out is very likely to lead to nasty bugs
+	if (clc.demoplaying && clc.newDemoPlayer) {
+		Cmd_TokenizeString(va("demo \"%s\"", clc.demoName));
+		CL_PlayDemo(qtrue);
+	}
+
 	// start the cgame if connected
-	if ( cls.state > CA_CONNECTED && cls.state != CA_CINEMATIC ) {
+	else if ( cls.state > CA_CONNECTED && cls.state != CA_CINEMATIC ) {
 		cls.cgameStarted = qtrue;
 		CL_InitCGame();
 		// send pure checksums
@@ -1527,7 +1550,7 @@ qboolean CL_BeginHttpDownload()
 		return qfalse;
 	}
 
-	Sleep(3000);
+	Sys_Sleep(3000);
 
 	ss->failure_callback = HttpFailureCallback;
 	Q_strncpyz(download_filename, COM_SkipPath(local_file_name), sizeof(download_filename));
@@ -1764,36 +1787,38 @@ void CL_NextDownload( void ) {
 	char *remoteName, *localName;
 
 	// We are looking to start a download here
-	if ( *clc.downloadList ) {
+	if ( *clc.downloadList )
+	{
 		s = clc.downloadList;
 
 		// format is:
 		//  @remotename@localname@remotename@localname, etc.
 
-		if ( *s == '@' ) {
+		if (*s == '@') {
 			s++;
 		}
 		remoteName = s;
 
-		if ( ( s = strchr( s, '@' ) ) == NULL ) {
+		if ((s = strchr(s, '@')) == NULL) {
 			CL_DownloadsComplete();
 			return;
 		}
 
 		*s++ = 0;
 		localName = s;
-		if ( ( s = strchr( s, '@' ) ) != NULL ) {
+		if ((s = strchr(s, '@')) != NULL) {
 			*s++ = 0;
-		} else {
-			s = localName + strlen( localName ); // point at the nul byte
+		}
+		else {
+			s = localName + strlen(localName); // point at the nul byte
 
 		}
-		CL_BeginDownload( localName, remoteName, qtrue );
+		CL_BeginDownload(localName, remoteName, qtrue);
 
 		clc.downloadRestart = qtrue;
 
 		// move over the rest
-		memmove( clc.downloadList, s, strlen( s ) + 1 );
+		memmove(clc.downloadList, s, strlen(s) + 1);
 
 		return;
 	}
@@ -3232,12 +3257,14 @@ void CL_Init( void ) {
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
 	cl_motdString = Cvar_Get( "cl_motdString", "", CVAR_ROM );
-    cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM  );
+    cl_guid = Cvar_Get("cl_guid", NO_GUID, CVAR_ROM | CVAR_USERINFO );
 
 	// rtcwpro
 	cl_httpDomain = Cvar_Get("cl_httpDomain", "www.rtcw.life", CVAR_ARCHIVE); //"www.x-labs.co.uk", CVAR_ARCHIVE);
 	cl_httpPath = Cvar_Get("cl_httpPath", "/files/mapdb", CVAR_ARCHIVE); //"/mapdb/rtcw", CVAR_ARCHIVE);
 	// end
+	cl_demoPlayer = Cvar_Get("cl_demoPlayer", "1", CVAR_ARCHIVE);
+
 /*
 	if (strlen(cl_guid->string) != (GUID_LEN - 1)) {
 		CL_SetGuid();
@@ -3387,6 +3414,9 @@ void CL_Init( void ) {
 	Cvar_Set( "cl_running", "1" );
 	// RTCWPro
 	Cvar_Set("cl_checkversion", "17");
+
+	// Allow cgame to interrogate the client if it supports extensions
+	Cvar_Set("//trap_GetValue", "700");
 
 	// DHM - Nerve
 	autoupdateChecked = qfalse;

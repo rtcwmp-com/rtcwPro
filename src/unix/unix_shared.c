@@ -26,6 +26,8 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#include <dlfcn.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -35,9 +37,21 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <pwd.h>
+#if defined(__linux__)
+#include <sys/sysinfo.h>
+#elif defined(__FreeBSD__)
+#include <sys/user.h>
+#include <sys/sysctl.h>
+#endif
+#include <inttypes.h>
+#ifdef DEDICATED
+#include <sys/wait.h>
+#endif
 
 #include "../qcommon/q_shared.h"
 #include "../qcommon/qcommon.h"
+
+#include "linux_local.h"
 
 //=============================================================================
 
@@ -49,6 +63,23 @@ static char installPath[MAX_OSPATH];
 
 // Used to determine where to store user-specific files
 static char homePath[MAX_OSPATH];
+
+static void LIN_MicroSleep(int us)
+{
+	struct timespec req, rem;
+	req.tv_sec = us / 1000000;
+	req.tv_nsec = (us % 1000000) * 1000;
+	while (clock_nanosleep(CLOCK_REALTIME, 0, &req, &rem) == EINTR) {
+		req = rem;
+	}
+}
+
+
+void Sys_Sleep(int ms)
+{
+	LIN_MicroSleep(ms * 1000);
+}
+
 
 /*
 ================
@@ -81,65 +112,223 @@ int Sys_Milliseconds( void ) {
 	return curtime;
 }
 
-#if !defined( DEDICATED )
-/*
-================
-Sys_XTimeToSysTime
-sub-frame timing of events returned by X
-X uses the Time typedef - unsigned long
-disable with in_subframe 0
 
- sys_timeBase*1000 is the number of ms since the Epoch of our origin
- xtime is in ms and uses the Epoch as origin
-   Time data type is an unsigned long: 0xffffffff ms - ~49 days period
- I didn't find much info in the XWindow documentation about the wrapping
-   we clamp sys_timeBase*1000 to unsigned long, that gives us the current origin for xtime
-   the computation will still work if xtime wraps (at ~49 days period since the Epoch) after we set sys_timeBase
-
-================
-*/
-extern cvar_t *in_subframe;
-int Sys_XTimeToSysTime( unsigned long xtime ) {
-	int ret, time, test;
-
-	if ( !in_subframe->value ) {
-		// if you don't want to do any event times corrections
-		return Sys_Milliseconds();
-	}
-
-	// test the wrap issue
-#if 0
-	// reference values for test: sys_timeBase 0x3dc7b5e9 xtime 0x541ea451 (read these from a test run)
-	// xtime will wrap in 0xabe15bae ms >~ 0x2c0056 s (33 days from Nov 5 2002 -> 8 Dec)
-	//   NOTE: date -d '1970-01-01 UTC 1039384002 seconds' +%c
-	// use sys_timeBase 0x3dc7b5e9+0x2c0056 = 0x3df3b63f
-	// after around 5s, xtime would have wrapped around
-	// we get 7132, the formula handles the wrap safely
-	unsigned long xtime_aux,base_aux;
-	int test;
-//	Com_Printf("sys_timeBase: %p\n", sys_timeBase);
-//	Com_Printf("xtime: %p\n", xtime);
-	xtime_aux = 500; // 500 ms after wrap
-	base_aux = 0x3df3b63f; // the base a few seconds before wrap
-	test = xtime_aux - ( unsigned long )( base_aux * 1000 );
-	Com_Printf( "xtime wrap test: %d\n", test );
+qbool Sys_HardReboot()
+{
+#ifdef DEDICATED
+	return qtrue;
+#else
+	return qfalse;
 #endif
-
-	// show_bug.cgi?id=565
-	// some X servers (like suse 8.1's) report weird event times
-	// if the game is loading, resolving DNS, etc. we are also getting old events
-	// so we only deal with subframe corrections that look 'normal'
-	ret = xtime - ( unsigned long )( sys_timeBase * 1000 );
-	time = Sys_Milliseconds();
-	test = time - ret;
-	//printf("delta: %d\n", test);
-	if ( test < 0 || test > 30 ) { // in normal conditions I've never seen this go above
-		return time;
-	}
-
-	return ret;
 }
+
+
+#ifdef DEDICATED
+
+
+static int Lin_RunProcess(char** argv)
+{
+	const pid_t pid = fork();
+	if (pid == 0) {
+		if (execve(argv[0], argv, NULL) == -1) {
+			fprintf(stderr, "failed to launch child process: %s\n", strerror(errno));
+			_exit(1); // quit without calling atexit handlers
+			return 0;
+		}
+	}
+
+	int status;
+	while (waitpid(pid, &status, WNOHANG) == 0)
+		sleep(1); // in seconds
+
+	return WEXITSTATUS(status);
+}
+
+
+void Lin_HardRebootHandler(int argc, char** argv)
+{
+	for (int i = 0; i < argc; ++i) {
+		if (!Q_stricmp(argv[i], "nohardreboot")) {
+			return;
+		}
+	}
+
+	static char* args[256];
+	if (argc + 2 >= sizeof(args) / sizeof(args[0])) {
+		fprintf(stderr, "too many arguments: %d\n", argc);
+		_exit(1); // quit without calling atexit handlers
+		return;
+}
+
+	for (int i = 0; i < argc; ++i)
+		args[i] = argv[i];
+	args[argc + 0] = (char*)"nohardreboot";
+	args[argc + 1] = NULL;
+
+	SIG_InitParent();
+
+	for (;;) {
+		if (Lin_RunProcess(args) == 0)
+			_exit(0); // quit without calling atexit handlers
+	}
+}
+
+
 #endif
+
+
+static qbool lin_hasParent = qfalse;
+static pid_t lix_parentPid;
+
+
+static const char* Lin_GetExeName(const char* path)
+{
+	const char* lastSlash = strrchr(path, '/');
+	if (lastSlash == NULL)
+		return path;
+
+	return lastSlash + 1;
+}
+
+
+void Lin_TrackParentProcess()
+{
+#if defined(__linux__)
+
+	static char cmdLine[1024];
+
+	char fileName[128];
+	Com_sprintf(fileName, sizeof(fileName), "/proc/%d/cmdline", (int)getppid());
+
+	const int fd = open(fileName, O_RDONLY);
+	if (fd == -1)
+		return;
+
+	const qbool hasCmdLine = read(fd, cmdLine, sizeof(cmdLine)) > 0;
+	close(fd);
+
+	if (!hasCmdLine)
+		return;
+
+	cmdLine[sizeof(cmdLine) - 1] = '\0';
+	lin_hasParent = strcmp(Lin_GetExeName(cmdLine), Lin_GetExeName(q_argv[0])) == 0;
+
+#elif defined(__FreeBSD__)
+
+	static char cmdLine[1024];
+
+	int mib[4];
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_ARGS;
+	mib[3] = getppid();
+	size_t length = sizeof(cmdLine);
+	if (sysctl(mib, 4, cmdLine, &length, NULL, 0) != 0)
+		return;
+
+	cmdLine[sizeof(cmdLine) - 1] = '\0';
+	lin_hasParent = strcmp(Lin_GetExeName(cmdLine), Lin_GetExeName(q_argv[0])) == 0;
+
+#endif
+}
+
+
+qbool Sys_HasRtcwProParent()
+{
+	return lin_hasParent;
+}
+
+
+static int Sys_GetProcessUptime(pid_t pid)
+{
+#if defined(__linux__)
+
+	// length must be in sync with the fscanf call!
+	static char word[256];
+
+	// The process start time is the 22nd column and
+	// encoded as jiffies after system boot.
+	const int jiffiesPerSec = sysconf(_SC_CLK_TCK);
+	if (jiffiesPerSec <= 0)
+		return -1;
+
+	char fileName[128];
+	Com_sprintf(fileName, sizeof(fileName), "/proc/%" PRIu64 "/stat", (uint64_t)pid);
+	FILE* const file = fopen(fileName, "r");
+	if (file == NULL)
+		return -1;
+
+	for (int i = 0; i < 21; ++i) {
+		if (fscanf(file, "%255s", word) != 1) {
+			fclose(file);
+			return -1;
+		}
+	}
+
+	int64_t jiffies;
+	const qbool success = fscanf(file, "%" PRId64, &jiffies) == 1;
+	fclose(file);
+
+	if (!success)
+		return -1;
+
+	const int64_t secondsSinceBoot = jiffies / (int64_t)jiffiesPerSec;
+	struct sysinfo info;
+	sysinfo(&info);
+	const int64_t uptime = (int64_t)info.uptime - secondsSinceBoot;
+
+	return (int)uptime;
+
+#elif defined(__FreeBSD__)
+
+	int mib[4];
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PID;
+	mib[3] = pid;
+	struct kinfo_proc kp;
+	size_t len = sizeof(kp);
+	if (sysctl(mib, 4, &kp, &len, NULL, 0) != 0) {
+		return -1;
+	}
+
+	struct timeval now;
+	gettimeofday(&now, NULL);
+
+	return (int)(now.tv_sec - kp.ki_start.tv_sec);
+
+#else
+
+	return -1;
+
+#endif
+}
+
+int Sys_GetUptimeSeconds(qbool parent)
+{
+	return Sys_GetProcessUptime(parent ? getppid() : getpid());
+}
+
+void Sys_LoadHistory()
+{
+#ifdef DEDICATED
+	History_LoadFromFile(tty_GetHistory());
+#else
+	//History_LoadFromFile(&g_history);
+#endif
+}
+
+
+void Sys_SaveHistory()
+{
+#ifdef DEDICATED
+	History_SaveToFile(tty_GetHistory());
+#else
+	//History_SaveToFile(&g_history);
+#endif
+}
+
+
 
 //#if 0 // bk001215 - see snapvector.nasm for replacement
 #if ( defined __APPLE__ ) // rcg010206 - using this for PPC builds...
@@ -452,4 +641,12 @@ void Sys_EnterCriticalSection( void *ptr ) {
 }
 
 void Sys_LeaveCriticalSection( void *ptr ) {
+}
+
+
+char* Sys_GetScreenshotPath(char* filename){
+	char* homepath = Cvar_VariableString("fs_homepath");
+	char* gamepath = Cvar_VariableString("fs_game");
+
+	return va("%s/%s/screenshots/%s.jpg", homepath, gamepath, filename);
 }

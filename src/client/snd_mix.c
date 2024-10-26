@@ -46,9 +46,6 @@ int     *snd_p;
 int snd_linear_count;
 short   *snd_out;
 
-#if !( defined __linux__ && defined __i386__ )
-#if !id386
-
 /*
 ===================
 S_WriteLinearBlastStereo16
@@ -80,60 +77,6 @@ void S_WriteLinearBlastStereo16( void ) {
 	}
 }
 
-#else // !id386
-
-__declspec( naked ) void S_WriteLinearBlastStereo16( void ) {
-	__asm {
-
-		push edi
-		push ebx
-		mov ecx,ds : dword ptr[snd_linear_count]
-		mov ebx,ds : dword ptr[snd_p]
-		mov edi,ds : dword ptr[snd_out]
-LWLBLoopTop:
-		mov eax,ds : dword ptr[-8 + ebx + ecx * 4]
-		sar eax,8
-		cmp eax,07FFFh
-		jg LClampHigh
-		cmp eax,0FFFF8000h
-		jnl LClampDone
-		mov eax,0FFFF8000h
-		jmp LClampDone
-LClampHigh:
-		mov eax,07FFFh
-LClampDone:
-		mov edx,ds : dword ptr[-4 + ebx + ecx * 4]
-		sar edx,8
-		cmp edx,07FFFh
-		jg LClampHigh2
-		cmp edx,0FFFF8000h
-		jnl LClampDone2
-		mov edx,0FFFF8000h
-		jmp LClampDone2
-LClampHigh2:
-		mov edx,07FFFh
-LClampDone2:
-		shl edx,16
-		and eax,0FFFFh
-		or edx,eax
-		mov ds : dword ptr[-4 + edi + ecx * 2],edx
-		sub ecx,2
-		jnz LWLBLoopTop
-		pop ebx
-		pop edi
-		ret
-	}
-}
-
-#endif // !id386
-
-#else // !(defined __linux__ && defined __i386__)
-
-// snd_mixa.s
-void S_WriteLinearBlastStereo16( void );
-
-#endif
-
 /*
 ===================
 S_TransferStereo16
@@ -149,11 +92,13 @@ void S_TransferStereo16( unsigned long *pbuf, int endtime ) {
 	while ( ls_paintedtime < endtime )
 	{
 		// handle recirculating buffer issues
-		lpos = ls_paintedtime & ( ( dma.samples >> 1 ) - 1 );
+		//lpos = ls_paintedtime & ( ( dma.samples >> 1 ) - 1 );
+		lpos = ls_paintedtime % (dma.samples / dma.channels);
 
 		snd_out = (short *) pbuf + ( lpos << 1 );
 
-		snd_linear_count = ( dma.samples >> 1 ) - lpos;
+		//snd_linear_count = ( dma.samples >> 1 ) - lpos;
+		snd_linear_count = (dma.samples / dma.channels) - lpos;
 		if ( ls_paintedtime + snd_linear_count > endtime ) {
 			snd_linear_count = endtime - ls_paintedtime;
 		}

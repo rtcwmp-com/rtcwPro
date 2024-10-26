@@ -34,11 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "bg_public.h"
 #include "g_public.h"
 #include "../../MAIN/ui_mp/menudef.h"
-#ifdef _WIN32
-#include "../qcommon/jansson_win/jansson.h"
-#else
-#include "../qcommon/jansson/jansson.h"
-#endif // _WIN32
+#include "jansson.h"
 
 //==================================================================
 
@@ -580,6 +576,7 @@ typedef struct {
 
 	int clientFlags;		// Sort some stuff based upon user settings
 	int specSpeed;
+	char* lastChatText;		// prevent spam chat text being saved to stats gamelog
 } clientSession_t;
 
 //
@@ -859,6 +856,7 @@ struct gclient_s {
 	int			lastUpdateFrame;
 	//unlagged - smooth clients #1
 	qboolean        spawnprotected;
+	int lastRevivePushTime; //revive push at fixed interval for sv_fps
 };
 
 //
@@ -1779,6 +1777,7 @@ extern vmCvar_t g_playPauseMusic;
 // unlagged
 extern vmCvar_t	g_delagHitscan;
 extern vmCvar_t g_maxExtrapolatedFrames;
+extern vmCvar_t	g_maxLagCompensation;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );
@@ -1839,8 +1838,8 @@ int     trap_submit_curlPost( char* jsonfile, char* matchid );
 int		trap_HTTP_apiQuery(char* param, char* jsonText, int clientNumber);
 char*	G_CreateAPIJson(char* commandText, char* arg1, char* arg2, char* callerGuid);
 void	Cmd_APIQuery(gentity_t* ent);
-void	trap_HandleApiResponse(int clientNum, char* response);
-int		ReadApiResultJson(char* data);
+void	trap_HandleApiResponse(int clientNum, char* response, int size);
+int		ReadApiResultJson(char* data, int size);
 
 int     trap_BotLibSetup( void );
 int     trap_BotLibShutdown( void );
