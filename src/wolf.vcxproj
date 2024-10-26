@@ -90,14 +90,14 @@
     <IntDir>$(SolutionDir)Builds\Release\$(ProjectName)\intermediate\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)DED</TargetName>
-    <IncludePath>$(SolutionDir)libcurl\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\deps\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dedicated|Win32'">
     <OutDir>$(SolutionDir)Builds\Debug\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\Debug\$(ProjectName)\intermediate\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <TargetName>$(ProjectName)DED</TargetName>
-    <IncludePath>$(SolutionDir)libcurl\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\deps\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
