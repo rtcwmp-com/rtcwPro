@@ -1,0 +1,78 @@
+
+🛠️ Unlag 2.0
+- implemented working version of Neil Toroto's Unlag
+- Don't unlag players behind walls; cap time shift
+- Remove unlag from explosions by default
+- Apply time shift to alive players only (gib bug fix for 1.2.9 unlag)
+
+🛠️ New Features
+- New Demo Player
+	- show timeline using END key
+	- added PGDN/PGUP hotkeys to go forward/back on kills
+	- updated demo help window
+- added cg_teamObituaryColors for kill feed (uses OSP color codes)
+- shoutcast - enable grenade trail using cg_shoutcastGrenadeTrail 
+- universal map spawn timer using /timerset (no need for map configs)
+- added proper lagometer speed graph with history
+- show server name and date in scoreboard
+
+🔧 Fixes
+- Fixed pause floating players (revive push)
+- Fixed CI sprite on respawn
+- Fixed crash from spectating 999 player drop
+- Fixed large number for teammate ammo when weapon is dropped; continue extension validation
+- Fixed wrong reqss prints
+- Fixed compiler warnings in qagame
+- Fixed weapon switching overwriting the cmd's weapon
+- Fixed issue with choppy jump deceleration
+- Fixed jansson include path in makefile
+- Fixed +zoomView interaction with sniper scope
+- Fixed 99.5% of reported valgrind errors
+- Fixed custom screen shake (g_screenshake 100 now using a percentage)
+- Fixed axis grenade visibility using drawgun 2
+- Fixed unpure client pk3s loaded on pure server
+- Keep the vote name and countdown after voting
+- Reset push velocity after revive
+- Check if entities are clients in revive push
+
+🔧 Under the hood enhancements
+- Update curl include for windows dedicated
+- Update cvarlist
+- Check for cmake
+- Refresh docker's build files on image creation
+- Clean up build dependencies on Windows
+- Update makefile for linux client
+- Added more cvars to /serverstatus
+- Provide cl_guid in userinfo string - ECGN server support
+- Remove unused curl source
+- Cross-compile windows client on Linux
+- Linux client w/ SDL for sound, window, input
+- Cleaned up countdown wav files
+- Added extension to update the view angles each frame
+- Give rcon the ref commands
+- Build user commands once per fixed timestep
+- Replace x86 assembly in several functions
+- Added alloc/free for stats URL
+- Added g++ to build images for libunwind
+- Build images from git to push to docker
+- Added Windows crash reporting
+- Restart server automatically if nobody is playing (sv_minRestartDelay)
+- Added build image for Ubuntu 18
+- Added Static Huffman to server
+- Make build scripts executable
+- Static Huffman from CNQ3
+- Refactor extension loading out of CG_Init
+- Change references from dockerbuild to develop
+- Run a server build in valgrind
+- Move jansson to windows dependencies also
+- Use curl response size and null terminator for json API
+- Build, deploy, and run using docker images
+- Allow cgame to check for client capabilities before loading them
+- hide demo upload advert that is not used
+- jpeg turbo - use JCS_EXT_RGBA for screenshotjpeg
+- added dat file for assets (makes sure client downloads the file)
+- Remove curl, mysql, openssl, mongodb, jpeg6 from the repo
+- Refactor project files to use deps directory
+- Improve fetch-depdencies
+- refactored opening server config file
+- prevent stats gamelog chat spam
