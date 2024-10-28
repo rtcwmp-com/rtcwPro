@@ -1,3 +1,5 @@
+🛠️ Linux Client
+- Thanks to Snappas we finally have a working Linux client
 
 🛠️ Unlag 2.0
 - implemented working version of Neil Toroto's Unlag
@@ -6,21 +8,25 @@
 - Apply time shift to alive players only (gib bug fix for 1.2.9 unlag)
 
 🛠️ New Features
-- New Demo Player
-	- show timeline using END key
-	- added PGDN/PGUP hotkeys to go forward/back on kills
-	- updated demo help window
+- New Demo Player (new pro 1.4.0.2 client only)
+	- Clickable timeline of events (END key)
+	- added kill navigation (PGDN/PGUP keys)
+	- Fast seek
+	- Rewind	
+	- POV kills and team obj status on timeline
+	- Key controls for 3/10/60s forward/backward in demo
+	- Support for OSP, bani, all versions of pro demo playback
 - added cg_teamObituaryColors for kill feed (uses OSP color codes)
 - shoutcast - enable grenade trail using cg_shoutcastGrenadeTrail 
 - universal map spawn timer using /timerset (no need for map configs)
 - added proper lagometer speed graph with history
 - show server name and date in scoreboard
 
-🔧 Fixes
+🛠️ Fixes
 - Fixed pause floating players (revive push)
 - Fixed CI sprite on respawn
 - Fixed crash from spectating 999 player drop
-- Fixed large number for teammate ammo when weapon is dropped; continue extension validation
+- Fixed large number for teammate ammo when weapon is dropped
 - Fixed wrong reqss prints
 - Fixed compiler warnings in qagame
 - Fixed weapon switching overwriting the cmd's weapon
@@ -35,7 +41,7 @@
 - Reset push velocity after revive
 - Check if entities are clients in revive push
 
-🔧 Under the hood enhancements
+🛠️ Under the hood enhancements
 - Update curl include for windows dedicated
 - Update cvarlist
 - Check for cmake
@@ -73,6 +79,5 @@
 - added dat file for assets (makes sure client downloads the file)
 - Remove curl, mysql, openssl, mongodb, jpeg6 from the repo
 - Refactor project files to use deps directory
-- Improve fetch-depdencies
 - refactored opening server config file
 - prevent stats gamelog chat spam
