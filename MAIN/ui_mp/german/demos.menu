@@ -24,21 +24,18 @@ menuDef {
 	rect 0 0 640 480
 	visible 1
 	fullscreen 1
-    focusColor LGREY
-    style 1
-    border 1
+	focusColor LGREY
+	style 1
+	border 1
 
 	onOpen {
-		show back;
-		show ui_back;
+		show back; show ui_back;
 		hide grpmessage
 	}
-
 	onClose {
 		setitemcolor gotobar backcolor MGREY .0
 	}
 
-	
 	itemDef {
 		name ui_back
 		style WINDOW_STYLE_SHADER
@@ -54,10 +51,10 @@ menuDef {
 	itemDef {
 		name gotobar
 		style 2
-		rect 0 445 640 20 
+		rect 0 445 640 20
 		textscale .4
 		textalignx 60
-		textaligny 21        
+		textaligny 21
 		style 2
 		border 4
 		bordercolor MGREY 0
@@ -71,15 +68,15 @@ menuDef {
 		name back
 		text "BACK"
 		type 1
-		style 0	
+		style 0
 		textstyle 6
-		rect 30 450 40 14 
+		rect 30 450 40 14
 		textalign 0
 		textfont UI_FONT_NORMAL
-		textscale .25		
+		textscale .25
 		textalignx 6
 		textaligny 12
-		visible 1 
+		visible 1
 
 		action {
 			setitemcolor gotobar backcolor MGREY 0;
@@ -87,16 +84,16 @@ menuDef {
 			close demos_menu;
 			open main
 		}
-			
+
 		mouseEnter {
 			show message_back;
 			setitemcolor gotobar backcolor MGREY .5
 		}
-		
+
 		mouseExit {
 			hide message_back;
 			setitemcolor gotobar backcolor MGREY 0
-		}	
+		}
 	}
 
 // Messages //
@@ -104,7 +101,7 @@ menuDef {
 	itemDef {
 		name message_back
 		group grpmessage
-		style 0 
+		style 0
 		rect 320 437 128 30
 		textstyle 1
 		textalign 1
@@ -113,20 +110,17 @@ menuDef {
 		textfont UI_FONT_NORMAL
 		textscale .25
 		text "EXIT TO MAIN MENU"
-		decoration 
+		decoration
 		visible 0
 	}
 }
 
 
-
-
-
 menuDef {
-    name "demos_load"
-    visible 0
-    fullscreen 0
-    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+	name "demos_load"
+	visible 0
+	fullscreen 0
+	rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
 	focusColor 1 .75 0 1
 	style 1
 	border 0
@@ -138,7 +132,7 @@ menuDef {
 	itemDef {
 		name currentdir
 		text "DEMO LADEN"
- 		type 1
+		type 1
 		style WINDOW_STYLE_FILLED
 		textstyle 3
 		rect $evalfloat(.5*WINDOW_WIDTH-80) $evalfloat(.5*WINDOW_HEIGHT-12) 160 24
@@ -157,14 +151,11 @@ menuDef {
 }
 
 
-
-
-
 menuDef {
-    name "demos_list"
-    visible 0
-    fullscreen 0
-    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+name "demos_list"
+visible 0
+fullscreen 0
+rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
 	focusColor 1 .75 0 1
 	style 1
 	border 1
@@ -198,7 +189,7 @@ menuDef {
 	itemDef {
 		name windowtitle
 		text "DEMO WIEDERGABE"
- 		type 1
+		type 1
 		style WINDOW_STYLE_FILLED
 		textstyle 3
 		rect 2 4 $evalint(WINDOW_WIDTH-4) 20
@@ -218,7 +209,7 @@ menuDef {
 	itemDef {
 		name windowtitle
 		text "Verzeichnis:"
- 		type 1
+		type 1
 		style 0
 		textstyle 3
 		rect 10 25 76 20
@@ -234,7 +225,7 @@ menuDef {
 	itemDef {
 		name currentdir
 		cvar "ui_demoDir"
- 		type 1
+		type 1
 		style WINDOW_STYLE_FILLED
 		textstyle 3
 		rect 80 25 $evalint(WINDOW_WIDTH-4-80) 20
@@ -257,7 +248,7 @@ menuDef {
 	itemDef {
 		name windowtitle
 		text "DEMOS:"
- 		type 1
+		type 1
 		style 0
 		textstyle 3
 		rect 10 47 76 20
@@ -334,7 +325,6 @@ menuDef {
 		backcolor BACK_DEF
 		mouseEnter { setitemcolor bttn_renamedemo backcolor HILIT_ENTR }
 		mouseExit { setitemcolor bttn_renamedemo backcolor HILIT_EXIT }
-
 		visible 0
 		action {
 			play "sound/misc/nomenu.wav";
@@ -398,25 +388,22 @@ menuDef {
 // DELETE Demo pop-up... currently not used :(
 /*
 menuDef {
-    name "demos_delete"
-    visible 0
-    fullscreen 0
-    rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
+name "demos_delete"
+visible 0
+fullscreen 0
+rect WINDOW_X WINDOW_Y WINDOW_WIDTH WINDOW_HEIGHT
 	focusColor 1 .75 0 1
 	style 1
 	border 0
 
-
 	onClose {
 		open demos_list;
 	}
-
 	onEsc {
 		close demos_delete;
 	}
 
 	/////////////
-
 
 	itemDef {
 		name window
@@ -432,7 +419,7 @@ menuDef {
 	itemDef {
 		name windowtitle
 		text "DEMO LÖSCHEN"
- 		type 1
+		type 1
 		style WINDOW_STYLE_FILLED
 		textstyle 3
 		rect $evalfloat(.5*WINDOW_WIDTH-160+2) $evalfloat(.5*WINDOW_HEIGHT-50+4) $evalint(320-4) 20
@@ -497,6 +484,5 @@ menuDef {
 			close demos_delete
 		}
 	}
-
 }
 */
