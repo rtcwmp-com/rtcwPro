@@ -1056,9 +1056,11 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			// JPW NERVE -- if LT is selected but illegal weapon, set to team-specific SMG
 			if ( ( pc == PC_LT ) && ( client->sess.playerWeapon > 5 ) ) {
 				if ( client->sess.sessionTeam == TEAM_RED ) {
-					client->sess.playerWeapon = 3;
+					client->sess.playerWeapon = WP_MP40;
+					client->pers.mainWeapon = WP_MP40;
 				} else {
-					client->sess.playerWeapon = 4;
+					client->sess.playerWeapon = WP_THOMPSON;
+					client->pers.mainWeapon = WP_THOMPSON;
 				}
 			}
 			// jpw
@@ -1073,6 +1075,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
 					}
 					client->ps.weapon = WP_MP40;
+					client->pers.mainWeapon = WP_MP40;
 					break;
 
 				case 4:     // WP_THOMPSON
@@ -1084,6 +1087,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
 					}
 					client->ps.weapon = WP_THOMPSON;
+					client->pers.mainWeapon = WP_THOMPSON;
 					break;
 
 				case 5:     // WP_STEN
@@ -1095,6 +1099,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 						client->ps.ammo[BG_FindAmmoForWeapon( WP_STEN )] += (32 * ltClips);
 					}
 					client->ps.weapon = WP_STEN;
+					client->pers.mainWeapon = WP_STEN;
 					break;
 
 
@@ -1124,6 +1129,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					client->ps.ammoclip[BG_FindClipForWeapon( WP_MAUSER )] = 10;
 					client->ps.ammo[BG_FindAmmoForWeapon( WP_MAUSER )] = 10;
 					client->ps.weapon = WP_MAUSER;
+					client->pers.mainWeapon = WP_MAUSER;
 					break;
 
 				case 8:     // WP_PANZERFAUST
@@ -1142,6 +1148,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					COM_BitSet( client->ps.weapons, WP_PANZERFAUST );
 					client->ps.ammo[BG_FindAmmoForWeapon( WP_PANZERFAUST )] = 4;
 					client->ps.weapon = WP_PANZERFAUST;
+					client->pers.mainWeapon = WP_PANZERFAUST;
 					break;
 
 				case 9:     // WP_VENOM
@@ -1160,6 +1167,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 					COM_BitSet( client->ps.weapons, WP_VENOM );
 					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_VENOM )] = 500;
 					client->ps.weapon = WP_VENOM;
+					client->pers.mainWeapon = WP_VENOM;
 					break;
 
 				case 10:    // WP_FLAMETHROWER
@@ -1173,16 +1181,12 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							SetDefaultWeapon(client, qtrue);
 							break;
 						}
-
-						if (client->pers.restrictedWeapon != WP_FLAMETHROWER) {
-							(client->sess.sessionTeam == TEAM_RED) ? level.axisFlamer++ : level.alliedFlamer++;
-							client->pers.restrictedWeapon = WP_FLAMETHROWER;
-						}
 					}
 
 					COM_BitSet( client->ps.weapons, WP_FLAMETHROWER );
 					client->ps.ammoclip[BG_FindAmmoForWeapon( WP_FLAMETHROWER )] = 200;
 					client->ps.weapon = WP_FLAMETHROWER;
+					client->pers.mainWeapon = WP_FLAMETHROWER;
 					break;
 
 				default:    // give MP40 if given invalid weapon number
@@ -1195,6 +1199,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							client->ps.ammo[BG_FindAmmoForWeapon( WP_MP40 )] += (32 * ltClips);
 						}
 						client->ps.weapon = WP_MP40;
+						client->pers.mainWeapon = WP_MP40;
 					} else { // TEAM_BLUE
 						COM_BitSet( client->ps.weapons, WP_THOMPSON );
 						client->ps.ammoclip[BG_FindClipForWeapon( WP_THOMPSON )] += 30;
@@ -1204,6 +1209,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 							client->ps.ammo[BG_FindAmmoForWeapon( WP_THOMPSON )] += (30 * ltClips);
 						}
 						client->ps.weapon = WP_THOMPSON;
+						client->pers.mainWeapon = WP_THOMPSON;
 					}
 					break;
 			}

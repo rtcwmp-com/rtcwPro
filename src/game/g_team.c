@@ -1052,8 +1052,8 @@ void TeamplayInfoMessage(team_t team)
 			{
 				displayHealth = 0;
 			}
-
-			playerWeapon = player->client->ps.weapon;
+			
+			playerWeapon = player->client->pers.mainWeapon; // use new pers var becasue player->client->ps.weapon is current weapon being used
 			playerAmmoClip = player->client->ps.ammoclip[BG_FindAmmoForWeapon(playerWeapon)];
 			playerAmmo = player->client->ps.ammo[BG_FindAmmoForWeapon(playerWeapon)];
 			playerNades += player->client->ps.ammoclip[BG_FindClipForWeapon(WP_GRENADE_LAUNCHER)];

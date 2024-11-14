@@ -659,6 +659,7 @@ typedef struct {
 	int	samplehead;
 	unsigned int pingsample_counter;
 	int deathYaw;
+	int mainWeapon;
 } clientPersistant_t;
 
 // L0 - antilag port
