@@ -102,12 +102,14 @@ void setDefWeap(gclient_t *client, int clips) {
 		client->ps.ammo[BG_FindAmmoForWeapon(WP_MP40)] += (32 * clips);
 		client->ps.weapon = WP_MP40;
 		client->sess.playerWeapon = WP_MP40; // set this so Weapon Restrictions work
+		client->pers.mainWeapon = WP_MP40;
 	} else {
 		COM_BitSet(client->ps.weapons, WP_THOMPSON);
 		client->ps.ammoclip[BG_FindClipForWeapon(WP_THOMPSON)] += 30;
 		client->ps.ammo[BG_FindAmmoForWeapon(WP_THOMPSON)] += (30 * clips);
 		client->ps.weapon = WP_THOMPSON;
 		client->sess.playerWeapon = WP_THOMPSON; // set this so Weapon Restrictions work
+		client->pers.mainWeapon = WP_THOMPSON;
 	}
 }
 
@@ -130,7 +132,7 @@ void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 
 	// Medic
 	if (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC) {
-		if (client->sess.selectedWeapon != 0) {
+		if (client->sess.selectedWeapon != 0) { // this has never used as we never ported customMG cvar
 			COM_BitSet(client->ps.weapons, client->sess.selectedWeapon);
 			client->ps.ammoclip[BG_FindClipForWeapon(client->sess.selectedWeapon)] += ammo;
 			client->ps.ammo[BG_FindAmmoForWeapon(client->sess.selectedWeapon)] += (ammo * g_medicClips.integer);
@@ -146,7 +148,7 @@ void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 
 	// Engineer
 	if (client->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
-		if (client->sess.selectedWeapon != 0) {
+		if (client->sess.selectedWeapon != 0) { // this has never used as we never ported customMG cvar
 			COM_BitSet(client->ps.weapons, client->sess.selectedWeapon);
 			client->ps.ammoclip[BG_FindClipForWeapon(client->sess.selectedWeapon)] += ammo;
 			client->ps.ammo[BG_FindAmmoForWeapon(client->sess.selectedWeapon)] += (ammo * g_engineerClips.integer);
