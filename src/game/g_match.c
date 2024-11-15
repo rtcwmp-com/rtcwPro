@@ -102,14 +102,12 @@ void setDefWeap(gclient_t *client, int clips) {
 		client->ps.ammo[BG_FindAmmoForWeapon(WP_MP40)] += (32 * clips);
 		client->ps.weapon = WP_MP40;
 		client->sess.playerWeapon = WP_MP40; // set this so Weapon Restrictions work
-		client->pers.mainWeapon = WP_MP40;
 	} else {
 		COM_BitSet(client->ps.weapons, WP_THOMPSON);
 		client->ps.ammoclip[BG_FindClipForWeapon(WP_THOMPSON)] += 30;
 		client->ps.ammo[BG_FindAmmoForWeapon(WP_THOMPSON)] += (30 * clips);
 		client->ps.weapon = WP_THOMPSON;
 		client->sess.playerWeapon = WP_THOMPSON; // set this so Weapon Restrictions work
-		client->pers.mainWeapon = WP_THOMPSON;
 	}
 }
 
