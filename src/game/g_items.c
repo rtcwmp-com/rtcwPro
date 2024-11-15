@@ -545,6 +545,7 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 	else
 	{
 		other->client->ps.ammoclip[BG_FindClipForWeapon(ent->item->giTag)] = quantity;
+		other->client->pers.mainWeapon = ent->item->giTag; // change main weapon for cross hair info
 	}
 // jpw
 

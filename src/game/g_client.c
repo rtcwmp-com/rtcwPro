@@ -1047,6 +1047,13 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 			COM_BitSet( client->ps.weapons, WP_MEDKIT );
 			client->ps.ammoclip[BG_FindClipForWeapon( WP_MEDKIT )] = 1;
 			client->ps.ammo[WP_MEDKIT] = 1;
+
+			if (client->sess.sessionTeam == TEAM_RED) {
+				client->pers.mainWeapon = WP_MP40;
+			}
+			else {
+				client->pers.mainWeapon = WP_THOMPSON;
+			}
 		}
 		// jpw
 
