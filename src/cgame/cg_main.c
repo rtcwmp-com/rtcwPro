@@ -455,6 +455,17 @@ vmCvar_t g_fixedphysicsfps;
 vmCvar_t g_allowEnemySpawnTimer;
 vmCvar_t stats_matchid;
 
+vmCvar_t cg_customCrosshair;
+vmCvar_t cg_customCrosshairHeight;
+vmCvar_t cg_customCrosshairThickness;
+vmCvar_t cg_customCrosshairThicknessAlt;
+vmCvar_t cg_customCrosshairWidth;
+vmCvar_t cg_customCrosshairXOffset;
+vmCvar_t cg_customCrosshairYOffset;
+vmCvar_t cg_customCrosshairColor;
+vmCvar_t cg_customCrosshairColorAlt;
+vmCvar_t cg_customCrosshairVMirror;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -807,8 +818,18 @@ cvarTable_t cvarTable[] = {
 	{ &g_delagHitscan, "g_delagHitscan", "", CVAR_SERVERINFO },
 	{ &g_fixedphysicsfps, "g_fixedphysicsfps", "", CVAR_SERVERINFO },
 	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "", CVAR_SERVERINFO },
-	{ &stats_matchid, "stats_matchid", "", CVAR_SERVERINFO }
+	{ &stats_matchid, "stats_matchid", "", CVAR_SERVERINFO },
 
+	{ &cg_customCrosshair, "cg_customCrosshair", "1", CVAR_ARCHIVE },
+	{ &cg_customCrosshairHeight, "cg_customCrosshairHeight", "5", CVAR_ARCHIVE },
+	{ &cg_customCrosshairWidth, "cg_customCrosshairWidth", "5", CVAR_ARCHIVE },
+	{ &cg_customCrosshairThickness, "cg_customCrosshairThickness", "1", CVAR_ARCHIVE },
+	{ &cg_customCrosshairThicknessAlt, "cg_customCrosshairThicknessAlt", "1", CVAR_ARCHIVE },
+	{ &cg_customCrosshairColor, "cg_customCrosshairColor", "000000FF", CVAR_ARCHIVE },
+	{ &cg_customCrosshairColorAlt, "cg_customCrosshairColorAlt", "FFFFFFFF", CVAR_ARCHIVE },
+	{ &cg_customCrosshairXOffset, "cg_customCrosshairXOffset", "0", CVAR_ARCHIVE },
+	{ &cg_customCrosshairYOffset, "cg_customCrosshairYOffset", "0", CVAR_ARCHIVE },
+	{ &cg_customCrosshairVMirror, "cg_customCrosshairVMirror", "1", CVAR_ARCHIVE }
 	
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

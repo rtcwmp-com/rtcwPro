@@ -2458,6 +2458,70 @@ static void CG_DrawBinocReticle( void ) {
 
 void CG_FinishWeaponChange( int lastweap, int newweap ); // JPW NERVE
 
+void Com_ParseHexColor( float* c, const char* text, qbool hasAlpha )
+{
+	c[0] = 1.0f;
+	c[1] = 1.0f;
+	c[2] = 1.0f;
+	c[3] = 1.0f;
+
+	unsigned int uc[4];
+	if ( hasAlpha ) {
+		if ( sscanf(text, "%02X%02X%02X%02X", &uc[0], &uc[1], &uc[2], &uc[3]) != 4 )
+			return;
+		c[0] = uc[0] / 255.0f;
+		c[1] = uc[1] / 255.0f;
+		c[2] = uc[2] / 255.0f;
+		c[3] = uc[3] / 255.0f;
+	} else {
+		if ( sscanf(text, "%02X%02X%02X", &uc[0], &uc[1], &uc[2]) != 3 )
+			return;
+		c[0] = uc[0] / 255.0f;
+		c[1] = uc[1] / 255.0f;
+		c[2] = uc[2] / 255.0f;
+		c[3] = 1.0f;
+	}
+}
+/*
+==============
+CG_DrawCustomCrosshair
+==============
+*/
+static void CG_DrawCustomCrosshair( void ) {
+	vec4_t color = {0, 0, 0, 1};
+	vec4_t colorAlt = {0, 0, 0, 1};
+	if ( cg_customCrosshair.integer ) {
+		float h = cg_customCrosshairHeight.value;
+		float t = cg_customCrosshairThickness.value;
+		float ta = cg_customCrosshairThicknessAlt.value;
+		float w = cg_customCrosshairWidth.value;
+		float xOff = cg_customCrosshairXOffset.value;
+		float yOff = cg_customCrosshairYOffset.value;
+		char* colorString = cg_customCrosshairColor.string;
+		char* colorStringAlt = cg_customCrosshairColorAlt.string;
+		Com_ParseHexColor(color, colorString, qtrue);
+		Com_ParseHexColor(colorAlt, colorStringAlt, qtrue);
+
+		//Center = 320, 240
+		//lower left quad
+		CG_FillRect( 320-xOff-w, 240+yOff, w, t, colorAlt ); //left
+		CG_FillRect( 320-xOff-t, 240+yOff, t, h, colorAlt ); //vertical
+		//lower right quad
+		CG_FillRect( 320+xOff, 240+yOff, w, t, colorAlt ); //right
+		CG_FillRect( 320+xOff, 240+yOff, t, h, colorAlt ); //vertical
+
+		if(cg_customCrosshairVMirror.integer){
+			//upper left quad
+			CG_FillRect( 320-xOff-w, 240-yOff-t, w, t, colorAlt ); //left
+			CG_FillRect( 320-xOff-t, 240-yOff-h, t, h, colorAlt ); //vertical
+			//upper right quad
+			CG_FillRect( 320+xOff, 240-yOff-t, w, t, colorAlt ); //right
+			CG_FillRect( 320+xOff, 240-yOff-h, t, h, colorAlt ); //vertical
+		}
+
+		CG_FillRect( (640-ta)/2, (480-ta)/2, ta, ta, color ); //center
+	}
+}
 
 /*
 =================
@@ -2543,6 +2607,11 @@ static void CG_DrawCrosshair( void ) {
 	} else {
 		// OSPx - Crosshair (patched)
 		trap_R_SetColor(cg.xhairColor);
+	}
+
+	if( cg_customCrosshair.integer ){
+		CG_DrawCustomCrosshair();
+		return;
 	}
 
 	w = h = cg_crosshairSize.value;
