@@ -2367,7 +2367,7 @@ static void CG_DrawWeapReticle( void ) {
 
 			// hairs
 			CG_FillRect( 84, 239, 177, 2, color );   // left
-			CG_FillRect( 320, 242, 1, 58, color );   // center top
+			CG_FillRect( 319.5f, 240, 1, 60, color );   // center top
 			CG_FillRect( 319, 300, 2, 178, color );  // center bot
 			CG_FillRect( 380, 239, 177, 2, color );  // right
 		}
@@ -2504,22 +2504,22 @@ static void CG_DrawCustomCrosshair( void ) {
 
 		//Center = 320, 240
 		//lower left quad
-		CG_FillRect( 320-xOff-w, 240+yOff, w, t, colorAlt ); //left
-		CG_FillRect( 320-xOff-t, 240+yOff, t, h, colorAlt ); //vertical
+		CG_FillRect( 320-xOff-w, 240+yOff, w, t, color ); //left
+		CG_FillRect( 320-xOff-t, 240+yOff, t, h, color ); //vertical
 		//lower right quad
-		CG_FillRect( 320+xOff, 240+yOff, w, t, colorAlt ); //right
-		CG_FillRect( 320+xOff, 240+yOff, t, h, colorAlt ); //vertical
+		CG_FillRect( 320+xOff, 240+yOff, w, t, color ); //right
+		CG_FillRect( 320+xOff, 240+yOff, t, h, color ); //vertical
 
 		if(cg_customCrosshairVMirror.integer){
 			//upper left quad
-			CG_FillRect( 320-xOff-w, 240-yOff-t, w, t, colorAlt ); //left
-			CG_FillRect( 320-xOff-t, 240-yOff-h, t, h, colorAlt ); //vertical
+			CG_FillRect( 320-xOff-w, 240-yOff-t, w, t, color ); //left
+			CG_FillRect( 320-xOff-t, 240-yOff-h, t, h, color ); //vertical
 			//upper right quad
-			CG_FillRect( 320+xOff, 240-yOff-t, w, t, colorAlt ); //right
-			CG_FillRect( 320+xOff, 240-yOff-h, t, h, colorAlt ); //vertical
+			CG_FillRect( 320+xOff, 240-yOff-t, w, t, color ); //right
+			CG_FillRect( 320+xOff, 240-yOff-h, t, h, color ); //vertical
 		}
 
-		CG_FillRect( (640-ta)/2, (480-ta)/2, ta, ta, color ); //center
+		CG_FillRect( (640-ta)/2, (480-ta)/2, ta, ta, colorAlt ); //center
 	}
 }
 
