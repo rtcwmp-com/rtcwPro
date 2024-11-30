@@ -2367,7 +2367,7 @@ static void CG_DrawWeapReticle( void ) {
 
 			// hairs
 			CG_FillRect( 84, 239, 177, 2, color );   // left
-			CG_FillRect( 320, 242, 1, 58, color );   // center top
+			CG_FillRect( 319.5f, 240, 1, 60, color );   // center top
 			CG_FillRect( 319, 300, 2, 178, color );  // center bot
 			CG_FillRect( 380, 239, 177, 2, color );  // right
 		}
