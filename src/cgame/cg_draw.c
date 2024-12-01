@@ -2497,6 +2497,8 @@ static void CG_DrawCustomCrosshair( void ) {
 		float w = cg_customCrosshairWidth.value;
 		float xOff = cg_customCrosshairXOffset.value;
 		float yOff = cg_customCrosshairYOffset.value;
+		float xGap = cg_customCrosshairXGap.value;
+		float yGap = cg_customCrosshairYGap.value;
 		char* colorString = cg_customCrosshairColor.string;
 		char* colorStringAlt = cg_customCrosshairColorAlt.string;
 		Com_ParseHexColor(color, colorString, qtrue);
@@ -2504,22 +2506,22 @@ static void CG_DrawCustomCrosshair( void ) {
 
 		//Center = 320, 240
 		//lower left quad
-		CG_FillRect( 320-xOff-w, 240+yOff, w, t, colorAlt ); //left
-		CG_FillRect( 320-xOff-t, 240+yOff, t, h, colorAlt ); //vertical
+		CG_FillRect( 320-xGap-xOff-w, 240+yOff, w, t, color ); //left
+		CG_FillRect( 320-xOff-t, 240+yOff+yGap, t, h, color ); //vertical
 		//lower right quad
-		CG_FillRect( 320+xOff, 240+yOff, w, t, colorAlt ); //right
-		CG_FillRect( 320+xOff, 240+yOff, t, h, colorAlt ); //vertical
+		CG_FillRect( 320+xOff+xGap, 240+yOff, w, t, color ); //right
+		CG_FillRect( 320+xOff, 240+yOff+yGap, t, h, color ); //vertical
 
 		if(cg_customCrosshairVMirror.integer){
 			//upper left quad
-			CG_FillRect( 320-xOff-w, 240-yOff-t, w, t, colorAlt ); //left
-			CG_FillRect( 320-xOff-t, 240-yOff-h, t, h, colorAlt ); //vertical
+			CG_FillRect( 320-xGap-xOff-w, 240-yOff-t, w, t, color ); //left
+			CG_FillRect( 320-xOff-t, 240-yGap-yOff-h, t, h, color ); //vertical
 			//upper right quad
-			CG_FillRect( 320+xOff, 240-yOff-t, w, t, colorAlt ); //right
-			CG_FillRect( 320+xOff, 240-yOff-h, t, h, colorAlt ); //vertical
+			CG_FillRect( 320+xGap+xOff, 240-yOff-t, w, t, color ); //right
+			CG_FillRect( 320+xOff, 240-yGap-yOff-h, t, h, color ); //vertical
 		}
 
-		CG_FillRect( (640-ta)/2, (480-ta)/2, ta, ta, color ); //center
+		CG_FillRect( (640-ta)/2, (480-ta)/2, ta, ta, colorAlt ); //center
 	}
 }
 
