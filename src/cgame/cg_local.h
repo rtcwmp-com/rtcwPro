@@ -3124,3 +3124,16 @@ enum
 	BAR_DECOR = BIT(10),
 	BAR_ICON = BIT(11),
 };
+
+extern vmCvar_t cg_customCrosshair;
+extern vmCvar_t cg_customCrosshairHeight;
+extern vmCvar_t cg_customCrosshairThickness;
+extern vmCvar_t cg_customCrosshairThicknessAlt;
+extern vmCvar_t cg_customCrosshairWidth;
+extern vmCvar_t cg_customCrosshairXOffset;
+extern vmCvar_t cg_customCrosshairYOffset;
+extern vmCvar_t cg_customCrosshairColor;
+extern vmCvar_t cg_customCrosshairColorAlt;
+extern vmCvar_t cg_customCrosshairVMirror;
+extern vmCvar_t cg_customCrosshairXGap;
+extern vmCvar_t cg_customCrosshairYGap;
