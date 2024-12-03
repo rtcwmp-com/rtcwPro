@@ -51,4 +51,4 @@ Installer powered by Advanced Installer: https://www.advancedinstaller.com/
   
  - [Release 1.3.1](changelog/1.3.1-changelog.txt)
 
- - [Release 1.4](changelog/1.4-changelog) working Linux client
+ - [Release 1.4](changelog/1.4-changelog.txt) working Linux client
