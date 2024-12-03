@@ -822,7 +822,7 @@ cvarTable_t cvarTable[] = {
 	{ &g_allowEnemySpawnTimer, "g_allowEnemySpawnTimer", "", CVAR_SERVERINFO },
 	{ &stats_matchid, "stats_matchid", "", CVAR_SERVERINFO },
 
-	{ &cg_customCrosshair, "cg_customCrosshair", "1", CVAR_ARCHIVE },
+	{ &cg_customCrosshair, "cg_customCrosshair", "0", CVAR_ARCHIVE },
 	{ &cg_customCrosshairHeight, "cg_customCrosshairHeight", "5", CVAR_ARCHIVE },
 	{ &cg_customCrosshairWidth, "cg_customCrosshairWidth", "5", CVAR_ARCHIVE },
 	{ &cg_customCrosshairThickness, "cg_customCrosshairThickness", "1", CVAR_ARCHIVE },
