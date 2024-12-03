@@ -57,7 +57,7 @@ assets:
 	cd ../MAIN && zip -r ../build/rtcwpro/rtcwpro_assets.pk3 ./*
 
 xhairs:
-	cd ../Assets/xhair && zip -r ../build/rtcwpro/rtcwpro_xhairs.pk3 ./*
+	cd ../Assets/xhair && zip -r ../../build/rtcwpro/rtcwpro_xhairs.pk3 ./*
 
 models:
 	cd ../Assets && mkdir -p models/multiplayer/medpack && cp medpack.jpg models/multiplayer/medpack && zip -r ../build/rtcwpro/rtcwpro_models.pk3 ./models rtcwpro_models.dat && rm -rf ./models
