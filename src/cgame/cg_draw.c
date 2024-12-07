@@ -2367,7 +2367,7 @@ static void CG_DrawWeapReticle( void ) {
 
 			// hairs
 			CG_FillRect( 84, 239, 177, 2, color );   // left
-			CG_FillRect( 320, 242, 1, 58, color );   // center top
+			CG_FillRect( 319.5f, 240, 1, 60, color );   // center top
 			CG_FillRect( 319, 300, 2, 178, color );  // center bot
 			CG_FillRect( 380, 239, 177, 2, color );  // right
 		}
@@ -2458,6 +2458,72 @@ static void CG_DrawBinocReticle( void ) {
 
 void CG_FinishWeaponChange( int lastweap, int newweap ); // JPW NERVE
 
+void Com_ParseHexColor( float* c, const char* text, qbool hasAlpha )
+{
+	c[0] = 1.0f;
+	c[1] = 1.0f;
+	c[2] = 1.0f;
+	c[3] = 1.0f;
+
+	unsigned int uc[4];
+	if ( hasAlpha ) {
+		if ( sscanf(text, "%02X%02X%02X%02X", &uc[0], &uc[1], &uc[2], &uc[3]) != 4 )
+			return;
+		c[0] = uc[0] / 255.0f;
+		c[1] = uc[1] / 255.0f;
+		c[2] = uc[2] / 255.0f;
+		c[3] = uc[3] / 255.0f;
+	} else {
+		if ( sscanf(text, "%02X%02X%02X", &uc[0], &uc[1], &uc[2]) != 3 )
+			return;
+		c[0] = uc[0] / 255.0f;
+		c[1] = uc[1] / 255.0f;
+		c[2] = uc[2] / 255.0f;
+		c[3] = 1.0f;
+	}
+}
+/*
+==============
+CG_DrawCustomCrosshair
+==============
+*/
+static void CG_DrawCustomCrosshair( void ) {
+	vec4_t color = {0, 0, 0, 1};
+	vec4_t colorAlt = {0, 0, 0, 1};
+	if ( cg_customCrosshair.integer ) {
+		float h = cg_customCrosshairHeight.value;
+		float t = cg_customCrosshairThickness.value;
+		float ta = cg_customCrosshairThicknessAlt.value;
+		float w = cg_customCrosshairWidth.value;
+		float xOff = cg_customCrosshairXOffset.value;
+		float yOff = cg_customCrosshairYOffset.value;
+		float xGap = cg_customCrosshairXGap.value;
+		float yGap = cg_customCrosshairYGap.value;
+		char* colorString = cg_customCrosshairColor.string;
+		char* colorStringAlt = cg_customCrosshairColorAlt.string;
+		Com_ParseHexColor(color, colorString, qtrue);
+		Com_ParseHexColor(colorAlt, colorStringAlt, qtrue);
+
+		//Center = 320, 240
+		//lower left quad
+		CG_FillRect( 320-xGap-xOff-w, 240+yOff, w, t, color ); //left
+		CG_FillRect( 320-xOff-t, 240+yOff+yGap, t, h, color ); //vertical
+		//lower right quad
+		CG_FillRect( 320+xOff+xGap, 240+yOff, w, t, color ); //right
+		CG_FillRect( 320+xOff, 240+yOff+yGap, t, h, color ); //vertical
+
+		if(cg_customCrosshairVMirror.integer){
+			//upper left quad
+			CG_FillRect( 320-xGap-xOff-w, 240-yOff-t, w, t, color ); //left
+			CG_FillRect( 320-xOff-t, 240-yGap-yOff-h, t, h, color ); //vertical
+			//upper right quad
+			CG_FillRect( 320+xGap+xOff, 240-yOff-t, w, t, color ); //right
+			CG_FillRect( 320+xOff, 240-yGap-yOff-h, t, h, color ); //vertical
+		}
+
+		CG_FillRect( (640-ta)/2, (480-ta)/2, ta, ta, colorAlt ); //center
+	}
+}
 
 /*
 =================
@@ -2543,6 +2609,11 @@ static void CG_DrawCrosshair( void ) {
 	} else {
 		// OSPx - Crosshair (patched)
 		trap_R_SetColor(cg.xhairColor);
+	}
+
+	if( cg_customCrosshair.integer ){
+		CG_DrawCustomCrosshair();
+		return;
 	}
 
 	w = h = cg_crosshairSize.value;
@@ -3546,15 +3617,11 @@ static void CG_DrawWarmup( void ) {
 	}
 
 	s = va( "%s %i", CG_TranslateString( "^3(WARMUP) Match begins in: ^1" ), sec + 1 );
-
-	if (cg_announcer.integer)
-	{
-		if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
-		if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
-		if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
-		if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
-		if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
-	}
+	if (sec == 5) trap_S_StartLocalSound(cgs.media.count5Sound, CHAN_ANNOUNCER);
+	if (sec == 4) trap_S_StartLocalSound(cgs.media.count4Sound, CHAN_ANNOUNCER);
+	if (sec == 3) trap_S_StartLocalSound(cgs.media.count3Sound, CHAN_ANNOUNCER);
+	if (sec == 2) trap_S_StartLocalSound(cgs.media.count2Sound, CHAN_ANNOUNCER);
+	if (sec == 1) trap_S_StartLocalSound(cgs.media.count1Sound, CHAN_ANNOUNCER);
 
 	w = CG_DrawStrlen( s );
 	CG_DrawStringExt( 320 - w * 6, 120, s, colorWhite, qfalse, qtrue, 12, 18, 0 );

@@ -130,7 +130,7 @@ void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 
 	// Medic
 	if (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC) {
-		if (client->sess.selectedWeapon != 0) {
+		if (client->sess.selectedWeapon != 0) { // this has never used as we never ported customMG cvar
 			COM_BitSet(client->ps.weapons, client->sess.selectedWeapon);
 			client->ps.ammoclip[BG_FindClipForWeapon(client->sess.selectedWeapon)] += ammo;
 			client->ps.ammo[BG_FindAmmoForWeapon(client->sess.selectedWeapon)] += (ammo * g_medicClips.integer);
@@ -146,7 +146,7 @@ void SetDefaultWeapon(gclient_t *client, qboolean isSold) {
 
 	// Engineer
 	if (client->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) {
-		if (client->sess.selectedWeapon != 0) {
+		if (client->sess.selectedWeapon != 0) { // this has never used as we never ported customMG cvar
 			COM_BitSet(client->ps.weapons, client->sess.selectedWeapon);
 			client->ps.ammoclip[BG_FindClipForWeapon(client->sess.selectedWeapon)] += ammo;
 			client->ps.ammo[BG_FindAmmoForWeapon(client->sess.selectedWeapon)] += (ammo * g_engineerClips.integer);

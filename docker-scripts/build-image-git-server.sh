@@ -7,7 +7,7 @@ then
 	exit 1
 fi
 
-if [ ! -d "dockerfiles/build" ]; then
+if [ -d "dockerfiles/build" ]; then
 rm -rf dockerfiles/build
 fi
 cp -r ../build dockerfiles

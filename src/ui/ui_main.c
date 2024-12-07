@@ -5523,7 +5523,7 @@ static void UI_BuildServerDisplayList( qboolean force ) {
 	trap_Cvar_VariableStringBuffer( "cl_motdString", uiInfo.serverStatus.motd, sizeof( uiInfo.serverStatus.motd ) );
 	len = strlen( uiInfo.serverStatus.motd );
 	if ( len == 0 ) {
-		strcpy( uiInfo.serverStatus.motd, va( "Wolf Multiplayer - Version: %s | Codename: %s", Q3_VERSION, CODENAME ) );
+		strcpy( uiInfo.serverStatus.motd, va( "Wolf MP - Version: %s | Mod: %s", Q3_VERSION, fs_game.string) );
 		len = strlen( uiInfo.serverStatus.motd );
 	}
 	if ( len != uiInfo.serverStatus.motdLen ) {
@@ -7549,7 +7549,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	info[0] = '\0';
 
 	if ( !Q_stricmp( cstate.servername,"localhost" ) ) {
-		Text_PaintCenter( centerPoint, yStart + 48, scale, colorWhite,va( "Wolf Multiplayer - Version: %s | Codename: %s", Q3_VERSION, CODENAME ), ITEM_TEXTSTYLE_SHADOWEDMORE );
+		Text_PaintCenter( centerPoint, yStart + 48, scale, colorWhite,va( "Wolf MP - Version: %s | Mod: %s", Q3_VERSION, fs_game.string ), ITEM_TEXTSTYLE_SHADOWEDMORE );
 	} else {
 		strcpy( text, va( trap_TranslateString( "Connecting to %s" ), cstate.servername ) );
 		Text_PaintCenter( centerPoint, yStart + 48, scale, colorWhite,text, ITEM_TEXTSTYLE_SHADOWEDMORE );

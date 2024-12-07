@@ -1520,6 +1520,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	trap_FS_FOpenFile("rtcwpro_assets.dat", &i, FS_READ);
 	trap_FS_FCloseFile(i);
 
+	trap_FS_FOpenFile("rtcwpro_xhair.dat", &i, FS_READ);
+	trap_FS_FCloseFile(i);
+
 	G_RegisterCvars();
 
 	// Xian enforcemaxlives stuff
