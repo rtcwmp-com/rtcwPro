@@ -1,5 +1,5 @@
 
-all: clean dependencies binaries assets models binaries-win resources
+all: clean dependencies binaries assets models binaries-win resources xhairs
 all-valgrind: clean dependencies binaries-valgrind assets models binaries-win resources
 
 dependencies:
@@ -55,6 +55,9 @@ binaries-valgrind:
 
 assets:
 	cd ../MAIN && zip -r ../build/rtcwpro/rtcwpro_assets.pk3 ./*
+
+xhairs:
+	cd ../Assets/xhair && zip -r ../../build/rtcwpro/rtcwpro_xhairs.pk3 ./*
 
 models:
 	cd ../Assets && mkdir -p models/multiplayer/medpack && cp medpack.jpg models/multiplayer/medpack && zip -r ../build/rtcwpro/rtcwpro_models.pk3 ./models rtcwpro_models.dat && rm -rf ./models

@@ -29,6 +29,7 @@ rm -rf $RTCWPRO_SRC/build/objs
 mv $RTCWPRO_SRC/build/rtcwpro/rtcwpro_bin.pk3 $RTCWPRO_SRC/build/rtcwpro/rtcwpro_bin-$(date +%Y%m%d).pk3
 mv $RTCWPRO_SRC/build/rtcwpro/rtcwpro_assets.pk3 $RTCWPRO_SRC/build/rtcwpro/rtcwpro_assets-$(date +%Y%m%d).pk3
 mv $RTCWPRO_SRC/build/rtcwpro/rtcwpro_models.pk3 $RTCWPRO_SRC/build/rtcwpro/rtcwpro_models-$(date +%Y%m%d).pk3
+mv $RTCWPRO_SRC/build/rtcwpro/rtcwpro_xhairs.pk3 $RTCWPRO_SRC/build/rtcwpro/rtcwpro_xhairs-$(date +%Y%m%d).pk3
 
 # load a shell into the image
 #docker run -it -v /var/run/docker.sock:/var/run/docker.sock \
