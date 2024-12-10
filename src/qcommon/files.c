@@ -2603,9 +2603,6 @@ void FS_Path_f( void ) {
 						Z_Free(s->pack->buildBuffer);
 						Z_Free(s->pack);
 					}
-					if (s->dir) {
-						Z_Free(s->dir);
-					}
 					p->next = s->next;
 					Z_Free(s);
 					s = p;
@@ -2617,6 +2614,7 @@ void FS_Path_f( void ) {
 			}
 		} else {
 			Com_Printf( "%s/%s\n", s->dir->path, s->dir->gamedir );
+			p = s; //use the directories too if updating the next pointers
 		}
 	}
 
