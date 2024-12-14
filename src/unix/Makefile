@@ -125,7 +125,7 @@ client: NASM := nasm
 client: CFLAGS := $(CFLAGSREL) -m32 -DBOTLIB -DDLL_ONLY -I../../deps/libunwind/build/include/ -I../../deps/curl/build/include/  -I../../deps/libjpeg-turbo/build/ 
 client: CPPFLAGS := $(CFLAGS)
 client: LDFLAGS := \
-	 -m32 -ldl -lm -lstdc++ -lSDL2 -lc
+	 -m32 -ldl -lm -lstdc++ -lSDL2 -lc -pthread
 client: $(CLOBJS)
 	$(CC) -g -o wolfMP.x86 $(CLOBJS) ../../deps/libunwind/build/lib/libunwind.a ../../deps/curl/build/lib/libcurl.a ../../deps/openssl/build/lib/libssl.a ../../deps/openssl/build/lib/libcrypto.a  ../../deps/libjpeg-turbo/build/libturbojpeg.a $(LDFLAGS)
 	#strip -s wolfMP.x86
