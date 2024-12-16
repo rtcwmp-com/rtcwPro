@@ -7,6 +7,7 @@ dependencies:
 	mkdir -p ../build
 	cp ../deps/libjpeg-turbo/build-win/libjpeg-62.dll ../build
 	cp ../deps/curl-win/curl/bin/libcurl.dll ../build
+	cp ../deps/jansson/build-win/bin/libjansson-4.dll ../build
 
 binaries:
 	mkdir -p ../build/rtcwpro
