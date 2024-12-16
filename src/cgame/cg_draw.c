@@ -1078,9 +1078,7 @@ static float CG_DrawRespawnTimer(float y) {
 		return y;
 	}
 
-	if (cgs.gamestate != GS_PLAYING)
-		str = "";
-	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
 		str = "";
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED)
 		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
@@ -1319,11 +1317,7 @@ static float CG_DrawProRespawnTimer(float y) {
 		return y;
 	}
 
-	if (cgs.gamestate != GS_PLAYING) {
-		return y;
-	}
-
-	if (cgs.clientinfo[cg.clientNum].shoutStatus) {
+	if (cgs.clientinfo[cg.clientNum].shoutStatus || cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR) {
 		return y;
 	}
 
