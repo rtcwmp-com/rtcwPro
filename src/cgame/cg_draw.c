@@ -1818,11 +1818,11 @@ CG_DrawDisconnect
 Should we draw something differnet for long lag vs no packets?
 ==============
 */
-static void CG_DrawDisconnect( void ) {
+static void CG_DrawDisconnect(void) {
 	float x, y;
 	int cmdNum;
 	usercmd_t cmd;
-	const char      *s;
+	const char* s = "";
 	int w;          // bk010215 - FIXME char message[1024];
 
 	// OSPx - Fix for "connection interrupted" when user is previewing demo with timescale lower than 0.5...
@@ -1838,16 +1838,18 @@ static void CG_DrawDisconnect( void ) {
 
 	// draw the phone jack if we are completely past our buffers
 	cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
-	trap_GetUserCmd( cmdNum, &cmd );
-	if ( cmd.serverTime <= cg.snap->ps.commandTime
-		 || cmd.serverTime > cg.time ) { // special check for map_restart // bk 0102165 - FIXME
+	trap_GetUserCmd(cmdNum, &cmd);
+	if (cmd.serverTime <= cg.snap->ps.commandTime
+		|| cmd.serverTime > cg.time) { // special check for map_restart // bk 0102165 - FIXME
 		return;
 	}
 
 	// also add text in center of screen
-	s = CG_TranslateString( "CI" ); // bk 010215 - FIXME
-	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
-	
+	if (cg_drawCI.integer)
+		s = CG_TranslateString("CI"); // bk 010215 - FIXME
+
+	w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
+
 	//320 - w / 2, 80
 	if (cg_lagometer.integer)
 		CG_DrawBigString(cg_lagometerX.integer + 10, cg_lagometerY.integer, s, 1.0F );
