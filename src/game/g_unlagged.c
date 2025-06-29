@@ -106,7 +106,7 @@ Move a client back to where he was at the specified "time"
 */
 void G_TimeShiftClient( gentity_t *ent, int time, qboolean debug, gentity_t *debugger ) {
 	int		j, k;
-	//char msg[2048];
+	char msg[2048];
 
 	// this will dump out the head index, and the time for all the stored positions
 

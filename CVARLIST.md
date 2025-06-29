@@ -85,6 +85,7 @@
 | cg_notifyTextWidth | `integer` | `0-99` | `8` | Change kill feed char width |
 | cg_notifyTextHeight | `integer` | `0-99` | `8` | Change kill feed char height |
 | cg_notifyTextShadow | `integer` | `0-1` | `0` | Enable/disable shadowing of kill feed |
+| cg_notifyPlayerOnly | `integer` | `0-1` | `0` | Only show your own kills in the killfeed (demo only) |
 | cg_chatX | `integer` | `-999-999` | `0` | Change chat position in the horizontal axis |
 | cg_chatY | `integer` | `-999-999` | `385` | Change chat position in the vertical axis |
 | cg_teamOverlayX | `integer` | `-999-999` | `640` | Change team overlay position in the horizontal axis |
@@ -101,6 +102,21 @@
 | cg_priorityTextY | `integer` | `-999-999` | `0` | Change objective taken/returned prints position in the vertical axis |
 | cg_lagometer | `integer` | `0-9999` | `0` | 1 - normal, 2 - draw speed, each increase from 2 increases max speed drawn, 2 - 2048, 3 - 3072, etc. |
 | cg_draw2d | `integer` | `0-2` | `1` | `0` - No HUD, `1` - Normal HUD, `2` - xhair, killfeed, frag center print (demo only) |
+| cg_showLimboMessage | `integer` | `0-1` | `0` | Hide the Press X to open Limbo Menu message while dead | 
+| cg_teamObituaryColors | `integer` | `0-1` | `0` | Force teammate and enemy name colors based on team |
+| cg_customCrosshair | `integer` | `0-1` | `0` | Enable/Disable the custom crosshair cvars |
+| cg_customCrosshairHeight | `float` | `0.0-999.0` | `5` | Vertical span of the crosshair |
+| cg_customCrosshairWidth | `float` | `0.0-999.0` | `5` | Horizontal span of the crosshair |
+| cg_customCrosshairThickness | `float` | `0.0-999.0` | `1` | Thickness of the non-center crosshair elements |
+| cg_customCrosshairThicknessAlt | `float` | `0.0-999.0` | `1` | Thickness of the crosshair center dot |
+| cg_customCrosshairColor | `string` | `RRGGBBAA` | `000000FF` | Hex color code in RGBA (00-FF range) of the non-center elements |
+| cg_customCrosshairColorAlt | `string` | `RRGGBBAA` | `FFFFFFFF` | Hex color code in RGBA (00-FF range) of the center dot |
+| cg_customCrosshairXOffset | `float` | `-999.0-999.0` | `0` | X-Axis offset from center of the non-center elements |
+| cg_customCrosshairYOffset | `float` | `-999.0-999.0` | `0` | Y-Axis offset from center of the non-center elements |
+| cg_customCrosshairXGap | `float` | `0.0-999.0` | `0` | X-Axis gap from center of the horizontal crosshair elements |
+| cg_customCrosshairYGap | `float` | `0.0-999.0` | `0` | Y-Axis gap from center of the vertical crosshair elements |
+| cg_customCrosshairVMirror | `integer` | `0-1` | `1` | Horizontally mirror the lower half of the crosshair to the upper half |
+
 
 # Server  
 #### Engine (sv)

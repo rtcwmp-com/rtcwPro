@@ -50,20 +50,6 @@ void CL_TakeSS(char* name) {
 }
 
 /*
-===============
-RTCWPro - lazy way
-to get path to ss
-CL_GetFilePath
-===============
-*/
-char* CL_GetFilePath(char* filename) {
-	char* basepath = Cvar_VariableString("fs_basepath");
-	char* fs = Cvar_VariableString("fs_game");
-
-	return va("%s/%s/screenshots/%s.jpg", basepath, fs, filename);
-}
-
-/*
 ================
 ScreenShot request from server
 ================
@@ -96,7 +82,7 @@ void CL_GenerateSS(char* address, char* hookid, char* hooktoken, char* waittime,
 	filename = va("%i", n);
 	CL_TakeSS(filename);
 
-	filepath = CL_GetFilePath(filename);
+	filepath = Sys_GetScreenshotPath(filename);
 
 	//Com_Printf("CL_GenerateSS:\n address: %s\n hookid: %s\n hooktoken: %s\n waittime: %s\n cleanName: %s\n guid: %s\n filepath: %s\n filename: %s\n",
 		//address, hookid, hooktoken, waittime, cleanName, guid, filepath, filename);

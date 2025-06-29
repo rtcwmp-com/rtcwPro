@@ -39,3 +39,28 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_PATH                MAX_QPATH
 #define Maximum( x,y )            ( x > y ? x : y )
 #define Minimum( x,y )            ( x < y ? x : y )
+
+#ifndef MAX_QPATH
+  #define MAX_QPATH 64
+#endif
+
+// compiler specific attribute translation
+// msvc should come first, so if clang is in msvc mode it gets the right defines
+
+// NOTE: this will only do checking in msvc with versions that support /analyze
+#ifdef _MSC_VER
+#include <stddef.h>
+#ifdef _USE_ATTRIBUTES_FOR_SAL
+#undef _USE_ATTRIBUTES_FOR_SAL
+#endif
+/* nolint */
+#define _USE_ATTRIBUTES_FOR_SAL 1
+#include <sal.h> // @manual
+#define PRINTF_FORMAT _Printf_format_string_
+#define PRINTF_FORMAT_ATTR(format_param, dots_param) /**/
+#else
+#define PRINTF_FORMAT /**/
+#define PRINTF_FORMAT_ATTR(format_param, dots_param) \
+  __attribute__((__format__(__printf__, format_param, dots_param)))
+#endif
+

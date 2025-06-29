@@ -394,7 +394,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wolf.rc" />
+    <ResourceCompile Include="win32\wolf.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="win32\wolf.ico" />

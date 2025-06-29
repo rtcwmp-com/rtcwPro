@@ -306,6 +306,7 @@ vmCvar_t g_floatPlayerPosition;
 vmCvar_t g_delagHitscan;
 vmCvar_t g_maxExtrapolatedFrames;
 vmCvar_t g_maxLagCompensation;
+vmCvar_t g_delagMissiles;
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -559,7 +560,8 @@ cvarTable_t gameCvarTable[] = {
 	// unlagged
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse },
-	{ &g_maxLagCompensation, "g_maxLagCompensation", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue }
+	{ &g_maxLagCompensation, "g_maxLagCompensation", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_delagMissiles, "g_delagMissiles", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue }
 };
 
 // bk001129 - made static to avoid aliasing
@@ -1516,6 +1518,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	trap_FS_FCloseFile(i);
 
 	trap_FS_FOpenFile("rtcwpro_assets.dat", &i, FS_READ);
+	trap_FS_FCloseFile(i);
+
+	trap_FS_FOpenFile("rtcwpro_xhair.dat", &i, FS_READ);
 	trap_FS_FCloseFile(i);
 
 	G_RegisterCvars();
@@ -3572,7 +3577,7 @@ void G_RunFrame( int levelTime ) {
 		) {
 			// L0 - Pause dump
 			if ( level.paused == PAUSE_NONE ) {
-				if (g_antilag.integer != 2) {
+				if (g_antilag.integer != 2 || g_delagMissiles.integer == 0) {
 					G_RunMissile(ent);
 				}
 			} else {
@@ -3623,7 +3628,7 @@ void G_RunFrame( int levelTime ) {
 	// Ridah, move the AI
 	//AICast_StartServerFrame ( level.time );
 
-	if (g_antilag.integer == 2) // unlagged
+	if (g_antilag.integer == 2 && g_delagMissiles.integer == 1) // unlagged
 	{
 		//unlagged - backward reconciliation #2
 		// NOW run the missiles, with all players backward-reconciled
@@ -3652,7 +3657,7 @@ void G_RunFrame( int levelTime ) {
 	}
 
 	end = trap_Milliseconds();
-	
+  
 	start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];

@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../client/client.h"
 #include "win_local.h"
+#include "../renderer/tr_public.h"
 
 WinVars_t g_wv;
 
@@ -41,7 +42,6 @@ static UINT MSH_MOUSEWHEEL;
 // Console variables that we need to access from this module
 cvar_t      *vid_xpos;          // X coordinate of window position
 cvar_t      *vid_ypos;          // Y coordinate of window position
-cvar_t      *r_fullscreen;
 
 #define VID_NUM_MODES ( sizeof( vid_modes ) / sizeof( vid_modes[0] ) )
 

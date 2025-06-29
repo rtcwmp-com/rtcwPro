@@ -4477,6 +4477,8 @@ const colorTable_t OSP_Colortable[] =
 	{ NULL, NULL }
 };
 
+player_ready_status_t player_ready_status[MAX_CLIENTS];
+
 extern void trap_Cvar_Set(const char *var_name, const char *value);
 void BG_setCrosshair(char *colString, float *col, float alpha, char *cvarName) {
 	char *s = colString;

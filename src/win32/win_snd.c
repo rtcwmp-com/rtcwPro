@@ -68,7 +68,6 @@ HWAVEOUT hWaveOut;
 
 WAVEOUTCAPS wavecaps;
 
-DWORD gSndBufSize;
 
 MMTIME mmstarttime;
 
@@ -338,7 +337,7 @@ Initialize direct sound
 Returns false if failed
 ==================
 */
-int SNDDMA_Init( void ) {
+qboolean SNDDMA_Init( void ) {
 
 	memset( (void *)&dma, 0, sizeof( dma ) );
 	dsound_init = 0;

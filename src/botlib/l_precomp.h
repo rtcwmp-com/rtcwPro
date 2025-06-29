@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
  *
  *
  *****************************************************************************/
+#include "l_utils.h"
 
 #ifndef PATH_SEPERATORSTR
 	#if defined( WIN32 ) | defined( _WIN32 ) | defined( __NT__ ) | defined( __WINDOWS__ ) | defined( __WINDOWS_386__ )
@@ -150,9 +151,9 @@ source_t *LoadSourceMemory( char *ptr, int length, char *name );
 //free the given source
 void FreeSource( source_t *source );
 //print a source error
-void QDECL SourceError(source_t *source, char *str, ...) __attribute__ ((format (printf, 2, 3)));
+void QDECL SourceError(source_t *source, PRINTF_FORMAT char *str, ...) PRINTF_FORMAT_ATTR(2, 3);
 //print a source warning
-void QDECL SourceWarning(source_t *source, char *str, ...)  __attribute__ ((format (printf, 2, 3)));
+void QDECL SourceWarning(source_t *source, PRINTF_FORMAT char *str, ...)  PRINTF_FORMAT_ATTR(2, 3);
 
 //
 int PC_LoadSourceHandle( const char *filename );

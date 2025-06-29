@@ -700,6 +700,8 @@ void CL_NDP_HandleError();
 
 void	Sys_Sleep( int ms );
 
+char* Sys_GetScreenshotPath(char* filename);
+
 
 #endif // !__CLIENT_H
 

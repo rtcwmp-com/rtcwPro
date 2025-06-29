@@ -1,0 +1,28 @@
+FROM ubuntu:18.04
+
+ARG BRANCH
+ENV BRANCH=${BRANCH}
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN useradd -ms /bin/bash compile
+
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y wget libc6:i386 zip \
+    unzip git gdb-multiarch gcc cmake perl curl gcc-multilib g++-multilib \
+    autoconf libtool nasm mingw-w64 mingw-w64-tools g++ \
+    libgl-dev libsdl2-dev:i386 clang-tools-10 lld-10
+
+RUN ln -s /usr/bin/clang-10 /usr/bin/clang && \
+    ln -s /usr/bin/clang-cl-10 /usr/bin/clang-cl && \
+    ln -s /usr/bin/llvm-lib-10 /usr/bin/llvm-lib && \
+    ln -s /usr/bin/lld-link-10 /usr/bin/lld-link && \
+    ln -s /usr/bin/llvm-rc-10 /usr/bin/llvm-rc
+
+RUN mkdir /output
+RUN chown compile:compile /output
+
+USER compile
+WORKDIR /home/compile

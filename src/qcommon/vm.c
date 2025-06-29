@@ -668,7 +668,7 @@ int QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	vm_t    *oldVM;
 	int r;
 	//rcg010207 see dissertation at top of VM_DllSyscall() in this file.
-#if ( ( defined __linux__ ) && ( defined __powerpc__ ) ) || ( defined MACOS_X )
+#if ( ( defined __linux__ ) && ( defined __powerpc__ ) ) || ( defined MACOS_X ) || ((defined __clang__) && (defined _MSC_VER))
 	int i;
 	int args[16];
 	va_list ap;
@@ -694,7 +694,7 @@ int QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	// if we have a dll loaded, call it directly
 	if ( vm->entryPoint ) {
 		//rcg010207 -  see dissertation at top of VM_DllSyscall() in this file.
-#if ( ( defined __linux__ ) && ( defined __powerpc__ ) ) || ( defined MACOS_X )
+#if ( ( defined __linux__ ) && ( defined __powerpc__ ) ) || ( defined MACOS_X ) || ((defined __clang__) && (defined _MSC_VER))
 		va_start( ap, callnum );
 		for ( i = 0; i < sizeof( args ) / sizeof( args[i] ); i++ )
 			args[i] = va_arg( ap, int );

@@ -99,31 +99,11 @@ rem ***************************************************************************
 	cd deps
 
 	echo Fetching Dependencies...
-	if not exist "openssl" (
-		echo openssl...
-		call powershell "$source= ((Invoke-RestMethod -Method GET -Uri """https://api.github.com/repos/openssl/openssl/releases""")[0].assets | Where-Object name -like """openssl*.tar.gz""" ).browser_download_url;Write-Host $source;Invoke-WebRequest -Uri $source -Out $(Split-Path -Path $source -Leaf)"
-		call powershell "$file = Get-ChildItem """openssl*"""; tar -xzf $file"
-		call powershell "Get-ChildItem """openssl*""" | move-item -Destination """openssl\""
-	) else (
-		set SKIP_SSL=1
-	)
-	
-	rem OpenSSL needs perl to build, strawberry perl portable will do it, add it to PATH
-	if not exist "strawberry-perl" (
-		echo strawberry-perl...
-		call powershell "$source= ((Invoke-RestMethod -Method GET -Uri """https://api.github.com/repos/StrawberryPerl/Perl-Dist-Strawberry/releases""")[0].assets | Where-Object name -like """*portable.zip""" ).browser_download_url;Write-Host $source;Invoke-WebRequest -Uri $source -Out $(Split-Path -Path $source -Leaf)"
-		call powershell "Get-ChildItem """strawberry*portable.zip""" | move-item -Destination """strawberry-perl.zip""""
-		call powershell "Expand-Archive -Path """strawberry-perl*portable.zip""" -DestinationPath """strawberry-perl""""
-		call powershell "rm strawberry-perl.zip"
-	)
-	set PATH=%cd%\strawberry-perl\perl\bin;%PATH%
-	
-	rem I couldn't get curl release to work for Windows. Use the source archive instead (zipball) that includes GIT-INFO and VS tmpl files to generate VS solution files
+
 	if not exist "curl" (
 		echo curl...
-		call powershell "$source= (Invoke-RestMethod -Method GET -Uri """https://api.github.com/repos/curl/curl/releases""")[0].zipball_url;Write-Host $source;Invoke-WebRequest -Uri $source -Out $(Split-Path -Path $source -Leaf)"
-		call powershell "Get-ChildItem """curl*""" | move-item -Destination """curl.zip""""
-		call powershell "Expand-Archive -Path """curl*.zip""" -DestinationPath """curl""""
+		call powershell "Invoke-WebRequest -Uri https://curl.se/windows/latest.cgi?p=win32-mingw.zip -Out curl.zip"
+		call powershell "Expand-Archive -Path curl.zip -DestinationPath curl"
 		call powershell "Get-ChildItem """curl\*\*""" | move-item -Destination """curl\""
 		call powershell "rm curl.zip"
 	) else (
@@ -160,23 +140,14 @@ rem ***************************************************************************
 :buildDeps
 	call "%PF%\%VC_PATH%\VC\Auxiliary\Build\vcvars32.bat"
 	set ROOT_DEP_DIR=%cd%
-:buildOpenSSL
-	if defined SKIP_SSL (
-		goto buildCurl
-	)
-	cd "%ROOT_DEP_DIR%\curl\projects\"
-	call build-openssl.bat %vc_version% x86 release ..\..\openssl 
 :buildCurl
 	if defined SKIP_CURL (
 		goto buildLibJPEG
 	)
-	
 	cd "%ROOT_DEP_DIR%\curl"
-	call buildconf.bat
-	cd "%ROOT_DEP_DIR%\curl\projects\"
-	call generate.bat %VC_generate%
-	cd "%ROOT_DEP_DIR%\curl\projects\Windows\%VC_DESC%"
-	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" curl-all.sln /Build "DLL Release - DLL OpenSSL"
+	cd bin
+	lib /def:libcurl.def /OUT:libcurl.lib /MACHINE:X86
+	
 :buildLibJPEG
 	if defined SKIP_JPEG (
 		goto buildJansson
@@ -186,6 +157,7 @@ rem ***************************************************************************
 	cd build
 	call cmake -G"%cmake_makefiles%" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
 	call "%PF%\%VC_PATH%\Common7\IDE\devenv.exe" libjpeg-turbo.sln /Build Release
+	call powershell "Get-ChildItem """..\src\*.h""" | copy-item -Destination """..\""
 	call powershell "Get-ChildItem """*.h""" | copy-item -Destination """..\""
 	
 :buildJansson
@@ -203,14 +175,8 @@ rem ***************************************************************************
 	if not exist "bin" (
 		mkdir bin
 	)
-	call powershell "Get-ChildItem """curl\build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.dll""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """curl\build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.lib""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """curl\build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.pdb""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """curl\build\Win32\%VC_DESC%\DLL Release - DLL OpenSSL\*.exe""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """openssl\build\Win32\%VC_DESC%\DLL Release\*.dll""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """openssl\build\Win32\%VC_DESC%\DLL Release\*.lib""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """openssl\build\Win32\%VC_DESC%\DLL Release\*.pdb""" | copy-item -Destination """bin\""
-	call powershell "Get-ChildItem """openssl\build\Win32\%VC_DESC%\DLL Release\*.exe""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """curl\bin\*.dll""" | copy-item -Destination """bin\""
+	call powershell "Get-ChildItem """curl\bin\*.lib""" | copy-item -Destination """bin\""
 	call powershell "Get-ChildItem """libjpeg-turbo\build\Release\*.dll""" | copy-item -Destination """bin\""
 	call powershell "Get-ChildItem """libjpeg-turbo\build\Release\*.lib""" | copy-item -Destination """bin\""
 	call powershell "Get-ChildItem """jansson\build\lib\Release\*.lib""" | copy-item -Destination """bin\""
