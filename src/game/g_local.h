@@ -577,6 +577,8 @@ typedef struct {
 	int clientFlags;		// Sort some stuff based upon user settings
 	int specSpeed;
 	char* lastChatText;		// prevent spam chat text being saved to stats gamelog
+
+	int mainWeapon;	// keep track of players main WP_WEAPON type for player ammo counts // sess.playerWeapon is storing mp_weapon values
 } clientSession_t;
 
 //
@@ -1773,6 +1775,7 @@ extern vmCvar_t	g_ssWaitTime;
 extern vmCvar_t	g_broadcastClients;
 extern vmCvar_t g_logConfigStringChanges;
 extern vmCvar_t g_playPauseMusic;
+extern vmCvar_t g_allowReadyTeam;
 
 // unlagged
 extern vmCvar_t	g_delagHitscan;

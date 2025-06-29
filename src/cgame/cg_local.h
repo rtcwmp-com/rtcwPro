@@ -2276,6 +2276,8 @@ extern vmCvar_t cg_teamObituaryColorSameTK;		// same team TK color
 extern vmCvar_t cg_teamObituaryColorEnemy;		// enemy team color
 extern vmCvar_t cg_teamObituaryColorEnemyTK;	// enemy team TK color
 
+extern vmCvar_t cg_drawCI;
+
 //
 // cg_main.c
 //

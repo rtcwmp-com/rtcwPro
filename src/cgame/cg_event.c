@@ -82,10 +82,14 @@ const char  *CG_PlaceString( int rank ) {
 	return str;
 }
 
-ID_INLINE void CG_ColorObituaryEntName(clientInfo_t* ci, char* name, qboolean teamKill)
+ID_INLINE void CG_ColorObituaryEntName(clientInfo_t *ci, char *name, qboolean teamKill)
 {
 	clientInfo_t* self = &cgs.clientinfo[cg.clientNum];
-	Q_CleanStr(name);
+
+	char cleanName[MAX_NETNAME];
+	BG_cleanName(name, cleanName, MAX_NETNAME, qfalse);
+	Q_strncpyz(name, cleanName, sizeof(cleanName));
+
 	memmove(name + 2, name, strlen(name) + 1);
 	name[0] = '^';
 
@@ -189,12 +193,15 @@ static void CG_Obituary( entityState_t *ent ) {
 	}
 	Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof( targetName ) - 2 );
 
+	char targetNameCopy[MAX_NETNAME];
+	Q_strncpyz(targetNameCopy, targetName, sizeof(targetName));
+
 	if (cg_teamObituaryColors.integer)
 	{
-		CG_ColorObituaryEntName(ci, targetName, ci->team == ca->team);
+		CG_ColorObituaryEntName(ci, targetNameCopy, ci->team == ca->team);
 	}
 
-	strcat( targetName, S_COLOR_WHITE );
+	strcat(targetNameCopy, S_COLOR_WHITE );
 
 	message2 = "";
 
@@ -282,7 +289,7 @@ static void CG_Obituary( entityState_t *ent ) {
 	}
 	if ( message ) {
 		message = CG_TranslateString( message );
-		CG_Printf( "[cgnotify]%s %s.\n", targetName, message );
+		CG_Printf( "[cgnotify]%s %s.\n", targetNameCopy, message );
 		return;
 	}
 
@@ -291,14 +298,14 @@ static void CG_Obituary( entityState_t *ent ) {
 		char    *s;
 
 		if ( cgs.gametype < GT_TEAM ) {
-			s = va( "You killed %s\n%s place with %i", targetName,
+			s = va( "You killed %s\n%s place with %i", targetNameCopy,
 					CG_PlaceString( cg.snap->ps.persistant[PERS_RANK] + 1 ),
 					cg.snap->ps.persistant[PERS_SCORE] );
 		} else {
 			if ( ci->team == ca->team ) {
-				s = va( "%s %s", CG_TranslateString( "You killed ^1TEAMMATE^7" ), targetName );
+				s = va( "%s %s", CG_TranslateString( "You killed ^1TEAMMATE^7" ), targetNameCopy);
 			} else {
-				s = va( "%s %s", CG_TranslateString( "You killed" ), targetName );
+				s = va( "%s %s", CG_TranslateString( "You killed" ), targetNameCopy);
 			}
 		}
 
@@ -489,7 +496,7 @@ static void CG_Obituary( entityState_t *ent ) {
 			if ( message2 ) {
 				message2 = CG_TranslateString( message2 );
 			}
-			CG_Printf( "[cgnotify]%s %s %s%s\n", targetName, message, attackerName, message2 );
+			CG_Printf( "[cgnotify]%s %s %s%s\n", targetNameCopy, message, attackerName, message2 );
 			return;
 		}
 	}
@@ -498,10 +505,10 @@ static void CG_Obituary( entityState_t *ent ) {
 // JPW NERVE added mod check for machinegun (prolly mortar here too)
 	switch ( mod ) {
 	case MOD_MACHINEGUN:
-		CG_Printf( "[cgnotify]%s was riddled by machinegun fire\n",targetName );
+		CG_Printf( "[cgnotify]%s was riddled by machinegun fire\n", targetNameCopy);
 		break;
 	default:
-		CG_Printf( "[cgnotify]%s died.\n", targetName );
+		CG_Printf( "[cgnotify]%s died.\n", targetNameCopy);
 		break;
 	}
 // jpw

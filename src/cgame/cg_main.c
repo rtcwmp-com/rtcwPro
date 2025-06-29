@@ -468,6 +468,8 @@ vmCvar_t cg_customCrosshairVMirror;
 vmCvar_t cg_customCrosshairXGap;
 vmCvar_t cg_customCrosshairYGap;
 
+vmCvar_t cg_drawCI;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -833,7 +835,9 @@ cvarTable_t cvarTable[] = {
 	{ &cg_customCrosshairYOffset, "cg_customCrosshairYOffset", "0", CVAR_ARCHIVE },
 	{ &cg_customCrosshairVMirror, "cg_customCrosshairVMirror", "1", CVAR_ARCHIVE },
 	{ &cg_customCrosshairXGap, "cg_customCrosshairXGap", "0", CVAR_ARCHIVE },
-	{ &cg_customCrosshairYGap, "cg_customCrosshairYGap", "0", CVAR_ARCHIVE }
+	{ &cg_customCrosshairYGap, "cg_customCrosshairYGap", "0", CVAR_ARCHIVE },
+
+	{ &cg_drawCI, "cg_drawCI", "1", CVAR_ARCHIVE }
 	
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

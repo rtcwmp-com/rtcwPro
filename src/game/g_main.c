@@ -268,7 +268,8 @@ vmCvar_t g_pistolClips;		// How many clips pistol gets
 vmCvar_t g_maxTeamPF;		// Max Pf's per team
 vmCvar_t g_maxTeamSniper;	// Max snipers per team
 vmCvar_t g_maxTeamVenom;	// Max venoms per team
-vmCvar_t g_maxTeamFlamer;	// Max flamers per team
+vmCvar_t g_maxTeamFlamer;	// Max flamers per 
+vmCvar_t g_allowReadyTeam;  // Allow readyteam command
 
 vmCvar_t g_antiWarp;
 vmCvar_t g_dropWeapons;			// allow drop weapon for each class, bitflag value: 1 - soldier, 2 - eng, 4 - medic, 8 - lt, default 9
@@ -556,6 +557,8 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_logConfigStringChanges, "g_logConfigStringChanges", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_playPauseMusic, "g_playPauseMusic", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &P, "P", "", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse }, // ET Port Players server info
+	{ &g_allowReadyTeam, "g_allowReadyTeam", "0", CVAR_ARCHIVE, 0, qfalse },// Allow readyteam command
+
 
 	// unlagged
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },

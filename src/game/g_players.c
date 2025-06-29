@@ -574,6 +574,10 @@ void pCmd_teamReady(gentity_t *ent, qboolean ready) {
 	if (!g_tournament.integer) {
 		return;
 	}
+	if (!g_allowReadyTeam.integer) {
+		CP("print \"ReadyTeam command is not enabled on this server.\n\"");
+		return;
+	}
 	if (team_nocontrols.integer) {
 		CP("print \"Team commands are not enabled on this server.\n\"");
 		return;

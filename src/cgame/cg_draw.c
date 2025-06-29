@@ -1078,9 +1078,7 @@ static float CG_DrawRespawnTimer(float y) {
 		return y;
 	}
 
-	if (cgs.gamestate != GS_PLAYING)
-		str = "";
-	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
+	if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR)
 		str = "";
 	else if (cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_RED)
 		str = va("RT: %-2d", CG_CalculateReinfTime(qfalse));
@@ -1319,11 +1317,7 @@ static float CG_DrawProRespawnTimer(float y) {
 		return y;
 	}
 
-	if (cgs.gamestate != GS_PLAYING) {
-		return y;
-	}
-
-	if (cgs.clientinfo[cg.clientNum].shoutStatus) {
+	if (cgs.clientinfo[cg.clientNum].shoutStatus || cgs.clientinfo[cg.snap->ps.clientNum].team == TEAM_SPECTATOR) {
 		return y;
 	}
 
@@ -1866,7 +1860,8 @@ static void CG_DrawDisconnect( void ) {
 	x = 640 - 72;
 	y = 480 - 52;
 
-	CG_DrawPic( x, y, 48, 48, trap_R_RegisterShader( "gfx/2d/net.tga" ) );
+	if (cg_drawCI.integer)
+		CG_DrawPic( x, y, 48, 48, trap_R_RegisterShader( "gfx/2d/net.tga" ) );
 }
 
 

@@ -103,7 +103,11 @@
 | cg_lagometer | `integer` | `0-9999` | `0` | 1 - normal, 2 - draw speed, each increase from 2 increases max speed drawn, 2 - 2048, 3 - 3072, etc. |
 | cg_draw2d | `integer` | `0-2` | `1` | `0` - No HUD, `1` - Normal HUD, `2` - xhair, killfeed, frag center print (demo only) |
 | cg_showLimboMessage | `integer` | `0-1` | `0` | Hide the Press X to open Limbo Menu message while dead | 
-| cg_teamObituaryColors | `integer` | `0-1` | `0` | Force teammate and enemy name colors based on team |
+| cg_teamObituaryColors | `integer` | `0-1` | `0` | Enable/disable console custom text color for kill feed |
+| cg_teamObituaryColorSame | `string` | `Color table` | `green` | Console kill message color for same team kills |
+| cg_teamObituaryColorSameTK | `string` | `Color table` | `mdgreen` | Console kill message color for same team TKs |
+| cg_teamObituaryColorEnemy | `string` | `Color table` | `red` | Console kill message color for enemy team kills |
+| cg_teamObituaryColorEnemyTK | `string` | `Color table` | `mdred` | Console kill message color for enemy team TKs | 
 | cg_customCrosshair | `integer` | `0-1` | `0` | Enable/Disable the custom crosshair cvars |
 | cg_customCrosshairHeight | `float` | `0.0-999.0` | `5` | Vertical span of the crosshair |
 | cg_customCrosshairWidth | `float` | `0.0-999.0` | `5` | Horizontal span of the crosshair |

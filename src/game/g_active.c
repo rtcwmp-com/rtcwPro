@@ -2399,16 +2399,6 @@ void ClientEndFrame( gentity_t *ent ) {
 	}
 	// End ETL port
 
-	/*
-	// add the EF_CONNECTION flag if we haven't gotten commands recently
-	if (level.time - ent->client->lastCmdTime > 1000) {
-		ent->s.eFlags |= EF_CONNECTION;
-	}
-	else {
-		ent->s.eFlags &= ~EF_CONNECTION;
-	}
-	*/
-
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;   // FIXME: get rid of ent->health...
 
 	G_SetClientSound( ent );
@@ -2417,6 +2407,14 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	if (g_antilag.integer < 2) // Nobo antilag or off
 	{
+		// add the EF_CONNECTION flag if we haven't gotten commands recently
+		if (level.time - ent->client->lastCmdTime > 1000) {
+			ent->s.eFlags |= EF_CONNECTION;
+		}
+		else {
+			ent->s.eFlags &= ~EF_CONNECTION;
+		}
+
 		// RTCWPro
 		// Ridah, fixes jittery zombie movement
 		if (g_smoothClients.integer) {
