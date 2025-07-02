@@ -397,6 +397,7 @@ extern cvar_t  *cl_timegraph;
 extern cvar_t  *cl_maxpackets;
 extern cvar_t  *cl_packetdup;
 extern cvar_t  *cl_shownet;
+extern cvar_t  *cl_autoNudge;
 extern cvar_t  *cl_shownuments;             // DHM - Nerve
 extern cvar_t  *cl_visibleClients;          // DHM - Nerve
 extern cvar_t  *cl_showSend;
