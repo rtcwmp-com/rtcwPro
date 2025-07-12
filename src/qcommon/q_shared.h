@@ -750,6 +750,7 @@ void Q_ColorizeString(char colorCode, const char* inStr, char* outStr, size_t ou
 //=============================================
 
 float Com_Clamp( float min, float max, float value );
+int Com_ClampInt( int min, int max, int value );
 
 char    *COM_SkipPath( char *pathname );
 void    COM_StripExtension( const char *in, char *out );
