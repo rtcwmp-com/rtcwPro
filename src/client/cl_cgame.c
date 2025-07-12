@@ -1366,7 +1366,7 @@ static float CL_AvgPing( void ) {
 	float result;
 
 	for ( i = 0; i < PACKET_BACKUP; i++ ) {
-		if ( cl.snapshots[i].ping > 0 && cl.snapshots[i].ping < 999 ) {
+		if ( cl.snapshots[i].ping > 0 && cl.snapshots[i].ping < 999 && cl.snapshots[i].ps.clientNum == clc.clientNum) {
 			ping[count] = cl.snapshots[i].ping;
 			count++;
 		}
@@ -1404,19 +1404,12 @@ Returns either auto-nudge or cl_timeNudge value.
 ==================
 */
 static int CL_TimeNudge( void ) {
-	float autoNudge = cl_autoNudge->value;
-	int tn;
+	float autoNudge = Com_Clamp(0.0f, 1.0f, cl_autoNudge->value);
 
 	if ( autoNudge != 0.0f )
 		return (int)((CL_AvgPing() * autoNudge) + 0.5f) * -1;
 	else
-		tn = cl_timeNudge->integer;
-		if ( tn < -30 ) {
-			tn = -30;
-		} else if ( tn > 30 ) {
-			tn = 30;
-		}
-		return tn;
+		return cl_timeNudge->integer;
 }
 
 /*
@@ -1486,17 +1479,7 @@ void CL_SetCGameTime( void ) {
 		// smoothness or better responsiveness.
 
 		// Moved to CL_TimeNudge()
-		/*int tn;
-
-		tn = cl_timeNudge->integer;
-		if ( tn < -30 ) {
-			tn = -30;
-		} else if ( tn > 30 ) {
-			tn = 30;
-		}
-
-		cl.serverTime = cls.realtime + cl.serverTimeDelta - tn;*/
-		cl.serverTime = cls.realtime + cl.serverTimeDelta - CL_TimeNudge();
+		cl.serverTime = cls.realtime + cl.serverTimeDelta - Com_ClampInt(-30, 30, CL_TimeNudge());
 
 
 		// guarantee that time will never flow backwards, even if

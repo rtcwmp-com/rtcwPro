@@ -1939,6 +1939,16 @@ static void CG_CalcEntityLerpPositions( centity_t *cent ) {
 	}
 	// -NERVE - SMF
 
+	// interpolating failed (probably no nextSnap), so extrapolate
+	// this can also happen if the teleport bit is flipped, but that
+	// won't be noticeable
+	if ( cent->currentState.number < MAX_CLIENTS &&
+			cent->currentState.clientNum != cg.predictedPlayerState.clientNum ) {
+		cent->currentState.pos.trType = TR_LINEAR_STOP;
+		cent->currentState.pos.trTime = cg.snap->serverTime;
+		cent->currentState.pos.trDuration = 1000 / trap_Cvar_VariableIntegerValue("sv_fps");
+	}
+
 	// just use the current frame and evaluate as best we can
 	BG_EvaluateTrajectory( &cent->currentState.pos, cg.time, cent->lerpOrigin );
 	BG_EvaluateTrajectory( &cent->currentState.apos, cg.time, cent->lerpAngles );
