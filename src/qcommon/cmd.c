@@ -421,6 +421,18 @@ void    Cmd_ArgsBuffer( char *buffer, int bufferLength ) {
 
 /*
 ============
+Cmd_ArgsFromBuffer
+
+The interpreted versions use this because
+they can't have pointers returned to them
+============
+*/
+void    Cmd_ArgsFromBuffer( int arg, char *buffer, int bufferLength ) {
+	Q_strncpyz( buffer, Cmd_ArgsFrom(arg), bufferLength );
+}
+
+/*
+============
 Cmd_Cmd
 
 Retrieve the unmodified command string

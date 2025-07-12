@@ -874,3 +874,7 @@ void trap_SQL_CleanString(const char* in, char* out, int len) {
 	return;
 }
 #endif
+
+char* trap_Cmd_ArgsFrom(int arg, char *buffer, int buffersize){
+	return syscall(G_CMD_ARGSFROM, arg, buffer, buffersize);
+}
