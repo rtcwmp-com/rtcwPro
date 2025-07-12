@@ -38,12 +38,12 @@ void Cmd_APIQuery(gentity_t* ent)
 {
 	char command[256];
 	char arg1[256];
-	char arg2[256];
+	char arg2[8192];
 	char* jsonText;
 
 	trap_Argv(1, command, sizeof(command));
 	trap_Argv(2, arg1, sizeof(arg1));
-	trap_Argv(3, arg2, sizeof(arg2));
+	trap_Cmd_ArgsFrom(3, arg2, sizeof(arg2));
 
 	// get JSON text for the command
 	jsonText = G_CreateAPIJson(command, arg1, arg2, ent->client->sess.guid);
