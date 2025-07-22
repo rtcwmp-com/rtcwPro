@@ -661,6 +661,11 @@ typedef struct {
 	int	samplehead;
 	unsigned int pingsample_counter;
 	int deathYaw;
+
+	//unlagged - client options
+	// these correspond with variables in the userinfo string
+	int	delag;
+	//unlagged - client options
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -851,7 +856,7 @@ struct gclient_s {
 	// an approximation of the actual server time we received this
 	// command (not in 50ms increments)
 	int			frameOffset;
-//unlagged - backward reconciliation #1
+	//unlagged - backward reconciliation #1
 
 	//unlagged - smooth clients #1
 	// the last frame number we got an update from this client
@@ -1322,7 +1327,10 @@ void mg42_fire( gentity_t *other );
 //
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker );
 void CalcMuzzlePoint( gentity_t *ent, int weapon, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
-void SnapVectorTowards( vec3_t v, vec3_t to );
+//unlagged - attack prediction #3
+// we're making this available to both games
+//void SnapVectorTowards( vec3_t v, vec3_t to );
+//unlagged - attack prediction #3
 trace_t *CheckMeleeAttack( gentity_t *ent, float dist, qboolean isTest );
 gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenadeWPID );
 // Rafael
@@ -1781,6 +1789,7 @@ extern vmCvar_t g_allowReadyTeam;
 extern vmCvar_t	g_delagHitscan;
 extern vmCvar_t g_maxExtrapolatedFrames;
 extern vmCvar_t	g_maxLagCompensation;
+extern vmCvar_t	g_unlaggedVersion;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

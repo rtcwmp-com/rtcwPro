@@ -68,7 +68,9 @@ CG_TransitionEntity
 cent->nextState is moved to cent->currentState and events are fired
 ===============
 */
-static void CG_TransitionEntity( centity_t *cent ) {
+//unlagged - early transitioning
+// used to be static, now needed to transition entities from within cg_ents.c
+void CG_TransitionEntity( centity_t *cent ) {
 
 	// Ridah, update the fireDir if it's on fire
 	if ( CG_EntOnFire( cent ) ) {

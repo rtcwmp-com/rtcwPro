@@ -302,12 +302,14 @@ vmCvar_t g_broadcastClients; // fix clients appearing from thin air on some maps
 vmCvar_t g_logConfigStringChanges; // log config string changes (debugging)
 vmCvar_t g_playPauseMusic; // play music during pause
 
- // unlagged
+//unlagged - server options
 vmCvar_t g_floatPlayerPosition;
 vmCvar_t g_delagHitscan;
 vmCvar_t g_maxExtrapolatedFrames;
 vmCvar_t g_maxLagCompensation;
 vmCvar_t g_delagMissiles;
+vmCvar_t g_unlaggedVersion;
+//unlagged - server options
 
 cvarTable_t gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -560,11 +562,13 @@ cvarTable_t gameCvarTable[] = {
 	{ &g_allowReadyTeam, "g_allowReadyTeam", "0", CVAR_ARCHIVE, 0, qfalse },// Allow readyteam command
 
 
-	// unlagged
+	//unlagged - server options
 	{ &g_delagHitscan, "g_delagHitscan", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
 	{ &g_maxExtrapolatedFrames, "g_maxExtrapolatedFrames", "2", 0 , 0, qfalse },
 	{ &g_maxLagCompensation, "g_maxLagCompensation", "125", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
-	{ &g_delagMissiles, "g_delagMissiles", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue }
+	{ &g_delagMissiles, "g_delagMissiles", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qtrue },
+	{ &g_unlaggedVersion, "g_unlaggedVersion", "2.0", CVAR_ROM | CVAR_SERVERINFO, 0, qfalse }
+	//unlagged - server options
 };
 
 // bk001129 - made static to avoid aliasing

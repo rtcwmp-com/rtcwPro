@@ -882,6 +882,10 @@ typedef struct {
 
 #define MAX_PREDICTED_EVENTS    16
 
+//unlagged - optimized prediction
+#define NUM_SAVED_STATES (CMD_BACKUP + 2)
+//unlagged - optimized prediction
+
 #define MAX_SPAWN_VARS          64
 #define MAX_SPAWN_VARS_CHARS    2048
 // OSPx - Draw HUDnames
@@ -1260,6 +1264,13 @@ typedef struct {
 	// RtcwPro shoutcast overlay
 	int lastKeyCatcher;
 	qbool ndpDemoEnabled;
+
+//unlagged - optimized prediction
+	int			lastPredictedCommand;
+	int			lastServerTime;
+	playerState_t savedPmoveStates[NUM_SAVED_STATES];
+	int			stateHead, stateTail;
+//unlagged - optimized prediction	
 } cg_t;
 
 
@@ -1960,6 +1971,11 @@ typedef struct {
 	qboolean fKeyPressed[256];                          // Key status to get around console issues
 	int timescaleUpdate;                                // Timescale display for demo playback
 	demoTimeline_t demoTimeline;
+
+//unlagged - client options
+	// this will be set to the server's g_delagHitscan
+	int				delagHitscan;
+//unlagged - client options
 } cgs_t;
 
 //==============================================================================
@@ -2071,7 +2087,10 @@ extern vmCvar_t cg_noVoiceText;                     // NERVE - SMF
 extern vmCvar_t cg_enableBreath;
 extern vmCvar_t cg_autoactivate;
 extern vmCvar_t cg_emptyswitch;
+//unlagged - smooth clients #2
+// this is done server-side now
 //extern vmCvar_t cg_smoothClients;
+//unlagged - smooth clients #2
 extern vmCvar_t pmove_fixed;
 extern vmCvar_t pmove_msec;
 
@@ -2277,6 +2296,18 @@ extern vmCvar_t cg_teamObituaryColorEnemy;		// enemy team color
 extern vmCvar_t cg_teamObituaryColorEnemyTK;	// enemy team TK color
 
 extern vmCvar_t cg_drawCI;
+
+//unlagged - client options
+extern	vmCvar_t		cg_delag;
+extern	vmCvar_t		sv_fps;
+extern	vmCvar_t		cg_optimizePrediction;
+//unlagged - client options
+
+
+//unlagged - cg_unlagged.c
+void CG_PredictWeaponEffects( centity_t *cent );
+qboolean CG_PredictedWeapon( int weapon );
+//unlagged - cg_unlagged.c
 
 //
 // cg_main.c
@@ -2714,6 +2745,10 @@ void CG_RumbleEfx( float pitch, float yaw );
 //
 void CG_ProcessSnapshots( void );
 void CG_NDP_ProcessSnapshots( void );
+
+//unlagged - early transitioning
+void CG_TransitionEntity( centity_t *cent );
+//unlagged - early transitioning
 
 //
 // cg_spawn.c

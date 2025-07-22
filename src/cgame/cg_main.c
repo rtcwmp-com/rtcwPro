@@ -225,7 +225,10 @@ vmCvar_t cg_enableBreath;
 vmCvar_t cg_autoactivate;
 vmCvar_t cg_blinktime;      //----(SA)	added
 
-//vmCvar_t cg_smoothClients;
+//unlagged - smooth clients #2
+// this is done server-side now
+//vmCvar_t 	cg_smoothClients;
+//unlagged - smooth clients #2
 vmCvar_t pmove_fixed;
 vmCvar_t pmove_msec;
 
@@ -470,6 +473,12 @@ vmCvar_t cg_customCrosshairYGap;
 
 vmCvar_t cg_drawCI;
 
+//unlagged - client options
+vmCvar_t	cg_delag;
+vmCvar_t	sv_fps;
+vmCvar_t	cg_optimizePrediction;
+//unlagged - client options
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -589,7 +598,10 @@ cvarTable_t cvarTable[] = {
 	{ &cg_timescaleFadeEnd, "cg_timescaleFadeEnd", "1", 0},
 	{ &cg_timescaleFadeSpeed, "cg_timescaleFadeSpeed", "0", 0},
 	{ &cg_timescale, "timescale", "1", 0},
+//unlagged - smooth clients #2
+// this is done server-side now
 //	{ &cg_smoothClients, "cg_smoothClients", "0", CVAR_USERINFO | CVAR_ARCHIVE},
+//unlagged - smooth clients #2
 	{ &cg_cameraMode, "com_cameraMode", "0", CVAR_CHEAT},
 
 	{ &pmove_fixed, "pmove_fixed", "0", 0},
@@ -837,7 +849,14 @@ cvarTable_t cvarTable[] = {
 	{ &cg_customCrosshairXGap, "cg_customCrosshairXGap", "0", CVAR_ARCHIVE },
 	{ &cg_customCrosshairYGap, "cg_customCrosshairYGap", "0", CVAR_ARCHIVE },
 
-	{ &cg_drawCI, "cg_drawCI", "1", CVAR_ARCHIVE }
+	{ &cg_drawCI, "cg_drawCI", "1", CVAR_ARCHIVE },
+
+//unlagged - client options
+	{ &cg_delag, "cg_delag", "1", CVAR_ARCHIVE | CVAR_USERINFO },
+	// this will be automagically copied from the server
+	{ &sv_fps, "sv_fps", "20", 0 },
+	{ &cg_optimizePrediction, "cg_optimizePrediction", "1", CVAR_ARCHIVE },
+//unlagged - client options
 	
 };
 int cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
@@ -910,6 +929,7 @@ void CG_UpdateCvars( void ) {
 	qboolean fSetFlags = qfalse;	// OSPx - Auto Actions
 
 	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) {
+
 		trap_Cvar_Update( cv->vmCvar );
 
 		// RTCWPro - update the modification count and perform actions on special cvars

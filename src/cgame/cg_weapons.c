@@ -4770,6 +4770,12 @@ void CG_FireWeapon( centity_t *cent ) {
 			weap->ejectBrassFunc( cent );
 		}
 	} // jpw
+
+	//unlagged - attack prediction #1
+	if ( CG_PredictedWeapon( ent->weapon ) ) {
+		CG_PredictWeaponEffects( cent );
+	}
+	//unlagged - attack prediction #1
 }
 
 
@@ -6161,7 +6167,7 @@ static qboolean CG_CalcMuzzlePoint( int entityNum, vec3_t muzzle ) {
 
 }
 
-void SnapVectorTowards( vec3_t v, vec3_t to ) {
+/*void SnapVectorTowards( vec3_t v, vec3_t to ) {
 	int i;
 
 	for ( i = 0 ; i < 3 ; i++ ) {
@@ -6173,7 +6179,7 @@ void SnapVectorTowards( vec3_t v, vec3_t to ) {
 			v[i] = ceil( v[i] );
 		}
 	}
-}
+}*/
 
 /**
  * @brief Renders bullet tracers if tracer option is valid.

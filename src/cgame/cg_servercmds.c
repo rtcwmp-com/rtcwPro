@@ -326,6 +326,12 @@ void CG_ParseServerinfo( void ) {
 	trap_Cvar_Set( "g_allowEnemySpawnTimer", Info_ValueForKey( info, "g_allowEnemySpawnTimer" ) );
 	trap_Cvar_Set( "stats_matchid", Info_ValueForKey( info, "stats_matchid" ) );
 	trap_Cvar_Set( "version", Info_ValueForKey( info, "version" ) );
+
+//unlagged - server options
+	// we'll need this for deciding whether or not to predict weapon effects
+	cgs.delagHitscan = atoi( Info_ValueForKey( info, "g_delagHitscan" ) );
+	trap_Cvar_Set("g_delagHitscan", va("%i", cgs.delagHitscan));
+//unlagged - server options
 }
 
 /*

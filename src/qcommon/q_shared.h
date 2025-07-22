@@ -654,6 +654,11 @@ typedef struct {
 
 #define SnapVector( v ) {v[0] = ( (int)( v[0] ) ); v[1] = ( (int)( v[1] ) ); v[2] = ( (int)( v[2] ) );}
 
+//unlagged - attack prediction #3
+// moved from g_weapon.c
+void SnapVectorTowards( vec3_t v, vec3_t to );
+//unlagged - attack prediction #3
+
 // just in case you do't want to use the macros
 vec_t _DotProduct( const vec3_t v1, const vec3_t v2 );
 void _VectorSubtract( const vec3_t veca, const vec3_t vecb, vec3_t out );

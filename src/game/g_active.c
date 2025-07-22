@@ -1240,66 +1240,16 @@ void ClientThink_real( gentity_t *ent ) {
 		// does a G_RunFrame()
 		client->frameOffset = trap_Milliseconds() - level.frameStartTime;
 
-
-		//unlagged - lag simulation #3
-			// if the client wants to simulate outgoing packet loss
-		/*if ( client->pers.plOut ) {
-			// see if a random value is below the threshhold
-			float thresh = (float)client->pers.plOut / 100.0f;
-			if ( random() < thresh ) {
-				// do nothing at all if it is - this is a lost command
-				return;
-			}
-		}*/
-		//unlagged - lag simulation #3
-
-		//unlagged - lag simulation #2
-		// keep a queue of past commands
-		/*client->pers.cmdqueue[client->pers.cmdhead] = client->pers.cmd;
-		client->pers.cmdhead++;
-		if ( client->pers.cmdhead >= MAX_LATENT_CMDS ) {
-			client->pers.cmdhead -= MAX_LATENT_CMDS;
-		}
-
-		// if the client wants latency in commands (client-to-server latency)
-		if ( client->pers.latentCmds ) {
-			// save the actual command time
-			int time = ucmd->serverTime;
-
-			// find out which index in the queue we want
-			int cmdindex = client->pers.cmdhead - client->pers.latentCmds - 1;
-			while ( cmdindex < 0 ) {
-				cmdindex += MAX_LATENT_CMDS;
-			}
-
-			// read in the old command
-			client->pers.cmd = client->pers.cmdqueue[cmdindex];
-
-			// adjust the real ping to reflect the new latency
-			client->pers.realPing += time - ucmd->serverTime;
-		}*/
-
-
 		//unlagged - backward reconciliation #4
 		// save the command time *before* pmove_fixed messes with the serverTime,
 		// and *after* lag simulation messes with it :)
 		// attackTime will be used for backward reconciliation later (time shift)
 		client->attackTime = ucmd->serverTime;
 
-
 		//unlagged - smooth clients #1
 		// keep track of this for later - we'll use this to decide whether or not
 		// to send extrapolated positions for this client
 		client->lastUpdateFrame = level.framenum;
-
-		//unlagged - lag simulation #1
-		// if the client is adding latency to received snapshots (server-to-client latency)
-		/*if ( client->pers.latentSnaps ) {
-			// adjust the real ping
-			client->pers.realPing += client->pers.latentSnaps * (1000 / sv_fps.integer);
-			// adjust the attack time so backward reconciliation will work
-			client->attackTime -= client->pers.latentSnaps * (1000 / sv_fps.integer);
-		}*/
 	}
 
 	// RTCWPro
@@ -1716,12 +1666,21 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// RTCWPro
 	// Ridah, fixes jittery zombie movement
-	if (g_smoothClients.integer) {
-		BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
-	}
-	else {
+	if (g_antilag.integer < 2) // Nobo antilag or off
+	{
+		// RTCWPro
+		// Ridah, fixes jittery zombie movement
+		if (g_smoothClients.integer) {
+			BG_PlayerStateToEntityStateExtraPolate(&ent->client->ps, &ent->s, ent->client->ps.commandTime, qtrue);
+		}
+		else {
+			BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
+		}
+    }
+	else if (g_antilag.integer == 2) // Unlagged
+	{
 		BG_PlayerStateToEntityState(&ent->client->ps, &ent->s, qtrue);
-	}
+    }
 
 	/*if (g_thinkStateLevelTime.integer) 
 	{

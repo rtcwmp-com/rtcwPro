@@ -1603,6 +1603,16 @@ void ClientUserinfoChanged(int clientNum) {
 		client->pers.predictItemPickup = qtrue;
 	}
 
+	//unlagged - client options
+	// see if the player has opted out
+	s = Info_ValueForKey( userinfo, "cg_delag" );
+	if ( !atoi( s ) ) {
+		client->pers.delag = 0;
+	} else {
+		client->pers.delag = atoi( s );
+	}
+	//unlagged - client options
+
 	// check the auto activation
 	s = Info_ValueForKey( userinfo, "cg_autoactivate" );
 	if ( !atoi( s ) ) {
