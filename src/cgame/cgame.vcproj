@@ -783,6 +783,27 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="cg_unlagged.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						BrowseInformation="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="cg_view.c"
 				>
 				<FileConfiguration

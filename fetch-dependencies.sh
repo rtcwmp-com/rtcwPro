@@ -95,7 +95,8 @@ cd $DEPS_ROOT
 
 LIBUNWIND_DIR=`pwd`/libunwind
 if [ ! -d "$LIBUNWIND_DIR" ]; then
-VER=$(curl --silent -qI https://github.com/libunwind/libunwind/releases/latest | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}');
+#VER=$(curl --silent -qI https://github.com/libunwind/libunwind/releases/latest | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}');
+VER="v1.8.1"
 wget https://api.github.com/repos/libunwind/libunwind/tarball/$VER
 tar xvfz $VER
 rm $VER

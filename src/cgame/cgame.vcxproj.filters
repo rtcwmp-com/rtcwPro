@@ -82,6 +82,9 @@
     <ClCompile Include="cg_trails.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cg_unlagged.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="cg_view.c">
       <Filter>Source Files</Filter>
     </ClCompile>

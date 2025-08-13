@@ -61,6 +61,7 @@ $CG_FILESREF = \@CG_FILES_OUT;
   ../cgame/cg_spawn.c
   ../cgame/cg_syscalls.c
   ../cgame/cg_trails.c
+  ../cgame/cg_unlagged.c
   ../cgame/cg_view.c
   ../cgame/cg_weapons.c
   );
