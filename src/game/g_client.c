@@ -1631,8 +1631,12 @@ void ClientUserinfoChanged(int clientNum) {
 
 	// set name
 	Q_strncpyz( oldname, client->pers.netname, sizeof( oldname ) );
-	s = Info_ValueForKey( userinfo, "name" );
-	ClientCleanName( s, client->pers.netname, sizeof( client->pers.netname ) );
+	if(!client->pers.renamed){
+		s = Info_ValueForKey( userinfo, "name" );
+		G_ClientCleanName( s, client->pers.netname, sizeof( client->pers.netname ) );
+	}else if(g_enforceNames.integer){
+		CP(va("print \"" S_COLOR_YELLOW "Names are currently enforced by the server.\n\""));
+	}
 
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
 		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {

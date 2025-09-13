@@ -661,6 +661,7 @@ typedef struct {
 	int	samplehead;
 	unsigned int pingsample_counter;
 	int deathYaw;
+	qboolean renamed;
 } clientPersistant_t;
 
 // L0 - antilag port
@@ -1781,6 +1782,8 @@ extern vmCvar_t g_allowReadyTeam;
 extern vmCvar_t	g_delagHitscan;
 extern vmCvar_t g_maxExtrapolatedFrames;
 extern vmCvar_t	g_maxLagCompensation;
+
+extern vmCvar_t g_enforceNames;
 
 void    trap_Printf( const char *fmt );
 void    trap_Error( const char *fmt );

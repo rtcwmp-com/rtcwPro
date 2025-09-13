@@ -1032,6 +1032,35 @@ void Svcmd_Ref_f(void) {
 	G_ref_cmd(NULL, 0);
 }
 
+void G_Rename_f(void){
+	if(trap_Argc() < 2){
+		return;
+	}
+
+	char argvBuf[1024];
+	trap_Argv(1, argvBuf, sizeof(argvBuf));
+
+	int clientNum = atoi(argvBuf);
+
+	trap_Cmd_ArgsFrom(2, argvBuf, sizeof(argvBuf));
+
+	char clientName[64];
+	G_ClientCleanName(argvBuf, clientName, sizeof(clientName));
+
+	char userinfo[MAX_INFO_STRING];
+	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
+	Info_SetValueForKey(userinfo, "name", clientName);
+	trap_SetUserinfo(clientNum, userinfo);
+
+	gentity_t *ent = g_entities + clientNum;
+	gclient_t *client = ent->client;
+	client->pers.renamed = qfalse;
+	//do the rename and inform everybody
+	ClientUserinfoChanged( clientNum );
+
+	client->pers.renamed = qtrue;
+}
+
 /*
 =================
 ConsoleCommand
@@ -1131,6 +1160,11 @@ qboolean    ConsoleCommand( void ) {
 	// ref commands
 	if (Q_stricmp(cmd, "ref") == 0) {
 		Svcmd_Ref_f();
+		return qtrue;
+	}
+
+	if (Q_stricmp(cmd, "rename") == 0) {
+		G_Rename_f();
 		return qtrue;
 	}
 

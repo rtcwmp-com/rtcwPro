@@ -836,10 +836,12 @@ void SVC_RemoteCommand( netadr_t from, msg_t *msg ) {
 	static unsigned int lasttime = 0;
 	char *cmd_aux;
 
-	// TTimo - show_bug.cgi?id=534
 	time = Com_Milliseconds();
-	if ( time < ( lasttime + 500 ) ) {
-		return;
+	//ignore flood from localhost
+	if(!Sys_IsLANAddress(from)){
+		if ( time < ( lasttime + 500 ) ) {
+			return;
+		}
 	}
 	lasttime = time;
 
