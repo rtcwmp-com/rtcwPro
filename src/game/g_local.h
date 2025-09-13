@@ -1366,6 +1366,7 @@ void ClientDisconnect(int clientNum);
 void ClientBegin(int clientNum);
 void ClientCommand(int clientNum);
 void AddMedicTeamBonus(gclient_t* client);
+void ClientCleanName( const char *in, char *out, int outSize );
 
 //void RemoveWeaponRestrictions(gentity_t *ent);
 //void ResetTeamWeaponRestrictions(int clientNum, team_t team, weapon_t enumWeapon, int weapon);

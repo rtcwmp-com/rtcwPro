@@ -1237,7 +1237,7 @@ void SetWolfSpawnWeapons( gentity_t *ent ) {
 ClientCheckName
 ============
 */
-static void ClientCleanName( const char *in, char *out, int outSize ) {
+void ClientCleanName( const char *in, char *out, int outSize ) {
 	int len, colorlessLen;
 	char ch;
 	char    *p;
