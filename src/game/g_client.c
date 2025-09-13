@@ -1633,7 +1633,7 @@ void ClientUserinfoChanged(int clientNum) {
 	Q_strncpyz( oldname, client->pers.netname, sizeof( oldname ) );
 	if(!client->pers.renamed){
 		s = Info_ValueForKey( userinfo, "name" );
-		G_ClientCleanName( s, client->pers.netname, sizeof( client->pers.netname ) );
+		ClientCleanName( s, client->pers.netname, sizeof( client->pers.netname ) );
 	}else if(g_enforceNames.integer){
 		CP(va("print \"" S_COLOR_YELLOW "Names are currently enforced by the server.\n\""));
 	}

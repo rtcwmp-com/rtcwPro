@@ -1045,7 +1045,7 @@ void G_Rename_f(void){
 	trap_Cmd_ArgsFrom(2, argvBuf, sizeof(argvBuf));
 
 	char clientName[64];
-	G_ClientCleanName(argvBuf, clientName, sizeof(clientName));
+	ClientCleanName(argvBuf, clientName, sizeof(clientName));
 
 	char userinfo[MAX_INFO_STRING];
 	trap_GetUserinfo(clientNum, userinfo, sizeof(userinfo));
